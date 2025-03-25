@@ -2,7 +2,7 @@
 
 A simple time management tool written in Dart using the Flutter framework.
 
-** :warning: Very early development! Do not use! :warning: **
+**:warning: Very early development! Do not use! :warning:**
 
 ## Getting Started
 
