@@ -7,16 +7,10 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   var _selectedIndex = 0;
-  var _showAppBar = false;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      if (_selectedIndex == 0) {
-        _showAppBar = true;
-      } else {
-        _showAppBar = false;
-      }
     });
   }
 
@@ -34,24 +28,23 @@ class _MainPageState extends State<MainPage> {
         page = StatisticsPage();
       case 4:
         page = SettingsPage();
+      case 5:
+        page = FocusPage();
       default:
-        throw UnimplementedError('no widget for $_selectedIndex');
+        throw UnimplementedError('no page for $_selectedIndex');
     }
 
     return LayoutBuilder(
         builder: (context, constraints) {
           return Scaffold(
-            appBar: _showAppBar ? AppBar(
-              actions: [
-                IconButton(
-                  onPressed: () {_onItemTapped(4);},
-                  icon: Icon(Icons.settings),
-                  tooltip: 'Navigate to settings',
-                )
-              ],
-            ) : null,
-            body: Row(
+            body: Column(
               children: [
+                Expanded(
+                  child: Container(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    child: page,
+                  ),
+                ),
                 SafeArea(
                   child: NavigationBar(
                       selectedIndex: _selectedIndex,
@@ -75,12 +68,6 @@ class _MainPageState extends State<MainPage> {
                           label: "Stats",
                         ),
                       ],
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: page,
                   ),
                 ),
               ],

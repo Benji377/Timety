@@ -1,11 +1,11 @@
 import 'package:timety/commons.dart';
 
-class TasksPage extends StatelessWidget {
+class FocusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
     return Center(
-      child: Text("TasksPage - Not implemented!"),
+      child: Text("FocusPage - Not implemented!"),
     );
   }
 }

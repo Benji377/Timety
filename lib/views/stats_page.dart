@@ -5,7 +5,7 @@ class StatisticsPage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Center(
-      child: Text("Not implemented!"),
+      child: Text("StatisticsPage - Not implemented!"),
     );
   }
 }

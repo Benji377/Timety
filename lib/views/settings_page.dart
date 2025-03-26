@@ -5,7 +5,7 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Center(
-      child: Text("Not implemented!"),
+      child: Text("SettingsPage - Not implemented!"),
     );
   }
 }

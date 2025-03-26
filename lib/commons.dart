@@ -1,6 +1,5 @@
 // Central file for project imports, to avoid duplicates
 // External packages
-export 'package:english_words/english_words.dart';
 export 'package:flutter/material.dart';
 export 'package:provider/provider.dart';
 export 'package:pie_chart/pie_chart.dart';
