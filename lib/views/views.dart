@@ -1,5 +1,8 @@
 // Like the "pages" of the app
 
-export 'home.dart';
-export 'favorites.dart';
-export 'generator.dart';
+export 'main.dart';
+export 'home_page.dart';
+export 'calender_page.dart';
+export 'tasks_page.dart';
+export 'stats_page.dart';
+export 'settings_page.dart';
