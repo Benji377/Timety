@@ -21,15 +21,13 @@ class _MainPageState extends State<MainPage> {
       case 0:
         page = HomePage();
       case 1:
-        page = CalenderPage();
+        page = FocusPage();
       case 2:
         page = TasksPage();
       case 3:
         page = StatisticsPage();
       case 4:
         page = SettingsPage();
-      case 5:
-        page = FocusPage();
       default:
         throw UnimplementedError('no page for $_selectedIndex');
     }
@@ -40,36 +38,36 @@ class _MainPageState extends State<MainPage> {
             body: Column(
               children: [
                 Expanded(
-                  child: Container(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: page,
+                  child: SafeArea(
+                    child: Container(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      child: page,
+                    ),
                   ),
                 ),
-                SafeArea(
-                  child: NavigationBar(
+                NavigationBar(
                       selectedIndex: _selectedIndex,
                       onDestinationSelected: _onItemTapped,
                       indicatorColor: Colors.deepPurple,
                       destinations: [
                         NavigationDestination(
                             icon: Icon(Icons.home),
-                            label: "Home",
+                            label: "HOME",
                         ),
                         NavigationDestination(
-                          icon: Icon(Icons.calendar_month),
-                          label: "Calendar",
+                          icon: Icon(Icons.coffee),
+                          label: "FOCUS",
                         ),
                         NavigationDestination(
                           icon: Icon(Icons.check_circle_outline),
-                          label: "Tasks",
+                          label: "TASKS",
                         ),
                         NavigationDestination(
                           icon: Icon(Icons.pie_chart),
-                          label: "Stats",
+                          label: "STATS",
                         ),
                       ],
                   ),
-                ),
               ],
             ),
           );

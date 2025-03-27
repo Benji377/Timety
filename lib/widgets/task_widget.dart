@@ -16,7 +16,7 @@ class TaskItemWidget extends StatelessWidget {
           child: ExpansionTile(
             leading: Icon(taskItem.icon),
             title: Text(taskItem.title),
-            subtitle: Text(taskItem.dueDate),
+            subtitle: Text(taskItem.dueDate.toString()),
             trailing: IconButton(
                 onPressed: () {print("Pressed task edit button");},
                 icon: Icon(Icons.edit)

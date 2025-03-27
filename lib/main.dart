@@ -13,10 +13,7 @@ class App extends StatelessWidget {
       create: (context) => MainState(),
       child: MaterialApp(
         title: 'Timety',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
-        ),
+        theme: timetyTheme(),
         home: MainPage(),
       ),
     );

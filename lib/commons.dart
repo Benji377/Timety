@@ -5,9 +5,9 @@ export 'package:provider/provider.dart';
 export 'package:pie_chart/pie_chart.dart';
 
 // Internal packages
-export 'models/models.dart';
-export 'services/services.dart';
-export 'styles/styles.dart';
-export 'utils/utils.dart';
-export 'views/views.dart';
-export 'widgets/widgets.dart';
+export 'models/_models.dart';
+export 'services/_services.dart';
+export 'styles/_styles.dart';
+export 'utils/_utils.dart';
+export 'views/_views.dart';
+export 'widgets/_widgets.dart';
