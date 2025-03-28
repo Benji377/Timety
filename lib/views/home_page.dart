@@ -8,13 +8,28 @@ class HomePage extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          Row(children: [Text("Hello ${appState.userName}!")]),
+          Row(
+              children: [
+                Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Hello ${appState.userName}!",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),),
+                    )),
+                IconButton(
+                  alignment: Alignment.topRight,
+                    onPressed: () {},
+                    icon: Icon(Icons.settings)
+                ),
+              ]
+          ),
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(60),
                   child: FocusPieChart(dataMap: appState.getFocusDataMap()),
                 ),
                 SimpleTaskListWidget(taskList: appState.taskList),
