@@ -37,6 +37,8 @@ dependencies:
   # TUTORIAL
   provider: ^6.1.2
   pie_chart: ^5.4.0
+  flutter_neat_and_clean_calendar: ^0.4.16
+  flutter_week_view: ^1.4.3
 
 
 dev_dependencies:
