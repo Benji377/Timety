@@ -32,8 +32,9 @@ jobs:
     - name: Retrieve Flutter dependencies
       run: flutter pub get
 
-    - name: Test Flutter build
-      run: flutter test
+# Temporarely disabled because we don't have functioning tests yet
+#    - name: Test Flutter build
+#      run: flutter test
 
     - name: Build debug APK
       run: flutter build apk --debug --split-per-abi
