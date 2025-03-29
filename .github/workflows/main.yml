@@ -2,11 +2,6 @@ name: Test, Build and Release apk
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -32,9 +27,8 @@ jobs:
     - name: Retrieve Flutter dependencies
       run: flutter pub get
 
-# Temporarely disabled because we don't have functioning tests yet
-#    - name: Test Flutter build
-#      run: flutter test
+    - name: Test Flutter build
+      run: flutter test
 
     - name: Build debug APK
       run: flutter build apk --debug --split-per-abi
