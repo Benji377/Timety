@@ -3,4 +3,3 @@
 export 'task_widget.dart';
 export 'focus_piechart.dart';
 export 'tasks_list.dart';
-export 'scheduling.dart';

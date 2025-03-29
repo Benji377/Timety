@@ -5,18 +5,18 @@ class FocusPage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<MainState>();
 
-    return Center(
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(20.0),
-            child: FocusPieChart(dataMap: appState.getFocusDataMap()),
-          ),
-          Expanded(
-            child: Padding(padding: EdgeInsets.all(8.0), child: SchedulingWidget()),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text("Studying..."),
+        ),
+        FocusPieChart(dataMap: appState.getFocusDataMap()),
+        Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: IconButton(onPressed: () {}, icon: Icon(Icons.play_arrow)),
+        )
+      ],
     );
   }
 }

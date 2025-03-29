@@ -70,43 +70,19 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
-  flutter_neat_and_clean_calendar:
-    dependency: "direct main"
-    description:
-      name: flutter_neat_and_clean_calendar
-      sha256: cfdd57bdd9b8b60109e6ceeb436782084fd4c467ae193109f2c9b2770e644c41
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.16"
-  flutter_platform_widgets:
-    dependency: transitive
-    description:
-      name: flutter_platform_widgets
-      sha256: "84f39540cf433aa44b235b7fca6518d1bd30aa281d8196f00be60bc76cac96f4"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.0.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_week_view:
+  geekyants_flutter_gauges:
     dependency: "direct main"
     description:
-      name: flutter_week_view
-      sha256: "748e182a9bfea66c9a5f5d8e369e87b605f94b9621f412c6cd7c9defa5ba62e7"
+      name: geekyants_flutter_gauges
+      sha256: "75de8caf0b067931b8da09548cef858c750c59f8390de4411d329eba257ba9c3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.3"
-  intl:
-    dependency: transitive
-    description:
-      name: intl
-      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.20.2"
+    version: "1.0.4"
   leak_tracker:
     dependency: transitive
     description:
@@ -179,14 +155,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
-  pie_chart:
-    dependency: "direct main"
-    description:
-      name: pie_chart
-      sha256: "58e6a46999ac938bfa1c3e5be414d6e149f037647197dca03ba3614324c12c82"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.4.0"
   provider:
     dependency: "direct main"
     description:
@@ -248,6 +216,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
+  time_scheduler_table:
+    dependency: "direct main"
+    description:
+      name: time_scheduler_table
+      sha256: "3a0f2ca77f0c782ed679e6929250dcc1cbe818f7fa0d4aa7dab909a6d673d9e6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   vector_math:
     dependency: transitive
     description:
