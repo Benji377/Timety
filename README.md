@@ -1,4 +1,6 @@
-# timety
+# Timety
+
+[![Test and Analyze](https://github.com/Benji377/Timety/actions/workflows/testing.yml/badge.svg)](https://github.com/Benji377/Timety/actions/workflows/testing.yml)
 
 A simple time management tool written in Dart using the Flutter framework.
 
