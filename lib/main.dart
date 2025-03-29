@@ -4,6 +4,8 @@ void main() {
   runApp(App());
 }
 
+
+
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -15,7 +17,16 @@ class App extends StatelessWidget {
         title: 'Timety',
         theme: timetyTheme(),
         home: MainPage(),
+        routes: {
+          '/home': (context) => HomePage(),
+          '/settings': (context) => SettingsPage(),
+          '/tasks': (context) => TasksPage(),
+          '/focus': (context) => FocusPage(),
+          '/stats': (context) => StatisticsPage(),
+        },
       ),
+      
+      
     );
   }
 }
