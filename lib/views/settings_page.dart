@@ -5,7 +5,12 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Center(
-      child: Text("SettingsPage - Not implemented!"),
+      child: Column(
+        children: [
+          Text("SettingsPage - Not implemented!"),
+          IconButton(onPressed: () => Navigator.pushNamed(context, '/home'), icon: Icon(Icons.home))
+        ],
+      ),
     );
   }
 }

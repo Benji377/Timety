@@ -25,17 +25,12 @@ class HomePage extends StatelessWidget {
                 ),
               ]
           ),
-          Expanded(
-            child: Column(
+          Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(60),
-                  child: FocusPieChart(dataMap: appState.getFocusDataMap()),
-                ),
+                FocusPieChart(dataMap: appState.getFocusDataMap()),
                 SimpleTaskListWidget(taskList: appState.taskList),
               ],
             ),
-          ),
         ],
       ),
     );
