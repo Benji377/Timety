@@ -4,8 +4,10 @@ class StatisticsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Center(
-      child: Text("StatisticsPage - Not implemented!"),
+    return Scaffold(
+      body: Center(
+        child: Text("StatisticsPage - Not implemented!"),
+      ),
     );
   }
 }
