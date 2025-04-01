@@ -38,7 +38,7 @@ dependencies:
   # TUTORIAL
   provider: ^6.1.2
   geekyants_flutter_gauges: ^1.0.4
-  time_scheduler_table: ^1.0.1
+  table_calendar: ^3.2.0
 
 
 dev_dependencies:

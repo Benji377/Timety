@@ -3,8 +3,9 @@
 export 'package:flutter/material.dart';
 export 'package:provider/provider.dart';
 export 'package:geekyants_flutter_gauges/geekyants_flutter_gauges.dart';
-export 'package:time_scheduler_table/time_scheduler_table.dart';
+export 'package:table_calendar/table_calendar.dart';
 export 'dart:math';
+export 'dart:collection';
 
 // Internal packages
 export 'models/_models.dart';

@@ -7,3 +7,4 @@ export 'main_state.dart';
 export 'data/history_tracker.dart';
 export 'data/scheduler.dart';
 export 'data/task_item.dart';
+export 'data/event.dart';

@@ -2,4 +2,5 @@
 
 export 'task_widget.dart';
 export 'focus_piechart.dart';
-export 'tasks_list.dart';
+export 'events_list.dart';
+export 'calendar_widget.dart';

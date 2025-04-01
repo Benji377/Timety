@@ -1,6 +1,13 @@
 import 'package:timety/commons.dart';
 
-class TasksPage extends StatelessWidget {
+class TasksPage extends StatefulWidget {
+  @override
+  State<TasksPage> createState() => _TasksPageState();
+}
+
+class _TasksPageState extends State<TasksPage> {
+  late final ValueNotifier<List<Event>> _selectedEvents;
+
   @override
   Widget build(BuildContext context) {
 
@@ -8,9 +15,15 @@ class TasksPage extends StatelessWidget {
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(8.0),
-          child: Placeholder()
+          child: Column(
+            children: [
+              CalendarWidget(),
+              Divider(),
+              Expanded(child: EventsListWidget()),
+            ],
+          ),
+          )
         ),
-      ),
     );
   }
 }

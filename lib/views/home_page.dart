@@ -28,7 +28,6 @@ class HomePage extends StatelessWidget {
           Column(
               children: [
                 FocusPieChart(dataMap: appState.getFocusDataMap()),
-                SimpleTaskListWidget(taskList: appState.taskList),
               ],
             ),
         ],
