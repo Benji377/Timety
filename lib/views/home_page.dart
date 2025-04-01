@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
                     )),
                 IconButton(
                   alignment: Alignment.topRight,
-                    onPressed: () => Navigator.pushNamed(context, '/settings'),
+                    onPressed: () => Navigator.of(context).pushNamed('/settings'),
                     icon: Icon(Icons.settings)
                 ),
               ]
