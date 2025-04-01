@@ -39,6 +39,7 @@ dependencies:
   provider: ^6.1.2
   geekyants_flutter_gauges: ^1.0.4
   table_calendar: ^3.2.0
+  time: ^2.1.5
 
 
 dev_dependencies:

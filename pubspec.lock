@@ -240,6 +240,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
+  time:
+    dependency: "direct main"
+    description:
+      name: time
+      sha256: "370572cf5d1e58adcb3e354c47515da3f7469dac3a95b447117e728e7be6f461"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.5"
   vector_math:
     dependency: transitive
     description:
