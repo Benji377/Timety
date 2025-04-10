@@ -1,29 +1,55 @@
-# :timer_clock: Timety
+# ⏰ Timety
 
 [![Test and Analyze](https://github.com/Benji377/Timety/actions/workflows/testing.yml/badge.svg)](https://github.com/Benji377/Timety/actions/workflows/testing.yml)
 ![GitHub downloads](https://img.shields.io/github/downloads/Benji377/Timety/total?label=Downloads)
 
 <div align="center">
-  <img src="media/timety_logo.png" alt="Logo" style="width: 45%; max-width: 400px; vertical-align: middle">
+  <img src="media/timety_logo.png" alt="Timety Logo" width="300" />
 </div>
 
 > [!CAUTION]
-> **:warning: Very early development! Do not use! :warning:**
+> Timety is still in its **very early stages** — expect bugs and missing features! Use at your own risk.
 
-## Introduction
-Timety is a small time tracking app with a couple more features than your ususal clock. For once, the app has a calendar, a tasks list with reminders and a pomodoro timer to track your focus. But additionally, the app also has a leveling system with achievements and titles to flex on your unproductive friends!
-All this for free, offline and open-source. No data is collected and everything is stored on your device for maximum security and privacy, you are in control!
+---
 
-Check out the [Roadmap](https://github.com/users/Benji377/projects/6) to find out at which state the app currently is.
+## 🚀 What is Timety?
 
-## Getting Started
+**Timety** is more than just a clock. It's a **free, offline-first, open-source** time tracking app designed to help you stay productive, motivated, and in control of your data.  
+Here’s what you get:
 
-### For Developers
-Follow our guide on the Wiki to indstall all the necessary tools and getting started on working on the Timety project. Its not as difficult as it seems, we promise!
+- 🗓️ Calendar
+- ✅ Task List + Reminders
+- 🍅 Pomodoro Timer
+- 🏆 Leveling System
+- 🎖️ Achievements
+- 🧢 Titles to flex on your unproductive friends  
 
-### For Regular Users
-Simply download the latest release from the release page and install the apk as a regular app on your device. We will try and provide app store support in the future, but for now thats the only way
+All data stays on your device — no ads, no tracking, full privacy.  
+You're the boss of your time 🧠🔒
 
-## Helpful links
-- Documentation (GitHub Wiki): https://github.com/Benji377/Timety/wiki
-- Project Timeline: https://github.com/users/Benji377/projects/6
+📌 Check out the [📍Roadmap](https://github.com/users/Benji377/projects/6) to see where we're headed!
+
+---
+
+## 🛠️ Getting Started
+
+### 👨‍💻 For Developers
+Want to contribute? We love that! ❤️  
+Head over to our [Developer Guide on the Wiki](https://github.com/Benji377/Timety/wiki/Developers) to get everything set up.  
+It’s easier than you think — we promise! 😄
+
+### 📱 For Users
+Just want to use the app?
+
+1. Go to the [Releases](https://github.com/Benji377/Timety/releases) page  
+2. Download the latest APK  
+3. Install it on your device like any other app 📦📲
+
+⚠️ App store support is in the works — stay tuned!
+
+---
+
+## 🔗 Helpful Links
+
+- 📚 **Documentation:** [GitHub Wiki](https://github.com/Benji377/Timety/wiki)  
+- 🗺️ **Project Timeline & Roadmap:** [View Project](https://github.com/users/Benji377/projects/6)
