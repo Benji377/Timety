@@ -1,5 +1,4 @@
 import 'package:timety/commons.dart';
-import 'package:timety/viewmodel/focus_view_model.dart';
 
 class FocusPage extends StatefulWidget {
   @override
@@ -10,7 +9,7 @@ class FocusPage extends StatefulWidget {
 class _FocusPageState extends State<FocusPage> {
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MainState>();
+    var appState = context.read(mainStateProvider);
     return Scaffold(
       body: Center(
         child: Column(
