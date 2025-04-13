@@ -1,30 +1,25 @@
 import 'package:timety/commons.dart';
+import 'package:timety/core/providers/navigation_provider.dart';
+import '../../app_pages.dart';
 
-class MainPage extends StatefulWidget {
-  @override
-  State<MainPage> createState() => _MainPageState();
-}
 
-class _MainPageState extends State<MainPage> {
+
+class MainPage extends ConsumerWidget {
   var _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    HomePage(),
-    FocusPage(),
-    TasksPage(),
-    StatisticsPage(),
-  ];
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
 
   @override
-  Widget build(BuildContext context) {
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedIndex = ref.watch(bottomNavIndexProvider);
     
+    final _screens = [
+      HomePage(),
+      FocusPage(),
+      TasksPage(),
+      StatisticsPage(),
+    ];
+
     return Scaffold(
       body: Column(
         children: [
@@ -40,7 +35,7 @@ class _MainPageState extends State<MainPage> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
+        onDestinationSelected: (index) => ref.read(bottomNavIndexProvider.notifier).state = index,
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.home),

@@ -4,7 +4,7 @@
 export 'main_state.dart';
 
 // Objects
-export 'data/history_tracker.dart';
-export 'data/scheduler.dart';
-export 'data/task_item.dart';
-export 'data/event.dart';
+export '../features/focus/domain/history_tracker.dart';
+export '../features/tasks/domain/scheduler.dart';
+export '../features/tasks/domain/task_item.dart';
+export '../features/tasks/domain/event.dart';

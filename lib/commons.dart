@@ -10,9 +10,6 @@ export 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Internal packages
 export 'models/_models.dart';
-export 'services/_services.dart';
-export 'config/theme/_styles.dart';
-export 'utils/_utils.dart';
-export 'views/_views.dart';
+export 'core/config/theme/_styles.dart';
+export 'core/utils/_utils.dart';
 export 'widgets/_widgets.dart';
-export 'viewmodel/_view_models.dart';

@@ -1,4 +1,6 @@
+import 'package:timety/core/navigation/app.dart';
 import 'commons.dart';
+import 'app_pages.dart';
 
 void main() {
   runApp(ProviderScope(
