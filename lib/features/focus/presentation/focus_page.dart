@@ -1,6 +1,7 @@
 import 'package:timety/commons.dart';
 import 'package:timety/features/focus/application/focus_summery_provider.dart';
-import 'package:timety/features/focus/presentation/stop_watcher.dart'; // Import FocusViewModel
+import 'package:timety/features/focus/application/stop_watcher.dart'; // Import FocusViewModel
+import 'focus_piechart.dart';
 
 
 

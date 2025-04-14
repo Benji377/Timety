@@ -1,4 +1,6 @@
 import 'package:timety/commons.dart';
+import '../presentation/presentation.dart';
+import '../application/application.dart';
 
 class EventsListWidget extends StatelessWidget {
 

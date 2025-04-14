@@ -5,13 +5,10 @@ import '../../app_pages.dart';
 
 
 class MainPage extends ConsumerWidget {
-  var _selectedIndex = 0;
-
-
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedIndex = ref.watch(bottomNavIndexProvider);
+    final _selectedIndex = ref.watch(bottomNavIndexProvider);
     
     final _screens = [
       HomePage(),

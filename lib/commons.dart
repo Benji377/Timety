@@ -12,4 +12,3 @@ export 'package:flutter_riverpod/flutter_riverpod.dart';
 export 'models/_models.dart';
 export 'core/config/theme/_styles.dart';
 export 'core/utils/_utils.dart';
-export 'widgets/_widgets.dart';

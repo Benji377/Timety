@@ -9,7 +9,7 @@ class MainState extends ChangeNotifier {
   List<TaskItem> taskList = []; // for taskpage
   ValueNotifier<List<Event>> selectedEvents = ValueNotifier([]);
 
-  void updateSelectedEvents(List<Event> events) { // for eventpage
+  void updateSelectedEvents(List<Event> events) { // for eventpage in task feature
     selectedEvents.value = events;
     notifyListeners();
   }
