@@ -40,6 +40,8 @@ dependencies:
   geekyants_flutter_gauges: ^1.0.4
   table_calendar: ^3.2.0
   time: ^2.1.5
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
 
 
 dev_dependencies:
@@ -52,6 +54,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  riverpod_generator: ^2.6.5
+  build_runner: ^2.4.15
+  custom_lint: ^0.7.5
+  riverpod_lint: ^2.6.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

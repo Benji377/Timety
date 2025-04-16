@@ -1,6 +1,6 @@
 import 'package:timety/commons.dart';
 
-class FocusViewModel extends ChangeNotifier{
+class StopWatcher extends Notifier{
   DateTime? start;
   DateTime? end;
   Duration? totalTime;
@@ -17,6 +17,12 @@ class FocusViewModel extends ChangeNotifier{
     }
     print(end);
     print(totalTime);
+  }
+  
+  @override
+  build() {
+    // TODO: implement build
+    throw UnimplementedError();
   }
 
 }

@@ -1,19 +1,22 @@
+import 'package:timety/core/navigation/app.dart';
 import 'commons.dart';
+import 'app_pages.dart';
 
 void main() {
-  runApp(App());
+  runApp(ProviderScope(
+      child:MyApp()
+    ));
 }
 
 
 
-class App extends StatelessWidget {
-  const App({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MainState(),
-      child: MaterialApp(
+
+      return MaterialApp(
         title: 'Timety',
         theme: timetyTheme(),
         home: MainPage(),
@@ -24,10 +27,10 @@ class App extends StatelessWidget {
           '/focus': (context) => FocusPage(),
           '/stats': (context) => StatisticsPage(),
         },
-      ),
+      );
       
       
-    );
+    
   }
 }
 
