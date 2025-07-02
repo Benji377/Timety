@@ -38,6 +38,9 @@ android {
         viewBinding = true
         compose = true
     }
+    lint {
+        sarifOutput = file("${layout.buildDirectory}/reports/lint-results.sarif")
+    }
 }
 
 dependencies {
