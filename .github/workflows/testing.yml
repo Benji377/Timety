@@ -5,7 +5,6 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "main" ]
 
 jobs:
@@ -23,18 +22,16 @@ jobs:
           distribution: 'oracle'
           java-version: '21'
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
         with:
-          channel: stable
-          flutter-version-file: pubspec.yaml
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: Retrieve Flutter dependencies
-        run: flutter pub get
+      - name: Run Android Lint
+        run: ./gradlew lint
 
-      - name: Analyze Code
-        run: flutter analyze
-
-      # Temporarily disabled because we don't have functioning tests yet
-      #    - name: Test Flutter build
-      #      run: flutter test
+      - name: Run Unit Tests
+        run: ./gradlew test
