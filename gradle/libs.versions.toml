@@ -12,7 +12,7 @@ material = "1.10.0"
 constraintlayout = "2.1.4"
 lifecycleLivedataKtx = "2.6.1"
 lifecycleViewmodelKtx = "2.6.1"
-navigationFragmentKtx = "2.6.0"
+navigationFragmentKtx = "2.9.0"
 navigationUiKtx = "2.6.0"
 
 [libraries]
