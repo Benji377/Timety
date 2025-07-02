@@ -40,9 +40,9 @@ jobs:
           path: app/build/reports/lint-results-debug.html
 
       - name: Upload SARIF report
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: app/build/reports/lint-results.sarif
+          sarif_file: app/build/reports/lint-results-debug.sarif
 
       - name: Run Unit Tests
         run: ./gradlew test
