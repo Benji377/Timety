@@ -13,7 +13,7 @@ constraintlayout = "2.2.1"
 lifecycleLivedataKtx = "2.9.2"
 lifecycleViewmodelKtx = "2.9.2"
 navigationFragmentKtx = "2.9.3"
-navigationUiKtx = "2.9.2"
+navigationUiKtx = "2.9.3"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
