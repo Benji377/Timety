@@ -1,0 +1,5 @@
+screens/ (Your pages: HomeScreen.kt, FocusScreen.kt, ProfileScreen.kt)
+
+components/ (Reusable Compose UI: TaskCard.kt, XPBar.kt)
+
+theme/ (Colors, typography, shapes—this replaces Tailwind)
