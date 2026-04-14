@@ -14,4 +14,10 @@ class Converters {
 
     @TypeConverter
     fun toFocusRating(value: String?): FocusRating? = value?.let { FocusRating.valueOf(it) }
+
+    @TypeConverter
+    fun fromLongList(value: List<Long>): String = value.joinToString(",")
+
+    @TypeConverter
+    fun toLongList(value: String): List<Long> = if (value.isEmpty()) emptyList() else value.split(",").map { it.toLong() }
 }

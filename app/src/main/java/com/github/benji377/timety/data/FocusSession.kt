@@ -1,5 +1,6 @@
 package com.github.benji377.timety.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
@@ -23,8 +24,8 @@ import androidx.room.PrimaryKey
 )
 data class FocusSession(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val categoryId: Int,
-    val taskId: Int? = null,
+    @ColumnInfo(index = true) val categoryId: Int,
+    @ColumnInfo(index = true) val taskId: Int? = null,
     val startTime: Long,
     val endTime: Long,
     val duration: Long,

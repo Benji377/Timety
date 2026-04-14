@@ -10,6 +10,7 @@ class MainRepository(private val database: AppDatabase) {
     // Tasks
     val allTasks: Flow<List<Task>> = database.taskDao().getAllTasks()
     fun getTasksByStatus(status: TaskStatus): Flow<List<Task>> = database.taskDao().getTasksByStatus(status)
+    fun getTasksInRange(start: Long, end: Long): Flow<List<Task>> = database.taskDao().getTasksInRange(start, end)
     suspend fun insertTask(task: Task) = database.taskDao().insertTask(task)
     suspend fun updateTask(task: Task) = database.taskDao().updateTask(task)
     suspend fun deleteTask(task: Task) = database.taskDao().deleteTask(task)

@@ -12,6 +12,7 @@ data class Task(
     val location: String? = null,
     val dueDate: Long? = null,
     val reminderTime: Long? = null,
+    val reminders: List<Long> = emptyList(),
     val durationEst: Long? = null,
     val status: TaskStatus = TaskStatus.TODO
 )

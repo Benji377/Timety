@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.benji377.timety.data.MainRepository
+import com.github.benji377.timety.data.Task
 import com.github.benji377.timety.data.TaskStatus
 import com.github.benji377.timety.data.User
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,6 +25,13 @@ class HomeViewModel(private val repository: MainRepository) : ViewModel() {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    fun toggleTaskStatus(task: Task) {
+        viewModelScope.launch {
+            val newStatus = if (task.status == TaskStatus.DONE) TaskStatus.TODO else TaskStatus.DONE
+            repository.updateTask(task.copy(status = newStatus))
+        }
+    }
 
     fun updateXp(additionalXp: Int) {
         viewModelScope.launch {

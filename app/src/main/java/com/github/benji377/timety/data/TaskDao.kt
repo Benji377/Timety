@@ -14,6 +14,9 @@ interface TaskDao {
     @Query("SELECT * FROM task WHERE status = :status")
     fun getTasksByStatus(status: TaskStatus): Flow<List<Task>>
 
+    @Query("SELECT * FROM task WHERE dueDate BETWEEN :start AND :end ORDER BY dueDate ASC")
+    fun getTasksInRange(start: Long, end: Long): Flow<List<Task>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: Task)
 

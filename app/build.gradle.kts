@@ -69,4 +69,7 @@ dependencies {
     // 3. ViewModel & Lifecycle utilities for Compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // 4. Gson (For JSON export)
+    implementation(libs.gson)
 }
