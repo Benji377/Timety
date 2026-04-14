@@ -1,7 +1,0 @@
-Model and databases go here
-
-TaskEntity.kt (Defines your SQLite table columns)
-
-TaskDao.kt (The functions to insert/delete tasks)
-
-AppDatabase.kt (The Room database setup)

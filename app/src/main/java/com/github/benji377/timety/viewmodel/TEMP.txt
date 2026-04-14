@@ -1,5 +1,0 @@
-The ViewModel - the bridge between Data and UI
-
-TimerViewModel.kt (Holds your background timer logic and state)
-
-TaskViewModel.kt (Fetches tasks from the database to give to the UI)
