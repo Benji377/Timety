@@ -28,6 +28,7 @@ fun HomeScreen(
 ) {
     val user by viewModel.user.collectAsState()
     val tasks by viewModel.todayTasks.collectAsState()
+    val todayFocusTime by viewModel.todayFocusTime.collectAsState()
 
     Scaffold(
         topBar = {
@@ -49,14 +50,12 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val focusTarget = user?.dailyFocusTarget ?: (2 * 60 * 60 * 1000L) // Default 2h
-            // In a real app, we'd calculate focusTimeToday from FocusSessions
-            val focusTimeToday = 0L 
-            val progress = if (focusTarget > 0) focusTimeToday.toFloat() / focusTarget else 0f
+            val progress = if (focusTarget > 0) todayFocusTime.toFloat() / focusTarget else 0f
 
             Box(modifier = Modifier.clickable { onFocusClick() }) {
                 RadialGraph(
                     progress = progress,
-                    text = "${focusTimeToday / 60000} / ${focusTarget / 60000} min",
+                    text = "${todayFocusTime / 60000} / ${focusTarget / 60000} min",
                     modifier = Modifier.padding(vertical = 24.dp)
                 )
             }

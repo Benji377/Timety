@@ -50,14 +50,15 @@ fun TaskCard(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Checkbox(
                 checked = task.status == TaskStatus.DONE,
                 onCheckedChange = { onCheckedChange() }
             )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = task.title,
                     style = MaterialTheme.typography.titleMedium,
@@ -68,6 +69,39 @@ fun TaskCard(
                         text = it,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1
+                    )
+                }
+                // Priority and Size indicators
+                Row(
+                    modifier = Modifier
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Priority indicator
+                    Icon(
+                        imageVector = task.priority.getIcon(),
+                        contentDescription = task.priority.label,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = task.priority.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    // Size indicator
+                    Icon(
+                        imageVector = task.size.getIcon(),
+                        contentDescription = task.size.label,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${task.size.estimatedMinutes}min",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

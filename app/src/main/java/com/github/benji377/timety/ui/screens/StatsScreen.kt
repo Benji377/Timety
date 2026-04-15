@@ -30,73 +30,84 @@ fun StatsScreen(viewModel: StatsViewModel) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Stats & Profile") }) }
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Profile Header
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = user?.name ?: "Hero",
-                                style = MaterialTheme.typography.headlineSmall
+            item {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = user?.name ?: "Hero",
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+                                // Dynamic title based on streak
+                                val title = when {
+                                    user?.currentStreak ?: 0 >= 30 -> "🔥 Focus Master"
+                                    user?.currentStreak ?: 0 >= 14 -> "⚡ Unstoppable"
+                                    user?.currentStreak ?: 0 >= 7 -> "🌟 On Fire"
+                                    user?.currentStreak ?: 0 >= 3 -> "💪 Building Momentum"
+                                    (user?.currentStreak ?: 0) > 0 -> "🎯 Focused"
+                                    else -> "🚀 Ready to Focus"
+                                }
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.LocalFireDepartment,
+                                contentDescription = "Streak",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(32.dp)
                             )
                             Text(
-                                text = "Productivity Warrior",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.secondary
+                                text = "${user?.currentStreak ?: 0}",
+                                style = MaterialTheme.typography.titleLarge
                             )
                         }
-                        Icon(
-                            imageVector = Icons.Default.LocalFireDepartment,
-                            contentDescription = "Streak",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(32.dp)
-                        )
-                        Text(
-                            text = "${user?.currentStreak ?: 0}",
-                            style = MaterialTheme.typography.titleLarge
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        XPBar(
+                            currentXp = user?.xp ?: 0,
+                            level = user?.level ?: 1
                         )
                     }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    XPBar(
-                        currentXp = user?.xp ?: 0,
-                        level = user?.level ?: 1
+                }
+            }
+
+            item {
+                Text(text = "Today's Progress", style = MaterialTheme.typography.titleLarge)
+
+                val target = user?.dailyFocusTarget ?: 1L
+                val progress = (todayFocusTime.toFloat() / target.toFloat()).coerceIn(0f, 1f)
+                val hours = todayFocusTime / 3600000
+                val minutes = (todayFocusTime % 3600000) / 60000
+
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    RadialGraph(
+                        progress = progress,
+                        text = "${hours}h ${minutes}m",
+                        modifier = Modifier.size(150.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(text = "Today's Progress", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            val target = user?.dailyFocusTarget ?: 1L
-            val progress = (todayFocusTime.toFloat() / target.toFloat()).coerceIn(0f, 1f)
-            val hours = todayFocusTime / 3600000
-            val minutes = (todayFocusTime % 3600000) / 60000
-            
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                RadialGraph(
-                    progress = progress,
-                    text = "${hours}h ${minutes}m",
-                    modifier = Modifier.size(150.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
             if (distribution.isNotEmpty()) {
-                Text(text = "Category Distribution", style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                distribution.forEach { (catId, duration) ->
+                item {
+                    Text(text = "Category Distribution", style = MaterialTheme.typography.titleLarge)
+                }
+
+                items(distribution.size) { index ->
+                    val (catId, duration) = distribution.toList()[index]
                     val category = categories.find { it.id == catId }
                     val catHours = duration / 3600000
                     val catMinutes = (duration % 3600000) / 60000
@@ -116,18 +127,16 @@ fun StatsScreen(viewModel: StatsViewModel) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            item {
+                Text(text = "Recent Sessions", style = MaterialTheme.typography.titleLarge)
+            }
 
-            Text(text = "Recent Sessions", style = MaterialTheme.typography.titleLarge)
-            
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(sessions) { session ->
-                    ListItem(
-                        headlineContent = { Text("Focus Session") },
-                        supportingContent = { Text("${session.duration / 60000} minutes") },
-                        trailingContent = { Text(session.rating?.name ?: "") }
-                    )
-                }
+            items(sessions) { session ->
+                ListItem(
+                    headlineContent = { Text("Focus Session") },
+                    supportingContent = { Text("${session.duration / 60000} minutes") },
+                    trailingContent = { Text(session.rating?.name ?: "") }
+                )
             }
         }
     }

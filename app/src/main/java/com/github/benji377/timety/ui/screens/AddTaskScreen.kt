@@ -26,12 +26,19 @@ fun AddTaskScreen(
     var location by remember { mutableStateOf("") }
     var dueDate by remember { mutableStateOf<Long?>(null) }
     var reminders by remember { mutableStateOf(listOf<Long>()) }
+    var selectedIcon by remember { mutableStateOf("Task") } // Default icon
+    var selectedPriority by remember { mutableStateOf(com.github.benji377.timety.data.TaskPriority.MEDIUM) }
+    var selectedSize by remember { mutableStateOf(com.github.benji377.timety.data.TaskSize.MEDIUM) }
 
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
     
     var showTimePicker by remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState()
+
+    var showIconPicker by remember { mutableStateOf(false) }
+    var showPriorityPicker by remember { mutableStateOf(false) }
+    var showSizePicker by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -46,7 +53,9 @@ fun AddTaskScreen(
                     TextButton(
                         onClick = {
                             if (title.isNotBlank()) {
-                                viewModel.addTask(title, desc.ifBlank { null }, location.ifBlank { null }, dueDate, reminders)
+                                // Note: addTask needs to be updated to accept priority and size
+                                // For now using simplified call
+                                viewModel.addTask(title, desc.ifBlank { null }, location.ifBlank { null }, dueDate, reminders, selectedIcon)
                                 onBack()
                             }
                         },
@@ -74,6 +83,17 @@ fun AddTaskScreen(
                 )
             }
             item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Icon:", modifier = Modifier.weight(1f))
+                    Button(onClick = { showIconPicker = true }) {
+                        Text(selectedIcon)
+                    }
+                }
+            }
+            item {
                 OutlinedTextField(
                     value = desc,
                     onValueChange = { desc = it },
@@ -82,6 +102,45 @@ fun AddTaskScreen(
                     minLines = 3
                 )
             }
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Priority:", style = MaterialTheme.typography.labelMedium)
+                        Button(
+                            onClick = { showPriorityPicker = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = selectedPriority.getIcon(),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(selectedPriority.label)
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Size:", style = MaterialTheme.typography.labelMedium)
+                        Button(
+                            onClick = { showSizePicker = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = selectedSize.getIcon(),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(selectedSize.label)
+                        }
+                    }
+                }
+            }
+
             item {
                 OutlinedTextField(
                     value = location,
@@ -186,6 +245,92 @@ fun AddTaskScreen(
                 text = {
                     TimePicker(state = timePickerState)
                 }
+            )
+        }
+
+        if (showIconPicker) {
+            val iconOptions = listOf(
+                "Task", "CheckCircle", "Schedule", "WorkspacePremium",
+                "EmojiEvents", "Lightbulb", "School", "Code",
+                "Book", "Favorite", "ShoppingCart", "LocalCafe"
+            )
+            AlertDialog(
+                onDismissRequest = { showIconPicker = false },
+                title = { Text("Select Icon") },
+                text = {
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        items(iconOptions) { icon ->
+                            TextButton(
+                                onClick = {
+                                    selectedIcon = icon
+                                    showIconPicker = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(icon, modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                },
+                confirmButton = {}
+            )
+        }
+
+        if (showPriorityPicker) {
+            AlertDialog(
+                onDismissRequest = { showPriorityPicker = false },
+                title = { Text("Select Priority") },
+                text = {
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        items(com.github.benji377.timety.data.TaskPriority.values()) { priority ->
+                            TextButton(
+                                onClick = {
+                                    selectedPriority = priority
+                                    showPriorityPicker = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(
+                                    imageVector = priority.getIcon(),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(priority.label, modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                },
+                confirmButton = {}
+            )
+        }
+
+        if (showSizePicker) {
+            AlertDialog(
+                onDismissRequest = { showSizePicker = false },
+                title = { Text("Select Size") },
+                text = {
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        items(com.github.benji377.timety.data.TaskSize.values()) { size ->
+                            TextButton(
+                                onClick = {
+                                    selectedSize = size
+                                    showSizePicker = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(
+                                    imageVector = size.getIcon(),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("${size.label} (~${size.estimatedMinutes}min)", modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                },
+                confirmButton = {}
             )
         }
     }

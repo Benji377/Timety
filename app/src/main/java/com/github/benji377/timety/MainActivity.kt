@@ -24,12 +24,17 @@ import androidx.navigation.NavType
 import com.github.benji377.timety.ui.Screen
 import com.github.benji377.timety.ui.screens.*
 import com.github.benji377.timety.ui.theme.TimetyTheme
+import com.github.benji377.timety.utils.NotificationHelper
 import com.github.benji377.timety.viewmodel.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Initialize notification channels
+        NotificationHelper.createNotificationChannels(this)
+
         setContent {
             val app = application as TimetyApplication
             val repository = app.repository
@@ -98,7 +103,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.Focus.route) {
                             val focusViewModel: FocusViewModel = viewModel(
-                                factory = FocusViewModelFactory(repository)
+                                factory = FocusViewModelFactory(repository, this@MainActivity)
                             )
                             FocusScreen(focusViewModel, null)
                         }
@@ -113,13 +118,13 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val taskId = backStackEntry.arguments?.getString("taskId")?.toIntOrNull()
                             val focusViewModel: FocusViewModel = viewModel(
-                                factory = FocusViewModelFactory(repository)
+                                factory = FocusViewModelFactory(repository, this@MainActivity)
                             )
                             FocusScreen(focusViewModel, taskId)
                         }
                         composable(Screen.Tasks.route) {
                             val tasksViewModel: TasksViewModel = viewModel(
-                                factory = TasksViewModelFactory(repository)
+                                factory = TasksViewModelFactory(repository, this@MainActivity)
                             )
                             TasksScreen(
                                 viewModel = tasksViewModel,
@@ -129,7 +134,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.AddTask.route) {
                             val tasksViewModel: TasksViewModel = viewModel(
-                                factory = TasksViewModelFactory(repository)
+                                factory = TasksViewModelFactory(repository, this@MainActivity)
                             )
                             AddTaskScreen(
                                 viewModel = tasksViewModel,
@@ -154,7 +159,7 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.TaskDetail.route) { backStackEntry ->
                             val taskId = backStackEntry.arguments?.getString("taskId")?.toIntOrNull()
                             val tasksViewModel: TasksViewModel = viewModel(
-                                factory = TasksViewModelFactory(repository)
+                                factory = TasksViewModelFactory(repository, this@MainActivity)
                             )
                             if (taskId != null) {
                                     TaskDetailScreen(

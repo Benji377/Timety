@@ -7,10 +7,13 @@ import com.github.benji377.timety.data.MainRepository
 import com.github.benji377.timety.data.Task
 import com.github.benji377.timety.data.TaskStatus
 import com.github.benji377.timety.data.User
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class HomeViewModel(private val repository: MainRepository) : ViewModel() {
 
@@ -25,6 +28,30 @@ class HomeViewModel(private val repository: MainRepository) : ViewModel() {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    val todayFocusTime: StateFlow<Long> = repository.allSessions.map { sessions ->
+        val today = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        sessions.filter { it.startTime >= today }.sumOf { it.duration }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0L
+    )
+
+    init {
+        // Update overdue tasks periodically
+        viewModelScope.launch {
+            while (true) {
+                repository.updateOverdueTasks(System.currentTimeMillis())
+                delay(60000) // Check every minute
+            }
+        }
+    }
 
     fun toggleTaskStatus(task: Task) {
         viewModelScope.launch {

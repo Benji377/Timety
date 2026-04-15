@@ -1,11 +1,13 @@
 package com.github.benji377.timety.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.benji377.timety.data.MainRepository
 import com.github.benji377.timety.data.Task
 import com.github.benji377.timety.data.TaskStatus
+import com.github.benji377.timety.utils.ReminderManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +17,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-class TasksViewModel(private val repository: MainRepository) : ViewModel() {
+class TasksViewModel(
+    private val repository: MainRepository,
+    private val context: Context? = null
+) : ViewModel() {
 
     private val _selectedDate = MutableStateFlow(System.currentTimeMillis())
     val selectedDate: StateFlow<Long> = _selectedDate.asStateFlow()
@@ -84,6 +89,11 @@ class TasksViewModel(private val repository: MainRepository) : ViewModel() {
                 status = TaskStatus.TODO
             )
             repository.insertTask(newTask)
+
+            // Schedule reminders if provided
+            if (reminders.isNotEmpty() && context != null) {
+                ReminderManager.scheduleMultipleReminders(context, newTask.id, title, reminders)
+            }
         }
     }
 
@@ -107,11 +117,14 @@ class TasksViewModel(private val repository: MainRepository) : ViewModel() {
     }
 }
 
-class TasksViewModelFactory(private val repository: MainRepository) : ViewModelProvider.Factory {
+class TasksViewModelFactory(
+    private val repository: MainRepository,
+    private val context: Context? = null
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TasksViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TasksViewModel(repository) as T
+            return TasksViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

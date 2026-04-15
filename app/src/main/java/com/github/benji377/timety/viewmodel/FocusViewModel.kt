@@ -1,5 +1,6 @@
 package com.github.benji377.timety.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,7 @@ import com.github.benji377.timety.data.Category
 import com.github.benji377.timety.data.FocusRating
 import com.github.benji377.timety.data.FocusSession
 import com.github.benji377.timety.data.MainRepository
+import com.github.benji377.timety.utils.NotificationHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +18,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
-class FocusViewModel(private val repository: MainRepository) : ViewModel() {
+class FocusViewModel(
+    private val repository: MainRepository,
+    private val context: Context? = null
+) : ViewModel() {
 
     val categories: StateFlow<List<Category>> = repository.allCategories.stateIn(
         scope = viewModelScope,
@@ -114,12 +120,59 @@ class FocusViewModel(private val repository: MainRepository) : ViewModel() {
                 )
                 val user = repository.user.first()
                 user?.let {
-                    val xpGained = (duration / 60000).toInt()
+                    val xpGained = (duration / 60000).toInt() // XP = minutes focused
                     val totalXp = it.xp + xpGained
                     val levelUpXp = 100
-                    val newLevel = it.level + (totalXp / levelUpXp)
-                    val remainingXp = totalXp % levelUpXp
-                    repository.insertOrUpdateUser(it.copy(xp = remainingXp, level = newLevel))
+                    val newLevel = (totalXp / levelUpXp) + 1
+
+                    // Streak logic: check if user completed a focus today
+                    val today = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+
+                    val lastActiveDate = it.lastActiveDate
+                    val lastActiveDateNormalized = Calendar.getInstance().apply {
+                        timeInMillis = lastActiveDate
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+
+                    val (newStreak, newHighestStreak) = when {
+                        lastActiveDateNormalized == today -> {
+                            // Already focused today, streak unchanged
+                            it.currentStreak to it.highestStreak
+                        }
+                        lastActiveDateNormalized == today - (24 * 60 * 60 * 1000L) -> {
+                            // Focused yesterday, increment streak
+                            val newCurrent = it.currentStreak + 1
+                            newCurrent to maxOf(newCurrent, it.highestStreak)
+                        }
+                        else -> {
+                            // Streak broken, reset to 1
+                            1 to it.highestStreak
+                        }
+                    }
+
+                    repository.insertOrUpdateUser(it.copy(
+                        xp = totalXp,
+                        level = newLevel,
+                        currentStreak = newStreak,
+                        highestStreak = newHighestStreak,
+                        lastActiveDate = today
+                    ))
+
+                    // Send notification when session completes
+                    context?.let {
+                        NotificationHelper.showTimerCompleteNotification(
+                            context,
+                            "Focus session complete! +$xpGained XP"
+                        )
+                    }
                 }
             }
         }
@@ -133,11 +186,14 @@ class FocusViewModel(private val repository: MainRepository) : ViewModel() {
     }
 }
 
-class FocusViewModelFactory(private val repository: MainRepository) : ViewModelProvider.Factory {
+class FocusViewModelFactory(
+    private val repository: MainRepository,
+    private val context: Context? = null
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(FocusViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return FocusViewModel(repository) as T
+            return FocusViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

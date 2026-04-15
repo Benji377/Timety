@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.github.benji377.timety.data.TaskStatus
@@ -30,6 +31,8 @@ fun TaskDetailScreen(
     var description by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var dueDate by remember { mutableStateOf<Long?>(null) }
+    var priority by remember { mutableStateOf(com.github.benji377.timety.data.TaskPriority.MEDIUM) }
+    var size by remember { mutableStateOf(com.github.benji377.timety.data.TaskSize.MEDIUM) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(task) {
@@ -38,6 +41,8 @@ fun TaskDetailScreen(
             description = it.description ?: ""
             location = it.location ?: ""
             dueDate = it.dueDate
+            priority = it.priority
+            size = it.size
         }
     }
 
@@ -59,7 +64,9 @@ fun TaskDetailScreen(
                                 title = title,
                                 description = description.ifBlank { null },
                                 location = location.ifBlank { null },
-                                dueDate = dueDate
+                                dueDate = dueDate,
+                                priority = priority,
+                                size = size
                             ))
                             onBack()
                         }) {
@@ -137,6 +144,64 @@ fun TaskDetailScreen(
                 
                 Text(text = "Status: ${it.status}", style = MaterialTheme.typography.bodyMedium)
                 
+                // Priority and Size Display
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Priority", style = MaterialTheme.typography.labelSmall)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = priority.getIcon(),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(priority.label, style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Size", style = MaterialTheme.typography.labelSmall)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = size.getIcon(),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Column {
+                                    Text(size.label, style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        "~${size.estimatedMinutes} min",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Task Duration Tracking (v1.1 - Placeholder)
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text("Focus Time Tracking", style = MaterialTheme.typography.labelMedium)
+                        Text(
+                            "Total focus time: Coming in v1.2",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
                 Button(
                     onClick = { onStartFocus(it.id) },
                     modifier = Modifier.fillMaxWidth(),

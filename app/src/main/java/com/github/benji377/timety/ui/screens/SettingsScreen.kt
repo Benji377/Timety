@@ -139,35 +139,6 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "Backup", style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                // Google Drive Sync
-                Button(
-                    onClick = {
-                        isSyncing = true
-                        Toast.makeText(context, "Connecting to Google Drive...", Toast.LENGTH_SHORT).show()
-                        scope.launch {
-                            delay(2000)
-                            isSyncing = false
-                            Toast.makeText(context, "Sync completed successfully!", Toast.LENGTH_LONG).show()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isSyncing
-                ) {
-                    if (isSyncing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(Icons.Default.CloudUpload, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Sync to Google Drive")
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
 
                 // Export
                 OutlinedButton(

@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions for notifications and background operations -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
         android:name=".TimetyApplication"
         android:allowBackup="true"
@@ -23,6 +28,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Focus Timer Service -->
+        <service
+            android:name=".services.FocusTimerService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- Reminder Broadcast Receiver -->
+        <receiver
+            android:name=".receivers.ReminderBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.github.benji377.timety.TASK_REMINDER" />
+            </intent-filter>
+        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

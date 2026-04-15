@@ -25,4 +25,10 @@ interface TaskDao {
 
     @Delete
     suspend fun deleteTask(task: Task)
+
+    @Query("UPDATE task SET status = :status WHERE id = :taskId")
+    suspend fun updateTaskStatus(taskId: Int, status: TaskStatus)
+
+    @Query("UPDATE task SET status = :newStatus WHERE status = :oldStatus AND dueDate < :now")
+    suspend fun updateOverdueTasks(now: Long, oldStatus: TaskStatus, newStatus: TaskStatus)
 }

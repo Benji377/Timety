@@ -14,6 +14,7 @@ class MainRepository(private val database: AppDatabase) {
     suspend fun insertTask(task: Task) = database.taskDao().insertTask(task)
     suspend fun updateTask(task: Task) = database.taskDao().updateTask(task)
     suspend fun deleteTask(task: Task) = database.taskDao().deleteTask(task)
+    suspend fun updateOverdueTasks(now: Long) = database.taskDao().updateOverdueTasks(now, TaskStatus.TODO, TaskStatus.OVERDUE)
 
     // Categories
     val allCategories: Flow<List<Category>> = database.categoryDao().getAllCategories()

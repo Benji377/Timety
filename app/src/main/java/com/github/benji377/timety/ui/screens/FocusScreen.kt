@@ -2,6 +2,10 @@ package com.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -95,6 +99,8 @@ fun FocusScreen(viewModel: FocusViewModel, taskId: Int? = null) {
                     onClick = { selectedCategoryId?.let { viewModel.startTimer(it, taskId) } },
                     enabled = !isRunning && (isStopwatchMode || timerMillis > 0)
                 ) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = "Start", modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Start")
                 }
 
@@ -103,6 +109,8 @@ fun FocusScreen(viewModel: FocusViewModel, taskId: Int? = null) {
                     onClick = { viewModel.pauseTimer() },
                     enabled = isRunning
                 ) {
+                    Icon(Icons.Default.Pause, contentDescription = "Pause", modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Pause")
                 }
 
@@ -112,6 +120,8 @@ fun FocusScreen(viewModel: FocusViewModel, taskId: Int? = null) {
                     enabled = isRunning || (!isRunning && timerMillis > 0 && isStopwatchMode),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
+                    Icon(Icons.Default.Stop, contentDescription = "Stop", modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Stop")
                 }
             }
