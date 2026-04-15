@@ -7,6 +7,7 @@ import com.github.benji377.timety.data.MainRepository
 import com.github.benji377.timety.data.User
 import com.github.benji377.timety.data.Category
 import com.github.benji377.timety.data.FocusSession
+import com.github.benji377.timety.utils.InsightsGenerator
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import java.util.Calendar
@@ -51,6 +52,62 @@ class StatsViewModel(private val repository: MainRepository) : ViewModel() {
     val categoryDistribution: StateFlow<Map<Int, Long>> = allSessions.map { sessions ->
         sessions.groupBy { it.categoryId }
             .mapValues { (_, sessions) -> sessions.sumOf { it.duration } }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyMap()
+    )
+
+    val insights: StateFlow<List<String>> = allSessions.map { sessions ->
+        InsightsGenerator.generateInsights(sessions)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = listOf("Start focusing to unlock insights!")
+    )
+
+    val weeklyFocusData: StateFlow<Map<String, Long>> = allSessions.map { sessions ->
+        val calendar = Calendar.getInstance()
+        val focusByDay = mutableMapOf<String, Long>()
+
+        // Initialize last 7 days
+        repeat(7) { i ->
+            val dayMills = calendar.timeInMillis - (i * 24 * 60 * 60 * 1000L)
+            val cal = Calendar.getInstance().apply {
+                timeInMillis = dayMills
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val dayName = when (cal.get(Calendar.DAY_OF_WEEK)) {
+                1 -> "Sun"
+                2 -> "Mon"
+                3 -> "Tue"
+                4 -> "Wed"
+                5 -> "Thu"
+                6 -> "Fri"
+                else -> "Sat"
+            }
+            focusByDay[dayName] = 0L
+        }
+
+        // Aggregate sessions by day
+        sessions.forEach { session ->
+            val cal = Calendar.getInstance().apply { timeInMillis = session.startTime }
+            val dayName = when (cal.get(Calendar.DAY_OF_WEEK)) {
+                1 -> "Sun"
+                2 -> "Mon"
+                3 -> "Tue"
+                4 -> "Wed"
+                5 -> "Thu"
+                6 -> "Fri"
+                else -> "Sat"
+            }
+            focusByDay[dayName] = (focusByDay[dayName] ?: 0L) + session.duration
+        }
+
+        focusByDay
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

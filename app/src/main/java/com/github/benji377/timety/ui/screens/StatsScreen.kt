@@ -26,6 +26,8 @@ fun StatsScreen(viewModel: StatsViewModel) {
     val todayFocusTime by viewModel.todayFocusTime.collectAsState()
     val categories by viewModel.allCategories.collectAsState()
     val distribution by viewModel.categoryDistribution.collectAsState()
+    val insights by viewModel.insights.collectAsState()
+    val weeklyData by viewModel.weeklyFocusData.collectAsState()
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Stats & Profile") }) }
@@ -98,6 +100,60 @@ fun StatsScreen(viewModel: StatsViewModel) {
                         text = "${hours}h ${minutes}m",
                         modifier = Modifier.size(150.dp)
                     )
+                }
+            }
+
+            // Weekly Chart
+            item {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("This Week's Focus", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        weeklyData.forEach { (day, duration) ->
+                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(day, style = MaterialTheme.typography.labelMedium)
+                                    Text("${duration / 60000} min", style = MaterialTheme.typography.labelSmall)
+                                }
+                                val maxDuration = weeklyData.values.maxOrNull() ?: 1L
+                                val barProgress = if (maxDuration > 0) duration.toFloat() / maxDuration.toFloat() else 0f
+                                LinearProgressIndicator(
+                                    progress = { barProgress },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Insights
+            if (insights.isNotEmpty()) {
+                item {
+                    Text(text = "Insights", style = MaterialTheme.typography.titleLarge)
+                }
+
+                items(insights) { insight ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    ) {
+                        Text(
+                            text = insight,
+                            modifier = Modifier.padding(12.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
 

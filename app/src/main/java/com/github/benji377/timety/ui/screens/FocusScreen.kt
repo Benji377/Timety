@@ -50,7 +50,7 @@ fun FocusScreen(viewModel: FocusViewModel, taskId: Int? = null) {
             verticalArrangement = Arrangement.Center
         ) {
             // Mode Toggle
-            TabRow(
+            PrimaryTabRow(
                 selectedTabIndex = if (isStopwatchMode) 1 else 0,
                 modifier = Modifier.width(200.dp),
                 containerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -93,36 +93,55 @@ fun FocusScreen(viewModel: FocusViewModel, taskId: Int? = null) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                // Start Button
-                Button(
-                    onClick = { selectedCategoryId?.let { viewModel.startTimer(it, taskId) } },
-                    enabled = !isRunning && (isStopwatchMode || timerMillis > 0)
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = "Start", modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Start")
-                }
+                    // Start Button - Icon only, larger
+                    IconButton(
+                        onClick = { selectedCategoryId?.let { viewModel.startTimer(it, taskId) } },
+                        enabled = !isRunning && (isStopwatchMode || timerMillis > 0),
+                        modifier = Modifier.size(64.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = "Start",
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
 
-                // Pause Button
-                Button(
-                    onClick = { viewModel.pauseTimer() },
-                    enabled = isRunning
-                ) {
-                    Icon(Icons.Default.Pause, contentDescription = "Pause", modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Pause")
-                }
+                    // Pause Button - Icon only, larger
+                    IconButton(
+                        onClick = { viewModel.pauseTimer() },
+                        enabled = isRunning,
+                        modifier = Modifier.size(64.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Pause,
+                            contentDescription = "Pause",
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
 
-                // Stop Button
-                Button(
-                    onClick = { viewModel.stopTimerManual() },
-                    enabled = isRunning || (!isRunning && timerMillis > 0 && isStopwatchMode),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Icon(Icons.Default.Stop, contentDescription = "Stop", modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Stop")
+                    // Stop Button - Icon only, larger
+                    IconButton(
+                        onClick = { viewModel.stopTimerManual() },
+                        enabled = isRunning || (!isRunning && timerMillis > 0 && isStopwatchMode),
+                        modifier = Modifier.size(64.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Stop,
+                            contentDescription = "Stop",
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
 

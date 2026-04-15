@@ -172,11 +172,7 @@ fun TaskDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Icon(
-                                    imageVector = size.getIcon(),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                                com.github.benji377.timety.ui.components.TaskSizeBadge(size.badgeText)
                                 Column {
                                     Text(size.label, style = MaterialTheme.typography.bodyMedium)
                                     Text(
@@ -190,15 +186,20 @@ fun TaskDetailScreen(
                     }
                 }
 
-                // Task Duration Tracking (v1.1 - Placeholder)
+                // Task Duration Tracking
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("Focus Time Tracking", style = MaterialTheme.typography.labelMedium)
+                        Text("Focus Sessions", style = MaterialTheme.typography.labelMedium)
                         Text(
-                            "Total focus time: Coming in v1.2",
+                            "Total focus time on this task will appear here after you complete focus sessions",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        // Note: In v1.2, this will show:
+                        // - Total time spent on task
+                        // - Number of sessions
+                        // - Average session length
+                        // - Comparison to estimated time
                     }
                 }
 

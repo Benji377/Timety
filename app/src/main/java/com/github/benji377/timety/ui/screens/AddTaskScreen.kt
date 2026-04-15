@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.PaddingValues
 import com.github.benji377.timety.viewmodel.TasksViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -129,11 +131,7 @@ fun AddTaskScreen(
                             onClick = { showSizePicker = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(
-                                imageVector = selectedSize.getIcon(),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            com.github.benji377.timety.ui.components.TaskSizeBadge(selectedSize.badgeText)
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(selectedSize.label)
                         }
@@ -179,7 +177,7 @@ fun AddTaskScreen(
                 ) {
                     Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                     Text(
-                        text = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(reminder)),
+                        text = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(reminder)),
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = { reminders = reminders - reminder }) {
@@ -189,13 +187,76 @@ fun AddTaskScreen(
             }
             
             item {
-                TextButton(
-                    onClick = { showTimePicker = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Add Reminder")
+                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                    Text("Quick Reminders:", style = MaterialTheme.typography.labelMedium)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                val cal = Calendar.getInstance()
+                                cal.add(Calendar.MINUTE, 30)
+                                reminders = reminders + cal.timeInMillis
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(36.dp),
+                            contentPadding = PaddingValues(4.dp)
+                        ) {
+                            Text("30min", fontSize = 10.sp)
+                        }
+                        Button(
+                            onClick = {
+                                val cal = Calendar.getInstance()
+                                cal.add(Calendar.HOUR, 1)
+                                reminders = reminders + cal.timeInMillis
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(36.dp),
+                            contentPadding = PaddingValues(4.dp)
+                        ) {
+                            Text("1hr", fontSize = 10.sp)
+                        }
+                        Button(
+                            onClick = {
+                                val cal = Calendar.getInstance()
+                                cal.add(Calendar.HOUR, 3)
+                                reminders = reminders + cal.timeInMillis
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(36.dp),
+                            contentPadding = PaddingValues(4.dp)
+                        ) {
+                            Text("3hrs", fontSize = 10.sp)
+                        }
+                        Button(
+                            onClick = {
+                                val cal = Calendar.getInstance()
+                                cal.add(Calendar.DAY_OF_MONTH, 1)
+                                reminders = reminders + cal.timeInMillis
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(36.dp),
+                            contentPadding = PaddingValues(4.dp)
+                        ) {
+                            Text("1day", fontSize = 10.sp)
+                        }
+                    }
+
+                    TextButton(
+                        onClick = { showTimePicker = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Custom Date & Time")
+                    }
                 }
             }
         }
@@ -227,8 +288,7 @@ fun AddTaskScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         val cal = Calendar.getInstance()
-                        // Default to today if no due date, or use due date
-                        dueDate?.let { cal.timeInMillis = it }
+                        datePickerState.selectedDateMillis?.let { cal.timeInMillis = it }
                         cal.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
                         cal.set(Calendar.MINUTE, timePickerState.minute)
                         reminders = reminders + cal.timeInMillis
@@ -243,8 +303,35 @@ fun AddTaskScreen(
                     }
                 },
                 text = {
-                    TimePicker(state = timePickerState)
-                }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text("Date:", style = MaterialTheme.typography.labelSmall)
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            DatePicker(
+                                state = datePickerState,
+                                modifier = Modifier
+                                    .fillMaxWidth(0.9f)
+                                    .height(350.dp)
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text("Time (24-hour):", style = MaterialTheme.typography.labelSmall)
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            TimePicker(
+                                state = timePickerState,
+                                modifier = Modifier
+                                    .fillMaxWidth(0.85f)
+                            )
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(0.95f)
             )
         }
 
@@ -319,13 +406,16 @@ fun AddTaskScreen(
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Icon(
-                                    imageVector = size.getIcon(),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                                com.github.benji377.timety.ui.components.TaskSizeBadge(size.badgeText)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("${size.label} (~${size.estimatedMinutes}min)", modifier = Modifier.weight(1f))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(size.label)
+                                    Text(
+                                        "(~${size.estimatedMinutes}min)",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }

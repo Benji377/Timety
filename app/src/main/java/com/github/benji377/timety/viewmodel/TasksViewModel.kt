@@ -66,6 +66,13 @@ class TasksViewModel(
         initialValue = emptyList()
     )
 
+    fun getTotalFocusTimeForTask(taskId: Int?): Long {
+        if (taskId == null) return 0L
+        // This would need to be a proper query in real implementation
+        // For now, users would need to check stats
+        return 0L
+    }
+
     fun selectDate(date: Long) {
         _selectedDate.value = date
     }

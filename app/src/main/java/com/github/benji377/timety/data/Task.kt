@@ -40,19 +40,19 @@ enum class TaskPriority(val label: String) {
     }
 }
 
-enum class TaskSize(val label: String, val estimatedMinutes: Int) {
-    TINY("Tiny", 15),
-    SMALL("Small", 30),
-    MEDIUM("Medium", 60),
-    LARGE("Large", 120),
-    XLARGE("X-Large", 240);
+enum class TaskSize(val label: String, val estimatedMinutes: Int, val badgeText: String) {
+    TINY("Tiny", 15, "XS"),
+    SMALL("Small", 30, "S"),
+    MEDIUM("Medium", 60, "M"),
+    LARGE("Large", 120, "L"),
+    XLARGE("X-Large", 240, "XL");
 
     fun getIcon(): ImageVector = when(this) {
-        TINY -> Icons.Default.ViewComfy
-        SMALL -> Icons.Default.ViewDay
-        MEDIUM -> Icons.Default.ViewWeek
-        LARGE -> Icons.Default.ViewAgenda
-        XLARGE -> Icons.Default.ViewCompactAlt
+        TINY -> Icons.Default.Crop
+        SMALL -> Icons.Default.CropSquare
+        MEDIUM -> Icons.Default.Fullscreen
+        LARGE -> Icons.Default.AspectRatio
+        XLARGE -> Icons.Default.FitScreen
     }
 }
 

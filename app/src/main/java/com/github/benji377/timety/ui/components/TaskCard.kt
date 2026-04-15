@@ -78,12 +78,10 @@ fun TaskCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Priority indicator
-                    Icon(
-                        imageVector = task.priority.getIcon(),
-                        contentDescription = task.priority.label,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    // Priority badge
+                    PriorityBadge(
+                        icon = task.priority.getIcon(),
+                        label = task.priority.label
                     )
                     Text(
                         text = task.priority.label,
@@ -91,13 +89,9 @@ fun TaskCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    // Size indicator
-                    Icon(
-                        imageVector = task.size.getIcon(),
-                        contentDescription = task.size.label,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Size badge
+                    Spacer(modifier = Modifier.width(4.dp))
+                    TaskSizeBadge(task.size.badgeText)
                     Text(
                         text = "${task.size.estimatedMinutes}min",
                         style = MaterialTheme.typography.labelSmall,

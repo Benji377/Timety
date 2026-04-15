@@ -37,6 +37,25 @@ fun TasksScreen(
     val selectedDate by viewModel.selectedDate.collectAsState()
     var showDatePicker by remember { mutableStateOf(false) }
 
+    // Calculate task count by date (normalized to start of day)
+    val taskCountByDate = remember(tasks, upcomingTasks) {
+        val map = mutableMapOf<Long, Int>()
+        (tasks + upcomingTasks).forEach { task ->
+            task.dueDate?.let { dueDate ->
+                val cal = Calendar.getInstance().apply {
+                    timeInMillis = dueDate
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val key = cal.timeInMillis
+                map[key] = (map[key] ?: 0) + 1
+            }
+        }
+        map
+    }
+
     val datePickerState = rememberDatePickerState()
 
     Scaffold(
@@ -59,7 +78,8 @@ fun TasksScreen(
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             CalendarStrip(
                 selectedDate = selectedDate,
-                onDateSelected = { viewModel.selectDate(it) }
+                onDateSelected = { viewModel.selectDate(it) },
+                taskCountByDate = taskCountByDate
             )
             
             LazyColumn(
@@ -122,12 +142,21 @@ fun TasksScreen(
 }
 
 @Composable
-fun CalendarStrip(selectedDate: Long, onDateSelected: (Long) -> Unit) {
+fun CalendarStrip(
+    selectedDate: Long,
+    onDateSelected: (Long) -> Unit,
+    taskCountByDate: Map<Long, Int> = emptyMap()
+) {
     val days = remember {
         (0..13).map { i ->
             val cal = Calendar.getInstance()
             cal.add(Calendar.DAY_OF_YEAR, i - 3) // Show 3 days before today
-            cal.timeInMillis
+            cal.apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
         }
     }
 
@@ -138,9 +167,11 @@ fun CalendarStrip(selectedDate: Long, onDateSelected: (Long) -> Unit) {
     ) {
         items(days) { date ->
             val isSelected = isSameDay(date, selectedDate)
+            val taskCount = taskCountByDate[date] ?: 0
             DayItem(
                 date = date,
                 isSelected = isSelected,
+                taskCount = taskCount,
                 onClick = { onDateSelected(date) }
             )
         }
@@ -148,7 +179,7 @@ fun CalendarStrip(selectedDate: Long, onDateSelected: (Long) -> Unit) {
 }
 
 @Composable
-fun DayItem(date: Long, isSelected: Boolean, onClick: () -> Unit) {
+fun DayItem(date: Long, isSelected: Boolean, taskCount: Int = 0, onClick: () -> Unit) {
     val cal = Calendar.getInstance().apply { timeInMillis = date }
     val dayName = SimpleDateFormat("EEE", Locale.getDefault()).format(cal.time)
     val dayNumber = cal.get(Calendar.DAY_OF_MONTH).toString()
@@ -173,6 +204,31 @@ fun DayItem(date: Long, isSelected: Boolean, onClick: () -> Unit) {
             fontWeight = FontWeight.Bold,
             color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        // Task count dots
+        if (taskCount > 0) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                repeat(minOf(taskCount, 3)) {
+                    Box(
+                        modifier = Modifier
+                            .size(4.dp)
+                            .background(
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(2.dp)
+                            )
+                    )
+                }
+                if (taskCount > 3) {
+                    Text(
+                        text = "+",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                        fontSize = androidx.compose.ui.unit.TextUnit.Unspecified
+                    )
+                }
+            }
+        }
     }
 }
 
