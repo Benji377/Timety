@@ -25,7 +25,7 @@ fun TaskDetailScreen(
     onStartFocus: (Int) -> Unit
 ) {
     val tasks by viewModel.allTasks.collectAsState()
-    val task = tasks.find { it.id == taskId }
+    val task = remember(tasks, taskId) { tasks.find { it.id == taskId } }
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }

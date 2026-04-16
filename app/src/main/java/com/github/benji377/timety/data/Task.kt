@@ -16,6 +16,7 @@ data class Task(
     val dueDate: Long? = null,
     val reminderTime: Long? = null,
     val reminders: List<Long> = emptyList(),
+    val categoryId: Int? = null,
     val durationEst: Long? = null,
     val status: TaskStatus = TaskStatus.TODO,
     val priority: TaskPriority = TaskPriority.MEDIUM,

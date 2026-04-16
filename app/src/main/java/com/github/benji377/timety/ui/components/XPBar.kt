@@ -1,10 +1,6 @@
 package com.github.benji377.timety.ui.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -17,13 +13,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun XPBar(
+    progress: Float,
     currentXp: Int,
+    targetXp: Int,
     level: Int,
     modifier: Modifier = Modifier
 ) {
-    val xpForNextLevel = 100 // Simplified logic
-    val progress = (currentXp % xpForNextLevel).toFloat() / xpForNextLevel
-
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -36,7 +31,7 @@ fun XPBar(
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "${currentXp % xpForNextLevel} / $xpForNextLevel XP",
+                text = "$currentXp / $targetXp XP",
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -50,9 +45,4 @@ fun XPBar(
             trackColor = MaterialTheme.colorScheme.primaryContainer,
         )
     }
-}
-
-@Composable
-fun Spacer(modifier: Modifier) {
-    androidx.compose.foundation.layout.Spacer(modifier = modifier)
 }

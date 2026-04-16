@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.PaddingValues
+import com.github.benji377.timety.data.*
 import com.github.benji377.timety.viewmodel.TasksViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,8 +30,8 @@ fun AddTaskScreen(
     var dueDate by remember { mutableStateOf<Long?>(null) }
     var reminders by remember { mutableStateOf(listOf<Long>()) }
     var selectedIcon by remember { mutableStateOf("Task") } // Default icon
-    var selectedPriority by remember { mutableStateOf(com.github.benji377.timety.data.TaskPriority.MEDIUM) }
-    var selectedSize by remember { mutableStateOf(com.github.benji377.timety.data.TaskSize.MEDIUM) }
+    var selectedPriority by remember { mutableStateOf(TaskPriority.MEDIUM) }
+    var selectedSize by remember { mutableStateOf(TaskSize.MEDIUM) }
 
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
@@ -55,9 +56,16 @@ fun AddTaskScreen(
                     TextButton(
                         onClick = {
                             if (title.isNotBlank()) {
-                                // Note: addTask needs to be updated to accept priority and size
-                                // For now using simplified call
-                                viewModel.addTask(title, desc.ifBlank { null }, location.ifBlank { null }, dueDate, reminders, selectedIcon)
+                                viewModel.addTask(
+                                    title = title,
+                                    description = desc.ifBlank { null },
+                                    location = location.ifBlank { null },
+                                    dueDate = dueDate,
+                                    reminders = reminders,
+                                    iconName = selectedIcon,
+                                    priority = selectedPriority,
+                                    size = selectedSize
+                                )
                                 onBack()
                             }
                         },
@@ -369,7 +377,7 @@ fun AddTaskScreen(
                 title = { Text("Select Priority") },
                 text = {
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                        items(com.github.benji377.timety.data.TaskPriority.values()) { priority ->
+                        items(TaskPriority.values()) { priority ->
                             TextButton(
                                 onClick = {
                                     selectedPriority = priority
@@ -398,7 +406,7 @@ fun AddTaskScreen(
                 title = { Text("Select Size") },
                 text = {
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                        items(com.github.benji377.timety.data.TaskSize.values()) { size ->
+                        items(TaskSize.values()) { size ->
                             TextButton(
                                 onClick = {
                                     selectedSize = size

@@ -78,9 +78,19 @@ fun StatsScreen(viewModel: StatsViewModel) {
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        val currentXp = user?.xp ?: 0
+                        val level = user?.level ?: 1
+                        val nextLevelXp = level * 100
+                        val currentLevelXp = (level - 1) * 100
+                        val xpInLevel = currentXp - currentLevelXp
+                        val xpTarget = 100
+                        val progress = (xpInLevel.toFloat() / xpTarget.toFloat()).coerceIn(0f, 1f)
+
                         XPBar(
-                            currentXp = user?.xp ?: 0,
-                            level = user?.level ?: 1
+                            progress = progress,
+                            currentXp = xpInLevel,
+                            targetXp = xpTarget,
+                            level = level
                         )
                     }
                 }

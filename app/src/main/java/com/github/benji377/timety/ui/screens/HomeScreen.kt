@@ -17,7 +17,6 @@ import com.github.benji377.timety.ui.components.RadialGraph
 import com.github.benji377.timety.ui.components.TaskCard
 import com.github.benji377.timety.viewmodel.HomeViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -26,20 +25,23 @@ fun HomeScreen(
     onFocusClick: () -> Unit,
     onAddTaskClick: () -> Unit
 ) {
+    val greeting by viewModel.greeting.collectAsState()
     val user by viewModel.user.collectAsState()
     val tasks by viewModel.todayTasks.collectAsState()
     val todayFocusTime by viewModel.todayFocusTime.collectAsState()
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Good morning, ${user?.name ?: "Hero"}") },
-                actions = {
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
-                    }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                IconButton(onClick = onSettingsClick) {
+                    Icon(Icons.Default.Settings, contentDescription = "Settings")
                 }
-            )
+            }
         }
     ) { padding ->
         Column(
@@ -47,8 +49,15 @@ fun HomeScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            Text(
+                text = greeting,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
             val focusTarget = user?.dailyFocusTarget ?: (2 * 60 * 60 * 1000L) // Default 2h
             val progress = if (focusTarget > 0) todayFocusTime.toFloat() / focusTarget else 0f
 
@@ -59,6 +68,8 @@ fun HomeScreen(
                     modifier = Modifier.padding(vertical = 24.dp)
                 )
             }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
             Text(
                 text = "Today's Tasks",
@@ -75,7 +86,7 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "No tasks for today. Tap to add one!",
+                        "No tasks for today, take a break or add some!",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )

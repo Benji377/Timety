@@ -49,13 +49,14 @@ class MainActivity : ComponentActivity() {
                     Screen.Home,
                     Screen.Focus,
                     Screen.Tasks,
-                    Screen.Stats
+                    Screen.Calendar,
+                    Screen.User
                 )
                 
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
                 val showBottomBar = items.any { screen -> 
-                    currentDestination?.route?.startsWith(screen.route) == true
+                    currentDestination?.route == screen.route
                 }
 
                 Scaffold(
@@ -105,7 +106,16 @@ class MainActivity : ComponentActivity() {
                             val focusViewModel: FocusViewModel = viewModel(
                                 factory = FocusViewModelFactory(repository, this@MainActivity)
                             )
-                            FocusScreen(focusViewModel, null)
+                            FocusScreen(
+                                viewModel = focusViewModel,
+                                taskId = null,
+                                onNavigateToStats = { 
+                                    navController.navigate(Screen.DailyStats.createRoute(System.currentTimeMillis())) 
+                                },
+                                onNavigateToModes = {
+                                    navController.navigate(Screen.FocusModes.route)
+                                }
+                            )
                         }
                         composable(
                             route = Screen.Focus.route + "?taskId={taskId}",
@@ -120,7 +130,16 @@ class MainActivity : ComponentActivity() {
                             val focusViewModel: FocusViewModel = viewModel(
                                 factory = FocusViewModelFactory(repository, this@MainActivity)
                             )
-                            FocusScreen(focusViewModel, taskId)
+                            FocusScreen(
+                                viewModel = focusViewModel,
+                                taskId = taskId,
+                                onNavigateToStats = { 
+                                    navController.navigate(Screen.DailyStats.createRoute(System.currentTimeMillis())) 
+                                },
+                                onNavigateToModes = {
+                                    navController.navigate(Screen.FocusModes.route)
+                                }
+                            )
                         }
                         composable(Screen.Tasks.route) {
                             val tasksViewModel: TasksViewModel = viewModel(
@@ -141,11 +160,58 @@ class MainActivity : ComponentActivity() {
                                 onBack = { navController.popBackStack() }
                             )
                         }
-                        composable(Screen.Stats.route) {
+                        composable(Screen.Calendar.route) {
+                            val calendarViewModel: CalendarViewModel = viewModel(
+                                factory = CalendarViewModelFactory(repository)
+                            )
+                            CalendarScreen(
+                                viewModel = calendarViewModel,
+                                onDayClick = { date: Long -> navController.navigate(Screen.DailyStats.createRoute(date)) }
+                            )
+                        }
+                        composable(Screen.User.route) {
+                            val settingsViewModel: SettingsViewModel = viewModel(
+                                factory = SettingsViewModelFactory(repository)
+                            )
+                            UserScreen(viewModel = settingsViewModel)
+                        }
+                        composable(Screen.FocusModes.route) {
+                            val focusViewModel: FocusViewModel = viewModel(
+                                factory = FocusViewModelFactory(repository, this@MainActivity)
+                            )
+                            FocusModesScreen(
+                                viewModel = focusViewModel,
+                                onBack = { navController.popBackStack() },
+                                onAddMode = { navController.navigate(Screen.AddFocusMode.route) },
+                                onEditMode = { modeId -> 
+                                    // navController.navigate(Screen.EditFocusMode.createRoute(modeId))
+                                }
+                            )
+                        }
+                        composable(Screen.AddFocusMode.route) {
+                            val focusViewModel: FocusViewModel = viewModel(
+                                factory = FocusViewModelFactory(repository, this@MainActivity)
+                            )
+                            AddFocusModeScreen(
+                                viewModel = focusViewModel,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(
+                            route = Screen.DailyStats.route,
+                            arguments = listOf(
+                                navArgument("date") { type = NavType.LongType }
+                            )
+                        ) { backStackEntry ->
+                            val date = backStackEntry.arguments?.getLong("date") ?: 0L
                             val statsViewModel: StatsViewModel = viewModel(
                                 factory = StatsViewModelFactory(repository)
                             )
-                            StatsScreen(statsViewModel)
+                            DailyStatsScreen(
+                                viewModel = statsViewModel,
+                                initialDate = date,
+                                onBack = { navController.popBackStack() }
+                            )
                         }
                         composable(Screen.Settings.route) {
                             val settingsViewModel: SettingsViewModel = viewModel(

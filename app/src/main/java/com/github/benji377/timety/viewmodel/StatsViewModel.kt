@@ -113,6 +113,18 @@ class StatsViewModel(private val repository: MainRepository) : ViewModel() {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyMap()
     )
+
+    fun getEventsForDay(date: Long): kotlinx.coroutines.flow.Flow<List<com.github.benji377.timety.data.DailyEvent>> {
+        val calendar = Calendar.getInstance().apply { timeInMillis = date }
+        val startOfDay = calendar.apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val endOfDay = startOfDay + 24 * 60 * 60 * 1000L
+        return repository.getEventsForDay(startOfDay, endOfDay)
+    }
 }
 
 class StatsViewModelFactory(private val repository: MainRepository) : ViewModelProvider.Factory {

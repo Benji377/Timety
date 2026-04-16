@@ -30,19 +30,16 @@ class SettingsViewModel(private val repository: MainRepository) : ViewModel() {
         initialValue = emptyList()
     )
 
-    fun updateUserName(newName: String) {
+    fun updateUser(user: User) {
+        viewModelScope.launch {
+            repository.insertOrUpdateUser(user)
+        }
+    }
+
+    fun updateUserName(name: String) {
         viewModelScope.launch {
             user.value?.let {
-                repository.insertOrUpdateUser(it.copy(name = newName))
-            } ?: run {
-                // If no user exists, create one
-                repository.insertOrUpdateUser(
-                    User(
-                        name = newName,
-                        dailyFocusTarget = 2 * 60 * 60 * 1000L,
-                        lastActiveDate = System.currentTimeMillis()
-                    )
-                )
+                repository.insertOrUpdateUser(it.copy(name = name))
             }
         }
     }

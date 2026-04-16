@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [User::class, Task::class, Category::class, FocusSession::class],
+    entities = [User::class, Task::class, Category::class, FocusSession::class, FocusMode::class, DailyEvent::class],
     version = 1,
     exportSchema = false
 )
@@ -17,6 +17,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun categoryDao(): CategoryDao
     abstract fun focusSessionDao(): FocusSessionDao
+    abstract fun focusModeDao(): FocusModeDao
+    abstract fun dailyEventDao(): DailyEventDao
 
     companion object {
         @Volatile

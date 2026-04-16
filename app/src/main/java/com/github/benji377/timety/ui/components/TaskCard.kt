@@ -2,8 +2,11 @@ package com.github.benji377.timety.ui.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,14 +26,18 @@ fun isDueToday(dueDate: Long?): Boolean {
            cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
 }
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun TaskCard(
     task: Task,
     onCheckedChange: () -> Unit,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLongClick: () -> Unit = {},
+    isSelected: Boolean = false
 ) {
     val borderColor = when {
+        isSelected -> MaterialTheme.colorScheme.primary
         task.status == TaskStatus.DONE -> Color.Green
         task.status == TaskStatus.OVERDUE -> Color.Red
         isDueToday(task.dueDate) -> Color.Yellow
@@ -41,10 +48,15 @@ fun TaskCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .border(2.dp, borderColor, RoundedCornerShape(12.dp))
-            .clickable { onClick() },
+            .border(if (isSelected) 3.dp else 2.dp, borderColor, RoundedCornerShape(12.dp))
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -53,10 +65,19 @@ fun TaskCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Checkbox(
-                checked = task.status == TaskStatus.DONE,
-                onCheckedChange = { onCheckedChange() }
-            )
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Selected",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Checkbox(
+                    checked = task.status == TaskStatus.DONE,
+                    onCheckedChange = { onCheckedChange() }
+                )
+            }
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
