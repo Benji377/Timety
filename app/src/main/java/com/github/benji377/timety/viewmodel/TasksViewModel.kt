@@ -4,7 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.benji377.timety.data.*
+import com.github.benji377.timety.data.Category
+import com.github.benji377.timety.data.MainRepository
+import com.github.benji377.timety.data.Task
+import com.github.benji377.timety.data.TaskPriority
+import com.github.benji377.timety.data.TaskSize
+import com.github.benji377.timety.data.TaskStatus
 import com.github.benji377.timety.utils.ReminderManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +30,7 @@ class TasksViewModel(
     private val _selectedDate = MutableStateFlow(System.currentTimeMillis())
     val selectedDate: StateFlow<Long> = _selectedDate.asStateFlow()
 
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     val tasksByDate: StateFlow<List<Task>> = _selectedDate.flatMapLatest { date ->
         val cal = Calendar.getInstance()
         cal.timeInMillis = date
@@ -45,7 +50,7 @@ class TasksViewModel(
         initialValue = emptyList()
     )
 
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     val upcomingTasks: StateFlow<List<Task>> = _selectedDate.flatMapLatest { date ->
         val cal = Calendar.getInstance()
         cal.timeInMillis = date
@@ -95,7 +100,7 @@ class TasksViewModel(
         if (query.isNotBlank()) {
             filtered = filtered.filter { it.title.contains(query, ignoreCase = true) }
         }
-        
+
         when (sort) {
             SortOrder.PRIORITY -> filtered.sortedByDescending { it.priority }
             SortOrder.NAME -> filtered.sortedBy { it.title }
@@ -174,8 +179,8 @@ class TasksViewModel(
         dueDate: Long? = null,
         reminders: List<Long> = emptyList(),
         iconName: String = "Check",
-        priority: com.github.benji377.timety.data.TaskPriority = com.github.benji377.timety.data.TaskPriority.MEDIUM,
-        size: com.github.benji377.timety.data.TaskSize = com.github.benji377.timety.data.TaskSize.MEDIUM
+        priority: TaskPriority = TaskPriority.MEDIUM,
+        size: TaskSize = TaskSize.MEDIUM
     ) {
         viewModelScope.launch {
             val newTask = Task(
@@ -251,12 +256,14 @@ class TasksViewModel(
                         TaskSize.TINY -> 0.5
                     }
                     val streakMult = (1.0 + (it.currentStreak * 0.05)).coerceAtMost(1.5)
-                    
+
                     val xpGained = (baseXp * priorityMult * sizeMult * streakMult).toInt()
-                    repository.insertOrUpdateUser(it.copy(
-                        xp = it.xp + xpGained,
-                        level = ((it.xp + xpGained) / 100) + 1
-                    ))
+                    repository.insertOrUpdateUser(
+                        it.copy(
+                            xp = it.xp + xpGained,
+                            level = ((it.xp + xpGained) / 100) + 1
+                        )
+                    )
                 }
             }
         }

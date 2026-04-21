@@ -1,22 +1,59 @@
 package com.github.benji377.timety.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.PaddingValues
-import com.github.benji377.timety.data.*
+import com.github.benji377.timety.data.TaskPriority
+import com.github.benji377.timety.data.TaskSize
 import com.github.benji377.timety.viewmodel.TasksViewModel
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +72,7 @@ fun AddTaskScreen(
 
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
-    
+
     var showTimePicker by remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState()
 
@@ -161,9 +198,16 @@ fun AddTaskScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                    Icon(
+                        Icons.Default.CalendarMonth,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
                     Text(
-                        text = if (dueDate == null) "No due date" else SimpleDateFormat("EEE, MMM dd, yyyy", Locale.getDefault()).format(Date(dueDate!!)),
+                        text = if (dueDate == null) "No due date" else SimpleDateFormat(
+                            "EEE, MMM dd, yyyy",
+                            Locale.getDefault()
+                        ).format(Date(dueDate!!)),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f)
                     )
@@ -172,20 +216,32 @@ fun AddTaskScreen(
                     }
                 }
             }
-            
+
             item {
                 HorizontalDivider()
-                Text("Reminders", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+                Text(
+                    "Reminders",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
-            
+
             items(reminders) { reminder ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
                 ) {
-                    Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
                     Text(
-                        text = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(reminder)),
+                        text = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(
+                            Date(reminder)
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = { reminders = reminders - reminder }) {
@@ -193,9 +249,11 @@ fun AddTaskScreen(
                     }
                 }
             }
-            
+
             item {
-                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)) {
                     Text("Quick Reminders:", style = MaterialTheme.typography.labelMedium)
                     Row(
                         modifier = Modifier
@@ -289,7 +347,7 @@ fun AddTaskScreen(
                 DatePicker(state = datePickerState)
             }
         }
-        
+
         if (showTimePicker) {
             AlertDialog(
                 onDismissRequest = { showTimePicker = false },
@@ -318,7 +376,10 @@ fun AddTaskScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text("Date:", style = MaterialTheme.typography.labelSmall)
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             DatePicker(
                                 state = datePickerState,
                                 modifier = Modifier
@@ -326,11 +387,14 @@ fun AddTaskScreen(
                                     .height(350.dp)
                             )
                         }
-                        
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
+
                         Text("Time (24-hour):", style = MaterialTheme.typography.labelSmall)
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             TimePicker(
                                 state = timePickerState,
                                 modifier = Modifier

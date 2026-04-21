@@ -1,7 +1,7 @@
 package com.github.benji377.timety.utils
 
 import com.github.benji377.timety.data.FocusSession
-import java.util.*
+import java.util.Calendar
 
 /**
  * Generates insights based on focus session data.
@@ -32,7 +32,8 @@ object InsightsGenerator {
             }
         }
 
-        val bestTimeOfDay = timeOfDayBreakdown.maxByOrNull { it.value.sumOf { s -> s.duration } }?.key
+        val bestTimeOfDay =
+            timeOfDayBreakdown.maxByOrNull { it.value.sumOf { s -> s.duration } }?.key
         if (bestTimeOfDay != null) {
             val timeLabel = when (bestTimeOfDay) {
                 "morning" -> "Morning"
@@ -52,7 +53,8 @@ object InsightsGenerator {
         // Insight 4: Average session length
         val avgSessionMinutes = (sessions.sumOf { it.duration } / sessions.size) / 60000L
         if (avgSessionMinutes > 0) {
-            val sessionLabel = if (avgSessionMinutes < 30) "short" else if (avgSessionMinutes < 90) "medium" else "long"
+            val sessionLabel =
+                if (avgSessionMinutes < 30) "short" else if (avgSessionMinutes < 90) "medium" else "long"
             insights.add("Your average focus session is $sessionLabel (~$avgSessionMinutes min)")
         }
 

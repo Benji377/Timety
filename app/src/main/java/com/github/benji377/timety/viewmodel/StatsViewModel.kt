@@ -3,17 +3,16 @@ package com.github.benji377.timety.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.benji377.timety.data.MainRepository
-import com.github.benji377.timety.data.User
 import com.github.benji377.timety.data.Category
 import com.github.benji377.timety.data.FocusSession
+import com.github.benji377.timety.data.MainRepository
+import com.github.benji377.timety.data.User
 import com.github.benji377.timety.utils.InsightsGenerator
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import java.util.Calendar
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.util.Calendar
 
 class StatsViewModel(private val repository: MainRepository) : ViewModel() {
 

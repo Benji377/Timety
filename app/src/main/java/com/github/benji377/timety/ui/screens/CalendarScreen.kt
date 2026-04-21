@@ -2,7 +2,17 @@ package com.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -10,8 +20,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,7 +44,9 @@ import com.github.benji377.timety.ui.components.TaskCard
 import com.github.benji377.timety.utils.DateUtils
 import com.github.benji377.timety.viewmodel.CalendarViewModel
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun CalendarScreen(
@@ -100,7 +120,7 @@ fun CalendarScreen(
                         items(selectedDaySessions) { session ->
                             FocusSessionItem(session)
                         }
-                        
+
                         item {
                             Card(
                                 modifier = Modifier
@@ -127,7 +147,10 @@ fun CalendarScreen(
                                         )
                                     }
                                     Spacer(modifier = Modifier.weight(1f))
-                                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = null
+                                    )
                                 }
                             }
                         }
@@ -164,21 +187,23 @@ fun CalendarGrid(
     onDateSelected: (Long) -> Unit
 ) {
     val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Σ")
-    val calendar = Calendar.getInstance().apply { 
+    val calendar = Calendar.getInstance().apply {
         timeInMillis = currentMonthMillis
         set(Calendar.DAY_OF_MONTH, 1)
     }
-    
+
     // Adjust for Monday start (Monday=2 in Java Calendar)
     val firstDayOfWeek = (calendar.get(Calendar.DAY_OF_WEEK) + 5) % 7
-    val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-    
-    val prevMonthDays = Calendar.getInstance().apply {
+    calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+    Calendar.getInstance().apply {
         timeInMillis = currentMonthMillis
         add(Calendar.MONTH, -1)
     }.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 8.dp)) {
         // Day Labels
         Row(modifier = Modifier.fillMaxWidth()) {
             daysOfWeek.forEach { day ->
@@ -214,15 +239,23 @@ fun CalendarGrid(
             ) {
                 var rowFocusMins = 0L
                 var rowTasks = 0
-                
+
                 for (col in 0..6) {
                     val dayInMillis = gridCalendar.timeInMillis
                     val displayDay = gridCalendar.get(Calendar.DAY_OF_MONTH)
-                    val isCurrentMonth = gridCalendar.get(Calendar.MONTH) == Calendar.getInstance().apply { timeInMillis = currentMonthMillis }.get(Calendar.MONTH)
+                    val isCurrentMonth = gridCalendar.get(Calendar.MONTH) == Calendar.getInstance()
+                        .apply { timeInMillis = currentMonthMillis }.get(Calendar.MONTH)
 
                     val isSelected = DateUtils.isSameDay(dayInMillis, selectedDate)
-                    val dayTasks = allTasks.filter { it.dueDate != null && DateUtils.isSameDay(it.dueDate, dayInMillis) }.size
-                    val dayFocusMins = allSessions.filter { DateUtils.isSameDay(it.startTime, dayInMillis) }.sumOf { it.duration } / 60000
+                    val dayTasks = allTasks.filter {
+                        it.dueDate != null && DateUtils.isSameDay(
+                            it.dueDate,
+                            dayInMillis
+                        )
+                    }.size
+                    val dayFocusMins =
+                        allSessions.filter { DateUtils.isSameDay(it.startTime, dayInMillis) }
+                            .sumOf { it.duration } / 60000
 
                     rowTasks += dayTasks
                     rowFocusMins += dayFocusMins
@@ -236,17 +269,20 @@ fun CalendarGrid(
                         modifier = Modifier.weight(1f),
                         onClick = { onDateSelected(dayInMillis) }
                     )
-                    
+
                     gridCalendar.add(Calendar.DAY_OF_MONTH, 1)
                 }
-                
+
                 // Weekly Summary Column
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .height(64.dp)
                         .padding(2.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(4.dp)),
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            RoundedCornerShape(4.dp)
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -272,7 +308,9 @@ fun CalendarGrid(
             val nextRowFirstDay = Calendar.getInstance().apply {
                 timeInMillis = gridCalendar.timeInMillis
             }
-            if (nextRowFirstDay.get(Calendar.MONTH) != Calendar.getInstance().apply { timeInMillis = currentMonthMillis }.get(Calendar.MONTH) && row >= 4) {
+            if (nextRowFirstDay.get(Calendar.MONTH) != Calendar.getInstance()
+                    .apply { timeInMillis = currentMonthMillis }.get(Calendar.MONTH) && row >= 4
+            ) {
                 break
             }
         }
@@ -301,7 +339,9 @@ fun DayCell(
         Text(
             text = day.toString(),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (isCurrentMonth) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+            color = if (isCurrentMonth) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                alpha = 0.4f
+            ),
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
         Row(
@@ -341,7 +381,7 @@ fun FocusSessionItem(session: FocusSession) {
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val startTime = timeFormat.format(Date(session.startTime))
     val endTime = timeFormat.format(Date(session.endTime))
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -373,7 +413,10 @@ fun FocusSessionItem(session: FocusSession) {
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(4.dp))
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            RoundedCornerShape(4.dp)
+                        )
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 )
             }

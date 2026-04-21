@@ -7,7 +7,12 @@ import android.os.IBinder
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.benji377.timety.utils.NotificationHelper
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Foreground service that keeps the focus timer running even when the app is backgrounded.
@@ -36,6 +41,7 @@ class FocusTimerService : Service() {
                 val duration = intent.getLongExtra(EXTRA_DURATION, 25 * 60 * 1000L)
                 startTimer(duration)
             }
+
             ACTION_PAUSE_TIMER -> pauseTimer()
             ACTION_STOP_TIMER -> stopTimer()
         }

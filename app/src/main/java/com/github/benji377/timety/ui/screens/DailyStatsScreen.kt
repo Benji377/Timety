@@ -1,15 +1,40 @@
 package com.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -18,12 +43,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.benji377.timety.data.DailyEvent
 import com.github.benji377.timety.data.FocusSession
 import com.github.benji377.timety.viewmodel.StatsViewModel
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -50,7 +76,8 @@ fun DailyStatsScreen(
         allSessions.filter { it.startTime in startOfDay until endOfDay }
     }
 
-    val dailyEvents by viewModel.getEventsForDay(currentDateMillis).collectAsState(initial = emptyList())
+    val dailyEvents by viewModel.getEventsForDay(currentDateMillis)
+        .collectAsState(initial = emptyList())
 
     val totalFocussedMillis = dailySessions.sumOf { it.duration }
     val dailyTargetMillis = user?.dailyFocusTarget ?: (120 * 60 * 1000L)
@@ -66,22 +93,34 @@ fun DailyStatsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         IconButton(onClick = {
-                            val cal = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
+                            val cal =
+                                Calendar.getInstance().apply { timeInMillis = currentDateMillis }
                             cal.add(Calendar.DAY_OF_YEAR, -1)
                             currentDateMillis = cal.timeInMillis
                         }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Day")
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Previous Day"
+                            )
                         }
                         Text(
-                            text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date(currentDateMillis)),
+                            text = SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(
+                                Date(
+                                    currentDateMillis
+                                )
+                            ),
                             style = MaterialTheme.typography.titleMedium
                         )
                         IconButton(onClick = {
-                            val cal = Calendar.getInstance().apply { timeInMillis = currentDateMillis }
+                            val cal =
+                                Calendar.getInstance().apply { timeInMillis = currentDateMillis }
                             cal.add(Calendar.DAY_OF_YEAR, 1)
                             currentDateMillis = cal.timeInMillis
                         }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Day")
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Next Day"
+                            )
                         }
                     }
                 },
@@ -162,7 +201,11 @@ fun EventTimelineItem(event: DailyEvent) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.width(60.dp)) {
-            Text(text = timeStr, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+            Text(
+                text = timeStr,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -171,8 +214,15 @@ fun EventTimelineItem(event: DailyEvent) {
             modifier = Modifier.weight(1f),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
         ) {
-            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(16.dp))
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.Notifications,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = event.type,
@@ -229,10 +279,11 @@ fun Circular24hGraph(sessions: List<FocusSession>) {
             sessions.forEach { session ->
                 val startCal = Calendar.getInstance().apply { timeInMillis = session.startTime }
                 val endCal = Calendar.getInstance().apply { timeInMillis = session.endTime }
-                
-                val startHour = startCal.get(Calendar.HOUR_OF_DAY) + startCal.get(Calendar.MINUTE) / 60f
+
+                val startHour =
+                    startCal.get(Calendar.HOUR_OF_DAY) + startCal.get(Calendar.MINUTE) / 60f
                 val endHour = endCal.get(Calendar.HOUR_OF_DAY) + endCal.get(Calendar.MINUTE) / 60f
-                
+
                 val startAngle = (startHour * 15f - 90f)
                 val sweepAngle = (endHour - startHour) * 15f
 
@@ -247,7 +298,11 @@ fun Circular24hGraph(sessions: List<FocusSession>) {
         }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("24h", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+            Text(
+                "24h",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.ExtraBold
+            )
             Text("Focus Distribution", style = MaterialTheme.typography.bodySmall)
         }
     }
@@ -255,7 +310,8 @@ fun Circular24hGraph(sessions: List<FocusSession>) {
 
 @Composable
 fun TimelineItem(session: FocusSession) {
-    val startTimeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(session.startTime))
+    val startTimeStr =
+        SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(session.startTime))
     val endTimeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(session.endTime))
 
     Row(
@@ -265,12 +321,20 @@ fun TimelineItem(session: FocusSession) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.width(60.dp)) {
-            Text(text = startTimeStr, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-            Text(text = endTimeStr, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+            Text(
+                text = startTimeStr,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = endTimeStr,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
         }
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         Card(
             modifier = Modifier.weight(1f),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)

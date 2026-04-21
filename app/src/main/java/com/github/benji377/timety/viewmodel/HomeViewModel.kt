@@ -3,7 +3,12 @@ package com.github.benji377.timety.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.benji377.timety.data.*
+import com.github.benji377.timety.data.MainRepository
+import com.github.benji377.timety.data.Task
+import com.github.benji377.timety.data.TaskPriority
+import com.github.benji377.timety.data.TaskSize
+import com.github.benji377.timety.data.TaskStatus
+import com.github.benji377.timety.data.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -98,12 +103,14 @@ class HomeViewModel(private val repository: MainRepository) : ViewModel() {
                         TaskSize.TINY -> 0.5
                     }
                     val streakMult = (1.0 + (it.currentStreak * 0.05)).coerceAtMost(1.5)
-                    
+
                     val xpGained = (baseXp * priorityMult * sizeMult * streakMult).toInt()
-                    repository.insertOrUpdateUser(it.copy(
-                        xp = it.xp + xpGained,
-                        level = ((it.xp + xpGained) / 100) + 1
-                    ))
+                    repository.insertOrUpdateUser(
+                        it.copy(
+                            xp = it.xp + xpGained,
+                            level = ((it.xp + xpGained) / 100) + 1
+                        )
+                    )
                 }
             }
         }

@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -63,20 +63,23 @@ class FocusViewModel(
     private fun updateStepTimer() {
         val mode = _currentFocusMode.value ?: return
         val step = mode.steps.getOrNull(_currentStepIndex.value) ?: return
-        
+
         when (step.type) {
             FocusStepType.FOCUS, FocusStepType.REST -> {
                 _timerMillis.value = step.durationMins * 60 * 1000L
                 _targetMillis.value = _timerMillis.value
             }
+
             FocusStepType.STOPWATCH -> {
                 _timerMillis.value = 0
                 _targetMillis.value = 120 * 60 * 1000L // Default max for UI circle
             }
+
             FocusStepType.FLEXIBLE -> {
                 _timerMillis.value = 0
                 _targetMillis.value = 0
             }
+
             else -> {}
         }
     }
@@ -128,7 +131,8 @@ class FocusViewModel(
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }.timeInMillis
-                _totalFocusTimeToday.value = sessions.filter { it.startTime >= today }.sumOf { it.duration }
+                _totalFocusTimeToday.value =
+                    sessions.filter { it.startTime >= today }.sumOf { it.duration }
                 _recentSessions.value = sessions.take(10) // Get last 10 sessions for Time Machine
             }
         }
@@ -149,7 +153,7 @@ class FocusViewModel(
         currentSessionCategoryId = categoryId
         currentSessionTaskId = taskId
         _isRunning.value = true
-        
+
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             if (_isStopwatchMode.value) {
@@ -181,8 +185,9 @@ class FocusViewModel(
 
     fun saveSession(rating: FocusRating, note: String? = null) {
         val endTime = System.currentTimeMillis()
-        val duration = if (_isStopwatchMode.value) _timerMillis.value else (endTime - currentSessionStartTime)
-        
+        val duration =
+            if (_isStopwatchMode.value) _timerMillis.value else (endTime - currentSessionStartTime)
+
         if (duration > 1000) {
             viewModelScope.launch {
                 repository.insertSession(
@@ -216,22 +221,26 @@ class FocusViewModel(
                     }
                     val lastActiveDateNormalized = lastActiveCal.timeInMillis
 
-                    val diffDays = ((today - lastActiveDateNormalized) / (24 * 60 * 60 * 1000L)).toInt()
+                    val diffDays =
+                        ((today - lastActiveDateNormalized) / (24 * 60 * 60 * 1000L)).toInt()
 
                     val (newStreak, newHighestStreak) = when {
                         diffDays <= 0 -> {
                             // Already focused today or in future (?), streak unchanged
                             it.currentStreak to it.highestStreak
                         }
+
                         diffDays == 1 -> {
                             // Focused yesterday, increment streak
                             val newCurrent = it.currentStreak + 1
                             newCurrent to maxOf(newCurrent, it.highestStreak)
                         }
+
                         diffDays <= 2 -> {
                             // Within 2-day frozen period (Day 1 and Day 2 of inactivity), keep streak
                             it.currentStreak to it.highestStreak
                         }
+
                         else -> {
                             // Streak broken on Day 3 of inactivity, reset to 1
                             1 to it.highestStreak
@@ -243,13 +252,15 @@ class FocusViewModel(
                     val totalXp = it.xp + xpGained
                     val newLevel = (totalXp / 100) + 1
 
-                    repository.insertOrUpdateUser(it.copy(
-                        xp = totalXp,
-                        level = newLevel,
-                        currentStreak = newStreak,
-                        highestStreak = newHighestStreak,
-                        lastActiveDate = today
-                    ))
+                    repository.insertOrUpdateUser(
+                        it.copy(
+                            xp = totalXp,
+                            level = newLevel,
+                            currentStreak = newStreak,
+                            highestStreak = newHighestStreak,
+                            lastActiveDate = today
+                        )
+                    )
 
                     // Send notification when session completes
                     context?.let {
@@ -346,7 +357,7 @@ class FocusViewModel(
             _timerMillis.value = remainingMillis
             _targetMillis.value = durationMins * 60 * 1000L
             _isRunning.value = true
-            
+
             timerJob?.cancel()
             timerJob = viewModelScope.launch {
                 while (_timerMillis.value > 0) {
@@ -383,7 +394,11 @@ class FocusViewModel(
 
             val (newStreak, newHighestStreak) = when {
                 diffDays <= 0 -> it.currentStreak to it.highestStreak
-                diffDays == 1 -> (it.currentStreak + 1) to maxOf(it.currentStreak + 1, it.highestStreak)
+                diffDays == 1 -> (it.currentStreak + 1) to maxOf(
+                    it.currentStreak + 1,
+                    it.highestStreak
+                )
+
                 diffDays <= 2 -> it.currentStreak to it.highestStreak
                 else -> 1 to it.highestStreak
             }
@@ -393,13 +408,15 @@ class FocusViewModel(
             val totalXp = it.xp + xpGained
             val newLevel = (totalXp / 100) + 1
 
-            repository.insertOrUpdateUser(it.copy(
-                xp = totalXp,
-                level = newLevel,
-                currentStreak = newStreak,
-                highestStreak = newHighestStreak,
-                lastActiveDate = today
-            ))
+            repository.insertOrUpdateUser(
+                it.copy(
+                    xp = totalXp,
+                    level = newLevel,
+                    currentStreak = newStreak,
+                    highestStreak = newHighestStreak,
+                    lastActiveDate = today
+                )
+            )
         }
     }
 

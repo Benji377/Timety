@@ -3,7 +3,11 @@ package com.github.benji377.timety.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.benji377.timety.data.*
+import com.github.benji377.timety.data.Category
+import com.github.benji377.timety.data.FocusSession
+import com.github.benji377.timety.data.MainRepository
+import com.github.benji377.timety.data.Task
+import com.github.benji377.timety.data.User
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.SharingStarted
@@ -54,7 +58,13 @@ class SettingsViewModel(private val repository: MainRepository) : ViewModel() {
 
     fun addCategory(name: String, colorHex: String, iconName: String) {
         viewModelScope.launch {
-            repository.insertCategory(Category(name = name, colorHex = colorHex, iconName = iconName))
+            repository.insertCategory(
+                Category(
+                    name = name,
+                    colorHex = colorHex,
+                    iconName = iconName
+                )
+            )
         }
     }
 
@@ -70,14 +80,14 @@ class SettingsViewModel(private val repository: MainRepository) : ViewModel() {
             val sessions = repository.allSessions.first()
             val tasks = repository.allTasks.first()
             val categoriesData = repository.allCategories.first()
-            
+
             val exportMap = mapOf(
                 "user" to userData,
                 "sessions" to sessions,
                 "tasks" to tasks,
                 "categories" to categoriesData
             )
-            
+
             val json = Gson().toJson(exportMap)
             val file = File(cacheDir, "timety_export_${System.currentTimeMillis()}.json")
             try {
@@ -99,9 +109,18 @@ class SettingsViewModel(private val repository: MainRepository) : ViewModel() {
                 // Need to properly deserialize each part
                 val gson = Gson()
                 val userData = gson.fromJson(gson.toJson(importMap["user"]), User::class.java)
-                val sessions = gson.fromJson<List<FocusSession>>(gson.toJson(importMap["sessions"]), object : TypeToken<List<FocusSession>>() {}.type)
-                val tasks = gson.fromJson<List<Task>>(gson.toJson(importMap["tasks"]), object : TypeToken<List<Task>>() {}.type)
-                val categoriesData = gson.fromJson<List<Category>>(gson.toJson(importMap["categories"]), object : TypeToken<List<Category>>() {}.type)
+                val sessions = gson.fromJson<List<FocusSession>>(
+                    gson.toJson(importMap["sessions"]),
+                    object : TypeToken<List<FocusSession>>() {}.type
+                )
+                val tasks = gson.fromJson<List<Task>>(
+                    gson.toJson(importMap["tasks"]),
+                    object : TypeToken<List<Task>>() {}.type
+                )
+                val categoriesData = gson.fromJson<List<Category>>(
+                    gson.toJson(importMap["categories"]),
+                    object : TypeToken<List<Category>>() {}.type
+                )
 
                 if (userData != null) repository.insertOrUpdateUser(userData)
                 categoriesData?.forEach { repository.insertCategory(it) }

@@ -11,7 +11,12 @@ import com.github.benji377.timety.receivers.ReminderBroadcastReceiver
  */
 object ReminderManager {
 
-    fun scheduleReminder(context: Context, taskId: Int, taskTitle: String, reminderTimeMillis: Long) {
+    fun scheduleReminder(
+        context: Context,
+        taskId: Int,
+        taskTitle: String,
+        reminderTimeMillis: Long
+    ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val intent = Intent(context, ReminderBroadcastReceiver::class.java).apply {
@@ -57,7 +62,12 @@ object ReminderManager {
         }
     }
 
-    fun scheduleMultipleReminders(context: Context, taskId: Int, taskTitle: String, reminderTimes: List<Long>) {
+    fun scheduleMultipleReminders(
+        context: Context,
+        taskId: Int,
+        taskTitle: String,
+        reminderTimes: List<Long>
+    ) {
         reminderTimes.forEachIndexed { index, reminderTime ->
             val intent = Intent(context, ReminderBroadcastReceiver::class.java).apply {
                 action = "com.github.benji377.timety.TASK_REMINDER"

@@ -23,7 +23,8 @@ class Converters {
     fun fromLongList(value: List<Long>): String = value.joinToString(",")
 
     @TypeConverter
-    fun toLongList(value: String): List<Long> = if (value.isEmpty()) emptyList() else value.split(",").map { it.toLong() }
+    fun toLongList(value: String): List<Long> =
+        if (value.isEmpty()) emptyList() else value.split(",").map { it.toLong() }
 
     @TypeConverter
     fun fromFocusStepList(value: List<FocusStep>): String = gson.toJson(value)

@@ -1,7 +1,15 @@
 package com.github.benji377.timety.data
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AspectRatio
+import androidx.compose.material.icons.filled.Crop
+import androidx.compose.material.icons.filled.CropSquare
+import androidx.compose.material.icons.filled.FitScreen
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowUp
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -33,7 +41,7 @@ enum class TaskPriority(val label: String) {
     MEDIUM("Medium"),
     LOW("Low");
 
-    fun getIcon(): ImageVector = when(this) {
+    fun getIcon(): ImageVector = when (this) {
         URGENT -> Icons.Default.KeyboardDoubleArrowUp
         HIGH -> Icons.Default.KeyboardArrowUp
         MEDIUM -> Icons.Default.Remove
@@ -48,7 +56,7 @@ enum class TaskSize(val label: String, val estimatedMinutes: Int, val badgeText:
     LARGE("Large", 120, "L"),
     XLARGE("X-Large", 240, "XL");
 
-    fun getIcon(): ImageVector = when(this) {
+    fun getIcon(): ImageVector = when (this) {
         TINY -> Icons.Default.Crop
         SMALL -> Icons.Default.CropSquare
         MEDIUM -> Icons.Default.Fullscreen
