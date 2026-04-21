@@ -4,6 +4,7 @@ import '../providers/task_provider.dart';
 import '../providers/user_provider.dart';
 import '../data/task.dart';
 import '../widgets/task_card.dart';
+import '../theme/app_theme.dart';
 import 'add_task_screen.dart';
 import 'task_detail_screen.dart';
 
@@ -24,6 +25,8 @@ class _TasksScreenState extends State<TasksScreen> {
     final taskProvider = context.watch<TaskProvider>();
     final allTasks = taskProvider.allTasks;
     final categories = taskProvider.categories;
+    final theme = Theme.of(context);
+    final semantic = theme.extension<TimetySemanticColors>()!;
 
     final filteredTasks = allTasks.where((task) {
       final matchesSearch = task.title.toLowerCase().contains(
@@ -77,10 +80,7 @@ class _TasksScreenState extends State<TasksScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Tasks',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
+                  Text('Tasks', style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 16),
                   TextField(
                     onChanged: (val) => setState(() => _searchQuery = val),
@@ -105,6 +105,9 @@ class _TasksScreenState extends State<TasksScreen> {
                             label: const Text('All'),
                             onSelected: (_) =>
                                 setState(() => _selectedCategoryId = null),
+                            selectedColor: semantic.focus.withValues(
+                              alpha: 0.18,
+                            ),
                           ),
                         ),
                         ...categories.map(
@@ -115,6 +118,9 @@ class _TasksScreenState extends State<TasksScreen> {
                               label: Text(cat.name),
                               onSelected: (_) =>
                                   setState(() => _selectedCategoryId = cat.id),
+                              selectedColor: semantic.info.withValues(
+                                alpha: 0.18,
+                              ),
                             ),
                           ),
                         ),
@@ -130,17 +136,17 @@ class _TasksScreenState extends State<TasksScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   if (overdueTasks.isNotEmpty) ...[
-                    _buildSectionHeader('Overdue', Colors.red),
+                    _buildSectionHeader('Overdue', semantic.warning),
                     ...overdueTasks.map((t) => _buildTaskCard(context, t)),
                     const SizedBox(height: 16),
                   ],
                   if (todayTasks.isNotEmpty) ...[
-                    _buildSectionHeader('Today', Colors.orange),
+                    _buildSectionHeader('Today', semantic.info),
                     ...todayTasks.map((t) => _buildTaskCard(context, t)),
                     const SizedBox(height: 16),
                   ],
                   if (upcomingTasks.isNotEmpty) ...[
-                    _buildSectionHeader('Upcoming', Colors.blue),
+                    _buildSectionHeader('Upcoming', semantic.focus),
                     ...upcomingTasks.map((t) => _buildTaskCard(context, t)),
                     const SizedBox(height: 16),
                   ],
@@ -149,7 +155,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       title: Text(
                         'Done (${doneTasks.length})',
                         style: TextStyle(
-                          color: Colors.green,
+                          color: semantic.success,
                           fontWeight: FontWeight.bold,
                           fontSize: Theme.of(
                             context,
@@ -160,7 +166,7 @@ class _TasksScreenState extends State<TasksScreen> {
                         _doneExpanded
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
-                        color: Colors.green,
+                        color: semantic.success,
                       ),
                       onTap: () =>
                           setState(() => _doneExpanded = !_doneExpanded),
@@ -180,6 +186,8 @@ class _TasksScreenState extends State<TasksScreen> {
           context,
           MaterialPageRoute(builder: (_) => const AddTaskScreen()),
         ),
+        backgroundColor: semantic.focus,
+        foregroundColor: theme.colorScheme.onPrimary,
         child: const Icon(Icons.add),
       ),
     );
@@ -188,12 +196,19 @@ class _TasksScreenState extends State<TasksScreen> {
   Widget _buildSectionHeader(String title, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
         ),
       ),
     );

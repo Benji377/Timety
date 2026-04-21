@@ -6,6 +6,7 @@ import '../data/category.dart';
 import '../widgets/radial_graph.dart';
 import '../widgets/xp_bar.dart';
 import '../data/user.dart';
+import '../theme/app_theme.dart';
 import 'daily_stats_screen.dart';
 
 class StatsScreen extends StatelessWidget {
@@ -16,6 +17,7 @@ class StatsScreen extends StatelessWidget {
     final statsProvider = context.watch<StatsProvider>();
     final userProvider = context.watch<UserProvider>();
     final user = userProvider.user;
+    final theme = Theme.of(context);
 
     final todayFocusTime = statsProvider
         .getSessionsForDay(DateTime.now())
@@ -29,10 +31,7 @@ class StatsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text(
-              'Profile & Stats',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text('Profile & Stats', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 24),
             _buildProfileHeader(context, user),
             const SizedBox(height: 24),
@@ -45,14 +44,11 @@ class StatsScreen extends StatelessWidget {
               const SizedBox(height: 12),
               ...insights.map(
                 (insight) => Card(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  color: theme.colorScheme.secondaryContainer,
                   margin: const EdgeInsets.only(bottom: 8),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: Text(
-                      insight,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
+                    child: Text(insight, style: theme.textTheme.bodyMedium),
                   ),
                 ),
               ),
@@ -69,12 +65,14 @@ class StatsScreen extends StatelessWidget {
   Widget _buildProfileHeader(BuildContext context, User? user) {
     if (user == null) return const SizedBox();
 
+    final semantic = Theme.of(context).extension<TimetySemanticColors>()!;
     final streak = user.currentStreak;
     final title = user.userTitle;
     final emoji = user.levelEmoji;
     final xpInLevel = user.xp;
 
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -93,7 +91,7 @@ class StatsScreen extends StatelessWidget {
                       Text(
                         '$emoji $title',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary,
+                          color: semantic.focus,
                           fontSize: Theme.of(
                             context,
                           ).textTheme.bodyMedium?.fontSize,
@@ -104,7 +102,7 @@ class StatsScreen extends StatelessWidget {
                 ),
                 Icon(
                   Icons.local_fire_department,
-                  color: Theme.of(context).colorScheme.error,
+                  color: semantic.warning,
                   size: 32,
                 ),
                 const SizedBox(width: 8),
@@ -124,6 +122,7 @@ class StatsScreen extends StatelessWidget {
     User? user,
     int todayFocusTime,
   ) {
+    final semantic = Theme.of(context).extension<TimetySemanticColors>()!;
     final target = user?.dailyFocusTarget ?? 7200000;
     final progress = todayFocusTime / target;
     final hours = todayFocusTime ~/ 3600000;
@@ -144,6 +143,7 @@ class StatsScreen extends StatelessWidget {
             progress: progress.clamp(0.0, 1.0),
             text: '${hours}h ${minutes}m',
             size: 150,
+            color: semantic.focus,
           ),
         ),
       ],
@@ -151,12 +151,14 @@ class StatsScreen extends StatelessWidget {
   }
 
   Widget _buildWeeklyChart(BuildContext context, Map<String, int> weeklyData) {
+    final semantic = Theme.of(context).extension<TimetySemanticColors>()!;
     final maxDuration = weeklyData.values.fold(
       1,
       (max, d) => d > max ? d : max,
     );
 
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -191,6 +193,7 @@ class StatsScreen extends StatelessWidget {
                       value: barProgress.clamp(0.0, 1.0),
                       minHeight: 8,
                       borderRadius: BorderRadius.circular(4),
+                      color: semantic.focus,
                     ),
                   ],
                 ),

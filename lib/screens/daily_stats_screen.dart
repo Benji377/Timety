@@ -1,14 +1,18 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../data/daily_event.dart';
+import '../data/focus_session.dart';
 import '../providers/stats_provider.dart';
 import '../providers/user_provider.dart';
-import '../data/focus_session.dart';
-import '../data/daily_event.dart';
+import '../theme/app_theme.dart';
 
 class DailyStatsScreen extends StatefulWidget {
   final DateTime? initialDate;
+
   const DailyStatsScreen({super.key, this.initialDate});
 
   @override
@@ -26,24 +30,27 @@ class _DailyStatsScreenState extends State<DailyStatsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final semantic = theme.extension<TimetySemanticColors>()!;
     final statsProvider = context.watch<StatsProvider>();
     final userProvider = context.watch<UserProvider>();
     final user = userProvider.user;
 
     final dailySessions = statsProvider.getSessionsForDay(_currentDate);
-    final totalFocussedMillis = dailySessions.fold(
+    final totalFocusedMillis = dailySessions.fold<int>(
       0,
-      (sum, s) => sum + s.duration,
+      (sum, session) => sum + session.duration,
     );
     final dailyTargetMillis = user?.dailyFocusTarget ?? 7200000;
-    final progress = totalFocussedMillis / dailyTargetMillis;
+    final progress = totalFocusedMillis / dailyTargetMillis;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: FutureBuilder<List<DailyEvent>>(
           future: statsProvider.getEventsForDay(_currentDate),
           builder: (context, snapshot) {
-            final events = snapshot.data ?? [];
+            final events = snapshot.data ?? const <DailyEvent>[];
             final timelineItems = [...dailySessions, ...events]
               ..sort((a, b) {
                 final timeA = a is FocusSession
@@ -58,87 +65,96 @@ class _DailyStatsScreenState extends State<DailyStatsScreen> {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Date Navigation Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back),
                       onPressed: () => setState(
                         () => _currentDate = _currentDate.subtract(
                           const Duration(days: 1),
                         ),
                       ),
+                      icon: const Icon(Icons.arrow_back),
                     ),
-                    Text(
-                      DateFormat('EEEE, MMM d').format(_currentDate),
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    Row(
+                    Column(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_forward),
-                          onPressed: () => setState(
-                            () => _currentDate = _currentDate.add(
-                              const Duration(days: 1),
-                            ),
+                        Text(
+                          DateFormat('EEEE').format(_currentDate),
+                          style: theme.textTheme.titleLarge,
+                        ),
+                        Text(
+                          DateFormat('MMM d, yyyy').format(_currentDate),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: Navigator.of(context).pop,
-                        ),
                       ],
+                    ),
+                    IconButton(
+                      onPressed: () => setState(
+                        () => _currentDate = _currentDate.add(
+                          const Duration(days: 1),
+                        ),
+                      ),
+                      icon: const Icon(Icons.arrow_forward),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
-
-                // 24-hour Circular Graph
                 _Circular24hGraph(sessions: dailySessions),
-                const SizedBox(height: 32),
-
-                // Progress Stats
-                Column(
-                  children: [
-                    Text(
-                      '${totalFocussedMillis ~/ 60000} / ${dailyTargetMillis ~/ 60000} mins',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.4,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: progress.clamp(0.0, 1.0),
-                      minHeight: 8,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Today', style: theme.textTheme.titleMedium),
+                          Text(
+                            '${totalFocusedMillis ~/ 60000} / ${dailyTargetMillis ~/ 60000} mins',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                          minHeight: 10,
+                          backgroundColor:
+                              theme.colorScheme.surfaceContainerHighest,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            semantic.focus,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const Divider(height: 48),
-
-                // Timeline
-                Text(
-                  'Timeline',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                const Divider(height: 40),
+                Text('Timeline', style: theme.textTheme.titleMedium),
                 const SizedBox(height: 16),
                 if (timelineItems.isEmpty)
-                  Center(
-                    child: Text(
-                      'No focus sessions or events today',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  )
+                  _EmptyState(theme: theme)
                 else
                   ...timelineItems.map((item) {
                     if (item is FocusSession) {
                       return _TimelineSessionItem(session: item);
-                    } else {
-                      return _TimelineEventItem(event: item as DailyEvent);
                     }
+                    return _TimelineEventItem(event: item as DailyEvent);
                   }),
                 const SizedBox(height: 24),
               ],
@@ -152,10 +168,14 @@ class _DailyStatsScreenState extends State<DailyStatsScreen> {
 
 class _Circular24hGraph extends StatelessWidget {
   final List<FocusSession> sessions;
+
   const _Circular24hGraph({required this.sessions});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final semantic = theme.extension<TimetySemanticColors>()!;
+
     return Center(
       child: Stack(
         alignment: Alignment.center,
@@ -166,10 +186,9 @@ class _Circular24hGraph extends StatelessWidget {
             child: CustomPaint(
               painter: _Circular24hPainter(
                 sessions: sessions,
-                primaryColor: Theme.of(context).colorScheme.primary,
-                secondaryColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
+                primaryColor: semantic.focus,
+                secondaryColor: theme.colorScheme.surfaceContainerHighest,
+                labelColor: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -178,13 +197,15 @@ class _Circular24hGraph extends StatelessWidget {
             children: [
               Text(
                 '24h',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               Text(
                 'Focus Distribution',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -198,11 +219,13 @@ class _Circular24hPainter extends CustomPainter {
   final List<FocusSession> sessions;
   final Color primaryColor;
   final Color secondaryColor;
+  final Color labelColor;
 
   _Circular24hPainter({
     required this.sessions,
     required this.primaryColor,
     required this.secondaryColor,
+    required this.labelColor,
   });
 
   @override
@@ -218,9 +241,8 @@ class _Circular24hPainter extends CustomPainter {
 
     canvas.drawCircle(center, radius - strokeWidth / 2, basePaint);
 
-    // Draw hour marks
     final markPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.5)
+      ..color = labelColor.withValues(alpha: 0.7)
       ..strokeWidth = 2;
 
     for (int i = 0; i < 24; i++) {
@@ -236,14 +258,13 @@ class _Circular24hPainter extends CustomPainter {
       canvas.drawLine(inner, outer, markPaint);
     }
 
-    // Draw sessions
     final sessionPaint = Paint()
       ..color = primaryColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    for (var session in sessions) {
+    for (final session in sessions) {
       final startDate = DateTime.fromMillisecondsSinceEpoch(session.startTime);
       final endDate = DateTime.fromMillisecondsSinceEpoch(session.endTime);
 
@@ -264,15 +285,22 @@ class _Circular24hPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _Circular24hPainter oldDelegate) {
+    return oldDelegate.sessions != sessions ||
+        oldDelegate.primaryColor != primaryColor ||
+        oldDelegate.secondaryColor != secondaryColor ||
+        oldDelegate.labelColor != labelColor;
+  }
 }
 
 class _TimelineSessionItem extends StatelessWidget {
   final FocusSession session;
+
   const _TimelineSessionItem({required this.session});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final startStr = DateFormat(
       'HH:mm',
     ).format(DateTime.fromMillisecondsSinceEpoch(session.startTime));
@@ -286,19 +314,21 @@ class _TimelineSessionItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 50,
+            width: 58,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   startStr,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 Text(
                   endStr,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -306,28 +336,34 @@ class _TimelineSessionItem extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             child: Card(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: theme.colorScheme.surfaceContainerLow,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Focus Session',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       '${session.duration ~/ 60000} minutes',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                    if (session.note != null && session.note!.isNotEmpty)
+                    if (session.note != null && session.note!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
                       Text(
                         session.note!,
-                        style: const TextStyle(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontStyle: FontStyle.italic,
-                          fontSize: 12,
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),
@@ -341,10 +377,12 @@ class _TimelineSessionItem extends StatelessWidget {
 
 class _TimelineEventItem extends StatelessWidget {
   final DailyEvent event;
+
   const _TimelineEventItem({required this.event});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final timeStr = DateFormat(
       'HH:mm',
     ).format(DateTime.fromMillisecondsSinceEpoch(event.timestamp));
@@ -354,25 +392,36 @@ class _TimelineEventItem extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: 50,
+            width: 58,
             child: Text(
               timeStr,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Card(
-              color: Theme.of(context).colorScheme.secondaryContainer,
+              color: theme.colorScheme.secondaryContainer,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 child: Row(
                   children: [
-                    const Icon(Icons.notifications, size: 16),
+                    Icon(
+                      Icons.notifications,
+                      size: 16,
+                      color: theme.colorScheme.onSecondaryContainer,
+                    ),
                     const SizedBox(width: 8),
-                    Text(
-                      event.type,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    Expanded(
+                      child: Text(
+                        event.type,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -380,6 +429,28 @@ class _TimelineEventItem extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final ThemeData theme;
+
+  const _EmptyState({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Text(
+          'No focus sessions or events today',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

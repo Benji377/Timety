@@ -8,6 +8,7 @@ import 'providers/task_provider.dart';
 import 'providers/focus_provider.dart';
 import 'providers/stats_provider.dart';
 import 'screens/home_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,42 +26,45 @@ void main() async {
         ChangeNotifierProvider(create: (_) => FocusProvider(repository)),
         ChangeNotifierProvider(create: (_) => StatsProvider(repository)),
       ],
-      child: const TimetyApp(),
+      child: const TimetyRoot(),
     ),
   );
 }
 
-class TimetyApp extends StatelessWidget {
-  const TimetyApp({super.key});
+class TimetyRoot extends StatelessWidget {
+  const TimetyRoot({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = context.watch<UserProvider>();
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, _) {
+        return TimetyApp(
+          themeMode: userProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          home: const HomeScreen(),
+        );
+      },
+    );
+  }
+}
 
+class TimetyApp extends StatelessWidget {
+  final ThemeMode themeMode;
+  final Widget home;
+
+  const TimetyApp({
+    super.key,
+    this.themeMode = ThemeMode.system,
+    required this.home,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Timety',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.light,
-        appBarTheme: const AppBarTheme(
-          centerTitle: false,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-        ),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.dark,
-        appBarTheme: const AppBarTheme(
-          centerTitle: false,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-        ),
-      ),
-      themeMode: userProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: const HomeScreen(),
+      theme: TimetyTheme.light(),
+      darkTheme: TimetyTheme.dark(),
+      themeMode: themeMode,
+      home: home,
     );
   }
 }

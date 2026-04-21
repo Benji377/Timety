@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/task.dart';
+import '../theme/app_theme.dart';
 
 class TaskCard extends StatelessWidget {
   final Task task;
@@ -20,15 +21,19 @@ class TaskCard extends StatelessWidget {
   bool isDueToday(DateTime? dueDate) {
     if (dueDate == null) return false;
     final now = DateTime.now();
-    return dueDate.year == now.year && dueDate.month == now.month && dueDate.day == now.day;
+    return dueDate.year == now.year &&
+        dueDate.month == now.month &&
+        dueDate.day == now.day;
   }
 
   Color getBorderColor(BuildContext context) {
+    final semantic = Theme.of(context).extension<TimetySemanticColors>()!;
+
     if (isSelected) return Theme.of(context).colorScheme.primary;
-    if (task.status == TaskStatus.done) return Colors.green;
-    if (task.status == TaskStatus.overdue) return Colors.red;
-    if (isDueToday(task.dueDateTime)) return Colors.orange;
-    return Colors.blue;
+    if (task.status == TaskStatus.done) return semantic.success;
+    if (task.status == TaskStatus.overdue) return semantic.warning;
+    if (isDueToday(task.dueDateTime)) return semantic.info;
+    return Theme.of(context).colorScheme.primary;
   }
 
   IconData getPriorityIcon(TaskPriority priority) {
@@ -46,27 +51,31 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final semantic = Theme.of(context).extension<TimetySemanticColors>()!;
     final borderColor = getBorderColor(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       clipBehavior: Clip.antiAlias,
-      elevation: isSelected ? 4 : 1,
-      color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
+      elevation: isSelected ? 1 : 0,
+      color: isSelected
+          ? colorScheme.primaryContainer
+          : colorScheme.surfaceContainerLow,
       child: InkWell(
         onTap: onClick,
         onLongPress: onLongClick,
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(color: borderColor, width: isSelected ? 3 : 2),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(24),
           ),
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               if (isSelected)
-                const Icon(Icons.check_circle, color: Colors.blue)
+                Icon(Icons.check_circle, color: semantic.focus)
               else
                 Checkbox(
                   value: task.status == TaskStatus.done,
@@ -80,8 +89,10 @@ class TaskCard extends StatelessWidget {
                     Text(
                       task.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            decoration: task.status == TaskStatus.done ? TextDecoration.lineThrough : null,
-                          ),
+                        decoration: task.status == TaskStatus.done
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
                     ),
                     if (task.description != null)
                       Text(
@@ -130,17 +141,15 @@ class _PriorityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(4),
+        color: colorScheme.primaryContainer.withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(999),
       ),
-      child: Icon(
-        icon,
-        size: 14,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
+      child: Icon(icon, size: 14, color: colorScheme.onPrimaryContainer),
     );
   }
 }
@@ -152,17 +161,20 @@ class _TaskSizeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(4),
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         sizeText,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            ),
+          color: colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class RadialGraph extends StatelessWidget {
   final double progress;
@@ -17,7 +18,9 @@ class RadialGraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeColor = color ?? Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final semantic = theme.extension<TimetySemanticColors>()!;
+    final themeColor = color ?? semantic.focus;
 
     return Center(
       child: Stack(
@@ -30,13 +33,16 @@ class RadialGraph extends StatelessWidget {
               painter: _RadialPainter(
                 progress: progress,
                 color: themeColor,
-                strokeWidth: 12,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                strokeWidth: 14,
               ),
             ),
           ),
           Text(
             text,
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -47,11 +53,13 @@ class RadialGraph extends StatelessWidget {
 class _RadialPainter extends CustomPainter {
   final double progress;
   final Color color;
+  final Color backgroundColor;
   final double strokeWidth;
 
   _RadialPainter({
     required this.progress,
     required this.color,
+    required this.backgroundColor,
     required this.strokeWidth,
   });
 
@@ -61,14 +69,21 @@ class _RadialPainter extends CustomPainter {
     final radius = (size.shortestSide - strokeWidth) / 2;
 
     final backgroundPaint = Paint()
-      ..color = color.withValues(alpha: 0.2)
+      ..color = backgroundColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
     canvas.drawCircle(center, radius, backgroundPaint);
 
     final foregroundPaint = Paint()
-      ..color = color
+      ..shader = SweepGradient(
+        colors: [
+          color.withValues(alpha: 0.9),
+          color,
+          color.withValues(alpha: 0.75),
+        ],
+        stops: const [0.0, 0.7, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -83,5 +98,10 @@ class _RadialPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _RadialPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.backgroundColor != backgroundColor ||
+        oldDelegate.strokeWidth != strokeWidth;
+  }
 }

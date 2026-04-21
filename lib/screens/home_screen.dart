@@ -6,6 +6,7 @@ import '../providers/focus_provider.dart';
 import '../widgets/radial_graph.dart';
 import '../widgets/task_card.dart';
 import '../data/task.dart';
+import '../theme/app_theme.dart';
 import 'settings_screen.dart';
 import 'focus_screen.dart';
 import 'task_detail_screen.dart';
@@ -38,7 +39,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final semantic = theme.extension<TimetySemanticColors>()!;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) => setState(() => _currentIndex = index),
@@ -50,25 +55,39 @@ class _HomeScreenState extends State<HomeScreen> {
           StatsScreen(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
           _pageController.animateToPage(
             index,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
         },
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.local_cafe), label: 'Focus'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Tasks'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
+        backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.95),
+        indicatorColor: semantic.focus.withValues(alpha: 0.18),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
+          NavigationDestination(
+            icon: Icon(Icons.timelapse_outlined),
+            selectedIcon: Icon(Icons.timelapse),
+            label: 'Focus',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.task_alt_outlined),
+            selectedIcon: Icon(Icons.task_alt),
+            label: 'Tasks',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.calendar_month_outlined),
+            selectedIcon: Icon(Icons.calendar_month),
             label: 'Calendar',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );
@@ -93,6 +112,8 @@ class _HomeScreenContent extends StatelessWidget {
     final userProvider = context.watch<UserProvider>();
     final taskProvider = context.watch<TaskProvider>();
     final focusProvider = context.watch<FocusProvider>();
+    final theme = Theme.of(context);
+    final semantic = theme.extension<TimetySemanticColors>()!;
 
     final user = userProvider.user;
     final now = DateTime.now();
@@ -136,7 +157,7 @@ class _HomeScreenContent extends StatelessWidget {
                           builder: (_) => const SettingsScreen(),
                         ),
                       ),
-                      icon: const Icon(Icons.settings),
+                      icon: const Icon(Icons.settings_outlined),
                       tooltip: 'Settings',
                     ),
                   ],
@@ -165,7 +186,7 @@ class _HomeScreenContent extends StatelessWidget {
                       Text(
                         'Tap to start focusing',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -202,7 +223,7 @@ class _HomeScreenContent extends StatelessWidget {
                             Icon(
                               Icons.check_circle_outline,
                               size: 48,
-                              color: Theme.of(context).colorScheme.primary,
+                              color: semantic.focus,
                             ),
                             const SizedBox(height: 16),
                             Text(

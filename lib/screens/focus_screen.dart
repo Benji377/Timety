@@ -10,6 +10,8 @@ import '../data/focus_session.dart';
 import '../data/task.dart';
 import 'focus_modes_screen.dart';
 import 'daily_stats_screen.dart';
+import '../theme/app_theme.dart';
+import '../widgets/radial_duration_picker.dart';
 
 class FocusScreen extends StatefulWidget {
   const FocusScreen({super.key});
@@ -381,67 +383,27 @@ class _FocusScreenState extends State<FocusScreen> {
   }
 
   void _showDurationPicker() {
-    if (!_isRunning) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          int tempMinutes = (_secondsRemaining ~/ 60);
-          final tempController = TextEditingController(
-            text: tempMinutes.toString(),
-          );
+    if (_isRunning) return;
 
-          return AlertDialog(
-            title: const Text('Set Duration'),
-            content: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () => setState(() {
-                    if (tempMinutes > 1) {
-                      tempMinutes--;
-                      tempController.text = tempMinutes.toString();
-                    }
-                  }),
-                  icon: const Icon(Icons.remove),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: tempController,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    onChanged: (val) {
-                      tempMinutes = int.tryParse(val) ?? tempMinutes;
-                    },
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => setState(() {
-                    if (tempMinutes < 120) {
-                      tempMinutes++;
-                      tempController.text = tempMinutes.toString();
-                    }
-                  }),
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() => _secondsRemaining = tempMinutes * 60);
-                  Navigator.pop(context);
-                },
-                child: const Text('Set'),
-              ),
-            ],
-          );
-        },
-      );
-    }
+    showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: RadialDurationPicker(
+            initialMinutes: (_secondsRemaining ~/ 60).clamp(5, 180),
+          ),
+        );
+      },
+    ).then((minutes) {
+      if (!mounted || minutes == null) return;
+      setState(() => _secondsRemaining = minutes * 60);
+    });
   }
 
   @override
@@ -449,6 +411,7 @@ class _FocusScreenState extends State<FocusScreen> {
     final focusProvider = context.watch<FocusProvider>();
     final taskProvider = context.watch<TaskProvider>();
     final userProvider = context.watch<UserProvider>();
+    final semantic = Theme.of(context).extension<TimetySemanticColors>()!;
 
     if (_isRunning && _selectedMode != null) {
       final currentStep = _selectedMode!.steps[_currentStepIndex];
@@ -491,8 +454,8 @@ class _FocusScreenState extends State<FocusScreen> {
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(
                                 color: currentStep.type.name == 'focus'
-                                    ? Colors.green
-                                    : Colors.orange,
+                                    ? semantic.focus
+                                    : semantic.warning,
                               ),
                         ),
                         const SizedBox(height: 40),
@@ -501,7 +464,12 @@ class _FocusScreenState extends State<FocusScreen> {
                           size: const Size(280, 280),
                           painter: _TimerPainter(
                             progress: progress,
-                            isFocus: currentStep.type.name == 'focus',
+                            progressColor: currentStep.type.name == 'focus'
+                                ? semantic.focus
+                                : semantic.warning,
+                            trackColor: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
                           ),
                           child: Center(
                             child: Column(
@@ -544,19 +512,19 @@ class _FocusScreenState extends State<FocusScreen> {
                     // Cancel button
                     CircularButton(
                       icon: Icons.close,
-                      color: Colors.red,
+                      color: semantic.warning,
                       onPressed: _cancelSession,
                     ),
                     // Pause/Resume button
                     CircularButton(
                       icon: _isPaused ? Icons.play_arrow : Icons.pause,
-                      color: Colors.orange,
+                      color: semantic.info,
                       onPressed: _pauseResume,
                     ),
                     // Stop button
                     CircularButton(
                       icon: Icons.stop,
-                      color: Colors.green,
+                      color: semantic.success,
                       onPressed: _stopSession,
                     ),
                   ],
@@ -698,8 +666,10 @@ class _FocusScreenState extends State<FocusScreen> {
                       color:
                           _selectedMode?.id ==
                               focusProvider.focusModes[index].id
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey[300],
+                          ? semantic.focus
+                          : Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
                     ),
                   ),
                 ),
@@ -766,12 +736,16 @@ class _FocusScreenState extends State<FocusScreen> {
   }
 
   Widget _buildModeCard(FocusMode mode, bool isSelected) {
+    final semantic = Theme.of(context).extension<TimetySemanticColors>()!;
+
     return GestureDetector(
       onTap: () => setState(() => _selectedMode = mode),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         color: isSelected
-            ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+            ? Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.8)
             : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -792,13 +766,13 @@ class _FocusScreenState extends State<FocusScreen> {
                       mode.title,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: isSelected
-                            ? Theme.of(context).primaryColor
+                            ? Theme.of(context).colorScheme.primary
                             : null,
                       ),
                     ),
                   ),
                   if (isSelected)
-                    const Icon(Icons.check_circle, color: Colors.green),
+                    Icon(Icons.check_circle, color: semantic.focus),
                 ],
               ),
               const SizedBox(height: 12),
@@ -814,8 +788,8 @@ class _FocusScreenState extends State<FocusScreen> {
                             style: const TextStyle(fontSize: 12),
                           ),
                           backgroundColor: step.type.name == 'focus'
-                              ? Colors.green.withValues(alpha: 0.2)
-                              : Colors.orange.withValues(alpha: 0.2),
+                              ? semantic.focus.withValues(alpha: 0.16)
+                              : semantic.warning.withValues(alpha: 0.16),
                         ),
                       )
                       .toList(),
@@ -831,9 +805,14 @@ class _FocusScreenState extends State<FocusScreen> {
 
 class _TimerPainter extends CustomPainter {
   final double progress;
-  final bool isFocus;
+  final Color progressColor;
+  final Color trackColor;
 
-  _TimerPainter({required this.progress, required this.isFocus});
+  _TimerPainter({
+    required this.progress,
+    required this.progressColor,
+    required this.trackColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -845,13 +824,12 @@ class _TimerPainter extends CustomPainter {
       center,
       radius,
       Paint()
-        ..color = Colors.grey[300]!
+        ..color = trackColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 20,
     );
 
     // Draw progress arc
-    final progressColor = isFocus ? Colors.green : Colors.orange;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -math.pi / 2,
@@ -866,7 +844,11 @@ class _TimerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _TimerPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.progressColor != progressColor ||
+        oldDelegate.trackColor != trackColor;
+  }
 }
 
 class CircularButton extends StatelessWidget {
@@ -887,10 +869,14 @@ class CircularButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: tooltip ?? '',
-      child: FloatingActionButton(
-        backgroundColor: color,
+      child: IconButton.filledTonal(
+        style: IconButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          fixedSize: const Size.square(56),
+        ),
         onPressed: onPressed,
-        child: Icon(icon),
+        icon: Icon(icon),
       ),
     );
   }
