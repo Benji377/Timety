@@ -16,52 +16,111 @@ class _AddFocusModeScreenState extends State<AddFocusModeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isValid = _titleController.text.isNotEmpty && _steps.isNotEmpty;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Focus Mode'),
-        actions: [
-          TextButton(
-            onPressed: (_titleController.text.isNotEmpty && _steps.isNotEmpty) ? _saveMode : null,
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
-              onChanged: (_) => setState(() {}),
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'New Focus Mode',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    onPressed: Navigator.of(context).pop,
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Steps', style: Theme.of(context).textTheme.titleMedium),
-                ElevatedButton.icon(
-                  onPressed: () => setState(() => _steps.add(FocusStep(durationMins: 25, type: FocusStepType.focus))),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Step'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+
+            // Form
             Expanded(
-              child: _steps.isEmpty
-                  ? const Center(child: Text('No steps added yet.'))
-                  : ListView.builder(
-                      itemCount: _steps.length,
-                      itemBuilder: (context, index) {
-                        return _StepItem(
-                          step: _steps[index],
-                          onDelete: () => setState(() => _steps.removeAt(index)),
-                          onUpdate: (updated) => setState(() => _steps[index] = updated),
-                        );
-                      },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Mode Title *',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.label),
+                      ),
+                      onChanged: (_) => setState(() {}),
                     ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Steps',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () => setState(
+                            () => _steps.add(
+                              FocusStep(
+                                durationMins: 25,
+                                type: FocusStepType.focus,
+                              ),
+                            ),
+                          ),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: _steps.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No steps added yet\nTap Add to create steps',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.outline,
+                                    ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _steps.length,
+                              itemBuilder: (context, index) {
+                                return _StepItem(
+                                  step: _steps[index],
+                                  onDelete: () =>
+                                      setState(() => _steps.removeAt(index)),
+                                  onUpdate: (updated) =>
+                                      setState(() => _steps[index] = updated),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Action Buttons
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: ElevatedButton(
+                onPressed: isValid ? _saveMode : null,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                child: const Text('Save Mode'),
+              ),
             ),
           ],
         ),
@@ -85,45 +144,81 @@ class _StepItem extends StatelessWidget {
   final VoidCallback onDelete;
   final Function(FocusStep) onUpdate;
 
-  const _StepItem({required this.step, required this.onDelete, required this.onUpdate});
+  const _StepItem({
+    required this.step,
+    required this.onDelete,
+    required this.onUpdate,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  child: Text(step.type.name[0].toUpperCase()),
+                Chip(
+                  label: Text(step.type.name.toUpperCase()),
+                  avatar: CircleAvatar(
+                    child: Text(step.type.name[0].toUpperCase()),
+                  ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(child: Text(step.type.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold))),
-                IconButton(icon: const Icon(Icons.delete, color: Colors.red, size: 20), onPressed: onDelete),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                  onPressed: onDelete,
+                  visualDensity: VisualDensity.compact,
+                ),
               ],
             ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: DropdownButton<FocusStepType>(
+                  child: DropdownButtonFormField<FocusStepType>(
                     value: step.type,
-                    isExpanded: true,
-                    items: FocusStepType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
-                    onChanged: (val) => onUpdate(FocusStep(durationMins: step.durationMins, type: val!, behavior: step.behavior)),
+                    decoration: const InputDecoration(
+                      labelText: 'Type',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    items: FocusStepType.values
+                        .map(
+                          (t) =>
+                              DropdownMenuItem(value: t, child: Text(t.name)),
+                        )
+                        .toList(),
+                    onChanged: (val) => onUpdate(
+                      FocusStep(
+                        durationMins: step.durationMins,
+                        type: val!,
+                        behavior: step.behavior,
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 SizedBox(
-                  width: 60,
-                  child: TextField(
+                  width: 90,
+                  child: TextFormField(
+                    initialValue: step.durationMins.toString(),
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Mins'),
-                    controller: TextEditingController(text: step.durationMins.toString()),
-                    onChanged: (val) => onUpdate(FocusStep(durationMins: int.tryParse(val) ?? 0, type: step.type, behavior: step.behavior)),
+                    decoration: const InputDecoration(
+                      labelText: 'Minutes',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    onChanged: (val) => onUpdate(
+                      FocusStep(
+                        durationMins: int.tryParse(val) ?? 0,
+                        type: step.type,
+                        behavior: step.behavior,
+                      ),
+                    ),
                   ),
                 ),
               ],

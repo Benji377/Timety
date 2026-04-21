@@ -13,9 +13,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
   await NotificationHelper.init();
-  
+
   final repository = MainRepository();
-  
+
   runApp(
     MultiProvider(
       providers: [
@@ -36,18 +36,28 @@ class TimetyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
-    
+
     return MaterialApp(
       title: 'Timety',
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
         brightness: Brightness.light,
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+        ),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
         brightness: Brightness.dark,
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+        ),
       ),
       themeMode: userProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: const HomeScreen(),

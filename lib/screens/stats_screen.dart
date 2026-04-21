@@ -17,59 +17,62 @@ class StatsScreen extends StatelessWidget {
     final userProvider = context.watch<UserProvider>();
     final user = userProvider.user;
 
-    final todayFocusTime = statsProvider.getSessionsForDay(DateTime.now()).fold(0, (sum, s) => sum + s.duration);
+    final todayFocusTime = statsProvider
+        .getSessionsForDay(DateTime.now())
+        .fold(0, (sum, s) => sum + s.duration);
     final insights = statsProvider.getInsights();
     final weeklyData = statsProvider.getWeeklyFocusData();
     final distribution = statsProvider.getCategoryDistribution();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Stats & Profile')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildProfileHeader(context, user),
-          const SizedBox(height: 24),
-          _buildTodayProgress(context, user, todayFocusTime),
-          const SizedBox(height: 24),
-          _buildWeeklyChart(context, weeklyData),
-          const SizedBox(height: 24),
-          if (insights.isNotEmpty) ...[
-            Text('Insights', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            ...insights.map((insight) => Card(
-              color: Theme.of(context).colorScheme.secondaryContainer,
-              margin: const EdgeInsets.only(bottom: 8),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(insight, style: Theme.of(context).textTheme.bodyMedium),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              'Profile & Stats',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 24),
+            _buildProfileHeader(context, user),
+            const SizedBox(height: 24),
+            _buildTodayProgress(context, user, todayFocusTime),
+            const SizedBox(height: 24),
+            _buildWeeklyChart(context, weeklyData),
+            const SizedBox(height: 24),
+            if (insights.isNotEmpty) ...[
+              Text('Insights', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 12),
+              ...insights.map(
+                (insight) => Card(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      insight,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ),
               ),
-            )),
+              const SizedBox(height: 24),
+            ],
+            _buildCategoryDistribution(context, distribution, statsProvider),
+            const SizedBox(height: 24),
           ],
-          const SizedBox(height: 24),
-          _buildCategoryDistribution(context, distribution, statsProvider),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildProfileHeader(BuildContext context, User? user) {
-    final streak = user?.currentStreak ?? 0;
-    String title = '🚀 Ready to Focus';
-    if (streak >= 30) {
-      title = '🔥 Focus Master';
-    } else if (streak >= 14) {
-      title = '⚡ Unstoppable';
-    } else if (streak >= 7) {
-      title = '🌟 On Fire';
-    } else if (streak >= 3) {
-      title = '💪 Building Momentum';
-    } else if (streak > 0) {
-      title = '🎯 Focused';
-    }
+    if (user == null) return const SizedBox();
 
-    final xp = user?.xp ?? 0;
-    final level = user?.level ?? 1;
-    final xpInLevel = xp % 100;
+    final streak = user.currentStreak;
+    final title = user.userTitle;
+    final emoji = user.levelEmoji;
+    final xpInLevel = user.xp;
 
     return Card(
       child: Padding(
@@ -82,24 +85,45 @@ class StatsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(user?.name ?? 'Hero', style: Theme.of(context).textTheme.headlineSmall),
-                      Text(title, style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
+                      Text(
+                        user.name,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '$emoji $title',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontSize: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.fontSize,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Icon(Icons.local_fire_department, color: Theme.of(context).colorScheme.error, size: 32),
+                Icon(
+                  Icons.local_fire_department,
+                  color: Theme.of(context).colorScheme.error,
+                  size: 32,
+                ),
+                const SizedBox(width: 8),
                 Text('$streak', style: Theme.of(context).textTheme.titleLarge),
               ],
             ),
             const SizedBox(height: 16),
-            XPBar(currentXp: xpInLevel, maxXp: 100, level: level),
+            XPBar(currentXp: xpInLevel, maxXp: 2000, level: user.level),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTodayProgress(BuildContext context, User? user, int todayFocusTime) {
+  Widget _buildTodayProgress(
+    BuildContext context,
+    User? user,
+    int todayFocusTime,
+  ) {
     final target = user?.dailyFocusTarget ?? 7200000;
     final progress = todayFocusTime / target;
     final hours = todayFocusTime ~/ 3600000;
@@ -110,7 +134,12 @@ class StatsScreen extends StatelessWidget {
         Text("Today's Progress", style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 16),
         GestureDetector(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DailyStatsScreen(initialDate: DateTime.now()))),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DailyStatsScreen(initialDate: DateTime.now()),
+            ),
+          ),
           child: RadialGraph(
             progress: progress.clamp(0.0, 1.0),
             text: '${hours}h ${minutes}m',
@@ -122,7 +151,10 @@ class StatsScreen extends StatelessWidget {
   }
 
   Widget _buildWeeklyChart(BuildContext context, Map<String, int> weeklyData) {
-    final maxDuration = weeklyData.values.fold(1, (max, d) => d > max ? d : max);
+    final maxDuration = weeklyData.values.fold(
+      1,
+      (max, d) => d > max ? d : max,
+    );
 
     return Card(
       child: Padding(
@@ -130,7 +162,10 @@ class StatsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("This Week's Focus", style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              "This Week's Focus",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 16),
             ...weeklyData.entries.map((entry) {
               final barProgress = entry.value / maxDuration;
@@ -141,8 +176,14 @@ class StatsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(entry.key, style: Theme.of(context).textTheme.labelMedium),
-                        Text('${entry.value ~/ 60000} min', style: Theme.of(context).textTheme.labelSmall),
+                        Text(
+                          entry.key,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        Text(
+                          '${entry.value ~/ 60000} min',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -161,19 +202,27 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryDistribution(BuildContext context, Map<int, int> distribution, StatsProvider provider) {
+  Widget _buildCategoryDistribution(
+    BuildContext context,
+    Map<int, int> distribution,
+    StatsProvider provider,
+  ) {
     if (distribution.isEmpty) return const SizedBox();
     final total = distribution.values.fold(0, (sum, d) => sum + d);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Category Distribution", style: Theme.of(context).textTheme.titleLarge),
+        Text(
+          "Category Distribution",
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         const SizedBox(height: 16),
         ...distribution.entries.map((entry) {
           final category = provider.categories.firstWhere(
-            (c) => c.id == entry.key, 
-            orElse: () => Category(name: 'Unknown', colorHex: '#808080', iconName: '')
+            (c) => c.id == entry.key,
+            orElse: () =>
+                Category(name: 'Unknown', colorHex: '#808080', iconName: ''),
           );
           final duration = entry.value;
           final catHours = duration ~/ 3600000;
@@ -191,8 +240,12 @@ class StatsScreen extends StatelessWidget {
               const SizedBox(height: 4),
               LinearProgressIndicator(
                 value: (duration / total).clamp(0.0, 1.0),
-                color: Color(int.parse(category.colorHex.replaceAll('#', '0xFF'))),
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Color(
+                  int.parse(category.colorHex.replaceAll('#', '0xFF')),
+                ),
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
               ),
               const SizedBox(height: 12),
             ],

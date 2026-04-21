@@ -14,9 +14,12 @@ class TaskProvider with ChangeNotifier {
 
   List<Task> get allTasks => _allTasks;
   List<Category> get categories => _categories;
-  List<Task> get todoTasks => _allTasks.where((t) => t.status == TaskStatus.todo).toList();
-  List<Task> get doneTasks => _allTasks.where((t) => t.status == TaskStatus.done).toList();
-  List<Task> get overdueTasks => _allTasks.where((t) => t.status == TaskStatus.overdue).toList();
+  List<Task> get todoTasks =>
+      _allTasks.where((t) => t.status == TaskStatus.todo).toList();
+  List<Task> get doneTasks =>
+      _allTasks.where((t) => t.status == TaskStatus.done).toList();
+  List<Task> get overdueTasks =>
+      _allTasks.where((t) => t.status == TaskStatus.overdue).toList();
 
   Future<void> refreshAll() async {
     _allTasks = await _repository.getAllTasks();
@@ -34,35 +37,64 @@ class TaskProvider with ChangeNotifier {
     await refreshAll();
   }
 
-  Future<void> updateTaskStatus(int taskId, TaskStatus status, {required Function(int) onXpGain}) async {
+  Future<void> updateTaskStatus(
+    int taskId,
+    TaskStatus status, {
+    required Function(int) onXpGain,
+  }) async {
     final task = _allTasks.firstWhere((t) => t.id == taskId);
-    final isCompleting = status == TaskStatus.done && task.status != TaskStatus.done;
-    
+    final isCompleting =
+        status == TaskStatus.done && task.status != TaskStatus.done;
+
     await _repository.updateTaskStatus(taskId, status);
-    
-    if (isCompleting) {
+
+    // Only award XP once per task completion, and only if it's not overdue
+    if (isCompleting && !task.xpAwarded && task.status != TaskStatus.overdue) {
       int baseXp = 50;
       double priorityMult = 1.0;
       switch (task.priority) {
-        case TaskPriority.urgent: priorityMult = 2.0; break;
-        case TaskPriority.high: priorityMult = 1.5; break;
-        case TaskPriority.medium: priorityMult = 1.0; break;
-        case TaskPriority.low: priorityMult = 1.0; break;
+        case TaskPriority.urgent:
+          priorityMult = 2.0;
+          break;
+        case TaskPriority.high:
+          priorityMult = 1.5;
+          break;
+        case TaskPriority.medium:
+          priorityMult = 1.0;
+          break;
+        case TaskPriority.low:
+          priorityMult = 1.0;
+          break;
       }
-      
+
       double sizeMult = 1.0;
       switch (task.size) {
-        case TaskSize.xlarge: sizeMult = 2.0; break;
-        case TaskSize.large: sizeMult = 1.5; break;
-        case TaskSize.medium: sizeMult = 1.0; break;
-        case TaskSize.small: sizeMult = 0.75; break;
-        case TaskSize.tiny: sizeMult = 0.5; break;
+        case TaskSize.xlarge:
+          sizeMult = 2.0;
+          break;
+        case TaskSize.large:
+          sizeMult = 1.5;
+          break;
+        case TaskSize.medium:
+          sizeMult = 1.0;
+          break;
+        case TaskSize.small:
+          sizeMult = 0.75;
+          break;
+        case TaskSize.tiny:
+          sizeMult = 0.5;
+          break;
       }
-      
+
       final xpGained = (baseXp * priorityMult * sizeMult).toInt();
+
+      // Mark XP as awarded
+      final updatedTask = task.copyWith(xpAwarded: true);
+      await _repository.updateTask(updatedTask);
+
       onXpGain(xpGained);
     }
-    
+
     await refreshAll();
   }
 

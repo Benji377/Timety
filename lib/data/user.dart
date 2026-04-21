@@ -5,8 +5,13 @@ class User {
   final int level;
   final int currentStreak;
   final int highestStreak;
+  final int
+  streakFrozenDaysRemaining; // Days remaining before streak resets (0 = not frozen)
+  final int lastActiveDate; // Milliseconds - last day user did focus or task
   final int dailyFocusTarget; // Milliseconds
-  final int lastActiveDate; // Milliseconds
+  final int
+  minStreakMinutes; // Minutes of focus required for streak (default: 1)
+  final int maxFocusSessionDuration; // Minutes (default: 120)
   final bool isDarkMode;
 
   User({
@@ -16,10 +21,36 @@ class User {
     this.level = 1,
     this.currentStreak = 0,
     this.highestStreak = 0,
-    required this.dailyFocusTarget,
+    this.streakFrozenDaysRemaining = 0,
     required this.lastActiveDate,
+    required this.dailyFocusTarget,
+    this.minStreakMinutes = 1,
+    this.maxFocusSessionDuration = 120,
     this.isDarkMode = false,
   });
+
+  // Calculate title and emoji based on level
+  String get userTitle {
+    if (level >= 50) return '🔥 Focus Grandmaster';
+    if (level >= 40) return '⭐ Focus Legend';
+    if (level >= 30) return '💎 Focus Master';
+    if (level >= 20) return '🏆 Focus Champion';
+    if (level >= 15) return '👑 Focus King/Queen';
+    if (level >= 10) return '🌟 Focus Expert';
+    if (level >= 5) return '⚡ Focus Adept';
+    return '🚀 Ready to Focus';
+  }
+
+  String get levelEmoji {
+    if (level >= 50) return '🔥';
+    if (level >= 40) return '⭐';
+    if (level >= 30) return '💎';
+    if (level >= 20) return '🏆';
+    if (level >= 15) return '👑';
+    if (level >= 10) return '🌟';
+    if (level >= 5) return '⚡';
+    return '🚀';
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -29,8 +60,11 @@ class User {
       'level': level,
       'currentStreak': currentStreak,
       'highestStreak': highestStreak,
-      'dailyFocusTarget': dailyFocusTarget,
+      'streakFrozenDaysRemaining': streakFrozenDaysRemaining,
       'lastActiveDate': lastActiveDate,
+      'dailyFocusTarget': dailyFocusTarget,
+      'minStreakMinutes': minStreakMinutes,
+      'maxFocusSessionDuration': maxFocusSessionDuration,
       'isDarkMode': isDarkMode ? 1 : 0,
     };
   }
@@ -43,8 +77,11 @@ class User {
       level: map['level'] ?? 1,
       currentStreak: map['currentStreak'] ?? 0,
       highestStreak: map['highestStreak'] ?? 0,
-      dailyFocusTarget: map['dailyFocusTarget'] ?? 7200000,
+      streakFrozenDaysRemaining: map['streakFrozenDaysRemaining'] ?? 0,
       lastActiveDate: map['lastActiveDate'] ?? 0,
+      dailyFocusTarget: map['dailyFocusTarget'] ?? 7200000,
+      minStreakMinutes: map['minStreakMinutes'] ?? 1,
+      maxFocusSessionDuration: map['maxFocusSessionDuration'] ?? 120,
       isDarkMode: (map['isDarkMode'] ?? 0) == 1,
     );
   }
@@ -55,8 +92,11 @@ class User {
     int? level,
     int? currentStreak,
     int? highestStreak,
-    int? dailyFocusTarget,
+    int? streakFrozenDaysRemaining,
     int? lastActiveDate,
+    int? dailyFocusTarget,
+    int? minStreakMinutes,
+    int? maxFocusSessionDuration,
     bool? isDarkMode,
   }) {
     return User(
@@ -66,8 +106,13 @@ class User {
       level: level ?? this.level,
       currentStreak: currentStreak ?? this.currentStreak,
       highestStreak: highestStreak ?? this.highestStreak,
-      dailyFocusTarget: dailyFocusTarget ?? this.dailyFocusTarget,
+      streakFrozenDaysRemaining:
+          streakFrozenDaysRemaining ?? this.streakFrozenDaysRemaining,
       lastActiveDate: lastActiveDate ?? this.lastActiveDate,
+      dailyFocusTarget: dailyFocusTarget ?? this.dailyFocusTarget,
+      minStreakMinutes: minStreakMinutes ?? this.minStreakMinutes,
+      maxFocusSessionDuration:
+          maxFocusSessionDuration ?? this.maxFocusSessionDuration,
       isDarkMode: isDarkMode ?? this.isDarkMode,
     );
   }

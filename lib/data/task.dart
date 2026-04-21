@@ -14,10 +14,14 @@ enum TaskPriority {
 
   IconData get icon {
     switch (this) {
-      case TaskPriority.urgent: return Icons.keyboard_double_arrow_up;
-      case TaskPriority.high: return Icons.keyboard_arrow_up;
-      case TaskPriority.medium: return Icons.remove;
-      case TaskPriority.low: return Icons.keyboard_arrow_down;
+      case TaskPriority.urgent:
+        return Icons.keyboard_double_arrow_up;
+      case TaskPriority.high:
+        return Icons.keyboard_arrow_up;
+      case TaskPriority.medium:
+        return Icons.remove;
+      case TaskPriority.low:
+        return Icons.keyboard_arrow_down;
     }
   }
 }
@@ -36,11 +40,16 @@ enum TaskSize {
 
   IconData get icon {
     switch (this) {
-      case TaskSize.tiny: return Icons.crop;
-      case TaskSize.small: return Icons.crop_square;
-      case TaskSize.medium: return Icons.fullscreen;
-      case TaskSize.large: return Icons.aspect_ratio;
-      case TaskSize.xlarge: return Icons.fit_screen;
+      case TaskSize.tiny:
+        return Icons.crop;
+      case TaskSize.small:
+        return Icons.crop_square;
+      case TaskSize.medium:
+        return Icons.fullscreen;
+      case TaskSize.large:
+        return Icons.aspect_ratio;
+      case TaskSize.xlarge:
+        return Icons.fit_screen;
     }
   }
 }
@@ -51,14 +60,16 @@ class Task {
   final String? description;
   final String iconName;
   final String? location;
-  final int? dueDate; // Unix epoch milliseconds
-  final int? reminderTime; // Unix epoch milliseconds
+  final int? dueDate; // Unix epoch milliseconds (date only, midnight)
+  final int?
+  dueTime; // Unix epoch milliseconds (time only, as if same day) - ADDED
   final List<int> reminders; // List of Unix epoch milliseconds
   final int? categoryId;
   final int? durationEst; // Milliseconds
   final TaskStatus status;
   final TaskPriority priority;
   final TaskSize size;
+  final bool xpAwarded; // Track if XP was already awarded - ADDED
 
   Task({
     this.id,
@@ -67,13 +78,14 @@ class Task {
     this.iconName = 'default',
     this.location,
     this.dueDate,
-    this.reminderTime,
+    this.dueTime,
     this.reminders = const [],
     this.categoryId,
     this.durationEst,
     this.status = TaskStatus.todo,
     this.priority = TaskPriority.medium,
     this.size = TaskSize.medium,
+    this.xpAwarded = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -84,13 +96,14 @@ class Task {
       'iconName': iconName,
       'location': location,
       'dueDate': dueDate,
-      'reminderTime': reminderTime,
+      'dueTime': dueTime,
       'reminders': jsonEncode(reminders),
       'categoryId': categoryId,
       'durationEst': durationEst,
       'status': status.index,
       'priority': priority.index,
       'size': size.index,
+      'xpAwarded': xpAwarded ? 1 : 0,
     };
   }
 
@@ -102,21 +115,25 @@ class Task {
       iconName: map['iconName'] ?? 'default',
       location: map['location'],
       dueDate: map['dueDate'],
-      reminderTime: map['reminderTime'],
-      reminders: map['reminders'] != null 
-          ? (jsonDecode(map['reminders']) as List).cast<int>() 
+      dueTime: map['dueTime'],
+      reminders: map['reminders'] != null
+          ? (jsonDecode(map['reminders']) as List).cast<int>()
           : [],
       categoryId: map['categoryId'],
       durationEst: map['durationEst'],
       status: TaskStatus.values[map['status'] ?? 0],
       priority: TaskPriority.values[map['priority'] ?? 2],
       size: TaskSize.values[map['size'] ?? 2],
+      xpAwarded: (map['xpAwarded'] ?? 0) == 1,
     );
   }
 
-  DateTime? get dueDateTime => dueDate != null ? DateTime.fromMillisecondsSinceEpoch(dueDate!) : null;
-  DateTime? get reminderDateTime => reminderTime != null ? DateTime.fromMillisecondsSinceEpoch(reminderTime!) : null;
-  List<DateTime> get reminderDateTimes => reminders.map((r) => DateTime.fromMillisecondsSinceEpoch(r)).toList();
+  DateTime? get dueDateTime =>
+      dueDate != null ? DateTime.fromMillisecondsSinceEpoch(dueDate!) : null;
+  DateTime? get dueTimeDateTime =>
+      dueTime != null ? DateTime.fromMillisecondsSinceEpoch(dueTime!) : null;
+  List<DateTime> get reminderDateTimes =>
+      reminders.map((r) => DateTime.fromMillisecondsSinceEpoch(r)).toList();
 
   Task copyWith({
     int? id,
@@ -125,13 +142,14 @@ class Task {
     String? iconName,
     String? location,
     int? dueDate,
-    int? reminderTime,
+    int? dueTime,
     List<int>? reminders,
     int? categoryId,
     int? durationEst,
     TaskStatus? status,
     TaskPriority? priority,
     TaskSize? size,
+    bool? xpAwarded,
   }) {
     return Task(
       id: id ?? this.id,
@@ -140,13 +158,14 @@ class Task {
       iconName: iconName ?? this.iconName,
       location: location ?? this.location,
       dueDate: dueDate ?? this.dueDate,
-      reminderTime: reminderTime ?? this.reminderTime,
+      dueTime: dueTime ?? this.dueTime,
       reminders: reminders ?? this.reminders,
       categoryId: categoryId ?? this.categoryId,
       durationEst: durationEst ?? this.durationEst,
       status: status ?? this.status,
       priority: priority ?? this.priority,
       size: size ?? this.size,
+      xpAwarded: xpAwarded ?? this.xpAwarded,
     );
   }
 }
