@@ -134,6 +134,8 @@ class _FocusScreenState extends State<FocusScreen> {
     final endTime = DateTime.now();
     final duration = endTime.difference(_startTime!);
     final durationMinutes = duration.inMinutes;
+    final focusProvider = context.read<FocusProvider>();
+    final userProvider = context.read<UserProvider>();
 
     // Award XP: 10 XP per minute of focus
     const int xpPerMinute = 10;
@@ -141,7 +143,7 @@ class _FocusScreenState extends State<FocusScreen> {
 
     if (_selectedMode != null) {
       // Add the session to database
-      await context.read<FocusProvider>().addSession(
+      await focusProvider.addSession(
         FocusSession(
           categoryId: _selectedTask?.categoryId ?? 0,
           taskId: _selectedTask?.id,
@@ -154,7 +156,6 @@ class _FocusScreenState extends State<FocusScreen> {
 
       xpEarned = durationMinutes * xpPerMinute;
 
-      final userProvider = context.read<UserProvider>();
       final user = userProvider.user;
 
       if (user != null) {
@@ -169,6 +170,7 @@ class _FocusScreenState extends State<FocusScreen> {
       }
     }
 
+    if (!mounted) return;
     setState(() => _isRunning = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -182,6 +184,7 @@ class _FocusScreenState extends State<FocusScreen> {
     TimeOfDay? selectedTime;
     int durationMins = 30;
     final durationController = TextEditingController(text: '30');
+    final focusProviderRef = context.read<FocusProvider>();
 
     showDialog(
       context: context,
@@ -201,7 +204,7 @@ class _FocusScreenState extends State<FocusScreen> {
                         context: context,
                         initialTime: TimeOfDay.now(),
                       );
-                      if (time != null) {
+                      if (time != null && mounted) {
                         setState(() => selectedTime = time);
                       }
                     },
@@ -260,16 +263,10 @@ class _FocusScreenState extends State<FocusScreen> {
                         final remainingMins = endDateTime
                             .difference(now)
                             .inMinutes;
-                        _selectedMode = context
-                            .read<FocusProvider>()
-                            .focusModes
-                            .firstWhere(
-                              (m) => m.title == 'Flexible',
-                              orElse: () => context
-                                  .read<FocusProvider>()
-                                  .focusModes
-                                  .first,
-                            );
+                        _selectedMode = focusProviderRef.focusModes.firstWhere(
+                          (m) => m.title == 'Flexible',
+                          orElse: () => focusProviderRef.focusModes.first,
+                        );
 
                         setState(() {
                           _startTime = now;
@@ -290,7 +287,7 @@ class _FocusScreenState extends State<FocusScreen> {
                         });
                       } else {
                         // Log past session immediately
-                        context.read<FocusProvider>().addSession(
+                        focusProviderRef.addSession(
                           FocusSession(
                             categoryId: _selectedTask?.categoryId ?? 0,
                             taskId: _selectedTask?.id,
@@ -378,42 +375,6 @@ class _FocusScreenState extends State<FocusScreen> {
               child: const Text('Add'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void _showTagSelector() {
-    final taskProvider = context.read<TaskProvider>();
-    final categories = taskProvider.categories;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Category'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: categories
-                .map(
-                  (cat) => ListTile(
-                    title: Text(cat.name),
-                    leading: Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: Color(int.parse(cat.colorHex)),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    onTap: () {
-                      setState(() => _selectedTag = cat.name);
-                      Navigator.pop(context);
-                    },
-                  ),
-                )
-                .toList(),
-          ),
         ),
       ),
     );
@@ -773,7 +734,7 @@ class _FocusScreenState extends State<FocusScreen> {
                   labelText: 'Focus on Task (optional)',
                   border: OutlineInputBorder(),
                 ),
-                value: _selectedTask,
+                initialValue: _selectedTask,
                 items: taskProvider.todoTasks
                     .map(
                       (t) => DropdownMenuItem(value: t, child: Text(t.title)),
@@ -810,7 +771,7 @@ class _FocusScreenState extends State<FocusScreen> {
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         color: isSelected
-            ? Theme.of(context).primaryColor.withOpacity(0.1)
+            ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
             : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -853,8 +814,8 @@ class _FocusScreenState extends State<FocusScreen> {
                             style: const TextStyle(fontSize: 12),
                           ),
                           backgroundColor: step.type.name == 'focus'
-                              ? Colors.green.withOpacity(0.2)
-                              : Colors.orange.withOpacity(0.2),
+                              ? Colors.green.withValues(alpha: 0.2)
+                              : Colors.orange.withValues(alpha: 0.2),
                         ),
                       )
                       .toList(),
@@ -915,12 +876,12 @@ class CircularButton extends StatelessWidget {
   final String? tooltip;
 
   const CircularButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.onPressed,
     this.color,
     this.tooltip,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

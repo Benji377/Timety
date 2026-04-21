@@ -147,8 +147,8 @@ class _HomeScreenContent extends StatelessWidget {
                 GestureDetector(
                   onTap: () => Navigator.of(context).push(
                     PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const FocusScreen(),
-                      transitionsBuilder: (_, animation, __, child) {
+                      pageBuilder: (_, _, _) => const FocusScreen(),
+                      transitionsBuilder: (_, animation, _, child) {
                         return FadeTransition(opacity: animation, child: child);
                       },
                     ),

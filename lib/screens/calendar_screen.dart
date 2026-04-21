@@ -184,7 +184,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
               // Calendar days

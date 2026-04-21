@@ -180,7 +180,7 @@ class _StepItem extends StatelessWidget {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<FocusStepType>(
-                    value: step.type,
+                    initialValue: step.type,
                     decoration: const InputDecoration(
                       labelText: 'Type',
                       border: OutlineInputBorder(),

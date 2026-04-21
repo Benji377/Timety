@@ -56,7 +56,7 @@ class FocusModesScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${mode.steps.length} steps • ${totalDuration} min total',
+                            '${mode.steps.length} steps • $totalDuration min total',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           const SizedBox(height: 4),

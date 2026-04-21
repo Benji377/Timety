@@ -245,7 +245,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.category),
                       ),
-                      value: _selectedCategory,
+                      initialValue: _selectedCategory,
                       items: categories
                           .map(
                             (c) =>
@@ -336,7 +336,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
 
-    if (date != null && mounted) {
+    if (!mounted) return;
+    if (date != null) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
@@ -399,6 +400,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           _reminders[i],
         );
       }
+
+      if (!mounted) return;
 
       if (widget.initialTask != null) {
         context.read<TaskProvider>().updateTask(task);
