@@ -1,125 +1,53 @@
 import 'package:flutter/material.dart';
-import '../data/main_repository.dart';
 import '../data/task.dart';
-import '../data/category.dart';
+import '../data/task_repository.dart';
 
-class TaskProvider with ChangeNotifier {
-  final MainRepository _repository;
-  List<Task> _allTasks = [];
-  List<Category> _categories = [];
+class TaskProvider extends ChangeNotifier {
+  final TaskRepository repository;
+  List<Task> _tasks = [];
 
-  TaskProvider(this._repository) {
-    refreshAll();
+  List<Task> get tasks => _tasks;
+
+  TaskProvider({required this.repository});
+
+  // Load data initially
+  Future<void> loadTasks() async {
+    _tasks = await repository.fetchTasks();
+    notifyListeners(); // Tells the UI to rebuild
   }
 
-  List<Task> get allTasks => _allTasks;
-  List<Category> get categories => _categories;
-  List<Task> get todoTasks =>
-      _allTasks.where((t) => t.status == TaskStatus.todo).toList();
-  List<Task> get doneTasks =>
-      _allTasks.where((t) => t.status == TaskStatus.done).toList();
-  List<Task> get overdueTasks =>
-      _allTasks.where((t) => t.status == TaskStatus.overdue).toList();
-
-  Future<void> refreshAll() async {
-    _allTasks = await _repository.getAllTasks();
-    _categories = await _repository.getAllCategories();
+  // Add a new Task
+  Future<void> addTask(String title, String description) async {
+    final newTask = Task(id: DateTime.now().toString(), title: title, description: description);
+    _tasks.add(newTask);
+    await repository.saveTasks(_tasks);
     notifyListeners();
   }
 
-  Future<void> addTask(Task task) async {
-    await _repository.insertTask(task);
-    await refreshAll();
-  }
-
-  Future<void> updateTask(Task task) async {
-    await _repository.updateTask(task);
-    await refreshAll();
-  }
-
-  Future<void> updateTaskStatus(
-    int taskId,
-    TaskStatus status, {
-    required Function(int) onXpGain,
-  }) async {
-    final task = _allTasks.firstWhere((t) => t.id == taskId);
-    final isCompleting =
-        status == TaskStatus.done && task.status != TaskStatus.done;
-
-    await _repository.updateTaskStatus(taskId, status);
-
-    // Only award XP once per task completion, and only if it's not overdue
-    if (isCompleting && !task.xpAwarded && task.status != TaskStatus.overdue) {
-      int baseXp = 50;
-      double priorityMult = 1.0;
-      switch (task.priority) {
-        case TaskPriority.urgent:
-          priorityMult = 2.0;
-          break;
-        case TaskPriority.high:
-          priorityMult = 1.5;
-          break;
-        case TaskPriority.medium:
-          priorityMult = 1.0;
-          break;
-        case TaskPriority.low:
-          priorityMult = 1.0;
-          break;
-      }
-
-      double sizeMult = 1.0;
-      switch (task.size) {
-        case TaskSize.xlarge:
-          sizeMult = 2.0;
-          break;
-        case TaskSize.large:
-          sizeMult = 1.5;
-          break;
-        case TaskSize.medium:
-          sizeMult = 1.0;
-          break;
-        case TaskSize.small:
-          sizeMult = 0.75;
-          break;
-        case TaskSize.tiny:
-          sizeMult = 0.5;
-          break;
-      }
-
-      final xpGained = (baseXp * priorityMult * sizeMult).toInt();
-
-      // Mark XP as awarded
-      final updatedTask = task.copyWith(xpAwarded: true);
-      await _repository.updateTask(updatedTask);
-
-      onXpGain(xpGained);
+  // Toggle completion
+  Future<void> toggleTask(String id) async {
+    final index = _tasks.indexWhere((t) => t.id == id);
+    if (index != -1) {
+      _tasks[index].isCompleted = !_tasks[index].isCompleted;
+      await repository.saveTasks(_tasks);
+      notifyListeners();
     }
-
-    await refreshAll();
   }
 
-  Future<void> deleteTask(int taskId) async {
-    await _repository.deleteTask(taskId);
-    await refreshAll();
+// Remove a Task
+  Future<void> removeTask(String id) async {
+    _tasks.removeWhere((task) => task.id == id);
+    await repository.saveTasks(_tasks);
+    notifyListeners();
   }
 
-  Future<void> addCategory(Category category) async {
-    await _repository.insertCategory(category);
-    await refreshAll();
-  }
-
-  Future<void> updateCategory(Category category) async {
-    await _repository.updateCategory(category);
-    await refreshAll();
-  }
-
-  Future<void> deleteCategory(int categoryId) async {
-    await _repository.deleteCategory(categoryId);
-    await refreshAll();
-  }
-
-  Future<void> updateOverdueTasks() async {
-    await _repository.updateOverdueTasks(DateTime.now().millisecondsSinceEpoch);
-    await refreshAll();
+  // Update an existing Task
+  Future<void> updateTask(Task updatedTask) async {
+    final index = _tasks.indexWhere((t) => t.id == updatedTask.id);
+    if (index != -1) {
+      _tasks[index] = updatedTask;
+      await repository.saveTasks(_tasks);
+      notifyListeners();
+    }
   }
 }
