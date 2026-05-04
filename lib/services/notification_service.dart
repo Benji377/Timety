@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 
 class NotificationService {
@@ -9,11 +10,19 @@ class NotificationService {
   static final NotificationService instance = NotificationService._internal();
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
   Future<void> init() async {
     if (_isInitialized) return;
+
+    // --- WEB GUARD ---
+    // If we are running on Chrome/Web for UI testing, skip the mobile notification setup
+    if (kIsWeb) {
+      _isInitialized = true;
+      return;
+    }
 
     // 1. Initialize Timezones
     tz.initializeTimeZones();
@@ -21,14 +30,16 @@ class NotificationService {
     tz.setLocalLocation(tz.getLocation(timeZoneName.identifier));
 
     // 2. Android Initialization Settings
-    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
     // 3. iOS Initialization Settings
-    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+    const DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings(
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
@@ -40,7 +51,9 @@ class NotificationService {
     // Request permissions for Android 13+
     if (Platform.isAndroid) {
       await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestNotificationsPermission();
     }
 
@@ -56,6 +69,9 @@ class NotificationService {
     required String body,
     required DateTime scheduledTime,
   }) async {
+    // --- WEB GUARD ---
+    if (kIsWeb) return;
+
     // Don't schedule in the past
     if (scheduledTime.isBefore(DateTime.now())) return;
 
@@ -81,11 +97,17 @@ class NotificationService {
 
   /// Cancels a specific notification
   Future<void> cancelNotification(int notificationId) async {
+    // --- WEB GUARD ---
+    if (kIsWeb) return;
+
     await _notificationsPlugin.cancel(id: notificationId);
   }
 
   /// Future implementation: Daily Motivation
   Future<void> scheduleDailyMotivation() async {
-    // You can implement this later using zonedSchedule with a daily frequency!
+    // --- WEB GUARD ---
+    if (kIsWeb) return;
+
+    // TODO: Implement daily motivation scheduling logic here
   }
 }
