@@ -157,6 +157,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       category: _category,
       reminders: _reminders,
       isCompleted: _isNewTask ? false : widget.task!.isCompleted,
+      completedAt: _isNewTask ? null : widget.task!.completedAt,
+      createdAt: _isNewTask ? DateTime.now() : widget.task!.createdAt,
     );
 
     if (_isNewTask) {

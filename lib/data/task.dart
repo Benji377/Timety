@@ -12,6 +12,8 @@ class Task {
   final String category; 
   final Size size;
   bool isCompleted;
+  DateTime? completedAt;
+  final DateTime createdAt;
 
   Task({
     required this.id,
@@ -24,6 +26,8 @@ class Task {
     this.reminders = const [],
     this.category = "",
     this.isCompleted = false,
+    this.completedAt,
+    required this.createdAt,
   });
 
   Map<String, dynamic> toJson() {
@@ -39,6 +43,8 @@ class Task {
       'category': category,
       'isCompleted': isCompleted,
       'size': size.name,
+      'completedAt': completedAt != null ? completedAt!.toIso8601String() : "",
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 
@@ -56,5 +62,7 @@ class Task {
             .toList(),
         category: json['category'] ?? "",
         isCompleted: json['isCompleted'] ?? false,
+        completedAt: json['completedAt'] != "" ? DateTime.parse(json['completedAt']) : null,
+        createdAt: DateTime.parse(json['createdAt']),
       );
 }
