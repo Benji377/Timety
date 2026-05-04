@@ -9,4 +9,9 @@ abstract class FocusRepository {
   // Sessions (History)
   Future<List<FocusSession>> fetchSessions();
   Future<void> saveSession(FocusSession session);
+
+  // Tags
+  Future<List<FocusTag>> fetchTags();
+  Future<void> saveTag(FocusTag tag);
+  Future<void> deleteTag(String id);
 }

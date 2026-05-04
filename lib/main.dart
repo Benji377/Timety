@@ -26,13 +26,14 @@ void main() async {
   Hive.registerAdapter(PriorityAdapter());
   Hive.registerAdapter(SizeAdapter());
 
-  // Register Focus Adapters (NEW!)
+  // Register Focus Adapters
   Hive.registerAdapter(FocusModeTypeAdapter());
   Hive.registerAdapter(FocusModeAdapter());
   Hive.registerAdapter(DistractionAdapter());
   Hive.registerAdapter(FocusSessionAdapter());
   Hive.registerAdapter(PhaseTypeAdapter());
   Hive.registerAdapter(SessionPhaseAdapter());
+  Hive.registerAdapter(FocusTagAdapter());
 
   await NotificationService.instance.init();
   await NotificationService.instance.scheduleDailyMotivation();

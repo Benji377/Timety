@@ -6,12 +6,21 @@ class InteractiveGauge extends StatefulWidget {
   final int initialMinutes;
   final bool isInteractive;
   final ValueChanged<int>? onChanged;
+  
   final String label;
+  final String centerText;
+  final String bottomText; 
+  final Color bottomTextColor;
+  final VoidCallback? onBottomTextTapped;
 
   const InteractiveGauge({
     super.key,
     required this.maxMinutes,
     required this.initialMinutes,
+    required this.centerText,
+    required this.bottomText,
+    required this.bottomTextColor,
+    this.onBottomTextTapped,
     this.isInteractive = true,
     this.onChanged,
     required this.label,
@@ -27,7 +36,6 @@ class _InteractiveGaugeState extends State<InteractiveGauge> {
   @override
   void initState() {
     super.initState();
-    // Prevent divide by zero if maxMinutes is 0 (like in Stopwatch)
     _progress = widget.maxMinutes > 0 ? widget.initialMinutes / widget.maxMinutes : 1.0;
   }
 
@@ -46,17 +54,12 @@ class _InteractiveGaugeState extends State<InteractiveGauge> {
     final dx = localPosition.dx - center.dx;
     final dy = localPosition.dy - center.dy;
 
-    // Calculate angle using arctangent. atan2 returns -pi to pi.
     double angle = atan2(dy, dx);
-    
-    // Shift the angle so 0 starts at the top (-pi/2)
     angle += pi / 2;
-    if (angle < 0) angle += 2 * pi; // Normalize to 0 -> 2*pi
+    if (angle < 0) angle += 2 * pi;
 
     setState(() {
       _progress = angle / (2 * pi);
-      
-      // Add a slight snap to 0 and 100% to make it feel premium
       if (_progress < 0.02) _progress = 0.0;
       if (_progress > 0.98) _progress = 1.0;
     });
@@ -66,26 +69,17 @@ class _InteractiveGaugeState extends State<InteractiveGauge> {
     }
   }
 
-  String _formatTime(int minutes) {
-    int h = minutes ~/ 60;
-    int m = minutes % 60;
-    if (h > 0) {
-      return '${h}h ${m.toString().padLeft(2, '0')}m';
-    }
-    return '${m}m';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final int currentMinutes = (_progress * widget.maxMinutes).round();
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return GestureDetector(
-      onPanStart: (details) => _handlePan(details.localPosition, const Size(250, 250)),
-      onPanUpdate: (details) => _handlePan(details.localPosition, const Size(250, 250)),
+      // INCREASED SIZE
+      onPanStart: (details) => _handlePan(details.localPosition, const Size(300, 300)),
+      onPanUpdate: (details) => _handlePan(details.localPosition, const Size(300, 300)),
       child: SizedBox(
-        width: 250,
-        height: 250,
+        width: 300,
+        height: 300,
         child: CustomPaint(
           painter: _GaugePainter(
             progress: _progress,
@@ -95,21 +89,40 @@ class _InteractiveGaugeState extends State<InteractiveGauge> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(height: 20),
               Text(
                 widget.label,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
                   color: Colors.grey.shade600,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                widget.isInteractive ? _formatTime(currentMinutes) : widget.label == "STOPWATCH" ? "Counting..." : _formatTime(widget.initialMinutes),
-                style: const TextStyle(fontSize: 56, fontWeight: FontWeight.w300),
+                widget.centerText,
+                style: const TextStyle(fontSize: 60, fontWeight: FontWeight.w300),
               ),
-              if (widget.isInteractive)
-                const Text("Drag to set time", style: TextStyle(color: Colors.grey, fontSize: 12)),
+              const SizedBox(height: 4),
+              GestureDetector(
+                onTap: widget.onBottomTextTapped,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    "< ${widget.bottomText} >",
+                    style: TextStyle(
+                      color: widget.bottomTextColor, 
+                      fontSize: 16, 
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -129,59 +142,66 @@ class _GaugePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2;
-    final strokeWidth = 16.0;
+    final strokeWidth = 16.0; // Slightly thicker
+    final innerRadius = radius - strokeWidth - 14;
 
-    // 1. Draw Background Track
+    final innerBackgroundPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawShadow(Path()..addOval(Rect.fromCircle(center: center, radius: innerRadius)), Colors.black26, 4.0, true);
+    canvas.drawCircle(center, innerRadius, innerBackgroundPaint);
+
+    final innerBorderPaint = Paint()
+      ..color = Colors.grey.shade300 
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, innerRadius, innerBorderPaint);
+
+    // DARKER EMPTY TRACK FOR BETTER VISIBILITY
     final trackPaint = Paint()
-      ..color = Colors.grey.shade200
+      ..color = Colors.grey.shade300
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
-    canvas.drawCircle(center, radius - strokeWidth, trackPaint);
+    canvas.drawCircle(center, radius - strokeWidth / 2, trackPaint);
 
-    // 2. Draw Progress Arc
     final progressPaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
     
-    // Start at -90 degrees (top), sweep based on progress
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeWidth),
+      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
       -pi / 2,
       2 * pi * progress,
       false,
       progressPaint,
     );
 
-    // 3. Draw the Draggable Thumb (Only if interactive)
     if (isInteractive) {
-      // Calculate thumb position
       final thumbAngle = (-pi / 2) + (2 * pi * progress);
       final thumbCenter = Offset(
-        center.dx + (radius - strokeWidth) * cos(thumbAngle),
-        center.dy + (radius - strokeWidth) * sin(thumbAngle),
+        center.dx + (radius - strokeWidth / 2) * cos(thumbAngle),
+        center.dy + (radius - strokeWidth / 2) * sin(thumbAngle),
       );
 
-      // Draw Thumb Shadow/Glow
       final shadowPaint = Paint()
         ..color = color.withValues(alpha: 0.3)
         ..style = PaintingStyle.fill;
-      canvas.drawCircle(thumbCenter, 16, shadowPaint);
+      canvas.drawCircle(thumbCenter, 20, shadowPaint);
 
-      // Draw Thumb Core
       final thumbPaint = Paint()
         ..color = Colors.white
         ..style = PaintingStyle.fill;
-      canvas.drawCircle(thumbCenter, 12, thumbPaint);
+      canvas.drawCircle(thumbCenter, 14, thumbPaint);
       
-      // Draw Thumb Border
       final borderPaint = Paint()
         ..color = color
         ..style = PaintingStyle.stroke
         ..strokeWidth = 4;
-      canvas.drawCircle(thumbCenter, 12, borderPaint);
+      canvas.drawCircle(thumbCenter, 14, borderPaint);
     }
   }
 

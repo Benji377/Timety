@@ -126,6 +126,46 @@ class DistractionAdapter extends TypeAdapter<Distraction> {
           typeId == other.typeId;
 }
 
+class FocusTagAdapter extends TypeAdapter<FocusTag> {
+  @override
+  final int typeId = 9;
+
+  @override
+  FocusTag read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return FocusTag(
+      id: fields[0] as String,
+      name: fields[1] as String,
+      colorValue: fields[2] as int,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, FocusTag obj) {
+    writer
+      ..writeByte(3)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.colorValue);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FocusTagAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
 class FocusSessionAdapter extends TypeAdapter<FocusSession> {
   @override
   final int typeId = 6;
@@ -144,13 +184,14 @@ class FocusSessionAdapter extends TypeAdapter<FocusSession> {
       totalSecondsFocused: fields[4] as int,
       distractions: (fields[5] as List).cast<Distraction>(),
       isCompleted: fields[6] as bool,
+      tagId: fields[7] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, FocusSession obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -164,7 +205,9 @@ class FocusSessionAdapter extends TypeAdapter<FocusSession> {
       ..writeByte(5)
       ..write(obj.distractions)
       ..writeByte(6)
-      ..write(obj.isCompleted);
+      ..write(obj.isCompleted)
+      ..writeByte(7)
+      ..write(obj.tagId);
   }
 
   @override

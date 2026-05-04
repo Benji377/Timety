@@ -9,18 +9,20 @@ class FocusProvider extends ChangeNotifier {
   // --- STATE ---
   List<FocusMode> _modes = [];
   List<FocusSession> _history = [];
-  
+  List<FocusTag> _tags = [];
+  FocusTag? _selectedTag;
+
   FocusMode? _activeMode;
   FocusSession? _currentSession;
-  
+
   Timer? _timer;
   bool _isRunning = false;
   bool _isPaused = false;
   int _currentSecondsFocussed = 0;
   int _dailyTargetMinutes = 90;
-  
+
   int _currentPhaseIndex = 0;
-  int _secondsRemainingInPhase = 0; 
+  int _secondsRemainingInPhase = 0;
   PhaseType _currentPhaseType = PhaseType.focus;
 
   // --- GETTERS ---
@@ -34,6 +36,8 @@ class FocusProvider extends ChangeNotifier {
   int get currentPhaseIndex => _currentPhaseIndex;
   int get secondsRemainingInPhase => _secondsRemainingInPhase;
   PhaseType get currentPhaseType => _currentPhaseType;
+  List<FocusTag> get tags => _tags;
+  FocusTag? get selectedTag => _selectedTag;
 
   // Require the repository in the constructor
   FocusProvider({required this.repository}) {
@@ -43,6 +47,18 @@ class FocusProvider extends ChangeNotifier {
   Future<void> _init() async {
     _modes = await repository.fetchModes();
     _history = await repository.fetchSessions();
+    _tags = await repository.fetchTags();
+    if (_tags.isEmpty) {
+      // Create a default tag so it isn't empty
+      final defaultTag = FocusTag(
+        id: 'empty_tag',
+        name: 'None',
+        colorValue: Colors.blue.toARGB32(),
+      );
+      await repository.saveTag(defaultTag);
+      _tags.add(defaultTag);
+    }
+    _selectedTag = _tags.first;
 
     // Inject System Modes if they don't exist
     if (!_modes.any((m) => m.id == 'system_stopwatch')) {
@@ -75,9 +91,9 @@ class FocusProvider extends ChangeNotifier {
 
   Future<void> saveCustomMode(FocusMode mode) async {
     if (mode.isSystem) return;
-    
+
     await repository.saveMode(mode);
-    
+
     final index = _modes.indexWhere((m) => m.id == mode.id);
     if (index != -1) {
       _modes[index] = mode;
@@ -89,10 +105,10 @@ class FocusProvider extends ChangeNotifier {
 
   Future<void> deleteMode(String modeId) async {
     final mode = _modes.firstWhere((m) => m.id == modeId);
-    if (mode.isSystem) return; 
-    
+    if (mode.isSystem) return;
+
     await repository.deleteMode(modeId);
-    
+
     _modes.removeWhere((m) => m.id == modeId);
     if (_activeMode?.id == modeId) {
       _activeMode = _modes.firstWhere((m) => m.id == 'system_stopwatch');
@@ -118,7 +134,7 @@ class FocusProvider extends ChangeNotifier {
       _currentPhaseIndex = 0;
       _currentSecondsFocussed = 0;
       _setupPhase(_currentPhaseIndex);
-      
+
       _currentSession = FocusSession(
         id: DateTime.now().toString(),
         modeId: _activeMode!.id,
@@ -142,7 +158,9 @@ class FocusProvider extends ChangeNotifier {
 
     final phase = _activeMode!.phases[index];
     _currentPhaseType = phase.type;
-    _secondsRemainingInPhase = phase.durationMinutes > 0 ? phase.durationMinutes * 60 : 0;
+    _secondsRemainingInPhase = phase.durationMinutes > 0
+        ? phase.durationMinutes * 60
+        : 0;
   }
 
   void _tick(Timer timer) {
@@ -151,10 +169,10 @@ class FocusProvider extends ChangeNotifier {
     }
 
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
-    
+
     if (currentPhase.durationMinutes > 0) {
       _secondsRemainingInPhase--;
-      
+
       if (_secondsRemainingInPhase <= 0) {
         _currentPhaseIndex++;
         _setupPhase(_currentPhaseIndex);
@@ -172,12 +190,13 @@ class FocusProvider extends ChangeNotifier {
 
   void stopSession({bool completed = false}) async {
     _timer?.cancel();
-    
+
     if (_currentSession != null) {
       _currentSession!.endTime = DateTime.now();
       _currentSession!.totalSecondsFocused = _currentSecondsFocussed;
       _currentSession!.isCompleted = completed;
-      
+      _currentSession!.tagId = _selectedTag?.id;
+
       await repository.saveSession(_currentSession!);
       _history.add(_currentSession!);
     }
@@ -187,7 +206,7 @@ class FocusProvider extends ChangeNotifier {
     _currentSession = null;
     _currentSecondsFocussed = 0;
     _currentPhaseIndex = 0;
-    
+
     notifyListeners();
   }
 
@@ -203,7 +222,9 @@ class FocusProvider extends ChangeNotifier {
 
   void logDistraction(String note) {
     if (_currentSession != null) {
-      _currentSession!.distractions.add(Distraction(time: DateTime.now(), note: note));
+      _currentSession!.distractions.add(
+        Distraction(time: DateTime.now(), note: note),
+      );
       notifyListeners();
     }
   }
@@ -211,7 +232,7 @@ class FocusProvider extends ChangeNotifier {
   int getMinutesFocusedToday() {
     final today = DateTime.now();
     int totalSeconds = 0;
-    
+
     for (var session in _history) {
       if (session.startTime.year == today.year &&
           session.startTime.month == today.month &&
@@ -222,6 +243,34 @@ class FocusProvider extends ChangeNotifier {
     if (_isRunning) {
       totalSeconds += _currentSecondsFocussed;
     }
-    return totalSeconds ~/ 60; 
+    return totalSeconds ~/ 60;
+  }
+
+  // --- TAG MANAGEMENT ---
+
+  void setSelectedTag(FocusTag tag) {
+    _selectedTag = tag;
+    notifyListeners();
+  }
+
+  Future<void> createTag(String name, Color color) async {
+    final newTag = FocusTag(
+      id: DateTime.now().toString(),
+      name: name,
+      colorValue: color.toARGB32(),
+    );
+    await repository.saveTag(newTag);
+    _tags.add(newTag);
+    _selectedTag = newTag; // Auto-select the newly created tag
+    notifyListeners();
+  }
+
+  Future<void> deleteTag(String id) async {
+    await repository.deleteTag(id);
+    _tags.removeWhere((t) => t.id == id);
+    if (_selectedTag?.id == id) {
+      _selectedTag = _tags.isNotEmpty ? _tags.first : null;
+    }
+    notifyListeners();
   }
 }

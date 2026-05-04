@@ -5,6 +5,7 @@ import 'focus_repository.dart';
 class HiveFocusRepository implements FocusRepository {
   static const String modeBoxName = 'focusModesBox';
   static const String sessionBoxName = 'focusSessionsBox';
+  static const String tagBoxName = 'focusTagsBox';
 
   @override
   Future<List<FocusMode>> fetchModes() async {
@@ -34,5 +35,23 @@ class HiveFocusRepository implements FocusRepository {
   Future<void> saveSession(FocusSession session) async {
     final box = await Hive.openBox<FocusSession>(sessionBoxName);
     await box.put(session.id, session);
+  }
+
+  @override
+  Future<List<FocusTag>> fetchTags() async {
+    final box = await Hive.openBox<FocusTag>(tagBoxName);
+    return box.values.toList();
+  }
+
+  @override
+  Future<void> saveTag(FocusTag tag) async {
+    final box = await Hive.openBox<FocusTag>(tagBoxName);
+    await box.put(tag.id, tag);
+  }
+
+  @override
+  Future<void> deleteTag(String id) async {
+    final box = await Hive.openBox<FocusTag>(tagBoxName);
+    await box.delete(id);
   }
 }

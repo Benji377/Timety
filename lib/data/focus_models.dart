@@ -89,6 +89,15 @@ class Distraction {
   Distraction({required this.time, this.note = ""});
 }
 
+@HiveType(typeId: 9)
+class FocusTag {
+  @HiveField(0) final String id;
+  @HiveField(1) final String name;
+  @HiveField(2) final int colorValue; // Stores the integer value of a Flutter Color
+
+  FocusTag({required this.id, required this.name, required this.colorValue});
+}
+
 @HiveType(typeId: 6)
 class FocusSession {
   @HiveField(0) final String id;
@@ -98,6 +107,7 @@ class FocusSession {
   @HiveField(4) int totalSecondsFocused; 
   @HiveField(5) List<Distraction> distractions;
   @HiveField(6) bool isCompleted;
+  @HiveField(7) String? tagId;
 
   FocusSession({
     required this.id,
@@ -107,5 +117,6 @@ class FocusSession {
     this.totalSecondsFocused = 0,
     this.distractions = const [],
     this.isCompleted = false,
+    this.tagId,
   });
 }
