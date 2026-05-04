@@ -5,7 +5,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class LocationPicker extends StatefulWidget {
-  const LocationPicker({super.key});
+  final String? initialLocation;
+
+  const LocationPicker({super.key, this.initialLocation});
 
   @override
   State<LocationPicker> createState() => _LocationPickerState();
@@ -24,13 +26,34 @@ class _LocationPickerState extends State<LocationPicker> {
     _initialize();
   }
 
+// Helper to safely parse "Lat, Lng" strings back into map coordinates
+  LatLng? _parseInitialLocation() {
+    if (widget.initialLocation == null || widget.initialLocation!.isEmpty) return null;
+    
+    final parts = widget.initialLocation!.split(',');
+    if (parts.length == 2) {
+      final lat = double.tryParse(parts[0].trim());
+      final lng = double.tryParse(parts[1].trim());
+      if (lat != null && lng != null) {
+        return LatLng(lat, lng);
+      }
+    }
+    return null; // Returns null if it was a text address like "Webex Meeting"
+  }
+
   Future<void> _initialize() async {
-    // 1. Check Internet Connection
     final connectivityResult = await Connectivity().checkConnectivity();
     _hasInternet = !connectivityResult.contains(ConnectivityResult.none);
 
-    // 2. Try to get rough GPS position
-    await _determinePosition();
+    // 1. Try to load the passed-in location first
+    _selectedPosition = _parseInitialLocation();
+
+    // 2. If no valid coordinates were passed, get the GPS location
+    if (_selectedPosition != null) {
+       _currentPosition = _selectedPosition; 
+    } else {
+       await _determinePosition();
+    }
 
     setState(() {
       _isLoading = false;
@@ -50,10 +73,11 @@ class _LocationPickerState extends State<LocationPicker> {
 
     Position position = await Geolocator.getCurrentPosition(
       locationSettings: LocationSettings(accuracy: LocationAccuracy.medium),
-    ); // Medium is faster
-
+    );
     _currentPosition = LatLng(position.latitude, position.longitude);
-    _selectedPosition = _currentPosition;
+    
+    // Only set selected position to current if we didn't pass one in
+    _selectedPosition ??= _currentPosition;
   }
 
   @override
@@ -70,16 +94,23 @@ class _LocationPickerState extends State<LocationPicker> {
             IconButton(
               icon: const Icon(Icons.check),
               onPressed: () {
-                // Return string format: "Lat, Lng"
-                Navigator.pop(
-                  context,
-                  "${_selectedPosition!.latitude.toStringAsFixed(5)}, ${_selectedPosition!.longitude.toStringAsFixed(5)}",
-                );
+                Navigator.pop(context, "${_selectedPosition!.latitude.toStringAsFixed(5)}, ${_selectedPosition!.longitude.toStringAsFixed(5)}");
               },
-            ),
+            )
         ],
       ),
       body: _hasInternet ? _buildOnlineMap() : _buildOfflineFallback(),
+      // Add a quick FAB so users can jump back to their physical GPS location
+      floatingActionButton: _hasInternet ? FloatingActionButton(
+        onPressed: () async {
+          await _determinePosition();
+          if (_currentPosition != null) {
+            _mapController.move(_currentPosition!, 15.0);
+            setState(() => _selectedPosition = _currentPosition);
+          }
+        },
+        child: const Icon(Icons.my_location),
+      ) : null,
     );
   }
 
@@ -87,8 +118,8 @@ class _LocationPickerState extends State<LocationPicker> {
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
-        initialCenter: _currentPosition ?? const LatLng(0, 0),
-        initialZoom: _currentPosition == null ? 2.0 : 15.0,
+        initialCenter: _selectedPosition ?? const LatLng(0, 0),
+        initialZoom: _selectedPosition == null ? 2.0 : 15.0,
         onTap: (tapPosition, point) {
           setState(() => _selectedPosition = point);
         },
@@ -96,18 +127,20 @@ class _LocationPickerState extends State<LocationPicker> {
       children: [
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'io.github.benji377.timety',
+          userAgentPackageName: 'com.yourdomain.todoapp',
+        ),
+        // OFFICIAL OSM ATTRIBUTION
+        const RichAttributionWidget(
+          attributions: [
+            TextSourceAttribution('© OpenStreetMap contributors'),
+          ],
         ),
         if (_selectedPosition != null)
           MarkerLayer(
             markers: [
               Marker(
                 point: _selectedPosition!,
-                child: const Icon(
-                  Icons.location_pin,
-                  color: Colors.red,
-                  size: 40,
-                ),
+                child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
               ),
             ],
           ),

@@ -1,4 +1,5 @@
-enum Priority { low, medium, high }
+enum Priority { low, medium, high, veryHigh }
+enum Size { small, medium, large, veryLarge }
 
 class Task {
   final String id;
@@ -9,6 +10,7 @@ class Task {
   final Priority priority;
   final List<DateTime> reminders;
   final String category; 
+  final Size size;
   bool isCompleted;
 
   Task({
@@ -17,7 +19,8 @@ class Task {
     this.description = "",
     this.dueDate,
     this.location = "",
-    this.priority = Priority.low,
+    this.priority = Priority.medium,
+    this.size = Size.medium,
     this.reminders = const [],
     this.category = "",
     this.isCompleted = false,
@@ -35,6 +38,7 @@ class Task {
       'reminders': reminders.map((e) => e.toIso8601String()).toList(),
       'category': category,
       'isCompleted': isCompleted,
+      'size': size.name,
     };
   }
 
@@ -45,6 +49,7 @@ class Task {
         dueDate: json['dueDate'] != "" ? DateTime.parse(json['dueDate']) : null,
         location: json['location'],
         priority: Priority.values.firstWhere((p) => p.name == json['priority']),
+        size: Size.values.firstWhere((s) => s.name == json['size']),
         // Cast to List and map back to DateTime
         reminders: (json['reminders'] as List)
             .map((e) => DateTime.parse(e as String))
