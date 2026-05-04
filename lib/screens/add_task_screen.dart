@@ -23,6 +23,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final List<DateTime> _reminders = [];
   String _category = "";
 
+  final List<String> _reminderOptions = [
+    'On time',
+    '30 minutes before',
+    '1 hour before',
+    '1 day before',
+    'Custom',
+  ];
+  String _selectedReminderOption = '30 minutes before';
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -33,15 +42,117 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   }
 
   Future<void> _pickDueDate() async {
+    // 1. Pick the Date
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    // Stop if user canceled
+    if (pickedDate == null || !mounted) return;
+
+    // 2. Pick the Time
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_dueDate ?? DateTime.now()),
+    );
+
+    // Stop if user canceled time
+    if (pickedTime == null) return;
+
+    // 3. Merge them together
+    setState(() {
+      _dueDate = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
+  }
+
+  Future<void> _addReminder() async {
+    DateTime? reminderTime;
+
+    if (_selectedReminderOption == 'Custom') {
+      reminderTime = await _pickCustomReminderTime();
+    } else {
+      // Relative reminders require a due date!
+      if (_dueDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Please set a Due Date first to use relative reminders.',
+            ),
+          ),
+        );
+        return;
+      }
+
+      // Calculate relative times
+      if (_selectedReminderOption == 'On time') {
+        reminderTime = _dueDate!;
+      } else if (_selectedReminderOption == '30 minutes before') {
+        reminderTime = _dueDate!.subtract(const Duration(minutes: 30));
+      } else if (_selectedReminderOption == '1 hour before') {
+        reminderTime = _dueDate!.subtract(const Duration(hours: 1));
+      } else if (_selectedReminderOption == '1 day before') {
+        reminderTime = _dueDate!.subtract(const Duration(days: 1));
+      }
+    }
+
+    if (reminderTime != null) {
+      setState(() {
+        // Prevent exact duplicates
+        if (!_reminders.contains(reminderTime)) {
+          _reminders.add(reminderTime!);
+          _reminders.sort(); // Keep them in chronological order
+        }
+      });
+    }
+  }
+
+  // Function to handle the 'Custom' option
+  Future<DateTime?> _pickCustomReminderTime() async {
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
+      // Max date is the due date (if it exists), otherwise year 2100
+      lastDate: _dueDate ?? DateTime(2100),
     );
-    if (pickedDate != null) {
-      setState(() => _dueDate = pickedDate);
+    if (pickedDate == null || !mounted) return null;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (pickedTime == null) return null;
+
+    final customDateTime = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    // Final safety check if Due Date is set
+    if (_dueDate != null && customDateTime.isAfter(_dueDate!)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Custom reminder must be before the Due Date.'),
+          ),
+        );
+      }
+      return null;
     }
+
+    return customDateTime;
   }
 
   @override
@@ -133,6 +244,64 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             trailing: const Icon(Icons.calendar_today),
             onTap: _pickDueDate,
           ),
+          const SizedBox(height: 16),
+
+          // Reminders Section
+          const Text(
+            'Reminders',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  initialValue: _selectedReminderOption,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _reminderOptions.map((String option) {
+                    return DropdownMenuItem(value: option, child: Text(option));
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => _selectedReminderOption = val);
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: _addReminder,
+                icon: const Icon(Icons.add_alarm),
+                label: const Text('Add'),
+              ),
+            ],
+          ),
+
+          // Display the list of added reminders as Chips
+          if (_reminders.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Wrap(
+                spacing: 8.0,
+                children: _reminders.map((reminder) {
+                  // Format: YYYY-MM-DD HH:MM
+                  final formattedString =
+                      "${reminder.year}-${reminder.month.toString().padLeft(2, '0')}-${reminder.day.toString().padLeft(2, '0')} ${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')}";
+
+                  return Chip(
+                    label: Text(
+                      formattedString,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    deleteIcon: const Icon(Icons.close, size: 16),
+                    onDeleted: () {
+                      setState(() => _reminders.remove(reminder));
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
           const SizedBox(height: 16),
 
           // Category Chips Input
