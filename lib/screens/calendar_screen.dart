@@ -438,8 +438,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     int nonFocusSeconds =
                                         totalElapsedSeconds -
                                         session.totalSecondsFocused;
-                                    if (nonFocusSeconds > 0)
+                                    if (nonFocusSeconds > 0) {
                                       restMins = nonFocusSeconds ~/ 60;
+                                    }
                                   }
 
                                   return Card(
