@@ -10,7 +10,7 @@ class HiveTaskRepository implements TaskRepository {
   Future<List<Task>> fetchTasks() async {
     // Open the box (if it's already open, this just returns it instantly)
     final box = await Hive.openBox<Task>(boxName);
-    
+
     // Hive returns an Iterable, so we convert it to a List
     return box.values.toList();
   }
@@ -18,10 +18,22 @@ class HiveTaskRepository implements TaskRepository {
   @override
   Future<void> saveTasks(List<Task> tasks) async {
     final box = await Hive.openBox<Task>(boxName);
-    
-    // Clear old data and save the new list. 
-    // TODO: optimize this to only save/update individual tasks!
-    await box.clear();
-    await box.addAll(tasks);
+
+    // 1. Convert the List into a Map where the Key is the Task ID
+    final Map<String, Task> taskMap = {for (var t in tasks) t.id: t};
+
+    // 2. Find any keys in the database that are NOT in the new list (meaning the user deleted them)
+    final keysToDelete = box.keys
+        .where((key) => !taskMap.containsKey(key))
+        .toList();
+
+    // 3. Batch delete removed tasks
+    if (keysToDelete.isNotEmpty) {
+      await box.deleteAll(keysToDelete);
+    }
+
+    // 4. Batch update/insert remaining tasks.
+    // Because we use t.id as the key, Hive will only overwrite tasks that actually changed!
+    await box.putAll(taskMap);
   }
 }

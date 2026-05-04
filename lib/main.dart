@@ -12,14 +12,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
-  
+
   // 2. Register our generated Adapters
   Hive.registerAdapter(TaskAdapter());
   Hive.registerAdapter(PriorityAdapter());
   Hive.registerAdapter(SizeAdapter());
 
-
   await NotificationService.instance.init();
+  await NotificationService.instance.scheduleDailyMotivation();
 
   runApp(const TimetyApp());
 }

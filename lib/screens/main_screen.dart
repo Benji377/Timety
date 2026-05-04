@@ -13,8 +13,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // We default to index 2 (Tasks) so the app opens right to the to-do list
-  int _currentIndex = 2; 
+  // We default to index 0 (Home) so the app opens right to the home screen
+  int _currentIndex = 0;
 
   // The list of pages to show
   final List<Widget> _pages = const [
@@ -28,10 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // IndexedStack keeps the state of all pages alive
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -40,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
           });
         },
         // 'fixed' ensures the labels always show and the background doesn't shift
-        type: BottomNavigationBarType.fixed, 
+        type: BottomNavigationBarType.fixed,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
         items: const [

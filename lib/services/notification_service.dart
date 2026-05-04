@@ -108,6 +108,53 @@ class NotificationService {
     // --- WEB GUARD ---
     if (kIsWeb) return;
 
-    // TODO: Implement daily motivation scheduling logic here
+    // 1. Set the time you want it to fire (e.g., 8:00 AM)
+    final now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      8,
+      0,
+    );
+
+    // If it's already past 8:00 AM today, schedule for tomorrow
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    // 2. A fun list of rotating quotes!
+    final quotes = [
+      "Conquer your day! 🚀",
+      "Small steps lead to big results. Keep going! 💪",
+      "What's on the agenda today? Let's make it happen.",
+      "Clear your mind, organize your tasks.",
+      "You have a 100% track record of surviving bad days.",
+    ];
+    // Use the day of the year to pick a pseudo-random quote that changes daily
+    final quote = quotes[now.day % quotes.length];
+
+    // 3. Schedule the recurring alarm
+    await _notificationsPlugin.zonedSchedule(
+      id: 9999, // Reserved ID for daily motivation
+      title: 'Good Morning!',
+      body: quote,
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'daily_motivation_channel',
+          'Daily Motivation',
+          channelDescription: 'Your daily morning boost',
+          importance: Importance
+              .defaultImportance, // Doesn't need to be MAX like a task alarm
+          priority: Priority.defaultPriority,
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
   }
 }
