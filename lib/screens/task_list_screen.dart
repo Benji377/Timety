@@ -286,8 +286,11 @@ class _TodoListScreenState extends State<TodoListScreen> {
                     final dueDay = DateTime(task.dueDate!.year, task.dueDate!.month, task.dueDate!.day);
                     if (dueDay.isBefore(today)) {
                       overdue.add(task);
-                    } else if (dueDay.isAtSameMomentAs(today)) dueToday.add(task);
-                    else todo.add(task);
+                    } else if (dueDay.isAtSameMomentAs(today)) {
+                      dueToday.add(task);
+                    } else {
+                      todo.add(task);
+                    }
                   } else {
                     todo.add(task);
                   }

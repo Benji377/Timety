@@ -3,9 +3,13 @@ import 'screens/task_list_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/task_provider.dart';
 import 'data/task_repository_local.dart';
+import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.instance.init();
+
   runApp(const TimetyApp());
 }
 

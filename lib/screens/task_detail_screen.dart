@@ -211,7 +211,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<Priority>(
-                    value: _priority,
+                    initialValue: _priority,
                     decoration: const InputDecoration(labelText: 'Priority', border: OutlineInputBorder()),
                     items: Priority.values.map((Priority p) {
                       return DropdownMenuItem<Priority>(
@@ -233,7 +233,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<Size>(
-                    value: _size,
+                    initialValue: _size,
                     decoration: const InputDecoration(labelText: 'Size', border: OutlineInputBorder()),
                     items: Size.values.map((Size s) {
                       return DropdownMenuItem<Size>(
@@ -305,7 +305,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedReminderOption,
+                      initialValue: _selectedReminderOption,
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.alarm),
                         border: OutlineInputBorder(),
