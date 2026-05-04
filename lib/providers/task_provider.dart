@@ -63,6 +63,13 @@ class TaskProvider extends ChangeNotifier {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
       _tasks[index].isCompleted = !_tasks[index].isCompleted;
+
+      if (_tasks[index].isCompleted) {
+        _tasks[index].completedAt = DateTime.now();
+      } else {
+        _tasks[index].completedAt = null;
+      }
+
       _syncTaskReminders(_tasks[index]);
       await repository.saveTasks(_tasks);
       notifyListeners();
@@ -74,7 +81,9 @@ class TaskProvider extends ChangeNotifier {
     final task = _tasks.firstWhere((t) => t.id == id);
     // Cancel all before removing
     for (var reminder in task.reminders) {
-      NotificationService.instance.cancelNotification(_generateNotificationId(task.id, reminder));
+      NotificationService.instance.cancelNotification(
+        _generateNotificationId(task.id, reminder),
+      );
     }
     _tasks.removeWhere((task) => task.id == id);
     await repository.saveTasks(_tasks);

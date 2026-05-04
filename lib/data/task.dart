@@ -1,19 +1,37 @@
-enum Priority { low, medium, high, veryHigh }
-enum Size { small, medium, large, veryLarge }
+import 'package:hive/hive.dart';
 
+part 'task.g.dart';
+
+@HiveType(typeId: 1)
+enum Priority { 
+  @HiveField(0) low, 
+  @HiveField(1) medium, 
+  @HiveField(2) high, 
+  @HiveField(3) veryHigh 
+}
+
+@HiveType(typeId: 2)
+enum Size { 
+  @HiveField(0) small, 
+  @HiveField(1) medium, 
+  @HiveField(2) large, 
+  @HiveField(3) veryLarge 
+}
+
+@HiveType(typeId: 0)
 class Task {
-  final String id;
-  final String title;
-  final String description;
-  final DateTime? dueDate;
-  final String location;
-  final Priority priority;
-  final List<DateTime> reminders;
-  final String category; 
-  final Size size;
-  bool isCompleted;
-  DateTime? completedAt;
-  final DateTime createdAt;
+  @HiveField(0) final String id;
+  @HiveField(1) final String title;
+  @HiveField(2) final String description;
+  @HiveField(3) final DateTime? dueDate;
+  @HiveField(4) final String location;
+  @HiveField(5) final Priority priority;
+  @HiveField(6) final List<DateTime> reminders;
+  @HiveField(7) final String category; 
+  @HiveField(8) final Size size;
+  @HiveField(9) bool isCompleted;
+  @HiveField(10) DateTime? completedAt;
+  @HiveField(11) final DateTime createdAt;
 
   Task({
     required this.id,
