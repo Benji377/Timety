@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
-import '../widgets/add_task_dialog.dart';
 import '../widgets/app_dialogs.dart';
+import 'add_task_screen.dart';
 import 'task_detail_screen.dart';
 
 
@@ -86,16 +86,11 @@ class _TodoListScreenState extends State<TodoListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-// Show the custom dialog
-          showDialog(
-            context: context,
-            builder: (context) => AddTaskDialog(
-              onAdd: (title, description) {
-                context.read<TaskProvider>().addTask(title, description);
-              },
-            ),
-          );
-        },
+        Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddTaskScreen()),
+            );
+          },
         child: const Icon(Icons.add),
       ),
     );

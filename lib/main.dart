@@ -17,7 +17,7 @@ class TimetyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => TaskProvider(repository: LocalTaskRepository()),
       child: MaterialApp(
-        title: 'Flutter Todo',
+        title: 'Timety',
         theme: AppTheme.lightTheme,
         home: const TodoListScreen(),
       ),

@@ -17,9 +17,8 @@ class TaskProvider extends ChangeNotifier {
   }
 
   // Add a new Task
-  Future<void> addTask(String title, String description) async {
-    final newTask = Task(id: DateTime.now().toString(), title: title, description: description);
-    _tasks.add(newTask);
+  Future<void> addTask(Task task) async {
+    _tasks.add(task);
     await repository.saveTasks(_tasks);
     notifyListeners();
   }
