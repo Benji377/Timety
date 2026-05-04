@@ -10,14 +10,14 @@ import 'task_stats_screen.dart';
 
 enum SortOption { dueDate, priority, size, alphabetical, category }
 
-class TodoListScreen extends StatefulWidget {
-  const TodoListScreen({super.key});
+class TaskListScreen extends StatefulWidget {
+  const TaskListScreen({super.key});
 
   @override
-  State<TodoListScreen> createState() => _TodoListScreenState();
+  State<TaskListScreen> createState() => _TaskListScreenState();
 }
 
-class _TodoListScreenState extends State<TodoListScreen> {
+class _TaskListScreenState extends State<TaskListScreen> {
   // --- Search & Sort State ---
   String _searchQuery = '';
   SortOption _sortOption = SortOption.dueDate;

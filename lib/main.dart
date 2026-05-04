@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:timety/screens/main_screen.dart';
 import 'data/task.dart';
-import 'screens/task_list_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/task_provider.dart';
 import 'data/task_repository_hive.dart';
@@ -34,7 +34,7 @@ class TimetyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Timety',
         theme: AppTheme.lightTheme,
-        home: const TodoListScreen(),
+        home: const MainScreen(),
       ),
     );
   }
