@@ -78,6 +78,7 @@ class FocusProvider extends ChangeNotifier {
     }
 
     _activeMode = _modes.firstWhere((m) => m.id == 'system_stopwatch');
+    _setupPhase(0);
     notifyListeners();
   }
 
@@ -86,6 +87,7 @@ class FocusProvider extends ChangeNotifier {
   void setActiveMode(FocusMode mode) {
     if (_isRunning) return;
     _activeMode = mode;
+    _setupPhase(0);
     notifyListeners();
   }
 
@@ -121,6 +123,7 @@ class FocusProvider extends ChangeNotifier {
     if (_activeMode?.type == FocusModeType.flexible && !_isRunning) {
       final clamped = minutes > 120 ? 120 : minutes;
       _activeMode!.phases.first.durationMinutes = clamped;
+      _secondsRemainingInPhase = clamped * 60;
       notifyListeners();
     }
   }
@@ -206,7 +209,7 @@ class FocusProvider extends ChangeNotifier {
     _currentSession = null;
     _currentSecondsFocussed = 0;
     _currentPhaseIndex = 0;
-
+    _setupPhase(0);
     notifyListeners();
   }
 
@@ -217,6 +220,7 @@ class FocusProvider extends ChangeNotifier {
     _currentSession = null;
     _currentSecondsFocussed = 0;
     _currentPhaseIndex = 0;
+    _setupPhase(0);
     notifyListeners();
   }
 

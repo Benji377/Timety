@@ -124,8 +124,8 @@ class FocusScreen extends StatelessWidget {
     bool isFlexibleMode = activeMode?.type == FocusModeType.flexible;
     bool canDrag = isFlexibleMode && !isRunning && !isPaused;
 
-    int currentMinutes = 25;
-    int maxMinutes = 120;
+    double gaugeProgress = 1.0;
+    bool isStopwatchMode = false;
     String label = "FOCUS";
     String centerText = "25:00";
 
@@ -133,19 +133,30 @@ class FocusScreen extends StatelessWidget {
       final currentPhase = activeMode.phases[focusProvider.currentPhaseIndex];
 
       if (canDrag) {
-        currentMinutes = currentPhase.durationMinutes == -1
+        int currentMinutes = currentPhase.durationMinutes == -1
             ? 25
             : currentPhase.durationMinutes;
+        gaugeProgress = currentMinutes / 120.0; // Max 120 mins
         label = "SET TIME";
         centerText = _formatDigitalTime(currentMinutes * 60);
-      } else if (currentPhase.durationMinutes > 0) {
-        currentMinutes = (focusProvider.secondsRemainingInPhase / 60).ceil();
-        maxMinutes = currentPhase.durationMinutes;
+      } else if (currentPhase.durationMinutes > 0 ||
+          currentPhase.durationMinutes == -1) {
+        // Countdown Modes (Pomodoro, Running Flexible)
+        int totalPhaseSeconds = currentPhase.durationMinutes > 0
+            ? currentPhase.durationMinutes * 60
+            : 25 * 60;
+        if (totalPhaseSeconds == 0) totalPhaseSeconds = 1; // Safety
+
+        // As time decreases, this goes from 1.0 (Full) down to 0.0 (Empty)
+        gaugeProgress =
+            focusProvider.secondsRemainingInPhase / totalPhaseSeconds;
+
         label = currentPhase.type == PhaseType.rest ? "REST" : "FOCUS";
         centerText = _formatDigitalTime(focusProvider.secondsRemainingInPhase);
       } else {
-        currentMinutes = (focusProvider.currentSecondsFocussed / 60).floor();
-        maxMinutes = 0;
+        // Stopwatch Mode
+        isStopwatchMode = isRunning; // Only animate when it's actually playing
+        gaugeProgress = 0.0;
         label = "STOPWATCH";
         centerText = _formatDigitalTime(focusProvider.currentSecondsFocussed);
       }
@@ -160,26 +171,16 @@ class FocusScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      // RESTORED APP BAR
       appBar: AppBar(
         title: const Text('Focus'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: 'Statistics',
-            onPressed: () {}, // TODO: Navigate to Statistics
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_month),
-            tooltip: 'Calendar',
-            onPressed: () {}, // TODO: Navigate to Calendar
-          ),
+          IconButton(icon: const Icon(Icons.calendar_month), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.bar_chart), onPressed: () {}),
           const SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
-          // --- TOP RIGHT: DAILY TARGET ---
           Align(
             alignment: Alignment.topRight,
             child: Padding(
@@ -196,7 +197,6 @@ class FocusScreen extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // --- CAROUSEL MODE SELECTOR ---
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -233,20 +233,17 @@ class FocusScreen extends StatelessWidget {
 
           const Spacer(),
 
-          // --- GAUGE & SIDE BUTTONS IN A RESTRICTED STACK ---
           SizedBox(
             height: 320,
-            width: 600,
+            width: 550,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Center Gauge
                 InteractiveGauge(
                   key: ValueKey(activeMode?.id),
-                  maxMinutes: maxMinutes,
-                  initialMinutes: currentMinutes,
+                  progress: gaugeProgress,
+                  isStopwatch: isStopwatchMode,
                   centerText: centerText,
-
                   bottomText: focusProvider.selectedTag?.name ?? "No Tag",
                   bottomTextColor: focusProvider.selectedTag != null
                       ? Color(focusProvider.selectedTag!.colorValue)
@@ -254,17 +251,17 @@ class FocusScreen extends StatelessWidget {
                   onBottomTextTapped: (isRunning || isPaused)
                       ? null
                       : () => _showTagSelector(context, focusProvider),
-
                   isInteractive: canDrag,
                   label: label,
-                  onChanged: (newMinutes) {
-                    if (canDrag && newMinutes > 0) {
-                      focusProvider.setFlexibleDuration(newMinutes);
+                  onChanged: (newProgress) {
+                    // Convert the 0.0 - 1.0 progress back into minutes (max 120)
+                    if (canDrag) {
+                      int newMins = (newProgress * 120).round();
+                      if (newMins < 1) newMins = 1;
+                      focusProvider.setFlexibleDuration(newMins);
                     }
                   },
                 ),
-
-                // Left Button (History) - Fixed strictly to the left edge of the 380px box
                 Positioned(
                   left: 0,
                   child: IconButton.filledTonal(
@@ -274,8 +271,6 @@ class FocusScreen extends StatelessWidget {
                     onPressed: (isRunning || isPaused) ? null : () {},
                   ),
                 ),
-
-                // Right Button (Distraction) - Fixed strictly to the right edge of the 380px box
                 Positioned(
                   right: 0,
                   child: IconButton.filledTonal(
@@ -289,7 +284,6 @@ class FocusScreen extends StatelessWidget {
             ),
           ),
 
-          // --- TIMELINE WIDGET ---
           ModeTimeline(
             phases: activeMode?.phases ?? [],
             currentPhaseIndex: focusProvider.currentPhaseIndex,
@@ -298,7 +292,6 @@ class FocusScreen extends StatelessWidget {
 
           const Spacer(),
 
-          // --- BOTTOM CONTROLS ---
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -313,9 +306,7 @@ class FocusScreen extends StatelessWidget {
                       : null,
                 ),
               ),
-
               const SizedBox(width: 32),
-
               SizedBox(
                 height: 80,
                 width: 80,
@@ -341,9 +332,7 @@ class FocusScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(width: 32),
-
               Opacity(
                 opacity: (isRunning || isPaused) ? 1.0 : 0.0,
                 child: IconButton(
