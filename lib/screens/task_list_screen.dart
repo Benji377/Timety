@@ -391,6 +391,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "task_list_add_button",
         onPressed: () {
           Navigator.push(
             context,

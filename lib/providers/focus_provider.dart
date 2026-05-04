@@ -51,9 +51,9 @@ class FocusProvider extends ChangeNotifier {
     if (_tags.isEmpty) {
       // Create a default tag so it isn't empty
       final defaultTag = FocusTag(
-        id: 'empty_tag',
+        id: 'default_tag',
         name: 'None',
-        colorValue: Colors.blue.toARGB32(),
+        colorValue: Colors.green.toARGB32(),
       );
       await repository.saveTag(defaultTag);
       _tags.add(defaultTag);

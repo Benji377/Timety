@@ -102,6 +102,7 @@ class _LocationPickerState extends State<LocationPicker> {
       body: _hasInternet ? _buildOnlineMap() : _buildOfflineFallback(),
       // Add a quick FAB so users can jump back to their physical GPS location
       floatingActionButton: _hasInternet ? FloatingActionButton(
+        heroTag: "gps_button",
         onPressed: () async {
           await _determinePosition();
           if (_currentPosition != null) {

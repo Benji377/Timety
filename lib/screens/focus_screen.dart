@@ -4,6 +4,7 @@ import '../providers/focus_provider.dart';
 import '../data/focus_models.dart';
 import '../widgets/interactive_gauge.dart';
 import '../widgets/focus_mode_timeline.dart';
+import 'calendar_screen.dart';
 
 class FocusScreen extends StatelessWidget {
   const FocusScreen({super.key});
@@ -174,8 +175,17 @@ class FocusScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Focus'),
         actions: [
-          IconButton(icon: const Icon(Icons.calendar_month), onPressed: () {}),
           IconButton(icon: const Icon(Icons.bar_chart), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            tooltip: 'Calendar View',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CalendarScreen()),
+              );
+            },
+          ),
           const SizedBox(width: 8),
         ],
       ),
@@ -311,6 +321,7 @@ class FocusScreen extends StatelessWidget {
                 height: 80,
                 width: 80,
                 child: FloatingActionButton(
+                  heroTag: "focus_main_button",
                   shape: const CircleBorder(),
                   elevation: 4,
                   backgroundColor: isRunning
