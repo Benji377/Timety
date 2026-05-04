@@ -1,3 +1,4 @@
+// lib/screens/task_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,10 +10,14 @@ import '../utils/date_time_picker.dart';
 import '../widgets/location_picker.dart';
 
 class TaskDetailScreen extends StatefulWidget {
-  final Task task;
+  final Task? task; // NULL means "Create New Task", NOT NULL means "View/Edit"
   final bool isEditing;
 
-  const TaskDetailScreen({super.key, required this.task, required this.isEditing});
+  const TaskDetailScreen({
+    super.key, 
+    this.task, 
+    this.isEditing = false, // Default to false, but we'll override if task is null
+  });
 
   @override
   State<TaskDetailScreen> createState() => _TaskDetailScreenState();
@@ -20,6 +25,7 @@ class TaskDetailScreen extends StatefulWidget {
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late bool _isEditing;
+  late bool _isNewTask;
   
   // Controllers
   late TextEditingController _titleController;
@@ -35,28 +41,27 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late List<DateTime> _reminders;
 
   final List<String> _reminderOptions = [
-    'On time',
-    '30 minutes before',
-    '1 hour before',
-    '1 day before',
-    'Custom',
+    'On time', '30 minutes before', '1 hour before', '1 day before', 'Custom',
   ];
   String _selectedReminderOption = '30 minutes before';
 
   @override
   void initState() {
     super.initState();
-    _isEditing = widget.isEditing;
-    _titleController = TextEditingController(text: widget.task.title);
-    _descController = TextEditingController(text: widget.task.description);
-    _locationController = TextEditingController(text: widget.task.location);
+    _isNewTask = widget.task == null;
+    // If it's a new task, force edit mode to true
+    _isEditing = _isNewTask ? true : widget.isEditing;
     
-    _priority = widget.task.priority;
-    _size = widget.task.size; // Assuming you added Size to Task model
-    _dueDate = widget.task.dueDate;
-    _category = widget.task.category;
-    // Create a mutable copy of the reminders list
-    _reminders = List.from(widget.task.reminders); 
+    // Initialize with existing data OR defaults
+    _titleController = TextEditingController(text: widget.task?.title ?? '');
+    _descController = TextEditingController(text: widget.task?.description ?? '');
+    _locationController = TextEditingController(text: widget.task?.location ?? '');
+    
+    _priority = widget.task?.priority ?? Priority.medium;
+    _size = widget.task?.size ?? Size.medium;
+    _dueDate = widget.task?.dueDate;
+    _category = widget.task?.category ?? "";
+    _reminders = widget.task != null ? List.from(widget.task!.reminders) : []; 
   }
 
   @override
@@ -68,7 +73,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     super.dispose();
   }
 
-  // --- HELPERS ---
+  // --- LOGIC HELPERS (Now shared for both Add and Edit!) ---
   LatLng? _parseLocation() {
     if (_locationController.text.isEmpty) return null;
     final parts = _locationController.text.split(',');
@@ -105,18 +110,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       );
 
       if (reminderTime != null && _dueDate != null && reminderTime.isAfter(_dueDate!)) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Custom reminder must be before the Due Date.')),
-          );
-        }
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Custom reminder must be before the Due Date.')));
         return;
       }
     } else {
       if (_dueDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please set a Due Date first.')),
-        );
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please set a Due Date first.')));
         return;
       }
       if (_selectedReminderOption == 'On time') {
@@ -140,19 +139,58 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     }
   }
 
+  // Master Save Logic
+  void _saveTask() {
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Title is required!')));
+      return;
+    }
+
+    final taskToSave = Task(
+      id: _isNewTask ? DateTime.now().toString() : widget.task!.id, // Generate ID if new, keep if old
+      title: _titleController.text.trim(),
+      description: _descController.text.trim(),
+      location: _locationController.text.trim(),
+      priority: _priority,
+      size: _size,
+      dueDate: _dueDate,
+      category: _category,
+      reminders: _reminders,
+      isCompleted: _isNewTask ? false : widget.task!.isCompleted,
+    );
+
+    if (_isNewTask) {
+      context.read<TaskProvider>().addTask(taskToSave);
+      Navigator.pop(context); // Leave screen entirely after adding
+    } else {
+      context.read<TaskProvider>().updateTask(taskToSave);
+      setState(() => _isEditing = false); // Just exit edit mode
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mapCenter = _parseLocation();
+    
+    // Dynamic App Bar Title
+    String appBarTitle = _isNewTask ? "Create New Task" : (_isEditing ? "Edit Task" : "Task Details");
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? "Edit Task" : "Task Details"),
+        title: Text(appBarTitle),
         actions: [
+          // If viewing an existing task, show the edit button.
           if (!_isEditing)
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => setState(() => _isEditing = true),
             ),
+          // If we are creating a brand new task, put the checkmark at the top right for convenience
+          if (_isNewTask)
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: _saveTask,
+            )
         ],
       ),
       body: ListView(
@@ -391,7 +429,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ),
           ),
 
-          // The read-only mini map preview
           if (mapCenter != null)
             Container(
               height: 150,
@@ -428,8 +465,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             
           const SizedBox(height: 32),
 
-          // 7. SAVE BUTTON (Only in Edit Mode)
-          if (_isEditing)
+          // 7. SAVE BUTTON (Only show dialog if editing an existing task, otherwise just save)
+          if (_isEditing && !_isNewTask)
             ElevatedButton.icon(
               icon: const Icon(Icons.save),
               onPressed: () {
@@ -439,27 +476,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     title: const Text('Confirm Save'),
                     content: const Text('Are you sure you want to save changes to this task?'),
                     actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Cancel'),
-                      ),
+                      TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
                       ElevatedButton(
                         onPressed: () {
-                          final updatedTask = Task(
-                            id: widget.task.id, // Keep original ID
-                            title: _titleController.text.trim(),
-                            description: _descController.text.trim(),
-                            location: _locationController.text.trim(),
-                            priority: _priority,
-                            size: _size,
-                            dueDate: _dueDate,
-                            category: _category,
-                            reminders: _reminders,
-                            isCompleted: widget.task.isCompleted,
-                          );
-                          context.read<TaskProvider>().updateTask(updatedTask);
                           Navigator.of(ctx).pop(); 
-                          setState(() => _isEditing = false); 
+                          _saveTask();
                         },
                         child: const Text('Save'),
                       ),

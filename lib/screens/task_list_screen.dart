@@ -4,7 +4,6 @@ import '../data/task.dart';
 import '../utils/utils.dart';
 import '../providers/task_provider.dart';
 import '../widgets/app_dialogs.dart';
-import 'add_task_screen.dart';
 import 'task_detail_screen.dart';
 
 enum SortOption { dueDate, priority, size, alphabetical, category }
@@ -37,7 +36,11 @@ class _TodoListScreenState extends State<TodoListScreen> {
     if (task.dueDate != null) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      final dueDay = DateTime(task.dueDate!.year, task.dueDate!.month, task.dueDate!.day);
+      final dueDay = DateTime(
+        task.dueDate!.year,
+        task.dueDate!.month,
+        task.dueDate!.day,
+      );
       if (dueDay.isBefore(today)) return Colors.red;
       if (dueDay.isAtSameMomentAs(today)) return Colors.amber.shade600;
     }
@@ -50,8 +53,8 @@ class _TodoListScreenState extends State<TodoListScreen> {
     var processed = rawTasks.where((task) {
       if (_searchQuery.isEmpty) return true;
       final q = _searchQuery.toLowerCase();
-      return task.title.toLowerCase().contains(q) || 
-             task.description.toLowerCase().contains(q);
+      return task.title.toLowerCase().contains(q) ||
+          task.description.toLowerCase().contains(q);
     }).toList();
 
     // 2. Sort
@@ -153,7 +156,11 @@ class _TodoListScreenState extends State<TodoListScreen> {
                       const SizedBox(width: 4),
                       Text(
                         "${task.dueDate!.month.toString().padLeft(2, '0')}/${task.dueDate!.day.toString().padLeft(2, '0')} ${task.dueDate!.hour.toString().padLeft(2, '0')}:${task.dueDate!.minute.toString().padLeft(2, '0')}",
-                        style: TextStyle(fontSize: 12, color: borderColor, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: borderColor,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -163,7 +170,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(AppUtils().getSizeEmoji(task.size), style: const TextStyle(fontSize: 18)),
+              Text(
+                AppUtils().getSizeEmoji(task.size),
+                style: const TextStyle(fontSize: 18),
+              ),
               const SizedBox(width: 8),
               AppUtils().getPriorityIcon(task.priority),
             ],
@@ -171,7 +181,9 @@ class _TodoListScreenState extends State<TodoListScreen> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => TaskDetailScreen(task: task, isEditing: false)),
+              MaterialPageRoute(
+                builder: (_) => TaskDetailScreen(task: task, isEditing: false),
+              ),
             );
           },
         ),
@@ -180,7 +192,12 @@ class _TodoListScreenState extends State<TodoListScreen> {
   }
 
   // --- ACCORDION BUILDER ---
-  Widget _buildAccordion(String title, Color color, List<Task> tasks, {bool initExpanded = true}) {
+  Widget _buildAccordion(
+    String title,
+    Color color,
+    List<Task> tasks, {
+    bool initExpanded = true,
+  }) {
     if (tasks.isEmpty) return const SizedBox.shrink(); // Hide if empty
 
     return Theme(
@@ -195,7 +212,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
             Icon(Icons.circle, size: 12, color: color),
             const SizedBox(width: 8),
             Text(
-              "$title (${tasks.length})", 
+              "$title (${tasks.length})",
               style: TextStyle(fontWeight: FontWeight.bold, color: color),
             ),
           ],
@@ -221,14 +238,16 @@ class _TodoListScreenState extends State<TodoListScreen> {
                     decoration: InputDecoration(
                       hintText: 'Search title or description...',
                       prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                     onChanged: (val) => setState(() => _searchQuery = val),
                   ),
                 ),
                 const SizedBox(width: 8),
-                
+
                 // Sort Dropdown
                 PopupMenuButton<SortOption>(
                   icon: const Icon(Icons.sort),
@@ -236,18 +255,36 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   onSelected: (SortOption result) {
                     setState(() => _sortOption = result);
                   },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<SortOption>>[
-                    const PopupMenuItem(value: SortOption.dueDate, child: Text('Due Date')),
-                    const PopupMenuItem(value: SortOption.priority, child: Text('Priority')),
-                    const PopupMenuItem(value: SortOption.size, child: Text('Size')),
-                    const PopupMenuItem(value: SortOption.category, child: Text('Category')),
-                    const PopupMenuItem(value: SortOption.alphabetical, child: Text('Alphabetical')),
-                  ],
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<SortOption>>[
+                        const PopupMenuItem(
+                          value: SortOption.dueDate,
+                          child: Text('Due Date'),
+                        ),
+                        const PopupMenuItem(
+                          value: SortOption.priority,
+                          child: Text('Priority'),
+                        ),
+                        const PopupMenuItem(
+                          value: SortOption.size,
+                          child: Text('Size'),
+                        ),
+                        const PopupMenuItem(
+                          value: SortOption.category,
+                          child: Text('Category'),
+                        ),
+                        const PopupMenuItem(
+                          value: SortOption.alphabetical,
+                          child: Text('Alphabetical'),
+                        ),
+                      ],
                 ),
-                
+
                 // Order Toggle (Asc/Desc)
                 IconButton(
-                  icon: Icon(_isAscending ? Icons.arrow_upward : Icons.arrow_downward),
+                  icon: Icon(
+                    _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                  ),
                   tooltip: _isAscending ? 'Ascending' : 'Descending',
                   onPressed: () => setState(() => _isAscending = !_isAscending),
                 ),
@@ -260,14 +297,18 @@ class _TodoListScreenState extends State<TodoListScreen> {
             child: Consumer<TaskProvider>(
               builder: (context, provider, child) {
                 if (provider.tasks.isEmpty) {
-                  return const Center(child: Text("No tasks yet! Tap + to add one."));
+                  return const Center(
+                    child: Text("No tasks yet! Tap + to add one."),
+                  );
                 }
 
                 // Apply pipeline
                 final processedTasks = _getProcessedTasks(provider.tasks);
 
                 if (processedTasks.isEmpty) {
-                  return const Center(child: Text("No tasks match your search."));
+                  return const Center(
+                    child: Text("No tasks match your search."),
+                  );
                 }
 
                 // Grouping Logic
@@ -283,7 +324,11 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   if (task.isCompleted) {
                     done.add(task);
                   } else if (task.dueDate != null) {
-                    final dueDay = DateTime(task.dueDate!.year, task.dueDate!.month, task.dueDate!.day);
+                    final dueDay = DateTime(
+                      task.dueDate!.year,
+                      task.dueDate!.month,
+                      task.dueDate!.day,
+                    );
                     if (dueDay.isBefore(today)) {
                       overdue.add(task);
                     } else if (dueDay.isAtSameMomentAs(today)) {
@@ -300,9 +345,18 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   padding: const EdgeInsets.only(bottom: 80), // Keep FAB clear
                   children: [
                     _buildAccordion("Overdue", Colors.red, overdue),
-                    _buildAccordion("Due Today", Colors.amber.shade700, dueToday),
+                    _buildAccordion(
+                      "Due Today",
+                      Colors.amber.shade700,
+                      dueToday,
+                    ),
                     _buildAccordion("To Do", Colors.blue, todo),
-                    _buildAccordion("Done", Colors.green, done, initExpanded: false), // Default Closed
+                    _buildAccordion(
+                      "Done",
+                      Colors.green,
+                      done,
+                      initExpanded: false,
+                    ), // Default Closed
                   ],
                 );
               },
@@ -314,7 +368,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddTaskScreen()),
+            MaterialPageRoute(builder: (context) => const TaskDetailScreen()),
           );
         },
         child: const Icon(Icons.add),
