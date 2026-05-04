@@ -1,22 +1,29 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import '../data/focus_models.dart';
+import '../data/focus_repository.dart';
 
 class FocusProvider extends ChangeNotifier {
-  static const String modeBoxName = 'focusModesBox';
-  static const String sessionBoxName = 'focusSessionsBox';
+  final FocusRepository repository;
 
+  // --- STATE ---
   List<FocusMode> _modes = [];
   List<FocusSession> _history = [];
   
   FocusMode? _activeMode;
   FocusSession? _currentSession;
   
+  Timer? _timer;
   bool _isRunning = false;
   bool _isPaused = false;
   int _currentSecondsFocussed = 0;
   int _dailyTargetMinutes = 90;
+  
+  int _currentPhaseIndex = 0;
+  int _secondsRemainingInPhase = 0; 
+  PhaseType _currentPhaseType = PhaseType.focus;
 
+  // --- GETTERS ---
   List<FocusMode> get modes => _modes;
   List<FocusSession> get history => _history;
   FocusMode? get activeMode => _activeMode;
@@ -24,32 +31,33 @@ class FocusProvider extends ChangeNotifier {
   bool get isPaused => _isPaused;
   int get currentSecondsFocussed => _currentSecondsFocussed;
   int get dailyTargetMinutes => _dailyTargetMinutes;
+  int get currentPhaseIndex => _currentPhaseIndex;
+  int get secondsRemainingInPhase => _secondsRemainingInPhase;
+  PhaseType get currentPhaseType => _currentPhaseType;
 
-  FocusProvider() {
+  // Require the repository in the constructor
+  FocusProvider({required this.repository}) {
     _init();
   }
 
   Future<void> _init() async {
-    final modeBox = await Hive.openBox<FocusMode>(modeBoxName);
-    final sessionBox = await Hive.openBox<FocusSession>(sessionBoxName);
-
-    _modes = modeBox.values.toList();
-    _history = sessionBox.values.toList();
+    _modes = await repository.fetchModes();
+    _history = await repository.fetchSessions();
 
     // Inject System Modes if they don't exist
     if (!_modes.any((m) => m.id == 'system_stopwatch')) {
       final sw = FocusMode.stopwatch();
-      await modeBox.put(sw.id, sw);
+      await repository.saveMode(sw);
       _modes.add(sw);
     }
     if (!_modes.any((m) => m.id == 'system_flexible')) {
       final flex = FocusMode.flexible();
-      await modeBox.put(flex.id, flex);
+      await repository.saveMode(flex);
       _modes.add(flex);
     }
     if (!_modes.any((m) => m.id == 'system_pomodoro')) {
       final pomo = FocusMode.classicPomodoro();
-      await modeBox.put(pomo.id, pomo);
+      await repository.saveMode(pomo);
       _modes.add(pomo);
     }
 
@@ -66,10 +74,9 @@ class FocusProvider extends ChangeNotifier {
   }
 
   Future<void> saveCustomMode(FocusMode mode) async {
-    if (mode.isSystem) return; // Guard: Cannot overwrite system modes directly
+    if (mode.isSystem) return;
     
-    final modeBox = Hive.box<FocusMode>(modeBoxName);
-    await modeBox.put(mode.id, mode);
+    await repository.saveMode(mode);
     
     final index = _modes.indexWhere((m) => m.id == mode.id);
     if (index != -1) {
@@ -82,10 +89,9 @@ class FocusProvider extends ChangeNotifier {
 
   Future<void> deleteMode(String modeId) async {
     final mode = _modes.firstWhere((m) => m.id == modeId);
-    if (mode.isSystem) return; // Guard: Cannot delete system modes
+    if (mode.isSystem) return; 
     
-    final modeBox = Hive.box<FocusMode>(modeBoxName);
-    await modeBox.delete(modeId);
+    await repository.deleteMode(modeId);
     
     _modes.removeWhere((m) => m.id == modeId);
     if (_activeMode?.id == modeId) {
@@ -97,29 +103,101 @@ class FocusProvider extends ChangeNotifier {
   // --- FLEXIBLE TIMER SETTER ---
   void setFlexibleDuration(int minutes) {
     if (_activeMode?.type == FocusModeType.flexible && !_isRunning) {
-      // Clamp to max 120
       final clamped = minutes > 120 ? 120 : minutes;
       _activeMode!.phases.first.durationMinutes = clamped;
       notifyListeners();
     }
   }
 
-  // --- SESSION ACTIONS (Placeholders) ---
+  // --- SESSION ACTIONS ---
+
   void startSession() {
+    if (_activeMode == null || _activeMode!.phases.isEmpty) return;
+
+    if (!_isRunning && !_isPaused) {
+      _currentPhaseIndex = 0;
+      _currentSecondsFocussed = 0;
+      _setupPhase(_currentPhaseIndex);
+      
+      _currentSession = FocusSession(
+        id: DateTime.now().toString(),
+        modeId: _activeMode!.id,
+        startTime: DateTime.now(),
+      );
+    }
+
     _isRunning = true;
     _isPaused = false;
+    notifyListeners();
+
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), _tick);
+  }
+
+  void _setupPhase(int index) {
+    if (_activeMode == null || index >= _activeMode!.phases.length) {
+      stopSession(completed: true);
+      return;
+    }
+
+    final phase = _activeMode!.phases[index];
+    _currentPhaseType = phase.type;
+    _secondsRemainingInPhase = phase.durationMinutes > 0 ? phase.durationMinutes * 60 : 0;
+  }
+
+  void _tick(Timer timer) {
+    if (_currentPhaseType == PhaseType.focus) {
+      _currentSecondsFocussed++;
+    }
+
+    final currentPhase = _activeMode!.phases[_currentPhaseIndex];
+    
+    if (currentPhase.durationMinutes > 0) {
+      _secondsRemainingInPhase--;
+      
+      if (_secondsRemainingInPhase <= 0) {
+        _currentPhaseIndex++;
+        _setupPhase(_currentPhaseIndex);
+      }
+    }
     notifyListeners();
   }
 
   void pauseSession() {
+    _timer?.cancel();
     _isPaused = true;
+    _isRunning = false;
     notifyListeners();
   }
 
-  void stopSession() {
+  void stopSession({bool completed = false}) async {
+    _timer?.cancel();
+    
+    if (_currentSession != null) {
+      _currentSession!.endTime = DateTime.now();
+      _currentSession!.totalSecondsFocused = _currentSecondsFocussed;
+      _currentSession!.isCompleted = completed;
+      
+      await repository.saveSession(_currentSession!);
+      _history.add(_currentSession!);
+    }
+
     _isRunning = false;
     _isPaused = false;
+    _currentSession = null;
     _currentSecondsFocussed = 0;
+    _currentPhaseIndex = 0;
+    
+    notifyListeners();
+  }
+
+  void resetSession() {
+    _timer?.cancel();
+    _isRunning = false;
+    _isPaused = false;
+    _currentSession = null;
+    _currentSecondsFocussed = 0;
+    _currentPhaseIndex = 0;
     notifyListeners();
   }
 

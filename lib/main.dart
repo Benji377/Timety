@@ -1,22 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:timety/screens/main_screen.dart';
-import 'data/task.dart';
 import 'package:provider/provider.dart';
-import 'providers/task_provider.dart';
-import 'data/task_repository_hive.dart';
-import 'services/notification_service.dart';
+
+import 'package:timety/screens/main_screen.dart';
 import 'theme/app_theme.dart';
+import 'services/notification_service.dart';
+
+// Tasks
+import 'data/task.dart';
+import 'data/task_repository_hive.dart';
+import 'providers/task_provider.dart';
+
+// Focus
+import 'data/focus_models.dart';
+import 'data/focus_repository_hive.dart';
+import 'providers/focus_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
 
-  // 2. Register our generated Adapters
+  // Register Task Adapters
   Hive.registerAdapter(TaskAdapter());
   Hive.registerAdapter(PriorityAdapter());
   Hive.registerAdapter(SizeAdapter());
+
+  // Register Focus Adapters (NEW!)
+  Hive.registerAdapter(FocusModeTypeAdapter());
+  Hive.registerAdapter(FocusModeAdapter());
+  Hive.registerAdapter(DistractionAdapter());
+  Hive.registerAdapter(FocusSessionAdapter());
+  Hive.registerAdapter(PhaseTypeAdapter());
+  Hive.registerAdapter(SessionPhaseAdapter());
 
   await NotificationService.instance.init();
   await NotificationService.instance.scheduleDailyMotivation();
@@ -27,10 +43,17 @@ void main() async {
 class TimetyApp extends StatelessWidget {
   const TimetyApp({super.key});
 
-  @override
+@override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => TaskProvider(repository: HiveTaskRepository()),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => TaskProvider(repository: HiveTaskRepository()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FocusProvider(repository: HiveFocusRepository()),
+        ),
+      ],
       child: MaterialApp(
         title: 'Timety',
         theme: AppTheme.lightTheme,
