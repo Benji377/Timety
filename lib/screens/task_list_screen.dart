@@ -4,6 +4,7 @@ import '../data/task.dart';
 import '../utils/utils.dart';
 import '../providers/task_provider.dart';
 import '../widgets/app_dialogs.dart';
+import 'calendar_screen.dart';
 import 'task_detail_screen.dart';
 
 enum SortOption { dueDate, priority, size, alphabetical, category }
@@ -225,7 +226,21 @@ class _TodoListScreenState extends State<TodoListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Tasks')),
+      appBar: AppBar(
+        title: const Text('My Tasks'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            tooltip: 'Calendar View',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CalendarScreen()),
+              );
+            },
+          ),
+        ],
+        ),
       body: Column(
         children: [
           // --- TOP BAR: SEARCH & SORT ---
