@@ -7,13 +7,13 @@ import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
 
 // Tasks
-import 'data/task.dart';
-import 'data/task_repository_hive.dart';
+import 'data/task/task.dart';
+import 'data/task/task_repository_hive.dart';
 import 'providers/task_provider.dart';
 
 // Focus
-import 'data/focus_models.dart';
-import 'data/focus_repository_hive.dart';
+import 'data/focus/focus_models.dart';
+import 'data/focus/focus_repository_hive.dart';
 import 'providers/focus_provider.dart';
 
 void main() async {

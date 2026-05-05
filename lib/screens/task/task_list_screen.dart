@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../data/task.dart';
-import '../utils/utils.dart';
-import '../providers/task_provider.dart';
-import '../widgets/app_dialogs.dart';
-import 'calendar_screen.dart';
+import '../../data/task/task.dart';
+import '../../utils/utils.dart';
+import '../../providers/task_provider.dart';
+import '../../widgets/app_dialogs.dart';
+import '../calendar_screen.dart';
 import 'task_detail_screen.dart';
 import 'task_stats_screen.dart';
 

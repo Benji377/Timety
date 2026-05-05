@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/focus_models.dart';
+import '../data/focus/focus_models.dart';
 import '../providers/focus_provider.dart';
 
 class AppDialogs {

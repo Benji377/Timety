@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/screens/settings_screen.dart';
 
-import '../data/task.dart';
+import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../utils/utils.dart';
 import '../widgets/interactive_gauge.dart';
-import 'task_detail_screen.dart';
+import 'task/task_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
 final VoidCallback onNavigateToFocus;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'focus_screen.dart';
-import 'task_list_screen.dart';
+import 'focus/focus_screen.dart';
+import 'task/task_list_screen.dart';
 import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/focus_models.dart';
+import '../data/focus/focus_models.dart';
 
 class PhaseEditorDialog extends StatefulWidget {
   final SessionPhase? initialPhase;

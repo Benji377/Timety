@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/task.dart';
-import '../data/task_repository.dart';
+import '../data/task/task.dart';
+import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
 
 class TaskProvider extends ChangeNotifier {
@@ -19,16 +19,16 @@ class TaskProvider extends ChangeNotifier {
 
   // Master synchronization function
   Future<void> _syncTaskReminders(Task task) async {
-    // 1. Always cancel existing reminders for this task first to prevent duplicates
+    // Always cancel existing reminders for this task first to prevent duplicates
     for (var reminder in task.reminders) {
       final notifId = _generateNotificationId(task.id, reminder);
       await NotificationService.instance.cancelNotification(notifId);
     }
 
-    // 2. If the task is completed, we don't reschedule them. We just stop here.
+    // If the task is completed, we don't reschedule them. We just stop here.
     if (task.isCompleted) return;
 
-    // 3. If not completed, schedule all future reminders
+    // If not completed, schedule all future reminders
     for (var reminder in task.reminders) {
       if (reminder.isAfter(DateTime.now())) {
         final notifId = _generateNotificationId(task.id, reminder);

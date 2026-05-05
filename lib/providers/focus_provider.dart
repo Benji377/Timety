@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../data/focus_models.dart';
-import '../data/focus_repository.dart';
+import '../data/focus/focus_models.dart';
+import '../data/focus/focus_repository.dart';
 
 class FocusProvider extends ChangeNotifier {
   final FocusRepository repository;

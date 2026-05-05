@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart'; 
-import '../data/task.dart';
-import '../providers/task_provider.dart';
+import '../../data/task/task.dart';
+import '../../providers/task_provider.dart';
 
 class TaskStatsScreen extends StatefulWidget {
   const TaskStatsScreen({super.key});
@@ -116,7 +116,6 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     bool isCurrentRealWeek = DateTime.now().isAfter(startOfWeek) && DateTime.now().isBefore(endOfWeek);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Insights & Statistics')),
       body: tasks.isEmpty 
         ? const Center(child: Text("No data to display yet."))
         : ListView(

@@ -1,11 +1,11 @@
 // lib/screens/focus_modes_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/focus_provider.dart';
-import '../data/focus_models.dart';
-import '../widgets/focus_mode_timeline.dart';
-import '../widgets/app_dialogs.dart'; // Import your AppDialogs
-import '../widgets/phase_editor_dialog.dart'; // Import the new Editor
+import '../../providers/focus_provider.dart';
+import '../../data/focus/focus_models.dart';
+import '../../widgets/focus_mode_timeline.dart';
+import '../../widgets/app_dialogs.dart'; // Import your AppDialogs
+import '../../widgets/phase_editor_dialog.dart'; // Import the new Editor
 
 class FocusModesScreen extends StatelessWidget {
   const FocusModesScreen({super.key});

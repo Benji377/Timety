@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/focus_provider.dart';
-import '../data/focus_models.dart';
-import '../widgets/focus_mode_timeline.dart';
-import '../widgets/interactive_gauge.dart';
-import '../widgets/app_dialogs.dart';
-import 'calendar_screen.dart';
+import '../../providers/focus_provider.dart';
+import '../../data/focus/focus_models.dart';
+import '../../widgets/focus_mode_timeline.dart';
+import '../../widgets/interactive_gauge.dart';
+import '../../widgets/app_dialogs.dart';
+import '../calendar_screen.dart';
 import 'focus_modes_screen.dart';
-import 'settings_screen.dart';
+import '../settings_screen.dart';
 
 class FocusScreen extends StatelessWidget {
 

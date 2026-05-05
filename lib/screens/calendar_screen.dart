@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:timety/utils/utils.dart';
 
 import '../providers/task_provider.dart';
-import 'task_detail_screen.dart';
+import 'task/task_detail_screen.dart';
 import '../providers/focus_provider.dart';
 
 class CalendarScreen extends StatefulWidget {

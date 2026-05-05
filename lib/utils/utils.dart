@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../data/task.dart';
+import '../data/task/task.dart';
 
 class AppUtils {
 
