@@ -2,11 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/utils/utils.dart';
-
 import '../theme/app_theme.dart';
 import '../providers/task_provider.dart';
 import 'task/task_detail_screen.dart';
 import '../providers/focus_provider.dart';
+import '../data/habit/habit_models.dart';
+import '../providers/habit_provider.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -57,26 +58,42 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     final taskProvider = context.watch<TaskProvider>();
     final focusProvider = context.watch<FocusProvider>();
+    final habitProvider = context.watch<HabitProvider>(); // <--- ADDED
 
     final allTasks = taskProvider.tasks;
     final allSessions = focusProvider.history;
+    final allHabits = habitProvider.habits; // <--- ADDED
 
     final weeks = _generateWeeks(_focusedMonth);
 
-    // Filter and SORT the lists chronologically!
+    // --- FILTER & SORT ACCORDION DATA ---
+
+    // 1. Tasks
     final selectedDayTasks = allTasks
         .where((t) => _isSameDay(t.dueDate, _selectedDate))
         .toList();
-    // We sort tasks by priority (highest first) as a nice bonus
     selectedDayTasks.sort(
       (a, b) => b.priority.index.compareTo(a.priority.index),
     );
 
+    // 2. Focus
     final selectedDaySessions = allSessions
         .where((s) => _isSameDay(s.startTime, _selectedDate))
         .toList();
-    // Sort sessions chronologically (morning to evening)
     selectedDaySessions.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    // 3. Habits (Combine habits scheduled for this day + habits actually completed on this day)
+    List<Habit> selectedDayHabits = [];
+    if (_selectedDate != null) {
+      final scheduled = habitProvider.getHabitsForDay(_selectedDate!);
+      final completed = allHabits
+          .where((h) => habitProvider.isCompletedOn(h, _selectedDate!))
+          .toList();
+      selectedDayHabits = {
+        ...scheduled,
+        ...completed,
+      }.toList(); // Use a Set spread to remove duplicates
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -154,31 +171,42 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ],
                         ),
                         ...weeks.map((week) {
-                          int weeklyTaskCount = allTasks.where((t) {
-                            if (t.dueDate == null) return false;
-                            return t.dueDate!.isAfter(
-                                  week.first.subtract(
-                                    const Duration(seconds: 1),
-                                  ),
-                                ) &&
-                                t.dueDate!.isBefore(
-                                  week.last.add(const Duration(days: 1)),
-                                );
-                          }).length;
+                          final weekStart = week.first.subtract(
+                            const Duration(seconds: 1),
+                          );
+                          final weekEnd = week.last.add(
+                            const Duration(days: 1),
+                          );
+
+                          // Weekly Analytics Calculations
+                          int weeklyTaskCount = allTasks
+                              .where(
+                                (t) =>
+                                    t.dueDate != null &&
+                                    t.dueDate!.isAfter(weekStart) &&
+                                    t.dueDate!.isBefore(weekEnd),
+                              )
+                              .length;
 
                           int weeklyFocusSeconds = allSessions
-                              .where((s) {
-                                return s.startTime.isAfter(
-                                      week.first.subtract(
-                                        const Duration(seconds: 1),
-                                      ),
-                                    ) &&
-                                    s.startTime.isBefore(
-                                      week.last.add(const Duration(days: 1)),
-                                    );
-                              })
+                              .where(
+                                (s) =>
+                                    s.startTime.isAfter(weekStart) &&
+                                    s.startTime.isBefore(weekEnd),
+                              )
                               .fold(0, (sum, s) => sum + s.totalSecondsFocused);
                           int weeklyFocusMins = weeklyFocusSeconds ~/ 60;
+
+                          int weeklyHabitCount = allHabits.fold(0, (sum, h) {
+                            return sum +
+                                h.completions
+                                    .where(
+                                      (c) =>
+                                          c.isAfter(weekStart) &&
+                                          c.isBefore(weekEnd),
+                                    )
+                                    .length;
+                          });
 
                           return TableRow(
                             children: [
@@ -196,6 +224,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 );
                                 final hasFocus = allSessions.any(
                                   (s) => _isSameDay(s.startTime, day),
+                                );
+                                final hasHabits = allHabits.any(
+                                  (h) => habitProvider.isCompletedOn(h, day),
                                 );
 
                                 return TableCell(
@@ -235,34 +266,53 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             ),
                                           ),
                                           const SizedBox(height: 2),
+                                          // --- MICRO DOTS ---
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
                                             children: [
                                               if (hasTasks)
                                                 Container(
-                                                  width: 6,
-                                                  height: 6,
+                                                  width: 5,
+                                                  height: 5,
                                                   decoration:
                                                       const BoxDecoration(
                                                         color: Colors.blue,
                                                         shape: BoxShape.circle,
                                                       ),
                                                 ),
-                                              if (hasTasks && hasFocus)
-                                                const SizedBox(width: 4),
+                                              if (hasTasks &&
+                                                  (hasFocus || hasHabits))
+                                                const SizedBox(width: 2),
+
                                               if (hasFocus)
                                                 Container(
-                                                  width: 6,
-                                                  height: 6,
+                                                  width: 5,
+                                                  height: 5,
                                                   decoration:
                                                       const BoxDecoration(
                                                         color: Colors.green,
                                                         shape: BoxShape.circle,
                                                       ),
                                                 ),
-                                              if (!hasTasks && !hasFocus)
-                                                const SizedBox(height: 6),
+                                              if (hasFocus && hasHabits)
+                                                const SizedBox(width: 2),
+
+                                              if (hasHabits)
+                                                Container(
+                                                  width: 5,
+                                                  height: 5,
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                        color: Colors.purple,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                ),
+
+                                              if (!hasTasks &&
+                                                  !hasFocus &&
+                                                  !hasHabits)
+                                                const SizedBox(height: 5),
                                             ],
                                           ),
                                         ],
@@ -271,17 +321,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   ),
                                 );
                               }),
+                              // --- WEEKLY SUMMARY COLUMN ---
                               TableCell(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      weeklyTaskCount.toString(),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
+                                    if (weeklyTaskCount > 0)
+                                      Text(
+                                        weeklyTaskCount.toString(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
                                     if (weeklyFocusMins > 0)
                                       Text(
                                         '${weeklyFocusMins}m',
@@ -289,6 +342,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           fontWeight: FontWeight.bold,
                                           color: Colors.green,
                                           fontSize: 12,
+                                        ),
+                                      ),
+                                    if (weeklyHabitCount > 0)
+                                      Text(
+                                        '$weeklyHabitCount 🔁',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.purple,
+                                          fontSize: 11,
                                         ),
                                       ),
                                   ],
@@ -324,13 +386,102 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   : ListView(
                       padding: const EdgeInsets.all(8),
                       children: [
+                        // --- HABITS ACCORDION (NEW) ---
+                        ExpansionTile(
+                          initiallyExpanded: true,
+                          title: Text(
+                            "Habits (${selectedDayHabits.length})",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.purple,
+                            ),
+                          ),
+                          iconColor: Colors.purple,
+                          collapsedIconColor: Colors.purple,
+                          children: selectedDayHabits.isEmpty
+                              ? [
+                                  const Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Text(
+                                      "No habits scheduled or logged.",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ),
+                                ]
+                              : selectedDayHabits.map((habit) {
+                                  final isCompleted = habitProvider
+                                      .isCompletedOn(habit, _selectedDate!);
+                                  return Card(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                        color: isCompleted
+                                            ? Colors.purple.withValues(
+                                                alpha: 0.3,
+                                              )
+                                            : Colors.purple,
+                                        width: 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: ListTile(
+                                      leading: Checkbox(
+                                        value: isCompleted,
+                                        activeColor: Colors.purple,
+                                        onChanged: (_) {
+                                          // Time-Travel Logging!
+                                          if (isCompleted) {
+                                            habit.completions.removeWhere(
+                                              (c) =>
+                                                  _isSameDay(c, _selectedDate!),
+                                            );
+                                          } else {
+                                            // Keep the current time, but force the date to be the selected calendar date
+                                            final now = DateTime.now();
+                                            final retroDate = DateTime(
+                                              _selectedDate!.year,
+                                              _selectedDate!.month,
+                                              _selectedDate!.day,
+                                              now.hour,
+                                              now.minute,
+                                            );
+                                            habit.completions.add(retroDate);
+                                          }
+                                          habitProvider.saveHabit(habit);
+                                        },
+                                      ),
+                                      title: Text(
+                                        habit.name,
+                                        style: TextStyle(
+                                          decoration: isCompleted
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                          color: isCompleted
+                                              ? Colors.grey
+                                              : null,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                        ),
+
                         // --- TASKS ACCORDION ---
                         ExpansionTile(
                           initiallyExpanded: true,
                           title: Text(
                             "Tasks (${selectedDayTasks.length})",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
                           ),
+                          iconColor: Colors.blue,
+                          collapsedIconColor: Colors.blue,
                           children: selectedDayTasks.isEmpty
                               ? [
                                   const Padding(
@@ -375,15 +526,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       trailing: AppUtils().getPriorityIcon(
                                         task.priority,
                                       ),
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                TaskDetailScreen(task: task),
-                                          ),
-                                        );
-                                      },
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              TaskDetailScreen(task: task),
+                                        ),
+                                      ),
                                     ),
                                   );
                                 }).toList(),
@@ -391,11 +540,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                         // --- FOCUS SESSIONS ACCORDION ---
                         ExpansionTile(
-                          initiallyExpanded: true,
+                          initiallyExpanded: false,
                           title: Text(
                             "Focus Sessions (${selectedDaySessions.length})",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
                           ),
+                          iconColor: Colors.green,
+                          collapsedIconColor: Colors.green,
                           children: selectedDaySessions.isEmpty
                               ? [
                                   const Padding(
@@ -417,7 +571,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             .firstOrNull
                                       : null;
 
-                                  // Calculate exact time strings
                                   String timeString = _formatTime(
                                     session.startTime,
                                   );
@@ -430,20 +583,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                                   int focusMins =
                                       session.totalSecondsFocused ~/ 60;
-                                  int restMins = 0;
-
-                                  if (session.endTime != null) {
-                                    int totalElapsedSeconds = session.endTime!
-                                        .difference(session.startTime)
-                                        .inSeconds;
-                                    int nonFocusSeconds =
-                                        totalElapsedSeconds -
-                                        session.totalSecondsFocused;
-                                    if (nonFocusSeconds > 0) {
-                                      restMins = nonFocusSeconds ~/ 60;
-                                    }
-                                  }
-
                                   return Card(
                                     margin: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -470,7 +609,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      // NEW: Expanded Subtitle showing Mode and Time
                                       subtitle: Padding(
                                         padding: const EdgeInsets.only(
                                           top: 4.0,
@@ -497,28 +635,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           ],
                                         ),
                                       ),
-                                      trailing: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            '${focusMins}m focus',
-                                            style: const TextStyle(
-                                              color: Colors.green,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          if (restMins > 0)
-                                            Text(
-                                              '${restMins}m rest',
-                                              style: const TextStyle(
-                                                color: Colors.orange,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                        ],
+                                      trailing: Text(
+                                        '${focusMins}m focus',
+                                        style: const TextStyle(
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   );

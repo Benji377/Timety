@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:timety/providers/habit_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
@@ -18,12 +19,11 @@ class UserScreen extends StatefulWidget {
 }
 
 class _UserScreenState extends State<UserScreen> {
-  
   // --- IMAGE PICKER ---
   Future<void> _pickImage(SettingsProvider settings) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (pickedFile != null && mounted) {
       settings.setProfileImagePath(pickedFile.path);
     }
@@ -43,7 +43,10 @@ class _UserScreenState extends State<UserScreen> {
           textCapitalization: TextCapitalization.words,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           ElevatedButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
@@ -59,19 +62,30 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   // --- STREAK ALGORITHM ---
-  Map<String, int> _calculateStreaks(TaskProvider taskProv, FocusProvider focusProv) {
+  Map<String, int> _calculateStreaks(
+    TaskProvider taskProv,
+    FocusProvider focusProv,
+    HabitProvider habitProv,
+  ) {
     Set<String> activeDates = {};
-    String formatDate(DateTime dt) => "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
+    String formatDate(DateTime dt) =>
+        "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
 
     for (var task in taskProv.tasks) {
       if (task.isCompleted && task.completedAt != null) {
         activeDates.add(formatDate(task.completedAt!));
       }
     }
-    
+
     for (var session in focusProv.history) {
       if (session.totalSecondsFocused >= 60) {
         activeDates.add(formatDate(session.startTime));
+      }
+    }
+
+    for (var habit in habitProv.habits) {
+      for (var completion in habit.completions) {
+        activeDates.add(formatDate(completion));
       }
     }
 
@@ -84,7 +98,7 @@ class _UserScreenState extends State<UserScreen> {
     for (int i = 1; i < sortedDates.length; i++) {
       DateTime prev = DateTime.parse(sortedDates[i - 1]);
       DateTime curr = DateTime.parse(sortedDates[i]);
-      
+
       if (curr.difference(prev).inDays == 1) {
         currentRun++;
         if (currentRun > highest) highest = currentRun;
@@ -95,10 +109,12 @@ class _UserScreenState extends State<UserScreen> {
 
     int current = 0;
     DateTime checkDate = DateTime.now();
-    
+
     if (activeDates.contains(formatDate(checkDate))) {
       // Keep checking
-    } else if (activeDates.contains(formatDate(checkDate.subtract(const Duration(days: 1))))) {
+    } else if (activeDates.contains(
+      formatDate(checkDate.subtract(const Duration(days: 1))),
+    )) {
       checkDate = checkDate.subtract(const Duration(days: 1));
     } else {
       return {'current': 0, 'highest': highest};
@@ -117,12 +133,20 @@ class _UserScreenState extends State<UserScreen> {
     final settings = context.watch<SettingsProvider>();
     final tasks = context.watch<TaskProvider>();
     final focus = context.watch<FocusProvider>();
+    final habits = context.watch<HabitProvider>();
 
     // Compute stats
     final totalTasks = tasks.tasks.where((t) => t.isCompleted).length;
     final totalSessions = focus.history.length;
-    final totalFocusMins = focus.history.fold(0, (sum, s) => sum + (s.totalSecondsFocused ~/ 60));
-    final streaks = _calculateStreaks(tasks, focus);
+    final totalFocusMins = focus.history.fold(
+      0,
+      (sum, s) => sum + (s.totalSecondsFocused ~/ 60),
+    );
+    final totalHabitsDone = habits.habits.fold(
+      0,
+      (sum, h) => sum + h.completions.length,
+    );
+    final streaks = _calculateStreaks(tasks, focus, habits);
 
     final currentStreak = streaks['current'] ?? 0;
     final highestStreak = streaks['highest'] ?? 0;
@@ -134,12 +158,18 @@ class _UserScreenState extends State<UserScreen> {
           IconButton(
             icon: const Icon(Icons.bar_chart),
             tooltip: 'Statistics',
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatisticsScreen())),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const StatisticsScreen()),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
           ),
         ],
       ),
@@ -147,7 +177,7 @@ class _UserScreenState extends State<UserScreen> {
         child: Column(
           children: [
             const SizedBox(height: AppTheme.space2XLarge),
-            
+
             // --- PROFILE HEADER ---
             GestureDetector(
               onTap: () => _pickImage(settings),
@@ -156,12 +186,18 @@ class _UserScreenState extends State<UserScreen> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                    backgroundImage: settings.profileImagePath != null 
-                        ? FileImage(File(settings.profileImagePath!)) 
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    backgroundImage: settings.profileImagePath != null
+                        ? FileImage(File(settings.profileImagePath!))
                         : null,
                     child: settings.profileImagePath == null
-                        ? Icon(Icons.person, size: AppTheme.profileImageSize, color: Theme.of(context).colorScheme.primary)
+                        ? Icon(
+                            Icons.person,
+                            size: AppTheme.profileImageSize,
+                            color: Theme.of(context).colorScheme.primary,
+                          )
                         : null,
                   ),
                   Container(
@@ -169,56 +205,84 @@ class _UserScreenState extends State<UserScreen> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 3),
+                      border: Border.all(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        width: 3,
+                      ),
                     ),
-                    child: Icon(Icons.camera_alt, size: AppTheme.iconSizeMedium, color: Theme.of(context).colorScheme.onPrimary),
+                    child: Icon(
+                      Icons.camera_alt,
+                      size: AppTheme.iconSizeMedium,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: AppTheme.spaceXLarge),
-            
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   settings.userName,
-                  style: const TextStyle(fontSize: AppTheme.fsLargeNumber, fontWeight: AppTheme.fwBold),
+                  style: const TextStyle(
+                    fontSize: AppTheme.fsLargeNumber,
+                    fontWeight: AppTheme.fwBold,
+                  ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.edit, size: AppTheme.iconSizeMedium, color: Colors.grey),
+                  icon: const Icon(
+                    Icons.edit,
+                    size: AppTheme.iconSizeMedium,
+                    color: Colors.grey,
+                  ),
                   onPressed: () => _editName(context, settings),
-                )
+                ),
               ],
             ),
-            
+
             const SizedBox(height: AppTheme.spaceLarge),
 
             // --- STREAK BADGE ---
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceXLarge, vertical: AppTheme.spaceMedium),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spaceXLarge,
+                vertical: AppTheme.spaceMedium,
+              ),
               decoration: BoxDecoration(
-                color: currentStreak > 0 
-                    ? AppTheme.warningColor.withValues(alpha: AppTheme.opacityVeryLight) 
+                color: currentStreak > 0
+                    ? AppTheme.warningColor.withValues(
+                        alpha: AppTheme.opacityVeryLight,
+                      )
                     : Colors.grey.withValues(alpha: AppTheme.opacityVeryLight),
                 borderRadius: AppTheme.brCircle,
                 border: Border.all(
-                  color: currentStreak > 0 
-                      ? AppTheme.warningColor.withValues(alpha: AppTheme.opacityLight) 
+                  color: currentStreak > 0
+                      ? AppTheme.warningColor.withValues(
+                          alpha: AppTheme.opacityLight,
+                        )
                       : Colors.grey.shade300,
                 ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(currentStreak > 0 ? "🔥" : "🩶", style: const TextStyle(fontSize: 24)),
+                  Text(
+                    currentStreak > 0 ? "🔥" : "🩶",
+                    style: const TextStyle(fontSize: 24),
+                  ),
                   const SizedBox(width: AppTheme.spaceSmall),
                   Text(
-                    currentStreak > 0 ? "$currentStreak Day Streak!" : "Start a streak today!",
+                    currentStreak > 0
+                        ? "$currentStreak Day Streak!"
+                        : "Start a streak today!",
                     style: TextStyle(
-                      fontSize: AppTheme.fsBodyLarge, 
+                      fontSize: AppTheme.fsBodyLarge,
                       fontWeight: AppTheme.fwBold,
-                      color: currentStreak > 0 ? AppTheme.warningColor : Colors.grey.shade600,
+                      color: currentStreak > 0
+                          ? AppTheme.warningColor
+                          : Colors.grey.shade600,
                     ),
                   ),
                 ],
@@ -226,25 +290,67 @@ class _UserScreenState extends State<UserScreen> {
             ),
 
             const SizedBox(height: AppTheme.space2XLarge),
-            const Divider(indent: AppTheme.space2XLarge, endIndent: AppTheme.space2XLarge),
+            const Divider(
+              indent: AppTheme.space2XLarge,
+              endIndent: AppTheme.space2XLarge,
+            ),
             const SizedBox(height: AppTheme.spaceXLarge),
 
             // --- COMPACT TOTALS OVERVIEW ---
-            const Text("All-Time Stats", style: TextStyle(fontSize: AppTheme.fsHeadingSmall, fontWeight: AppTheme.fwBold)),
+            const Text(
+              "All-Time Stats",
+              style: TextStyle(
+                fontSize: AppTheme.fsHeadingSmall,
+                fontWeight: AppTheme.fwBold,
+              ),
+            ),
             const SizedBox(height: AppTheme.spaceLarge),
-            
+
             // Replaced GridView with a centered Wrap
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLarge),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spaceLarge,
+              ),
               child: Wrap(
                 alignment: WrapAlignment.center,
                 spacing: AppTheme.spaceMedium,
                 runSpacing: AppTheme.spaceMedium,
                 children: [
-                  _buildStatCard(context, "Tasks Done", "$totalTasks", Icons.check_circle_outline, Colors.blue),
-                  _buildStatCard(context, "Focus Mins", "$totalFocusMins", Icons.timer_outlined, Colors.green),
-                  _buildStatCard(context, "Sessions", "$totalSessions", Icons.coffee_outlined, Colors.brown),
-                  _buildStatCard(context, "Best Streak", "$highestStreak", Icons.military_tech, AppTheme.warningColor),
+                  _buildStatCard(
+                    context,
+                    "Tasks Done",
+                    "$totalTasks",
+                    Icons.check_circle_outline,
+                    Colors.blue,
+                  ),
+                  _buildStatCard(
+                    context,
+                    "Habits Met",
+                    "$totalHabitsDone",
+                    Icons.repeat,
+                    Colors.purple,
+                  ),
+                  _buildStatCard(
+                    context,
+                    "Focus Mins",
+                    "$totalFocusMins",
+                    Icons.timer_outlined,
+                    Colors.green,
+                  ),
+                  _buildStatCard(
+                    context,
+                    "Sessions",
+                    "$totalSessions",
+                    Icons.coffee_outlined,
+                    Colors.brown,
+                  ),
+                  _buildStatCard(
+                    context,
+                    "Best Streak",
+                    "$highestStreak",
+                    Icons.military_tech,
+                    AppTheme.warningColor,
+                  ),
                 ],
               ),
             ),
@@ -256,14 +362,23 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   // Updated to be a fixed-size compact box
-  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return SizedBox(
       width: 140, // Fixed compact width
       height: 100, // Fixed compact height
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: color.withValues(alpha: AppTheme.opacityLight), width: 1.5),
+          side: BorderSide(
+            color: color.withValues(alpha: AppTheme.opacityLight),
+            width: 1.5,
+          ),
           borderRadius: AppTheme.brXLarge,
         ),
         color: color.withValues(alpha: 0.05),
@@ -278,11 +393,24 @@ class _UserScreenState extends State<UserScreen> {
                 children: [
                   Icon(icon, color: color, size: AppTheme.iconSizeSmall),
                   const SizedBox(width: AppTheme.spaceXSmall),
-                  Text(title, style: TextStyle(fontSize: AppTheme.fsCaption, color: Colors.grey.shade700, fontWeight: AppTheme.fwBold)),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: AppTheme.fsCaption,
+                      color: Colors.grey.shade700,
+                      fontWeight: AppTheme.fwBold,
+                    ),
+                  ),
                 ],
               ),
               const Spacer(),
-              Text(value, style: const TextStyle(fontSize: AppTheme.fsHeadingMedium, fontWeight: AppTheme.fwExtraBold)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: AppTheme.fsHeadingMedium,
+                  fontWeight: AppTheme.fwExtraBold,
+                ),
+              ),
             ],
           ),
         ),

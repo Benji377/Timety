@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'habit/habit_list_screen.dart';
 import 'home_screen.dart';
 import 'focus/focus_screen.dart';
 import 'task/task_list_screen.dart';
@@ -32,6 +33,7 @@ class _MainScreenState extends State<MainScreen> {
           HomeScreen(onNavigateToFocus: () => _switchTab(1)), 
           const FocusScreen(),
           const TaskListScreen(),
+          const HabitListScreen(),
           const UserScreen(),
         ]
       ),
@@ -56,6 +58,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.task_outlined),
             activeIcon: Icon(Icons.task),
             label: 'Tasks',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.alarm_outlined),
+            activeIcon: Icon(Icons.alarm),
+            label: 'Habits',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),

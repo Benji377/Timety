@@ -5,8 +5,8 @@ import '../../utils/utils.dart';
 import '../../providers/task_provider.dart';
 import '../../widgets/app_dialogs.dart';
 import '../calendar_screen.dart';
+import '../statistics_screen.dart';
 import 'task_detail_screen.dart';
-import 'task_stats_screen.dart';
 
 enum SortOption { dueDate, priority, size, alphabetical, category }
 
@@ -237,7 +237,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const TaskStatsScreen(),
+                  builder: (context) => const StatisticsScreen(),
                 ),
               );
             },

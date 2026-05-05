@@ -1,5 +1,6 @@
 // lib/screens/statistics_screen.dart
 import 'package:flutter/material.dart';
+import 'habit/habit_stats_screen.dart';
 import 'overview_stats_screen.dart';
 import 'task/task_stats_screen.dart';
 import 'focus/focus_stats_screen.dart';
@@ -10,7 +11,7 @@ class StatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Insights & Statistics'),
@@ -51,6 +52,7 @@ class StatisticsScreen extends StatelessWidget {
                     Tab(text: 'Overview'),
                     Tab(text: 'Tasks'),
                     Tab(text: 'Focus'),
+                    Tab(text: 'Habits'),
                   ],
                 ),
               ),
@@ -62,6 +64,7 @@ class StatisticsScreen extends StatelessWidget {
             OverviewStatsScreen(),
             TaskStatsScreen(),
             FocusStatsScreen(),
+            HabitStatsScreen(),
           ],
         ),
       ),

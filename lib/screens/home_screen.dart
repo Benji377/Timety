@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/screens/settings_screen.dart';
+import '../data/habit/habit_models.dart';
+import '../providers/habit_provider.dart';
 import '../theme/app_theme.dart';
 import '../data/task/task.dart';
 import '../providers/task_provider.dart';
@@ -124,13 +126,53 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // --- HABIT UI HELPER ---
+  Widget _buildHabitTile(BuildContext context, Habit habit) {
+    final provider = context.read<HabitProvider>();
+    final isCompleted = provider.isCompletedOn(habit, DateTime.now());
+    final color = Color(habit.colorValue);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: isCompleted ? color.withValues(alpha: 0.3) : color,
+          width: 2,
+        ),
+        borderRadius: AppTheme.brMedium,
+      ),
+      child: ListTile(
+        leading: Checkbox(
+          value: isCompleted,
+          activeColor: color,
+          onChanged: (_) => provider.toggleCompletionToday(habit),
+        ),
+        title: Text(
+          habit.name,
+          style: TextStyle(
+            decoration: isCompleted ? TextDecoration.lineThrough : null,
+            color: isCompleted ? Colors.grey : null,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: habit.targetTime != null
+            ? Text(
+                "⏰ ${habit.targetTime!.format(context)}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              )
+            : null,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final userName = context.watch<SettingsProvider>().userName;
 
-    // Providers
     final focusProvider = context.watch<FocusProvider>();
     final taskProvider = context.watch<TaskProvider>();
+    final habitProvider = context.watch<HabitProvider>();
     final settings = context.watch<SettingsProvider>();
 
     // Focus Calculations
@@ -138,9 +180,8 @@ class HomeScreen extends StatelessWidget {
     int dailyTarget = settings.dailyGoalMins;
     double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
 
-    // Task Calculations (Due Today + Overdue)
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    // Task & Habit Calculations
+    final today = DateTime.now();
 
     List<Task> urgentTasks = taskProvider.tasks.where((task) {
       if (task.isCompleted || task.dueDate == null) return false;
@@ -151,9 +192,18 @@ class HomeScreen extends StatelessWidget {
       );
       return dueDay.isBefore(today) || dueDay.isAtSameMomentAs(today);
     }).toList();
-
-    // Sort: Overdue first, then by time
     urgentTasks.sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
+
+    List<Habit> todaysHabits = habitProvider.getHabitsForDay(today);
+
+    // Sort uncompleted habits to the top
+    todaysHabits.sort((a, b) {
+      bool aDone = habitProvider.isCompletedOn(a, today);
+      bool bDone = habitProvider.isCompletedOn(b, today);
+      if (aDone && !bDone) return 1;
+      if (!aDone && bDone) return -1;
+      return 0;
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -162,12 +212,10 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            ),
           ),
         ],
       ),
@@ -198,7 +246,7 @@ class HomeScreen extends StatelessWidget {
                   onTap: onNavigateToFocus,
                   child: InteractiveGauge(
                     progress: focusProgress,
-                    isInteractive: false, // Read-only on the home screen
+                    isInteractive: false,
                     label: "DAILY GOAL",
                     centerText: "${(focusProgress * 100).toInt()}%",
                     bottomText: "$focusMinsToday / $dailyTarget m",
@@ -210,81 +258,105 @@ class HomeScreen extends StatelessWidget {
 
             const Divider(height: 1),
 
-            // --- BOTTOM HALF: URGENT TASKS ---
+            // --- BOTTOM HALF: ACTION REQUIRED ---
             Expanded(
-              flex: 5,
+              flex: 6,
               child: Container(
                 color: Theme.of(
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (urgentTasks.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
+                child: (urgentTasks.isEmpty && todaysHabits.isEmpty)
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.assignment_late,
-                              color: Colors.amber.shade700,
+                              Icons.check_circle_outline,
+                              size: 48,
+                              color: Colors.green.shade300,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(height: 16),
                             const Text(
-                              "Action Required Today",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              "You're all caught up for today!",
+                              style: TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
-                      ),
-                    Expanded(
-                      child: urgentTasks.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.only(top: 16, bottom: 80),
+                        children: [
+                          if (todaysHabits.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
+                              ),
+                              child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.check_circle_outline,
-                                    size: 48,
-                                    color: Colors.green.shade300,
+                                  const Icon(
+                                    Icons.repeat,
+                                    color: Colors.purple,
                                   ),
-                                  const SizedBox(height: 16),
-                                  const Text(
-                                    "You're all caught up for today!",
-                                    style: TextStyle(color: Colors.grey),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "Habits Today",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.purple.shade700,
+                                    ),
                                   ),
                                 ],
                               ),
-                            )
-                          : ListView.builder(
-                              itemCount: urgentTasks.length,
-                              itemBuilder: (context, index) {
-                                return _buildTaskTile(
-                                  context,
-                                  urgentTasks[index],
-                                );
-                              },
                             ),
-                    ),
-                  ],
-                ),
+                            ...todaysHabits.map(
+                              (h) => _buildHabitTile(context, h),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+
+                          if (urgentTasks.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.assignment_late,
+                                    color: Colors.amber.shade700,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "Tasks Due",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.amber.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ...urgentTasks.map(
+                              (t) => _buildTaskTile(context, t),
+                            ),
+                          ],
+                        ],
+                      ),
               ),
             ),
           ],
         ),
       ),
-      // FAB to quickly jump into a new task from the home screen
       floatingActionButton: FloatingActionButton(
         heroTag: "home_fab",
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TaskDetailScreen()),
-          );
-        },
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const TaskDetailScreen()),
+        ),
         child: const Icon(Icons.add),
       ),
     );
