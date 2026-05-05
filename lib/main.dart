@@ -7,6 +7,11 @@ import 'providers/settings_provider.dart';
 import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
 
+// Habits
+import 'data/habit/habit_models.dart';
+import 'data/habit/habit_repository_hive.dart';
+import 'providers/habit_provider.dart';
+
 // Tasks
 import 'data/task/task.dart';
 import 'data/task/task_repository_hive.dart';
@@ -36,6 +41,10 @@ void main() async {
   Hive.registerAdapter(SessionPhaseAdapter());
   Hive.registerAdapter(FocusTagAdapter());
 
+  // Register Habit Adapters
+  Hive.registerAdapter(HabitFrequencyAdapter());
+  Hive.registerAdapter(HabitAdapter());
+
   await NotificationService.instance.init();
   await NotificationService.instance.scheduleDailyMotivation();
 
@@ -56,6 +65,7 @@ class TimetyApp extends StatelessWidget {
           create: (_) => FocusProvider(repository: HiveFocusRepository()),
         ),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => HabitProvider(repository: HiveHabitRepository())),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
