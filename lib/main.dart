@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'package:timety/screens/main_screen.dart';
+import 'providers/settings_provider.dart';
 import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
 
@@ -53,6 +54,9 @@ class TimetyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => FocusProvider(repository: HiveFocusRepository()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SettingsProvider(),
         ),
       ],
       child: MaterialApp(
