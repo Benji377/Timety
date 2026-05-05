@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/utils/utils.dart';
 
+import '../theme/app_theme.dart';
 import '../providers/task_provider.dart';
 import 'task/task_detail_screen.dart';
 import '../providers/focus_provider.dart';
@@ -213,7 +214,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 width: 2,
                                               )
                                             : null,
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: AppTheme.brMedium,
                                       ),
                                       height: 45,
                                       child: Column(

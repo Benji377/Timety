@@ -236,7 +236,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const TaskStatsScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const TaskStatsScreen(),
+                ),
               );
             },
           ),
@@ -251,7 +253,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             },
           ),
         ],
-        ),
+      ),
       body: Column(
         children: [
           // --- TOP BAR: SEARCH & SORT ---

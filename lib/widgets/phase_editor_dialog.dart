@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 
 class PhaseEditorDialog extends StatefulWidget {
@@ -33,7 +34,7 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
   @override
   Widget build(BuildContext context) {
     final isNew = widget.initialPhase == null;
-    
+
     return AlertDialog(
       title: Text(isNew ? "Add Phase" : "Edit Phase"),
       content: Column(
@@ -41,15 +42,23 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
         children: [
           SegmentedButton<PhaseType>(
             segments: const [
-              ButtonSegment(value: PhaseType.focus, label: Text("Focus"), icon: Icon(Icons.center_focus_strong)),
-              ButtonSegment(value: PhaseType.rest, label: Text("Rest"), icon: Icon(Icons.coffee)),
+              ButtonSegment(
+                value: PhaseType.focus,
+                label: Text("Focus"),
+                icon: Icon(Icons.center_focus_strong),
+              ),
+              ButtonSegment(
+                value: PhaseType.rest,
+                label: Text("Rest"),
+                icon: Icon(Icons.coffee),
+              ),
             ],
             selected: {_selectedType},
             onSelectionChanged: (Set<PhaseType> newSelection) {
               setState(() => _selectedType = newSelection.first);
             },
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppTheme.space2XLarge),
           TextField(
             controller: _timeController,
             keyboardType: TextInputType.number,
@@ -76,9 +85,12 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
           onPressed: () {
             int? mins = int.tryParse(_timeController.text);
             if (mins != null && mins > 0) {
-              if (mins > 240) mins = 240; 
+              if (mins > AppTheme.maxNodeMins) mins = AppTheme.maxNodeMins;
               // Return the brand new SessionPhase object back to the parent
-              Navigator.pop(context, SessionPhase(type: _selectedType, durationMinutes: mins));
+              Navigator.pop(
+                context,
+                SessionPhase(type: _selectedType, durationMinutes: mins),
+              );
             }
           },
           child: const Text("Save"),

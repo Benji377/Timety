@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/screens/statistics_screen.dart';
+import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../data/focus/focus_models.dart';
@@ -348,7 +349,7 @@ class FocusScreen extends StatelessWidget {
                             ),
                           );
                         },
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppTheme.brMedium,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(

@@ -1,15 +1,16 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class InteractiveGauge extends StatefulWidget {
   final double progress;
   final bool isInteractive;
   final bool isStopwatch; // Triggers the pulse animation
   final ValueChanged<double>? onChanged; // Returns progress 0.0 to 1.0
-  
+
   final String label;
   final String centerText;
-  final String bottomText; 
+  final String bottomText;
   final Color bottomTextColor;
   final VoidCallback? onBottomTextTapped;
 
@@ -30,7 +31,8 @@ class InteractiveGauge extends StatefulWidget {
   State<InteractiveGauge> createState() => _InteractiveGaugeState();
 }
 
-class _InteractiveGaugeState extends State<InteractiveGauge> with SingleTickerProviderStateMixin {
+class _InteractiveGaugeState extends State<InteractiveGauge>
+    with SingleTickerProviderStateMixin {
   late double _progress;
   late AnimationController _pulseController;
 
@@ -38,9 +40,12 @@ class _InteractiveGaugeState extends State<InteractiveGauge> with SingleTickerPr
   void initState() {
     super.initState();
     _progress = widget.progress;
-    
+
     // The Stopwatch Pulse Animation
-    _pulseController = AnimationController(vsync: this, duration: const Duration(seconds: 2));
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: AppTheme.pulseDuration,
+    );
     if (widget.isStopwatch) _pulseController.repeat();
     _pulseController.addListener(() => setState(() {}));
   }
@@ -91,47 +96,89 @@ class _InteractiveGaugeState extends State<InteractiveGauge> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).colorScheme.primary;
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     // Determine what progress to paint based on mode
-    double paintProgress = widget.isStopwatch ? _pulseController.value : _progress;
-    
+    double paintProgress = widget.isStopwatch
+        ? _pulseController.value
+        : _progress;
+
     // Fade the track slightly during stopwatch pulse
-    double trackOpacity = widget.isStopwatch ? (1.0 - _pulseController.value).clamp(0.2, 1.0) : 1.0;
+    double trackOpacity = widget.isStopwatch
+        ? (1.0 - _pulseController.value).clamp(0.2, 1.0)
+        : 1.0;
 
     return GestureDetector(
-      onPanStart: (details) => _handlePan(details.localPosition, const Size(300, 300)),
-      onPanUpdate: (details) => _handlePan(details.localPosition, const Size(300, 300)),
+      onPanStart: (details) => _handlePan(
+        details.localPosition,
+        const Size(AppTheme.gaugeSize, AppTheme.gaugeSize),
+      ),
+      onPanUpdate: (details) => _handlePan(
+        details.localPosition,
+        const Size(AppTheme.gaugeSize, AppTheme.gaugeSize),
+      ),
       child: SizedBox(
-        width: 300,
-        height: 300,
+        width: AppTheme.gaugeSize,
+        height: AppTheme.gaugeSize,
         child: CustomPaint(
           painter: _GaugePainter(
             progress: paintProgress,
             color: primaryColor.withValues(alpha: trackOpacity),
             isInteractive: widget.isInteractive,
+            isDark: isDark,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: AppTheme.fsGaugeLabel),
               Text(
                 widget.label,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey.shade600),
+                style: TextStyle(
+                  fontSize: AppTheme.fsGaugeLabel,
+                  fontWeight: AppTheme.fwBold,
+                  letterSpacing: AppTheme.lsExtraWide,
+                  color: isDark
+                      ? AppTheme.gaugeLabelDark
+                      : AppTheme.gaugeTrackLight,
+                ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: AppTheme.spaceXSmall),
               Text(
                 widget.centerText,
-                style: const TextStyle(fontSize: 60, fontWeight: FontWeight.w300),
+                style: TextStyle(
+                  fontSize: AppTheme.fsGaugeDisplay,
+                  fontWeight: AppTheme.fwLight,
+                  color:
+                      Theme.of(context).textTheme.bodyLarge?.color ??
+                      AppTheme.gaugeTrackLight,
+                ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: AppTheme.spaceXSmall),
               GestureDetector(
                 onTap: widget.onBottomTextTapped,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.spaceLarge,
+                    vertical: AppTheme.spaceMedium,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppTheme.gaugeBgDark
+                        : AppTheme.gaugeBgLight,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusCircle),
+                    border: Border.all(
+                      color: isDark
+                          ? AppTheme.gaugeBorderDark
+                          : AppTheme.gaugeBorderLight,
+                    ),
+                  ),
                   child: Text(
                     "< ${widget.bottomText} >",
-                    style: TextStyle(color: widget.bottomTextColor, fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: widget.bottomTextColor,
+                      fontSize: AppTheme.fsBodyLarge,
+                      fontWeight: AppTheme.fwBold,
+                    ),
                   ),
                 ),
               ),
@@ -147,28 +194,61 @@ class _GaugePainter extends CustomPainter {
   final double progress;
   final Color color;
   final bool isInteractive;
+  final bool isDark;
 
-  _GaugePainter({required this.progress, required this.color, required this.isInteractive});
+  _GaugePainter({
+    required this.progress,
+    required this.color,
+    required this.isInteractive,
+    required this.isDark,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2;
-    final strokeWidth = 16.0; 
+    final strokeWidth = AppTheme.gaugeStrokeWidth;
     final innerRadius = radius - strokeWidth - 14;
 
-    final innerBackgroundPaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
-    canvas.drawShadow(Path()..addOval(Rect.fromCircle(center: center, radius: innerRadius)), Colors.black26, 4.0, true);
+    final innerBackgroundPaint = Paint()
+      ..color = isDark ? AppTheme.gaugeBgDark : AppTheme.gaugeWhite
+      ..style = PaintingStyle.fill;
+
+    canvas.drawShadow(
+      Path()..addOval(Rect.fromCircle(center: center, radius: innerRadius)),
+      (isDark ? AppTheme.gaugeBorderDark : AppTheme.gaugeBorderLight)
+          .withValues(alpha: 0.3),
+      4.0,
+      true,
+    );
+
     canvas.drawCircle(center, innerRadius, innerBackgroundPaint);
 
-    final innerBorderPaint = Paint()..color = Colors.grey.shade300..style = PaintingStyle.stroke..strokeWidth = 2;
+    final innerBorderPaint = Paint()
+      ..color = isDark ? AppTheme.gaugeBorderDark : AppTheme.gaugeBorderLight
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
     canvas.drawCircle(center, innerRadius, innerBorderPaint);
 
-    final trackPaint = Paint()..color = Colors.grey.shade300..style = PaintingStyle.stroke..strokeWidth = strokeWidth..strokeCap = StrokeCap.round;
+    final trackPaint = Paint()
+      ..color = isDark ? AppTheme.gaugeTrackDark : AppTheme.gaugeBorderLight
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
     canvas.drawCircle(center, radius - strokeWidth / 2, trackPaint);
 
-    final progressPaint = Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = strokeWidth..strokeCap = StrokeCap.round;
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius - strokeWidth / 2), -pi / 2, 2 * pi * progress, false, progressPaint);
+    final progressPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
+      -pi / 2,
+      2 * pi * progress,
+      false,
+      progressPaint,
+    );
 
     if (isInteractive) {
       final thumbAngle = (-pi / 2) + (2 * pi * progress);
@@ -177,19 +257,28 @@ class _GaugePainter extends CustomPainter {
         center.dy + (radius - strokeWidth / 2) * sin(thumbAngle),
       );
 
-      final shadowPaint = Paint()..color = color.withValues(alpha: 0.3)..style = PaintingStyle.fill;
+      final shadowPaint = Paint()
+        ..color = color.withValues(alpha: AppTheme.opacityLight)
+        ..style = PaintingStyle.fill;
       canvas.drawCircle(thumbCenter, 20, shadowPaint);
 
-      final thumbPaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+      final thumbPaint = Paint()
+        ..color = AppTheme.gaugeWhite
+        ..style = PaintingStyle.fill;
       canvas.drawCircle(thumbCenter, 14, thumbPaint);
-      
-      final borderPaint = Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 4;
+
+      final borderPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4;
       canvas.drawCircle(thumbCenter, 14, borderPaint);
     }
   }
 
   @override
   bool shouldRepaint(covariant _GaugePainter oldDelegate) {
-    return oldDelegate.progress != progress || oldDelegate.isInteractive != isInteractive;
+    return oldDelegate.progress != progress ||
+        oldDelegate.isInteractive != isInteractive ||
+        oldDelegate.isDark != isDark;
   }
 }

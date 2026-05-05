@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/screens/settings_screen.dart';
-
+import '../theme/app_theme.dart';
 import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
@@ -66,7 +66,7 @@ class HomeScreen extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         side: BorderSide(color: borderColor, width: 2),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppTheme.brMedium,
       ),
       child: ListTile(
         leading: Checkbox(

@@ -116,37 +116,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children:
-                  [
-                    Colors.blue,
-                    Colors.green,
-                    Colors.purple,
-                    Colors.orange,
-                  ].map((color) {
-                    final isSelected = settings.seedColor.toARGB32() == color.toARGB32();
-                    return GestureDetector(
-                      onTap: () => settings.setSeedColor(color),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: isSelected
-                              ? Border.all(color: Colors.white, width: 2)
-                              : null,
-                          boxShadow: isSelected
-                              ? [
-                                  const BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 4,
-                                  ),
-                                ]
-                              : null,
+                  [Colors.blue, Colors.green, Colors.purple, Colors.orange].map(
+                    (color) {
+                      final isSelected =
+                          settings.seedColor.toARGB32() == color.toARGB32();
+                      return GestureDetector(
+                        onTap: () => settings.setSeedColor(color),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: isSelected
+                                ? Border.all(color: Colors.white, width: 2)
+                                : null,
+                            boxShadow: isSelected
+                                ? [
+                                    const BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                    ),
+                                  ]
+                                : null,
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    },
+                  ).toList(),
             ),
           ),
 

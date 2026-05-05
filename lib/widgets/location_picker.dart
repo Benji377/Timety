@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -26,10 +27,12 @@ class _LocationPickerState extends State<LocationPicker> {
     _initialize();
   }
 
-// Helper to safely parse "Lat, Lng" strings back into map coordinates
+  // Helper to safely parse "Lat, Lng" strings back into map coordinates
   LatLng? _parseInitialLocation() {
-    if (widget.initialLocation == null || widget.initialLocation!.isEmpty) return null;
-    
+    if (widget.initialLocation == null || widget.initialLocation!.isEmpty) {
+      return null;
+    }
+
     final parts = widget.initialLocation!.split(',');
     if (parts.length == 2) {
       final lat = double.tryParse(parts[0].trim());
@@ -50,9 +53,9 @@ class _LocationPickerState extends State<LocationPicker> {
 
     // 2. If no valid coordinates were passed, get the GPS location
     if (_selectedPosition != null) {
-       _currentPosition = _selectedPosition; 
+      _currentPosition = _selectedPosition;
     } else {
-       await _determinePosition();
+      await _determinePosition();
     }
 
     setState(() {
@@ -75,7 +78,7 @@ class _LocationPickerState extends State<LocationPicker> {
       locationSettings: LocationSettings(accuracy: LocationAccuracy.medium),
     );
     _currentPosition = LatLng(position.latitude, position.longitude);
-    
+
     // Only set selected position to current if we didn't pass one in
     _selectedPosition ??= _currentPosition;
   }
@@ -94,24 +97,29 @@ class _LocationPickerState extends State<LocationPicker> {
             IconButton(
               icon: const Icon(Icons.check),
               onPressed: () {
-                Navigator.pop(context, "${_selectedPosition!.latitude.toStringAsFixed(5)}, ${_selectedPosition!.longitude.toStringAsFixed(5)}");
+                Navigator.pop(
+                  context,
+                  "${_selectedPosition!.latitude.toStringAsFixed(5)}, ${_selectedPosition!.longitude.toStringAsFixed(5)}",
+                );
               },
-            )
+            ),
         ],
       ),
       body: _hasInternet ? _buildOnlineMap() : _buildOfflineFallback(),
       // Add a quick FAB so users can jump back to their physical GPS location
-      floatingActionButton: _hasInternet ? FloatingActionButton(
-        heroTag: "gps_button",
-        onPressed: () async {
-          await _determinePosition();
-          if (_currentPosition != null) {
-            _mapController.move(_currentPosition!, 15.0);
-            setState(() => _selectedPosition = _currentPosition);
-          }
-        },
-        child: const Icon(Icons.my_location),
-      ) : null,
+      floatingActionButton: _hasInternet
+          ? FloatingActionButton(
+              heroTag: "gps_button",
+              onPressed: () async {
+                await _determinePosition();
+                if (_currentPosition != null) {
+                  _mapController.move(_currentPosition!, 15.0);
+                  setState(() => _selectedPosition = _currentPosition);
+                }
+              },
+              child: const Icon(Icons.my_location),
+            )
+          : null,
     );
   }
 
@@ -132,16 +140,18 @@ class _LocationPickerState extends State<LocationPicker> {
         ),
         // OFFICIAL OSM ATTRIBUTION
         const RichAttributionWidget(
-          attributions: [
-            TextSourceAttribution('© OpenStreetMap contributors'),
-          ],
+          attributions: [TextSourceAttribution('© OpenStreetMap contributors')],
         ),
         if (_selectedPosition != null)
           MarkerLayer(
             markers: [
               Marker(
                 point: _selectedPosition!,
-                child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
+                child: const Icon(
+                  Icons.location_pin,
+                  color: Colors.red,
+                  size: 40,
+                ),
               ),
             ],
           ),
@@ -152,18 +162,18 @@ class _LocationPickerState extends State<LocationPicker> {
   Widget _buildOfflineFallback() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: AppTheme.paddingScreenVertical,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
+            SizedBox(height: AppTheme.spaceLarge),
             const Text(
               'You are offline. The map cannot be displayed.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: AppTheme.fsBodyLarge),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: AppTheme.space2XLarge),
             if (_currentPosition != null) ...[
               const Text('We found your GPS coordinates:'),
               Text(

@@ -16,9 +16,7 @@ class FocusModesScreen extends StatelessWidget {
     final modes = focusProvider.modes;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Modes'),
-      ),
+      appBar: AppBar(title: const Text('Manage Modes')),
       body: ListView.builder(
         padding: const EdgeInsets.only(bottom: 100, top: 16),
         itemCount: modes.length,
@@ -60,13 +58,17 @@ class ModeEditCard extends StatefulWidget {
 class _ModeEditCardState extends State<ModeEditCard> {
   late TextEditingController _nameController;
   late List<SessionPhase> _tempPhases;
-  bool _isEditing = false; 
+  bool _isEditing = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.mode.name);
-    _tempPhases = widget.mode.phases.map((p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes)).toList();
+    _tempPhases = widget.mode.phases
+        .map(
+          (p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
+        )
+        .toList();
   }
 
   @override
@@ -74,7 +76,12 @@ class _ModeEditCardState extends State<ModeEditCard> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.mode.id != widget.mode.id && !_isEditing) {
       _nameController.text = widget.mode.name;
-      _tempPhases = widget.mode.phases.map((p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes)).toList();
+      _tempPhases = widget.mode.phases
+          .map(
+            (p) =>
+                SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
+          )
+          .toList();
     }
   }
 
@@ -134,13 +141,19 @@ class _ModeEditCardState extends State<ModeEditCard> {
     );
 
     context.read<FocusProvider>().saveCustomMode(updatedMode);
-    setState(() => _isEditing = false); 
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Mode Saved!")));
+    setState(() => _isEditing = false);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Mode Saved!")));
   }
 
   void _cancelEdit() {
     _nameController.text = widget.mode.name;
-    _tempPhases = widget.mode.phases.map((p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes)).toList();
+    _tempPhases = widget.mode.phases
+        .map(
+          (p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
+        )
+        .toList();
     setState(() => _isEditing = false);
   }
 
@@ -173,16 +186,26 @@ class _ModeEditCardState extends State<ModeEditCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.mode.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  Text(
+                    widget.mode.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.mode.isSystem ? "System Mode" : "Custom Mode", 
-                    style: TextStyle(color: widget.mode.isSystem ? Colors.grey : Colors.blue, fontSize: 13, fontWeight: FontWeight.w500)
+                    widget.mode.isSystem ? "System Mode" : "Custom Mode",
+                    style: TextStyle(
+                      color: widget.mode.isSystem ? Colors.grey : Colors.blue,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             ),
-            
+
             if (widget.mode.isSystem)
               const Padding(
                 padding: EdgeInsets.all(8.0),
@@ -206,9 +229,9 @@ class _ModeEditCardState extends State<ModeEditCard> {
               ),
           ],
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Align(
           alignment: Alignment.centerLeft,
           child: ModeTimeline(
@@ -228,24 +251,37 @@ class _ModeEditCardState extends State<ModeEditCard> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("Editing Mode", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue)),
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: _cancelEdit,
-            )
+            const Text(
+              "Editing Mode",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.blue,
+              ),
+            ),
+            IconButton(icon: const Icon(Icons.close), onPressed: _cancelEdit),
           ],
         ),
         const SizedBox(height: 16),
-        
+
         TextField(
           controller: _nameController,
-          decoration: const InputDecoration(labelText: "Mode Name", border: OutlineInputBorder()),
+          decoration: const InputDecoration(
+            labelText: "Mode Name",
+            border: OutlineInputBorder(),
+          ),
         ),
         const SizedBox(height: 24),
-        
-        const Text("Timeline Phases:", style: TextStyle(fontWeight: FontWeight.bold)),
+
+        const Text(
+          "Timeline Phases:",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
-        const Text("Tap a phase to edit or delete it.", style: TextStyle(fontSize: 12, color: Colors.grey)),
+        const Text(
+          "Tap a phase to edit or delete it.",
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
         const SizedBox(height: 16),
 
         SingleChildScrollView(
@@ -264,19 +300,35 @@ class _ModeEditCardState extends State<ModeEditCard> {
                         height: 56,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: phase.type == PhaseType.focus ? Colors.green : Colors.orange,
-                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+                          color: phase.type == PhaseType.focus
+                              ? Colors.green
+                              : Colors.orange,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Center(
                           child: Text(
-                            "${phase.durationMinutes == -1 ? 'Flex' : phase.durationMinutes}\nm", 
+                            "${phase.durationMinutes == -1 ? 'Flex' : phase.durationMinutes}\nm",
                             textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    Container(width: 24, height: 2, color: Colors.grey.shade300),
+                    Container(
+                      width: 24,
+                      height: 2,
+                      color: Colors.grey.shade300,
+                    ),
                   ],
                 );
               }),
@@ -288,7 +340,11 @@ class _ModeEditCardState extends State<ModeEditCard> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.grey.shade200,
-                    border: Border.all(color: Colors.grey.shade400, style: BorderStyle.solid, width: 2),
+                    border: Border.all(
+                      color: Colors.grey.shade400,
+                      style: BorderStyle.solid,
+                      width: 2,
+                    ),
                   ),
                   child: const Icon(Icons.add, color: Colors.grey),
                 ),
@@ -296,16 +352,13 @@ class _ModeEditCardState extends State<ModeEditCard> {
             ],
           ),
         ),
-        
+
         const SizedBox(height: 24),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            TextButton(
-              onPressed: _cancelEdit,
-              child: const Text("Cancel"),
-            ),
+            TextButton(onPressed: _cancelEdit, child: const Text("Cancel")),
             const SizedBox(width: 8),
             ElevatedButton.icon(
               onPressed: _saveMode,
