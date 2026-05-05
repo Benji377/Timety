@@ -7,6 +7,11 @@ class AppTheme {
   static const Color warningColor = Colors.amber;
   static const Color infoColor = Colors.blue;
 
+  // Types colors
+  static const Color typeTaskColor = Colors.blue;
+  static const Color typeHabitColor = Colors.purple;
+  static const Color typeFocusColor = Colors.green;
+
   // Phase type colors
   static const Color phaseFocusColor = Colors.blue;
   static const Color phaseBreakShortColor = Colors.orange;

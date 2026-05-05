@@ -31,6 +31,8 @@ class Habit {
   
   @HiveField(7) final DateTime createdAt;
   @HiveField(8) int colorValue;
+  @HiveField(9) String? notes;
+  @HiveField(10) int? iconCodePoint;
 
   Habit({
     required this.id,
@@ -39,6 +41,8 @@ class Habit {
     this.targetDaysPerWeek,
     this.targetWeekdays,
     this.targetTimeMinutes,
+    this.notes,
+    this.iconCodePoint,
     List<DateTime>? completions,
     DateTime? createdAt,
     int? colorValue,
@@ -63,4 +67,6 @@ class Habit {
       targetTimeMinutes = time.hour * 60 + time.minute;
     }
   }
+
+  IconData? get iconData => iconCodePoint != null ? IconData(iconCodePoint!, fontFamily: 'MaterialIcons') : null;
 }

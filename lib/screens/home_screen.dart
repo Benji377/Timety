@@ -148,13 +148,27 @@ class HomeScreen extends StatelessWidget {
           activeColor: color,
           onChanged: (_) => provider.toggleCompletionToday(habit),
         ),
-        title: Text(
-          habit.name,
-          style: TextStyle(
-            decoration: isCompleted ? TextDecoration.lineThrough : null,
-            color: isCompleted ? Colors.grey : null,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            if (habit.iconData != null) ...[
+              Icon(
+                habit.iconData,
+                size: 18,
+                color: isCompleted ? Colors.grey : color,
+              ),
+              const SizedBox(width: AppTheme.spaceSmall),
+            ],
+            Expanded(
+              child: Text(
+                habit.name,
+                style: TextStyle(
+                  decoration: isCompleted ? TextDecoration.lineThrough : null,
+                  color: isCompleted ? Colors.grey : null,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
         subtitle: habit.targetTime != null
             ? Text(
