@@ -34,7 +34,7 @@ class SettingsProvider extends ChangeNotifier {
     final themeIndex = _prefs?.getInt('themeMode') ?? ThemeMode.system.index;
     _themeMode = ThemeMode.values[themeIndex];
     
-    final colorValue = _prefs?.getInt('seedColor') ?? Colors.blue.value;
+    final colorValue = _prefs?.getInt('seedColor') ?? Colors.blue.toARGB32();
     _seedColor = Color(colorValue);
 
     // Notifications
@@ -60,7 +60,7 @@ class SettingsProvider extends ChangeNotifier {
 
   void setSeedColor(Color color) {
     _seedColor = color;
-    _prefs?.setInt('seedColor', color.value);
+    _prefs?.setInt('seedColor', color.toARGB32());
     notifyListeners();
   }
 

@@ -122,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Colors.purple,
                     Colors.orange,
                   ].map((color) {
-                    final isSelected = settings.seedColor.value == color.value;
+                    final isSelected = settings.seedColor.toARGB32() == color.toARGB32();
                     return GestureDetector(
                       onTap: () => settings.setSeedColor(color),
                       child: Container(
@@ -207,7 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Daily Motivation'),
             subtitle: const Text('Get a reminder to crush your goals'),
             value: settings.notificationsEnabled,
-            activeColor: Theme.of(context).colorScheme.primary,
+            activeThumbColor: Theme.of(context).colorScheme.primary,
             onChanged: (val) => settings.setNotificationsEnabled(val),
           ),
           ListTile(
@@ -235,7 +235,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Card(
               color: Theme.of(
                 context,
-              ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
