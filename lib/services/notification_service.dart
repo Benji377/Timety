@@ -1,8 +1,10 @@
+// lib/services/notification_service.dart
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'dart:io';
 
 class NotificationService {
@@ -10,36 +12,31 @@ class NotificationService {
   static final NotificationService instance = NotificationService._internal();
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
+
+  // Reserved IDs to prevent collisions
+  static const int dailyMotivationId = 9999;
+  static const int endOfDayCheckupId = 9998;
 
   Future<void> init() async {
     if (_isInitialized) return;
 
-    // --- WEB GUARD ---
-    // If we are running on Chrome/Web for UI testing, skip the mobile notification setup
     if (kIsWeb) {
       _isInitialized = true;
       return;
     }
 
-    // 1. Initialize Timezones
     tz.initializeTimeZones();
     final TimezoneInfo timeZoneName = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timeZoneName.identifier));
 
-    // 2. Android Initialization Settings
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    // 3. iOS Initialization Settings
-    const DarwinInitializationSettings iosSettings =
-        DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-        );
+    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
@@ -48,32 +45,29 @@ class NotificationService {
 
     await _notificationsPlugin.initialize(settings: initSettings);
 
-    // Request permissions for Android 13+
     if (Platform.isAndroid) {
       await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
     }
 
     _isInitialized = true;
   }
 
-  // --- MODULAR CAPABILITIES ---
+  // --- HELPER: GENERATE PREDICTABLE IDs ---
+  // We use prefixes so a task and a habit with similar data don't collide
+  int _generateId(String stringId, String prefix) {
+    return ('${prefix}_$stringId').hashCode;
+  }
 
-  /// Schedules a specific reminder for a task
+  // --- 1. TASKS ---
   Future<void> scheduleTaskReminder({
-    required int notificationId, // Plugin requires int IDs
+    required int notificationId, 
     required String title,
     required String body,
     required DateTime scheduledTime,
   }) async {
-    // --- WEB GUARD ---
-    if (kIsWeb) return;
-
-    // Don't schedule in the past
-    if (scheduledTime.isBefore(DateTime.now())) return;
+    if (kIsWeb || scheduledTime.isBefore(DateTime.now())) return;
 
     await _notificationsPlugin.zonedSchedule(
       id: notificationId,
@@ -95,59 +89,120 @@ class NotificationService {
     );
   }
 
-  /// Cancels a specific notification
-  Future<void> cancelNotification(int notificationId) async {
-    // --- WEB GUARD ---
+  // --- 2. HABIT SPECIFIC TIMES ---
+  /// Schedules a reminder for a habit at its designated time (e.g., 17:00)
+  Future<void> scheduleHabitReminder({
+    required String habitId,
+    required String habitName,
+    required TimeOfDay time,
+  }) async {
     if (kIsWeb) return;
 
-    await _notificationsPlugin.cancel(id: notificationId);
-  }
-
-  /// Future implementation: Daily Motivation
-  Future<void> scheduleDailyMotivation() async {
-    // --- WEB GUARD ---
-    if (kIsWeb) return;
-
-    // 1. Set the time you want it to fire (e.g., 8:00 AM)
     final now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      8,
-      0,
-    );
+    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, time.hour, time.minute);
 
-    // If it's already past 8:00 AM today, schedule for tomorrow
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    // 2. A fun list of rotating quotes!
+    await _notificationsPlugin.zonedSchedule(
+      id: _generateId(habitId, 'habit_time'),
+      title: 'Habit Reminder',
+      body: 'Time to: $habitName',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'habit_reminders_channel',
+          'Habit Reminders',
+          channelDescription: 'Specific time reminders for your habits',
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time, // Repeats daily at this time!
+    );
+  }
+
+  // --- 3. DAILY MOTIVATION (WITH DYNAMIC HABITS) ---
+  /// Called every time the app opens or habits change to refresh tomorrow's message
+  Future<void> scheduleDailyMotivation({
+    required TimeOfDay time,
+    bool includeHabits = true,
+    List<String> todaysHabits = const [],
+  }) async {
+    if (kIsWeb) return;
+
+    final now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, time.hour, time.minute);
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
     final quotes = [
       "Conquer your day! 🚀",
       "Small steps lead to big results. Keep going! 💪",
       "What's on the agenda today? Let's make it happen.",
-      "Clear your mind, organize your tasks.",
-      "You have a 100% track record of surviving bad days.",
     ];
-    // Use the day of the year to pick a pseudo-random quote that changes daily
-    final quote = quotes[now.day % quotes.length];
+    String body = quotes[now.day % quotes.length];
 
-    // 3. Schedule the recurring alarm
+    // Dynamically append habits if requested!
+    if (includeHabits && todaysHabits.isNotEmpty) {
+      String habitList = todaysHabits.take(2).join(", ");
+      if (todaysHabits.length > 2) habitList += " and more";
+      body += "\nDon't forget to $habitList today!";
+    }
+
     await _notificationsPlugin.zonedSchedule(
-      id: 9999, // Reserved ID for daily motivation
+      id: dailyMotivationId,
       title: 'Good Morning!',
-      body: quote,
+      body: body,
       scheduledDate: scheduledDate,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'daily_motivation_channel',
           'Daily Motivation',
           channelDescription: 'Your daily morning boost',
-          importance: Importance
-              .defaultImportance, // Doesn't need to be MAX like a task alarm
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+          styleInformation: BigTextStyleInformation(''), // Allows multi-line text
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  // --- 4. END OF DAY CHECKUP ---
+  /// A gentle nudge in the evening
+  Future<void> scheduleEndOfDayCheckup({
+    required TimeOfDay time, // e.g., 20:00 (8 PM)
+  }) async {
+    if (kIsWeb) return;
+
+    final now = tz.TZDateTime.now(tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, time.hour, time.minute);
+
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    await _notificationsPlugin.zonedSchedule(
+      id: endOfDayCheckupId,
+      title: 'Evening Check-in 🌙',
+      body: 'Did you complete all your habits today? Tap to log them!',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'evening_checkup_channel',
+          'Evening Checkup',
+          channelDescription: 'End of day reminders to log habits',
+          importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
           icon: '@mipmap/ic_launcher',
         ),
@@ -156,5 +211,16 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+  }
+
+  // --- CANCEL CAPABILITIES ---
+  Future<void> cancelNotification(int notificationId) async {
+    if (kIsWeb) return;
+    await _notificationsPlugin.cancel(id: notificationId);
+  }
+
+  Future<void> cancelHabitReminder(String habitId) async {
+    if (kIsWeb) return;
+    await _notificationsPlugin.cancel(id: _generateId(habitId, 'habit_time'));
   }
 }

@@ -46,7 +46,6 @@ void main() async {
   Hive.registerAdapter(HabitAdapter());
 
   await NotificationService.instance.init();
-  await NotificationService.instance.scheduleDailyMotivation();
 
   runApp(const TimetyApp());
 }
@@ -65,7 +64,14 @@ class TimetyApp extends StatelessWidget {
           create: (_) => FocusProvider(repository: HiveFocusRepository()),
         ),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
-        ChangeNotifierProvider(create: (_) => HabitProvider(repository: HiveHabitRepository())),
+        ChangeNotifierProxyProvider<SettingsProvider, HabitProvider>(
+          create: (_) => HabitProvider(repository: HiveHabitRepository()),
+          update: (_, settings, habitProvider) {
+            // Whenever settings change, pass them into the Habit Provider
+            habitProvider?.updateSettings(settings);
+            return habitProvider!;
+          },
+        ),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
