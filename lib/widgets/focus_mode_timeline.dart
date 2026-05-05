@@ -41,22 +41,24 @@ class ModeTimeline extends StatelessWidget {
       return Container(
         width: 24,
         height: 3,
-        color: isPast ? Colors.grey.shade400 : Colors.grey.shade200,
+        // Only darken past lines if the timer is actually running
+        color: (isRunning && isPast) ? Colors.grey.shade400 : Colors.grey.shade200,
       );
     }
 
     // 1. Start Node
-    nodes.add(buildDot(Colors.grey.shade500, currentPhaseIndex == 0 && !isCompleted && isRunning));
+    nodes.add(buildDot(Colors.grey.shade500, isRunning && currentPhaseIndex == 0 && !isCompleted));
 
     // 2. Phase Nodes
     for (int i = 0; i < phases.length; i++) {
       nodes.add(buildLine(currentPhaseIndex > i));
       
-      bool isActive = currentPhaseIndex == i && !isCompleted;
+      // ONLY set as active if the timer is running
+      bool isActive = isRunning && currentPhaseIndex == i && !isCompleted;
       Color dotColor = phases[i].type == PhaseType.focus ? Colors.green : Colors.orange;
       
-      // Fade future nodes so the path forward is clear
-      if (currentPhaseIndex < i) {
+      // ONLY fade future nodes if the timer is running (otherwise show full preview)
+      if (isRunning && currentPhaseIndex < i) {
         dotColor = dotColor.withValues(alpha: 0.3);
       }
 
@@ -65,7 +67,7 @@ class ModeTimeline extends StatelessWidget {
 
     // 3. End Node
     nodes.add(buildLine(isCompleted));
-    nodes.add(buildDot(Colors.grey.shade500, isCompleted));
+    nodes.add(buildDot(Colors.grey.shade500, isRunning && isCompleted));
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

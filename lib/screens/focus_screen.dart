@@ -5,6 +5,7 @@ import '../data/focus_models.dart';
 import '../widgets/interactive_gauge.dart';
 import '../widgets/focus_mode_timeline.dart';
 import 'calendar_screen.dart';
+import 'focus_modes_screen.dart';
 
 class FocusScreen extends StatelessWidget {
   const FocusScreen({super.key});
@@ -220,13 +221,34 @@ class FocusScreen extends StatelessWidget {
               ),
               SizedBox(
                 width: 180,
-                child: Text(
-                  activeMode?.name.toUpperCase() ?? 'SELECT MODE',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
+                child: InkWell(
+                  onTap: (isRunning || isPaused)
+                      ? null
+                      : () {
+                          // Navigates to the Modes page (hiding the navbar)
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const FocusModesScreen(),
+                            ),
+                          );
+                        },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      activeMode?.name.toUpperCase() ?? 'SELECT MODE',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        // Make it primary color to hint that it's clickable
+                        color: (isRunning || isPaused)
+                            ? Colors.grey
+                            : Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ),
               ),
