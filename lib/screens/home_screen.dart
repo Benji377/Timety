@@ -5,12 +5,13 @@ import 'package:timety/screens/settings_screen.dart';
 import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
+import '../providers/settings_provider.dart';
 import '../utils/utils.dart';
 import '../widgets/interactive_gauge.dart';
 import 'task/task_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-final VoidCallback onNavigateToFocus;
+  final VoidCallback onNavigateToFocus;
 
   const HomeScreen({super.key, required this.onNavigateToFocus});
 
@@ -130,10 +131,11 @@ final VoidCallback onNavigateToFocus;
     // Providers
     final focusProvider = context.watch<FocusProvider>();
     final taskProvider = context.watch<TaskProvider>();
+    final settings = context.watch<SettingsProvider>();
 
     // Focus Calculations
     int focusMinsToday = focusProvider.getMinutesFocusedToday();
-    int dailyTarget = focusProvider.dailyTargetMinutes;
+    int dailyTarget = settings.dailyGoalMins;
     double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
 
     // Task Calculations (Due Today + Overdue)

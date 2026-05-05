@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
+import '../providers/settings_provider.dart';
 
 class OverviewStatsScreen extends StatelessWidget {
   const OverviewStatsScreen({super.key});
@@ -16,9 +17,14 @@ class OverviewStatsScreen extends StatelessWidget {
 
   // --- DATA EXTRACTORS ---
   int _getTasksForDay(List<Task> tasks, DateTime day) {
-    return tasks.where((t) => 
-      t.isCompleted && t.completedAt != null && _isSameDay(t.completedAt!, day)
-    ).length;
+    return tasks
+        .where(
+          (t) =>
+              t.isCompleted &&
+              t.completedAt != null &&
+              _isSameDay(t.completedAt!, day),
+        )
+        .length;
   }
 
   int _getFocusForDay(FocusProvider provider, DateTime day) {
@@ -39,41 +45,63 @@ class OverviewStatsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final taskProvider = context.watch<TaskProvider>();
     final focusProvider = context.watch<FocusProvider>();
+    final settings = context.watch<SettingsProvider>();
 
     final now = DateTime.now();
     int tasksCompletedToday = _getTasksForDay(taskProvider.tasks, now);
     int focusMinsToday = _getFocusForDay(focusProvider, now);
-    int focusTarget = focusProvider.dailyTargetMinutes;
+    int focusTarget = settings.dailyGoalMins;
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text("Today's Summary", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          "Today's Summary",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
-        
+
         // --- KPI CARDS ---
         Row(
           children: [
-            _buildKpiCard(context, "Tasks Done", "$tasksCompletedToday", Icons.task_alt, Colors.green),
+            _buildKpiCard(
+              context,
+              "Tasks Done",
+              "$tasksCompletedToday",
+              Icons.task_alt,
+              Colors.green,
+            ),
             const SizedBox(width: 16),
-            _buildKpiCard(context, "Focus Time", "${focusMinsToday}m", Icons.timer, Colors.blue),
+            _buildKpiCard(
+              context,
+              "Focus Time",
+              "${focusMinsToday}m",
+              Icons.timer,
+              Colors.blue,
+            ),
           ],
         ),
         const SizedBox(height: 16),
         _buildKpiCard(
-          context, 
-          "Daily Focus Goal", 
-          "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%", 
-          Icons.track_changes, 
-          Colors.orange
+          context,
+          "Daily Focus Goal",
+          "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
+          Icons.track_changes,
+          Colors.orange,
         ),
-        
+
         const SizedBox(height: 40),
-        
+
         // --- SYNERGY HEADER ---
-        const Text("Productivity Synergy", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          "Productivity Synergy",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 4),
-        const Text("Focus Time vs. Task Completion (Last 7 Days)", style: TextStyle(fontSize: 12, color: Colors.grey)),
+        const Text(
+          "Focus Time vs. Task Completion (Last 7 Days)",
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
         const SizedBox(height: 16),
 
         // --- LEGEND ---
@@ -82,11 +110,25 @@ class OverviewStatsScreen extends StatelessWidget {
           children: [
             Icon(Icons.circle, size: 12, color: Colors.blue.shade400),
             const SizedBox(width: 4),
-            const Text("Focus Mins", style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+            const Text(
+              "Focus Mins",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(width: 24),
             Icon(Icons.circle, size: 12, color: Colors.green.shade400),
             const SizedBox(width: 4),
-            const Text("Tasks Done", style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+            const Text(
+              "Tasks Done",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 24),
@@ -101,7 +143,13 @@ class OverviewStatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildKpiCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildKpiCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Card(
         elevation: 0,
@@ -116,8 +164,17 @@ class OverviewStatsScreen extends StatelessWidget {
             children: [
               Icon(icon, color: color),
               const SizedBox(height: 12),
-              Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
             ],
           ),
         ),
@@ -126,19 +183,30 @@ class OverviewStatsScreen extends StatelessWidget {
   }
 
   // --- SYNERGY CHART BUILDER ---
-  Widget _buildSynergyChart(BuildContext context, TaskProvider taskProvider, FocusProvider focusProvider) {
+  Widget _buildSynergyChart(
+    BuildContext context,
+    TaskProvider taskProvider,
+    FocusProvider focusProvider,
+  ) {
     final now = DateTime.now();
     // Generate the last 7 days ending in today
-    final last7Days = List.generate(7, (i) => now.subtract(Duration(days: 6 - i)));
-    
+    final last7Days = List.generate(
+      7,
+      (i) => now.subtract(Duration(days: 6 - i)),
+    );
+
     // Extract actual real-world data
-    final dailyFocus = last7Days.map((d) => _getFocusForDay(focusProvider, d)).toList();
-    final dailyTasks = last7Days.map((d) => _getTasksForDay(taskProvider.tasks, d)).toList();
+    final dailyFocus = last7Days
+        .map((d) => _getFocusForDay(focusProvider, d))
+        .toList();
+    final dailyTasks = last7Days
+        .map((d) => _getTasksForDay(taskProvider.tasks, d))
+        .toList();
 
     // Normalization logic: find the highest value in both lists
     double maxFocus = dailyFocus.reduce(max).toDouble();
     if (maxFocus < 1) maxFocus = 1; // Prevent divide by zero
-    
+
     double maxTasks = dailyTasks.reduce(max).toDouble();
     if (maxTasks < 1) maxTasks = 1;
 
@@ -164,13 +232,19 @@ class OverviewStatsScreen extends StatelessWidget {
                 final dayIndex = touchedSpot.x.toInt();
                 if (touchedSpot.barIndex == 0) {
                   return LineTooltipItem(
-                    '${dailyFocus[dayIndex]} mins\n', 
-                    TextStyle(color: Colors.blue.shade300, fontWeight: FontWeight.bold)
+                    '${dailyFocus[dayIndex]} mins\n',
+                    TextStyle(
+                      color: Colors.blue.shade300,
+                      fontWeight: FontWeight.bold,
+                    ),
                   );
                 } else {
                   return LineTooltipItem(
-                    '${dailyTasks[dayIndex]} tasks', 
-                    TextStyle(color: Colors.green.shade300, fontWeight: FontWeight.bold)
+                    '${dailyTasks[dayIndex]} tasks',
+                    TextStyle(
+                      color: Colors.green.shade300,
+                      fontWeight: FontWeight.bold,
+                    ),
                   );
                 }
               }).toList();
@@ -190,18 +264,26 @@ class OverviewStatsScreen extends StatelessWidget {
                   child: Text(
                     DateFormat('EEE').format(day),
                     style: TextStyle(
-                      fontSize: 12, 
-                      color: isToday ? Theme.of(context).colorScheme.primary : Colors.grey,
-                      fontWeight: isToday ? FontWeight.bold : FontWeight.normal
+                      fontSize: 12,
+                      color: isToday
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
+                      fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 );
               },
             ),
           ),
-          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         lineBarsData: [
           // 1. FOCUS LINE

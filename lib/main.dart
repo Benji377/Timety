@@ -45,7 +45,7 @@ void main() async {
 class TimetyApp extends StatelessWidget {
   const TimetyApp({super.key});
 
-@override
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
@@ -55,14 +55,24 @@ class TimetyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => FocusProvider(repository: HiveFocusRepository()),
         ),
-        ChangeNotifierProvider(
-          create: (_) => SettingsProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
-      child: MaterialApp(
-        title: 'Timety',
-        theme: AppTheme.lightTheme,
-        home: const MainScreen(),
+      child: Consumer<SettingsProvider>(
+        builder: (context, settings, _) {
+          return MaterialApp(
+            title: 'Timety',
+            theme: AppTheme.buildTheme(
+              seedColor: settings.seedColor,
+              brightness: Brightness.light,
+            ),
+            darkTheme: AppTheme.buildTheme(
+              seedColor: settings.seedColor,
+              brightness: Brightness.dark,
+            ),
+            themeMode: settings.themeMode,
+            home: const MainScreen(),
+          );
+        },
       ),
     );
   }
