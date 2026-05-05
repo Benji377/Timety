@@ -1,0 +1,49 @@
+name: Lint
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint:
+    name: Flutter Analyze
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters
+        # Crucial: We must generate the Hive files before linting, or it will throw errors
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze code
+        run: flutter analyze --machine > flutter_analyze.log || true
+
+      - name: Convert to SARIF
+        uses: advanced-security/dart-analyzer-sarif@main
+        with:
+          input: flutter_analyze.log
+          output: flutter.sarif
+
+      # 3. Upload to GitHub Code Scanning UI
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: flutter.sarif
+          wait-for-processing: true

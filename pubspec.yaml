@@ -48,6 +48,7 @@ dependencies:
   hive_flutter: ^1.1.0
   shared_preferences: ^2.5.5
   image_picker: ^1.2.2
+  very_good_analysis: ^10.2.0
 
 dev_dependencies:
   flutter_test:
