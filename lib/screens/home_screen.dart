@@ -7,11 +7,12 @@ import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../utils/utils.dart';
 import '../widgets/interactive_gauge.dart';
-import 'focus_screen.dart';
 import 'task_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+final VoidCallback onNavigateToFocus;
+
+  const HomeScreen({super.key, required this.onNavigateToFocus});
 
   // --- GREETING HELPER ---
   String _getGreeting(String name) {
@@ -192,14 +193,7 @@ class HomeScreen extends StatelessWidget {
               flex: 5,
               child: Center(
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const FocusScreen(),
-                      ),
-                    );
-                  },
+                  onTap: onNavigateToFocus,
                   child: InteractiveGauge(
                     progress: focusProgress,
                     isInteractive: false, // Read-only on the home screen

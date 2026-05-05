@@ -1,4 +1,3 @@
-// lib/screens/main_screen.dart
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'focus_screen.dart';
@@ -13,30 +12,32 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // We default to index 0 (Home) so the app opens right to the home screen
   int _currentIndex = 0;
 
-  // The list of pages to show
-  final List<Widget> _pages = const [
-    HomeScreen(),
-    FocusScreen(),
-    TaskListScreen(),
-    SettingsScreen(),
-  ];
+  // Helper method to switch tabs
+  void _switchTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // IndexedStack keeps the state of all pages alive
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      // Move the pages directly into the IndexedStack
+      body: IndexedStack(
+        index: _currentIndex, 
+        children: [
+          // Pass the tab-switching function down to the HomeScreen
+          HomeScreen(onNavigateToFocus: () => _switchTab(1)), 
+          const FocusScreen(),
+          const TaskListScreen(),
+          const SettingsScreen(),
+        ]
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        // 'fixed' ensures the labels always show and the background doesn't shift
+        onTap: _switchTab, // Simplify the onTap call
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
