@@ -1,20 +1,53 @@
-# timety
+# Timety 🚀
 
-A new Flutter project.
+Timety is a comprehensive, offline-first productivity and time-management application built with Flutter. It seamlessly integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
 
-## Getting Started
+## ✨ Features
 
-This project is a starting point for a Flutter application.
+*   **Intelligent Task Management:** Organize one-off tasks with due dates, priority levels, and effort sizes.
+*   **Focus Engine:** A robust stopwatch and timer system tailored for deep work. Includes support for tags, custom modes, and short/long break phases.
+*   **Habit Tracker:** Build lasting routines with flexible frequencies (daily, specific weekdays, or flexible weekly goals).
+*   **Rich Analytics:** Visualize your productivity with interactive charts, weekly velocity metrics, and time-of-day habit analysis.
+*   **Gamification:** Track your active days, build streaks, and level up your productivity profile.
+*   **Smart Notifications:** Local reminders for tasks, specific habit times, and dynamic daily motivation.
+*   **Unified Calendar:** A custom micro-dot calendar view to see your tasks, focus sessions, and habits at a glance.
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Tech Stack
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+*   **Framework:** [Flutter](https://flutter.dev/) (Dart)
+*   **Local Storage:** [Hive](https://pub.dev/packages/hive) (Fast, NoSQL local database)
+*   **State Management:** [Provider](https://pub.dev/packages/provider)
+*   **Charts:** [fl_chart](https://pub.dev/packages/fl_chart)
+*   **Notifications:** [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Getting Started
 
-## Frameworks
-- https://flutter.syncfusion.com/
+### Prerequisites
+*   Flutter SDK (Stable channel)
+*   Dart SDK
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/yourusername/timety.git](https://github.com/yourusername/timety.git)
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd timety
+   ```
+3. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+4. **Crucial Step:** Generate the Hive database adapters:
+   ```bash
+   flutter pub run build_runner build --delete-conflicting-outputs
+   ```
+5. Run the app:
+   ```bash
+   flutter run
+   ```
+
+## 🔒 Privacy
+Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Hive. No accounts, no cloud sync, no tracking.
