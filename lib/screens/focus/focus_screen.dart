@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timety/screens/statistics_screen.dart';
 import '../../providers/focus_provider.dart';
 import '../../data/focus/focus_models.dart';
 import '../../widgets/focus_mode_timeline.dart';
@@ -191,7 +192,9 @@ class FocusScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Focus'),
         actions: [
-          IconButton(icon: const Icon(Icons.bar_chart), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.bar_chart), onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const StatisticsScreen()));
+          }),
           IconButton(
             icon: const Icon(Icons.calendar_today),
             tooltip: 'Calendar View',
