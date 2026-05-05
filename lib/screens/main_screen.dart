@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'focus/focus_screen.dart';
 import 'task/task_list_screen.dart';
-import 'settings_screen.dart';
+import 'user_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -32,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
           HomeScreen(onNavigateToFocus: () => _switchTab(1)), 
           const FocusScreen(),
           const TaskListScreen(),
-          const SettingsScreen(),
+          const UserScreen(),
         ]
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -58,9 +58,9 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Tasks',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),

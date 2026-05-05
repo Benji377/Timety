@@ -127,6 +127,7 @@ class AppTheme {
   static const double iconSizeSmall = 18;
   static const double iconSizeMedium = 24;
   static const double iconSizeLarge = 32;
+  static const double profileImageSize = 100;
 
   // ===== DURATIONS =====
   static const Duration animationFast = Duration(milliseconds: 150);

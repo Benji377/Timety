@@ -126,7 +126,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userName = "Bobert"; // Hardcoded for now
+    final userName = context.watch<SettingsProvider>().userName;
 
     // Providers
     final focusProvider = context.watch<FocusProvider>();
