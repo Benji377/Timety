@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
-import '../theme/app_theme.dart'; // Make sure this path is correct!
+import '../theme/app_theme.dart';
 import 'statistics_screen.dart';
 import 'settings_screen.dart';
 
