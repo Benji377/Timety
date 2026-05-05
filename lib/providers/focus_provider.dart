@@ -19,7 +19,6 @@ class FocusProvider extends ChangeNotifier {
   bool _isRunning = false;
   bool _isPaused = false;
   int _currentSecondsFocussed = 0;
-  int _dailyTargetMinutes = 90;
 
   int _currentPhaseIndex = 0;
   int _secondsRemainingInPhase = 0;
@@ -32,7 +31,6 @@ class FocusProvider extends ChangeNotifier {
   bool get isRunning => _isRunning;
   bool get isPaused => _isPaused;
   int get currentSecondsFocussed => _currentSecondsFocussed;
-  int get dailyTargetMinutes => _dailyTargetMinutes;
   int get currentPhaseIndex => _currentPhaseIndex;
   int get secondsRemainingInPhase => _secondsRemainingInPhase;
   PhaseType get currentPhaseType => _currentPhaseType;
