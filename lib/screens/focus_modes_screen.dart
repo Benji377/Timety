@@ -1,8 +1,11 @@
+// lib/screens/focus_modes_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/focus_provider.dart';
 import '../data/focus_models.dart';
 import '../widgets/focus_mode_timeline.dart';
+import '../widgets/app_dialogs.dart'; // Import your AppDialogs
+import '../widgets/phase_editor_dialog.dart'; // Import the new Editor
 
 class FocusModesScreen extends StatelessWidget {
   const FocusModesScreen({super.key});
@@ -57,8 +60,6 @@ class ModeEditCard extends StatefulWidget {
 class _ModeEditCardState extends State<ModeEditCard> {
   late TextEditingController _nameController;
   late List<SessionPhase> _tempPhases;
-  
-  // Replaces _isExpanded. Controls whether we see the Overview or the Editor.
   bool _isEditing = false; 
 
   @override
@@ -83,97 +84,38 @@ class _ModeEditCardState extends State<ModeEditCard> {
     super.dispose();
   }
 
-  // --- DIALOG: ADD / EDIT NODE ---
-  void _showPhaseDialog({int? index}) {
-    bool isNew = index == null;
-    PhaseType selectedType = isNew ? PhaseType.focus : _tempPhases[index].type;
-    TextEditingController timeController = TextEditingController(
-      text: isNew ? '25' : _tempPhases[index].durationMinutes.toString(),
+  // --- MUCH CLEANER DIALOG LOGIC ---
+  void _showPhaseDialog({int? index}) async {
+    final initialPhase = index != null ? _tempPhases[index] : null;
+
+    // Await the result from our standalone widget
+    final result = await showDialog<dynamic>(
+      context: context,
+      builder: (context) => PhaseEditorDialog(initialPhase: initialPhase),
     );
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text(isNew ? "Add Phase" : "Edit Phase"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SegmentedButton<PhaseType>(
-                    segments: const [
-                      ButtonSegment(value: PhaseType.focus, label: Text("Focus"), icon: Icon(Icons.center_focus_strong)),
-                      ButtonSegment(value: PhaseType.rest, label: Text("Rest"), icon: Icon(Icons.coffee)),
-                    ],
-                    selected: {selectedType},
-                    onSelectionChanged: (Set<PhaseType> newSelection) {
-                      setDialogState(() => selectedType = newSelection.first);
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: timeController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: "Duration (Minutes)",
-                      border: OutlineInputBorder(),
-                      suffixText: "min",
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                if (!isNew)
-                  TextButton(
-                    onPressed: () {
-                      setState(() => _tempPhases.removeAt(index));
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Delete", style: TextStyle(color: Colors.red)),
-                  ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    int? mins = int.tryParse(timeController.text);
-                    if (mins != null && mins > 0) {
-                      if (mins > 240) mins = 240; 
-                      
-                      setState(() {
-                        if (isNew) {
-                          _tempPhases.add(SessionPhase(type: selectedType, durationMinutes: mins!));
-                        } else {
-                          _tempPhases[index] = SessionPhase(type: selectedType, durationMinutes: mins!);
-                        }
-                      });
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text("Save"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+    // Process the result
+    if (result == 'DELETE' && index != null) {
+      setState(() => _tempPhases.removeAt(index));
+    } else if (result is SessionPhase) {
+      setState(() {
+        if (index == null) {
+          _tempPhases.add(result);
+        } else {
+          _tempPhases[index] = result;
+        }
+      });
+    }
   }
 
+  // --- INTEGRATED APP DIALOGS ---
   void _confirmDelete() async {
-    final confirm = await showDialog<bool>(
+    final confirm = await AppDialogs.showConfirmation(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Delete Mode?"),
-        content: const Text("Are you sure you want to delete this custom mode?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancel")),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Delete", style: TextStyle(color: Colors.red))),
-        ],
-      )
+      title: "Delete Mode?",
+      content: "Are you sure you want to delete this custom mode?",
     );
+
     if (confirm == true) {
       if (!mounted) return;
       context.read<FocusProvider>().deleteMode(widget.mode.id);
@@ -192,12 +134,11 @@ class _ModeEditCardState extends State<ModeEditCard> {
     );
 
     context.read<FocusProvider>().saveCustomMode(updatedMode);
-    setState(() => _isEditing = false); // Hide the editor after saving
+    setState(() => _isEditing = false); 
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Mode Saved!")));
   }
 
   void _cancelEdit() {
-    // Reset inputs back to original mode data
     _nameController.text = widget.mode.name;
     _tempPhases = widget.mode.phases.map((p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes)).toList();
     setState(() => _isEditing = false);
@@ -221,7 +162,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
     );
   }
 
-  // --- OVERVIEW: The Clean Default State ---
   Widget _buildOverview() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,7 +183,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
               ),
             ),
             
-            // Trailing Actions
             if (widget.mode.isSystem)
               const Padding(
                 padding: EdgeInsets.all(8.0),
@@ -270,8 +209,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
         
         const SizedBox(height: 8),
         
-        // The permanently visible small timeline
-        // Wrapped in an Align to ensure it stays neat on the left
         Align(
           alignment: Alignment.centerLeft,
           child: ModeTimeline(
@@ -284,7 +221,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
     );
   }
 
-  // --- EDITOR: Only visible when "Edit" is tapped ---
   Widget _buildEditorView() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -312,7 +248,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
         const Text("Tap a phase to edit or delete it.", style: TextStyle(fontSize: 12, color: Colors.grey)),
         const SizedBox(height: 16),
 
-        // Interactive Timeline Nodes
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
@@ -345,7 +280,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
                   ],
                 );
               }),
-              // "Add Phase" Node
               GestureDetector(
                 onTap: () => _showPhaseDialog(),
                 child: Container(
@@ -365,7 +299,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
         
         const SizedBox(height: 24),
 
-        // Action Buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

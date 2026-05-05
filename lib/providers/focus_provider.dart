@@ -226,9 +226,14 @@ class FocusProvider extends ChangeNotifier {
 
   void logDistraction(String note) {
     if (_currentSession != null) {
-      _currentSession!.distractions.add(
-        Distraction(time: DateTime.now(), note: note),
+      final growableDistractions = List<Distraction>.from(
+        _currentSession!.distractions,
       );
+
+      growableDistractions.add(Distraction(time: DateTime.now(), note: note));
+      _currentSession!.distractions = growableDistractions;
+      repository.saveSession(_currentSession!);
+
       notifyListeners();
     }
   }
@@ -248,6 +253,32 @@ class FocusProvider extends ChangeNotifier {
       totalSeconds += _currentSecondsFocussed;
     }
     return totalSeconds ~/ 60;
+  }
+
+  // --- TIME MACHINE LOGGING ---
+  Future<void> logPastSession({
+    required FocusMode mode,
+    required DateTime startTime,
+    required DateTime endTime,
+    FocusTag? tag,
+  }) async {
+    int totalSeconds = endTime.difference(startTime).inSeconds;
+    if (totalSeconds <= 0) return;
+
+    final session = FocusSession(
+      id: DateTime.now().toString(),
+      modeId: mode.id,
+      startTime: startTime,
+      endTime: endTime,
+      totalSecondsFocused:
+          totalSeconds, // For manual logs, we assume the time block was all focus
+      isCompleted: true,
+      tagId: tag?.id,
+    );
+
+    await repository.saveSession(session);
+    _history.add(session);
+    notifyListeners();
   }
 
   // --- TAG MANAGEMENT ---
