@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -5,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../utils/utils.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
+import '../../theme/app_theme.dart';
 import '../../utils/date_time_picker.dart';
 import '../../widgets/location_picker.dart';
 
@@ -31,7 +33,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descController;
   late TextEditingController _locationController;
-  final _categoryController = TextEditingController();
+  final _newCategoryController = TextEditingController();
 
   // State variables
   late Priority _priority;
@@ -39,6 +41,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   DateTime? _dueDate;
   late String _category;
   late List<DateTime> _reminders;
+
+  bool _isAddingNewCategory = false;
 
   final List<String> _reminderOptions = [
     'On time',
@@ -53,10 +57,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void initState() {
     super.initState();
     _isNewTask = widget.task == null;
-    // If it's a new task, force edit mode to true
     _isEditing = _isNewTask ? true : widget.isEditing;
 
-    // Initialize with existing data OR defaults
     _titleController = TextEditingController(text: widget.task?.title ?? '');
     _descController = TextEditingController(
       text: widget.task?.description ?? '',
@@ -77,11 +79,375 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     _titleController.dispose();
     _descController.dispose();
     _locationController.dispose();
-    _categoryController.dispose();
+    _newCategoryController.dispose();
     super.dispose();
   }
 
-  // --- LOGIC HELPERS (Now shared for both Add and Edit!) ---
+  // Visual Helper: Section Headers for better structure
+  Widget _buildSectionHeader(String title, IconData icon) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: AppTheme.spaceXLarge,
+        bottom: AppTheme.spaceMedium,
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: AppTheme.iconSizeSmall, color: colorScheme.primary),
+          const SizedBox(width: AppTheme.spaceSmall),
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: AppTheme.fsBodySmall,
+              fontWeight: AppTheme.fwBold,
+              color: colorScheme.primary.withValues(alpha: 0.8),
+              letterSpacing: AppTheme.lsWide,
+            ),
+          ),
+          const SizedBox(width: AppTheme.spaceSmall),
+          const Expanded(child: Divider()),
+        ],
+      ),
+    );
+  }
+
+  // Logic: Handle Category Selection
+  Widget _buildCategoryPicker() {
+    final dividerColor = Theme.of(context).dividerColor.withValues(alpha: 0.6);
+
+    // Get unique categories from existing tasks
+    final List<String> existingCategories = context
+        .read<TaskProvider>()
+        .tasks
+        .map((t) => t.category.trim())
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (!_isEditing) {
+      return TextField(
+        controller: TextEditingController(
+          text: _category.isEmpty ? "None" : _category,
+        ),
+        enabled: false,
+        decoration: InputDecoration(
+          labelText: 'Category',
+          prefixIcon: const Icon(Icons.label_outline),
+          border: const OutlineInputBorder(),
+          disabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: dividerColor),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!_isAddingNewCategory)
+          DropdownButtonFormField<String>(
+            initialValue: existingCategories.contains(_category)
+                ? _category
+                : null,
+            hint: Text(_category.isEmpty ? "Select Category" : _category),
+            decoration: const InputDecoration(
+              labelText: 'Category',
+              prefixIcon: Icon(Icons.label_outline),
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              const DropdownMenuItem(value: "", child: Text("None")),
+              ...existingCategories.map(
+                (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
+              ),
+              const DropdownMenuItem(
+                value: "__ADD_NEW__",
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.add,
+                      size: AppTheme.iconSizeSmall,
+                      color: AppTheme.infoColor,
+                    ),
+                    SizedBox(width: AppTheme.spaceSmall),
+                    Text(
+                      "Add New Category...",
+                      style: TextStyle(color: AppTheme.infoColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            onChanged: (val) {
+              if (val == "__ADD_NEW__") {
+                setState(() => _isAddingNewCategory = true);
+              } else if (val != null) {
+                setState(() => _category = val);
+              }
+            },
+          )
+        else
+          TextField(
+            controller: _newCategoryController,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'New Category Name',
+              prefixIcon: const Icon(Icons.label_important_outline),
+              border: const OutlineInputBorder(),
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.check, color: AppTheme.successColor),
+                    onPressed: () {
+                      if (_newCategoryController.text.trim().isNotEmpty) {
+                        setState(() {
+                          _category = _newCategoryController.text.trim();
+                          _isAddingNewCategory = false;
+                          _newCategoryController.clear();
+                        });
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: AppTheme.errorColor),
+                    onPressed: () =>
+                        setState(() => _isAddingNewCategory = false),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final disabledBorderColor = theme.dividerColor.withValues(alpha: 0.6);
+    final mapCenter = _parseLocation();
+    String appBarTitle = _isNewTask
+        ? "Create New Task"
+        : (_isEditing ? "Edit Task" : "Task Details");
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(appBarTitle),
+        actions: [
+          if (!_isEditing)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => setState(() => _isEditing = true),
+            ),
+          if (_isNewTask)
+            IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spaceLarge,
+          vertical: AppTheme.spaceSmall,
+        ),
+        children: [
+          // --- SECTION: THE BASICS ---
+          _buildSectionHeader("Task Info", Icons.info_outline),
+          TextField(
+            controller: _titleController,
+            enabled: _isEditing,
+            style: const TextStyle(
+              fontSize: AppTheme.fsHeadingSmall,
+              fontWeight: AppTheme.fwBold,
+            ),
+            decoration: InputDecoration(
+              labelText: 'Task Title *',
+              prefixIcon: const Icon(Icons.title),
+              border: const OutlineInputBorder(),
+              disabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: disabledBorderColor),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppTheme.spaceLarge),
+
+          _buildCategoryPicker(),
+
+          const SizedBox(height: AppTheme.spaceLarge),
+          TextField(
+            controller: _descController,
+            enabled: _isEditing,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: 'Description',
+              prefixIcon: const Icon(Icons.notes),
+              alignLabelWithHint: true,
+              border: const OutlineInputBorder(),
+              disabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: disabledBorderColor),
+              ),
+            ),
+          ),
+
+          // --- SECTION: PRIORITY & SIZE ---
+          _buildSectionHeader("Priority & Effort", Icons.bar_chart),
+          Row(
+            children: [
+              Expanded(
+                child: _isEditing
+                    ? DropdownButtonFormField<Priority>(
+                        initialValue: _priority,
+                        decoration: const InputDecoration(
+                          labelText: 'Priority',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: Priority.values
+                            .map(
+                              (p) => DropdownMenuItem(
+                                value: p,
+                                child: Text(p.name.toUpperCase()),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) => setState(() => _priority = val!),
+                      )
+                    : ListTile(
+                        title: const Text(
+                          "Priority",
+                          style: TextStyle(fontSize: AppTheme.fsBodySmall),
+                        ),
+                        subtitle: Text(_priority.name.toUpperCase()),
+                        leading: AppUtils().getPriorityIcon(_priority),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+              ),
+              const SizedBox(width: AppTheme.spaceLarge),
+              Expanded(
+                child: _isEditing
+                    ? DropdownButtonFormField<Size>(
+                        initialValue: _size,
+                        decoration: const InputDecoration(
+                          labelText: 'Size',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: Size.values
+                            .map(
+                              (s) => DropdownMenuItem(
+                                value: s,
+                                child: Text(s.name.toUpperCase()),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) => setState(() => _size = val!),
+                      )
+                    : ListTile(
+                        title: const Text(
+                          "Size",
+                          style: TextStyle(fontSize: AppTheme.fsBodySmall),
+                        ),
+                        subtitle: Text(_size.name.toUpperCase()),
+                        leading: Text(
+                          AppUtils().getSizeEmoji(_size),
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+              ),
+            ],
+          ),
+
+          // --- SECTION: TIME ---
+          _buildSectionHeader("Schedule", Icons.calendar_today),
+          ListTile(
+            tileColor: _isEditing
+                ? colorScheme.primaryContainer.withValues(alpha: 0.45)
+                : null,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppTheme.brMedium,
+              side: BorderSide(
+                color: _isEditing
+                    ? colorScheme.primary.withValues(alpha: 0.4)
+                    : theme.dividerColor.withValues(alpha: 0.6),
+              ),
+            ),
+            leading: const Icon(Icons.event),
+            title: Text(
+              _dueDate == null
+                  ? 'No Due Date Set'
+                  : 'Due: ${_dueDate!.toLocal()}'.split('.')[0],
+            ),
+            trailing: _isEditing ? const Icon(Icons.edit, size: 20) : null,
+            onTap: _isEditing ? _pickDueDate : null,
+          ),
+
+          // Reminders (Simplified visibility)
+          if (_isEditing || _reminders.isNotEmpty) ...[
+            const SizedBox(height: AppTheme.spaceMedium),
+            if (_isEditing) _buildReminderInput(),
+            const SizedBox(height: AppTheme.spaceSmall),
+            Wrap(
+              spacing: AppTheme.spaceSmall,
+              children: _reminders
+                  .map(
+                    (r) => Chip(
+                      backgroundColor: colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.7),
+                      label: Text(
+                        "${r.day}/${r.month} ${r.hour}:${r.minute.toString().padLeft(2, '0')}",
+                        style: const TextStyle(fontSize: AppTheme.fsBodySmall),
+                      ),
+                      onDeleted: _isEditing
+                          ? () => setState(() => _reminders.remove(r))
+                          : null,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+
+          // --- SECTION: LOCATION ---
+          _buildSectionHeader("Location", Icons.location_on_outlined),
+          TextField(
+            controller: _locationController,
+            enabled: _isEditing,
+            decoration: InputDecoration(
+              labelText: 'Location',
+              prefixIcon: const Icon(Icons.map_outlined),
+              border: const OutlineInputBorder(),
+              disabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: disabledBorderColor),
+              ),
+              suffixIcon: _isEditing
+                  ? IconButton(
+                      icon: const Icon(Icons.my_location),
+                      onPressed: _pickLocationOnMap,
+                    )
+                  : null,
+            ),
+          ),
+
+          if (mapCenter != null) _buildMapPreview(mapCenter),
+
+          const SizedBox(height: AppTheme.space3XLarge),
+          if (_isEditing && !_isNewTask)
+            ElevatedButton.icon(
+              icon: const Icon(Icons.save),
+              onPressed: _saveTask,
+              label: const Text('Save Changes'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: ui.Size.fromHeight(54),
+                shape: RoundedRectangleBorder(borderRadius: AppTheme.brLarge),
+              ),
+            ),
+          const SizedBox(height: AppTheme.space3XLarge),
+        ],
+      ),
+    );
+  }
+
+  // --- Logic Helpers ---
+
   LatLng? _parseLocation() {
     if (_locationController.text.isEmpty) return null;
     final parts = _locationController.text.split(',');
@@ -94,18 +460,83 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   Future<void> _pickDueDate() async {
-    final newDueDate = await AppDatePickers.pickDateTime(
+    final picked = await AppDatePickers.pickDateTime(
       context: context,
       initialDate: _dueDate,
-      fallbackTime: const TimeOfDay(hour: 23, minute: 59),
     );
+    if (picked != null) setState(() => _dueDate = picked);
+  }
 
-    if (newDueDate != null && mounted) {
-      setState(() {
-        if (_dueDate != newDueDate) _reminders.clear();
-        _dueDate = newDueDate;
-      });
-    }
+  Future<void> _pickLocationOnMap() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (c) =>
+            LocationPicker(initialLocation: _locationController.text),
+      ),
+    );
+    if (result != null) setState(() => _locationController.text = result);
+  }
+
+  Widget _buildReminderInput() {
+    return Row(
+      children: [
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            initialValue: _selectedReminderOption,
+            items: _reminderOptions
+                .map((o) => DropdownMenuItem(value: o, child: Text(o)))
+                .toList(),
+            onChanged: (v) => setState(() => _selectedReminderOption = v!),
+            decoration: const InputDecoration(
+              labelText: "Set Reminder",
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: AppTheme.spaceMedium,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppTheme.spaceSmall),
+        ElevatedButton(onPressed: _addReminder, child: const Text("Add")),
+      ],
+    );
+  }
+
+  Widget _buildMapPreview(LatLng center) {
+    return Container(
+      height: 160,
+      margin: const EdgeInsets.only(top: AppTheme.spaceMedium),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.6),
+        ),
+        borderRadius: AppTheme.brLarge,
+      ),
+      child: ClipRRect(
+        borderRadius: AppTheme.brLarge,
+        child: FlutterMap(
+          options: MapOptions(initialCenter: center, initialZoom: 15.0),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: center,
+                  child: const Icon(
+                    Icons.location_pin,
+                    color: AppTheme.locationPinColor,
+                    size: 36,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _addReminder() async {
@@ -192,415 +623,5 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       context.read<TaskProvider>().updateTask(taskToSave);
       setState(() => _isEditing = false); // Just exit edit mode
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final mapCenter = _parseLocation();
-
-    // Dynamic App Bar Title
-    String appBarTitle = _isNewTask
-        ? "Create New Task"
-        : (_isEditing ? "Edit Task" : "Task Details");
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(appBarTitle),
-        actions: [
-          // If viewing an existing task, show the edit button.
-          if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => setState(() => _isEditing = true),
-            ),
-          // If we are creating a brand new task, put the checkmark at the top right for convenience
-          if (_isNewTask)
-            IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          // 1. TITLE
-          TextField(
-            controller: _titleController,
-            enabled: _isEditing,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            decoration: InputDecoration(
-              labelText: _isEditing ? 'Task Title *' : null,
-              prefixIcon: const Icon(Icons.title),
-              border: _isEditing
-                  ? const OutlineInputBorder()
-                  : InputBorder.none,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // 2. CATEGORY
-          if (_isEditing) ...[
-            TextField(
-              controller: _categoryController,
-              decoration: InputDecoration(
-                labelText: 'Category',
-                prefixIcon: const Icon(Icons.label_outline),
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    if (_categoryController.text.isNotEmpty) {
-                      setState(() {
-                        _category = _categoryController.text.trim();
-                        _categoryController.clear();
-                      });
-                    }
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-
-          if (_category.isNotEmpty)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Chip(
-                label: Text(_category),
-                onDeleted: _isEditing
-                    ? () => setState(() => _category = "")
-                    : null,
-              ),
-            ),
-          const SizedBox(height: 16),
-
-          // 3. PRIORITY & SIZE
-          if (_isEditing)
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<Priority>(
-                    initialValue: _priority,
-                    decoration: const InputDecoration(
-                      labelText: 'Priority',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: Priority.values.map((Priority p) {
-                      return DropdownMenuItem<Priority>(
-                        value: p,
-                        child: Row(
-                          children: [
-                            AppUtils().getPriorityIcon(p),
-                            const SizedBox(width: 8),
-                            Text(
-                              p.name.toUpperCase().replaceAll(
-                                "VERYHIGH",
-                                "VERY HIGH",
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) setState(() => _priority = val);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: DropdownButtonFormField<Size>(
-                    initialValue: _size,
-                    decoration: const InputDecoration(
-                      labelText: 'Size',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: Size.values.map((Size s) {
-                      return DropdownMenuItem<Size>(
-                        value: s,
-                        child: Row(
-                          children: [
-                            Text(
-                              AppUtils().getSizeEmoji(s),
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              s.name.toUpperCase().replaceAll(
-                                'VERYLARGE',
-                                'VERY LARGE',
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) setState(() => _size = val);
-                    },
-                  ),
-                ),
-              ],
-            )
-          else
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    leading: AppUtils().getPriorityIcon(_priority),
-                    title: const Text(
-                      'Priority',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                    subtitle: Text(
-                      _priority.name.toUpperCase().replaceAll(
-                        "VERYHIGH",
-                        "VERY HIGH",
-                      ),
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                Expanded(
-                  child: ListTile(
-                    leading: Text(
-                      AppUtils().getSizeEmoji(_size),
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                    title: const Text(
-                      'Size',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                    subtitle: Text(
-                      _size.name.toUpperCase().replaceAll(
-                        'VERYLARGE',
-                        'VERY LARGE',
-                      ),
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
-            ),
-          const SizedBox(height: 16),
-
-          // 4. DUE DATE & REMINDERS
-          ListTile(
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: _isEditing ? Colors.grey.shade400 : Colors.transparent,
-              ),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            contentPadding: _isEditing
-                ? const EdgeInsets.symmetric(horizontal: 12)
-                : EdgeInsets.zero,
-            leading: const Icon(Icons.event),
-            title: Text(
-              _dueDate == null
-                  ? 'No Due Date Set'
-                  : 'Due: ${_dueDate!.toLocal().toString().split(' ')[0]} ${_dueDate!.hour.toString().padLeft(2, '0')}:${_dueDate!.minute.toString().padLeft(2, '0')}',
-            ),
-            trailing: _isEditing ? const Icon(Icons.edit_calendar) : null,
-            onTap: _isEditing ? _pickDueDate : null,
-          ),
-          const SizedBox(height: 16),
-
-          // Reminders
-          if (_isEditing || _reminders.isNotEmpty) ...[
-            const Text(
-              'Reminders',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            if (_isEditing)
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _selectedReminderOption,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.alarm),
-                        border: OutlineInputBorder(),
-                      ),
-                      items: _reminderOptions.map((String option) {
-                        return DropdownMenuItem(
-                          value: option,
-                          child: Text(option),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() => _selectedReminderOption = val);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    onPressed: _addReminder,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add'),
-                  ),
-                ],
-              ),
-
-            if (_reminders.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Wrap(
-                  spacing: 8.0,
-                  children: _reminders.map((reminder) {
-                    final formattedString =
-                        "${reminder.month.toString().padLeft(2, '0')}/${reminder.day.toString().padLeft(2, '0')} ${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')}";
-                    return Chip(
-                      avatar: const Icon(Icons.notifications_active, size: 16),
-                      label: Text(
-                        formattedString,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      deleteIcon: _isEditing
-                          ? const Icon(Icons.close, size: 16)
-                          : null,
-                      onDeleted: _isEditing
-                          ? () => setState(() => _reminders.remove(reminder))
-                          : null,
-                    );
-                  }).toList(),
-                ),
-              ),
-            const SizedBox(height: 16),
-          ],
-
-          // 5. DESCRIPTION
-          TextField(
-            controller: _descController,
-            enabled: _isEditing,
-            decoration: InputDecoration(
-              labelText: _isEditing ? 'Description' : null,
-              prefixIcon: const Icon(Icons.notes),
-              border: _isEditing
-                  ? const OutlineInputBorder()
-                  : InputBorder.none,
-            ),
-            maxLines: 4,
-          ),
-          const SizedBox(height: 16),
-
-          // 6. LOCATION & MAP PREVIEW
-          TextField(
-            controller: _locationController,
-            enabled: _isEditing,
-            decoration: InputDecoration(
-              labelText: _isEditing ? 'Location' : null,
-              prefixIcon: const Icon(Icons.location_on),
-              border: _isEditing
-                  ? const OutlineInputBorder()
-                  : InputBorder.none,
-              suffixIcon: _isEditing
-                  ? IconButton(
-                      icon: const Icon(Icons.map),
-                      tooltip: 'Pick on Map',
-                      onPressed: () async {
-                        final String? result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LocationPicker(
-                              initialLocation: _locationController.text,
-                            ),
-                          ),
-                        );
-
-                        if (result != null) {
-                          setState(() {
-                            _locationController.text = result;
-                          });
-                        }
-                      },
-                    )
-                  : null,
-            ),
-          ),
-
-          if (mapCenter != null)
-            Container(
-              height: 150,
-              margin: const EdgeInsets.only(top: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.grey.shade400),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: FlutterMap(
-                  options: MapOptions(
-                    initialCenter: mapCenter,
-                    initialZoom: 15.0,
-                    interactionOptions: const InteractionOptions(
-                      flags: InteractiveFlag.none,
-                    ),
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'io.github.benji377.timety',
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: mapCenter,
-                          child: const Icon(
-                            Icons.location_pin,
-                            color: Colors.red,
-                            size: 40,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-          const SizedBox(height: 32),
-
-          // 7. SAVE BUTTON (Only show dialog if editing an existing task, otherwise just save)
-          if (_isEditing && !_isNewTask)
-            ElevatedButton.icon(
-              icon: const Icon(Icons.save),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Confirm Save'),
-                    content: const Text(
-                      'Are you sure you want to save changes to this task?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Cancel'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                          _saveTask();
-                        },
-                        child: const Text('Save'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              label: const Text('Save Changes'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(16),
-              ),
-            ),
-
-          const SizedBox(height: 40),
-        ],
-      ),
-    );
   }
 }
