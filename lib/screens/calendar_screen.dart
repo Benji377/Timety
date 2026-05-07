@@ -187,14 +187,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               )
                               .length;
 
-                          int weeklyFocusSeconds = allSessions
+                          int weeklyFocusCount = allSessions
                               .where(
                                 (s) =>
                                     s.startTime.isAfter(weekStart) &&
                                     s.startTime.isBefore(weekEnd),
                               )
-                              .fold(0, (sum, s) => sum + s.totalSecondsFocused);
-                          int weeklyFocusMins = weeklyFocusSeconds ~/ 60;
+                              .length;
 
                           int weeklyHabitCount = allHabits.fold(0, (sum, h) {
                             return sum +
@@ -322,50 +321,50 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               }),
                               // --- WEEKLY SUMMARY COLUMN ---
                               TableCell(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if (weeklyTaskCount > 0)
-                                      Text(
-                                        weeklyTaskCount.toString(),
+                                child: Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: RichText(
+                                      text: TextSpan(
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.blue,
                                           fontSize: 12,
                                         ),
-                                      ),
-                                    if (weeklyFocusMins > 0)
-                                      Text(
-                                        '${weeklyFocusMins}m',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    if (weeklyHabitCount > 0)
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text(
-                                            '$weeklyHabitCount',
+                                          TextSpan(
+                                            text: '$weeklyTaskCount',
                                             style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.purple,
-                                              fontSize: 11,
+                                              color: Colors.blue,
                                             ),
                                           ),
-                                          const SizedBox(width: 2),
-                                          const Icon(
-                                            Icons.repeat,
-                                            color: Colors.purple,
-                                            size: 12,
+                                          TextSpan(
+                                            text: ' | ',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: '$weeklyHabitCount',
+                                            style: const TextStyle(
+                                              color: Colors.purple,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: ' | ',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: '$weeklyFocusCount',
+                                            style: const TextStyle(
+                                              color: Colors.green,
+                                            ),
                                           ),
                                         ],
                                       ),
-                                  ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
@@ -399,264 +398,302 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       padding: const EdgeInsets.all(8),
                       children: [
                         // --- HABITS ACCORDION ---
-                        ExpansionTile(
-                          initiallyExpanded: true,
-                          title: Text(
-                            "Habits (${selectedDayHabits.length})",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.purple,
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppTheme.spaceMedium,
                           ),
-                          iconColor: Colors.purple,
-                          collapsedIconColor: Colors.purple,
-                          children: selectedDayHabits.isEmpty
-                              ? [
-                                  const Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Text(
-                                      "No habits scheduled or logged.",
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                ]
-                              : selectedDayHabits.map((habit) {
-                                  final isCompleted = habitProvider
-                                      .isCompletedOn(habit, _selectedDate!);
-                                  return Card(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                        color: isCompleted
-                                            ? Colors.purple.withValues(
-                                                alpha: 0.3,
-                                              )
-                                            : Colors.purple,
-                                        width: 1,
+                          child: ExpansionTile(
+                            initiallyExpanded: false,
+                            title: Text(
+                              "Habits (${selectedDayHabits.length})",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.purple,
+                              ),
+                            ),
+                            iconColor: Colors.purple,
+                            collapsedIconColor: Colors.purple,
+                            children: selectedDayHabits.isEmpty
+                                ? [
+                                    const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text(
+                                        "No habits scheduled or logged.",
+                                        style: TextStyle(color: Colors.grey),
                                       ),
-                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: ListTile(
-                                      leading: Checkbox(
-                                        value: isCompleted,
-                                        activeColor: Colors.purple,
-                                        onChanged: (_) {
-                                          // Time-Travel Logging!
-                                          if (isCompleted) {
-                                            habit.completions.removeWhere(
-                                              (c) =>
-                                                  _isSameDay(c, _selectedDate!),
-                                            );
-                                          } else {
-                                            // Keep the current time, but force the date to be the selected calendar date
-                                            final now = DateTime.now();
-                                            final retroDate = DateTime(
-                                              _selectedDate!.year,
-                                              _selectedDate!.month,
-                                              _selectedDate!.day,
-                                              now.hour,
-                                              now.minute,
-                                            );
-                                            habit.completions.add(retroDate);
-                                          }
-                                          habitProvider.saveHabit(habit);
-                                        },
-                                      ),
-                                      title: Text(
-                                        habit.name,
-                                        style: TextStyle(
-                                          decoration: isCompleted
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                          color: isCompleted
-                                              ? Colors.grey
-                                              : null,
+                                  ]
+                                : [
+                                    ...selectedDayHabits.map((habit) {
+                                      final isCompleted = habitProvider
+                                          .isCompletedOn(habit, _selectedDate!);
+                                      return Card(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color: isCompleted
+                                                ? Colors.purple.withValues(
+                                                    alpha: 0.3,
+                                                  )
+                                                : Colors.purple,
+                                            width: 1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: ListTile(
+                                          leading: Checkbox(
+                                            value: isCompleted,
+                                            activeColor: Colors.purple,
+                                            onChanged: (_) {
+                                              // Time-Travel Logging!
+                                              if (isCompleted) {
+                                                habit.completions.removeWhere(
+                                                  (c) => _isSameDay(
+                                                    c,
+                                                    _selectedDate!,
+                                                  ),
+                                                );
+                                              } else {
+                                                // Keep the current time, but force the date to be the selected calendar date
+                                                final now = DateTime.now();
+                                                final retroDate = DateTime(
+                                                  _selectedDate!.year,
+                                                  _selectedDate!.month,
+                                                  _selectedDate!.day,
+                                                  now.hour,
+                                                  now.minute,
+                                                );
+                                                habit.completions.add(
+                                                  retroDate,
+                                                );
+                                              }
+                                              habitProvider.saveHabit(habit);
+                                            },
+                                          ),
+                                          title: Text(
+                                            habit.name,
+                                            style: TextStyle(
+                                              decoration: isCompleted
+                                                  ? TextDecoration.lineThrough
+                                                  : null,
+                                              color: isCompleted
+                                                  ? Colors.grey
+                                                  : null,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                    const SizedBox(height: AppTheme.spaceSmall),
+                                  ],
+                          ),
                         ),
 
                         // --- TASKS ACCORDION ---
-                        ExpansionTile(
-                          initiallyExpanded: true,
-                          title: Text(
-                            "Tasks (${selectedDayTasks.length})",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppTheme.spaceMedium,
                           ),
-                          iconColor: Colors.blue,
-                          collapsedIconColor: Colors.blue,
-                          children: selectedDayTasks.isEmpty
-                              ? [
-                                  const Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Text(
-                                      "No tasks scheduled.",
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                ]
-                              : selectedDayTasks.map((task) {
-                                  return Card(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                        color: task.isCompleted
-                                            ? Colors.green
-                                            : Colors.blue,
-                                        width: 1,
+                          child: ExpansionTile(
+                            initiallyExpanded: false,
+                            title: Text(
+                              "Tasks (${selectedDayTasks.length})",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            iconColor: Colors.blue,
+                            collapsedIconColor: Colors.blue,
+                            children: selectedDayTasks.isEmpty
+                                ? [
+                                    const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text(
+                                        "No tasks scheduled.",
+                                        style: TextStyle(color: Colors.grey),
                                       ),
-                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: ListTile(
-                                      leading: Checkbox(
-                                        value: task.isCompleted,
-                                        onChanged: (_) => context
-                                            .read<TaskProvider>()
-                                            .toggleTask(task.id),
-                                      ),
-                                      title: Text(
-                                        task.title,
-                                        style: TextStyle(
-                                          decoration: task.isCompleted
-                                              ? TextDecoration.lineThrough
-                                              : null,
+                                  ]
+                                : [
+                                    ...selectedDayTasks.map((task) {
+                                      return Card(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
                                         ),
-                                      ),
-                                      trailing: AppUtils().getPriorityIcon(
-                                        task.priority,
-                                      ),
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              TaskDetailScreen(task: task),
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color: task.isCompleted
+                                                ? Colors.green
+                                                : Colors.blue,
+                                            width: 1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
+                                        child: ListTile(
+                                          leading: Checkbox(
+                                            value: task.isCompleted,
+                                            onChanged: (_) => context
+                                                .read<TaskProvider>()
+                                                .toggleTask(task.id),
+                                          ),
+                                          title: Text(
+                                            task.title,
+                                            style: TextStyle(
+                                              decoration: task.isCompleted
+                                                  ? TextDecoration.lineThrough
+                                                  : null,
+                                            ),
+                                          ),
+                                          trailing: AppUtils().getPriorityIcon(
+                                            task.priority,
+                                          ),
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  TaskDetailScreen(task: task),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                    const SizedBox(height: AppTheme.spaceSmall),
+                                  ],
+                          ),
                         ),
 
                         // --- FOCUS SESSIONS ACCORDION ---
-                        ExpansionTile(
-                          initiallyExpanded: false,
-                          title: Text(
-                            "Focus Sessions (${selectedDaySessions.length})",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppTheme.spaceMedium,
                           ),
-                          iconColor: Colors.green,
-                          collapsedIconColor: Colors.green,
-                          children: selectedDaySessions.isEmpty
-                              ? [
-                                  const Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Text(
-                                      "No focus sessions logged.",
-                                      style: TextStyle(color: Colors.grey),
+                          child: ExpansionTile(
+                            initiallyExpanded: false,
+                            title: Text(
+                              "Focus Sessions (${selectedDaySessions.length})",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                            iconColor: Colors.green,
+                            collapsedIconColor: Colors.green,
+                            children: selectedDaySessions.isEmpty
+                                ? [
+                                    const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text(
+                                        "No focus sessions logged.",
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
                                     ),
-                                  ),
-                                ]
-                              : selectedDaySessions.map((session) {
-                                  final mode = focusProvider.modes.firstWhere(
-                                    (m) => m.id == session.modeId,
-                                    orElse: () => focusProvider.modes.first,
-                                  );
-                                  final tag = session.tagId != null
-                                      ? focusProvider.tags
-                                            .where((t) => t.id == session.tagId)
-                                            .firstOrNull
-                                      : null;
+                                  ]
+                                : [
+                                    ...selectedDaySessions.map((session) {
+                                      final mode = focusProvider.modes
+                                          .firstWhere(
+                                            (m) => m.id == session.modeId,
+                                            orElse: () =>
+                                                focusProvider.modes.first,
+                                          );
+                                      final tag = session.tagId != null
+                                          ? focusProvider.tags
+                                                .where(
+                                                  (t) => t.id == session.tagId,
+                                                )
+                                                .firstOrNull
+                                          : null;
 
-                                  String timeString = _formatTime(
-                                    session.startTime,
-                                  );
-                                  if (session.endTime != null) {
-                                    timeString +=
-                                        " - ${_formatTime(session.endTime!)}";
-                                  } else {
-                                    timeString += " - Ongoing";
-                                  }
+                                      String timeString = _formatTime(
+                                        session.startTime,
+                                      );
+                                      if (session.endTime != null) {
+                                        timeString +=
+                                            " - ${_formatTime(session.endTime!)}";
+                                      } else {
+                                        timeString += " - Ongoing";
+                                      }
 
-                                  int focusMins =
-                                      session.totalSecondsFocused ~/ 60;
-                                  return Card(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                        color: Colors.grey.shade300,
-                                        width: 1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: ListTile(
-                                      leading: Icon(
-                                        Icons.circle,
-                                        color: tag != null
-                                            ? Color(tag.colorValue)
-                                            : Colors.grey.shade400,
-                                      ),
-                                      title: Text(
-                                        tag?.name ?? "Untagged",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                      int focusMins =
+                                          session.totalSecondsFocused ~/ 60;
+                                      return Card(
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
                                         ),
-                                      ),
-                                      subtitle: Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 4.0,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            color: Colors.grey.shade300,
+                                            width: 1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              mode.name,
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                              ),
+                                        child: ListTile(
+                                          leading: Icon(
+                                            Icons.circle,
+                                            color: tag != null
+                                                ? Color(tag.colorValue)
+                                                : Colors.grey.shade400,
+                                          ),
+                                          title: Text(
+                                            tag?.name ?? "Untagged",
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              timeString,
-                                              style: TextStyle(
-                                                color: Colors.grey.shade600,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                          ),
+                                          subtitle: Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 4.0,
                                             ),
-                                          ],
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  mode.name,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  timeString,
+                                                  style: TextStyle(
+                                                    color: Colors.grey.shade600,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          trailing: Text(
+                                            '${focusMins}m focus',
+                                            style: const TextStyle(
+                                              color: Colors.green,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                      trailing: Text(
-                                        '${focusMins}m focus',
-                                        style: const TextStyle(
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
+                                      );
+                                    }),
+                                    const SizedBox(height: AppTheme.spaceSmall),
+                                  ],
+                          ),
                         ),
                       ],
                     ),

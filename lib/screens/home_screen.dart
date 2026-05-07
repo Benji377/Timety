@@ -150,14 +150,12 @@ class HomeScreen extends StatelessWidget {
         ),
         title: Row(
           children: [
-            if (habit.iconData != null) ...[
-              Icon(
-                habit.iconData,
-                size: 18,
-                color: isCompleted ? Colors.grey : color,
-              ),
-              const SizedBox(width: AppTheme.spaceSmall),
-            ],
+            Icon(
+              habit.iconData ?? Icons.circle,
+              size: 18,
+              color: isCompleted ? Colors.grey : color,
+            ),
+            const SizedBox(width: AppTheme.spaceSmall),
             Expanded(
               child: Text(
                 habit.name,

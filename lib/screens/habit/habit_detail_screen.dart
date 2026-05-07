@@ -22,7 +22,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
   HabitFrequency _frequency = HabitFrequency.daily;
   Color _selectedColor = AppTheme.typeHabitColor;
   TimeOfDay? _targetTime;
-  int? _selectedIconCode;
 
   // For Weekly Flexible
   int _targetDaysPerWeek = 3;
@@ -49,7 +48,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
       _frequency = widget.habit!.frequency;
       _selectedColor = Color(widget.habit!.colorValue);
       _targetTime = widget.habit!.targetTime;
-      _selectedIconCode = widget.habit!.iconCodePoint;
       _targetDaysPerWeek = widget.habit!.targetDaysPerWeek ?? 3;
       if (widget.habit!.targetWeekdays != null) {
         _selectedWeekdays = widget.habit!.targetWeekdays!.toSet();
@@ -82,7 +80,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
-      iconCodePoint: _selectedIconCode,
+      iconCodePoint: Icons.circle.codePoint,
       targetDaysPerWeek: _frequency == HabitFrequency.weeklyFlexible
           ? _targetDaysPerWeek
           : null,
@@ -134,46 +132,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               ),
               maxLines: 2,
             ),
-            const SizedBox(height: AppTheme.spaceXLarge),
-
-            // --- ICON PICKER ---
-            const Text(
-              "Habit Icon",
-              style: TextStyle(fontWeight: AppTheme.fwBold),
-            ),
-            const SizedBox(height: AppTheme.spaceSmall),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children:
-                  [
-                    Icons.fitness_center,
-                    Icons.menu_book,
-                    Icons.water_drop,
-                    Icons.bed,
-                    Icons.attach_money,
-                    Icons.self_improvement,
-                    Icons.directions_run,
-                    Icons.laptop_mac,
-                    Icons.favorite,
-                  ].map((icon) {
-                    final isSelected = _selectedIconCode == icon.codePoint;
-                    return ChoiceChip(
-                      label: Icon(
-                        icon,
-                        color: isSelected ? _selectedColor : Colors.grey,
-                      ),
-                      selected: isSelected,
-                      selectedColor: _selectedColor.withValues(alpha: 0.2),
-                      onSelected: (selected) => setState(
-                        () => _selectedIconCode = selected
-                            ? icon.codePoint
-                            : null,
-                      ),
-                    );
-                  }).toList(),
-            ),
-
             const SizedBox(height: AppTheme.spaceXLarge),
 
             // --- COLOR PICKER ---

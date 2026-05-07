@@ -89,14 +89,13 @@ class HabitListScreen extends StatelessWidget {
           ),
           title: Row(
             children: [
-              if (habit.iconData != null) ...[
-                Icon(
-                  habit.iconData,
-                  size: 18,
-                  color: isDoneToday ? Colors.grey : color,
-                ),
-                const SizedBox(width: AppTheme.spaceSmall),
-              ],
+              // Show habit icon (fallback to circle) colored by habit
+              Icon(
+                habit.iconData ?? Icons.circle,
+                size: 18,
+                color: isDoneToday ? Colors.grey : color,
+              ),
+              const SizedBox(width: AppTheme.spaceSmall),
               Expanded(
                 child: Text(
                   habit.name,
