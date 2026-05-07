@@ -1,13 +1,13 @@
 # Timety
 
 <p align="center">
-  <img src="assets/logo.png" width="180" alt="Timety Logo">
+  <img src="assets/logo.png" width="300" alt="Timety Logo">
   <p align="center">
-    <a href="https://github.com/Benji377/timety/actions/workflows/lint.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/timety/lint.yml?label=Lint&logo=flutter&style=for-the-badge&labelColor=555555&color=02569B" alt="lint">
+    <a href="https://github.com/Benji377/Timety/actions/workflows/lint.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/lint.yml?label=Lint&logo=flutter&style=for-the-badge&labelColor=555555&color=02569B" alt="lint">
     </a>
-    <a href="https://github.com/Benji377/timety/actions/workflows/test.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/timety/test.yml?label=Tests&logo=githubactions&style=for-the-badge&labelColor=555555&color=2088FF" alt="test">
+    <a href="https://github.com/Benji377/Timety/actions/workflows/test.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/test.yml?label=Tests&logo=githubactions&style=for-the-badge&labelColor=555555&color=2088FF" alt="test">
     </a>
   </p>
 </p>
