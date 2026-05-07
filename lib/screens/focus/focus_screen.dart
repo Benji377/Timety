@@ -268,11 +268,11 @@ class FocusScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // --- 3. THE NEW DAILY GOAL BADGE ---
+          // --- DAILY GOAL BADGE ---
           Align(
             alignment: Alignment.topRight,
             child: Padding(
-              padding: const EdgeInsets.only(top: 8.0, right: 24.0),
+              padding: const EdgeInsets.only(top: 8.0, right: 8.0),
               child: GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -383,7 +383,7 @@ class FocusScreen extends StatelessWidget {
           // --- GAUGE & SIDE BUTTONS ---
           SizedBox(
             height: 320,
-            width: 550,
+            width: double.infinity,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -412,7 +412,8 @@ class FocusScreen extends StatelessWidget {
 
                 // TIME MACHINE BUTTON
                 Positioned(
-                  left: 0,
+                  top: 16,
+                  left: 16,
                   child: IconButton.filledTonal(
                     icon: const Icon(Icons.history),
                     tooltip: "Log Past Session",
@@ -429,7 +430,8 @@ class FocusScreen extends StatelessWidget {
 
                 // DISTRACTIONS BUTTON
                 Positioned(
-                  right: 0,
+                  top: 16,
+                  right: 16,
                   child: IconButton.filledTonal(
                     icon: const Icon(Icons.warning_amber),
                     tooltip: "Log Distraction/Event",

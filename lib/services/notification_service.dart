@@ -12,12 +12,14 @@ class NotificationService {
   static final NotificationService instance = NotificationService._internal();
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
   // Reserved IDs to prevent collisions
   static const int dailyMotivationId = 9999;
   static const int endOfDayCheckupId = 9998;
+  static const int focusTimerId = 9997;
 
   Future<void> init() async {
     if (_isInitialized) return;
@@ -31,12 +33,14 @@ class NotificationService {
     final TimezoneInfo timeZoneName = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timeZoneName.identifier));
 
-    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings(
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
@@ -47,7 +51,9 @@ class NotificationService {
 
     if (Platform.isAndroid) {
       await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestNotificationsPermission();
     }
 
@@ -62,7 +68,7 @@ class NotificationService {
 
   // --- 1. TASKS ---
   Future<void> scheduleTaskReminder({
-    required int notificationId, 
+    required int notificationId,
     required String title,
     required String body,
     required DateTime scheduledTime,
@@ -99,7 +105,14 @@ class NotificationService {
     if (kIsWeb) return;
 
     final now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, time.hour, time.minute);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
 
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
@@ -122,7 +135,8 @@ class NotificationService {
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, // Repeats daily at this time!
+      matchDateTimeComponents:
+          DateTimeComponents.time, // Repeats daily at this time!
     );
   }
 
@@ -136,7 +150,14 @@ class NotificationService {
     if (kIsWeb) return;
 
     final now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, time.hour, time.minute);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
 
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
@@ -168,7 +189,9 @@ class NotificationService {
           channelDescription: 'Your daily morning boost',
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
-          styleInformation: BigTextStyleInformation(''), // Allows multi-line text
+          styleInformation: BigTextStyleInformation(
+            '',
+          ), // Allows multi-line text
           icon: '@mipmap/ic_launcher',
         ),
         iOS: DarwinNotificationDetails(),
@@ -186,7 +209,14 @@ class NotificationService {
     if (kIsWeb) return;
 
     final now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, time.hour, time.minute);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
 
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
@@ -222,5 +252,50 @@ class NotificationService {
   Future<void> cancelHabitReminder(String habitId) async {
     if (kIsWeb) return;
     await _notificationsPlugin.cancel(id: _generateId(habitId, 'habit_time'));
+  }
+
+  /// Shows a pinned notification that natively ticks up or down!
+  Future<void> showFocusTimerNotification({
+    required String phaseName,
+    required DateTime targetTime,
+    required bool isStopwatch,
+    bool isPaused = false,
+    String? pausedText,
+  }) async {
+    if (kIsWeb) return;
+
+    await _notificationsPlugin.show(
+      id: focusTimerId,
+      title: isPaused ? 'Focus Paused ⏸️' : 'Focus Active 🔥',
+      body: isPaused
+          ? 'Phase: $phaseName | $pausedText'
+          : 'Current Phase: $phaseName',
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'focus_timer_channel',
+          'Active Focus Timer',
+          channelDescription:
+              'Persistent notification for active focus sessions',
+          importance: Importance
+              .low, // Low importance so it doesn't pop-up and interrupt
+          priority: Priority.low,
+          ongoing: true, // PINNED: User cannot swipe it away!
+          autoCancel: false,
+          usesChronometer:
+              !isPaused, // THE MAGIC TRICK: Android natively ticks the timer
+          chronometerCountDown:
+              !isStopwatch, // Ticks down for timers, up for stopwatches
+          when: targetTime.millisecondsSinceEpoch,
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: const DarwinNotificationDetails(),
+      ),
+    );
+  }
+
+  /// Removes the pinned notification when stopped
+  Future<void> cancelFocusTimerNotification() async {
+    if (kIsWeb) return;
+    await _notificationsPlugin.cancel(id: focusTimerId);
   }
 }

@@ -270,6 +270,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
+            const SizedBox(height: 16),
             const Divider(height: 1),
 
             // --- BOTTOM HALF: ACTION REQUIRED ---

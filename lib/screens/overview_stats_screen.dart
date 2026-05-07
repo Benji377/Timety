@@ -64,31 +64,35 @@ class OverviewStatsScreen extends StatelessWidget {
         // --- KPI CARDS ---
         Row(
           children: [
-            _buildKpiCard(
-              context,
-              "Tasks Done",
-              "$tasksCompletedToday",
-              Icons.task_alt,
-              Colors.green,
+            Expanded(
+              child: _buildKpiCard(
+                context,
+                "Tasks Done",
+                "$tasksCompletedToday",
+                Icons.task_alt,
+                Colors.green,
+              ),
             ),
             const SizedBox(width: 16),
-            _buildKpiCard(
-              context,
-              "Focus Time",
-              "${focusMinsToday}m",
-              Icons.timer,
-              Colors.blue,
+            Expanded(
+              child: _buildKpiCard(
+                context,
+                "Focus Time",
+                "${focusMinsToday}m",
+                Icons.timer,
+                Colors.blue,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        _buildKpiCard(
-          context,
-          "Daily Focus Goal",
-          "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
-          Icons.track_changes,
-          Colors.orange,
-        ),
+          _buildKpiCard(
+            context,
+            "Daily Focus Goal",
+            "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
+            Icons.track_changes,
+            Colors.orange,
+          ),
 
         const SizedBox(height: 40),
 
@@ -150,33 +154,28 @@ class OverviewStatsScreen extends StatelessWidget {
     IconData icon,
     Color color,
   ) {
-    return Expanded(
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: color.withValues(alpha: 0.3), width: 1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: color),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: color.withValues(alpha: 0.3), width: 1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );
@@ -256,6 +255,8 @@ class OverviewStatsScreen extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              reservedSize: 40,
+              interval: 1,
               getTitlesWidget: (double value, TitleMeta meta) {
                 final day = last7Days[value.toInt()];
                 final isToday = value.toInt() == 6;
@@ -275,8 +276,30 @@ class OverviewStatsScreen extends StatelessWidget {
               },
             ),
           ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 30,
+              interval: 5,
+              getTitlesWidget: (double value, TitleMeta meta) {
+                // Only draw text for our specific intervals
+                if (value == 0 || value == 5 || value == 10) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Text(
+                      value.toInt().toString(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ),
           rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
@@ -290,6 +313,7 @@ class OverviewStatsScreen extends StatelessWidget {
           LineChartBarData(
             spots: focusSpots,
             isCurved: true,
+            preventCurveOverShooting: true,
             color: Colors.blue.shade400,
             barWidth: 3,
             isStrokeCapRound: true,
@@ -303,6 +327,7 @@ class OverviewStatsScreen extends StatelessWidget {
           LineChartBarData(
             spots: taskSpots,
             isCurved: true,
+            preventCurveOverShooting: true,
             color: Colors.green.shade400,
             barWidth: 3,
             isStrokeCapRound: true,

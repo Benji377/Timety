@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
+import '../services/notification_service.dart';
 
 class FocusProvider extends ChangeNotifier {
   final FocusRepository repository;
@@ -128,6 +129,36 @@ class FocusProvider extends ChangeNotifier {
 
   // --- SESSION ACTIONS ---
 
+  void _updateNotification({bool asPaused = false}) {
+    if (_activeMode == null || _activeMode!.phases.isEmpty) return;
+
+    final currentPhase = _activeMode!.phases[_currentPhaseIndex];
+    final isStopwatch = currentPhase.durationMinutes == -1;
+
+    if (asPaused) {
+      final mins = _secondsRemainingInPhase ~/ 60;
+      final secs = (_secondsRemainingInPhase % 60).toString().padLeft(2, '0');
+      NotificationService.instance.showFocusTimerNotification(
+        phaseName: currentPhase.type.name,
+        targetTime: DateTime.now(),
+        isStopwatch: isStopwatch,
+        isPaused: true,
+        pausedText: isStopwatch ? "Paused" : "$mins:$secs remaining",
+      );
+    } else {
+      final targetTime = isStopwatch
+          ? DateTime.now().subtract(Duration(seconds: _currentSecondsFocussed))
+          : DateTime.now().add(Duration(seconds: _secondsRemainingInPhase));
+
+      NotificationService.instance.showFocusTimerNotification(
+        phaseName: currentPhase.type.name,
+        targetTime: targetTime,
+        isStopwatch: isStopwatch,
+        isPaused: false,
+      );
+    }
+  }
+
   void startSession() {
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
 
@@ -145,6 +176,8 @@ class FocusProvider extends ChangeNotifier {
 
     _isRunning = true;
     _isPaused = false;
+
+    _updateNotification();
     notifyListeners();
 
     _timer?.cancel();
@@ -177,6 +210,10 @@ class FocusProvider extends ChangeNotifier {
       if (_secondsRemainingInPhase <= 0) {
         _currentPhaseIndex++;
         _setupPhase(_currentPhaseIndex);
+
+        if (_isRunning) {
+          _updateNotification();
+        }
       }
     }
     notifyListeners();
@@ -186,11 +223,13 @@ class FocusProvider extends ChangeNotifier {
     _timer?.cancel();
     _isPaused = true;
     _isRunning = false;
+    _updateNotification(asPaused: true);
     notifyListeners();
   }
 
   void stopSession({bool completed = false}) async {
     _timer?.cancel();
+    NotificationService.instance.cancelFocusTimerNotification();
 
     if (_currentSession != null) {
       _currentSession!.endTime = DateTime.now();
@@ -213,6 +252,8 @@ class FocusProvider extends ChangeNotifier {
 
   void resetSession() {
     _timer?.cancel();
+    NotificationService.instance.cancelFocusTimerNotification();
+
     _isRunning = false;
     _isPaused = false;
     _currentSession = null;
