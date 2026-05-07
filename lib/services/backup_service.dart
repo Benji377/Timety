@@ -139,8 +139,8 @@ class BackupService {
             ),
             actions: [
               ElevatedButton(
-                onPressed: () => exit(0), // Requires dart:io
-                child: const Text("Close App Now"),
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("Got it"),
               ),
             ],
           ),

@@ -1,4 +1,4 @@
-name: Build and Release APK
+name: Build and Release Mobile Artifacts
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         default: '1.0.0'
 
 jobs:
-  build:
+  build_apk:
     name: Build Android APK
     runs-on: ubuntu-latest
     permissions: write-all
@@ -35,32 +35,100 @@ jobs:
       - name: Generate Hive Adapters
         run: dart run build_runner build --delete-conflicting-outputs
 
-      # Build the APK (for direct installs/sideloading)
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
 
-      # Build the App Bundle (for Google Play Store)
+      - name: Rename APK Artifact
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk timety-v${{ github.event.inputs.version }}.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: timety-apk
+          path: |
+            timety-v${{ github.event.inputs.version }}.apk
+
+  build_aab:
+    name: Build Android App Bundle
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters
+        run: dart run build_runner build --delete-conflicting-outputs
+
       - name: Build App Bundle
         run: flutter build appbundle --release --no-tree-shake-icons
 
-      - name: Rename Artifacts
+      - name: Rename AAB Artifact
         run: |
-          mv build/app/outputs/flutter-apk/app-release.apk timety-v${{ github.event.inputs.version }}.apk
           mv build/app/outputs/bundle/release/app-release.aab timety-v${{ github.event.inputs.version }}.aab
 
-      - name: Upload Artifacts
+      - name: Upload AAB Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: timety-release-builds
+          name: timety-aab
           path: |
-            timety-v${{ github.event.inputs.version }}.apk
             timety-v${{ github.event.inputs.version }}.aab
+
+  build_ios:
+    name: Build iOS App Artifact
+    runs-on: macos-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate Hive Adapters
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Package iOS App Artifact
+        run: |
+          cd build/ios/iphoneos
+          zip -r ../../../timety-v${{ github.event.inputs.version }}-ios.app.zip Runner.app
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: timety-ios
+          path: |
+            timety-v${{ github.event.inputs.version }}-ios.app.zip
 
   upload_to_release:
     name: Upload to GitHub Release
     runs-on: ubuntu-latest
     permissions: write-all
-    needs: [build]
+    needs: [build_apk, build_aab, build_ios]
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -73,6 +141,7 @@ jobs:
           subject-path: |
             artifacts/*.apk
             artifacts/*.aab
+            artifacts/*-ios.app.zip
 
       - name: Release to GitHub
         uses: softprops/action-gh-release@v3
@@ -84,3 +153,4 @@ jobs:
           files: |
             artifacts/*.apk
             artifacts/*.aab
+            artifacts/*-ios.app.zip
