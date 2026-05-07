@@ -27,15 +27,15 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       // Move the pages directly into the IndexedStack
       body: IndexedStack(
-        index: _currentIndex, 
+        index: _currentIndex,
         children: [
           // Pass the tab-switching function down to the HomeScreen
-          HomeScreen(onNavigateToFocus: () => _switchTab(1)), 
+          HomeScreen(onNavigateToFocus: () => _switchTab(1)),
           const FocusScreen(),
           const TaskListScreen(),
           const HabitListScreen(),
           const UserScreen(),
-        ]
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

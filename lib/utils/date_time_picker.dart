@@ -37,9 +37,9 @@ class AppDatePickers {
 
     // 3. Merge them together
     final finalTime = pickedTime ?? fallbackTime;
-    
+
     // If the user skipped the time and no fallback was provided, cancel the whole operation
-    if (finalTime == null) return null; 
+    if (finalTime == null) return null;
 
     return DateTime(
       pickedDate.year,

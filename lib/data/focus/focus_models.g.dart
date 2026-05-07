@@ -99,10 +99,7 @@ class DistractionAdapter extends TypeAdapter<Distraction> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Distraction(
-      time: fields[0] as DateTime,
-      note: fields[1] as String,
-    );
+    return Distraction(time: fields[0] as DateTime, note: fields[1] as String);
   }
 
   @override

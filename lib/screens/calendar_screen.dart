@@ -1,4 +1,3 @@
-// lib/screens/calendar_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/utils/utils.dart';
@@ -386,7 +385,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   : ListView(
                       padding: const EdgeInsets.all(8),
                       children: [
-                        // --- HABITS ACCORDION (NEW) ---
+                        // --- HABITS ACCORDION ---
                         ExpansionTile(
                           initiallyExpanded: true,
                           title: Text(

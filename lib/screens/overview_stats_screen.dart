@@ -86,13 +86,13 @@ class OverviewStatsScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-          _buildKpiCard(
-            context,
-            "Daily Focus Goal",
-            "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
-            Icons.track_changes,
-            Colors.orange,
-          ),
+        _buildKpiCard(
+          context,
+          "Daily Focus Goal",
+          "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
+          Icons.track_changes,
+          Colors.orange,
+        ),
 
         const SizedBox(height: 40),
 

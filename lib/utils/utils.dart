@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../data/task/task.dart';
 
 class AppUtils {
-
   Icon getPriorityIcon(Priority p) {
     switch (p) {
       case Priority.low:

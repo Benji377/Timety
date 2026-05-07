@@ -51,10 +51,9 @@ class BackupService {
 
       // 5. Open native share sheet (Save to Files, Google Drive, Email, etc.)
       final xFile = XFile(zipPath, mimeType: 'application/zip');
-      await SharePlus.instance.share(ShareParams(
-        subject: 'Timety Backup',
-        files: [xFile],
-      ));
+      await SharePlus.instance.share(
+        ShareParams(subject: 'Timety Backup', files: [xFile]),
+      );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(

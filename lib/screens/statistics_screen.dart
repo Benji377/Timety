@@ -1,4 +1,3 @@
-// lib/screens/statistics_screen.dart
 import 'package:flutter/material.dart';
 import 'habit/habit_stats_screen.dart';
 import 'overview_stats_screen.dart';
@@ -24,12 +23,14 @@ class StatisticsScreen extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   // A subtle background color to contrast against the AppBar
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(25.0),
                 ),
                 child: TabBar(
                   // Removes the default grey line at the bottom
-                  dividerColor: Colors.transparent, 
+                  dividerColor: Colors.transparent,
                   // Makes the indicator fill the whole tab
                   indicatorSize: TabBarIndicatorSize.tab,
                   // The sliding pill-shaped indicator
@@ -46,7 +47,9 @@ class StatisticsScreen extends StatelessWidget {
                   ),
                   // Text colors
                   labelColor: Theme.of(context).colorScheme.onPrimary,
-                  unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                  unselectedLabelColor: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant,
                   labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                   tabs: const [
                     Tab(text: 'Overview'),

@@ -1,4 +1,3 @@
-// lib/screens/task_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -14,9 +13,10 @@ class TaskDetailScreen extends StatefulWidget {
   final bool isEditing;
 
   const TaskDetailScreen({
-    super.key, 
-    this.task, 
-    this.isEditing = false, // Default to false, but we'll override if task is null
+    super.key,
+    this.task,
+    this.isEditing =
+        false, // Default to false, but we'll override if task is null
   });
 
   @override
@@ -26,13 +26,13 @@ class TaskDetailScreen extends StatefulWidget {
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late bool _isEditing;
   late bool _isNewTask;
-  
+
   // Controllers
   late TextEditingController _titleController;
   late TextEditingController _descController;
   late TextEditingController _locationController;
   final _categoryController = TextEditingController();
-  
+
   // State variables
   late Priority _priority;
   late Size _size;
@@ -41,7 +41,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late List<DateTime> _reminders;
 
   final List<String> _reminderOptions = [
-    'On time', '30 minutes before', '1 hour before', '1 day before', 'Custom',
+    'On time',
+    '30 minutes before',
+    '1 hour before',
+    '1 day before',
+    'Custom',
   ];
   String _selectedReminderOption = '30 minutes before';
 
@@ -51,17 +55,21 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     _isNewTask = widget.task == null;
     // If it's a new task, force edit mode to true
     _isEditing = _isNewTask ? true : widget.isEditing;
-    
+
     // Initialize with existing data OR defaults
     _titleController = TextEditingController(text: widget.task?.title ?? '');
-    _descController = TextEditingController(text: widget.task?.description ?? '');
-    _locationController = TextEditingController(text: widget.task?.location ?? '');
-    
+    _descController = TextEditingController(
+      text: widget.task?.description ?? '',
+    );
+    _locationController = TextEditingController(
+      text: widget.task?.location ?? '',
+    );
+
     _priority = widget.task?.priority ?? Priority.medium;
     _size = widget.task?.size ?? Size.medium;
     _dueDate = widget.task?.dueDate;
     _category = widget.task?.category ?? "";
-    _reminders = widget.task != null ? List.from(widget.task!.reminders) : []; 
+    _reminders = widget.task != null ? List.from(widget.task!.reminders) : [];
   }
 
   @override
@@ -109,13 +117,23 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         lastDate: _dueDate ?? DateTime(2100),
       );
 
-      if (reminderTime != null && _dueDate != null && reminderTime.isAfter(_dueDate!)) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Custom reminder must be before the Due Date.')));
+      if (reminderTime != null &&
+          _dueDate != null &&
+          reminderTime.isAfter(_dueDate!)) {
+        if (mounted)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Custom reminder must be before the Due Date.'),
+            ),
+          );
         return;
       }
     } else {
       if (_dueDate == null) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please set a Due Date first.')));
+        if (mounted)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please set a Due Date first.')),
+          );
         return;
       }
       if (_selectedReminderOption == 'On time') {
@@ -142,12 +160,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   // Master Save Logic
   void _saveTask() {
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Title is required!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Title is required!')));
       return;
     }
 
     final taskToSave = Task(
-      id: _isNewTask ? DateTime.now().toString() : widget.task!.id, // Generate ID if new, keep if old
+      id: _isNewTask
+          ? DateTime.now().toString()
+          : widget.task!.id, // Generate ID if new, keep if old
       title: _titleController.text.trim(),
       description: _descController.text.trim(),
       location: _locationController.text.trim(),
@@ -173,9 +195,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final mapCenter = _parseLocation();
-    
+
     // Dynamic App Bar Title
-    String appBarTitle = _isNewTask ? "Create New Task" : (_isEditing ? "Edit Task" : "Task Details");
+    String appBarTitle = _isNewTask
+        ? "Create New Task"
+        : (_isEditing ? "Edit Task" : "Task Details");
 
     return Scaffold(
       appBar: AppBar(
@@ -189,10 +213,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ),
           // If we are creating a brand new task, put the checkmark at the top right for convenience
           if (_isNewTask)
-            IconButton(
-              icon: const Icon(Icons.check),
-              onPressed: _saveTask,
-            )
+            IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
         ],
       ),
       body: ListView(
@@ -206,7 +227,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             decoration: InputDecoration(
               labelText: _isEditing ? 'Task Title *' : null,
               prefixIcon: const Icon(Icons.title),
-              border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
+              border: _isEditing
+                  ? const OutlineInputBorder()
+                  : InputBorder.none,
             ),
           ),
           const SizedBox(height: 16),
@@ -234,13 +257,15 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ),
             const SizedBox(height: 8),
           ],
-          
+
           if (_category.isNotEmpty)
             Align(
               alignment: Alignment.centerLeft,
               child: Chip(
                 label: Text(_category),
-                onDeleted: _isEditing ? () => setState(() => _category = "") : null,
+                onDeleted: _isEditing
+                    ? () => setState(() => _category = "")
+                    : null,
               ),
             ),
           const SizedBox(height: 16),
@@ -252,7 +277,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 Expanded(
                   child: DropdownButtonFormField<Priority>(
                     initialValue: _priority,
-                    decoration: const InputDecoration(labelText: 'Priority', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Priority',
+                      border: OutlineInputBorder(),
+                    ),
                     items: Priority.values.map((Priority p) {
                       return DropdownMenuItem<Priority>(
                         value: p,
@@ -260,7 +288,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           children: [
                             AppUtils().getPriorityIcon(p),
                             const SizedBox(width: 8),
-                            Text(p.name.toUpperCase().replaceAll("VERYHIGH", "VERY HIGH")),
+                            Text(
+                              p.name.toUpperCase().replaceAll(
+                                "VERYHIGH",
+                                "VERY HIGH",
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -274,15 +307,26 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 Expanded(
                   child: DropdownButtonFormField<Size>(
                     initialValue: _size,
-                    decoration: const InputDecoration(labelText: 'Size', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Size',
+                      border: OutlineInputBorder(),
+                    ),
                     items: Size.values.map((Size s) {
                       return DropdownMenuItem<Size>(
                         value: s,
                         child: Row(
                           children: [
-                            Text(AppUtils().getSizeEmoji(s), style: const TextStyle(fontSize: 18)),
+                            Text(
+                              AppUtils().getSizeEmoji(s),
+                              style: const TextStyle(fontSize: 18),
+                            ),
                             const SizedBox(width: 8),
-                            Text(s.name.toUpperCase().replaceAll('VERYLARGE', 'VERY LARGE')),
+                            Text(
+                              s.name.toUpperCase().replaceAll(
+                                'VERYLARGE',
+                                'VERY LARGE',
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -300,16 +344,35 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 Expanded(
                   child: ListTile(
                     leading: AppUtils().getPriorityIcon(_priority),
-                    title: const Text('Priority', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    subtitle: Text(_priority.name.toUpperCase().replaceAll("VERYHIGH", "VERY HIGH")),
+                    title: const Text(
+                      'Priority',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    subtitle: Text(
+                      _priority.name.toUpperCase().replaceAll(
+                        "VERYHIGH",
+                        "VERY HIGH",
+                      ),
+                    ),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
                 Expanded(
                   child: ListTile(
-                    leading: Text(AppUtils().getSizeEmoji(_size), style: const TextStyle(fontSize: 24)),
-                    title: const Text('Size', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    subtitle: Text(_size.name.toUpperCase().replaceAll('VERYLARGE', 'VERY LARGE')),
+                    leading: Text(
+                      AppUtils().getSizeEmoji(_size),
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                    title: const Text(
+                      'Size',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    subtitle: Text(
+                      _size.name.toUpperCase().replaceAll(
+                        'VERYLARGE',
+                        'VERY LARGE',
+                      ),
+                    ),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -320,10 +383,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           // 4. DUE DATE & REMINDERS
           ListTile(
             shape: RoundedRectangleBorder(
-              side: BorderSide(color: _isEditing ? Colors.grey.shade400 : Colors.transparent),
+              side: BorderSide(
+                color: _isEditing ? Colors.grey.shade400 : Colors.transparent,
+              ),
               borderRadius: BorderRadius.circular(4),
             ),
-            contentPadding: _isEditing ? const EdgeInsets.symmetric(horizontal: 12) : EdgeInsets.zero,
+            contentPadding: _isEditing
+                ? const EdgeInsets.symmetric(horizontal: 12)
+                : EdgeInsets.zero,
             leading: const Icon(Icons.event),
             title: Text(
               _dueDate == null
@@ -337,9 +404,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
           // Reminders
           if (_isEditing || _reminders.isNotEmpty) ...[
-            const Text('Reminders', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Reminders',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            
+
             if (_isEditing)
               Row(
                 children: [
@@ -351,10 +421,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         border: OutlineInputBorder(),
                       ),
                       items: _reminderOptions.map((String option) {
-                        return DropdownMenuItem(value: option, child: Text(option));
+                        return DropdownMenuItem(
+                          value: option,
+                          child: Text(option),
+                        );
                       }).toList(),
                       onChanged: (val) {
-                        if (val != null) setState(() => _selectedReminderOption = val);
+                        if (val != null)
+                          setState(() => _selectedReminderOption = val);
                       },
                     ),
                   ),
@@ -377,9 +451,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         "${reminder.month.toString().padLeft(2, '0')}/${reminder.day.toString().padLeft(2, '0')} ${reminder.hour.toString().padLeft(2, '0')}:${reminder.minute.toString().padLeft(2, '0')}";
                     return Chip(
                       avatar: const Icon(Icons.notifications_active, size: 16),
-                      label: Text(formattedString, style: const TextStyle(fontSize: 12)),
-                      deleteIcon: _isEditing ? const Icon(Icons.close, size: 16) : null,
-                      onDeleted: _isEditing ? () => setState(() => _reminders.remove(reminder)) : null,
+                      label: Text(
+                        formattedString,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      deleteIcon: _isEditing
+                          ? const Icon(Icons.close, size: 16)
+                          : null,
+                      onDeleted: _isEditing
+                          ? () => setState(() => _reminders.remove(reminder))
+                          : null,
                     );
                   }).toList(),
                 ),
@@ -394,7 +475,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             decoration: InputDecoration(
               labelText: _isEditing ? 'Description' : null,
               prefixIcon: const Icon(Icons.notes),
-              border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
+              border: _isEditing
+                  ? const OutlineInputBorder()
+                  : InputBorder.none,
             ),
             maxLines: 4,
           ),
@@ -407,27 +490,31 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             decoration: InputDecoration(
               labelText: _isEditing ? 'Location' : null,
               prefixIcon: const Icon(Icons.location_on),
-              border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
-              suffixIcon: _isEditing ? IconButton(
-                icon: const Icon(Icons.map),
-                tooltip: 'Pick on Map',
-                onPressed: () async {
-                  final String? result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LocationPicker(
-                        initialLocation: _locationController.text,
-                      ),
-                    ),
-                  );
+              border: _isEditing
+                  ? const OutlineInputBorder()
+                  : InputBorder.none,
+              suffixIcon: _isEditing
+                  ? IconButton(
+                      icon: const Icon(Icons.map),
+                      tooltip: 'Pick on Map',
+                      onPressed: () async {
+                        final String? result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LocationPicker(
+                              initialLocation: _locationController.text,
+                            ),
+                          ),
+                        );
 
-                  if (result != null) {
-                    setState(() {
-                      _locationController.text = result;
-                    });
-                  }
-                },
-              ) : null,
+                        if (result != null) {
+                          setState(() {
+                            _locationController.text = result;
+                          });
+                        }
+                      },
+                    )
+                  : null,
             ),
           ),
 
@@ -445,18 +532,25 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   options: MapOptions(
                     initialCenter: mapCenter,
                     initialZoom: 15.0,
-                    interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+                    interactionOptions: const InteractionOptions(
+                      flags: InteractiveFlag.none,
+                    ),
                   ),
                   children: [
                     TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'io.github.benji377.timety',
                     ),
                     MarkerLayer(
                       markers: [
                         Marker(
                           point: mapCenter,
-                          child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
+                          child: const Icon(
+                            Icons.location_pin,
+                            color: Colors.red,
+                            size: 40,
+                          ),
                         ),
                       ],
                     ),
@@ -464,7 +558,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 ),
               ),
             ),
-            
+
           const SizedBox(height: 32),
 
           // 7. SAVE BUTTON (Only show dialog if editing an existing task, otherwise just save)
@@ -476,12 +570,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Confirm Save'),
-                    content: const Text('Are you sure you want to save changes to this task?'),
+                    content: const Text(
+                      'Are you sure you want to save changes to this task?',
+                    ),
                     actions: [
-                      TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('Cancel'),
+                      ),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.of(ctx).pop(); 
+                          Navigator.of(ctx).pop();
                           _saveTask();
                         },
                         child: const Text('Save'),
@@ -491,10 +590,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 );
               },
               label: const Text('Save Changes'),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+              ),
             ),
-            
-          const SizedBox(height: 40), 
+
+          const SizedBox(height: 40),
         ],
       ),
     );
