@@ -5,7 +5,7 @@ class SettingsProvider extends ChangeNotifier {
   SharedPreferences? _prefs;
 
   // Default Values
-  String _userName = "Focus Master";
+  String _userName = "Bobert";
   String? _profileImagePath;
   ThemeMode _themeMode = ThemeMode.system;
   Color _seedColor = Colors.blue;

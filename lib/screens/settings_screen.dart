@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/settings_provider.dart';
+import '../services/backup_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -191,7 +193,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               "Max Node Time",
               settings.maxNodeMins,
               10,
-              300,
+              480,
               (val) => settings.setMaxNode(val),
             ),
           ),
@@ -223,6 +225,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 settings.setNotificationTime(time);
               }
             },
+          ),
+
+          // --- DATA & BACKUP ---
+          _buildSectionHeader('Data & Backup'),
+          ListTile(
+            leading: const Icon(
+              Icons.cloud_upload_outlined,
+              color: Colors.blue,
+            ),
+            title: const Text('Export Backup'),
+            subtitle: const Text(
+              'Save your data locally or share it to the cloud',
+            ),
+            onTap: () => BackupService.exportBackup(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.restore, color: Colors.orange),
+            title: const Text('Restore Backup'),
+            subtitle: const Text(
+              'Overwrite current data from a backup zip file',
+            ),
+            onTap: () => BackupService.importBackup(context),
           ),
 
           const SizedBox(height: 32),
@@ -264,14 +288,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ListTile(
                     leading: const Icon(Icons.person_outline),
                     title: const Text(
-                      'Built by Your Name',
+                      'Built by Benji377',
                     ), // Change to your name!
                     subtitle: const Text('Solo Developer & Maintainer'),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.email_outlined),
-                    title: const Text('Contact Support'),
-                    subtitle: const Text('support@timety.app'),
+                    leading: const Icon(Icons.favorite),
+                    title: const Text('Donate'),
+                    subtitle: const Text('GitHub Sponsors'),
                     trailing: const Icon(
                       Icons.open_in_new,
                       size: 16,
@@ -279,6 +303,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     onTap: () {
                       // Add url_launcher logic here: launchUrl(Uri.parse('mailto:support@timety.app'));
+                      launchUrl(
+                        Uri.parse('https://github.com/sponsors/Benji377'),
+                      );
                     },
                   ),
                   ListTile(
@@ -292,6 +319,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     onTap: () {
                       // Add url_launcher logic here: launchUrl(Uri.parse('https://github.com/yourusername/timety'));
+                      launchUrl(
+                        Uri.parse('https://github.com/Benji377/timety'),
+                      );
                     },
                   ),
                   const SizedBox(height: 8),
