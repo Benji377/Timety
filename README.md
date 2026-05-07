@@ -54,7 +54,7 @@ Timety is a comprehensive, offline-first productivity and time-management applic
    ```
 4. **Crucial Step:** Generate the Hive database adapters:
    ```bash
-   flutter pub run build_runner build --delete-conflicting-outputs
+   dart run build_runner build --delete-conflicting-outputs
    ```
 5. Run the app:
    ```bash
