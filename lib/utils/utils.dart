@@ -22,13 +22,13 @@ class AppUtils {
   String getSizeEmoji(Size s) {
     switch (s) {
       case Size.small:
-        return '🐁';
+        return 'S';
       case Size.medium:
-        return '🐕';
+        return 'M';
       case Size.large:
-        return '🐎';
+        return 'L';
       case Size.veryLarge:
-        return '🐳';
+        return 'XL';
     }
   }
 }

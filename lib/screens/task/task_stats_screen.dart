@@ -71,9 +71,9 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
           ? "A quiet week so far. Time to plan ahead!"
           : "No activity recorded during this week.";
     } else if (completedThisWeek > createdThisWeek) {
-      return "Excellent! 📉 You are clearing your backlog faster than you are adding to it.";
+      return "Excellent! You are clearing your backlog faster than you are adding to it.";
     } else if (completedThisWeek > 10) {
-      return "Incredible focus! 🎯 You crushed $completedThisWeek tasks this week.";
+      return "Incredible focus! You crushed $completedThisWeek tasks this week.";
     } else if (completedThisWeek > 0) {
       return "Steady progress. You finished $completedThisWeek tasks this week.";
     } else {

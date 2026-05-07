@@ -33,11 +33,11 @@ class HomeScreen extends StatelessWidget {
     }
 
     if (weekday == DateTime.monday && hour < 12) {
-      return "$greeting Let's crush this week! 🚀";
+      return "$greeting Let's crush this week!";
     } else if (weekday == DateTime.friday && hour > 15) {
-      return "$greeting The weekend is almost here! 🎉";
+      return "$greeting The weekend is almost here!";
     } else if (weekday == DateTime.sunday) {
-      return "$greeting Take it easy today! ☕";
+      return "$greeting Take it easy today!";
     }
 
     return greeting;
@@ -171,9 +171,15 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         subtitle: habit.targetTime != null
-            ? Text(
-                "⏰ ${habit.targetTime!.format(context)}",
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ? Row(
+                children: [
+                  const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    habit.targetTime!.format(context),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
               )
             : null,
       ),

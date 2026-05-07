@@ -163,8 +163,8 @@ class NotificationService {
     }
 
     final quotes = [
-      "Conquer your day! 🚀",
-      "Small steps lead to big results. Keep going! 💪",
+      "Conquer your day!",
+      "Small steps lead to big results. Keep going!",
       "What's on the agenda today? Let's make it happen.",
     ];
     String body = quotes[now.day % quotes.length];
@@ -223,7 +223,7 @@ class NotificationService {
 
     await _notificationsPlugin.zonedSchedule(
       id: endOfDayCheckupId,
-      title: 'Evening Check-in 🌙',
+      title: 'Evening Check-in',
       body: 'Did you complete all your habits today? Tap to log them!',
       scheduledDate: scheduledDate,
       notificationDetails: const NotificationDetails(
@@ -265,7 +265,7 @@ class NotificationService {
 
     await _notificationsPlugin.show(
       id: focusTimerId,
-      title: isPaused ? 'Focus Paused ⏸️' : 'Focus Active 🔥',
+      title: isPaused ? 'Focus Paused' : 'Focus Active',
       body: isPaused
           ? 'Phase: $phaseName | $pausedText'
           : 'Current Phase: $phaseName',

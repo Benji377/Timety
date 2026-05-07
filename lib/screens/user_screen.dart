@@ -267,9 +267,12 @@ class _UserScreenState extends State<UserScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    currentStreak > 0 ? "🔥" : "🩶",
-                    style: const TextStyle(fontSize: 24),
+                  Icon(
+                    currentStreak > 0 ? Icons.whatshot : Icons.heart_broken,
+                    size: 24,
+                    color: currentStreak > 0
+                        ? AppTheme.warningColor
+                        : Colors.grey.shade600,
                   ),
                   const SizedBox(width: AppTheme.spaceSmall),
                   Text(

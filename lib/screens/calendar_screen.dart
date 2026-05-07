@@ -344,13 +344,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         ),
                                       ),
                                     if (weeklyHabitCount > 0)
-                                      Text(
-                                        '$weeklyHabitCount 🔁',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.purple,
-                                          fontSize: 11,
-                                        ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            '$weeklyHabitCount',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.purple,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 2),
+                                          const Icon(
+                                            Icons.repeat,
+                                            color: Colors.purple,
+                                            size: 12,
+                                          ),
+                                        ],
                                       ),
                                   ],
                                 ),

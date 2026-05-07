@@ -133,7 +133,7 @@ class BackupService {
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            title: const Text("Restore Successful! 🎉"),
+            title: const Text("Restore Successful!"),
             content: const Text(
               "Your data has been restored. Please completely close and restart Timety to load your backups.",
             ),

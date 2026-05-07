@@ -228,7 +228,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                     ),
                     _buildStatCard(
                       "Best Streak",
-                      "$allTimeBestStreak 🔥",
+                      "$allTimeBestStreak",
                       Icons.military_tech,
                       AppTheme.warningColor,
                     ),
@@ -319,13 +319,24 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(
-                            "$currentStreak 🔥",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: AppTheme.fwExtraBold,
-                              color: AppTheme.warningColor,
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "$currentStreak",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: AppTheme.fwExtraBold,
+                                  color: AppTheme.warningColor,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.whatshot,
+                                size: 16,
+                                color: AppTheme.warningColor,
+                              ),
+                            ],
                           ),
                           Text(
                             "Best: $bestStreak",
