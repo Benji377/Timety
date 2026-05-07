@@ -42,11 +42,11 @@ Timety is a comprehensive, offline-first productivity and time-management applic
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/yourusername/timety.git](https://github.com/yourusername/timety.git)
+   git clone https://github.com/Benji377/Timety.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd timety
+   cd Timety
    ```
 3. Install dependencies:
    ```bash
