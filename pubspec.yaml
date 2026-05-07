@@ -66,6 +66,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.4.13
   hive_generator: ^2.0.1
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -108,3 +109,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21 
+  # Optional: For Android 8+ Adaptive Icons
+  # adaptive_icon_background: "#FFFFFF" 
+  # adaptive_icon_foreground: "assets/logo_transparent.png"

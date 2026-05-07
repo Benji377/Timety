@@ -1,4 +1,16 @@
-# Timety 🚀
+# Timety
+
+<p align="center">
+  <img src="assets/logo.png" width="180" alt="Timety Logo">
+  <p align="center">
+    <a href="https://github.com/Benji377/timety/actions/workflows/lint.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/timety/lint.yml?label=Lint&logo=flutter&style=for-the-badge&labelColor=555555&color=02569B" alt="lint">
+    </a>
+    <a href="https://github.com/Benji377/timety/actions/workflows/test.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/timety/test.yml?label=Tests&logo=githubactions&style=for-the-badge&labelColor=555555&color=2088FF" alt="test">
+    </a>
+  </p>
+</p>
 
 Timety is a comprehensive, offline-first productivity and time-management application built with Flutter. It seamlessly integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
 
