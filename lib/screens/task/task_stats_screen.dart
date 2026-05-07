@@ -468,8 +468,9 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
 
   Widget _buildPieChart(BuildContext context, List<Task> tasks) {
     final categoryData = _getCategoryData(tasks);
-    if (categoryData.isEmpty)
+    if (categoryData.isEmpty) {
       return const Center(child: Text("No categories used."));
+    }
 
     final colors = [
       Colors.blue,

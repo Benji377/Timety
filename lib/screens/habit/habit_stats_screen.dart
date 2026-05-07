@@ -478,8 +478,9 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
 
   Widget _buildTimePieChart(List<Habit> habits) {
     final data = _getTimeOfDayData(habits);
-    if (data.values.every((v) => v == 0))
+    if (data.values.every((v) => v == 0)) {
       return const Center(child: Text("No completion data yet."));
+    }
 
     final colorMap = {
       'Morning': Colors.orange.shade300,

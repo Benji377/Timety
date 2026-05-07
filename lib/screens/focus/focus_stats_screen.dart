@@ -354,8 +354,9 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
 
   Widget _buildTagPieChart(List<FocusSession> sessions, List<FocusTag> tags) {
     final tagData = _getTagData(sessions, tags);
-    if (tagData.isEmpty || tagData.values.every((v) => v == 0))
+    if (tagData.isEmpty || tagData.values.every((v) => v == 0)) {
       return const Center(child: Text("No tagged focus time."));
+    }
 
     List<PieChartSectionData> sections = [];
 

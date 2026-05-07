@@ -120,20 +120,22 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       if (reminderTime != null &&
           _dueDate != null &&
           reminderTime.isAfter(_dueDate!)) {
-        if (mounted)
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Custom reminder must be before the Due Date.'),
             ),
           );
+        }
         return;
       }
     } else {
       if (_dueDate == null) {
-        if (mounted)
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Please set a Due Date first.')),
           );
+        }
         return;
       }
       if (_selectedReminderOption == 'On time') {
@@ -427,8 +429,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         );
                       }).toList(),
                       onChanged: (val) {
-                        if (val != null)
+                        if (val != null) {
                           setState(() => _selectedReminderOption = val);
+                        }
                       },
                     ),
                   ),
