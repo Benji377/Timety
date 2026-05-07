@@ -33,19 +33,28 @@ jobs:
         run: flutter pub get
 
       - name: Generate Hive Adapters
-        run: flutter pub run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build --delete-conflicting-outputs
 
+      # Build the APK (for direct installs/sideloading)
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
 
-      - name: Rename APK
-        run: mv build/app/outputs/flutter-apk/app-release.apk timety-v${{ github.event.inputs.version }}.apk
+      # Build the App Bundle (for Google Play Store)
+      - name: Build App Bundle
+        run: flutter build appbundle --release --no-tree-shake-icons
 
-      - name: Upload APK Artifact
+      - name: Rename Artifacts
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk timety-v${{ github.event.inputs.version }}.apk
+          mv build/app/outputs/bundle/release/app-release.aab timety-v${{ github.event.inputs.version }}.aab
+
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: timety-release-apk
-          path: timety-v${{ github.event.inputs.version }}.apk
+          name: timety-release-builds
+          path: |
+            timety-v${{ github.event.inputs.version }}.apk
+            timety-v${{ github.event.inputs.version }}.aab
 
   upload_to_release:
     name: Upload to GitHub Release
@@ -61,7 +70,9 @@ jobs:
       - name: Create attestation for build
         uses: actions/attest@v4
         with:
-          subject-path: artifacts/*.apk
+          subject-path: |
+            artifacts/*.apk
+            artifacts/*.aab
 
       - name: Release to GitHub
         uses: softprops/action-gh-release@v3
@@ -70,4 +81,6 @@ jobs:
           generate_release_notes: true
           name: Timety v${{ github.event.inputs.version }}
           tag_name: v${{ github.event.inputs.version }}
-          files: artifacts/*.apk
+          files: |
+            artifacts/*.apk
+            artifacts/*.aab
