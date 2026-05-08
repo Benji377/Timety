@@ -7,6 +7,7 @@ import 'task/task_detail_screen.dart';
 import '../providers/focus_provider.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
+import '../utils/date_utils.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -18,11 +19,6 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedMonth = DateTime.now();
   DateTime? _selectedDate;
-
-  bool _isSameDay(DateTime? a, DateTime? b) {
-    if (a == null || b == null) return false;
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
 
   // --- TIME HELPER ---
   String _formatTime(DateTime time) {
@@ -69,7 +65,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // 1. Tasks
     final selectedDayTasks = allTasks
-        .where((t) => _isSameDay(t.dueDate, _selectedDate))
+        .where((t) => AppDateUtils.isSameDay(t.dueDate, _selectedDate))
         .toList();
     selectedDayTasks.sort(
       (a, b) => b.priority.index.compareTo(a.priority.index),
@@ -77,7 +73,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // 2. Focus
     final selectedDaySessions = allSessions
-        .where((s) => _isSameDay(s.startTime, _selectedDate))
+        .where((s) => AppDateUtils.isSameDay(s.startTime, _selectedDate))
         .toList();
     selectedDaySessions.sort((a, b) => a.startTime.compareTo(b.startTime));
 
@@ -211,17 +207,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               ...week.map((day) {
                                 final isCurrentMonth =
                                     day.month == _focusedMonth.month;
-                                final isSelected = _isSameDay(
+                                final isSelected = AppDateUtils.isSameDay(
                                   day,
                                   _selectedDate,
                                 );
-                                final isToday = _isSameDay(day, DateTime.now());
+                                final isToday = AppDateUtils.isSameDay(
+                                  day,
+                                  DateTime.now(),
+                                );
 
                                 final hasTasks = allTasks.any(
-                                  (t) => _isSameDay(t.dueDate, day),
+                                  (t) => AppDateUtils.isSameDay(t.dueDate, day),
                                 );
                                 final hasFocus = allSessions.any(
-                                  (s) => _isSameDay(s.startTime, day),
+                                  (s) =>
+                                      AppDateUtils.isSameDay(s.startTime, day),
                                 );
                                 final hasHabits = allHabits.any(
                                   (h) => habitProvider.isCompletedOn(h, day),
@@ -454,7 +454,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                               // Time-Travel Logging!
                                               if (isCompleted) {
                                                 habit.completions.removeWhere(
-                                                  (c) => _isSameDay(
+                                                  (c) => AppDateUtils.isSameDay(
                                                     c,
                                                     _selectedDate!,
                                                   ),

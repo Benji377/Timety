@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/task/task.dart';
-import '../../utils/utils.dart';
 import '../../providers/task_provider.dart';
-import '../../widgets/app_dialogs.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/list_tiles/task_list_tile.dart';
+import '../../widgets/list_section_header.dart';
 import '../calendar_screen.dart';
 import '../statistics_screen.dart';
 import 'task_detail_screen.dart';
@@ -31,23 +32,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
       if (!mounted) return;
       context.read<TaskProvider>().loadTasks();
     });
-  }
-
-  // --- UI HELPERS ---
-  Color _getTaskBorderColor(Task task) {
-    if (task.isCompleted) return Colors.green;
-    if (task.dueDate != null) {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final dueDay = DateTime(
-        task.dueDate!.year,
-        task.dueDate!.month,
-        task.dueDate!.day,
-      );
-      if (dueDay.isBefore(today)) return Colors.red;
-      if (dueDay.isAtSameMomentAs(today)) return Colors.amber.shade600;
-    }
-    return Colors.blue;
   }
 
   // --- DATA PIPELINE: Filter & Sort ---
@@ -102,105 +86,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return processed;
   }
 
-  // --- INDIVIDUAL TASK TILE WIDGET ---
-  Widget _buildTaskTile(Task task) {
-    final borderColor = _getTaskBorderColor(task);
-
-    return Dismissible(
-      key: Key(task.id),
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) {
-        context.read<TaskProvider>().removeTask(task.id);
-      },
-      confirmDismiss: (direction) async {
-        return await AppDialogs.showConfirmation(
-              context: context,
-              title: 'Delete Task',
-              content: 'Are you sure you want to delete this task?',
-            ) ??
-            false;
-      },
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: borderColor, width: 2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: ListTile(
-          leading: Checkbox(
-            value: task.isCompleted,
-            activeColor: Colors.green,
-            onChanged: (_) => context.read<TaskProvider>().toggleTask(task.id),
-          ),
-          title: Text(
-            task.title,
-            style: TextStyle(
-              decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-              color: task.isCompleted ? Colors.grey : null,
-            ),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (task.description.isNotEmpty)
-                Text(
-                  task.description,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12),
-                ),
-              if (task.dueDate != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Row(
-                    children: [
-                      Icon(Icons.access_time, size: 14, color: borderColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${task.dueDate!.month.toString().padLeft(2, '0')}/${task.dueDate!.day.toString().padLeft(2, '0')} ${task.dueDate!.hour.toString().padLeft(2, '0')}:${task.dueDate!.minute.toString().padLeft(2, '0')}",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: borderColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                AppUtils().getSizeEmoji(task.size),
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(width: 8),
-              AppUtils().getPriorityIcon(task.priority),
-            ],
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TaskDetailScreen(task: task, isEditing: false),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   // --- ACCORDION BUILDER ---
   Widget _buildAccordion(
     String title,
@@ -217,17 +102,34 @@ class _TaskListScreenState extends State<TaskListScreen> {
         initiallyExpanded: initExpanded,
         iconColor: color,
         collapsedIconColor: color,
-        title: Row(
-          children: [
-            Icon(Icons.circle, size: 12, color: color),
-            const SizedBox(width: 8),
-            Text(
-              "$title (${tasks.length})",
-              style: TextStyle(fontWeight: FontWeight.bold, color: color),
-            ),
-          ],
+        title: ListSectionHeader(
+          title: '$title (${tasks.length})',
+          icon: Icons.circle,
+          color: color,
+          padding: EdgeInsets.zero,
+          iconSize: AppTheme.listSectionIconSize,
+          titleSize: AppTheme.listSectionTitleSize,
         ),
-        children: tasks.map((t) => _buildTaskTile(t)).toList(),
+        children: tasks
+            .map(
+              (task) => TaskListTile(
+                task: task,
+                onToggleCompleted: () =>
+                    context.read<TaskProvider>().toggleTask(task.id),
+                onDelete: () =>
+                    context.read<TaskProvider>().removeTask(task.id),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          TaskDetailScreen(task: task, isEditing: false),
+                    ),
+                  );
+                },
+              ),
+            )
+            .toList(),
       ),
     );
   }

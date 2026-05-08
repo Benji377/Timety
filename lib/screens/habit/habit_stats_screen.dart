@@ -2,10 +2,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/date_utils.dart';
+import '../../utils/streak_calculator.dart';
+import '../../widgets/stat_cards.dart';
+import '../../widgets/week_navigator.dart';
 
 class HabitStatsScreen extends StatefulWidget {
   const HabitStatsScreen({super.key});
@@ -23,77 +26,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     });
   }
 
-  DateTime _getStartOfWeek(DateTime date) {
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-    ).subtract(Duration(days: date.weekday - 1));
-  }
-
   // --- DATA PROCESSING ---
-
-  int _calculateBestStreak(Habit habit) {
-    if (habit.completions.isEmpty) return 0;
-
-    Set<String> activeDates = habit.completions
-        .map(
-          (dt) =>
-              "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}",
-        )
-        .toSet();
-
-    List<String> sortedDates = activeDates.toList()..sort();
-
-    int highest = 1;
-    int currentRun = 1;
-    for (int i = 1; i < sortedDates.length; i++) {
-      DateTime prev = DateTime.parse(sortedDates[i - 1]);
-      DateTime curr = DateTime.parse(sortedDates[i]);
-      if (curr.difference(prev).inDays == 1) {
-        currentRun++;
-        if (currentRun > highest) highest = currentRun;
-      } else {
-        currentRun = 1;
-      }
-    }
-    return highest;
-  }
-
-  int _calculateCurrentStreak(Habit habit) {
-    if (habit.completions.isEmpty) return 0;
-
-    Set<String> activeDates = habit.completions
-        .map(
-          (dt) =>
-              "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}",
-        )
-        .toSet();
-
-    String formatDate(DateTime dt) =>
-        "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
-
-    int current = 0;
-    DateTime checkDate = DateTime.now();
-
-    if (activeDates.contains(formatDate(checkDate))) {
-      // Done today
-    } else if (activeDates.contains(
-      formatDate(checkDate.subtract(const Duration(days: 1))),
-    )) {
-      checkDate = checkDate.subtract(
-        const Duration(days: 1),
-      ); // Done yesterday, grace period
-    } else {
-      return 0; // Broken streak
-    }
-
-    while (activeDates.contains(formatDate(checkDate))) {
-      current++;
-      checkDate = checkDate.subtract(const Duration(days: 1));
-    }
-    return current;
-  }
 
   List<int> _getCompletionsForWeek(
     List<Habit> habits,
@@ -143,15 +76,15 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
   Widget build(BuildContext context) {
     final habits = context.watch<HabitProvider>().habits;
 
-    final startOfWeek = _getStartOfWeek(_focusedDate);
+    final startOfWeek = AppDateUtils.startOfWeekMonday(_focusedDate);
     final endOfWeek = startOfWeek.add(
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
-    String weekRangeLabel =
-        "${DateFormat('MMM d').format(startOfWeek)} - ${DateFormat('MMM d, yyyy').format(endOfWeek)}";
-    bool isCurrentRealWeek =
-        DateTime.now().isAfter(startOfWeek) &&
-        DateTime.now().isBefore(endOfWeek);
+    bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
+      DateTime.now(),
+      startOfWeek,
+      endOfWeek,
+    );
 
     // KPI Calculations
     int totalCompletions = habits.fold(
@@ -160,7 +93,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     );
     int allTimeBestStreak = 0;
     for (var h in habits) {
-      int s = _calculateBestStreak(h);
+      int s = StreakCalculator.calculateBestStreak(h.completions);
       if (s > allTimeBestStreak) allTimeBestStreak = s;
     }
 
@@ -173,38 +106,9 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
               padding: AppTheme.paddingScreenVertical,
               children: [
                 // --- WEEK NAVIGATOR ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () => _changeWeek(-7),
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          isCurrentRealWeek ? "This Week" : "Past Week",
-                          style: const TextStyle(
-                            fontWeight: AppTheme.fwBold,
-                            fontSize: AppTheme.fsBodyLarge,
-                          ),
-                        ),
-                        Text(
-                          weekRangeLabel,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: AppTheme.fsBodySmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed: isCurrentRealWeek
-                          ? null
-                          : () => _changeWeek(7),
-                    ),
-                  ],
+                WeekNavigator(
+                  focusedDate: _focusedDate,
+                  onShiftWeek: _changeWeek,
                 ),
                 const SizedBox(height: AppTheme.spaceLarge),
 
@@ -214,23 +118,23 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                   spacing: AppTheme.spaceMedium,
                   runSpacing: AppTheme.spaceMedium,
                   children: [
-                    _buildStatCard(
-                      "Total Logged",
-                      "$totalCompletions",
-                      Icons.timeline,
-                      AppTheme.infoColor,
+                    CompactVerticalStatCard(
+                      title: "Total Logged",
+                      value: "$totalCompletions",
+                      icon: Icons.timeline,
+                      color: AppTheme.infoColor,
                     ),
-                    _buildStatCard(
-                      "Active Habits",
-                      "${habits.length}",
-                      Icons.all_inclusive,
-                      AppTheme.successColor,
+                    CompactVerticalStatCard(
+                      title: "Active Habits",
+                      value: "${habits.length}",
+                      icon: Icons.all_inclusive,
+                      color: AppTheme.successColor,
                     ),
-                    _buildStatCard(
-                      "Best Streak",
-                      "$allTimeBestStreak",
-                      Icons.military_tech,
-                      AppTheme.warningColor,
+                    CompactVerticalStatCard(
+                      title: "Best Streak",
+                      value: "$allTimeBestStreak",
+                      icon: Icons.military_tech,
+                      color: AppTheme.warningColor,
                     ),
                   ],
                 ),
@@ -292,8 +196,12 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                 ),
                 const SizedBox(height: AppTheme.spaceMedium),
                 ...habits.map((habit) {
-                  int currentStreak = _calculateCurrentStreak(habit);
-                  int bestStreak = _calculateBestStreak(habit);
+                  int currentStreak = StreakCalculator.calculateCurrentStreak(
+                    habit.completions,
+                  );
+                  int bestStreak = StreakCalculator.calculateBestStreak(
+                    habit.completions,
+                  );
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
@@ -357,56 +265,6 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
   }
 
   // --- CHART BUILDERS ---
-
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return SizedBox(
-      width: 105,
-      height: 90,
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: color.withValues(alpha: AppTheme.opacityLight),
-            width: 1.5,
-          ),
-          borderRadius: AppTheme.brXLarge,
-        ),
-        color: color.withValues(alpha: 0.05),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spaceSmall),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: AppTheme.iconSizeSmall),
-              const Spacer(),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: AppTheme.fsHeadingMedium,
-                  fontWeight: AppTheme.fwExtraBold,
-                ),
-              ),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: AppTheme.fsCaption,
-                  color: Colors.grey.shade700,
-                  fontWeight: AppTheme.fwBold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildBarChart(
     List<Habit> habits,

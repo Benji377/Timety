@@ -7,6 +7,8 @@ import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/streak_calculator.dart';
+import '../widgets/stat_cards.dart';
 import 'statistics_screen.dart';
 import 'settings_screen.dart';
 
@@ -60,73 +62,6 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 
-  // --- STREAK ALGORITHM ---
-  Map<String, int> _calculateStreaks(
-    TaskProvider taskProv,
-    FocusProvider focusProv,
-    HabitProvider habitProv,
-  ) {
-    Set<String> activeDates = {};
-    String formatDate(DateTime dt) =>
-        "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
-
-    for (var task in taskProv.tasks) {
-      if (task.isCompleted && task.completedAt != null) {
-        activeDates.add(formatDate(task.completedAt!));
-      }
-    }
-
-    for (var session in focusProv.history) {
-      if (session.totalSecondsFocused >= 60) {
-        activeDates.add(formatDate(session.startTime));
-      }
-    }
-
-    for (var habit in habitProv.habits) {
-      for (var completion in habit.completions) {
-        activeDates.add(formatDate(completion));
-      }
-    }
-
-    if (activeDates.isEmpty) return {'current': 0, 'highest': 0};
-
-    List<String> sortedDates = activeDates.toList()..sort();
-
-    int highest = 1;
-    int currentRun = 1;
-    for (int i = 1; i < sortedDates.length; i++) {
-      DateTime prev = DateTime.parse(sortedDates[i - 1]);
-      DateTime curr = DateTime.parse(sortedDates[i]);
-
-      if (curr.difference(prev).inDays == 1) {
-        currentRun++;
-        if (currentRun > highest) highest = currentRun;
-      } else {
-        currentRun = 1;
-      }
-    }
-
-    int current = 0;
-    DateTime checkDate = DateTime.now();
-
-    if (activeDates.contains(formatDate(checkDate))) {
-      // Keep checking
-    } else if (activeDates.contains(
-      formatDate(checkDate.subtract(const Duration(days: 1))),
-    )) {
-      checkDate = checkDate.subtract(const Duration(days: 1));
-    } else {
-      return {'current': 0, 'highest': highest};
-    }
-
-    while (activeDates.contains(formatDate(checkDate))) {
-      current++;
-      checkDate = checkDate.subtract(const Duration(days: 1));
-    }
-
-    return {'current': current, 'highest': highest};
-  }
-
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
@@ -145,10 +80,19 @@ class _UserScreenState extends State<UserScreen> {
       0,
       (sum, h) => sum + h.completions.length,
     );
-    final streaks = _calculateStreaks(tasks, focus, habits);
+    final activityDates = <DateTime>[
+      ...tasks.tasks
+          .where((t) => t.isCompleted && t.completedAt != null)
+          .map((t) => t.completedAt!),
+      ...focus.history
+          .where((s) => s.totalSecondsFocused >= 60)
+          .map((s) => s.startTime),
+      ...habits.habits.expand((h) => h.completions),
+    ];
+    final streaks = StreakCalculator.calculateBoth(activityDates);
 
-    final currentStreak = streaks['current'] ?? 0;
-    final highestStreak = streaks['highest'] ?? 0;
+    final currentStreak = streaks.current;
+    final highestStreak = streaks.highest;
 
     return Scaffold(
       appBar: AppBar(
@@ -318,103 +262,41 @@ class _UserScreenState extends State<UserScreen> {
                 spacing: AppTheme.spaceMedium,
                 runSpacing: AppTheme.spaceMedium,
                 children: [
-                  _buildStatCard(
-                    context,
-                    "Tasks Done",
-                    "$totalTasks",
-                    Icons.check_circle_outline,
-                    Colors.blue,
+                  CompactHeaderStatCard(
+                    title: "Tasks Done",
+                    value: "$totalTasks",
+                    icon: Icons.check_circle_outline,
+                    color: Colors.blue,
                   ),
-                  _buildStatCard(
-                    context,
-                    "Habits Met",
-                    "$totalHabitsDone",
-                    Icons.repeat,
-                    Colors.purple,
+                  CompactHeaderStatCard(
+                    title: "Habits Met",
+                    value: "$totalHabitsDone",
+                    icon: Icons.repeat,
+                    color: Colors.purple,
                   ),
-                  _buildStatCard(
-                    context,
-                    "Focus Mins",
-                    "$totalFocusMins",
-                    Icons.timer_outlined,
-                    Colors.green,
+                  CompactHeaderStatCard(
+                    title: "Focus Mins",
+                    value: "$totalFocusMins",
+                    icon: Icons.timer_outlined,
+                    color: Colors.green,
                   ),
-                  _buildStatCard(
-                    context,
-                    "Sessions",
-                    "$totalSessions",
-                    Icons.coffee_outlined,
-                    Colors.brown,
+                  CompactHeaderStatCard(
+                    title: "Sessions",
+                    value: "$totalSessions",
+                    icon: Icons.coffee_outlined,
+                    color: Colors.brown,
                   ),
-                  _buildStatCard(
-                    context,
-                    "Best Streak",
-                    "$highestStreak",
-                    Icons.military_tech,
-                    AppTheme.warningColor,
+                  CompactHeaderStatCard(
+                    title: "Best Streak",
+                    value: "$highestStreak",
+                    icon: Icons.military_tech,
+                    color: AppTheme.warningColor,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: AppTheme.space3XLarge),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Updated to be a fixed-size compact box
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return SizedBox(
-      width: 140, // Fixed compact width
-      height: 100, // Fixed compact height
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: color.withValues(alpha: AppTheme.opacityLight),
-            width: 1.5,
-          ),
-          borderRadius: AppTheme.brXLarge,
-        ),
-        color: color.withValues(alpha: 0.05),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spaceMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, color: color, size: AppTheme.iconSizeSmall),
-                  const SizedBox(width: AppTheme.spaceXSmall),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: AppTheme.fsCaption,
-                      color: Colors.grey.shade700,
-                      fontWeight: AppTheme.fwBold,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: AppTheme.fsHeadingMedium,
-                  fontWeight: AppTheme.fwExtraBold,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

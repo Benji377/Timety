@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
+import '../../utils/date_utils.dart';
+import '../../widgets/week_navigator.dart';
 
 class TaskStatsScreen extends StatefulWidget {
   const TaskStatsScreen({super.key});
@@ -21,15 +22,6 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     setState(() {
       _focusedDate = _focusedDate.add(Duration(days: days));
     });
-  }
-
-  // Helper to get the exact start and end of the currently focused week
-  DateTime _getStartOfWeek(DateTime date) {
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-    ).subtract(Duration(days: date.weekday - 1));
   }
 
   // --- DATA PROCESSING HELPERS ---
@@ -142,19 +134,17 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     final tasks = context.watch<TaskProvider>().tasks;
 
     // Calculate week bounds
-    final startOfWeek = _getStartOfWeek(_focusedDate);
+    final startOfWeek = AppDateUtils.startOfWeekMonday(_focusedDate);
     final endOfWeek = startOfWeek.add(
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
 
-    // Format the header string (e.g., "May 4 - May 10, 2026")
-    String weekRangeLabel =
-        "${DateFormat('MMM d').format(startOfWeek)} - ${DateFormat('MMM d, yyyy').format(endOfWeek)}";
-
     // Check if we are viewing the current real-world week
-    bool isCurrentRealWeek =
-        DateTime.now().isAfter(startOfWeek) &&
-        DateTime.now().isBefore(endOfWeek);
+    bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
+      DateTime.now(),
+      startOfWeek,
+      endOfWeek,
+    );
 
     return Scaffold(
       body: tasks.isEmpty
@@ -163,39 +153,9 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 // --- WEEK NAVIGATOR ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () => _changeWeek(-7),
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          isCurrentRealWeek ? "This Week" : "Past Week",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          weekRangeLabel,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      // Optionally disable going into the future
-                      onPressed: isCurrentRealWeek
-                          ? null
-                          : () => _changeWeek(7),
-                    ),
-                  ],
+                WeekNavigator(
+                  focusedDate: _focusedDate,
+                  onShiftWeek: _changeWeek,
                 ),
                 const SizedBox(height: 16),
 

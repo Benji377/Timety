@@ -4,157 +4,13 @@ import 'package:timety/screens/statistics_screen.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/app_dialogs.dart';
+import '../../widgets/list_tiles/habit_list_tile.dart';
+import '../../widgets/list_section_header.dart';
 import '../calendar_screen.dart';
 import 'habit_detail_screen.dart';
 
 class HabitListScreen extends StatelessWidget {
   const HabitListScreen({super.key});
-
-  // --- INDIVIDUAL HABIT TILE ---
-  Widget _buildHabitTile(
-    BuildContext context,
-    Habit habit,
-    HabitProvider provider,
-    bool isDoneToday,
-  ) {
-    final color = Color(habit.colorValue);
-
-    // Subtitle logic
-    String subtitle = "";
-    if (habit.frequency == HabitFrequency.daily) subtitle = "Daily";
-    if (habit.frequency == HabitFrequency.weeklyExact) {
-      subtitle = "Specific Days";
-    }
-    if (habit.frequency == HabitFrequency.weeklyFlexible) {
-      int doneThisWeek = provider.getCompletionsThisWeek(habit);
-      subtitle = "$doneThisWeek / ${habit.targetDaysPerWeek} this week";
-    }
-    if (habit.targetTime != null) {
-      subtitle += " • ${habit.targetTime!.format(context)}";
-    }
-
-    return Dismissible(
-      key: Key(habit.id),
-      background: Container(
-        color: AppTheme.errorColor,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: AppTheme.spaceXLarge),
-        margin: const EdgeInsets.symmetric(
-          horizontal: AppTheme.spaceSmall,
-          vertical: AppTheme.spaceXSmall,
-        ),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => provider.deleteHabit(habit.id),
-      confirmDismiss: (_) async =>
-          await AppDialogs.showConfirmation(
-            context: context,
-            title: 'Delete Habit',
-            content: 'Are you sure you want to delete this habit?',
-          ) ??
-          false,
-      child: Card(
-        margin: const EdgeInsets.symmetric(
-          horizontal: AppTheme.spaceSmall,
-          vertical: AppTheme.spaceXSmall,
-        ),
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: isDoneToday
-                ? color.withValues(alpha: AppTheme.opacityLight)
-                : color,
-            width: 2,
-          ),
-          borderRadius: AppTheme.brMedium,
-        ),
-        child: ListTile(
-          leading: InkWell(
-            onTap: () => provider.toggleCompletionToday(habit),
-            borderRadius: AppTheme.brCircle,
-            child: Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: isDoneToday ? color : Colors.transparent,
-                shape: BoxShape.circle,
-                border: Border.all(color: color, width: 2),
-              ),
-              child: isDoneToday
-                  ? const Icon(Icons.check, size: 18, color: Colors.white)
-                  : null,
-            ),
-          ),
-          title: Row(
-            children: [
-              // Show habit icon (fallback to circle) colored by habit
-              Icon(
-                habit.iconData ?? Icons.circle,
-                size: 18,
-                color: isDoneToday ? Colors.grey : color,
-              ),
-              const SizedBox(width: AppTheme.spaceSmall),
-              Expanded(
-                child: Text(
-                  habit.name,
-                  style: TextStyle(
-                    fontWeight: AppTheme.fwBold,
-                    decoration: isDoneToday ? TextDecoration.lineThrough : null,
-                    color: isDoneToday ? Colors.grey : null,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (habit.notes != null && habit.notes!.isNotEmpty)
-                Text(
-                  habit.notes!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: AppTheme.fsLabel),
-                ),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: AppTheme.fsLabel,
-                  color: Colors.grey,
-                ),
-              ),
-              if (habit.frequency == HabitFrequency.weeklyFlexible &&
-                  !isDoneToday)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppTheme.spaceXSmall),
-                  child: LinearProgressIndicator(
-                    value:
-                        provider.getCompletionsThisWeek(habit) /
-                        (habit.targetDaysPerWeek ?? 1),
-                    backgroundColor: color.withValues(
-                      alpha: AppTheme.opacityVeryLight,
-                    ),
-                    color: color,
-                    borderRadius: AppTheme.brSmall,
-                  ),
-                ),
-            ],
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    HabitDetailScreen(habit: habit, isEditing: true),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
 
   // --- ACCORDION BUILDER ---
   Widget _buildAccordion(
@@ -174,18 +30,55 @@ class HabitListScreen extends StatelessWidget {
         initiallyExpanded: initExpanded,
         iconColor: color,
         collapsedIconColor: color,
-        title: Row(
-          children: [
-            Icon(Icons.circle, size: AppTheme.fsBodySmall, color: color),
-            const SizedBox(width: AppTheme.spaceSmall),
-            Text(
-              "$title (${habits.length})",
-              style: TextStyle(fontWeight: AppTheme.fwBold, color: color),
-            ),
-          ],
+        title: ListSectionHeader(
+          title: '$title (${habits.length})',
+          icon: Icons.circle,
+          color: color,
+          padding: EdgeInsets.zero,
+          iconSize: AppTheme.listSectionIconSize,
+          titleSize: AppTheme.listSectionTitleSize,
         ),
         children: habits
-            .map((h) => _buildHabitTile(context, h, provider, isDone))
+            .map(
+              (habit) => HabitListTile(
+                habit: habit,
+                isCompleted: isDone,
+                subtitleText: () {
+                  var subtitle = '';
+                  if (habit.frequency == HabitFrequency.daily) {
+                    subtitle = 'Daily';
+                  }
+                  if (habit.frequency == HabitFrequency.weeklyExact) {
+                    subtitle = 'Specific Days';
+                  }
+                  if (habit.frequency == HabitFrequency.weeklyFlexible) {
+                    final doneThisWeek = provider.getCompletionsThisWeek(habit);
+                    subtitle =
+                        '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
+                  }
+                  if (habit.targetTime != null) {
+                    subtitle += ' • ${habit.targetTime!.format(context)}';
+                  }
+                  return subtitle;
+                }(),
+                progressValue:
+                    habit.frequency == HabitFrequency.weeklyFlexible && !isDone
+                    ? provider.getCompletionsThisWeek(habit) /
+                          (habit.targetDaysPerWeek ?? 1)
+                    : null,
+                onToggleCompleted: () => provider.toggleCompletionToday(habit),
+                onDelete: () => provider.deleteHabit(habit.id),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          HabitDetailScreen(habit: habit, isEditing: true),
+                    ),
+                  );
+                },
+              ),
+            )
             .toList(),
       ),
     );

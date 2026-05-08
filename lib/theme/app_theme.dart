@@ -133,6 +133,15 @@ class AppTheme {
   static const double iconSizeMedium = 24;
   static const double iconSizeLarge = 32;
   static const double profileImageSize = 100;
+  static const double listSectionIconSize = 12;
+  static const double listSectionTitleSize = fsBodyLarge;
+  static const double listTileBorderWidth = 2;
+  static const double listTileTrailingSpacing = 8;
+  static const double listTileSwipeIconSize = 24;
+  static const EdgeInsets listTileScreenMargin = EdgeInsets.symmetric(
+    horizontal: spaceLarge,
+    vertical: spaceXSmall,
+  );
 
   // ===== DURATIONS =====
   static const Duration animationFast = Duration(milliseconds: 150);

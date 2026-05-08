@@ -3,14 +3,17 @@ import 'package:provider/provider.dart';
 import 'package:timety/screens/settings_screen.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
-import '../theme/app_theme.dart';
 import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
-import '../utils/utils.dart';
+import '../theme/app_theme.dart';
 import '../widgets/interactive_gauge.dart';
+import '../widgets/list_tiles/task_list_tile.dart';
+import '../widgets/list_tiles/habit_list_tile.dart';
+import '../widgets/list_section_header.dart';
 import 'task/task_detail_screen.dart';
+import 'habit/habit_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback onNavigateToFocus;
@@ -41,147 +44,6 @@ class HomeScreen extends StatelessWidget {
     }
 
     return greeting;
-  }
-
-  // --- TASK UI HELPERS ---
-  Color _getTaskBorderColor(Task task) {
-    if (task.isCompleted) return Colors.green;
-    if (task.dueDate != null) {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final dueDay = DateTime(
-        task.dueDate!.year,
-        task.dueDate!.month,
-        task.dueDate!.day,
-      );
-      if (dueDay.isBefore(today)) return Colors.red;
-      if (dueDay.isAtSameMomentAs(today)) return Colors.amber.shade600;
-    }
-    return Colors.blue;
-  }
-
-  Widget _buildTaskTile(BuildContext context, Task task) {
-    final borderColor = _getTaskBorderColor(task);
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: borderColor, width: 2),
-        borderRadius: AppTheme.brMedium,
-      ),
-      child: ListTile(
-        leading: Checkbox(
-          value: task.isCompleted,
-          activeColor: Colors.green,
-          onChanged: (_) => context.read<TaskProvider>().toggleTask(task.id),
-        ),
-        title: Text(
-          task.title,
-          style: TextStyle(
-            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-            color: task.isCompleted ? Colors.grey : null,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: task.dueDate != null
-            ? Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Row(
-                  children: [
-                    Icon(Icons.access_time, size: 14, color: borderColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      "${task.dueDate!.hour.toString().padLeft(2, '0')}:${task.dueDate!.minute.toString().padLeft(2, '0')}",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: borderColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : null,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              AppUtils().getSizeEmoji(task.size),
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(width: 8),
-            AppUtils().getPriorityIcon(task.priority),
-          ],
-        ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TaskDetailScreen(task: task, isEditing: false),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // --- HABIT UI HELPER ---
-  Widget _buildHabitTile(BuildContext context, Habit habit) {
-    final provider = context.read<HabitProvider>();
-    final isCompleted = provider.isCompletedOn(habit, DateTime.now());
-    final color = Color(habit.colorValue);
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: isCompleted ? color.withValues(alpha: 0.3) : color,
-          width: 2,
-        ),
-        borderRadius: AppTheme.brMedium,
-      ),
-      child: ListTile(
-        leading: Checkbox(
-          value: isCompleted,
-          activeColor: color,
-          onChanged: (_) => provider.toggleCompletionToday(habit),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              habit.iconData ?? Icons.circle,
-              size: 18,
-              color: isCompleted ? Colors.grey : color,
-            ),
-            const SizedBox(width: AppTheme.spaceSmall),
-            Expanded(
-              child: Text(
-                habit.name,
-                style: TextStyle(
-                  decoration: isCompleted ? TextDecoration.lineThrough : null,
-                  color: isCompleted ? Colors.grey : null,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        subtitle: habit.targetTime != null
-            ? Row(
-                children: [
-                  const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    habit.targetTime!.format(context),
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
-              )
-            : null,
-      ),
-    );
   }
 
   @override
@@ -242,15 +104,15 @@ class HomeScreen extends StatelessWidget {
           children: [
             // --- TOP GREETING ---
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(AppTheme.spaceXLarge),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   _getGreeting(userName),
                   style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
+                    fontSize: AppTheme.fsHeadingLarge,
+                    fontWeight: AppTheme.fwExtraBold,
+                    letterSpacing: AppTheme.lsTight,
                   ),
                 ),
               ),
@@ -260,7 +122,7 @@ class HomeScreen extends StatelessWidget {
             Expanded(
               flex: 5,
               child: Padding(
-                padding: const EdgeInsets.all(15.0),
+                padding: const EdgeInsets.all(AppTheme.spaceMedium),
                 child: Center(
                   child: GestureDetector(
                     onTap: onNavigateToFocus,
@@ -294,76 +156,115 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.check_circle_outline,
-                              size: 48,
+                              size:
+                                  AppTheme.iconSizeLarge +
+                                  AppTheme.iconSizeLarge,
                               color: Colors.green.shade300,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppTheme.spaceLarge),
                             const Text(
                               "You're all caught up for today!",
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(color: AppTheme.phaseRestColor),
                             ),
                           ],
                         ),
                       )
                     : ListView(
-                        padding: const EdgeInsets.only(top: 16, bottom: 80),
+                        padding: const EdgeInsets.only(
+                          top: AppTheme.spaceLarge,
+                          bottom: 80,
+                        ),
                         children: [
                           if (todaysHabits.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 8.0,
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.repeat,
-                                    color: Colors.purple,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "Habits Today",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.purple.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            const ListSectionHeader(
+                              title: 'Habits Today',
+                              icon: Icons.repeat,
+                              color: AppTheme.typeHabitColor,
                             ),
                             ...todaysHabits.map(
-                              (h) => _buildHabitTile(context, h),
+                              (habit) => HabitListTile(
+                                habit: habit,
+                                isCompleted: habitProvider.isCompletedOn(
+                                  habit,
+                                  today,
+                                ),
+                                subtitleText: () {
+                                  if (habit.frequency == HabitFrequency.daily) {
+                                    return 'Daily';
+                                  }
+                                  if (habit.frequency ==
+                                      HabitFrequency.weeklyExact) {
+                                    return 'Specific Days';
+                                  }
+                                  final doneThisWeek = habitProvider
+                                      .getCompletionsThisWeek(habit);
+                                  return '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
+                                }(),
+                                progressValue:
+                                    habit.frequency ==
+                                            HabitFrequency.weeklyFlexible &&
+                                        !habitProvider.isCompletedOn(
+                                          habit,
+                                          today,
+                                        )
+                                    ? habitProvider.getCompletionsThisWeek(
+                                            habit,
+                                          ) /
+                                          (habit.targetDaysPerWeek ?? 1)
+                                    : null,
+                                enableDismissible: false,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4,
+                                ),
+                                onToggleCompleted: () =>
+                                    habitProvider.toggleCompletionToday(habit),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => HabitDetailScreen(
+                                        habit: habit,
+                                        isEditing: true,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppTheme.spaceLarge),
                           ],
 
                           if (urgentTasks.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 8.0,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.assignment_late,
-                                    color: Colors.amber.shade700,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "Tasks Due",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.amber.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            const ListSectionHeader(
+                              title: 'Tasks Due',
+                              icon: Icons.assignment_late,
+                              color: AppTheme.warningColor,
                             ),
                             ...urgentTasks.map(
-                              (t) => _buildTaskTile(context, t),
+                              (task) => TaskListTile(
+                                task: task,
+                                enableDismissible: false,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 4,
+                                ),
+                                showDescription: false,
+                                onToggleCompleted: () => context
+                                    .read<TaskProvider>()
+                                    .toggleTask(task.id),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => TaskDetailScreen(
+                                        task: task,
+                                        isEditing: false,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ],
                         ],

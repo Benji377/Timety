@@ -5,6 +5,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import '../../data/focus/focus_models.dart';
 import '../../providers/focus_provider.dart';
+import '../../utils/date_utils.dart';
+import '../../widgets/week_navigator.dart';
 
 class FocusStatsScreen extends StatefulWidget {
   const FocusStatsScreen({super.key});
@@ -21,20 +23,8 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     setState(() {
       _focusedWeek = _focusedWeek.add(Duration(days: days));
       // Snap the clock to the start of the newly viewed week
-      _selectedDayForClock = _getStartOfWeek(_focusedWeek);
+      _selectedDayForClock = AppDateUtils.startOfWeekMonday(_focusedWeek);
     });
-  }
-
-  DateTime _getStartOfWeek(DateTime date) {
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-    ).subtract(Duration(days: date.weekday - 1));
-  }
-
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   // --- DATA PROCESSORS ---
@@ -76,19 +66,19 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     final focusProvider = context.watch<FocusProvider>();
     final sessions = focusProvider.history;
 
-    final startOfWeek = _getStartOfWeek(_focusedWeek);
+    final startOfWeek = AppDateUtils.startOfWeekMonday(_focusedWeek);
     final endOfWeek = startOfWeek.add(
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
-    String weekRangeLabel =
-        "${DateFormat('MMM d').format(startOfWeek)} - ${DateFormat('MMM d, yyyy').format(endOfWeek)}";
-    bool isCurrentRealWeek =
-        DateTime.now().isAfter(startOfWeek) &&
-        DateTime.now().isBefore(endOfWeek);
+    bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
+      DateTime.now(),
+      startOfWeek,
+      endOfWeek,
+    );
 
     // Filter sessions for the 24-hour clock
     final clockSessions = sessions
-        .where((s) => _isSameDay(s.startTime, _selectedDayForClock))
+        .where((s) => AppDateUtils.isSameDay(s.startTime, _selectedDayForClock))
         .toList();
     int clockTotalMins = clockSessions.fold(
       0,
@@ -104,38 +94,9 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 // --- WEEK NAVIGATOR ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () => _changeWeek(-7),
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          isCurrentRealWeek ? "This Week" : "Past Week",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          weekRangeLabel,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed: isCurrentRealWeek
-                          ? null
-                          : () => _changeWeek(7),
-                    ),
-                  ],
+                WeekNavigator(
+                  focusedDate: _focusedWeek,
+                  onShiftWeek: _changeWeek,
                 ),
                 const SizedBox(height: 24),
 
@@ -152,7 +113,10 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                   child: Row(
                     children: List.generate(7, (index) {
                       DateTime day = startOfWeek.add(Duration(days: index));
-                      bool isSelected = _isSameDay(day, _selectedDayForClock);
+                      bool isSelected = AppDateUtils.isSameDay(
+                        day,
+                        _selectedDayForClock,
+                      );
                       return GestureDetector(
                         onTap: () => setState(() => _selectedDayForClock = day),
                         child: Container(

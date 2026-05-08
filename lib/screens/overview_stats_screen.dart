@@ -7,13 +7,11 @@ import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
+import '../utils/date_utils.dart';
+import '../widgets/stat_cards.dart';
 
 class OverviewStatsScreen extends StatelessWidget {
   const OverviewStatsScreen({super.key});
-
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
 
   // --- DATA EXTRACTORS ---
   int _getTasksForDay(List<Task> tasks, DateTime day) {
@@ -22,7 +20,7 @@ class OverviewStatsScreen extends StatelessWidget {
           (t) =>
               t.isCompleted &&
               t.completedAt != null &&
-              _isSameDay(t.completedAt!, day),
+              AppDateUtils.isSameDay(t.completedAt!, day),
         )
         .length;
   }
@@ -30,12 +28,12 @@ class OverviewStatsScreen extends StatelessWidget {
   int _getFocusForDay(FocusProvider provider, DateTime day) {
     int totalSeconds = 0;
     for (var session in provider.history) {
-      if (_isSameDay(session.startTime, day)) {
+      if (AppDateUtils.isSameDay(session.startTime, day)) {
         totalSeconds += session.totalSecondsFocused;
       }
     }
     // Include actively running session time if checking today
-    if (_isSameDay(DateTime.now(), day) && provider.isRunning) {
+    if (AppDateUtils.isSameDay(DateTime.now(), day) && provider.isRunning) {
       totalSeconds += provider.currentSecondsFocussed;
     }
     return totalSeconds ~/ 60;
@@ -65,33 +63,31 @@ class OverviewStatsScreen extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _buildKpiCard(
-                context,
-                "Tasks Done",
-                "$tasksCompletedToday",
-                Icons.task_alt,
-                Colors.green,
+              child: KpiStatCard(
+                title: "Tasks Done",
+                value: "$tasksCompletedToday",
+                icon: Icons.task_alt,
+                color: Colors.green,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildKpiCard(
-                context,
-                "Focus Time",
-                "${focusMinsToday}m",
-                Icons.timer,
-                Colors.blue,
+              child: KpiStatCard(
+                title: "Focus Time",
+                value: "${focusMinsToday}m",
+                icon: Icons.timer,
+                color: Colors.blue,
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        _buildKpiCard(
-          context,
-          "Daily Focus Goal",
-          "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
-          Icons.track_changes,
-          Colors.orange,
+        KpiStatCard(
+          title: "Daily Focus Goal",
+          value:
+              "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
+          icon: Icons.track_changes,
+          color: Colors.orange,
         ),
 
         const SizedBox(height: 40),
@@ -144,40 +140,6 @@ class OverviewStatsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 40),
       ],
-    );
-  }
-
-  Widget _buildKpiCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: color.withValues(alpha: 0.3), width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
