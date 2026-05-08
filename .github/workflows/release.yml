@@ -44,7 +44,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_PATH: release-keystore.jks
-        run: flutter build apk --release --obfuscate
+        run: flutter build apk --release
 
       - name: Rename APK Artifact
         run: |
@@ -92,7 +92,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_PATH: release-keystore.jks
-        run: flutter build appbundle --release --obfuscate
+        run: flutter build appbundle --release
 
       - name: Rename AAB Artifact
         run: |
@@ -134,7 +134,7 @@ jobs:
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build iOS (no codesign)
-        run: flutter build ios --release --no-codesign --obfuscate
+        run: flutter build ios --release --no-codesign
 
       - name: Package iOS App Artifact
         run: |
