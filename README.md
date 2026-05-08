@@ -14,6 +14,15 @@
 
 Timety is a comprehensive, offline-first productivity and time-management application built with Flutter. It seamlessly integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
 
+<p align="center">
+  <img src="screenshots/output/01_home_screen.png" width="32%" alt="Home Screen">
+  <img src="screenshots/output/02_focus_screen.png" width="32%" alt="Focus Screen">
+  <img src="screenshots/output/04_habits_screen.png" width="32%" alt="Habits Screen">
+</p>
+<p align="center">
+  <em>View the <a href="screenshots/output/">full screenshot gallery</a> to see the calendar, analytics, profile, and more!</em>
+</p>
+
 ## ✨ Features
 
 *   **Intelligent Task Management:** Organize one-off tasks with due dates, priority levels, and effort sizes.
@@ -60,6 +69,12 @@ Timety is a comprehensive, offline-first productivity and time-management applic
    ```bash
    flutter run
    ```
+
+## 🗺️ Development & Roadmap
+
+Want to see what's coming next or contribute to Timety?
+
+Check out the **[Timety GitHub Project Board](https://github.com/users/Benji377/projects/7)**! There, you can track the live status of all planned features, bugs, and enhancements, complete with priority tags and issue sizing.
 
 ## 🔒 Privacy
 Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Hive. No accounts, no cloud sync, no tracking.

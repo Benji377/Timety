@@ -18,7 +18,7 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedMonth = DateTime.now();
-  DateTime? _selectedDate;
+  DateTime? _selectedDate = DateTime.now();
 
   // --- TIME HELPER ---
   String _formatTime(DateTime time) {
