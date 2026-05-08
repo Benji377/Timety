@@ -40,18 +40,6 @@ class Subtask {
     required this.title,
     this.isCompleted = false,
   });
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'isCompleted': isCompleted,
-      };
-
-  factory Subtask.fromJson(Map<String, dynamic> json) => Subtask(
-        id: json['id'],
-        title: json['title'],
-        isCompleted: json['isCompleted'] ?? false,
-      );
 }
 
 @HiveType(typeId: 10)
@@ -98,48 +86,4 @@ class Task {
     required this.createdAt,
     this.subtasks = const [],
   });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      // DateTime must be converted to ISO8601 strings for JSON
-      'dueDate': dueDate != null ? dueDate!.toIso8601String() : "",
-      'location': location,
-      'priority': priority.name,
-      'reminders': reminders.map((e) => e.toIso8601String()).toList(),
-      'category': category,
-      'isCompleted': isCompleted,
-      'size': size.name,
-      'completedAt': completedAt != null ? completedAt!.toIso8601String() : "",
-      'createdAt': createdAt.toIso8601String(),
-      'subtasks': subtasks.map((s) => s.toJson()).toList(),
-    };
-  }
-
-  factory Task.fromJson(Map<String, dynamic> json) => Task(
-    id: json['id'],
-    title: json['title'],
-    description: json['description'],
-    dueDate: json['dueDate'] != "" ? DateTime.parse(json['dueDate']) : null,
-    location: json['location'],
-    priority: Priority.values.firstWhere((p) => p.name == json['priority']),
-    size: Size.values.firstWhere((s) => s.name == json['size']),
-    // Cast to List and map back to DateTime
-    reminders: (json['reminders'] as List)
-        .map((e) => DateTime.parse(e as String))
-        .toList(),
-    category: json['category'] ?? "",
-    isCompleted: json['isCompleted'] ?? false,
-    completedAt: json['completedAt'] != ""
-        ? DateTime.parse(json['completedAt'])
-        : null,
-    createdAt: DateTime.parse(json['createdAt']),
-    subtasks: json['subtasks'] != null
-        ? (json['subtasks'] as List)
-            .map((e) => Subtask.fromJson(e as Map<String, dynamic>))
-            .toList()
-        : const [],
-  );
 }

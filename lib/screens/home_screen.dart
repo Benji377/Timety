@@ -46,23 +46,179 @@ class HomeScreen extends StatelessWidget {
     return greeting;
   }
 
+  // --- SUBTITLE HELPER ---
+  String _buildHabitSubtitle(
+    BuildContext context,
+    Habit habit,
+    HabitProvider provider,
+  ) {
+    if (habit.frequency == HabitFrequency.daily) return 'Daily';
+    if (habit.frequency == HabitFrequency.weeklyExact) return 'Specific Days';
+    final doneThisWeek = provider.getCompletionsThisWeek(habit);
+    return '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
+  }
+
+  // --- NEW: GROUPED HABITS BUILDER FOR HOME ---
+  List<Widget> _buildGroupedHabits(
+    BuildContext context,
+    List<Habit> habits,
+    HabitProvider provider,
+    DateTime today,
+  ) {
+    final grouped = <String, List<Habit>>{};
+    final standalone = <Habit>[];
+
+    for (var h in habits) {
+      if (h.stackName != null && h.stackName!.trim().isNotEmpty) {
+        grouped.putIfAbsent(h.stackName!.trim(), () => []).add(h);
+      } else {
+        standalone.add(h);
+      }
+    }
+
+    final widgets = <Widget>[];
+
+    // 1. Stacks
+    grouped.forEach((stackName, stackHabits) {
+      stackHabits.sort(
+        (a, b) => (a.stackOrder ?? 99).compareTo(b.stackOrder ?? 99),
+      );
+
+      final globalStack = provider.habits
+          .where((h) => h.stackName?.trim() == stackName)
+          .toList();
+      final total = globalStack.length;
+      final completedCount = globalStack
+          .where((h) => provider.isCompletedOn(h, today))
+          .length;
+      final allDone = total > 0 && total == completedCount;
+
+      widgets.add(
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          elevation: 0,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+              width: 1,
+            ),
+            borderRadius: AppTheme.brMedium,
+          ),
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              initiallyExpanded:
+                  !allDone, // Auto-collapse if the whole stack is finished
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
+              title: Row(
+                children: [
+                  const Icon(Icons.layers, size: 14, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(
+                    stackName.toUpperCase(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '$completedCount / $total',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: allDone ? Colors.green : Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+              children: stackHabits.asMap().entries.map((entry) {
+                final index = entry.key;
+                final habit = entry.value;
+                final isDone = provider.isCompletedOn(habit, today);
+
+                // Locking Logic
+                bool isLocked = false;
+                if (index > 0 && !isDone) {
+                  final prev = stackHabits[index - 1];
+                  if (!provider.isCompletedOn(prev, today)) isLocked = true;
+                }
+
+                return Column(
+                  children: [
+                    if (index > 0) const Divider(height: 1, indent: 56),
+                    HabitListTile(
+                      habit: habit,
+                      isCompleted: isDone,
+                      isStacked: true,
+                      isLocked: isLocked,
+                      enableDismissible: false,
+                      subtitleText: _buildHabitSubtitle(
+                        context,
+                        habit,
+                        provider,
+                      ),
+                      onToggleCompleted: () =>
+                          provider.toggleCompletionToday(habit),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              HabitDetailScreen(habit: habit, isEditing: true),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+    });
+
+    // 2. Standalone
+    widgets.addAll(
+      standalone.map((habit) {
+        final isDone = provider.isCompletedOn(habit, today);
+        return HabitListTile(
+          habit: habit,
+          isCompleted: isDone,
+          enableDismissible: false,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          subtitleText: _buildHabitSubtitle(context, habit, provider),
+          onToggleCompleted: () => provider.toggleCompletionToday(habit),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => HabitDetailScreen(habit: habit, isEditing: true),
+            ),
+          ),
+        );
+      }),
+    );
+
+    return widgets;
+  }
+
   @override
   Widget build(BuildContext context) {
     final userName = context.watch<SettingsProvider>().userName;
-
     final focusProvider = context.watch<FocusProvider>();
     final taskProvider = context.watch<TaskProvider>();
     final habitProvider = context.watch<HabitProvider>();
     final settings = context.watch<SettingsProvider>();
 
-    // Focus Calculations
     int focusMinsToday = focusProvider.getMinutesFocusedToday();
     int dailyTarget = settings.dailyGoalMins;
     double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
-
-    // Task & Habit Calculations
     final today = DateTime.now();
 
+    // Urgent Tasks
     List<Task> urgentTasks = taskProvider.tasks.where((task) {
       if (task.isCompleted || task.dueDate == null) return false;
       final dueDay = DateTime(
@@ -74,16 +230,8 @@ class HomeScreen extends StatelessWidget {
     }).toList();
     urgentTasks.sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
 
+    // Habits for Today
     List<Habit> todaysHabits = habitProvider.getHabitsForDay(today);
-
-    // Sort uncompleted habits to the top
-    todaysHabits.sort((a, b) {
-      bool aDone = habitProvider.isCompletedOn(a, today);
-      bool bDone = habitProvider.isCompletedOn(b, today);
-      if (aDone && !bDone) return 1;
-      if (!aDone && bDone) return -1;
-      return 0;
-    });
 
     return Scaffold(
       appBar: AppBar(
@@ -91,7 +239,6 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SettingsScreen()),
@@ -102,7 +249,6 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // --- TOP GREETING ---
             Padding(
               padding: const EdgeInsets.all(AppTheme.spaceXLarge),
               child: Align(
@@ -112,37 +258,28 @@ class HomeScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: AppTheme.fsHeadingLarge,
                     fontWeight: AppTheme.fwExtraBold,
-                    letterSpacing: AppTheme.lsTight,
                   ),
                 ),
               ),
             ),
-
-            // --- TOP HALF: FOCUS GAUGE ---
             Expanded(
               flex: 5,
-              child: Padding(
-                padding: const EdgeInsets.all(AppTheme.spaceMedium),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: onNavigateToFocus,
-                    child: InteractiveGauge(
-                      progress: focusProgress,
-                      isInteractive: false,
-                      label: "DAILY GOAL",
-                      centerText: "${(focusProgress * 100).toInt()}%",
-                      bottomText: "$focusMinsToday / $dailyTarget m",
-                      bottomTextColor: Theme.of(context).colorScheme.primary,
-                    ),
+              child: Center(
+                child: GestureDetector(
+                  onTap: onNavigateToFocus,
+                  child: InteractiveGauge(
+                    progress: focusProgress,
+                    isInteractive: false,
+                    label: "DAILY GOAL",
+                    centerText: "${(focusProgress * 100).toInt()}%",
+                    bottomText: "$focusMinsToday / $dailyTarget m",
+                    bottomTextColor: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
             const Divider(height: 1),
-
-            // --- BOTTOM HALF: ACTION REQUIRED ---
             Expanded(
               flex: 6,
               child: Container(
@@ -150,24 +287,8 @@ class HomeScreen extends StatelessWidget {
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 child: (urgentTasks.isEmpty && todaysHabits.isEmpty)
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              size:
-                                  AppTheme.iconSizeLarge +
-                                  AppTheme.iconSizeLarge,
-                              color: Colors.green.shade300,
-                            ),
-                            const SizedBox(height: AppTheme.spaceLarge),
-                            const Text(
-                              "You're all caught up for today!",
-                              style: TextStyle(color: AppTheme.phaseRestColor),
-                            ),
-                          ],
-                        ),
+                    ? const Center(
+                        child: Text("You're all caught up for today!"),
                       )
                     : ListView(
                         padding: const EdgeInsets.only(
@@ -181,60 +302,15 @@ class HomeScreen extends StatelessWidget {
                               icon: Icons.repeat,
                               color: AppTheme.typeHabitColor,
                             ),
-                            ...todaysHabits.map(
-                              (habit) => HabitListTile(
-                                habit: habit,
-                                isCompleted: habitProvider.isCompletedOn(
-                                  habit,
-                                  today,
-                                ),
-                                subtitleText: () {
-                                  if (habit.frequency == HabitFrequency.daily) {
-                                    return 'Daily';
-                                  }
-                                  if (habit.frequency ==
-                                      HabitFrequency.weeklyExact) {
-                                    return 'Specific Days';
-                                  }
-                                  final doneThisWeek = habitProvider
-                                      .getCompletionsThisWeek(habit);
-                                  return '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
-                                }(),
-                                progressValue:
-                                    habit.frequency ==
-                                            HabitFrequency.weeklyFlexible &&
-                                        !habitProvider.isCompletedOn(
-                                          habit,
-                                          today,
-                                        )
-                                    ? habitProvider.getCompletionsThisWeek(
-                                            habit,
-                                          ) /
-                                          (habit.targetDaysPerWeek ?? 1)
-                                    : null,
-                                enableDismissible: false,
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 4,
-                                ),
-                                onToggleCompleted: () =>
-                                    habitProvider.toggleCompletionToday(habit),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => HabitDetailScreen(
-                                        habit: habit,
-                                        isEditing: true,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                            // --- USE THE NEW GROUPED BUILDER ---
+                            ..._buildGroupedHabits(
+                              context,
+                              todaysHabits,
+                              habitProvider,
+                              today,
                             ),
                             const SizedBox(height: AppTheme.spaceLarge),
                           ],
-
                           if (urgentTasks.isNotEmpty) ...[
                             const ListSectionHeader(
                               title: 'Tasks Due',
@@ -253,17 +329,15 @@ class HomeScreen extends StatelessWidget {
                                 onToggleCompleted: () => context
                                     .read<TaskProvider>()
                                     .toggleTask(task.id),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => TaskDetailScreen(
-                                        task: task,
-                                        isEditing: false,
-                                      ),
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TaskDetailScreen(
+                                      task: task,
+                                      isEditing: false,
                                     ),
-                                  );
-                                },
+                                  ),
+                                ),
                               ),
                             ),
                           ],

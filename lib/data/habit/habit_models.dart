@@ -46,6 +46,10 @@ class Habit {
   String? notes;
   @HiveField(10)
   int? iconCodePoint;
+  @HiveField(11)
+  String? stackName;
+  @HiveField(12)
+  int? stackOrder;
 
   Habit({
     required this.id,
@@ -56,6 +60,8 @@ class Habit {
     this.targetTimeMinutes,
     this.notes,
     this.iconCodePoint,
+    this.stackName,
+    this.stackOrder,
     List<DateTime>? completions,
     DateTime? createdAt,
     int? colorValue,

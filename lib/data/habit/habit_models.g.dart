@@ -25,6 +25,8 @@ class HabitAdapter extends TypeAdapter<Habit> {
       targetTimeMinutes: fields[5] as int?,
       notes: fields[9] as String?,
       iconCodePoint: fields[10] as int?,
+      stackName: fields[11] as String?,
+      stackOrder: fields[12] as int?,
       completions: (fields[6] as List?)?.cast<DateTime>(),
       createdAt: fields[7] as DateTime?,
       colorValue: fields[8] as int?,
@@ -34,7 +36,7 @@ class HabitAdapter extends TypeAdapter<Habit> {
   @override
   void write(BinaryWriter writer, Habit obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -56,7 +58,11 @@ class HabitAdapter extends TypeAdapter<Habit> {
       ..writeByte(9)
       ..write(obj.notes)
       ..writeByte(10)
-      ..write(obj.iconCodePoint);
+      ..write(obj.iconCodePoint)
+      ..writeByte(11)
+      ..write(obj.stackName)
+      ..writeByte(12)
+      ..write(obj.stackOrder);
   }
 
   @override

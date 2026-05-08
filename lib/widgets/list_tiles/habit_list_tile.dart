@@ -15,6 +15,8 @@ class HabitListTile extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final String deleteTitle;
   final String deleteContent;
+  final bool isStacked;
+  final bool isLocked;
 
   const HabitListTile({
     super.key,
@@ -26,6 +28,8 @@ class HabitListTile extends StatelessWidget {
     this.onDelete,
     this.enableDismissible = true,
     this.progressValue,
+    this.isStacked = false,
+    this.isLocked = false,
     this.margin = AppTheme.listTileScreenMargin,
     this.deleteTitle = 'Delete Habit',
     this.deleteContent = 'Are you sure you want to delete this habit?',
@@ -35,6 +39,106 @@ class HabitListTile extends StatelessWidget {
 
   Widget _buildCard(BuildContext context) {
     final color = _color;
+
+    final listTile = ListTile(
+      leading: InkWell(
+        onTap: isLocked
+            ? () {
+                // Better UX: Tell them WHY it's locked
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Complete the previous habit in the stack first!',
+                    ),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            : onToggleCompleted,
+        borderRadius: AppTheme.brCircle,
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: isCompleted
+                ? color
+                : (isLocked
+                      ? Colors.grey.withValues(alpha: 0.1)
+                      : Colors.transparent),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isLocked ? Colors.grey.withValues(alpha: 0.5) : color,
+              width: 2,
+            ),
+          ),
+          child: isCompleted
+              ? const Icon(Icons.check, size: 18, color: Colors.white)
+              : (isLocked
+                    ? const Icon(
+                        Icons.lock_outline,
+                        size: 14,
+                        color: Colors.grey,
+                      )
+                    : null),
+        ),
+      ),
+      title: Row(
+        children: [
+          Icon(
+            habit.iconData ?? Icons.circle,
+            size: 18,
+            color: isCompleted ? Colors.grey : (isLocked ? Colors.grey : color),
+          ),
+          const SizedBox(width: AppTheme.spaceSmall),
+          Expanded(
+            child: Text(
+              habit.name,
+              style: TextStyle(
+                fontWeight: AppTheme.fwBold,
+                decoration: isCompleted ? TextDecoration.lineThrough : null,
+                color: isCompleted || isLocked
+                    ? Colors.grey
+                    : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (habit.notes != null && habit.notes!.isNotEmpty)
+            Text(
+              habit.notes!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: AppTheme.fsLabel),
+            ),
+          Text(
+            subtitleText,
+            style: const TextStyle(
+              fontSize: AppTheme.fsLabel,
+              color: Colors.grey,
+            ),
+          ),
+          if (progressValue != null && !isCompleted)
+            Padding(
+              padding: const EdgeInsets.only(top: AppTheme.spaceXSmall),
+              child: LinearProgressIndicator(
+                value: progressValue!.clamp(0.0, 1.0),
+                backgroundColor: color.withValues(
+                  alpha: AppTheme.opacityVeryLight,
+                ),
+                color: color,
+                borderRadius: AppTheme.brSmall,
+              ),
+            ),
+        ],
+      ),
+      onTap: onTap,
+    );
+
+    if (isStacked) return listTile;
 
     return Card(
       margin: margin,
@@ -48,76 +152,7 @@ class HabitListTile extends StatelessWidget {
         ),
         borderRadius: AppTheme.brMedium,
       ),
-      child: ListTile(
-        leading: InkWell(
-          onTap: onToggleCompleted,
-          borderRadius: AppTheme.brCircle,
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: isCompleted ? color : Colors.transparent,
-              shape: BoxShape.circle,
-              border: Border.all(color: color, width: 2),
-            ),
-            child: isCompleted
-                ? const Icon(Icons.check, size: 18, color: Colors.white)
-                : null,
-          ),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              habit.iconData ?? Icons.circle,
-              size: 18,
-              color: isCompleted ? Colors.grey : color,
-            ),
-            const SizedBox(width: AppTheme.spaceSmall),
-            Expanded(
-              child: Text(
-                habit.name,
-                style: TextStyle(
-                  fontWeight: AppTheme.fwBold,
-                  decoration: isCompleted ? TextDecoration.lineThrough : null,
-                  color: isCompleted ? Colors.grey : null,
-                ),
-              ),
-            ),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (habit.notes != null && habit.notes!.isNotEmpty)
-              Text(
-                habit.notes!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: AppTheme.fsLabel),
-              ),
-            Text(
-              subtitleText,
-              style: const TextStyle(
-                fontSize: AppTheme.fsLabel,
-                color: Colors.grey,
-              ),
-            ),
-            if (progressValue != null && !isCompleted)
-              Padding(
-                padding: const EdgeInsets.only(top: AppTheme.spaceXSmall),
-                child: LinearProgressIndicator(
-                  value: progressValue!.clamp(0.0, 1.0),
-                  backgroundColor: color.withValues(
-                    alpha: AppTheme.opacityVeryLight,
-                  ),
-                  color: color,
-                  borderRadius: AppTheme.brSmall,
-                ),
-              ),
-          ],
-        ),
-        onTap: onTap,
-      ),
+      child: listTile,
     );
   }
 

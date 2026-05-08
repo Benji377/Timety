@@ -18,10 +18,12 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _notesController;
+  late TextEditingController _stackController;
 
   HabitFrequency _frequency = HabitFrequency.daily;
   Color _selectedColor = AppTheme.typeHabitColor;
   TimeOfDay? _targetTime;
+  int? _stackOrder;
 
   // For Weekly Flexible
   int _targetDaysPerWeek = 3;
@@ -43,11 +45,15 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     super.initState();
     _nameController = TextEditingController(text: widget.habit?.name ?? '');
     _notesController = TextEditingController(text: widget.habit?.notes ?? '');
+    _stackController = TextEditingController(
+      text: widget.habit?.stackName ?? '',
+    );
 
     if (widget.habit != null) {
       _frequency = widget.habit!.frequency;
       _selectedColor = Color(widget.habit!.colorValue);
       _targetTime = widget.habit!.targetTime;
+      _stackOrder = widget.habit!.stackOrder; // Init stack order
       _targetDaysPerWeek = widget.habit!.targetDaysPerWeek ?? 3;
       if (widget.habit!.targetWeekdays != null) {
         _selectedWeekdays = widget.habit!.targetWeekdays!.toSet();
@@ -59,6 +65,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
   void dispose() {
     _nameController.dispose();
     _notesController.dispose();
+    _stackController.dispose();
     super.dispose();
   }
 
@@ -80,6 +87,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
+      stackName: _stackController.text.trim().isEmpty
+          ? null
+          : _stackController.text.trim(),
+      stackOrder: _stackOrder,
       iconCodePoint: Icons.circle.codePoint,
       targetDaysPerWeek: _frequency == HabitFrequency.weeklyFlexible
           ? _targetDaysPerWeek
@@ -98,6 +109,16 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Extract existing stack names for autocomplete
+    final existingStacks = context
+        .read<HabitProvider>()
+        .habits
+        .map((h) => h.stackName?.trim())
+        .whereType<String>()
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -119,6 +140,72 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               validator: (val) => val == null || val.trim().isEmpty
                   ? 'Please enter a name'
                   : null,
+            ),
+            const SizedBox(height: AppTheme.spaceLarge),
+
+            // --- HABIT STACKING (AUTOCOMPLETE & ORDER) ---
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Autocomplete<String>(
+                    initialValue: TextEditingValue(text: _stackController.text),
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      // FIX 1: Show all existing stacks when the field is empty!
+                      if (textEditingValue.text.isEmpty) {
+                        return existingStacks;
+                      }
+                      return existingStacks.where((String option) {
+                        return option.toLowerCase().contains(
+                          textEditingValue.text.toLowerCase(),
+                        );
+                      });
+                    },
+                    onSelected: (String selection) {
+                      _stackController.text = selection;
+                    },
+                    fieldViewBuilder:
+                        (context, controller, focusNode, onEditingComplete) {
+                          return TextFormField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            // FIX 2: Use onChanged to safely sync the text without memory leaks
+                            onChanged: (val) => _stackController.text = val,
+                            decoration: const InputDecoration(
+                              labelText: 'Habit Stack (Optional)',
+                              hintText: 'e.g., Morning Routine',
+                              prefixIcon: Icon(Icons.layers),
+                            ),
+                          );
+                        },
+                  ),
+                ),
+                const SizedBox(width: AppTheme.spaceMedium),
+                Expanded(
+                  flex: 1,
+                  child: DropdownButtonFormField<int>(
+                    initialValue:
+                        _stackOrder, // Use value instead of initialValue for safe rebuilds
+                    decoration: const InputDecoration(
+                      labelText: 'Order',
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                    ),
+                    items: [
+                      const DropdownMenuItem<int>(
+                        value: null,
+                        child: Text("-"),
+                      ),
+                      ...List.generate(10, (index) => index + 1).map(
+                        (order) => DropdownMenuItem(
+                          value: order,
+                          child: Text(order.toString()),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) => setState(() => _stackOrder = val),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppTheme.spaceLarge),
 
