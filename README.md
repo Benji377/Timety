@@ -17,7 +17,7 @@ Timety is a comprehensive, offline-first productivity and time-management applic
 <p align="center">
   <img src="screenshots/output/01_home_screen.png" width="32%" alt="Home Screen">
   <img src="screenshots/output/02_focus_screen.png" width="32%" alt="Focus Screen">
-  <img src="screenshots/output/04_habits_screen.png" width="32%" alt="Habits Screen">
+  <img src="screenshots/output/03_tasks_screen.png" width="32%" alt="Habits Screen">
 </p>
 <p align="center">
   <em>View the <a href="screenshots/output/">full screenshot gallery</a> to see the calendar, analytics, profile, and more!</em>
