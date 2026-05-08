@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
-import '../../theme/app_theme.dart';
+import '../../widgets/expansion_section.dart';
 import '../../widgets/list_tiles/task_list_tile.dart';
-import '../../widgets/list_section_header.dart';
 import '../calendar_screen.dart';
 import '../statistics_screen.dart';
 import 'task_detail_screen.dart';
@@ -86,51 +85,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return processed;
   }
 
-  // --- ACCORDION BUILDER ---
-  Widget _buildAccordion(
+  Widget _buildTaskSection(
     String title,
     Color color,
     List<Task> tasks, {
     bool initExpanded = true,
   }) {
-    if (tasks.isEmpty) return const SizedBox.shrink(); // Hide if empty
-
-    return Theme(
-      // Remove the divider lines native to ExpansionTile
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        initiallyExpanded: initExpanded,
-        iconColor: color,
-        collapsedIconColor: color,
-        title: ListSectionHeader(
-          title: '$title (${tasks.length})',
-          icon: Icons.circle,
-          color: color,
-          padding: EdgeInsets.zero,
-          iconSize: AppTheme.listSectionIconSize,
-          titleSize: AppTheme.listSectionTitleSize,
-        ),
-        children: tasks
-            .map(
-              (task) => TaskListTile(
-                task: task,
-                onToggleCompleted: () =>
-                    context.read<TaskProvider>().toggleTask(task.id),
-                onDelete: () =>
-                    context.read<TaskProvider>().removeTask(task.id),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          TaskDetailScreen(task: task, isEditing: false),
-                    ),
-                  );
-                },
-              ),
-            )
-            .toList(),
-      ),
+    return ExpansionSection(
+      title: '$title (${tasks.length})',
+      color: color,
+      initiallyExpanded: initExpanded,
+      children: tasks
+          .map(
+            (task) => TaskListTile(
+              task: task,
+              onToggleCompleted: () =>
+                  context.read<TaskProvider>().toggleTask(task.id),
+              onDelete: () => context.read<TaskProvider>().removeTask(task.id),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        TaskDetailScreen(task: task, isEditing: false),
+                  ),
+                );
+              },
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -342,23 +325,21 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     }
 
                     return ListView(
-                      padding: const EdgeInsets.only(
-                        bottom: 80,
-                      ), // Keep FAB clear
+                      padding: const EdgeInsets.only(bottom: 80),
                       children: [
-                        _buildAccordion("Overdue", Colors.red, overdue),
-                        _buildAccordion(
-                          "Due Today",
+                        _buildTaskSection('Overdue', Colors.red, overdue),
+                        _buildTaskSection(
+                          'Due Today',
                           Colors.amber.shade700,
                           dueToday,
                         ),
-                        _buildAccordion("To Do", Colors.blue, todo),
-                        _buildAccordion(
-                          "Done",
+                        _buildTaskSection('To Do', Colors.blue, todo),
+                        _buildTaskSection(
+                          'Done',
                           Colors.green,
                           done,
                           initExpanded: false,
-                        ), // Default Closed
+                        ),
                       ],
                     );
                   },
@@ -369,7 +350,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        heroTag: "task_list_add_button",
+        heroTag: 'task_list_add_button',
         onPressed: () {
           Navigator.push(
             context,

@@ -4,83 +4,82 @@ import 'package:timety/screens/statistics_screen.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/expansion_section.dart';
 import '../../widgets/list_tiles/habit_list_tile.dart';
-import '../../widgets/list_section_header.dart';
 import '../calendar_screen.dart';
 import 'habit_detail_screen.dart';
 
 class HabitListScreen extends StatelessWidget {
   const HabitListScreen({super.key});
 
-  // --- ACCORDION BUILDER ---
-  Widget _buildAccordion(
+  String _buildSubtitle(
+    BuildContext context,
+    Habit habit,
+    HabitProvider provider,
+  ) {
+    var subtitle = '';
+    if (habit.frequency == HabitFrequency.daily) {
+      subtitle = 'Daily';
+    }
+    if (habit.frequency == HabitFrequency.weeklyExact) {
+      subtitle = 'Specific Days';
+    }
+    if (habit.frequency == HabitFrequency.weeklyFlexible) {
+      final doneThisWeek = provider.getCompletionsThisWeek(habit);
+      subtitle = '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
+    }
+    if (habit.targetTime != null) {
+      subtitle += ' • ${habit.targetTime!.format(context)}';
+    }
+    return subtitle;
+  }
+
+  Widget _buildHabitTile(
+    BuildContext context,
+    Habit habit,
+    HabitProvider provider, {
+    required bool isDone,
+  }) {
+    return HabitListTile(
+      habit: habit,
+      isCompleted: isDone,
+      subtitleText: _buildSubtitle(context, habit, provider),
+      progressValue: habit.frequency == HabitFrequency.weeklyFlexible && !isDone
+          ? provider.getCompletionsThisWeek(habit) /
+                (habit.targetDaysPerWeek ?? 1)
+          : null,
+      onToggleCompleted: () => provider.toggleCompletionToday(habit),
+      onDelete: () => provider.deleteHabit(habit.id),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HabitDetailScreen(habit: habit, isEditing: true),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHabitSection(
     BuildContext context,
     String title,
     Color color,
     List<Habit> habits,
     HabitProvider provider, {
-    bool initExpanded = true,
-    bool isDone = false,
+    bool initiallyExpanded = true,
+    required bool isDone,
   }) {
-    if (habits.isEmpty) return const SizedBox.shrink();
-
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        initiallyExpanded: initExpanded,
-        iconColor: color,
-        collapsedIconColor: color,
-        title: ListSectionHeader(
-          title: '$title (${habits.length})',
-          icon: Icons.circle,
-          color: color,
-          padding: EdgeInsets.zero,
-          iconSize: AppTheme.listSectionIconSize,
-          titleSize: AppTheme.listSectionTitleSize,
-        ),
-        children: habits
-            .map(
-              (habit) => HabitListTile(
-                habit: habit,
-                isCompleted: isDone,
-                subtitleText: () {
-                  var subtitle = '';
-                  if (habit.frequency == HabitFrequency.daily) {
-                    subtitle = 'Daily';
-                  }
-                  if (habit.frequency == HabitFrequency.weeklyExact) {
-                    subtitle = 'Specific Days';
-                  }
-                  if (habit.frequency == HabitFrequency.weeklyFlexible) {
-                    final doneThisWeek = provider.getCompletionsThisWeek(habit);
-                    subtitle =
-                        '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
-                  }
-                  if (habit.targetTime != null) {
-                    subtitle += ' • ${habit.targetTime!.format(context)}';
-                  }
-                  return subtitle;
-                }(),
-                progressValue:
-                    habit.frequency == HabitFrequency.weeklyFlexible && !isDone
-                    ? provider.getCompletionsThisWeek(habit) /
-                          (habit.targetDaysPerWeek ?? 1)
-                    : null,
-                onToggleCompleted: () => provider.toggleCompletionToday(habit),
-                onDelete: () => provider.deleteHabit(habit.id),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          HabitDetailScreen(habit: habit, isEditing: true),
-                    ),
-                  );
-                },
-              ),
-            )
-            .toList(),
-      ),
+    return ExpansionSection(
+      title: '$title (${habits.length})',
+      color: color,
+      initiallyExpanded: initiallyExpanded,
+      children: habits
+          .map(
+            (habit) =>
+                _buildHabitTile(context, habit, provider, isDone: isDone),
+          )
+          .toList(),
     );
   }
 
@@ -128,14 +127,13 @@ class HabitListScreen extends StatelessWidget {
           final weeklyGoalsMet = <Habit>[];
 
           for (var habit in provider.habits) {
-            bool isDoneToday = provider.isCompletedOn(habit, today);
+            final isDoneToday = provider.isCompletedOn(habit, today);
 
             if (isDoneToday) {
               doneToday.add(habit);
               continue;
             }
 
-            // Grouping Logic for "To Do"
             if (habit.frequency == HabitFrequency.daily) {
               todoToday.add(habit);
             } else if (habit.frequency == HabitFrequency.weeklyExact) {
@@ -143,11 +141,11 @@ class HabitListScreen extends StatelessWidget {
                 todoToday.add(habit);
               }
             } else if (habit.frequency == HabitFrequency.weeklyFlexible) {
-              int doneThisWeek = provider.getCompletionsThisWeek(habit);
+              final doneThisWeek = provider.getCompletionsThisWeek(habit);
               if (doneThisWeek >= (habit.targetDaysPerWeek ?? 1)) {
                 weeklyGoalsMet.add(habit);
               } else {
-                todoToday.add(habit); // Keep showing it until goal is met!
+                todoToday.add(habit);
               }
             }
           }
@@ -155,35 +153,37 @@ class HabitListScreen extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.only(bottom: 80),
             children: [
-              _buildAccordion(
+              _buildHabitSection(
                 context,
-                "To Do Today",
+                'To Do Today',
                 AppTheme.infoColor,
                 todoToday,
                 provider,
+                isDone: false,
               ),
-              _buildAccordion(
+              _buildHabitSection(
                 context,
-                "Done Today",
+                'Done Today',
                 AppTheme.successColor,
                 doneToday,
                 provider,
                 isDone: true,
               ),
-              _buildAccordion(
+              _buildHabitSection(
                 context,
-                "Weekly Goal Met",
+                'Weekly Goal Met',
                 AppTheme.warningColor,
                 weeklyGoalsMet,
                 provider,
-                initExpanded: false,
+                initiallyExpanded: false,
+                isDone: false,
               ),
             ],
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        heroTag: "habit_list_add_button",
+        heroTag: 'habit_list_add_button',
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const HabitDetailScreen()),
