@@ -35,7 +35,15 @@ jobs:
       - name: Generate Hive Adapters
         run: dart run build_runner build --delete-conflicting-outputs
 
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-keystore.jks
+
       - name: Build APK
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_PATH: release-keystore.jks
         run: flutter build apk --release --obfuscate
 
       - name: Rename APK Artifact
@@ -75,7 +83,15 @@ jobs:
       - name: Generate Hive Adapters
         run: dart run build_runner build --delete-conflicting-outputs
 
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-keystore.jks
+
       - name: Build App Bundle
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_PATH: release-keystore.jks
         run: flutter build appbundle --release --obfuscate
 
       - name: Rename AAB Artifact

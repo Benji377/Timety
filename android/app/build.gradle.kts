@@ -30,11 +30,24 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (System.getenv("CI") == "true") {
+            create("release") {
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+                storeFile = System.getenv("KEYSTORE_PATH")?.let { file(it) }
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (System.getenv("CI") == "true") {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             
             // Enable ProGuard/R8 code shrinking to reduce APK size
             isMinifyEnabled = true
