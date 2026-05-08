@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'task.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 11)
 enum Priority {
   @HiveField(0)
   low,
@@ -14,7 +14,7 @@ enum Priority {
   veryHigh,
 }
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 12)
 enum Size {
   @HiveField(0)
   small,
@@ -26,7 +26,35 @@ enum Size {
   veryLarge,
 }
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 13)
+class Subtask {
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String title;
+  @HiveField(2)
+  bool isCompleted;
+
+  Subtask({
+    required this.id,
+    required this.title,
+    this.isCompleted = false,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'isCompleted': isCompleted,
+      };
+
+  factory Subtask.fromJson(Map<String, dynamic> json) => Subtask(
+        id: json['id'],
+        title: json['title'],
+        isCompleted: json['isCompleted'] ?? false,
+      );
+}
+
+@HiveType(typeId: 10)
 class Task {
   @HiveField(0)
   final String id;
@@ -52,6 +80,8 @@ class Task {
   DateTime? completedAt;
   @HiveField(11)
   final DateTime createdAt;
+  @HiveField(12)
+  final List<Subtask> subtasks;
 
   Task({
     required this.id,
@@ -66,6 +96,7 @@ class Task {
     this.isCompleted = false,
     this.completedAt,
     required this.createdAt,
+    this.subtasks = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -83,6 +114,7 @@ class Task {
       'size': size.name,
       'completedAt': completedAt != null ? completedAt!.toIso8601String() : "",
       'createdAt': createdAt.toIso8601String(),
+      'subtasks': subtasks.map((s) => s.toJson()).toList(),
     };
   }
 
@@ -104,5 +136,10 @@ class Task {
         ? DateTime.parse(json['completedAt'])
         : null,
     createdAt: DateTime.parse(json['createdAt']),
+    subtasks: json['subtasks'] != null
+        ? (json['subtasks'] as List)
+            .map((e) => Subtask.fromJson(e as Map<String, dynamic>))
+            .toList()
+        : const [],
   );
 }

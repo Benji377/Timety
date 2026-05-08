@@ -31,6 +31,7 @@ void main() async {
   Hive.registerAdapter(TaskAdapter());
   Hive.registerAdapter(PriorityAdapter());
   Hive.registerAdapter(SizeAdapter());
+  Hive.registerAdapter(SubtaskAdapter());
 
   // Register Focus Adapters
   Hive.registerAdapter(FocusModeTypeAdapter());

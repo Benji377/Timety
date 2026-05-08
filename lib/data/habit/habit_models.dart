@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'habit_models.g.dart';
 
-@HiveType(typeId: 10)
+@HiveType(typeId: 31)
 enum HabitFrequency {
   @HiveField(0)
   daily, // e.g., Write a report every day
@@ -13,7 +13,7 @@ enum HabitFrequency {
   weeklyFlexible, // e.g., Workout 3x a week
 }
 
-@HiveType(typeId: 11)
+@HiveType(typeId: 30)
 class Habit {
   @HiveField(0)
   final String id;

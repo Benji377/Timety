@@ -50,6 +50,16 @@ class TaskListTile extends StatelessWidget {
 
   Widget _buildCard(BuildContext context) {
     final borderColor = _getBorderColor();
+    final theme = Theme.of(context);
+
+    final List<Subtask> safeSubtasks =
+        (task.subtasks as dynamic) ?? <Subtask>[];
+
+    // Calculate Subtask Progress
+    final hasSubtasks = safeSubtasks.isNotEmpty;
+    final completedSubtasks = safeSubtasks.where((s) => s.isCompleted).length;
+    final totalSubtasks = safeSubtasks.length;
+    final progress = hasSubtasks ? completedSubtasks / totalSubtasks : 0.0;
 
     return Card(
       margin: margin,
@@ -84,6 +94,44 @@ class TaskListTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: AppTheme.fsLabel),
+              ),
+
+            if (hasSubtasks)
+              Padding(
+                padding: const EdgeInsets.only(top: 6.0, bottom: 2.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.checklist,
+                      size: 14,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$completedSubtasks/$totalSubtasks',
+                      style: TextStyle(
+                        fontSize: AppTheme.fsLabel,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: AppTheme.fwMedium,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor:
+                              theme.colorScheme.surfaceContainerHighest,
+                          color: task.isCompleted
+                              ? AppTheme.successColor
+                              : borderColor,
+                          minHeight: 4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             if (showDueDate && task.dueDate != null)
               Padding(

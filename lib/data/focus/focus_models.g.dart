@@ -8,7 +8,7 @@ part of 'focus_models.dart';
 
 class SessionPhaseAdapter extends TypeAdapter<SessionPhase> {
   @override
-  final int typeId = 8;
+  final int typeId = 23;
 
   @override
   SessionPhase read(BinaryReader reader) {
@@ -45,7 +45,7 @@ class SessionPhaseAdapter extends TypeAdapter<SessionPhase> {
 
 class FocusModeAdapter extends TypeAdapter<FocusMode> {
   @override
-  final int typeId = 4;
+  final int typeId = 24;
 
   @override
   FocusMode read(BinaryReader reader) {
@@ -91,7 +91,7 @@ class FocusModeAdapter extends TypeAdapter<FocusMode> {
 
 class DistractionAdapter extends TypeAdapter<Distraction> {
   @override
-  final int typeId = 5;
+  final int typeId = 25;
 
   @override
   Distraction read(BinaryReader reader) {
@@ -99,7 +99,10 @@ class DistractionAdapter extends TypeAdapter<Distraction> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Distraction(time: fields[0] as DateTime, note: fields[1] as String);
+    return Distraction(
+      time: fields[0] as DateTime,
+      note: fields[1] as String,
+    );
   }
 
   @override
@@ -125,7 +128,7 @@ class DistractionAdapter extends TypeAdapter<Distraction> {
 
 class FocusTagAdapter extends TypeAdapter<FocusTag> {
   @override
-  final int typeId = 9;
+  final int typeId = 26;
 
   @override
   FocusTag read(BinaryReader reader) {
@@ -165,7 +168,7 @@ class FocusTagAdapter extends TypeAdapter<FocusTag> {
 
 class FocusSessionAdapter extends TypeAdapter<FocusSession> {
   @override
-  final int typeId = 6;
+  final int typeId = 20;
 
   @override
   FocusSession read(BinaryReader reader) {
@@ -220,7 +223,7 @@ class FocusSessionAdapter extends TypeAdapter<FocusSession> {
 
 class FocusModeTypeAdapter extends TypeAdapter<FocusModeType> {
   @override
-  final int typeId = 3;
+  final int typeId = 21;
 
   @override
   FocusModeType read(BinaryReader reader) {
@@ -269,7 +272,7 @@ class FocusModeTypeAdapter extends TypeAdapter<FocusModeType> {
 
 class PhaseTypeAdapter extends TypeAdapter<PhaseType> {
   @override
-  final int typeId = 7;
+  final int typeId = 22;
 
   @override
   PhaseType read(BinaryReader reader) {

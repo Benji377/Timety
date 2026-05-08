@@ -6,9 +6,49 @@ part of 'task.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
+class SubtaskAdapter extends TypeAdapter<Subtask> {
+  @override
+  final int typeId = 13;
+
+  @override
+  Subtask read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return Subtask(
+      id: fields[0] as String,
+      title: fields[1] as String,
+      isCompleted: fields[2] as bool,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Subtask obj) {
+    writer
+      ..writeByte(3)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.title)
+      ..writeByte(2)
+      ..write(obj.isCompleted);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SubtaskAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
 class TaskAdapter extends TypeAdapter<Task> {
   @override
-  final int typeId = 0;
+  final int typeId = 10;
 
   @override
   Task read(BinaryReader reader) {
@@ -29,13 +69,14 @@ class TaskAdapter extends TypeAdapter<Task> {
       isCompleted: fields[9] as bool,
       completedAt: fields[10] as DateTime?,
       createdAt: fields[11] as DateTime,
+      subtasks: (fields[12] as List).cast<Subtask>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -59,7 +100,9 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(10)
       ..write(obj.completedAt)
       ..writeByte(11)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(12)
+      ..write(obj.subtasks);
   }
 
   @override
@@ -75,7 +118,7 @@ class TaskAdapter extends TypeAdapter<Task> {
 
 class PriorityAdapter extends TypeAdapter<Priority> {
   @override
-  final int typeId = 1;
+  final int typeId = 11;
 
   @override
   Priority read(BinaryReader reader) {
@@ -124,7 +167,7 @@ class PriorityAdapter extends TypeAdapter<Priority> {
 
 class SizeAdapter extends TypeAdapter<Size> {
   @override
-  final int typeId = 2;
+  final int typeId = 12;
 
   @override
   Size read(BinaryReader reader) {

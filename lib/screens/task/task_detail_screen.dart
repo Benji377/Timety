@@ -34,6 +34,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late TextEditingController _descController;
   late TextEditingController _locationController;
   final _newCategoryController = TextEditingController();
+  final _newSubtaskController = TextEditingController();
 
   // State variables
   late Priority _priority;
@@ -41,6 +42,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   DateTime? _dueDate;
   late String _category;
   late List<DateTime> _reminders;
+  late List<Subtask> _subtasks;
 
   bool _isAddingNewCategory = false;
 
@@ -72,6 +74,19 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     _dueDate = widget.task?.dueDate;
     _category = widget.task?.category ?? "";
     _reminders = widget.task != null ? List.from(widget.task!.reminders) : [];
+
+    // Deep copy subtasks so we don't accidentally mutate Hive objects before saving
+    _subtasks = widget.task != null
+        ? widget.task!.subtasks
+              .map(
+                (s) => Subtask(
+                  id: s.id,
+                  title: s.title,
+                  isCompleted: s.isCompleted,
+                ),
+              )
+              .toList()
+        : [];
   }
 
   @override
@@ -80,6 +95,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     _descController.dispose();
     _locationController.dispose();
     _newCategoryController.dispose();
+    _newSubtaskController.dispose();
     super.dispose();
   }
 
@@ -429,7 +445,109 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
           if (mapCenter != null) _buildMapPreview(mapCenter),
 
+          // --- SUBTASKS ---
+          _buildSectionHeader("Checklist", Icons.checklist),
+
+          // Display existing subtasks
+          ..._subtasks.map(
+            (subtask) => CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              activeColor: AppTheme.successColor,
+              value: subtask.isCompleted,
+              title: Text(
+                subtask.title,
+                style: TextStyle(
+                  decoration: subtask.isCompleted
+                      ? TextDecoration.lineThrough
+                      : null,
+                  color: subtask.isCompleted ? Colors.grey : null,
+                ),
+              ),
+              secondary: _isEditing
+                  ? IconButton(
+                      icon: const Icon(
+                        Icons.close,
+                        color: AppTheme.errorColor,
+                        size: 20,
+                      ),
+                      onPressed: () =>
+                          setState(() => _subtasks.remove(subtask)),
+                    )
+                  : null,
+              onChanged: (val) {
+                setState(() => subtask.isCompleted = val ?? false);
+                // Quick-save so checking off subtasks works outside of edit mode!
+                if (!_isEditing && !_isNewTask) {
+                  _saveTask(); // Auto-saves changes in the background
+                  setState(() => _isEditing = false); // keeps it in view mode
+                }
+              },
+            ),
+          ),
+
+          // Add Subtask Field (Only in edit mode)
+          if (_isEditing)
+            Padding(
+              padding: const EdgeInsets.only(top: AppTheme.spaceSmall),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.subdirectory_arrow_right,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: AppTheme.spaceMedium),
+                  Expanded(
+                    child: TextField(
+                      controller: _newSubtaskController,
+                      decoration: InputDecoration(
+                        hintText: "Add subtask...",
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        suffixIcon: IconButton(
+                          icon: const Icon(
+                            Icons.add_circle,
+                            color: AppTheme.infoColor,
+                          ),
+                          onPressed: () {
+                            if (_newSubtaskController.text.trim().isNotEmpty) {
+                              setState(() {
+                                _subtasks.add(
+                                  Subtask(
+                                    id: DateTime.now().toString(),
+                                    title: _newSubtaskController.text.trim(),
+                                  ),
+                                );
+                                _newSubtaskController.clear();
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      onSubmitted: (val) {
+                        if (val.trim().isNotEmpty) {
+                          setState(() {
+                            _subtasks.add(
+                              Subtask(
+                                id: DateTime.now().toString(),
+                                title: val.trim(),
+                              ),
+                            );
+                            _newSubtaskController.clear();
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           const SizedBox(height: AppTheme.space3XLarge),
+
           if (_isEditing && !_isNewTask)
             ElevatedButton.icon(
               icon: const Icon(Icons.save),
@@ -506,7 +624,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   Widget _buildMapPreview(LatLng center) {
     return Container(
       height: 160,
-      margin: const EdgeInsets.only(top: AppTheme.spaceMedium),
+      margin: const EdgeInsets.only(top: AppTheme.spaceMedium, bottom: AppTheme.spaceMedium),
       decoration: BoxDecoration(
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.6),
@@ -611,6 +729,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       dueDate: _dueDate,
       category: _category,
       reminders: _reminders,
+      subtasks: _subtasks,
       isCompleted: _isNewTask ? false : widget.task!.isCompleted,
       completedAt: _isNewTask ? null : widget.task!.completedAt,
       createdAt: _isNewTask ? DateTime.now() : widget.task!.createdAt,

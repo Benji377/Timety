@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'focus_models.g.dart';
 
-@HiveType(typeId: 3)
+@HiveType(typeId: 21)
 enum FocusModeType {
   @HiveField(0)
   stopwatch,
@@ -14,7 +14,7 @@ enum FocusModeType {
   custom,
 }
 
-@HiveType(typeId: 7)
+@HiveType(typeId: 22)
 enum PhaseType {
   @HiveField(0)
   focus,
@@ -22,7 +22,7 @@ enum PhaseType {
   rest,
 }
 
-@HiveType(typeId: 8)
+@HiveType(typeId: 23)
 class SessionPhase {
   @HiveField(0)
   final PhaseType type;
@@ -36,7 +36,7 @@ class SessionPhase {
   SessionPhase({required this.type, required this.durationMinutes});
 }
 
-@HiveType(typeId: 4)
+@HiveType(typeId: 24)
 class FocusMode {
   @HiveField(0)
   final String id;
@@ -94,7 +94,7 @@ class FocusMode {
   );
 }
 
-@HiveType(typeId: 5)
+@HiveType(typeId: 25)
 class Distraction {
   @HiveField(0)
   final DateTime time;
@@ -104,7 +104,7 @@ class Distraction {
   Distraction({required this.time, this.note = ""});
 }
 
-@HiveType(typeId: 9)
+@HiveType(typeId: 26)
 class FocusTag {
   @HiveField(0)
   final String id;
@@ -116,7 +116,7 @@ class FocusTag {
   FocusTag({required this.id, required this.name, required this.colorValue});
 }
 
-@HiveType(typeId: 6)
+@HiveType(typeId: 20)
 class FocusSession {
   @HiveField(0)
   final String id;
