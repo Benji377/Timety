@@ -77,6 +77,7 @@ class TimetyApp extends StatelessWidget {
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Timety',
             theme: AppTheme.buildTheme(
               seedColor: settings.seedColor,
