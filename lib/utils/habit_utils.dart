@@ -8,7 +8,7 @@ class HabitUtils {
     if (habit.frequency == HabitFrequency.daily) return 'Daily';
     if (habit.frequency == HabitFrequency.weeklyExact) return 'Specific Days';
     final doneThisWeek = provider.getCompletionsThisWeek(habit);
-    return '${doneThisWeek} / ${habit.targetDaysPerWeek} this week';
+    return '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
   }
 
   /// Determines if a habit in a stack is locked based on previous habit completion
