@@ -20,6 +20,7 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   // --- Search & Sort State ---
   String _searchQuery = '';
+  String? _selectedCategoryFilter;
   SortOption _sortOption = SortOption.dueDate;
   bool _isAscending = true;
 
@@ -51,8 +52,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   // --- DATA PIPELINE: Filter & Sort ---
   List<Task> _getProcessedTasks(List<Task> rawTasks) {
-    // 1. Search Filter
+    // Search & Category Filter
     var processed = rawTasks.where((task) {
+      // Category Filter Check
+      if (_selectedCategoryFilter != null &&
+          _selectedCategoryFilter!.isNotEmpty) {
+        if (task.category != _selectedCategoryFilter) return false;
+      }
+
+      // Text Search Check
       if (_searchQuery.isEmpty) return true;
       final q = _searchQuery.toLowerCase();
       return task.title.toLowerCase().contains(q) ||
@@ -254,143 +262,209 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // --- TOP BAR: SEARCH & SORT ---
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search title or description...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    ),
-                    onChanged: (val) => setState(() => _searchQuery = val),
-                  ),
-                ),
-                const SizedBox(width: 8),
+      body: Consumer<TaskProvider>(
+        builder: (context, provider, child) {
+          // Extract unique categories from tasks
+          final allCategories =
+              provider.tasks
+                  .map((t) => t.category.trim())
+                  .where((c) => c.isNotEmpty)
+                  .toSet()
+                  .toList()
+                ..sort();
 
-                // Sort Dropdown
-                PopupMenuButton<SortOption>(
-                  icon: const Icon(Icons.sort),
-                  tooltip: 'Sort by',
-                  onSelected: (SortOption result) {
-                    setState(() => _sortOption = result);
-                  },
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<SortOption>>[
-                        const PopupMenuItem(
-                          value: SortOption.dueDate,
-                          child: Text('Due Date'),
-                        ),
-                        const PopupMenuItem(
-                          value: SortOption.priority,
-                          child: Text('Priority'),
-                        ),
-                        const PopupMenuItem(
-                          value: SortOption.size,
-                          child: Text('Size'),
-                        ),
-                        const PopupMenuItem(
-                          value: SortOption.category,
-                          child: Text('Category'),
-                        ),
-                        const PopupMenuItem(
-                          value: SortOption.alphabetical,
-                          child: Text('Alphabetical'),
-                        ),
-                      ],
-                ),
-
-                // Order Toggle (Asc/Desc)
-                IconButton(
-                  icon: Icon(
-                    _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                  ),
-                  tooltip: _isAscending ? 'Ascending' : 'Descending',
-                  onPressed: () => setState(() => _isAscending = !_isAscending),
-                ),
-              ],
-            ),
-          ),
-
-          // --- MAIN LIST AREA ---
-          Expanded(
-            child: Consumer<TaskProvider>(
-              builder: (context, provider, child) {
-                if (provider.tasks.isEmpty) {
-                  return const Center(
-                    child: Text("No tasks yet! Tap + to add one."),
-                  );
-                }
-
-                // Apply pipeline
-                final processedTasks = _getProcessedTasks(provider.tasks);
-
-                if (processedTasks.isEmpty) {
-                  return const Center(
-                    child: Text("No tasks match your search."),
-                  );
-                }
-
-                // Grouping Logic
-                final overdue = <Task>[];
-                final dueToday = <Task>[];
-                final todo = <Task>[];
-                final done = <Task>[];
-
-                final now = DateTime.now();
-                final today = DateTime(now.year, now.month, now.day);
-
-                for (var task in processedTasks) {
-                  if (task.isCompleted) {
-                    done.add(task);
-                  } else if (task.dueDate != null) {
-                    final dueDay = DateTime(
-                      task.dueDate!.year,
-                      task.dueDate!.month,
-                      task.dueDate!.day,
-                    );
-                    if (dueDay.isBefore(today)) {
-                      overdue.add(task);
-                    } else if (dueDay.isAtSameMomentAs(today)) {
-                      dueToday.add(task);
-                    } else {
-                      todo.add(task);
-                    }
-                  } else {
-                    todo.add(task);
-                  }
-                }
-
-                return ListView(
-                  padding: const EdgeInsets.only(bottom: 80), // Keep FAB clear
+          return Column(
+            children: [
+              // --- TOP BAR: SEARCH & SORT ---
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
                   children: [
-                    _buildAccordion("Overdue", Colors.red, overdue),
-                    _buildAccordion(
-                      "Due Today",
-                      Colors.amber.shade700,
-                      dueToday,
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search title or description...',
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                          ),
+                        ),
+                        onChanged: (val) => setState(() => _searchQuery = val),
+                      ),
                     ),
-                    _buildAccordion("To Do", Colors.blue, todo),
-                    _buildAccordion(
-                      "Done",
-                      Colors.green,
-                      done,
-                      initExpanded: false,
-                    ), // Default Closed
+                    const SizedBox(width: 8),
+
+                    // Sort Dropdown
+                    PopupMenuButton<SortOption>(
+                      icon: const Icon(Icons.sort),
+                      tooltip: 'Sort by',
+                      onSelected: (SortOption result) {
+                        setState(() => _sortOption = result);
+                      },
+                      itemBuilder: (BuildContext context) =>
+                          <PopupMenuEntry<SortOption>>[
+                            const PopupMenuItem(
+                              value: SortOption.dueDate,
+                              child: Text('Due Date'),
+                            ),
+                            const PopupMenuItem(
+                              value: SortOption.priority,
+                              child: Text('Priority'),
+                            ),
+                            const PopupMenuItem(
+                              value: SortOption.size,
+                              child: Text('Size'),
+                            ),
+                            const PopupMenuItem(
+                              value: SortOption.category,
+                              child: Text('Category'),
+                            ),
+                            const PopupMenuItem(
+                              value: SortOption.alphabetical,
+                              child: Text('Alphabetical'),
+                            ),
+                          ],
+                    ),
+
+                    // Order Toggle (Asc/Desc)
+                    IconButton(
+                      icon: Icon(
+                        _isAscending
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
+                      ),
+                      tooltip: _isAscending ? 'Ascending' : 'Descending',
+                      onPressed: () =>
+                          setState(() => _isAscending = !_isAscending),
+                    ),
                   ],
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              ),
+
+              // --- CATEGORY PILLS (NEW) ---
+              if (allCategories.isNotEmpty)
+                Container(
+                  height: 56,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    itemCount:
+                        allCategories.length + 1, // +1 for the "All" pill
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        final isSelected = _selectedCategoryFilter == null;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: FilterChip(
+                            label: const Text('All'),
+                            selected: isSelected,
+                            onSelected: (_) =>
+                                setState(() => _selectedCategoryFilter = null),
+                          ),
+                        );
+                      }
+
+                      final category = allCategories[index - 1];
+                      final isSelected = _selectedCategoryFilter == category;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: FilterChip(
+                          label: Text(category),
+                          selected: isSelected,
+                          onSelected: (_) {
+                            setState(() {
+                              // If tapped again, clear the filter. Otherwise, select it.
+                              _selectedCategoryFilter = isSelected
+                                  ? null
+                                  : category;
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+              // --- MAIN LIST AREA ---
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    if (provider.tasks.isEmpty) {
+                      return const Center(
+                        child: Text("No tasks yet! Tap + to add one."),
+                      );
+                    }
+
+                    // Apply pipeline
+                    final processedTasks = _getProcessedTasks(provider.tasks);
+
+                    if (processedTasks.isEmpty) {
+                      return const Center(
+                        child: Text("No tasks match your filters."),
+                      );
+                    }
+
+                    // Grouping Logic
+                    final overdue = <Task>[];
+                    final dueToday = <Task>[];
+                    final todo = <Task>[];
+                    final done = <Task>[];
+
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+
+                    for (var task in processedTasks) {
+                      if (task.isCompleted) {
+                        done.add(task);
+                      } else if (task.dueDate != null) {
+                        final dueDay = DateTime(
+                          task.dueDate!.year,
+                          task.dueDate!.month,
+                          task.dueDate!.day,
+                        );
+                        if (dueDay.isBefore(today)) {
+                          overdue.add(task);
+                        } else if (dueDay.isAtSameMomentAs(today)) {
+                          dueToday.add(task);
+                        } else {
+                          todo.add(task);
+                        }
+                      } else {
+                        todo.add(task);
+                      }
+                    }
+
+                    return ListView(
+                      padding: const EdgeInsets.only(
+                        bottom: 80,
+                      ), // Keep FAB clear
+                      children: [
+                        _buildAccordion("Overdue", Colors.red, overdue),
+                        _buildAccordion(
+                          "Due Today",
+                          Colors.amber.shade700,
+                          dueToday,
+                        ),
+                        _buildAccordion("To Do", Colors.blue, todo),
+                        _buildAccordion(
+                          "Done",
+                          Colors.green,
+                          done,
+                          initExpanded: false,
+                        ), // Default Closed
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "task_list_add_button",

@@ -127,62 +127,68 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
             isInteractive: widget.isInteractive,
             isDark: isDark,
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: AppTheme.fsGaugeLabel),
-              Text(
-                widget.label,
-                style: TextStyle(
-                  fontSize: AppTheme.fsGaugeLabel,
-                  fontWeight: AppTheme.fwBold,
-                  letterSpacing: AppTheme.lsExtraWide,
-                  color: isDark
-                      ? AppTheme.gaugeLabelDark
-                      : AppTheme.gaugeTrackLight,
-                ),
-              ),
-              SizedBox(height: AppTheme.spaceXSmall),
-              Text(
-                widget.centerText,
-                style: TextStyle(
-                  fontSize: AppTheme.fsGaugeDisplay,
-                  fontWeight: AppTheme.fwLight,
-                  color:
-                      Theme.of(context).textTheme.bodyLarge?.color ??
-                      AppTheme.gaugeTrackLight,
-                ),
-              ),
-              SizedBox(height: AppTheme.spaceXSmall),
-              GestureDetector(
-                onTap: widget.onBottomTextTapped,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spaceLarge,
-                    vertical: AppTheme.spaceMedium,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? AppTheme.gaugeBgDark
-                        : AppTheme.gaugeBgLight,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusCircle),
-                    border: Border.all(
-                      color: isDark
-                          ? AppTheme.gaugeBorderDark
-                          : AppTheme.gaugeBorderLight,
-                    ),
-                  ),
-                  child: Text(
-                    "< ${widget.bottomText} >",
+          child: Padding(
+            // Keeps the text safely inside the inner stroke
+            padding: const EdgeInsets.all(40.0), 
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: AppTheme.fsGaugeLabel),
+                  Text(
+                    widget.label,
                     style: TextStyle(
-                      color: widget.bottomTextColor,
-                      fontSize: AppTheme.fsBodyLarge,
+                      fontSize: AppTheme.fsGaugeLabel,
                       fontWeight: AppTheme.fwBold,
+                      letterSpacing: AppTheme.lsExtraWide,
+                      color: isDark
+                          ? AppTheme.gaugeLabelDark
+                          : AppTheme.gaugeTrackLight,
                     ),
                   ),
-                ),
+                  SizedBox(height: AppTheme.spaceXSmall),
+                  Text(
+                    widget.centerText,
+                    style: TextStyle(
+                      fontSize: AppTheme.fsGaugeDisplay,
+                      fontWeight: AppTheme.fwLight,
+                      color: Theme.of(context).textTheme.bodyLarge?.color ??
+                          AppTheme.gaugeTrackLight,
+                    ),
+                  ),
+                  SizedBox(height: AppTheme.spaceXSmall),
+                  GestureDetector(
+                    onTap: widget.onBottomTextTapped,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.spaceLarge,
+                        vertical: AppTheme.spaceMedium,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppTheme.gaugeBgDark
+                            : AppTheme.gaugeBgLight,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusCircle),
+                        border: Border.all(
+                          color: isDark
+                              ? AppTheme.gaugeBorderDark
+                              : AppTheme.gaugeBorderLight,
+                        ),
+                      ),
+                      child: Text(
+                        widget.bottomText,
+                        style: TextStyle(
+                          color: widget.bottomTextColor,
+                          fontSize: AppTheme.fsBodyLarge,
+                          fontWeight: AppTheme.fwBold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

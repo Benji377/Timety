@@ -259,16 +259,19 @@ class HomeScreen extends StatelessWidget {
             // --- TOP HALF: FOCUS GAUGE ---
             Expanded(
               flex: 5,
-              child: Center(
-                child: GestureDetector(
-                  onTap: onNavigateToFocus,
-                  child: InteractiveGauge(
-                    progress: focusProgress,
-                    isInteractive: false,
-                    label: "DAILY GOAL",
-                    centerText: "${(focusProgress * 100).toInt()}%",
-                    bottomText: "$focusMinsToday / $dailyTarget m",
-                    bottomTextColor: Theme.of(context).colorScheme.primary,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Center(
+                  child: GestureDetector(
+                    onTap: onNavigateToFocus,
+                    child: InteractiveGauge(
+                      progress: focusProgress,
+                      isInteractive: false,
+                      label: "DAILY GOAL",
+                      centerText: "${(focusProgress * 100).toInt()}%",
+                      bottomText: "$focusMinsToday / $dailyTarget m",
+                      bottomTextColor: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ),
               ),
