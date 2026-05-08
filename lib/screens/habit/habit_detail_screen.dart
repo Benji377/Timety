@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/color_picker.dart';
 
 class HabitDetailScreen extends StatefulWidget {
   final Habit? habit;
@@ -108,8 +109,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     // Extract existing stack names for autocomplete
     final existingStacks = context
         .read<HabitProvider>()
@@ -227,29 +226,11 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               style: TextStyle(fontWeight: AppTheme.fwBold),
             ),
             const SizedBox(height: AppTheme.spaceSmall),
-            Wrap(
-              spacing: AppTheme.spaceMedium,
-              children: _colorOptions.map((color) {
-                final isSelected =
-                    _selectedColor.toARGB32() == color.toARGB32();
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedColor = color),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: isSelected
-                          ? Border.all(
-                              color: isDark ? Colors.white : Colors.black,
-                              width: 3,
-                            )
-                          : null,
-                    ),
-                  ),
-                );
-              }).toList(),
+            ColorPicker(
+              selectedColor: _selectedColor,
+              colorOptions: _colorOptions,
+              onColorSelected: (color) =>
+                  setState(() => _selectedColor = color),
             ),
             const SizedBox(height: AppTheme.spaceXLarge),
 
