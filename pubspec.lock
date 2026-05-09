@@ -451,12 +451,13 @@ packages:
     source: hosted
     version: "14.0.2"
   geolocator_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: geolocator_android
-      sha256: "179c3cb66dfa674fc9ccbf2be872a02658724d1c067634e2c427cf6df7df901a"
-      url: "https://pub.dev"
-    source: hosted
+      path: geolocator_android
+      ref: floss
+      resolved-ref: "86997898ef254e2a5afb4f0cdca9875eb3d48022"
+      url: "https://github.com/onyx-lyon1/flutter-geolocator.git"
+    source: git
     version: "5.0.2"
   geolocator_apple:
     dependency: transitive

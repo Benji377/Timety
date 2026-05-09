@@ -16,8 +16,10 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     defaultConfig {
@@ -53,6 +55,11 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
         }
+    }
+    // Strip Google proprietary block from APK
+    dependenciesInfo {
+            includeInApk = false
+            includeInBundle = false
     }
 }
 

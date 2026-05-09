@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter/foundation.dart';
+import '../theme/app_theme.dart';
 
 class LocationPicker extends StatefulWidget {
   final String? initialLocation;
@@ -82,9 +83,7 @@ class _LocationPickerState extends State<LocationPicker> {
       if (permission == LocationPermission.denied) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Location permission was denied.'),
-            ),
+            const SnackBar(content: Text('Location permission was denied.')),
           );
         }
         return;
@@ -119,8 +118,22 @@ class _LocationPickerState extends State<LocationPicker> {
       return;
     }
 
+    LocationSettings locationSettings;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      locationSettings = AndroidSettings(
+        accuracy: LocationAccuracy.medium,
+        forceLocationManager:
+            true, // Forces native Android GPS, bypassing Google Play Services
+      );
+    } else {
+      locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.medium,
+      );
+    }
+
     Position position = await Geolocator.getCurrentPosition(
-      locationSettings: LocationSettings(accuracy: LocationAccuracy.medium),
+      locationSettings: locationSettings,
     );
     _currentPosition = LatLng(position.latitude, position.longitude);
 
