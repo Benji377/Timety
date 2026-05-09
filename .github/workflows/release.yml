@@ -45,7 +45,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_PATH: release-keystore.jks
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi --split-debug-info=build/symbols
 
       - name: Rename APK Artifacts
         run: |
