@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:timety/screens/statistics_screen.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/expansion_section.dart';
 import '../../widgets/list_tiles/habit_list_tile.dart';
@@ -52,7 +53,10 @@ class HabitListScreen extends StatelessWidget {
           ? provider.getCompletionsThisWeek(habit) /
                 (habit.targetDaysPerWeek ?? 1)
           : null,
-      onToggleCompleted: () => provider.toggleCompletionToday(habit),
+      onToggleCompleted: () => provider.toggleCompletionToday(
+        habit,
+        userProvider: context.read<UserProvider>(),
+      ),
       onDelete: () => provider.deleteHabit(habit.id),
       onTap: () {
         Navigator.push(

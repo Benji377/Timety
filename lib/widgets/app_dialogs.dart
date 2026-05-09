@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../providers/focus_provider.dart';
+import '../providers/user_provider.dart';
 
 class AppDialogs {
   // Generic confirmation dialog
@@ -244,6 +246,7 @@ class AppDialogs {
                       startTime: startDateTime,
                       endTime: endDateTime,
                       tag: selectedTag,
+                      userProvider: context.read<UserProvider>(),
                     );
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(

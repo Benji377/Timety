@@ -5,8 +5,6 @@ class SettingsProvider extends ChangeNotifier {
   SharedPreferences? _prefs;
 
   // Default Values
-  String _userName = "Bobert";
-  String? _profileImagePath;
   ThemeMode _themeMode = ThemeMode.system;
   Color _seedColor = Colors.blue;
   bool _notificationsEnabled = true;
@@ -16,8 +14,6 @@ class SettingsProvider extends ChangeNotifier {
   int _maxNodeMins = 240;
 
   // Getters
-  String get userName => _userName;
-  String? get profileImagePath => _profileImagePath;
   ThemeMode get themeMode => _themeMode;
   Color get seedColor => _seedColor;
   bool get notificationsEnabled => _notificationsEnabled;
@@ -33,10 +29,6 @@ class SettingsProvider extends ChangeNotifier {
   // --- INIT / LOAD ---
   Future<void> _loadSettings() async {
     _prefs = await SharedPreferences.getInstance();
-
-    // User Info
-    _userName = _prefs?.getString('userName') ?? "Bobert";
-    _profileImagePath = _prefs?.getString('profileImagePath');
 
     // Theme
     final themeIndex = _prefs?.getInt('themeMode') ?? ThemeMode.system.index;
@@ -60,18 +52,6 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   // --- SETTERS / SAVE ---
-  void setUserName(String name) {
-    _userName = name;
-    _prefs?.setString('userName', name);
-    notifyListeners();
-  }
-
-  void setProfileImagePath(String path) {
-    _profileImagePath = path;
-    _prefs?.setString('profileImagePath', path);
-    notifyListeners();
-  }
-
   void setThemeMode(ThemeMode mode) {
     _themeMode = mode;
     _prefs?.setInt('themeMode', mode.index);

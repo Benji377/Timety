@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/expansion_section.dart';
 import '../../widgets/list_tiles/task_list_tile.dart';
 import '../calendar_screen.dart';
@@ -99,8 +100,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
           .map(
             (task) => TaskListTile(
               task: task,
-              onToggleCompleted: () =>
-                  context.read<TaskProvider>().toggleTask(task.id),
+              onToggleCompleted: () => context.read<TaskProvider>().toggleTask(
+                task.id,
+                userProvider: context.read<UserProvider>(),
+              ),
               onDelete: () => context.read<TaskProvider>().removeTask(task.id),
               onTap: () {
                 Navigator.push(

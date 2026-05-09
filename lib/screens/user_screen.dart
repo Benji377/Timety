@@ -1,16 +1,19 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:timety/providers/habit_provider.dart';
+import 'package:timety/providers/user_provider.dart';
+import 'package:timety/utils/xp_calculator.dart';
+import 'package:timety/utils/wrapup_image_generator.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
-import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/streak_calculator.dart';
 import '../widgets/stat_cards.dart';
 import 'statistics_screen.dart';
-import 'settings_screen.dart';
 
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});
@@ -20,19 +23,68 @@ class UserScreen extends StatefulWidget {
 }
 
 class _UserScreenState extends State<UserScreen> {
+  bool _isExporting = false;
+
+  Future<void> _shareWrapUp(
+    String name,
+    int level,
+    String title,
+    int tasks,
+    int habits,
+    int focus,
+    int streak,
+  ) async {
+    if (_isExporting) return;
+    setState(() => _isExporting = true);
+
+    try {
+      // Generate a 1080x1920 PNG entirely via canvas — no widget rendering,
+      // no off-screen layout, no clipping surprises.
+      final pngBytes = await WrapUpImageGenerator.generate(
+        name: name,
+        level: level,
+        levelTitle: title,
+        streak: streak,
+        tasksCompleted: tasks,
+        focusMins: focus,
+        habitsMet: habits,
+      );
+
+      final directory = await getTemporaryDirectory();
+      final file = File('${directory.path}/timety_wrap_up.png');
+      await file.writeAsBytes(pngBytes);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          subject: 'My Timety Wrap-Up',
+          files: [XFile(file.path)],
+          text: 'Master your time with Timety!',
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to generate wrap-up image.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
   // --- IMAGE PICKER ---
-  Future<void> _pickImage(SettingsProvider settings) async {
+  Future<void> _pickImage(UserProvider user) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null && mounted) {
-      settings.setProfileImagePath(pickedFile.path);
+      user.updateProfileImage(pickedFile.path);
     }
   }
 
   // --- NAME EDITOR ---
-  void _editName(BuildContext context, SettingsProvider settings) {
-    final controller = TextEditingController(text: settings.userName);
+  void _editName(BuildContext context, UserProvider user) {
+    final controller = TextEditingController(text: user.name);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -40,6 +92,7 @@ class _UserScreenState extends State<UserScreen> {
         content: TextField(
           controller: controller,
           autofocus: true,
+          maxLength: 20,
           decoration: const InputDecoration(hintText: "Enter your name"),
           textCapitalization: TextCapitalization.words,
         ),
@@ -51,7 +104,7 @@ class _UserScreenState extends State<UserScreen> {
           ElevatedButton(
             onPressed: () {
               if (controller.text.trim().isNotEmpty) {
-                settings.setUserName(controller.text.trim());
+                user.updateName(controller.text.trim());
               }
               Navigator.pop(context);
             },
@@ -64,7 +117,7 @@ class _UserScreenState extends State<UserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsProvider>();
+    final userProvider = context.watch<UserProvider>();
     final tasks = context.watch<TaskProvider>();
     final focus = context.watch<FocusProvider>();
     final habits = context.watch<HabitProvider>();
@@ -80,6 +133,10 @@ class _UserScreenState extends State<UserScreen> {
       0,
       (sum, h) => sum + h.completions.length,
     );
+    final nextLevelXp = ExperienceEngine.getXpForLevel(
+      userProvider.currentLevel + 1,
+    );
+    final xpToNextLevel = nextLevelXp - userProvider.totalXp;
     final activityDates = <DateTime>[
       ...tasks.tasks
           .where((t) => t.isCompleted && t.completedAt != null)
@@ -98,20 +155,32 @@ class _UserScreenState extends State<UserScreen> {
       appBar: AppBar(
         title: const Text('Profile'),
         actions: [
+          // --- SHARE BUTTON ---
+          IconButton(
+            icon: _isExporting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.ios_share),
+            tooltip: 'Share Weekly Wrap-up',
+            onPressed: () => _shareWrapUp(
+              userProvider.name,
+              userProvider.currentLevel,
+              userProvider.levelTitle,
+              totalTasks,
+              totalHabitsDone,
+              totalFocusMins,
+              currentStreak,
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.bar_chart),
             tooltip: 'Statistics',
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const StatisticsScreen()),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
             ),
           ),
         ],
@@ -123,7 +192,7 @@ class _UserScreenState extends State<UserScreen> {
 
             // --- PROFILE HEADER ---
             GestureDetector(
-              onTap: () => _pickImage(settings),
+              onTap: () => _pickImage(userProvider),
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -132,10 +201,10 @@ class _UserScreenState extends State<UserScreen> {
                     backgroundColor: Theme.of(
                       context,
                     ).colorScheme.primaryContainer,
-                    backgroundImage: settings.profileImagePath != null
-                        ? FileImage(File(settings.profileImagePath!))
+                    backgroundImage: userProvider.profileImagePath != null
+                        ? FileImage(File(userProvider.profileImagePath!))
                         : null,
-                    child: settings.profileImagePath == null
+                    child: userProvider.profileImagePath == null
                         ? Icon(
                             Icons.person,
                             size: AppTheme.profileImageSize,
@@ -168,7 +237,7 @@ class _UserScreenState extends State<UserScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  settings.userName,
+                  userProvider.name,
                   style: const TextStyle(
                     fontSize: AppTheme.fsLargeNumber,
                     fontWeight: AppTheme.fwBold,
@@ -180,12 +249,75 @@ class _UserScreenState extends State<UserScreen> {
                     size: AppTheme.iconSizeMedium,
                     color: Colors.grey,
                   ),
-                  onPressed: () => _editName(context, settings),
+                  onPressed: () => _editName(context, userProvider),
                 ),
               ],
             ),
 
-            const SizedBox(height: AppTheme.spaceLarge),
+            // --- LEVEL & TITLE ---
+            Text(
+              "Level ${userProvider.currentLevel} • ${userProvider.levelTitle}",
+              style: TextStyle(
+                fontSize: AppTheme.fsBodyLarge,
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: AppTheme.spaceXLarge),
+
+            // --- ELIXIR XP BAR ---
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.space2XLarge,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "${userProvider.totalXp} XP",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.arrow_upward,
+                            color: Colors.blueAccent,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$xpToNextLevel XP',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: userProvider.levelProgress,
+                      minHeight: 12,
+                      backgroundColor: Colors.grey.shade200,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: AppTheme.space2XLarge),
 
             // --- STREAK BADGE ---
             Container(

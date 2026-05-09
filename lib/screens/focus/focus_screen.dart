@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:timety/screens/statistics_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../data/focus/focus_models.dart';
 import '../../widgets/focus_mode_timeline.dart';
@@ -188,6 +189,7 @@ class FocusScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final focusProvider = context.watch<FocusProvider>();
+    focusProvider.attachUserProvider(context.read<UserProvider>());
     final isRunning = focusProvider.isRunning;
     final isPaused = focusProvider.isPaused;
     final activeMode = focusProvider.activeMode;
@@ -268,7 +270,6 @@ class FocusScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-
           const SizedBox(height: 10),
 
           // --- MODE SELECTOR ---
@@ -486,7 +487,9 @@ class FocusScreen extends StatelessWidget {
                       : Theme.of(context).colorScheme.primary,
                   onPressed: () {
                     if (isRunning) {
-                      focusProvider.stopSession();
+                      focusProvider.stopSession(
+                        userProvider: context.read<UserProvider>(),
+                      );
                     } else {
                       focusProvider.startSession();
                     }

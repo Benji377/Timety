@@ -14,6 +14,11 @@ import 'package:timety/providers/focus_provider.dart';
 import 'package:timety/providers/habit_provider.dart';
 import 'package:timety/providers/settings_provider.dart';
 import 'package:timety/providers/task_provider.dart';
+import 'package:timety/providers/user_provider.dart';
+import 'package:timety/utils/xp_calculator.dart';
+
+// How to execute:
+// flutter drive --driver=screenshots/test_driver.dart --target=screenshots/screenshot_test.dart
 
 Future<void> _waitForCondition(
   WidgetTester tester,
@@ -85,8 +90,10 @@ Future<void> _seedMockData(BuildContext context) async {
   final taskProvider = context.read<TaskProvider>();
   final habitProvider = context.read<HabitProvider>();
   final focusProvider = context.read<FocusProvider>();
+  final userProvider = context.read<UserProvider>();
 
-  settings.setUserName('Maya Chen');
+  await userProvider.updateName("Bobert");
+  await userProvider.addXp(-userProvider.totalXp);
   settings.setThemeMode(ThemeMode.light);
   settings.setSeedColor(Colors.teal);
   settings.setDailyGoal(120);
@@ -253,6 +260,23 @@ Future<void> _seedMockData(BuildContext context) async {
         .add(const Duration(hours: 16, minutes: 30)),
     tag: deepWorkTag,
   );
+
+  final completedTasks = taskProvider.tasks.where((t) => t.isCompleted).length;
+  final totalHabitCompletions = habitProvider.habits.fold(
+    0,
+    (sum, h) => sum + h.completions.length,
+  );
+  final totalFocusMinutes = focusProvider.history.fold(
+    0,
+    (sum, s) => sum + (s.totalSecondsFocused ~/ 60),
+  );
+
+  final seededXp =
+      (completedTasks * ExperienceEngine.xpPerTask) +
+      (totalHabitCompletions * ExperienceEngine.xpPerHabit) +
+      (totalFocusMinutes * ExperienceEngine.xpPerFocusMin);
+
+  await userProvider.addXp(seededXp);
 }
 
 void main() {
@@ -281,8 +305,9 @@ void main() {
 
     // 2. Inject Dummy Data - capture context after async operations
     final BuildContext context = tester.element(find.byType(Scaffold).first);
-
-    await _seedMockData(context);
+    if (context.mounted) {
+      await _seedMockData(context);
+    }
 
     // Wait for the UI to visually update with the new data
     await binding.convertFlutterSurfaceToImage();

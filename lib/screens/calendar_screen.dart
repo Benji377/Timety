@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:timety/utils/utils.dart';
 import '../theme/app_theme.dart';
 import '../providers/task_provider.dart';
+import '../providers/user_provider.dart';
 import 'task/task_detail_screen.dart';
 import '../providers/focus_provider.dart';
 import '../data/habit/habit_models.dart';
@@ -545,7 +546,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             value: task.isCompleted,
                                             onChanged: (_) => context
                                                 .read<TaskProvider>()
-                                                .toggleTask(task.id),
+                                                .toggleTask(
+                                                  task.id,
+                                                  userProvider: context
+                                                      .read<UserProvider>(),
+                                                ),
                                           ),
                                           title: Text(
                                             task.title,

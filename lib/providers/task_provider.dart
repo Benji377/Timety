@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
+import '../utils/xp_calculator.dart';
+import 'user_provider.dart';
 
 class TaskProvider extends ChangeNotifier {
   final TaskRepository repository;
@@ -59,15 +61,17 @@ class TaskProvider extends ChangeNotifier {
   }
 
   // Toggle completion
-  Future<void> toggleTask(String id) async {
+  Future<void> toggleTask(String id, {UserProvider? userProvider}) async {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
       _tasks[index].isCompleted = !_tasks[index].isCompleted;
 
       if (_tasks[index].isCompleted) {
         _tasks[index].completedAt = DateTime.now();
+        userProvider?.addXp(ExperienceEngine.xpPerTask);
       } else {
         _tasks[index].completedAt = null;
+        userProvider?.addXp(-ExperienceEngine.xpPerTask);
       }
 
       _syncTaskReminders(_tasks[index]);

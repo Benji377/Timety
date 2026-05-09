@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
+import '../utils/xp_calculator.dart';
+import 'user_provider.dart';
 
 class FocusProvider extends ChangeNotifier {
   final FocusRepository repository;
+  UserProvider? _userProvider;
 
   // --- STATE ---
   List<FocusMode> _modes = [];
@@ -41,6 +44,10 @@ class FocusProvider extends ChangeNotifier {
   // Require the repository in the constructor
   FocusProvider({required this.repository}) {
     _init();
+  }
+
+  void attachUserProvider(UserProvider userProvider) {
+    _userProvider = userProvider;
   }
 
   Future<void> _init() async {
@@ -186,7 +193,7 @@ class FocusProvider extends ChangeNotifier {
 
   void _setupPhase(int index) {
     if (_activeMode == null || index >= _activeMode!.phases.length) {
-      stopSession(completed: true);
+      stopSession(completed: true, userProvider: _userProvider);
       return;
     }
 
@@ -227,7 +234,7 @@ class FocusProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void stopSession({bool completed = false}) async {
+  void stopSession({bool completed = false, UserProvider? userProvider}) async {
     _timer?.cancel();
     NotificationService.instance.cancelFocusTimerNotification();
 
@@ -239,6 +246,12 @@ class FocusProvider extends ChangeNotifier {
 
       await repository.saveSession(_currentSession!);
       _history.add(_currentSession!);
+
+      // ADD XP based on minutes focused
+      int focusMinutes = _currentSecondsFocussed ~/ 60;
+      if (focusMinutes > 0) {
+        userProvider?.addXp(focusMinutes * ExperienceEngine.xpPerFocusMin);
+      }
     }
 
     _isRunning = false;
@@ -300,6 +313,7 @@ class FocusProvider extends ChangeNotifier {
     required DateTime startTime,
     required DateTime endTime,
     FocusTag? tag,
+    UserProvider? userProvider,
   }) async {
     int totalSeconds = endTime.difference(startTime).inSeconds;
     if (totalSeconds <= 0) return;
@@ -317,6 +331,13 @@ class FocusProvider extends ChangeNotifier {
 
     await repository.saveSession(session);
     _history.add(session);
+
+    // ADD XP based on minutes focused
+    int focusMinutes = totalSeconds ~/ 60;
+    if (focusMinutes > 0) {
+      userProvider?.addXp(focusMinutes * ExperienceEngine.xpPerFocusMin);
+    }
+
     notifyListeners();
   }
 

@@ -1,0 +1,305 @@
+import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+/// Generates a 1080×1920 (9:16) wrap-up PNG using dart:ui canvas drawing.
+///
+/// No widget tree, no screenshot package, no layout-engine surprises —
+/// just direct draw calls that produce pixel-perfect output at any resolution.
+class WrapUpImageGenerator {
+  // ── Output dimensions (standard 9:16 Story / Reel format) ──────────────
+  static const double _w = 1080;
+  static const double _h = 1920;
+
+  // ── Layout constants (all in logical pixels at 1080-wide scale) ─────────
+  static const double _pad = 88;
+  static const double _iconBoxSize = 100;
+  static const double _iconSize = 54;
+  static const double _statRowHeight = 108;
+  static const double _statRowGap = 52;
+
+  // ── Public entry point ──────────────────────────────────────────────────
+
+  static Future<Uint8List> generate({
+    required String name,
+    required int level,
+    required String levelTitle,
+    required int streak,
+    required int tasksCompleted,
+    required int focusMins,
+    required int habitsMet,
+  }) async {
+    // Load the logo asset into a dart:ui Image so we can draw it on canvas.
+    final logoBytes = await rootBundle.load('assets/logo.png');
+    final logoCodec = await ui.instantiateImageCodec(
+      logoBytes.buffer.asUint8List(),
+      targetWidth: 112,
+      targetHeight: 112,
+    );
+    final logoImage = (await logoCodec.getNextFrame()).image;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, _w, _h));
+
+    canvas.scale(1.2, 1.2);
+    canvas.translate(0, 50);
+
+    _drawBackground(canvas);
+
+    // Track vertical cursor as we paint top-to-bottom.
+    double y = _h * 0.085;
+
+    y = _drawLogo(canvas, logoImage, y);
+    y = _drawHeader(canvas, name, level, levelTitle, y);
+    _drawStats(canvas, streak, tasksCompleted, focusMins, habitsMet, y);
+    _drawFooter(canvas);
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(_w.toInt(), _h.toInt());
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
+  // ── Private draw helpers ────────────────────────────────────────────────
+
+  static void _drawBackground(Canvas canvas) {
+    final paint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF1E1E2C), Color(0xFF2D2B55), Color(0xFF0F3E68)],
+      ).createShader(Rect.fromLTWH(0, 0, _w, _h));
+    canvas.drawRect(Rect.fromLTWH(0, 0, _w, _h), paint);
+  }
+
+  /// Returns updated y after drawing the logo.
+  static double _drawLogo(Canvas canvas, ui.Image logo, double y) {
+    const size = 112.0;
+    canvas.drawImageRect(
+      logo,
+      Rect.fromLTWH(0, 0, logo.width.toDouble(), logo.height.toDouble()),
+      Rect.fromLTWH(_pad, y, size, size),
+      Paint(),
+    );
+    return y + size + 36;
+  }
+
+  /// Returns updated y after drawing name / level header block.
+  static double _drawHeader(
+    Canvas canvas,
+    String name,
+    int level,
+    String levelTitle,
+    double y,
+  ) {
+    // "TIMETY WRAP-UP" eyebrow
+    _paintText(
+      canvas,
+      'TIMETY WRAP-UP',
+      Offset(_pad, y),
+      const TextStyle(
+        color: Colors.blueAccent,
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 5,
+      ),
+    );
+    y += 52;
+
+    // Name — scale down if it won't fit on one line
+    y = _paintFittedText(
+      canvas,
+      "$name's Stats",
+      Offset(_pad, y),
+      const TextStyle(
+        color: Colors.white,
+        fontSize: 82,
+        fontWeight: FontWeight.w900,
+        height: 1.1,
+      ),
+      maxWidth: _w - _pad * 2,
+    );
+    y += 14;
+
+    // Level badge
+    _paintText(
+      canvas,
+      "Level $level • $levelTitle",
+      Offset(_pad, y),
+      const TextStyle(
+        color: Colors.amberAccent,
+        fontSize: 38,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    y += 58;
+
+    return y;
+  }
+
+  /// Draws the four stat rows, vertically centred in the remaining canvas space.
+  static void _drawStats(
+    Canvas canvas,
+    int streak,
+    int tasks,
+    int focusMins,
+    int habits,
+    double headerBottom,
+  ) {
+    // A fixed, comfortable gap right below the "Level x" text
+    final startY = headerBottom + 100;
+
+    final rows = [
+      _StatRow(
+        Icons.local_fire_department,
+        Colors.orange,
+        '$streak Day',
+        'Active Streak',
+      ),
+      _StatRow(Icons.check_circle, Colors.blue, '$tasks', 'Tasks Completed'),
+      _StatRow(Icons.timer, Colors.green, '$focusMins', 'Minutes Focused'),
+      _StatRow(Icons.repeat, Colors.purpleAccent, '$habits', 'Habits Built'),
+    ];
+
+    double y = startY;
+    for (final row in rows) {
+      _drawStatRow(canvas, row, y);
+      y += _statRowHeight + _statRowGap;
+    }
+  }
+
+  static void _drawStatRow(Canvas canvas, _StatRow row, double y) {
+    // Coloured rounded background box
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(_pad, y, _iconBoxSize, _iconBoxSize),
+        const Radius.circular(22),
+      ),
+      Paint()..color = row.color.withValues(alpha: 0.22),
+    );
+
+    // Material icon drawn as a text glyph (icons ARE a font in Flutter)
+    final iconPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(row.icon.codePoint),
+        style: TextStyle(
+          fontSize: _iconSize,
+          fontFamily: row.icon.fontFamily,
+          color: row.color,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    iconPainter.paint(
+      canvas,
+      Offset(
+        _pad + (_iconBoxSize - iconPainter.width) / 2,
+        y + (_iconBoxSize - iconPainter.height) / 2,
+      ),
+    );
+
+    // Value (large bold number / text)
+    final textX = _pad + _iconBoxSize + 30;
+    _paintText(
+      canvas,
+      row.value,
+      Offset(textX, y + 2),
+      const TextStyle(
+        color: Colors.white,
+        fontSize: 52,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+
+    // Label (smaller, muted)
+    _paintText(
+      canvas,
+      row.label,
+      Offset(textX, y + 58),
+      const TextStyle(
+        color: Color(0xB3FFFFFF), // white70
+        fontSize: 30,
+      ),
+    );
+  }
+
+  static void _drawFooter(Canvas canvas) {
+    _paintText(
+      canvas,
+      'Master your time with Timety',
+      Offset(_w / 2 - 100, _h - 550),
+      const TextStyle(
+        color: Colors.white54,
+        fontSize: 30,
+        fontWeight: FontWeight.bold,
+      ),
+      textAlign: TextAlign.center,
+      anchorCenter: true,
+    );
+  }
+
+  // ── Text utilities ──────────────────────────────────────────────────────
+
+  /// Paints text and returns the bottom edge (y + measured height).
+  static double _paintText(
+    Canvas canvas,
+    String text,
+    Offset position,
+    TextStyle style, {
+    double maxWidth = _w - _pad * 2,
+    TextAlign textAlign = TextAlign.left,
+    bool anchorCenter = false,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textAlign: textAlign,
+    )..layout(maxWidth: maxWidth);
+
+    final dx = anchorCenter ? position.dx - painter.width / 2 : position.dx;
+    final dy = anchorCenter ? position.dy - painter.height / 2 : position.dy;
+    painter.paint(canvas, Offset(dx, dy));
+    return dy + painter.height;
+  }
+
+  /// Like [_paintText] but scales the font down until the text fits on one line.
+  /// Mirrors the behaviour of Flutter's FittedBox(fit: BoxFit.scaleDown).
+  static double _paintFittedText(
+    Canvas canvas,
+    String text,
+    Offset position,
+    TextStyle style, {
+    required double maxWidth,
+  }) {
+    double fontSize = style.fontSize!;
+    late TextPainter painter;
+
+    while (fontSize >= 20) {
+      painter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: style.copyWith(fontSize: fontSize),
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+      )..layout(maxWidth: double.infinity);
+
+      if (painter.width <= maxWidth) break;
+      fontSize -= 4;
+    }
+
+    painter.paint(canvas, position);
+    return position.dy + painter.height;
+  }
+}
+
+// ── Internal data class ─────────────────────────────────────────────────────
+
+class _StatRow {
+  final IconData icon;
+  final Color color;
+  final String value;
+  final String label;
+  const _StatRow(this.icon, this.color, this.value, this.label);
+}

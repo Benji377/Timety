@@ -3,6 +3,8 @@ import 'package:timety/providers/settings_provider.dart';
 import '../data/habit/habit_models.dart';
 import '../data/habit/habit_repository.dart';
 import '../services/notification_service.dart';
+import '../utils/xp_calculator.dart';
+import 'user_provider.dart';
 
 class HabitProvider extends ChangeNotifier {
   final HabitRepository repository;
@@ -103,16 +105,18 @@ class HabitProvider extends ChangeNotifier {
   }
 
   // Toggles completion for today
-  Future<void> toggleCompletionToday(Habit habit) async {
+  Future<void> toggleCompletionToday(Habit habit, {UserProvider? userProvider}) async {
     final today = DateTime.now();
     final completed = isCompletedOn(habit, today);
 
     if (completed) {
       // Remove today's completion
       habit.completions.removeWhere((c) => _isSameDay(c, today));
+      userProvider?.addXp(-ExperienceEngine.xpPerHabit);
     } else {
       // Add completion
       habit.completions.add(today);
+      userProvider?.addXp(ExperienceEngine.xpPerHabit);
     }
 
     await saveHabit(habit);

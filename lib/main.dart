@@ -3,7 +3,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'package:timety/screens/main_screen.dart';
+import 'data/user/user.dart';
+import 'data/user/user_repository_hive.dart';
 import 'providers/settings_provider.dart';
+import 'providers/user_provider.dart';
 import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
 
@@ -46,6 +49,9 @@ void main() async {
   Hive.registerAdapter(HabitFrequencyAdapter());
   Hive.registerAdapter(HabitAdapter());
 
+  // Register User Adapters
+  Hive.registerAdapter(UserProfileAdapter());
+
   await NotificationService.instance.init();
 
   runApp(const TimetyApp());
@@ -72,6 +78,9 @@ class TimetyApp extends StatelessWidget {
             habitProvider?.updateSettings(settings);
             return habitProvider!;
           },
+        ),
+        ChangeNotifierProvider(
+          create: (_) => UserProvider(repository: HiveUserRepository()),
         ),
       ],
       child: Consumer<SettingsProvider>(

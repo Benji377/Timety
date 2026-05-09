@@ -2,5 +2,6 @@
 // Tasks Domain:  10 - 19
 // Focus Domain:  20 - 29
 // Habit Domain:  30 - 39
-// Settings/Misc: 40 - 49
+// User Domain:   40 - 49
+// Other/Misc:    50 - 59
 // -----------------------------

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timety/providers/user_provider.dart';
 import 'package:timety/screens/settings_screen.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
@@ -48,7 +49,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userName = context.watch<SettingsProvider>().userName;
+    final userName = context.watch<UserProvider>().name;
     final focusProvider = context.watch<FocusProvider>();
     final taskProvider = context.watch<TaskProvider>();
     final habitProvider = context.watch<HabitProvider>();
@@ -158,7 +159,10 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                               onToggleCompleted: (habit) =>
-                                  habitProvider.toggleCompletionToday(habit),
+                                  habitProvider.toggleCompletionToday(
+                                    habit,
+                                    userProvider: context.read<UserProvider>(),
+                                  ),
                             ),
                             const SizedBox(height: AppTheme.spaceLarge),
                           ],
@@ -177,9 +181,12 @@ class HomeScreen extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 showDescription: false,
-                                onToggleCompleted: () => context
-                                    .read<TaskProvider>()
-                                    .toggleTask(task.id),
+                                onToggleCompleted: () =>
+                                    context.read<TaskProvider>().toggleTask(
+                                      task.id,
+                                      userProvider: context
+                                          .read<UserProvider>(),
+                                    ),
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
