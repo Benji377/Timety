@@ -10,7 +10,7 @@ on:
 
 jobs:
   build_apk:
-    name: Build Android APK
+    name: Build Android APKs (Split)
     runs-on: ubuntu-latest
     permissions: write-all
 
@@ -39,24 +39,28 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-keystore.jks
 
-      - name: Build APK
+      - name: Build Split APKs
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_PATH: release-keystore.jks
-        run: flutter build apk --release
+        run: flutter build apk --release --split-per-abi
 
-      - name: Rename APK Artifact
+      - name: Rename APK Artifacts
         run: |
-          mv build/app/outputs/flutter-apk/app-release.apk timety-v${{ github.event.inputs.version }}.apk
+          mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk timety-v${{ github.event.inputs.version }}-armeabi-v7a.apk
+          mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk timety-v${{ github.event.inputs.version }}-arm64-v8a.apk
+          mv build/app/outputs/flutter-apk/app-x86_64-release.apk timety-v${{ github.event.inputs.version }}-x86_64.apk
 
-      - name: Upload APK Artifact
+      - name: Upload APK Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: timety-apk
           path: |
-            timety-v${{ github.event.inputs.version }}.apk
+            timety-v${{ github.event.inputs.version }}-armeabi-v7a.apk
+            timety-v${{ github.event.inputs.version }}-arm64-v8a.apk
+            timety-v${{ github.event.inputs.version }}-x86_64.apk
 
   build_aab:
     name: Build Android App Bundle
