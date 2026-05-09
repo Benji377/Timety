@@ -1,7 +1,7 @@
 name: timety
 description: "An offline-first Flutter app uniting tasks, focus timers, and habit tracking"
 publish_to: 'none'
-version: 1.1.1+5
+version: 1.1.2+6
 environment:
   sdk: ^3.11.5
 
