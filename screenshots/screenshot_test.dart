@@ -18,7 +18,8 @@ import 'package:timety/providers/user_provider.dart';
 import 'package:timety/utils/xp_calculator.dart';
 
 // How to execute:
-// flutter drive --driver=screenshots/test_driver.dart --target=screenshots/screenshot_test.dart
+// 1. Start Emulator
+// 2. Execute: flutter drive --driver=screenshots/test_driver.dart --target=screenshots/screenshot_test.dart
 
 Future<void> _waitForCondition(
   WidgetTester tester,
