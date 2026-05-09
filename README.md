@@ -1,7 +1,7 @@
 # Timety
 
 <p align="center">
-  <img src="assets/logo.png" width="300" alt="Timety Logo">
+  <img src="assets/banner_small.png" alt="Timety banner">
   <p align="center">
     <a href="https://github.com/Benji377/Timety/actions/workflows/lint.yml">
       <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/lint.yml?label=Lint&logo=flutter&style=for-the-badge&labelColor=555555" alt="lint">

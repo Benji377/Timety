@@ -1,0 +1,12 @@
+<p>Timety is a comprehensive, offline-first productivity and time-management application built with Flutter. It seamlessly integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.</p>
+
+<b>Features</b>
+<ul>
+  <li><b>Intelligent Task Management:</b> Organize one-off tasks with due dates, priority levels, and effort sizes.</li>
+  <li><b>Focus Engine:</b> A robust stopwatch and timer system tailored for deep work. Includes support for tags, custom modes, and short/long break phases.</li>
+  <li><b>Habit Tracker:</b> Build lasting routines with flexible frequencies (daily, specific weekdays, or flexible weekly goals).</li>
+  <li><b>Rich Analytics:</b> Visualize your productivity with interactive charts, weekly velocity metrics, and time-of-day habit analysis.</li>
+  <li><b>Gamification:</b> Track your active days, build streaks, and level up your productivity profile.</li>
+  <li><b>Smart Notifications:</b> Local reminders for tasks, specific habit times, and dynamic daily motivation.</li>
+  <li><b>Unified Calendar:</b> A custom micro-dot calendar view to see your tasks, focus sessions, and habits at a glance.</li>
+</ul>
