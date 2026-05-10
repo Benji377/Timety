@@ -110,54 +110,13 @@ jobs:
           path: |
             timety-v${{ github.event.inputs.version }}.aab
 
-  build_ios:
-    name: Build iOS App Artifact
-    runs-on: macos-15
-    permissions: write-all
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Xcode (latest stable)
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
-      - name: Show Xcode version
-        run: xcodebuild -version
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate Hive Adapters
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Build iOS (no codesign)
-        run: flutter build ios --release --no-codesign
-
-      - name: Package iOS App Artifact
-        run: |
-          cd build/ios/iphoneos
-          zip -r ../../../timety-v${{ github.event.inputs.version }}-ios.app.zip Runner.app
-
-      - name: Upload iOS Artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: timety-ios
-          path: |
-            timety-v${{ github.event.inputs.version }}-ios.app.zip
+  # iOS build removed — project no longer supports iOS
 
   upload_to_release:
     name: Upload to GitHub Release
     runs-on: ubuntu-latest
     permissions: write-all
-    needs: [build_apk, build_aab, build_ios]
+    needs: [build_apk, build_aab]
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -170,7 +129,6 @@ jobs:
           subject-path: |
             artifacts/*.apk
             artifacts/*.aab
-            artifacts/*-ios.app.zip
 
       - name: Release to GitHub
         uses: softprops/action-gh-release@v3
@@ -182,4 +140,3 @@ jobs:
           files: |
             artifacts/*.apk
             artifacts/*.aab
-            artifacts/*-ios.app.zip

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../../theme/app_theme.dart';
+import '../../utils/habit_icons.dart';
 
 part 'habit_models.g.dart';
 
@@ -86,7 +87,14 @@ class Habit {
   }
 
   // Keep persisted data compatible while rendering the saved Material icon.
-  IconData? get iconData => iconCodePoint != null
-      ? IconData(iconCodePoint!, fontFamily: 'MaterialIcons')
-      : null;
+  IconData? get iconData {
+    if (iconCodePoint == null) return null;
+    try {
+      return HabitIcons.availableIcons.firstWhere(
+        (icon) => icon.codePoint == iconCodePoint,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 }

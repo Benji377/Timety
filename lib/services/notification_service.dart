@@ -34,12 +34,9 @@ class NotificationService {
 
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    const DarwinInitializationSettings iosSettings =
-        DarwinInitializationSettings();
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
-      iOS: iosSettings,
     );
 
     await _notificationsPlugin.initialize(settings: initSettings);
@@ -50,12 +47,6 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin
           >()
           ?.requestNotificationsPermission();
-    } else if (Platform.isIOS) {
-      await _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >()
-          ?.requestPermissions(alert: true, badge: true, sound: true);
     }
 
     _isInitialized = true;
@@ -90,7 +81,6 @@ class NotificationService {
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
         ),
-        iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
@@ -133,7 +123,6 @@ class NotificationService {
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
         ),
-        iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents:
@@ -193,7 +182,6 @@ class NotificationService {
           ), // Allows multi-line text
           icon: '@mipmap/ic_launcher',
         ),
-        iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -230,7 +218,6 @@ class NotificationService {
           channelDescription: 'End of day reminders to log habits',
           icon: '@mipmap/ic_launcher',
         ),
-        iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -281,7 +268,6 @@ class NotificationService {
           when: targetTime.millisecondsSinceEpoch,
           icon: '@mipmap/ic_launcher',
         ),
-        iOS: const DarwinNotificationDetails(),
       ),
     );
   }
