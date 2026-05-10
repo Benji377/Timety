@@ -453,7 +453,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         child: ListTile(
                                           leading: Checkbox(
                                             value: isCompleted,
-                                            activeColor: AppTheme.habitColor,
+                                            fillColor:
+                                                WidgetStateProperty.resolveWith(
+                                                  (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return AppTheme
+                                                          .successColor;
+                                                    }
+                                                    return Colors.transparent;
+                                                  },
+                                                ),
+                                            checkColor: Colors.white,
+                                            side: const BorderSide(
+                                              color: AppTheme.habitColor,
+                                              width: 2,
+                                            ),
                                             onChanged: (_) {
                                               // Time-Travel Logging!
                                               if (isCompleted) {
@@ -545,6 +561,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         child: ListTile(
                                           leading: Checkbox(
                                             value: task.isCompleted,
+                                            fillColor:
+                                                WidgetStateProperty.resolveWith(
+                                                  (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return AppTheme
+                                                          .successColor;
+                                                    }
+                                                    return Colors.transparent;
+                                                  },
+                                                ),
+                                            checkColor: Colors.white,
+                                            side: const BorderSide(
+                                              color: AppTheme.taskColor,
+                                              width: 2,
+                                            ),
                                             onChanged: (_) => context
                                                 .read<TaskProvider>()
                                                 .toggleTask(

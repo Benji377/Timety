@@ -316,6 +316,7 @@ class HabitListScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'habit_list_add_button',
+        backgroundColor: AppTheme.habitColor,
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const HabitDetailScreen()),

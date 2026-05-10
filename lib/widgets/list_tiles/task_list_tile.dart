@@ -74,7 +74,14 @@ class TaskListTile extends StatelessWidget {
       child: ListTile(
         leading: Checkbox(
           value: task.isCompleted,
-          activeColor: AppTheme.taskColor,
+          fillColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppTheme.successColor;
+            }
+            return Colors.transparent;
+          }),
+          checkColor: Colors.white,
+          side: const BorderSide(color: AppTheme.taskColor, width: 2),
           onChanged: (_) => onToggleCompleted(),
         ),
         title: Text(

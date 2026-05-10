@@ -10,9 +10,12 @@ class InteractiveGauge extends StatefulWidget {
 
   final String label;
   final String centerText;
+  final Color? centerTextColor;
+  final Color? labelColor;
   final String bottomText;
   final Color bottomTextColor;
   final VoidCallback? onBottomTextTapped;
+  final Color? color; // optional override for gauge color
 
   const InteractiveGauge({
     super.key,
@@ -24,6 +27,9 @@ class InteractiveGauge extends StatefulWidget {
     this.onBottomTextTapped,
     this.isInteractive = true,
     this.onChanged,
+    this.color,
+    this.centerTextColor,
+    this.labelColor,
     required this.label,
   });
 
@@ -108,6 +114,9 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
         ? (1.0 - _pulseController.value).clamp(0.2, 1.0)
         : 1.0;
 
+    // Allow the caller to override the gauge color; fall back to theme primary
+    final gaugeColor = widget.color ?? primaryColor;
+
     return GestureDetector(
       onPanStart: (details) => _handlePan(
         details.localPosition,
@@ -123,7 +132,7 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
         child: CustomPaint(
           painter: _GaugePainter(
             progress: paintProgress,
-            color: primaryColor.withValues(alpha: trackOpacity),
+            color: gaugeColor.withValues(alpha: trackOpacity),
             isInteractive: widget.isInteractive,
             isDark: isDark,
           ),
@@ -142,9 +151,11 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
                       fontSize: AppTheme.fsGaugeLabel,
                       fontWeight: AppTheme.fwBold,
                       letterSpacing: AppTheme.lsExtraWide,
-                      color: isDark
-                          ? AppTheme.gaugeLabelDark
-                          : AppTheme.gaugeTrackLight,
+                      color:
+                          widget.labelColor ??
+                          (isDark
+                              ? AppTheme.gaugeLabelDark
+                              : AppTheme.gaugeTrackLight),
                     ),
                   ),
                   const SizedBox(height: AppTheme.spaceXSmall),
@@ -153,9 +164,12 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
                     style: TextStyle(
                       fontSize: AppTheme.fsGaugeDisplay,
                       fontWeight: AppTheme.fwLight,
-                      color:
-                          Theme.of(context).textTheme.bodyLarge?.color ??
-                          AppTheme.gaugeTrackLight,
+                      color: widget.centerTextColor != null
+                          ? (isDark
+                                ? AppTheme.gaugeWhite
+                                : widget.centerTextColor)
+                          : Theme.of(context).textTheme.bodyLarge?.color ??
+                                AppTheme.gaugeTrackLight,
                     ),
                   ),
                   const SizedBox(height: AppTheme.spaceXSmall),

@@ -446,7 +446,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             (subtask) => CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
-              activeColor: AppTheme.successColor,
+              fillColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return AppTheme.successColor;
+                }
+                return Colors.transparent;
+              }),
+              checkColor: Colors.white,
+              side: const BorderSide(color: AppTheme.taskColor, width: 2),
               value: subtask.isCompleted,
               title: Text(
                 subtask.title,

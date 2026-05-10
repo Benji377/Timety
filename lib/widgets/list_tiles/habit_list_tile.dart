@@ -71,6 +71,13 @@ class HabitListTile extends StatelessWidget {
               width: 2,
             ),
           ),
+          child: isCompleted
+              ? Icon(
+                  Icons.check_rounded,
+                  size: 22,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                )
+              : null,
         ),
       ),
       title: Row(
