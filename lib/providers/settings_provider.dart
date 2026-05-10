@@ -6,18 +6,16 @@ class SettingsProvider extends ChangeNotifier {
 
   // Default Values
   ThemeMode _themeMode = ThemeMode.system;
-  Color _seedColor = Colors.blue;
-  bool _notificationsEnabled = true;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 8, minute: 0);
   int _dailyGoalMins = 90;
   int _maxStopwatchMins = 120;
   int _maxNodeMins = 240;
+  TimeOfDay _endOfDayTime = const TimeOfDay(hour: 20, minute: 0);
 
   // Getters
   ThemeMode get themeMode => _themeMode;
-  Color get seedColor => _seedColor;
-  bool get notificationsEnabled => _notificationsEnabled;
   TimeOfDay get notificationTime => _notificationTime;
+  TimeOfDay get endOfDayTime => _endOfDayTime;
   int get dailyGoalMins => _dailyGoalMins;
   int get maxStopwatchMins => _maxStopwatchMins;
   int get maxNodeMins => _maxNodeMins;
@@ -34,14 +32,13 @@ class SettingsProvider extends ChangeNotifier {
     final themeIndex = _prefs?.getInt('themeMode') ?? ThemeMode.system.index;
     _themeMode = ThemeMode.values[themeIndex];
 
-    final colorValue = _prefs?.getInt('seedColor') ?? Colors.blue.toARGB32();
-    _seedColor = Color(colorValue);
-
     // Notifications
-    _notificationsEnabled = _prefs?.getBool('notificationsEnabled') ?? true;
     final notifHour = _prefs?.getInt('notificationHour') ?? 8;
     final notifMin = _prefs?.getInt('notificationMin') ?? 0;
     _notificationTime = TimeOfDay(hour: notifHour, minute: notifMin);
+    final eodHour = _prefs?.getInt('endOfDayHour') ?? 20;
+    final eodMin = _prefs?.getInt('endOfDayMin') ?? 0;
+    _endOfDayTime = TimeOfDay(hour: eodHour, minute: eodMin);
 
     // Limits
     _dailyGoalMins = _prefs?.getInt('dailyGoalMins') ?? 90;
@@ -58,22 +55,17 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSeedColor(Color color) {
-    _seedColor = color;
-    _prefs?.setInt('seedColor', color.toARGB32());
-    notifyListeners();
-  }
-
-  void setNotificationsEnabled(bool enabled) {
-    _notificationsEnabled = enabled;
-    _prefs?.setBool('notificationsEnabled', enabled);
-    notifyListeners();
-  }
-
   void setNotificationTime(TimeOfDay time) {
     _notificationTime = time;
     _prefs?.setInt('notificationHour', time.hour);
     _prefs?.setInt('notificationMin', time.minute);
+    notifyListeners();
+  }
+
+  void setEndOfDayTime(TimeOfDay time) {
+    _endOfDayTime = time;
+    _prefs?.setInt('endOfDayHour', time.hour);
+    _prefs?.setInt('endOfDayMin', time.minute);
     notifyListeners();
   }
 

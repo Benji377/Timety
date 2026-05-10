@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/app_theme.dart';
+
 /// Generates a 1080×1920 (9:16) wrap-up PNG using dart:ui canvas drawing.
 ///
 /// No widget tree, no screenshot package, no layout-engine surprises —
@@ -40,7 +42,7 @@ class WrapUpImageGenerator {
     final logoImage = (await logoCodec.getNextFrame()).image;
 
     final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, _w, _h));
+    final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, _w, _h));
 
     canvas.scale(1.2, 1.2);
     canvas.translate(0, 50);
@@ -65,12 +67,16 @@ class WrapUpImageGenerator {
 
   static void _drawBackground(Canvas canvas) {
     final paint = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF1E1E2C), Color(0xFF2D2B55), Color(0xFF0F3E68)],
-      ).createShader(Rect.fromLTWH(0, 0, _w, _h));
-    canvas.drawRect(Rect.fromLTWH(0, 0, _w, _h), paint);
+        colors: [
+          AppTheme.paperDark,
+          const Color(0xFF2A2418),
+          AppTheme.taskColor.withValues(alpha: 0.9),
+        ],
+      ).createShader(const Rect.fromLTWH(0, 0, _w, _h));
+    canvas.drawRect(const Rect.fromLTWH(0, 0, _w, _h), paint);
   }
 
   /// Returns updated y after drawing the logo.
@@ -99,7 +105,7 @@ class WrapUpImageGenerator {
       'TIMETY WRAP-UP',
       Offset(_pad, y),
       const TextStyle(
-        color: Colors.blueAccent,
+        color: AppTheme.taskColor,
         fontSize: 28,
         fontWeight: FontWeight.bold,
         letterSpacing: 5,
@@ -128,7 +134,7 @@ class WrapUpImageGenerator {
       "Level $level • $levelTitle",
       Offset(_pad, y),
       const TextStyle(
-        color: Colors.amberAccent,
+        color: AppTheme.warningColor,
         fontSize: 38,
         fontWeight: FontWeight.bold,
       ),
@@ -153,13 +159,23 @@ class WrapUpImageGenerator {
     final rows = [
       _StatRow(
         Icons.local_fire_department,
-        Colors.orange,
+        AppTheme.warningColor,
         '$streak Day',
         'Active Streak',
       ),
-      _StatRow(Icons.check_circle, Colors.blue, '$tasks', 'Tasks Completed'),
-      _StatRow(Icons.timer, Colors.green, '$focusMins', 'Minutes Focused'),
-      _StatRow(Icons.repeat, Colors.purpleAccent, '$habits', 'Habits Built'),
+      _StatRow(
+        Icons.check_circle,
+        AppTheme.taskColor,
+        '$tasks',
+        'Tasks Completed',
+      ),
+      _StatRow(
+        Icons.timer,
+        AppTheme.successColor,
+        '$focusMins',
+        'Minutes Focused',
+      ),
+      _StatRow(Icons.repeat, AppTheme.habitColor, '$habits', 'Habits Built'),
     ];
 
     double y = startY;
@@ -200,7 +216,7 @@ class WrapUpImageGenerator {
     );
 
     // Value (large bold number / text)
-    final textX = _pad + _iconBoxSize + 30;
+    const textX = _pad + _iconBoxSize + 30;
     _paintText(
       canvas,
       row.value,
@@ -228,7 +244,7 @@ class WrapUpImageGenerator {
     _paintText(
       canvas,
       'Master your time with Timety',
-      Offset(_w / 2 - 100, _h - 550),
+      const Offset(_w / 2 - 100, _h - 550),
       const TextStyle(
         color: Colors.white54,
         fontSize: 30,
@@ -283,7 +299,7 @@ class WrapUpImageGenerator {
         ),
         textDirection: TextDirection.ltr,
         maxLines: 1,
-      )..layout(maxWidth: double.infinity);
+      )..layout();
 
       if (painter.width <= maxWidth) break;
       fontSize -= 4;

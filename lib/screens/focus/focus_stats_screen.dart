@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import '../../theme/app_theme.dart';
 import '../../data/focus/focus_models.dart';
 import '../../providers/focus_provider.dart';
 import '../../utils/date_utils.dart';
@@ -33,7 +34,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     DateTime startOfWeek,
     DateTime endOfWeek,
   ) {
-    List<int> dailyMins = List.filled(7, 0);
+    final List<int> dailyMins = List.filled(7, 0);
     for (var s in sessions) {
       if (s.startTime.isAfter(
             startOfWeek.subtract(const Duration(seconds: 1)),
@@ -49,7 +50,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     List<FocusSession> sessions,
     List<FocusTag> tags,
   ) {
-    Map<String, int> data = {};
+    final Map<String, int> data = {};
     for (var s in sessions) {
       String tagName = "Untagged";
       if (s.tagId != null) {
@@ -70,7 +71,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     final endOfWeek = startOfWeek.add(
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
-    bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
+    final bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
       DateTime.now(),
       startOfWeek,
       endOfWeek,
@@ -80,7 +81,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     final clockSessions = sessions
         .where((s) => AppDateUtils.isSameDay(s.startTime, _selectedDayForClock))
         .toList();
-    int clockTotalMins = clockSessions.fold(
+    final int clockTotalMins = clockSessions.fold(
       0,
       (sum, s) => sum + (s.totalSecondsFocused ~/ 60),
     );
@@ -112,8 +113,10 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: List.generate(7, (index) {
-                      DateTime day = startOfWeek.add(Duration(days: index));
-                      bool isSelected = AppDateUtils.isSameDay(
+                      final DateTime day = startOfWeek.add(
+                        Duration(days: index),
+                      );
+                      final bool isSelected = AppDateUtils.isSameDay(
                         day,
                         _selectedDayForClock,
                       );
@@ -127,12 +130,12 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Theme.of(context).colorScheme.primary
+                                ? AppTheme.taskColor
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
+                                  ? AppTheme.taskColor
                                   : Colors.grey.shade300,
                             ),
                           ),
@@ -160,7 +163,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                     child: CustomPaint(
                       painter: _ClockPainter(
                         sessions: clockSessions,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppTheme.taskColor,
                       ),
                       child: Center(
                         child: Column(
@@ -256,13 +259,13 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
           ),
         ),
         titlesData: FlTitlesData(
-          show: true,
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (double value, TitleMeta meta) {
-                int dayIndex = value.toInt();
-                bool isToday = isCurrentRealWeek && (dayIndex == todayIndex);
+                final int dayIndex = value.toInt();
+                final bool isToday =
+                    isCurrentRealWeek && (dayIndex == todayIndex);
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
@@ -271,36 +274,30 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                       fontSize: 12,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                       color: isToday
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey,
+                          ? AppTheme.taskColor
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );
               },
             ),
           ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          leftTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
+          rightTitles: const AxisTitles(),
         ),
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),
         barGroups: List.generate(7, (index) {
-          bool isToday = isCurrentRealWeek && (index == todayIndex);
+          final bool isToday = isCurrentRealWeek && (index == todayIndex);
           return BarChartGroupData(
             x: index,
             barRods: [
               BarChartRodData(
                 toY: dailyMins[index].toDouble(),
                 color: isToday
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.blue.shade200,
+                    ? AppTheme.taskColor
+                    : AppTheme.taskColor.withValues(alpha: 0.25),
                 width: 16,
                 borderRadius: BorderRadius.circular(4),
                 backDrawRodData: BackgroundBarChartRodData(
@@ -322,7 +319,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
       return const Center(child: Text("No tagged focus time."));
     }
 
-    List<PieChartSectionData> sections = [];
+    final List<PieChartSectionData> sections = [];
 
     tagData.forEach((name, mins) {
       if (mins > 0) {
@@ -366,7 +363,7 @@ class _ClockPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2;
-    final strokeWidth = 24.0;
+    const strokeWidth = 24.0;
 
     // Draw background track
     final trackPaint = Paint()
@@ -406,12 +403,12 @@ class _ClockPainter extends CustomPainter {
 
     for (var session in sessions) {
       // Calculate start angle (24 hours mapped to 2 * pi)
-      double startHour =
+      final double startHour =
           session.startTime.hour + (session.startTime.minute / 60.0);
-      double startAngle = (startHour / 24.0) * 2 * pi - (pi / 2);
+      final double startAngle = (startHour / 24.0) * 2 * pi - (pi / 2);
 
       // Calculate end angle
-      DateTime end = session.endTime ?? DateTime.now();
+      final DateTime end = session.endTime ?? DateTime.now();
       double endHour = end.hour + (end.minute / 60.0);
 
       // Handle sessions spanning past midnight (clamp at 24 for this view)
@@ -420,7 +417,7 @@ class _ClockPainter extends CustomPainter {
         endHour = 24.0;
       }
 
-      double sweepAngle = ((endHour - startHour) / 24.0) * 2 * pi;
+      final double sweepAngle = ((endHour - startHour) / 24.0) * 2 * pi;
       if (sweepAngle <= 0) continue; // Skip bad data
 
       canvas.drawArc(

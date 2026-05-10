@@ -58,7 +58,7 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
               setState(() => _selectedType = newSelection.first);
             },
           ),
-          SizedBox(height: AppTheme.space2XLarge),
+          const SizedBox(height: AppTheme.space2XLarge),
           TextField(
             controller: _timeController,
             keyboardType: TextInputType.number,
@@ -75,7 +75,10 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
           TextButton(
             // Return a special string flag so the parent knows to delete this node
             onPressed: () => Navigator.pop(context, 'DELETE'),
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            child: const Text(
+              "Delete",
+              style: TextStyle(color: AppTheme.errorColor),
+            ),
           ),
         TextButton(
           onPressed: () => Navigator.pop(context),

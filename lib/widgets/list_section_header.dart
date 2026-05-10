@@ -29,7 +29,7 @@ class ListSectionHeader extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: iconSize),
-          SizedBox(width: AppTheme.spaceSmall),
+          const SizedBox(width: AppTheme.spaceSmall),
           Text(
             title,
             style: TextStyle(

@@ -18,8 +18,12 @@ class ModeTimeline extends StatelessWidget {
   Widget build(BuildContext context) {
     if (phases.isEmpty) return const SizedBox.shrink();
 
-    List<Widget> nodes = [];
-    bool isCompleted = currentPhaseIndex >= phases.length;
+    final List<Widget> nodes = [];
+    final bool isCompleted = currentPhaseIndex >= phases.length;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final completionFill = isDark
+        ? AppTheme.paperLight
+        : AppTheme.paperAltLight;
 
     // Helper to build a node (dot)
     Widget buildDot(Color color, bool isActive) {
@@ -48,35 +52,57 @@ class ModeTimeline extends StatelessWidget {
       );
     }
 
+    Widget buildCompletionNode(bool isActive) {
+      return Container(
+        width: isActive ? 22 : 16,
+        height: isActive ? 22 : 16,
+        decoration: BoxDecoration(
+          color: completionFill,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline,
+            width: isActive ? 3 : 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(
+                context,
+              ).colorScheme.shadow.withValues(alpha: 0.12),
+              blurRadius: 6,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+      );
+    }
+
     // Helper to build the connecting line
     Widget buildLine(bool isPast) {
+      final lineColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
       return Container(
         width: 24,
         height: 3,
         // Only darken past lines if the timer is actually running
         color: (isRunning && isPast)
-            ? Colors.grey.shade400
-            : Colors.grey.shade200,
+            ? lineColor.withValues(alpha: 0.6)
+            : lineColor.withValues(alpha: 0.2),
       );
     }
 
-    // 1. Start Node
+    // Start Node
     nodes.add(
-      buildDot(
-        Colors.grey.shade500,
-        isRunning && currentPhaseIndex == 0 && !isCompleted,
-      ),
+      buildCompletionNode(isRunning && currentPhaseIndex == 0 && !isCompleted),
     );
 
-    // 2. Phase Nodes
+    // Phase Nodes
     for (int i = 0; i < phases.length; i++) {
       nodes.add(buildLine(currentPhaseIndex > i));
 
       // ONLY set as active if the timer is running
-      bool isActive = isRunning && currentPhaseIndex == i && !isCompleted;
+      final bool isActive = isRunning && currentPhaseIndex == i && !isCompleted;
       Color dotColor = phases[i].type == PhaseType.focus
-          ? Colors.green
-          : Colors.orange;
+          ? AppTheme.focusColor
+          : AppTheme.warningColor;
 
       // ONLY fade future nodes if the timer is running (otherwise show full preview)
       if (isRunning && currentPhaseIndex < i) {
@@ -86,9 +112,9 @@ class ModeTimeline extends StatelessWidget {
       nodes.add(buildDot(dotColor, isActive));
     }
 
-    // 3. End Node
+    // End Node
     nodes.add(buildLine(isCompleted));
-    nodes.add(buildDot(Colors.grey.shade500, isRunning && isCompleted));
+    nodes.add(buildCompletionNode(isRunning && isCompleted));
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

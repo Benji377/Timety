@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../theme/app_theme.dart';
 import '../providers/settings_provider.dart';
 import '../services/backup_service.dart';
 
@@ -71,8 +72,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
       child: Text(
         title.toUpperCase(),
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.primary,
+        style: const TextStyle(
+          color: AppTheme.taskColor,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
           fontSize: 12,
@@ -110,43 +111,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (val) {
                 if (val != null) settings.setThemeMode(val);
               },
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.palette_outlined),
-            title: const Text('Accent Color'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  [Colors.blue, Colors.green, Colors.purple, Colors.orange].map(
-                    (color) {
-                      final isSelected =
-                          settings.seedColor.toARGB32() == color.toARGB32();
-                      return GestureDetector(
-                        onTap: () => settings.setSeedColor(color),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: isSelected
-                                ? Border.all(color: Colors.white, width: 2)
-                                : null,
-                            boxShadow: isSelected
-                                ? [
-                                    const BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 4,
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                        ),
-                      );
-                    },
-                  ).toList(),
             ),
           ),
 
@@ -202,18 +166,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // --- NOTIFICATIONS ---
           _buildSectionHeader('Notifications'),
-          SwitchListTile(
-            secondary: const Icon(Icons.notifications_active_outlined),
-            title: const Text('Daily Motivation'),
-            subtitle: const Text('Get a reminder to crush your goals'),
-            value: settings.notificationsEnabled,
-            activeThumbColor: Theme.of(context).colorScheme.primary,
-            onChanged: (val) => settings.setNotificationsEnabled(val),
-          ),
           ListTile(
-            enabled: settings.notificationsEnabled,
             leading: const Icon(Icons.schedule),
-            title: const Text('Notification Time'),
+            title: const Text('Daily Motivation Time'),
             subtitle: Text(settings.notificationTime.format(context)),
             trailing: const Icon(Icons.edit),
             onTap: () async {
@@ -226,13 +181,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.nightlight_round),
+            title: const Text('End of Day Checkup Time'),
+            subtitle: Text(settings.endOfDayTime.format(context)),
+            trailing: const Icon(Icons.edit),
+            onTap: () async {
+              final TimeOfDay? time = await showTimePicker(
+                context: context,
+                initialTime: settings.endOfDayTime,
+              );
+              if (time != null && mounted) {
+                settings.setEndOfDayTime(time);
+              }
+            },
+          ),
 
           // --- DATA & BACKUP ---
           _buildSectionHeader('Data & Backup'),
           ListTile(
             leading: const Icon(
               Icons.cloud_upload_outlined,
-              color: Colors.blue,
+              color: AppTheme.taskColor,
             ),
             title: const Text('Export Backup'),
             subtitle: const Text(
@@ -241,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => BackupService.exportBackup(context),
           ),
           ListTile(
-            leading: const Icon(Icons.restore, color: Colors.orange),
+            leading: const Icon(Icons.restore, color: AppTheme.warningColor),
             title: const Text('Restore Backup'),
             subtitle: const Text(
               'Overwrite current data from a backup zip file',
@@ -268,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     padding: EdgeInsets.only(top: 24.0, bottom: 8.0),
                     child: CircleAvatar(
                       radius: 30,
-                      backgroundColor: Colors.blue,
+                      backgroundColor: AppTheme.taskColor,
                       child: Icon(
                         Icons.rocket_launch,
                         size: 30,
@@ -285,12 +255,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   const SizedBox(height: 16),
-                  ListTile(
-                    leading: const Icon(Icons.person_outline),
-                    title: const Text(
-                      'Built by Benji377',
-                    ), // Change to your name!
-                    subtitle: const Text('Solo Developer & Maintainer'),
+                  const ListTile(
+                    leading: Icon(Icons.person_outline),
+                    title: Text('Built by Benji377'), // Change to your name!
+                    subtitle: Text('Solo Developer & Maintainer'),
                   ),
                   ListTile(
                     leading: const Icon(Icons.favorite),

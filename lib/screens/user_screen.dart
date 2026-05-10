@@ -38,8 +38,7 @@ class _UserScreenState extends State<UserScreen> {
     setState(() => _isExporting = true);
 
     try {
-      // Generate a 1080x1920 PNG entirely via canvas — no widget rendering,
-      // no off-screen layout, no clipping surprises.
+      // Wrap-up image generation
       final pngBytes = await WrapUpImageGenerator.generate(
         name: name,
         level: level,
@@ -198,34 +197,32 @@ class _UserScreenState extends State<UserScreen> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer,
+                    backgroundColor: AppTheme.userColor.withValues(alpha: 0.15),
                     backgroundImage: userProvider.profileImagePath != null
                         ? FileImage(File(userProvider.profileImagePath!))
                         : null,
                     child: userProvider.profileImagePath == null
-                        ? Icon(
+                        ? const Icon(
                             Icons.person,
                             size: AppTheme.profileImageSize,
-                            color: Theme.of(context).colorScheme.primary,
+                            color: AppTheme.userColor,
                           )
                         : null,
                   ),
                   Container(
                     padding: const EdgeInsets.all(AppTheme.spaceSmall),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppTheme.userColor,
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Theme.of(context).scaffoldBackgroundColor,
                         width: 3,
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.camera_alt,
                       size: AppTheme.iconSizeMedium,
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -247,7 +244,7 @@ class _UserScreenState extends State<UserScreen> {
                   icon: const Icon(
                     Icons.edit,
                     size: AppTheme.iconSizeMedium,
-                    color: Colors.grey,
+                    color: AppTheme.wifiOffColor,
                   ),
                   onPressed: () => _editName(context, userProvider),
                 ),
@@ -288,7 +285,7 @@ class _UserScreenState extends State<UserScreen> {
                         children: [
                           const Icon(
                             Icons.arrow_upward,
-                            color: Colors.blueAccent,
+                            color: AppTheme.taskColor,
                             size: 18,
                           ),
                           const SizedBox(width: 4),
@@ -309,8 +306,10 @@ class _UserScreenState extends State<UserScreen> {
                     child: LinearProgressIndicator(
                       value: userProvider.levelProgress,
                       minHeight: 12,
-                      backgroundColor: Colors.grey.shade200,
-                      color: Colors.blueAccent,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      color: AppTheme.taskColor,
                     ),
                   ),
                 ],
@@ -330,14 +329,15 @@ class _UserScreenState extends State<UserScreen> {
                     ? AppTheme.warningColor.withValues(
                         alpha: AppTheme.opacityVeryLight,
                       )
-                    : Colors.grey.withValues(alpha: AppTheme.opacityVeryLight),
+                    : Theme.of(context).colorScheme.surfaceContainerHighest
+                          .withValues(alpha: AppTheme.opacityVeryLight),
                 borderRadius: AppTheme.brCircle,
                 border: Border.all(
                   color: currentStreak > 0
                       ? AppTheme.warningColor.withValues(
                           alpha: AppTheme.opacityLight,
                         )
-                      : Colors.grey.shade300,
+                      : Theme.of(context).dividerColor,
                 ),
               ),
               child: Row(
@@ -348,7 +348,7 @@ class _UserScreenState extends State<UserScreen> {
                     size: 24,
                     color: currentStreak > 0
                         ? AppTheme.warningColor
-                        : Colors.grey.shade600,
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: AppTheme.spaceSmall),
                   Text(
@@ -360,7 +360,7 @@ class _UserScreenState extends State<UserScreen> {
                       fontWeight: AppTheme.fwBold,
                       color: currentStreak > 0
                           ? AppTheme.warningColor
-                          : Colors.grey.shade600,
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -398,25 +398,25 @@ class _UserScreenState extends State<UserScreen> {
                     title: "Tasks Done",
                     value: "$totalTasks",
                     icon: Icons.check_circle_outline,
-                    color: Colors.blue,
+                    color: AppTheme.taskColor,
                   ),
                   CompactHeaderStatCard(
                     title: "Habits Met",
                     value: "$totalHabitsDone",
                     icon: Icons.repeat,
-                    color: Colors.purple,
+                    color: AppTheme.habitColor,
                   ),
                   CompactHeaderStatCard(
                     title: "Focus Mins",
                     value: "$totalFocusMins",
                     icon: Icons.timer_outlined,
-                    color: Colors.green,
+                    color: AppTheme.focusColor,
                   ),
                   CompactHeaderStatCard(
                     title: "Sessions",
                     value: "$totalSessions",
                     icon: Icons.coffee_outlined,
-                    color: Colors.brown,
+                    color: AppTheme.userColor,
                   ),
                   CompactHeaderStatCard(
                     title: "Best Streak",

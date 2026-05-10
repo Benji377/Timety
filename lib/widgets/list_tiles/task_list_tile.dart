@@ -33,7 +33,7 @@ class TaskListTile extends StatelessWidget {
   });
 
   Color _getBorderColor() {
-    if (task.isCompleted) return Colors.green;
+    if (task.isCompleted) return AppTheme.successColor;
     if (task.dueDate != null) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -42,10 +42,10 @@ class TaskListTile extends StatelessWidget {
         task.dueDate!.month,
         task.dueDate!.day,
       );
-      if (dueDay.isBefore(today)) return Colors.red;
-      if (dueDay.isAtSameMomentAs(today)) return Colors.amber.shade600;
+      if (dueDay.isBefore(today)) return AppTheme.errorColor;
+      if (dueDay.isAtSameMomentAs(today)) return AppTheme.warningColor;
     }
-    return Colors.blue;
+    return AppTheme.taskColor;
   }
 
   Widget _buildCard(BuildContext context) {
@@ -74,14 +74,21 @@ class TaskListTile extends StatelessWidget {
       child: ListTile(
         leading: Checkbox(
           value: task.isCompleted,
-          activeColor: Colors.green,
+          fillColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppTheme.successColor;
+            }
+            return Colors.transparent;
+          }),
+          checkColor: Colors.white,
+          side: const BorderSide(color: AppTheme.taskColor, width: 2),
           onChanged: (_) => onToggleCompleted(),
         ),
         title: Text(
           task.title,
           style: TextStyle(
             decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-            color: task.isCompleted ? Colors.grey : null,
+            color: task.isCompleted ? theme.colorScheme.onSurfaceVariant : null,
             fontWeight: AppTheme.fwBold,
           ),
         ),

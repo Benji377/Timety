@@ -39,12 +39,12 @@ class HabitListTile extends StatelessWidget {
 
   Widget _buildCard(BuildContext context) {
     final color = _color;
+    final habitIcon = habit.iconData ?? Icons.circle;
 
     final listTile = ListTile(
       leading: InkWell(
         onTap: isLocked
             ? () {
-                // Better UX: Tell them WHY it's locked
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
@@ -57,37 +57,37 @@ class HabitListTile extends StatelessWidget {
             : onToggleCompleted,
         borderRadius: AppTheme.brCircle,
         child: Container(
-          width: 28,
-          height: 28,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             color: isCompleted
                 ? color
-                : (isLocked
-                      ? Colors.grey.withValues(alpha: 0.1)
-                      : Colors.transparent),
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
             shape: BoxShape.circle,
             border: Border.all(
-              color: isLocked ? Colors.grey.withValues(alpha: 0.5) : color,
+              color: isCompleted
+                  ? color
+                  : (isLocked ? AppTheme.warningColor : AppTheme.habitColor),
               width: 2,
             ),
           ),
           child: isCompleted
-              ? const Icon(Icons.check, size: 18, color: Colors.white)
-              : (isLocked
-                    ? const Icon(
-                        Icons.lock_outline,
-                        size: 14,
-                        color: Colors.grey,
-                      )
-                    : null),
+              ? Icon(
+                  Icons.check_rounded,
+                  size: 22,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                )
+              : null,
         ),
       ),
       title: Row(
         children: [
           Icon(
-            habit.iconData ?? Icons.circle,
+            habitIcon,
             size: 18,
-            color: isCompleted ? Colors.grey : (isLocked ? Colors.grey : color),
+            color: isCompleted
+                ? Theme.of(context).colorScheme.onSurfaceVariant
+                : (isLocked ? AppTheme.wifiOffColor : AppTheme.habitColor),
           ),
           const SizedBox(width: AppTheme.spaceSmall),
           Expanded(
@@ -97,7 +97,7 @@ class HabitListTile extends StatelessWidget {
                 fontWeight: AppTheme.fwBold,
                 decoration: isCompleted ? TextDecoration.lineThrough : null,
                 color: isCompleted || isLocked
-                    ? Colors.grey
+                    ? Theme.of(context).colorScheme.onSurfaceVariant
                     : null,
               ),
             ),
@@ -116,9 +116,9 @@ class HabitListTile extends StatelessWidget {
             ),
           Text(
             subtitleText,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: AppTheme.fsLabel,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           if (progressValue != null && !isCompleted)

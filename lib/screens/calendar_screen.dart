@@ -27,19 +27,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   List<List<DateTime>> _generateWeeks(DateTime month) {
-    final firstDayOfMonth = DateTime(month.year, month.month, 1);
+    final firstDayOfMonth = DateTime(month.year, month.month);
     final lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
 
-    int offsetToMonday = firstDayOfMonth.weekday - DateTime.monday;
+    final int offsetToMonday = firstDayOfMonth.weekday - DateTime.monday;
     DateTime currentDay = firstDayOfMonth.subtract(
       Duration(days: offsetToMonday),
     );
 
-    List<List<DateTime>> weeks = [];
+    final List<List<DateTime>> weeks = [];
 
     while (currentDay.isBefore(lastDayOfMonth) ||
         currentDay.weekday != DateTime.monday) {
-      List<DateTime> week = [];
+      final List<DateTime> week = [];
       for (int i = 0; i < 7; i++) {
         week.add(currentDay);
         currentDay = currentDay.add(const Duration(days: 1));
@@ -54,17 +54,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     final taskProvider = context.watch<TaskProvider>();
     final focusProvider = context.watch<FocusProvider>();
-    final habitProvider = context.watch<HabitProvider>(); // <--- ADDED
+    final habitProvider = context.watch<HabitProvider>();
 
     final allTasks = taskProvider.tasks;
     final allSessions = focusProvider.history;
-    final allHabits = habitProvider.habits; // <--- ADDED
+    final allHabits = habitProvider.habits;
 
     final weeks = _generateWeeks(_focusedMonth);
 
     // --- FILTER & SORT ACCORDION DATA ---
-
-    // 1. Tasks
     final selectedDayTasks = allTasks
         .where((t) => AppDateUtils.isSameDay(t.dueDate, _selectedDate))
         .toList();
@@ -72,13 +70,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
       (a, b) => b.priority.index.compareTo(a.priority.index),
     );
 
-    // 2. Focus
     final selectedDaySessions = allSessions
         .where((s) => AppDateUtils.isSameDay(s.startTime, _selectedDate))
         .toList();
     selectedDaySessions.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    // 3. Habits (Combine habits scheduled for this day + habits actually completed on this day)
+    // Combine habits scheduled for this day + habits actually completed on this day
     List<Habit> selectedDayHabits = [];
     if (_selectedDate != null) {
       final scheduled = habitProvider.getHabitsForDay(_selectedDate!);
@@ -111,7 +108,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         children: [
           // --- TOP HALF: THE CALENDAR ---
           Expanded(
-            flex: 1,
             child: Container(
               color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.all(16.0),
@@ -163,7 +159,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             _CalendarHeaderCell('F'),
                             _CalendarHeaderCell('S'),
                             _CalendarHeaderCell('S'),
-                            _CalendarHeaderCell('Weekly', color: Colors.blue),
+                            _CalendarHeaderCell(
+                              'Weekly',
+                              color: AppTheme.taskColor,
+                            ),
                           ],
                         ),
                         ...weeks.map((week) {
@@ -175,7 +174,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           );
 
                           // Weekly Analytics Calculations
-                          int weeklyTaskCount = allTasks
+                          final int weeklyTaskCount = allTasks
                               .where(
                                 (t) =>
                                     t.dueDate != null &&
@@ -184,7 +183,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               )
                               .length;
 
-                          int weeklyFocusCount = allSessions
+                          final int weeklyFocusCount = allSessions
                               .where(
                                 (s) =>
                                     s.startTime.isAfter(weekStart) &&
@@ -192,7 +191,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               )
                               .length;
 
-                          int weeklyHabitCount = allHabits.fold(0, (sum, h) {
+                          final int weeklyHabitCount = allHabits.fold(0, (
+                            sum,
+                            h,
+                          ) {
                             return sum +
                                 h.completions
                                     .where(
@@ -236,11 +238,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       margin: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                         color: isSelected
-                                            ? Colors.blue.withValues(alpha: 0.2)
+                                            ? AppTheme.taskColor.withValues(
+                                                alpha: 0.2,
+                                              )
                                             : Colors.transparent,
                                         border: isToday
                                             ? Border.all(
-                                                color: Colors.blue,
+                                                color: AppTheme.taskColor,
                                                 width: 2,
                                               )
                                             : null,
@@ -276,7 +280,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   height: 5,
                                                   decoration:
                                                       const BoxDecoration(
-                                                        color: Colors.blue,
+                                                        color:
+                                                            AppTheme.taskColor,
                                                         shape: BoxShape.circle,
                                                       ),
                                                 ),
@@ -290,7 +295,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   height: 5,
                                                   decoration:
                                                       const BoxDecoration(
-                                                        color: Colors.green,
+                                                        color: AppTheme
+                                                            .successColor,
                                                         shape: BoxShape.circle,
                                                       ),
                                                 ),
@@ -303,7 +309,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   height: 5,
                                                   decoration:
                                                       const BoxDecoration(
-                                                        color: Colors.purple,
+                                                        color:
+                                                            AppTheme.habitColor,
                                                         shape: BoxShape.circle,
                                                       ),
                                                 ),
@@ -335,7 +342,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           TextSpan(
                                             text: '$weeklyTaskCount',
                                             style: const TextStyle(
-                                              color: Colors.blue,
+                                              color: AppTheme.taskColor,
                                             ),
                                           ),
                                           TextSpan(
@@ -347,7 +354,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           TextSpan(
                                             text: '$weeklyHabitCount',
                                             style: const TextStyle(
-                                              color: Colors.purple,
+                                              color: AppTheme.habitColor,
                                             ),
                                           ),
                                           TextSpan(
@@ -359,7 +366,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           TextSpan(
                                             text: '$weeklyFocusCount',
                                             style: const TextStyle(
-                                              color: Colors.green,
+                                              color: AppTheme.successColor,
                                             ),
                                           ),
                                         ],
@@ -383,7 +390,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           // --- BOTTOM HALF: ACCORDION LISTS ---
           Expanded(
-            flex: 1,
             child: Container(
               color: Theme.of(
                 context,
@@ -404,16 +410,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             bottom: AppTheme.spaceMedium,
                           ),
                           child: ExpansionTile(
-                            initiallyExpanded: false,
                             title: Text(
                               "Habits (${selectedDayHabits.length})",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.purple,
+                                color: AppTheme.habitColor,
                               ),
                             ),
-                            iconColor: Colors.purple,
-                            collapsedIconColor: Colors.purple,
+                            iconColor: AppTheme.habitColor,
+                            collapsedIconColor: AppTheme.habitColor,
                             children: selectedDayHabits.isEmpty
                                 ? [
                                     const Padding(
@@ -437,11 +442,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                             color: isCompleted
-                                                ? Colors.purple.withValues(
-                                                    alpha: 0.3,
-                                                  )
-                                                : Colors.purple,
-                                            width: 1,
+                                                ? AppTheme.habitColor
+                                                      .withValues(alpha: 0.3)
+                                                : AppTheme.habitColor,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -450,7 +453,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         child: ListTile(
                                           leading: Checkbox(
                                             value: isCompleted,
-                                            activeColor: Colors.purple,
+                                            fillColor:
+                                                WidgetStateProperty.resolveWith(
+                                                  (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return AppTheme
+                                                          .successColor;
+                                                    }
+                                                    return Colors.transparent;
+                                                  },
+                                                ),
+                                            checkColor: Colors.white,
+                                            side: const BorderSide(
+                                              color: AppTheme.habitColor,
+                                              width: 2,
+                                            ),
                                             onChanged: (_) {
                                               // Time-Travel Logging!
                                               if (isCompleted) {
@@ -502,16 +521,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             bottom: AppTheme.spaceMedium,
                           ),
                           child: ExpansionTile(
-                            initiallyExpanded: false,
                             title: Text(
                               "Tasks (${selectedDayTasks.length})",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                                color: AppTheme.taskColor,
                               ),
                             ),
-                            iconColor: Colors.blue,
-                            collapsedIconColor: Colors.blue,
+                            iconColor: AppTheme.taskColor,
+                            collapsedIconColor: AppTheme.taskColor,
                             children: selectedDayTasks.isEmpty
                                 ? [
                                     const Padding(
@@ -533,9 +551,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                             color: task.isCompleted
-                                                ? Colors.green
-                                                : Colors.blue,
-                                            width: 1,
+                                                ? AppTheme.successColor
+                                                : AppTheme.taskColor,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -544,6 +561,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         child: ListTile(
                                           leading: Checkbox(
                                             value: task.isCompleted,
+                                            fillColor:
+                                                WidgetStateProperty.resolveWith(
+                                                  (states) {
+                                                    if (states.contains(
+                                                      WidgetState.selected,
+                                                    )) {
+                                                      return AppTheme
+                                                          .successColor;
+                                                    }
+                                                    return Colors.transparent;
+                                                  },
+                                                ),
+                                            checkColor: Colors.white,
+                                            side: const BorderSide(
+                                              color: AppTheme.taskColor,
+                                              width: 2,
+                                            ),
                                             onChanged: (_) => context
                                                 .read<TaskProvider>()
                                                 .toggleTask(
@@ -584,16 +618,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             bottom: AppTheme.spaceMedium,
                           ),
                           child: ExpansionTile(
-                            initiallyExpanded: false,
                             title: Text(
                               "Focus Sessions (${selectedDaySessions.length})",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                                color: AppTheme.successColor,
                               ),
                             ),
-                            iconColor: Colors.green,
-                            collapsedIconColor: Colors.green,
+                            iconColor: AppTheme.successColor,
+                            collapsedIconColor: AppTheme.successColor,
                             children: selectedDaySessions.isEmpty
                                 ? [
                                     const Padding(
@@ -630,7 +663,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         timeString += " - Ongoing";
                                       }
 
-                                      int focusMins =
+                                      final int focusMins =
                                           session.totalSecondsFocused ~/ 60;
                                       return Card(
                                         margin: const EdgeInsets.symmetric(
@@ -641,7 +674,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                             color: Colors.grey.shade300,
-                                            width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -689,7 +721,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           trailing: Text(
                                             '${focusMins}m focus',
                                             style: const TextStyle(
-                                              color: Colors.green,
+                                              color: AppTheme.successColor,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),

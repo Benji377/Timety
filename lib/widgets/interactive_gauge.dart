@@ -10,9 +10,12 @@ class InteractiveGauge extends StatefulWidget {
 
   final String label;
   final String centerText;
+  final Color? centerTextColor;
+  final Color? labelColor;
   final String bottomText;
   final Color bottomTextColor;
   final VoidCallback? onBottomTextTapped;
+  final Color? color; // optional override for gauge color
 
   const InteractiveGauge({
     super.key,
@@ -24,6 +27,9 @@ class InteractiveGauge extends StatefulWidget {
     this.onBottomTextTapped,
     this.isInteractive = true,
     this.onChanged,
+    this.color,
+    this.centerTextColor,
+    this.labelColor,
     required this.label,
   });
 
@@ -99,14 +105,17 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Determine what progress to paint based on mode
-    double paintProgress = widget.isStopwatch
+    final double paintProgress = widget.isStopwatch
         ? _pulseController.value
         : _progress;
 
     // Fade the track slightly during stopwatch pulse
-    double trackOpacity = widget.isStopwatch
+    final double trackOpacity = widget.isStopwatch
         ? (1.0 - _pulseController.value).clamp(0.2, 1.0)
         : 1.0;
+
+    // Allow the caller to override the gauge color; fall back to theme primary
+    final gaugeColor = widget.color ?? primaryColor;
 
     return GestureDetector(
       onPanStart: (details) => _handlePan(
@@ -123,41 +132,47 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
         child: CustomPaint(
           painter: _GaugePainter(
             progress: paintProgress,
-            color: primaryColor.withValues(alpha: trackOpacity),
+            color: gaugeColor.withValues(alpha: trackOpacity),
             isInteractive: widget.isInteractive,
             isDark: isDark,
           ),
           child: Padding(
             // Keeps the text safely inside the inner stroke
-            padding: const EdgeInsets.all(40.0), 
+            padding: const EdgeInsets.all(40.0),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: AppTheme.fsGaugeLabel),
+                  const SizedBox(height: AppTheme.fsGaugeLabel),
                   Text(
                     widget.label,
                     style: TextStyle(
                       fontSize: AppTheme.fsGaugeLabel,
                       fontWeight: AppTheme.fwBold,
                       letterSpacing: AppTheme.lsExtraWide,
-                      color: isDark
-                          ? AppTheme.gaugeLabelDark
-                          : AppTheme.gaugeTrackLight,
+                      color:
+                          widget.labelColor ??
+                          (isDark
+                              ? AppTheme.gaugeLabelDark
+                              : AppTheme.gaugeTrackLight),
                     ),
                   ),
-                  SizedBox(height: AppTheme.spaceXSmall),
+                  const SizedBox(height: AppTheme.spaceXSmall),
                   Text(
                     widget.centerText,
                     style: TextStyle(
                       fontSize: AppTheme.fsGaugeDisplay,
                       fontWeight: AppTheme.fwLight,
-                      color: Theme.of(context).textTheme.bodyLarge?.color ??
-                          AppTheme.gaugeTrackLight,
+                      color: widget.centerTextColor != null
+                          ? (isDark
+                                ? AppTheme.gaugeWhite
+                                : widget.centerTextColor)
+                          : Theme.of(context).textTheme.bodyLarge?.color ??
+                                AppTheme.gaugeTrackLight,
                     ),
                   ),
-                  SizedBox(height: AppTheme.spaceXSmall),
+                  const SizedBox(height: AppTheme.spaceXSmall),
                   GestureDetector(
                     onTap: widget.onBottomTextTapped,
                     child: Container(
@@ -169,7 +184,9 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
                         color: isDark
                             ? AppTheme.gaugeBgDark
                             : AppTheme.gaugeBgLight,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusCircle),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusCircle,
+                        ),
                         border: Border.all(
                           color: isDark
                               ? AppTheme.gaugeBorderDark
@@ -213,7 +230,7 @@ class _GaugePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2;
-    final strokeWidth = AppTheme.gaugeStrokeWidth;
+    const strokeWidth = AppTheme.gaugeStrokeWidth;
     final innerRadius = radius - strokeWidth - 14;
 
     final innerBackgroundPaint = Paint()

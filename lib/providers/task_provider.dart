@@ -49,10 +49,9 @@ class TaskProvider extends ChangeNotifier {
   // Load data initially
   Future<void> loadTasks() async {
     _tasks = await repository.fetchTasks();
-    notifyListeners(); // Tells the UI to rebuild
+    notifyListeners();
   }
 
-  // Add a new Task
   Future<void> addTask(Task task) async {
     _tasks.add(task);
     _syncTaskReminders(task);
@@ -60,7 +59,6 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Toggle completion
   Future<void> toggleTask(String id, {UserProvider? userProvider}) async {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
@@ -80,7 +78,6 @@ class TaskProvider extends ChangeNotifier {
     }
   }
 
-  // Remove a Task
   Future<void> removeTask(String id) async {
     final task = _tasks.firstWhere((t) => t.id == id);
     // Cancel all before removing
@@ -94,7 +91,6 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Update an existing Task
   Future<void> updateTask(Task updatedTask) async {
     final index = _tasks.indexWhere((t) => t.id == updatedTask.id);
     if (index != -1) {

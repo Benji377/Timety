@@ -12,13 +12,11 @@ class HiveUserRepository implements UserRepository {
 
     // Check if the box is empty (New User)
     if (_box.isEmpty) {
-      // Create a fresh default profile
       final profile = UserProfile(
         name: "Bobert",
         accountCreated: DateTime.now(),
-        totalXp: 0, 
       );
-      
+
       // Save it to Hive as the one and only profile (Index 0)
       await _box.add(profile);
     }
@@ -66,5 +64,4 @@ class HiveUserRepository implements UserRepository {
       await user.save();
     }
   }
-
 }

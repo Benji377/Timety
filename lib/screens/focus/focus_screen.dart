@@ -17,27 +17,34 @@ class FocusScreen extends StatelessWidget {
   const FocusScreen({super.key});
 
   String _formatDigitalTime(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60;
-    int seconds = totalSeconds % 60;
+    final int minutes = totalSeconds ~/ 60;
+    final int seconds = totalSeconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  // --- 1. ALERTS / DISTRACTIONS BOTTOM SHEET ---
+  // --- ALERTS / DISTRACTIONS BOTTOM SHEET ---
   void _showDistractionSheet(BuildContext context, FocusProvider provider) {
-    // Fixed list of possible events
     final events = [
-      {'name': 'Distracted', 'icon': Icons.warning_amber, 'color': Colors.red},
+      {
+        'name': 'Distracted',
+        'icon': Icons.warning_amber,
+        'color': AppTheme.errorColor,
+      },
       {
         'name': 'Hydrated / Drink',
         'icon': Icons.water_drop,
-        'color': Colors.blue,
+        'color': AppTheme.taskColor,
       },
       {
         'name': 'Stretched',
         'icon': Icons.accessibility_new,
-        'color': Colors.orange,
+        'color': AppTheme.warningColor,
       },
-      {'name': 'Snack', 'icon': Icons.restaurant, 'color': Colors.green},
+      {
+        'name': 'Snack',
+        'icon': Icons.restaurant,
+        'color': AppTheme.successColor,
+      },
       {'name': 'Restroom', 'icon': Icons.wc, 'color': Colors.grey},
     ];
 
@@ -124,7 +131,10 @@ class FocusScreen extends StatelessWidget {
                         ),
                       ),
                       trailing: isSelected
-                          ? const Icon(Icons.check, color: Colors.green)
+                          ? const Icon(
+                              Icons.check,
+                              color: AppTheme.successColor,
+                            )
                           : null,
                       onTap: () {
                         provider.setSelectedTag(tag);
@@ -152,7 +162,7 @@ class FocusScreen extends StatelessWidget {
 
   void _showCreateTagDialog(BuildContext context, FocusProvider provider) {
     final TextEditingController controller = TextEditingController();
-    Color selectedColor = Colors.blue;
+    const Color selectedColor = AppTheme.taskColor;
 
     showDialog(
       context: context,
@@ -195,19 +205,20 @@ class FocusScreen extends StatelessWidget {
     final activeMode = focusProvider.activeMode;
     final modes = focusProvider.modes;
 
-    bool isFlexibleMode = activeMode?.type == FocusModeType.flexible;
-    bool canDrag = isFlexibleMode && !isRunning && !isPaused;
+    final bool isFlexibleMode = activeMode?.type == FocusModeType.flexible;
+    final bool canDrag = isFlexibleMode && !isRunning && !isPaused;
 
     double gaugeProgress = 1.0;
     bool isStopwatchMode = false;
     String label = "FOCUS";
     String centerText = "25:00";
+    bool isResting = false;
 
     if (activeMode != null && activeMode.phases.isNotEmpty) {
       final currentPhase = activeMode.phases[focusProvider.currentPhaseIndex];
 
       if (canDrag) {
-        int currentMinutes = currentPhase.durationMinutes == -1
+        final int currentMinutes = currentPhase.durationMinutes == -1
             ? 25
             : currentPhase.durationMinutes;
         gaugeProgress = currentMinutes / 120.0;
@@ -223,6 +234,7 @@ class FocusScreen extends StatelessWidget {
         gaugeProgress =
             focusProvider.secondsRemainingInPhase / totalPhaseSeconds;
         label = currentPhase.type == PhaseType.rest ? "REST" : "FOCUS";
+        isResting = currentPhase.type == PhaseType.rest;
         centerText = _formatDigitalTime(focusProvider.secondsRemainingInPhase);
       } else {
         isStopwatchMode = isRunning;
@@ -234,7 +246,7 @@ class FocusScreen extends StatelessWidget {
 
     void cycleMode(int direction) {
       if (isRunning || isPaused || activeMode == null) return;
-      int currentIndex = modes.indexWhere((m) => m.id == activeMode.id);
+      final int currentIndex = modes.indexWhere((m) => m.id == activeMode.id);
       int nextIndex = (currentIndex + direction) % modes.length;
       if (nextIndex < 0) nextIndex = modes.length - 1;
       focusProvider.setActiveMode(modes[nextIndex]);
@@ -308,8 +320,8 @@ class FocusScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
                         color: (isRunning || isPaused)
-                            ? Colors.grey
-                            : Theme.of(context).colorScheme.primary,
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
+                            : AppTheme.focusColor,
                       ),
                     ),
                   ),
@@ -348,31 +360,27 @@ class FocusScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer.withValues(alpha: 0.5),
+                    color: AppTheme.focusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.3),
+                      color: AppTheme.focusColor.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.track_changes,
                         size: 18,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppTheme.focusColor,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '${focusProvider.getMinutesFocusedToday()} / ${context.watch<SettingsProvider>().dailyGoalMins} m',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 15,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: AppTheme.focusColor,
                         ),
                       ),
                     ],
@@ -393,11 +401,18 @@ class FocusScreen extends StatelessWidget {
                   key: ValueKey(activeMode?.id),
                   progress: gaugeProgress,
                   isStopwatch: isStopwatchMode,
+                  color: isResting
+                      ? AppTheme.warningColor
+                      : AppTheme.focusColor,
+                  labelColor: isResting
+                      ? AppTheme.warningColor
+                      : AppTheme.focusColor,
+                  centerTextColor: AppTheme.focusColor,
                   centerText: centerText,
                   bottomText: focusProvider.selectedTag?.name ?? "No Tag",
                   bottomTextColor: focusProvider.selectedTag != null
                       ? Color(focusProvider.selectedTag!.colorValue)
-                      : Colors.grey,
+                      : AppTheme.focusColor,
                   onBottomTextTapped: (isRunning || isPaused)
                       ? null
                       : () => _showTagSelector(context, focusProvider),
@@ -480,11 +495,9 @@ class FocusScreen extends StatelessWidget {
                   shape: const CircleBorder(),
                   elevation: 4,
                   backgroundColor: isRunning
-                      ? Colors.red.shade100
-                      : Theme.of(context).colorScheme.primaryContainer,
-                  foregroundColor: isRunning
-                      ? Colors.red
-                      : Theme.of(context).colorScheme.primary,
+                      ? AppTheme.errorColor
+                      : AppTheme.focusColor,
+                  foregroundColor: Colors.white,
                   onPressed: () {
                     if (isRunning) {
                       focusProvider.stopSession(
@@ -495,7 +508,7 @@ class FocusScreen extends StatelessWidget {
                     }
                   },
                   child: Icon(
-                    isRunning ? Icons.stop : Icons.play_arrow,
+                    isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded,
                     size: 40,
                   ),
                 ),

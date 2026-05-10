@@ -75,10 +75,10 @@ class GroupedHabitsSection extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(
               side: BorderSide(
-                color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                width: 1,
+                color: Theme.of(context).dividerColor,
+                width: AppTheme.neoBorderWidth,
               ),
-              borderRadius: AppTheme.brMedium,
+              borderRadius: AppTheme.brNeo,
             ),
             child: Theme(
               data: Theme.of(
@@ -92,7 +92,11 @@ class GroupedHabitsSection extends StatelessWidget {
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
                 title: Row(
                   children: [
-                    const Icon(Icons.layers, size: 14, color: Colors.grey),
+                    Icon(
+                      Icons.layers,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       stackName.toUpperCase(),
@@ -108,7 +112,9 @@ class GroupedHabitsSection extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: allDone ? Colors.green : Colors.grey,
+                        color: allDone
+                            ? AppTheme.successColor
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -163,7 +169,6 @@ class GroupedHabitsSection extends StatelessWidget {
             habit: habit,
             isCompleted: isDone,
             enableDismissible: false,
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             subtitleText: HabitUtils.buildHabitSubtitle(habit, habitProvider),
             onToggleCompleted: () => onToggleCompleted(habit),
             onTap: () => onHabitTap(habit),

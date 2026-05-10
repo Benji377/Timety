@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../theme/app_theme.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
 import '../../utils/date_utils.dart';
@@ -25,7 +26,6 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
   }
 
   // --- DATA PROCESSING HELPERS ---
-
   String _generateInsights(
     List<Task> tasks,
     DateTime startOfWeek,
@@ -54,7 +54,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     }
 
     // Check if the focused week is the CURRENT week in the real world
-    bool isCurrentRealWeek =
+    final bool isCurrentRealWeek =
         DateTime.now().isAfter(startOfWeek) &&
         DateTime.now().isBefore(endOfWeek);
 
@@ -78,7 +78,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     DateTime startOfWeek,
     DateTime endOfWeek,
   ) {
-    List<List<int>> dailyCounts = List.generate(7, (_) => [0, 0]);
+    final List<List<int>> dailyCounts = List.generate(7, (_) => [0, 0]);
 
     for (var task in tasks) {
       if (task.createdAt.isAfter(
@@ -104,7 +104,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     DateTime startOfWeek,
     DateTime endOfWeek,
   ) {
-    List<int> dailyCounts = List.filled(7, 0);
+    final List<int> dailyCounts = List.filled(7, 0);
 
     for (var task in tasks) {
       if (task.isCompleted && task.completedAt != null) {
@@ -121,9 +121,11 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
 
   // Category data remains "All Time" to show overall distribution
   Map<String, int> _getCategoryData(List<Task> tasks) {
-    Map<String, int> categoryCounts = {};
+    final Map<String, int> categoryCounts = {};
     for (var task in tasks) {
-      String cat = task.category.isEmpty ? "Uncategorized" : task.category;
+      final String cat = task.category.isEmpty
+          ? "Uncategorized"
+          : task.category;
       categoryCounts[cat] = (categoryCounts[cat] ?? 0) + 1;
     }
     return categoryCounts;
@@ -140,7 +142,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     );
 
     // Check if we are viewing the current real-world week
-    bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
+    final bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
       DateTime.now(),
       startOfWeek,
       endOfWeek,
@@ -159,7 +161,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // 1. DYNAMIC INSIGHTS CARD
+                // DYNAMIC INSIGHTS CARD
                 Card(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   elevation: 0,
@@ -170,7 +172,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                         const Icon(
                           Icons.auto_awesome,
                           size: 32,
-                          color: Colors.amber,
+                          color: AppTheme.warningColor,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -179,6 +181,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
+                              color: AppTheme.paperLight,
                             ),
                           ),
                         ),
@@ -188,24 +191,24 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // 2. TASK VELOCITY CHART
+                // TASK VELOCITY CHART
                 const Text(
                   "Task Velocity",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                Row(
+                const Row(
                   children: [
-                    Icon(Icons.circle, size: 12, color: Colors.orange.shade300),
-                    const SizedBox(width: 4),
-                    const Text(
+                    Icon(Icons.circle, size: 12, color: AppTheme.warningColor),
+                    SizedBox(width: 4),
+                    Text(
                       "Created",
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
-                    const SizedBox(width: 16),
-                    const Icon(Icons.circle, size: 12, color: Colors.green),
-                    const SizedBox(width: 4),
-                    const Text(
+                    SizedBox(width: 16),
+                    Icon(Icons.circle, size: 12, color: AppTheme.successColor),
+                    SizedBox(width: 4),
+                    Text(
                       "Completed",
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
@@ -224,7 +227,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // 3. PRODUCTIVITY BAR CHART
+                // PRODUCTIVITY BAR CHART
                 const Text(
                   "Productivity",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -247,7 +250,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // 4. CATEGORY PIE CHART (ALL TIME)
+                // CATEGORY PIE CHART (ALL TIME)
                 const Text(
                   "All-Time Distribution",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -261,7 +264,6 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
   }
 
   // --- CHART BUILDERS ---
-
   Widget _buildVelocityChart(
     BuildContext context,
     List<Task> tasks,
@@ -283,16 +285,16 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
         maxY: maxY + 1,
-        barTouchData: BarTouchData(enabled: false),
+        barTouchData: const BarTouchData(enabled: false),
         titlesData: FlTitlesData(
-          show: true,
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (double value, TitleMeta meta) {
-                int dayIndex = value.toInt();
+                final int dayIndex = value.toInt();
                 // Only highlight the day if we are actually viewing the current week!
-                bool isToday = isCurrentRealWeek && (dayIndex == todayIndex);
+                final bool isToday =
+                    isCurrentRealWeek && (dayIndex == todayIndex);
 
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
@@ -301,22 +303,18 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                      color: isToday ? Colors.blue : Colors.grey,
+                      color: isToday
+                          ? AppTheme.taskColor
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );
               },
             ),
           ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          leftTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
+          rightTitles: const AxisTitles(),
         ),
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),
@@ -327,13 +325,13 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
             barRods: [
               BarChartRodData(
                 toY: velocityData[index][0].toDouble(),
-                color: Colors.orange.shade300,
+                color: AppTheme.warningColor,
                 width: 10,
                 borderRadius: BorderRadius.circular(2),
               ),
               BarChartRodData(
                 toY: velocityData[index][1].toDouble(),
-                color: Colors.green,
+                color: AppTheme.successColor,
                 width: 10,
                 borderRadius: BorderRadius.circular(2),
               ),
@@ -366,16 +364,16 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
         maxY: maxY + 1,
-        barTouchData: BarTouchData(enabled: false),
+        barTouchData: const BarTouchData(enabled: false),
         titlesData: FlTitlesData(
-          show: true,
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (double value, TitleMeta meta) {
-                int dayIndex = value.toInt();
+                final int dayIndex = value.toInt();
                 // Only highlight the day if we are actually viewing the current week
-                bool isToday = isCurrentRealWeek && (dayIndex == todayIndex);
+                final bool isToday =
+                    isCurrentRealWeek && (dayIndex == todayIndex);
 
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
@@ -384,33 +382,29 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                      color: isToday ? Colors.green : Colors.grey,
+                      color: isToday
+                          ? AppTheme.successColor
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );
               },
             ),
           ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          leftTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
+          rightTitles: const AxisTitles(),
         ),
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),
         barGroups: List.generate(7, (index) {
-          bool isToday = isCurrentRealWeek && (index == todayIndex);
+          final bool isToday = isCurrentRealWeek && (index == todayIndex);
           return BarChartGroupData(
             x: index,
             barRods: [
               BarChartRodData(
                 toY: dailyCounts[index].toDouble(),
-                color: isToday ? Colors.green : Colors.blue.shade300,
+                color: isToday ? AppTheme.successColor : AppTheme.taskColor,
                 width: 16,
                 borderRadius: BorderRadius.circular(4),
                 backDrawRodData: BackgroundBarChartRodData(
@@ -433,16 +427,18 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     }
 
     final colors = [
-      Colors.blue,
-      Colors.red,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.teal,
+      AppTheme.taskColor,
+      AppTheme.errorColor,
+      AppTheme.successColor,
+      AppTheme.warningColor,
+      AppTheme.habitColor,
+      Theme.of(context).colorScheme.primaryContainer,
     ];
     int colorIndex = 0;
 
-    List<PieChartSectionData> sections = categoryData.entries.map((entry) {
+    final List<PieChartSectionData> sections = categoryData.entries.map((
+      entry,
+    ) {
       final color = colors[colorIndex % colors.length];
       colorIndex++;
 

@@ -55,13 +55,13 @@ class HomeScreen extends StatelessWidget {
     final habitProvider = context.watch<HabitProvider>();
     final settings = context.watch<SettingsProvider>();
 
-    int focusMinsToday = focusProvider.getMinutesFocusedToday();
-    int dailyTarget = settings.dailyGoalMins;
-    double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
+    final int focusMinsToday = focusProvider.getMinutesFocusedToday();
+    final int dailyTarget = settings.dailyGoalMins;
+    final double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
     final today = DateTime.now();
 
     // Urgent Tasks
-    List<Task> urgentTasks = taskProvider.tasks.where((task) {
+    final List<Task> urgentTasks = taskProvider.tasks.where((task) {
       if (task.isCompleted || task.dueDate == null) return false;
       final dueDay = DateTime(
         task.dueDate!.year,
@@ -73,7 +73,7 @@ class HomeScreen extends StatelessWidget {
     urgentTasks.sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
 
     // Habits for Today
-    List<Habit> todaysHabits = habitProvider.getHabitsForDay(today);
+    final List<Habit> todaysHabits = habitProvider.getHabitsForDay(today);
 
     return Scaffold(
       appBar: AppBar(
@@ -114,8 +114,10 @@ class HomeScreen extends StatelessWidget {
                     isInteractive: false,
                     label: "DAILY GOAL",
                     centerText: "${(focusProgress * 100).toInt()}%",
+                    centerTextColor: AppTheme.focusColor,
+                    color: AppTheme.focusColor,
                     bottomText: "$focusMinsToday / $dailyTarget m",
-                    bottomTextColor: Theme.of(context).colorScheme.primary,
+                    bottomTextColor: AppTheme.focusColor,
                   ),
                 ),
               ),
@@ -144,7 +146,7 @@ class HomeScreen extends StatelessWidget {
                               icon: Icons.repeat,
                               color: AppTheme.typeHabitColor,
                             ),
-                            // --- USE THE NEW GROUPED HABITS SECTION WIDGET ---
+                            // --- GROUPED HABITS SECTION WIDGET ---
                             GroupedHabitsSection(
                               habits: todaysHabits,
                               habitProvider: habitProvider,
@@ -176,10 +178,6 @@ class HomeScreen extends StatelessWidget {
                               (task) => TaskListTile(
                                 task: task,
                                 enableDismissible: false,
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 4,
-                                ),
                                 showDescription: false,
                                 onToggleCompleted: () =>
                                     context.read<TaskProvider>().toggleTask(
@@ -190,10 +188,8 @@ class HomeScreen extends StatelessWidget {
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => TaskDetailScreen(
-                                      task: task,
-                                      isEditing: false,
-                                    ),
+                                    builder: (_) =>
+                                        TaskDetailScreen(task: task),
                                   ),
                                 ),
                               ),

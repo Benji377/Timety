@@ -27,13 +27,12 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
   }
 
   // --- DATA PROCESSING ---
-
   List<int> _getCompletionsForWeek(
     List<Habit> habits,
     DateTime startOfWeek,
     DateTime endOfWeek,
   ) {
-    List<int> dailyCounts = List.filled(7, 0);
+    final List<int> dailyCounts = List.filled(7, 0);
     for (var habit in habits) {
       for (var c in habit.completions) {
         if (c.isAfter(startOfWeek.subtract(const Duration(seconds: 1))) &&
@@ -80,20 +79,20 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     final endOfWeek = startOfWeek.add(
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
     );
-    bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
+    final bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
       DateTime.now(),
       startOfWeek,
       endOfWeek,
     );
 
     // KPI Calculations
-    int totalCompletions = habits.fold(
+    final int totalCompletions = habits.fold(
       0,
       (sum, h) => sum + h.completions.length,
     );
     int allTimeBestStreak = 0;
     for (var h in habits) {
-      int s = StreakCalculator.calculateBestStreak(h.completions);
+      final int s = StreakCalculator.calculateBestStreak(h.completions);
       if (s > allTimeBestStreak) allTimeBestStreak = s;
     }
 
@@ -196,28 +195,27 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                 ),
                 const SizedBox(height: AppTheme.spaceMedium),
                 ...habits.map((habit) {
-                  int currentStreak = StreakCalculator.calculateCurrentStreak(
-                    habit.completions,
-                  );
-                  int bestStreak = StreakCalculator.calculateBestStreak(
+                  final int currentStreak =
+                      StreakCalculator.calculateCurrentStreak(
+                        habit.completions,
+                      );
+                  final int bestStreak = StreakCalculator.calculateBestStreak(
                     habit.completions,
                   );
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       side: BorderSide(
-                        color: Color(
-                          habit.colorValue,
-                        ).withValues(alpha: AppTheme.opacityLight),
-                        width: 1,
+                        color: AppTheme.habitColor,
+                        width: AppTheme.neoBorderWidth,
                       ),
-                      borderRadius: AppTheme.brMedium,
+                      borderRadius: AppTheme.brNeo,
                     ),
                     child: ListTile(
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.stars,
-                        color: Color(habit.colorValue),
+                        color: AppTheme.habitColor,
                       ),
                       title: Text(
                         habit.name,
@@ -239,7 +237,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              Icon(
+                              const Icon(
                                 Icons.whatshot,
                                 size: 16,
                                 color: AppTheme.warningColor,
@@ -265,7 +263,6 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
   }
 
   // --- CHART BUILDERS ---
-
   Widget _buildBarChart(
     List<Habit> habits,
     DateTime startOfWeek,
@@ -283,15 +280,15 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
         maxY: maxY + 1,
-        barTouchData: BarTouchData(enabled: false),
+        barTouchData: const BarTouchData(enabled: false),
         titlesData: FlTitlesData(
-          show: true,
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (double value, TitleMeta meta) {
-                int dayIndex = value.toInt();
-                bool isToday = isCurrentRealWeek && (dayIndex == todayIndex);
+                final int dayIndex = value.toInt();
+                final bool isToday =
+                    isCurrentRealWeek && (dayIndex == todayIndex);
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
@@ -306,20 +303,14 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
               },
             ),
           ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          leftTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
+          rightTitles: const AxisTitles(),
         ),
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),
         barGroups: List.generate(7, (index) {
-          bool isToday = isCurrentRealWeek && (index == todayIndex);
+          final bool isToday = isCurrentRealWeek && (index == todayIndex);
           return BarChartGroupData(
             x: index,
             barRods: [
@@ -352,13 +343,13 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     }
 
     final colorMap = {
-      'Morning': Colors.orange.shade300,
-      'Afternoon': Colors.blue.shade400,
-      'Evening': Colors.indigo.shade400,
-      'Night': Colors.deepPurple.shade800,
+      'Morning': AppTheme.warningColor,
+      'Afternoon': AppTheme.taskColor,
+      'Evening': AppTheme.habitColor,
+      'Night': AppTheme.userColor,
     };
 
-    List<PieChartSectionData> sections = [];
+    final List<PieChartSectionData> sections = [];
     data.forEach((key, value) {
       if (value > 0) {
         sections.add(

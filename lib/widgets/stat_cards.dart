@@ -20,9 +20,10 @@ class KpiStatCard extends StatelessWidget {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: color.withValues(alpha: 0.3), width: 1),
-        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: color, width: AppTheme.neoBorderWidth),
+        borderRadius: AppTheme.brNeo,
       ),
+      color: color.withValues(alpha: 0.08),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -36,7 +37,10 @@ class KpiStatCard extends StatelessWidget {
             ),
             Text(
               title,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -67,17 +71,13 @@ class CompactVerticalStatCard extends StatelessWidget {
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: color.withValues(alpha: AppTheme.opacityLight),
-            width: 1.5,
-          ),
-          borderRadius: AppTheme.brXLarge,
+          side: BorderSide(color: color, width: AppTheme.neoBorderWidth),
+          borderRadius: AppTheme.brNeo,
         ),
-        color: color.withValues(alpha: 0.05),
+        color: color.withValues(alpha: 0.08),
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spaceSmall),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, color: color, size: AppTheme.iconSizeSmall),
@@ -94,7 +94,7 @@ class CompactVerticalStatCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: AppTheme.fsCaption,
-                  color: Colors.grey.shade700,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: AppTheme.fwBold,
                 ),
               ),
@@ -128,17 +128,13 @@ class CompactHeaderStatCard extends StatelessWidget {
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: color.withValues(alpha: AppTheme.opacityLight),
-            width: 1.5,
-          ),
-          borderRadius: AppTheme.brXLarge,
+          side: BorderSide(color: color, width: AppTheme.neoBorderWidth),
+          borderRadius: AppTheme.brNeo,
         ),
-        color: color.withValues(alpha: 0.05),
+        color: color.withValues(alpha: 0.08),
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spaceMedium),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(
@@ -150,7 +146,7 @@ class CompactHeaderStatCard extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: AppTheme.fsCaption,
-                      color: Colors.grey.shade700,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: AppTheme.fwBold,
                     ),
                   ),

@@ -49,10 +49,10 @@ class _LocationPickerState extends State<LocationPicker> {
     final connectivityResult = await Connectivity().checkConnectivity();
     _hasInternet = !connectivityResult.contains(ConnectivityResult.none);
 
-    // 1. Try to load the passed-in location first
+    // Try to load the passed-in location first
     _selectedPosition = _parseInitialLocation();
 
-    // 2. If no valid coordinates were passed, get the GPS location
+    // If no valid coordinates were passed, get the GPS location
     if (_selectedPosition != null) {
       _currentPosition = _selectedPosition;
     } else {
@@ -65,7 +65,7 @@ class _LocationPickerState extends State<LocationPicker> {
   }
 
   Future<void> _determinePosition() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -132,7 +132,7 @@ class _LocationPickerState extends State<LocationPicker> {
       );
     }
 
-    Position position = await Geolocator.getCurrentPosition(
+    final Position position = await Geolocator.getCurrentPosition(
       locationSettings: locationSettings,
     );
     _currentPosition = LatLng(position.latitude, position.longitude);
@@ -207,7 +207,7 @@ class _LocationPickerState extends State<LocationPicker> {
                 point: _selectedPosition!,
                 child: const Icon(
                   Icons.location_pin,
-                  color: Colors.red,
+                  color: AppTheme.errorColor,
                   size: 40,
                 ),
               ),
@@ -225,13 +225,13 @@ class _LocationPickerState extends State<LocationPicker> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
-            SizedBox(height: AppTheme.spaceLarge),
+            const SizedBox(height: AppTheme.spaceLarge),
             const Text(
               'You are offline. The map cannot be displayed.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: AppTheme.fsBodyLarge),
             ),
-            SizedBox(height: AppTheme.space2XLarge),
+            const SizedBox(height: AppTheme.space2XLarge),
             if (_currentPosition != null) ...[
               const Text('We found your GPS coordinates:'),
               Text(

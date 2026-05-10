@@ -50,37 +50,23 @@ class HabitProvider extends ChangeNotifier {
   void syncNotifications() {
     if (_settings == null) return;
 
-    // 1. General App Notifications
-    if (_settings!.notificationsEnabled) {
-      // Get today's habit names for the dynamic motivation message
-      final todaysHabits = getHabitsForDay(
-        DateTime.now(),
-      ).map((h) => h.name).toList();
+    final todaysHabits = getHabitsForDay(
+      DateTime.now(),
+    ).map((h) => h.name).toList();
 
-      NotificationService.instance.scheduleDailyMotivation(
-        time: _settings!.notificationTime,
-        includeHabits: true,
-        todaysHabits: todaysHabits,
-      );
+    NotificationService.instance.scheduleDailyMotivation(
+      time: _settings!.notificationTime,
+      todaysHabits: todaysHabits,
+    );
 
-      // Schedule a static evening checkup at 8:00 PM (20:00)
-      NotificationService.instance.scheduleEndOfDayCheckup(
-        time: const TimeOfDay(hour: 20, minute: 0),
-      );
-    } else {
-      // User turned off notifications in settings, so wipe them!
-      NotificationService.instance.cancelNotification(
-        NotificationService.dailyMotivationId,
-      );
-      NotificationService.instance.cancelNotification(
-        NotificationService.endOfDayCheckupId,
-      );
-    }
+    NotificationService.instance.scheduleEndOfDayCheckup(
+      time: _settings!.endOfDayTime,
+    );
 
     // 2. Specific Habit Reminders
     for (var habit in _habits) {
       // If notifications are ON and the habit has a specific time
-      if (_settings!.notificationsEnabled && habit.targetTime != null) {
+      if (habit.targetTime != null) {
         NotificationService.instance.scheduleHabitReminder(
           habitId: habit.id,
           habitName: habit.name,
@@ -105,7 +91,10 @@ class HabitProvider extends ChangeNotifier {
   }
 
   // Toggles completion for today
-  Future<void> toggleCompletionToday(Habit habit, {UserProvider? userProvider}) async {
+  Future<void> toggleCompletionToday(
+    Habit habit, {
+    UserProvider? userProvider,
+  }) async {
     final today = DateTime.now();
     final completed = isCompletedOn(habit, today);
 

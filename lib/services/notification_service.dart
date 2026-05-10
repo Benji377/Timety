@@ -35,11 +35,7 @@ class NotificationService {
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings iosSettings =
-        DarwinInitializationSettings(
-          requestAlertPermission: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-        );
+        DarwinInitializationSettings();
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
@@ -71,7 +67,7 @@ class NotificationService {
     return ('${prefix}_$stringId').hashCode;
   }
 
-  // --- 1. TASKS ---
+  // --- TASKS ---
   Future<void> scheduleTaskReminder({
     required int notificationId,
     required String title,
@@ -100,8 +96,8 @@ class NotificationService {
     );
   }
 
-  // --- 2. HABIT SPECIFIC TIMES ---
-  /// Schedules a reminder for a habit at its designated time (e.g., 17:00)
+  // --- HABIT SPECIFIC TIMES ---
+  // Schedules a reminder for a habit at its designated time (e.g., 17:00)
   Future<void> scheduleHabitReminder({
     required String habitId,
     required String habitName,
@@ -145,8 +141,8 @@ class NotificationService {
     );
   }
 
-  // --- 3. DAILY MOTIVATION (WITH DYNAMIC HABITS) ---
-  /// Called every time the app opens or habits change to refresh tomorrow's message
+  // --- DAILY MOTIVATION (WITH DYNAMIC HABITS) ---
+  // Called every time the app opens or habits change to refresh tomorrow's message
   Future<void> scheduleDailyMotivation({
     required TimeOfDay time,
     bool includeHabits = true,
@@ -192,8 +188,6 @@ class NotificationService {
           'daily_motivation_channel',
           'Daily Motivation',
           channelDescription: 'Your daily morning boost',
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
           styleInformation: BigTextStyleInformation(
             '',
           ), // Allows multi-line text
@@ -206,11 +200,8 @@ class NotificationService {
     );
   }
 
-  // --- 4. END OF DAY CHECKUP ---
-  /// A gentle nudge in the evening
-  Future<void> scheduleEndOfDayCheckup({
-    required TimeOfDay time, // e.g., 20:00 (8 PM)
-  }) async {
+  // --- END OF DAY CHECKUP ---
+  Future<void> scheduleEndOfDayCheckup({required TimeOfDay time}) async {
     if (kIsWeb) return;
 
     final now = tz.TZDateTime.now(tz.local);
@@ -237,8 +228,6 @@ class NotificationService {
           'evening_checkup_channel',
           'Evening Checkup',
           channelDescription: 'End of day reminders to log habits',
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
           icon: '@mipmap/ic_launcher',
         ),
         iOS: DarwinNotificationDetails(),
@@ -259,7 +248,7 @@ class NotificationService {
     await _notificationsPlugin.cancel(id: _generateId(habitId, 'habit_time'));
   }
 
-  /// Shows a pinned notification that natively ticks up or down!
+  // Shows a pinned notification that natively ticks up or down!
   Future<void> showFocusTimerNotification({
     required String phaseName,
     required DateTime targetTime,
@@ -284,10 +273,9 @@ class NotificationService {
           importance: Importance
               .low, // Low importance so it doesn't pop-up and interrupt
           priority: Priority.low,
-          ongoing: true, // PINNED: User cannot swipe it away!
+          ongoing: true, // User cannot swipe it away
           autoCancel: false,
-          usesChronometer:
-              !isPaused, // THE MAGIC TRICK: Android natively ticks the timer
+          usesChronometer: !isPaused, // Android natively ticks the timer
           chronometerCountDown:
               !isStopwatch, // Ticks down for timers, up for stopwatches
           when: targetTime.millisecondsSinceEpoch,
@@ -298,7 +286,7 @@ class NotificationService {
     );
   }
 
-  /// Removes the pinned notification when stopped
+  // Removes the pinned notification when stopped
   Future<void> cancelFocusTimerNotification() async {
     if (kIsWeb) return;
     await _notificationsPlugin.cancel(id: focusTimerId);

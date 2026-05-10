@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
+import '../../theme/app_theme.dart';
+
 part 'habit_models.g.dart';
 
 @HiveType(typeId: 31)
 enum HabitFrequency {
   @HiveField(0)
-  daily, // e.g., Write a report every day
+  daily,
   @HiveField(1)
-  weeklyExact, // e.g., Trash out on Tuesdays
+  weeklyExact,
   @HiveField(2)
-  weeklyFlexible, // e.g., Workout 3x a week
+  weeklyFlexible,
 }
 
 @HiveType(typeId: 30)
@@ -22,11 +24,8 @@ class Habit {
   @HiveField(2)
   HabitFrequency frequency;
 
-  // For WeeklyFlexible (e.g., 3 times a week)
   @HiveField(3)
   int? targetDaysPerWeek;
-
-  // For WeeklyExact (1 = Mon, 7 = Sun)
   @HiveField(4)
   List<int>? targetWeekdays;
 
@@ -34,7 +33,6 @@ class Habit {
   @HiveField(5)
   int? targetTimeMinutes;
 
-  // The core tracking mechanism: every time they do it, we add a timestamp here
   @HiveField(6)
   List<DateTime> completions;
 
@@ -67,7 +65,7 @@ class Habit {
     int? colorValue,
   }) : completions = completions ?? [],
        createdAt = createdAt ?? DateTime.now(),
-       colorValue = colorValue ?? Colors.blue.toARGB32();
+       colorValue = colorValue ?? AppTheme.habitColor.toARGB32();
 
   // Helper to get Flutter's TimeOfDay from the stored minutes
   TimeOfDay? get targetTime {
@@ -87,6 +85,8 @@ class Habit {
     }
   }
 
-  // Keep persisted data compatible, but render a fixed icon to allow icon font tree-shaking.
-  IconData? get iconData => iconCodePoint != null ? Icons.circle : null;
+  // Keep persisted data compatible while rendering the saved Material icon.
+  IconData? get iconData => iconCodePoint != null
+      ? IconData(iconCodePoint!, fontFamily: 'MaterialIcons')
+      : null;
 }
