@@ -72,7 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
       child: Text(
         title.toUpperCase(),
-        style: TextStyle(
+        style: const TextStyle(
           color: AppTheme.taskColor,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
@@ -166,21 +166,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // --- NOTIFICATIONS ---
           _buildSectionHeader('Notifications'),
-          SwitchListTile(
-            secondary: const Icon(Icons.notifications_active_outlined),
-            title: const Text('Daily Motivation'),
-            subtitle: const Text('Get a reminder to crush your goals'),
-            value: settings.notificationsEnabled,
-            activeThumbColor: Theme.of(context).colorScheme.primary,
-            activeTrackColor: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.4),
-            onChanged: (val) => settings.setNotificationsEnabled(val),
-          ),
           ListTile(
-            enabled: settings.notificationsEnabled,
             leading: const Icon(Icons.schedule),
-            title: const Text('Notification Time'),
+            title: const Text('Daily Motivation Time'),
             subtitle: Text(settings.notificationTime.format(context)),
             trailing: const Icon(Icons.edit),
             onTap: () async {
@@ -190,6 +178,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
               if (time != null && mounted) {
                 settings.setNotificationTime(time);
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.nightlight_round),
+            title: const Text('End of Day Checkup Time'),
+            subtitle: Text(settings.endOfDayTime.format(context)),
+            trailing: const Icon(Icons.edit),
+            onTap: () async {
+              final TimeOfDay? time = await showTimePicker(
+                context: context,
+                initialTime: settings.endOfDayTime,
+              );
+              if (time != null && mounted) {
+                settings.setEndOfDayTime(time);
               }
             },
           ),
@@ -252,12 +255,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   const SizedBox(height: 16),
-                  ListTile(
-                    leading: const Icon(Icons.person_outline),
-                    title: const Text(
-                      'Built by Benji377',
-                    ), // Change to your name!
-                    subtitle: const Text('Solo Developer & Maintainer'),
+                  const ListTile(
+                    leading: Icon(Icons.person_outline),
+                    title: Text('Built by Benji377'), // Change to your name!
+                    subtitle: Text('Solo Developer & Maintainer'),
                   ),
                   ListTile(
                     leading: const Icon(Icons.favorite),

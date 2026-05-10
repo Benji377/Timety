@@ -90,8 +90,7 @@ class AppDialogs {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<FocusMode>(
-                      initialValue:
-                          selectedMode, // Use value instead of initialValue
+                      initialValue: selectedMode,
                       decoration: const InputDecoration(
                         labelText: "Focus Mode",
                         border: OutlineInputBorder(),
@@ -108,17 +107,15 @@ class AppDialogs {
                         }
                       },
                     ),
-                    SizedBox(height: AppTheme.spaceLarge),
+                    const SizedBox(height: AppTheme.spaceLarge),
                     DropdownButtonFormField<FocusTag?>(
-                      initialValue:
-                          selectedTag, // Use value instead of initialValue
+                      initialValue: selectedTag,
                       decoration: const InputDecoration(
                         labelText: "Tag (Optional)",
                         border: OutlineInputBorder(),
                       ),
                       items: [
                         const DropdownMenuItem<FocusTag?>(
-                          value: null,
                           child: Text("No Tag"),
                         ),
                         ...provider.tags.map(
@@ -129,11 +126,11 @@ class AppDialogs {
                       onChanged: (val) =>
                           setDialogState(() => selectedTag = val),
                     ),
-                    SizedBox(height: AppTheme.spaceLarge),
+                    const SizedBox(height: AppTheme.spaceLarge),
                     ListTile(
-                      shape: RoundedRectangleBorder(
+                      shape: const RoundedRectangleBorder(
                         borderRadius: AppTheme.brMedium,
-                        side: const BorderSide(color: AppTheme.borderLight),
+                        side: BorderSide(color: AppTheme.borderLight),
                       ),
                       title: const Text(
                         "Start Time",
@@ -174,11 +171,11 @@ class AppDialogs {
                         }
                       },
                     ),
-                    SizedBox(height: AppTheme.spaceSmall),
+                    const SizedBox(height: AppTheme.spaceSmall),
                     ListTile(
-                      shape: RoundedRectangleBorder(
+                      shape: const RoundedRectangleBorder(
                         borderRadius: AppTheme.brMedium,
-                        side: const BorderSide(color: AppTheme.borderLight),
+                        side: BorderSide(color: AppTheme.borderLight),
                       ),
                       title: const Text(
                         "End Time",

@@ -47,9 +47,9 @@ class OverviewStatsScreen extends StatelessWidget {
     final settings = context.watch<SettingsProvider>();
 
     final now = DateTime.now();
-    int tasksCompletedToday = _getTasksForDay(taskProvider.tasks, now);
-    int focusMinsToday = _getFocusForDay(focusProvider, now);
-    int focusTarget = settings.dailyGoalMins;
+    final int tasksCompletedToday = _getTasksForDay(taskProvider.tasks, now);
+    final int focusMinsToday = _getFocusForDay(focusProvider, now);
+    final int focusTarget = settings.dailyGoalMins;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -106,12 +106,12 @@ class OverviewStatsScreen extends StatelessWidget {
         const SizedBox(height: 16),
 
         // --- LEGEND ---
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.circle, size: 12, color: AppTheme.taskColor),
-            const SizedBox(width: 4),
-            const Text(
+            SizedBox(width: 4),
+            Text(
               "Focus Mins",
               style: TextStyle(
                 fontSize: 12,
@@ -119,10 +119,10 @@ class OverviewStatsScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(width: 24),
+            SizedBox(width: 24),
             Icon(Icons.circle, size: 12, color: AppTheme.successColor),
-            const SizedBox(width: 4),
-            const Text(
+            SizedBox(width: 4),
+            Text(
               "Tasks Done",
               style: TextStyle(
                 fontSize: 12,
@@ -173,8 +173,8 @@ class OverviewStatsScreen extends StatelessWidget {
     if (maxTasks < 1) maxTasks = 1;
 
     // Convert real data to a relative 0-10 scale so both lines are clearly visible
-    List<FlSpot> focusSpots = [];
-    List<FlSpot> taskSpots = [];
+    final List<FlSpot> focusSpots = [];
+    final List<FlSpot> taskSpots = [];
     for (int i = 0; i < 7; i++) {
       focusSpots.add(FlSpot(i.toDouble(), (dailyFocus[i] / maxFocus) * 10));
       taskSpots.add(FlSpot(i.toDouble(), (dailyTasks[i] / maxTasks) * 10));
@@ -195,7 +195,7 @@ class OverviewStatsScreen extends StatelessWidget {
                 if (touchedSpot.barIndex == 0) {
                   return LineTooltipItem(
                     '${dailyFocus[dayIndex]} mins\n',
-                    TextStyle(
+                    const TextStyle(
                       color: AppTheme.taskColor,
                       fontWeight: FontWeight.bold,
                     ),
@@ -203,7 +203,7 @@ class OverviewStatsScreen extends StatelessWidget {
                 } else {
                   return LineTooltipItem(
                     '${dailyTasks[dayIndex]} tasks',
-                    TextStyle(
+                    const TextStyle(
                       color: AppTheme.successColor,
                       fontWeight: FontWeight.bold,
                     ),
@@ -214,7 +214,6 @@ class OverviewStatsScreen extends StatelessWidget {
           ),
         ),
         titlesData: FlTitlesData(
-          show: true,
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -264,15 +263,11 @@ class OverviewStatsScreen extends StatelessWidget {
               },
             ),
           ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          rightTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
         ),
         lineBarsData: [
-          // 1. FOCUS LINE
+          // FOCUS LINE
           LineChartBarData(
             spots: focusSpots,
             isCurved: true,
@@ -280,13 +275,12 @@ class OverviewStatsScreen extends StatelessWidget {
             color: AppTheme.taskColor,
             barWidth: 3,
             isStrokeCapRound: true,
-            dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
               color: AppTheme.taskColor.withValues(alpha: 0.1),
             ),
           ),
-          // 2. TASK LINE
+          // TASK LINE
           LineChartBarData(
             spots: taskSpots,
             isCurved: true,
@@ -294,7 +288,6 @@ class OverviewStatsScreen extends StatelessWidget {
             color: AppTheme.successColor,
             barWidth: 3,
             isStrokeCapRound: true,
-            dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
               color: AppTheme.successColor.withValues(alpha: 0.1),

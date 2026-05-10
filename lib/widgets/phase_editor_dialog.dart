@@ -58,7 +58,7 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
               setState(() => _selectedType = newSelection.first);
             },
           ),
-          SizedBox(height: AppTheme.space2XLarge),
+          const SizedBox(height: AppTheme.space2XLarge),
           TextField(
             controller: _timeController,
             keyboardType: TextInputType.number,

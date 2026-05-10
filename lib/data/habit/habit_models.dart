@@ -8,11 +8,11 @@ part 'habit_models.g.dart';
 @HiveType(typeId: 31)
 enum HabitFrequency {
   @HiveField(0)
-  daily, // e.g., Write a report every day
+  daily,
   @HiveField(1)
-  weeklyExact, // e.g., Trash out on Tuesdays
+  weeklyExact,
   @HiveField(2)
-  weeklyFlexible, // e.g., Workout 3x a week
+  weeklyFlexible,
 }
 
 @HiveType(typeId: 30)
@@ -24,11 +24,8 @@ class Habit {
   @HiveField(2)
   HabitFrequency frequency;
 
-  // For WeeklyFlexible (e.g., 3 times a week)
   @HiveField(3)
   int? targetDaysPerWeek;
-
-  // For WeeklyExact (1 = Mon, 7 = Sun)
   @HiveField(4)
   List<int>? targetWeekdays;
 
@@ -36,7 +33,6 @@ class Habit {
   @HiveField(5)
   int? targetTimeMinutes;
 
-  // The core tracking mechanism: every time they do it, we add a timestamp here
   @HiveField(6)
   List<DateTime> completions;
 

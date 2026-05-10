@@ -27,19 +27,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   List<List<DateTime>> _generateWeeks(DateTime month) {
-    final firstDayOfMonth = DateTime(month.year, month.month, 1);
+    final firstDayOfMonth = DateTime(month.year, month.month);
     final lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
 
-    int offsetToMonday = firstDayOfMonth.weekday - DateTime.monday;
+    final int offsetToMonday = firstDayOfMonth.weekday - DateTime.monday;
     DateTime currentDay = firstDayOfMonth.subtract(
       Duration(days: offsetToMonday),
     );
 
-    List<List<DateTime>> weeks = [];
+    final List<List<DateTime>> weeks = [];
 
     while (currentDay.isBefore(lastDayOfMonth) ||
         currentDay.weekday != DateTime.monday) {
-      List<DateTime> week = [];
+      final List<DateTime> week = [];
       for (int i = 0; i < 7; i++) {
         week.add(currentDay);
         currentDay = currentDay.add(const Duration(days: 1));
@@ -54,17 +54,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     final taskProvider = context.watch<TaskProvider>();
     final focusProvider = context.watch<FocusProvider>();
-    final habitProvider = context.watch<HabitProvider>(); // <--- ADDED
+    final habitProvider = context.watch<HabitProvider>();
 
     final allTasks = taskProvider.tasks;
     final allSessions = focusProvider.history;
-    final allHabits = habitProvider.habits; // <--- ADDED
+    final allHabits = habitProvider.habits;
 
     final weeks = _generateWeeks(_focusedMonth);
 
     // --- FILTER & SORT ACCORDION DATA ---
-
-    // 1. Tasks
     final selectedDayTasks = allTasks
         .where((t) => AppDateUtils.isSameDay(t.dueDate, _selectedDate))
         .toList();
@@ -72,13 +70,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
       (a, b) => b.priority.index.compareTo(a.priority.index),
     );
 
-    // 2. Focus
     final selectedDaySessions = allSessions
         .where((s) => AppDateUtils.isSameDay(s.startTime, _selectedDate))
         .toList();
     selectedDaySessions.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    // 3. Habits (Combine habits scheduled for this day + habits actually completed on this day)
+    // Combine habits scheduled for this day + habits actually completed on this day
     List<Habit> selectedDayHabits = [];
     if (_selectedDate != null) {
       final scheduled = habitProvider.getHabitsForDay(_selectedDate!);
@@ -111,7 +108,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         children: [
           // --- TOP HALF: THE CALENDAR ---
           Expanded(
-            flex: 1,
             child: Container(
               color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.all(16.0),
@@ -178,7 +174,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           );
 
                           // Weekly Analytics Calculations
-                          int weeklyTaskCount = allTasks
+                          final int weeklyTaskCount = allTasks
                               .where(
                                 (t) =>
                                     t.dueDate != null &&
@@ -187,7 +183,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               )
                               .length;
 
-                          int weeklyFocusCount = allSessions
+                          final int weeklyFocusCount = allSessions
                               .where(
                                 (s) =>
                                     s.startTime.isAfter(weekStart) &&
@@ -195,7 +191,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               )
                               .length;
 
-                          int weeklyHabitCount = allHabits.fold(0, (sum, h) {
+                          final int weeklyHabitCount = allHabits.fold(0, (
+                            sum,
+                            h,
+                          ) {
                             return sum +
                                 h.completions
                                     .where(
@@ -391,7 +390,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           // --- BOTTOM HALF: ACCORDION LISTS ---
           Expanded(
-            flex: 1,
             child: Container(
               color: Theme.of(
                 context,
@@ -412,7 +410,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             bottom: AppTheme.spaceMedium,
                           ),
                           child: ExpansionTile(
-                            initiallyExpanded: false,
                             title: Text(
                               "Habits (${selectedDayHabits.length})",
                               style: const TextStyle(
@@ -448,7 +445,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 ? AppTheme.habitColor
                                                       .withValues(alpha: 0.3)
                                                 : AppTheme.habitColor,
-                                            width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -509,7 +505,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             bottom: AppTheme.spaceMedium,
                           ),
                           child: ExpansionTile(
-                            initiallyExpanded: false,
                             title: Text(
                               "Tasks (${selectedDayTasks.length})",
                               style: const TextStyle(
@@ -542,7 +537,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             color: task.isCompleted
                                                 ? AppTheme.successColor
                                                 : AppTheme.taskColor,
-                                            width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -591,7 +585,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             bottom: AppTheme.spaceMedium,
                           ),
                           child: ExpansionTile(
-                            initiallyExpanded: false,
                             title: Text(
                               "Focus Sessions (${selectedDaySessions.length})",
                               style: const TextStyle(
@@ -637,7 +630,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         timeString += " - Ongoing";
                                       }
 
-                                      int focusMins =
+                                      final int focusMins =
                                           session.totalSecondsFocused ~/ 60;
                                       return Card(
                                         margin: const EdgeInsets.symmetric(
@@ -648,7 +641,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                             color: Colors.grey.shade300,
-                                            width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
                                             8,

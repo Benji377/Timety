@@ -46,7 +46,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
       _selectedIcon =
           _getIconFromCodePoint(widget.habit!.iconCodePoint) ?? Icons.circle;
       _targetTime = widget.habit!.targetTime;
-      _stackOrder = widget.habit!.stackOrder; // Init stack order
+      _stackOrder = widget.habit!.stackOrder;
       _targetDaysPerWeek = widget.habit!.targetDaysPerWeek ?? 3;
       if (widget.habit!.targetWeekdays != null) {
         _selectedWeekdays = widget.habit!.targetWeekdays!.toSet();
@@ -62,7 +62,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     super.dispose();
   }
 
-  /// Convert a codePoint back to an IconData object
+  // Convert a codePoint back to an IconData object
   IconData? _getIconFromCodePoint(int? codePoint) {
     if (codePoint == null) return null;
     try {
@@ -155,7 +155,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                   child: Autocomplete<String>(
                     initialValue: TextEditingValue(text: _stackController.text),
                     optionsBuilder: (TextEditingValue textEditingValue) {
-                      // FIX 1: Show all existing stacks when the field is empty!
                       if (textEditingValue.text.isEmpty) {
                         return existingStacks;
                       }
@@ -173,7 +172,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                           return TextFormField(
                             controller: controller,
                             focusNode: focusNode,
-                            // FIX 2: Use onChanged to safely sync the text without memory leaks
                             onChanged: (val) => _stackController.text = val,
                             decoration: const InputDecoration(
                               labelText: 'Habit Stack (Optional)',
@@ -186,19 +184,14 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 ),
                 const SizedBox(width: AppTheme.spaceMedium),
                 Expanded(
-                  flex: 1,
                   child: DropdownButtonFormField<int>(
-                    initialValue:
-                        _stackOrder, // Use value instead of initialValue for safe rebuilds
+                    initialValue: _stackOrder,
                     decoration: const InputDecoration(
                       labelText: 'Order',
                       contentPadding: EdgeInsets.symmetric(horizontal: 10),
                     ),
                     items: [
-                      const DropdownMenuItem<int>(
-                        value: null,
-                        child: Text("-"),
-                      ),
+                      const DropdownMenuItem<int>(child: Text("-")),
                       ...List.generate(10, (index) => index + 1).map(
                         (order) => DropdownMenuItem(
                           value: order,
@@ -354,7 +347,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             const SizedBox(height: AppTheme.spaceSmall),
             Card(
               child: ListTile(
-                leading: Icon(
+                leading: const Icon(
                   Icons.notifications_active,
                   color: AppTheme.habitColor,
                 ),

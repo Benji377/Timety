@@ -98,7 +98,6 @@ Future<void> _seedMockData(BuildContext context) async {
   await userProvider.addXp(-userProvider.totalXp);
   settings.setThemeMode(ThemeMode.light);
   settings.setDailyGoal(120);
-  settings.setNotificationsEnabled(false);
 
   taskProvider.tasks.clear();
   habitProvider.habits.clear();
@@ -205,8 +204,6 @@ Future<void> _seedMockData(BuildContext context) async {
       description: 'Collect highlights and blockers for Friday.',
       dueDate: dayStart.add(const Duration(days: 2)),
       location: 'Meeting room',
-      priority: Priority.medium,
-      size: Size.medium,
       category: 'Work',
       createdAt: dayStart,
     ),

@@ -17,14 +17,13 @@ class FocusScreen extends StatelessWidget {
   const FocusScreen({super.key});
 
   String _formatDigitalTime(int totalSeconds) {
-    int minutes = totalSeconds ~/ 60;
-    int seconds = totalSeconds % 60;
+    final int minutes = totalSeconds ~/ 60;
+    final int seconds = totalSeconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  // --- 1. ALERTS / DISTRACTIONS BOTTOM SHEET ---
+  // --- ALERTS / DISTRACTIONS BOTTOM SHEET ---
   void _showDistractionSheet(BuildContext context, FocusProvider provider) {
-    // Fixed list of possible events
     final events = [
       {
         'name': 'Distracted',
@@ -163,7 +162,7 @@ class FocusScreen extends StatelessWidget {
 
   void _showCreateTagDialog(BuildContext context, FocusProvider provider) {
     final TextEditingController controller = TextEditingController();
-    Color selectedColor = AppTheme.taskColor;
+    const Color selectedColor = AppTheme.taskColor;
 
     showDialog(
       context: context,
@@ -206,8 +205,8 @@ class FocusScreen extends StatelessWidget {
     final activeMode = focusProvider.activeMode;
     final modes = focusProvider.modes;
 
-    bool isFlexibleMode = activeMode?.type == FocusModeType.flexible;
-    bool canDrag = isFlexibleMode && !isRunning && !isPaused;
+    final bool isFlexibleMode = activeMode?.type == FocusModeType.flexible;
+    final bool canDrag = isFlexibleMode && !isRunning && !isPaused;
 
     double gaugeProgress = 1.0;
     bool isStopwatchMode = false;
@@ -218,7 +217,7 @@ class FocusScreen extends StatelessWidget {
       final currentPhase = activeMode.phases[focusProvider.currentPhaseIndex];
 
       if (canDrag) {
-        int currentMinutes = currentPhase.durationMinutes == -1
+        final int currentMinutes = currentPhase.durationMinutes == -1
             ? 25
             : currentPhase.durationMinutes;
         gaugeProgress = currentMinutes / 120.0;
@@ -245,7 +244,7 @@ class FocusScreen extends StatelessWidget {
 
     void cycleMode(int direction) {
       if (isRunning || isPaused || activeMode == null) return;
-      int currentIndex = modes.indexWhere((m) => m.id == activeMode.id);
+      final int currentIndex = modes.indexWhere((m) => m.id == activeMode.id);
       int nextIndex = (currentIndex + direction) % modes.length;
       if (nextIndex < 0) nextIndex = modes.length - 1;
       focusProvider.setActiveMode(modes[nextIndex]);

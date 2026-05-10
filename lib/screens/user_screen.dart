@@ -38,8 +38,7 @@ class _UserScreenState extends State<UserScreen> {
     setState(() => _isExporting = true);
 
     try {
-      // Generate a 1080x1920 PNG entirely via canvas — no widget rendering,
-      // no off-screen layout, no clipping surprises.
+      // Wrap-up image generation
       final pngBytes = await WrapUpImageGenerator.generate(
         name: name,
         level: level,
@@ -203,7 +202,7 @@ class _UserScreenState extends State<UserScreen> {
                         ? FileImage(File(userProvider.profileImagePath!))
                         : null,
                     child: userProvider.profileImagePath == null
-                        ? Icon(
+                        ? const Icon(
                             Icons.person,
                             size: AppTheme.profileImageSize,
                             color: AppTheme.userColor,
@@ -220,7 +219,7 @@ class _UserScreenState extends State<UserScreen> {
                         width: 3,
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.camera_alt,
                       size: AppTheme.iconSizeMedium,
                       color: Colors.white,

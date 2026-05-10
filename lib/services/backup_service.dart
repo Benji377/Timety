@@ -17,13 +17,13 @@ class BackupService {
       final backupDirPath = '${tempDir.path}/timety_backup';
       final backupDir = Directory(backupDirPath);
 
-      // 1. Create a fresh temporary backup folder
+      // Create a fresh temporary backup folder
       if (backupDir.existsSync()) {
         backupDir.deleteSync(recursive: true);
       }
       backupDir.createSync();
 
-      // 2. Export SharedPreferences to a JSON file
+      // Export SharedPreferences to a JSON file
       final prefs = await SharedPreferences.getInstance();
       final prefsMap = <String, dynamic>{};
       for (var key in prefs.getKeys()) {
@@ -32,7 +32,7 @@ class BackupService {
       final prefsFile = File('$backupDirPath/prefs.json');
       await prefsFile.writeAsString(jsonEncode(prefsMap));
 
-      // 3. Copy all Hive database files (.hive)
+      // Copy all Hive database files (.hive)
       final files = appDir.listSync();
       for (var file in files) {
         if (file is File && file.path.endsWith('.hive')) {
@@ -41,7 +41,7 @@ class BackupService {
         }
       }
 
-      // 4. Zip the folder
+      // Zip the folder
       final encoder = ZipFileEncoder();
       final zipPath =
           '${tempDir.path}/Timety_Backup_${DateTime.now().millisecondsSinceEpoch}.zip';
@@ -49,7 +49,7 @@ class BackupService {
       encoder.addDirectory(backupDir);
       encoder.close();
 
-      // 5. Open native share sheet (Save to Files, Google Drive, Email, etc.)
+      // Open native share sheet (Save to Files, Google Drive, Email, etc.)
       final xFile = XFile(zipPath, mimeType: 'application/zip');
       await SharePlus.instance.share(
         ShareParams(subject: 'Timety Backup', files: [xFile]),
@@ -66,8 +66,8 @@ class BackupService {
   // --- IMPORT BACKUP ---
   static Future<void> importBackup(BuildContext context) async {
     try {
-      // 1. Pick the zip file
-      FilePickerResult? result = await FilePicker.pickFiles(
+      // Pick the zip file
+      final FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['zip'],
       );
@@ -87,7 +87,7 @@ class BackupService {
       final zipFile = File(result.files.single.path!);
       final appDir = await getApplicationDocumentsDirectory();
 
-      // 2. Unzip the file
+      // Unzip the file
       final bytes = zipFile.readAsBytesSync();
       final archive = ZipDecoder().decodeBytes(bytes);
 
@@ -127,7 +127,7 @@ class BackupService {
         }
       }
 
-      // 3. Force App Restart Notification
+      // Force App Restart Notification
       if (context.mounted) {
         showDialog(
           context: context,
@@ -149,7 +149,7 @@ class BackupService {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Import failed: Check file format')),
+          const SnackBar(content: Text('Import failed: Check file format')),
         );
       }
     }

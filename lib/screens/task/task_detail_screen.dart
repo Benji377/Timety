@@ -14,12 +14,7 @@ class TaskDetailScreen extends StatefulWidget {
   final Task? task; // NULL means "Create New Task", NOT NULL means "View/Edit"
   final bool isEditing;
 
-  const TaskDetailScreen({
-    super.key,
-    this.task,
-    this.isEditing =
-        false, // Default to false, but we'll override if task is null
-  });
+  const TaskDetailScreen({super.key, this.task, this.isEditing = false});
 
   @override
   State<TaskDetailScreen> createState() => _TaskDetailScreenState();
@@ -99,7 +94,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     super.dispose();
   }
 
-  // Visual Helper: Section Headers for better structure
   Widget _buildSectionHeader(String title, IconData icon) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -128,7 +122,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     );
   }
 
-  // Logic: Handle Category Selection
   Widget _buildCategoryPicker() {
     final dividerColor = Theme.of(context).dividerColor.withValues(alpha: 0.6);
 
@@ -245,7 +238,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final colorScheme = theme.colorScheme;
     final disabledBorderColor = theme.dividerColor.withValues(alpha: 0.6);
     final mapCenter = _parseLocation();
-    String appBarTitle = _isNewTask
+    final String appBarTitle = _isNewTask
         ? "Create New Task"
         : (_isEditing ? "Edit Task" : "Task Details");
 
@@ -397,7 +390,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             onTap: _isEditing ? _pickDueDate : null,
           ),
 
-          // Reminders (Simplified visibility)
+          // Reminders
           if (_isEditing || _reminders.isNotEmpty) ...[
             const SizedBox(height: AppTheme.spaceMedium),
             if (_isEditing) _buildReminderInput(),
@@ -554,8 +547,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               onPressed: _saveTask,
               label: const Text('Save Changes'),
               style: ElevatedButton.styleFrom(
-                minimumSize: ui.Size.fromHeight(54),
-                shape: RoundedRectangleBorder(borderRadius: AppTheme.brLarge),
+                minimumSize: const ui.Size.fromHeight(54),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: AppTheme.brLarge,
+                ),
               ),
             ),
           const SizedBox(height: AppTheme.space3XLarge),
@@ -565,7 +560,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   // --- Logic Helpers ---
-
   LatLng? _parseLocation() {
     if (_locationController.text.isEmpty) return null;
     final parts = _locationController.text.split(',');
@@ -624,7 +618,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   Widget _buildMapPreview(LatLng center) {
     return Container(
       height: 160,
-      margin: const EdgeInsets.only(top: AppTheme.spaceMedium, bottom: AppTheme.spaceMedium),
+      margin: const EdgeInsets.only(
+        top: AppTheme.spaceMedium,
+        bottom: AppTheme.spaceMedium,
+      ),
       decoration: BoxDecoration(
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.6),

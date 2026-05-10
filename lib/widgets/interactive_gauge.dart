@@ -99,12 +99,12 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Determine what progress to paint based on mode
-    double paintProgress = widget.isStopwatch
+    final double paintProgress = widget.isStopwatch
         ? _pulseController.value
         : _progress;
 
     // Fade the track slightly during stopwatch pulse
-    double trackOpacity = widget.isStopwatch
+    final double trackOpacity = widget.isStopwatch
         ? (1.0 - _pulseController.value).clamp(0.2, 1.0)
         : 1.0;
 
@@ -129,13 +129,13 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
           ),
           child: Padding(
             // Keeps the text safely inside the inner stroke
-            padding: const EdgeInsets.all(40.0), 
+            padding: const EdgeInsets.all(40.0),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: AppTheme.fsGaugeLabel),
+                  const SizedBox(height: AppTheme.fsGaugeLabel),
                   Text(
                     widget.label,
                     style: TextStyle(
@@ -147,17 +147,18 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
                           : AppTheme.gaugeTrackLight,
                     ),
                   ),
-                  SizedBox(height: AppTheme.spaceXSmall),
+                  const SizedBox(height: AppTheme.spaceXSmall),
                   Text(
                     widget.centerText,
                     style: TextStyle(
                       fontSize: AppTheme.fsGaugeDisplay,
                       fontWeight: AppTheme.fwLight,
-                      color: Theme.of(context).textTheme.bodyLarge?.color ??
+                      color:
+                          Theme.of(context).textTheme.bodyLarge?.color ??
                           AppTheme.gaugeTrackLight,
                     ),
                   ),
-                  SizedBox(height: AppTheme.spaceXSmall),
+                  const SizedBox(height: AppTheme.spaceXSmall),
                   GestureDetector(
                     onTap: widget.onBottomTextTapped,
                     child: Container(
@@ -169,7 +170,9 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
                         color: isDark
                             ? AppTheme.gaugeBgDark
                             : AppTheme.gaugeBgLight,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusCircle),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusCircle,
+                        ),
                         border: Border.all(
                           color: isDark
                               ? AppTheme.gaugeBorderDark
@@ -213,7 +216,7 @@ class _GaugePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 2;
-    final strokeWidth = AppTheme.gaugeStrokeWidth;
+    const strokeWidth = AppTheme.gaugeStrokeWidth;
     final innerRadius = radius - strokeWidth - 14;
 
     final innerBackgroundPaint = Paint()

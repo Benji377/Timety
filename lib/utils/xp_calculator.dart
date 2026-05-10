@@ -28,12 +28,12 @@ class ExperienceEngine {
 
   // Returns progress to the NEXT level as a double (0.0 to 1.0)
   static double getLevelProgress(int totalXp) {
-    int currentLevel = calculateLevel(totalXp);
-    int currentTierXp = getXpForLevel(currentLevel);
-    int nextTierXp = getXpForLevel(currentLevel + 1);
+    final int currentLevel = calculateLevel(totalXp);
+    final int currentTierXp = getXpForLevel(currentLevel);
+    final int nextTierXp = getXpForLevel(currentLevel + 1);
 
-    int xpIntoLevel = totalXp - currentTierXp;
-    int xpNeededForNext = nextTierXp - currentTierXp;
+    final int xpIntoLevel = totalXp - currentTierXp;
+    final int xpNeededForNext = nextTierXp - currentTierXp;
 
     return xpIntoLevel / xpNeededForNext;
   }

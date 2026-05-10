@@ -169,7 +169,6 @@ class GroupedHabitsSection extends StatelessWidget {
             habit: habit,
             isCompleted: isDone,
             enableDismissible: false,
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             subtitleText: HabitUtils.buildHabitSubtitle(habit, habitProvider),
             onToggleCompleted: () => onToggleCompleted(habit),
             onTap: () => onHabitTap(habit),

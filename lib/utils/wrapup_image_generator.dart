@@ -42,7 +42,7 @@ class WrapUpImageGenerator {
     final logoImage = (await logoCodec.getNextFrame()).image;
 
     final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, _w, _h));
+    final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, _w, _h));
 
     canvas.scale(1.2, 1.2);
     canvas.translate(0, 50);
@@ -72,11 +72,11 @@ class WrapUpImageGenerator {
         end: Alignment.bottomRight,
         colors: [
           AppTheme.paperDark,
-          Color(0xFF2A2418),
+          const Color(0xFF2A2418),
           AppTheme.taskColor.withValues(alpha: 0.9),
         ],
-      ).createShader(Rect.fromLTWH(0, 0, _w, _h));
-    canvas.drawRect(Rect.fromLTWH(0, 0, _w, _h), paint);
+      ).createShader(const Rect.fromLTWH(0, 0, _w, _h));
+    canvas.drawRect(const Rect.fromLTWH(0, 0, _w, _h), paint);
   }
 
   /// Returns updated y after drawing the logo.
@@ -216,7 +216,7 @@ class WrapUpImageGenerator {
     );
 
     // Value (large bold number / text)
-    final textX = _pad + _iconBoxSize + 30;
+    const textX = _pad + _iconBoxSize + 30;
     _paintText(
       canvas,
       row.value,
@@ -244,7 +244,7 @@ class WrapUpImageGenerator {
     _paintText(
       canvas,
       'Master your time with Timety',
-      Offset(_w / 2 - 100, _h - 550),
+      const Offset(_w / 2 - 100, _h - 550),
       const TextStyle(
         color: Colors.white54,
         fontSize: 30,
@@ -299,7 +299,7 @@ class WrapUpImageGenerator {
         ),
         textDirection: TextDirection.ltr,
         maxLines: 1,
-      )..layout(maxWidth: double.infinity);
+      )..layout();
 
       if (painter.width <= maxWidth) break;
       fontSize -= 4;

@@ -45,7 +45,6 @@ class HabitListTile extends StatelessWidget {
       leading: InkWell(
         onTap: isLocked
             ? () {
-                // Better UX: Tell them WHY it's locked
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
@@ -72,7 +71,6 @@ class HabitListTile extends StatelessWidget {
               width: 2,
             ),
           ),
-          child: null,
         ),
       ),
       title: Row(

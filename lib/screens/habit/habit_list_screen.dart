@@ -69,7 +69,6 @@ class HabitListScreen extends StatelessWidget {
     );
   }
 
-  // --- UPDATED: Grouping, Sorting, Locking, and now Collapsing! ---
   List<Widget> _buildGroupedHabits(
     BuildContext context,
     List<Habit> habits,
@@ -91,9 +90,7 @@ class HabitListScreen extends StatelessWidget {
 
     final widgets = <Widget>[];
 
-    // Build the Stack Cards
     grouped.forEach((stackName, stackHabits) {
-      // Sort the local stack by order
       stackHabits.sort(
         (a, b) => (a.stackOrder ?? 99).compareTo(b.stackOrder ?? 99),
       );

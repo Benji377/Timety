@@ -78,7 +78,6 @@ class CompactVerticalStatCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spaceSmall),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, color: color, size: AppTheme.iconSizeSmall),
@@ -136,7 +135,6 @@ class CompactHeaderStatCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.spaceMedium),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(

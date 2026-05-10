@@ -136,7 +136,6 @@ class FocusProvider extends ChangeNotifier {
   }
 
   // --- SESSION ACTIONS ---
-
   void _updateNotification({bool asPaused = false}) {
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
 
@@ -162,7 +161,6 @@ class FocusProvider extends ChangeNotifier {
         phaseName: currentPhase.type.name,
         targetTime: targetTime,
         isStopwatch: isStopwatch,
-        isPaused: false,
       );
     }
   }
@@ -249,7 +247,7 @@ class FocusProvider extends ChangeNotifier {
       _history.add(_currentSession!);
 
       // ADD XP based on minutes focused
-      int focusMinutes = _currentSecondsFocussed ~/ 60;
+      final int focusMinutes = _currentSecondsFocussed ~/ 60;
       if (focusMinutes > 0) {
         userProvider?.addXp(focusMinutes * ExperienceEngine.xpPerFocusMin);
       }
@@ -316,7 +314,7 @@ class FocusProvider extends ChangeNotifier {
     FocusTag? tag,
     UserProvider? userProvider,
   }) async {
-    int totalSeconds = endTime.difference(startTime).inSeconds;
+    final int totalSeconds = endTime.difference(startTime).inSeconds;
     if (totalSeconds <= 0) return;
 
     final session = FocusSession(
@@ -334,7 +332,7 @@ class FocusProvider extends ChangeNotifier {
     _history.add(session);
 
     // ADD XP based on minutes focused
-    int focusMinutes = totalSeconds ~/ 60;
+    final int focusMinutes = totalSeconds ~/ 60;
     if (focusMinutes > 0) {
       userProvider?.addXp(focusMinutes * ExperienceEngine.xpPerFocusMin);
     }
@@ -343,7 +341,6 @@ class FocusProvider extends ChangeNotifier {
   }
 
   // --- TAG MANAGEMENT ---
-
   void setSelectedTag(FocusTag tag) {
     _selectedTag = tag;
     notifyListeners();

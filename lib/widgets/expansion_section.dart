@@ -34,7 +34,6 @@ class ExpansionSection extends StatelessWidget {
           color: color,
           padding: EdgeInsets.zero,
           iconSize: AppTheme.listSectionIconSize,
-          titleSize: AppTheme.listSectionTitleSize,
         ),
         children: children,
       ),

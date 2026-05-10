@@ -306,7 +306,7 @@ class AppTheme {
             horizontal: AppTheme.spaceLarge,
             vertical: AppTheme.spaceMedium,
           ),
-          shape: RoundedRectangleBorder(borderRadius: AppTheme.brNeo),
+          shape: const RoundedRectangleBorder(borderRadius: AppTheme.brNeo),
           elevation: 0,
         ),
       ),
@@ -345,7 +345,7 @@ class AppTheme {
         fillColor: const WidgetStatePropertyAll(taskColor),
         checkColor: const WidgetStatePropertyAll(Colors.white),
         side: BorderSide(color: borderColor, width: 2),
-        shape: RoundedRectangleBorder(borderRadius: AppTheme.brSmall),
+        shape: const RoundedRectangleBorder(borderRadius: AppTheme.brSmall),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: const WidgetStatePropertyAll(Colors.white),
@@ -374,7 +374,7 @@ class AppTheme {
         labelStyle: TextStyle(color: foregroundColor),
         secondaryLabelStyle: const TextStyle(color: Colors.white),
         side: BorderSide(color: borderColor, width: 2),
-        shape: RoundedRectangleBorder(borderRadius: AppTheme.brNeo),
+        shape: const RoundedRectangleBorder(borderRadius: AppTheme.brNeo),
         padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.spaceSmall,
           vertical: AppTheme.spaceXSmall,
@@ -395,7 +395,7 @@ class AppTheme {
           borderRadius: AppTheme.brNeo,
           borderSide: BorderSide(color: borderColor, width: 2),
         ),
-        focusedBorder: OutlineInputBorder(
+        focusedBorder: const OutlineInputBorder(
           borderRadius: AppTheme.brNeo,
           borderSide: BorderSide(color: taskColor, width: 3),
         ),

@@ -38,7 +38,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   // --- DATA PIPELINE: Filter & Sort ---
   List<Task> _getProcessedTasks(List<Task> rawTasks) {
     // Search & Category Filter
-    var processed = rawTasks.where((task) {
+    final processed = rawTasks.where((task) {
       // Category Filter Check
       if (_selectedCategoryFilter != null &&
           _selectedCategoryFilter!.isNotEmpty) {
@@ -52,7 +52,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
           task.description.toLowerCase().contains(q);
     }).toList();
 
-    // 2. Sort
     processed.sort((a, b) {
       int result = 0;
       switch (_sortOption) {
@@ -110,8 +109,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        TaskDetailScreen(task: task, isEditing: false),
+                    builder: (_) => TaskDetailScreen(task: task),
                   ),
                 );
               },
@@ -171,13 +169,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   children: [
                     Expanded(
                       child: TextField(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'Search title or description...',
-                          prefixIcon: const Icon(Icons.search),
+                          prefixIcon: Icon(Icons.search),
                           border: OutlineInputBorder(
                             borderRadius: AppTheme.brNeo,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(
+                          contentPadding: EdgeInsets.symmetric(
                             horizontal: AppTheme.spaceMedium,
                             vertical: AppTheme.spaceSmall,
                           ),
@@ -234,7 +232,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 ),
               ),
 
-              // --- CATEGORY PILLS (NEW) ---
+              // --- CATEGORY PILLS ---
               if (allCategories.isNotEmpty)
                 Container(
                   height: 56,

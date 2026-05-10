@@ -91,7 +91,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
     super.dispose();
   }
 
-  // --- MUCH CLEANER DIALOG LOGIC ---
   void _showPhaseDialog({int? index}) async {
     final initialPhase = index != null ? _tempPhases[index] : null;
 
@@ -346,7 +345,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
                     ).colorScheme.surfaceContainerHighest,
                     border: Border.all(
                       color: Theme.of(context).dividerColor,
-                      style: BorderStyle.solid,
                       width: 2,
                     ),
                   ),
