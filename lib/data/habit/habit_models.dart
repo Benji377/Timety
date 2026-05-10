@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
+import '../../theme/app_theme.dart';
+
 part 'habit_models.g.dart';
 
 @HiveType(typeId: 31)
@@ -67,7 +69,7 @@ class Habit {
     int? colorValue,
   }) : completions = completions ?? [],
        createdAt = createdAt ?? DateTime.now(),
-       colorValue = colorValue ?? Colors.blue.toARGB32();
+       colorValue = colorValue ?? AppTheme.habitColor.toARGB32();
 
   // Helper to get Flutter's TimeOfDay from the stored minutes
   TimeOfDay? get targetTime {

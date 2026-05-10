@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/app_theme.dart';
+
 /// Generates a 1080×1920 (9:16) wrap-up PNG using dart:ui canvas drawing.
 ///
 /// No widget tree, no screenshot package, no layout-engine surprises —
@@ -65,10 +67,14 @@ class WrapUpImageGenerator {
 
   static void _drawBackground(Canvas canvas) {
     final paint = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF1E1E2C), Color(0xFF2D2B55), Color(0xFF0F3E68)],
+        colors: [
+          AppTheme.paperDark,
+          Color(0xFF2A2418),
+          AppTheme.taskColor.withValues(alpha: 0.9),
+        ],
       ).createShader(Rect.fromLTWH(0, 0, _w, _h));
     canvas.drawRect(Rect.fromLTWH(0, 0, _w, _h), paint);
   }
@@ -99,7 +105,7 @@ class WrapUpImageGenerator {
       'TIMETY WRAP-UP',
       Offset(_pad, y),
       const TextStyle(
-        color: Colors.blueAccent,
+        color: AppTheme.taskColor,
         fontSize: 28,
         fontWeight: FontWeight.bold,
         letterSpacing: 5,
@@ -128,7 +134,7 @@ class WrapUpImageGenerator {
       "Level $level • $levelTitle",
       Offset(_pad, y),
       const TextStyle(
-        color: Colors.amberAccent,
+        color: AppTheme.warningColor,
         fontSize: 38,
         fontWeight: FontWeight.bold,
       ),
@@ -153,13 +159,23 @@ class WrapUpImageGenerator {
     final rows = [
       _StatRow(
         Icons.local_fire_department,
-        Colors.orange,
+        AppTheme.warningColor,
         '$streak Day',
         'Active Streak',
       ),
-      _StatRow(Icons.check_circle, Colors.blue, '$tasks', 'Tasks Completed'),
-      _StatRow(Icons.timer, Colors.green, '$focusMins', 'Minutes Focused'),
-      _StatRow(Icons.repeat, Colors.purpleAccent, '$habits', 'Habits Built'),
+      _StatRow(
+        Icons.check_circle,
+        AppTheme.taskColor,
+        '$tasks',
+        'Tasks Completed',
+      ),
+      _StatRow(
+        Icons.timer,
+        AppTheme.successColor,
+        '$focusMins',
+        'Minutes Focused',
+      ),
+      _StatRow(Icons.repeat, AppTheme.habitColor, '$habits', 'Habits Built'),
     ];
 
     double y = startY;

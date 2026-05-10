@@ -88,14 +88,8 @@ class TimetyApp extends StatelessWidget {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Timety',
-            theme: AppTheme.buildTheme(
-              seedColor: settings.seedColor,
-              brightness: Brightness.light,
-            ),
-            darkTheme: AppTheme.buildTheme(
-              seedColor: settings.seedColor,
-              brightness: Brightness.dark,
-            ),
+            theme: AppTheme.buildTheme(brightness: Brightness.light),
+            darkTheme: AppTheme.buildTheme(brightness: Brightness.dark),
             themeMode: settings.themeMode,
             home: const MainScreen(),
           );

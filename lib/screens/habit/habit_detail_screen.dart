@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/color_picker.dart';
 
 class HabitDetailScreen extends StatefulWidget {
   final Habit? habit;
@@ -22,7 +21,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
   late TextEditingController _stackController;
 
   HabitFrequency _frequency = HabitFrequency.daily;
-  Color _selectedColor = AppTheme.typeHabitColor;
+  Color _selectedColor = AppTheme.habitColor;
   TimeOfDay? _targetTime;
   int? _stackOrder;
 
@@ -31,15 +30,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
 
   // For Weekly Exact (1 = Mon, 7 = Sun)
   Set<int> _selectedWeekdays = {1, 3, 5};
-
-  final List<Color> _colorOptions = [
-    AppTheme.infoColor,
-    AppTheme.successColor,
-    AppTheme.warningColor,
-    AppTheme.errorColor,
-    Colors.purple,
-    Colors.teal,
-  ];
 
   @override
   void initState() {
@@ -52,7 +42,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
 
     if (widget.habit != null) {
       _frequency = widget.habit!.frequency;
-      _selectedColor = Color(widget.habit!.colorValue);
+      _selectedColor = AppTheme.habitColor;
       _targetTime = widget.habit!.targetTime;
       _stackOrder = widget.habit!.stackOrder; // Init stack order
       _targetDaysPerWeek = widget.habit!.targetDaysPerWeek ?? 3;
@@ -84,7 +74,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
       id: widget.habit?.id ?? DateTime.now().toString(),
       name: _nameController.text.trim(),
       frequency: _frequency,
-      colorValue: _selectedColor.toARGB32(),
+      colorValue: AppTheme.habitColor.toARGB32(),
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -226,11 +216,16 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               style: TextStyle(fontWeight: AppTheme.fwBold),
             ),
             const SizedBox(height: AppTheme.spaceSmall),
-            ColorPicker(
-              selectedColor: _selectedColor,
-              colorOptions: _colorOptions,
-              onColorSelected: (color) =>
-                  setState(() => _selectedColor = color),
+            Card(
+              child: ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: AppTheme.habitColor,
+                ),
+                title: const Text('Habit color is standardized'),
+                subtitle: const Text(
+                  'Purple is used for habits across the app.',
+                ),
+              ),
             ),
             const SizedBox(height: AppTheme.spaceXLarge),
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
 import '../../data/focus/focus_models.dart';
 import '../../widgets/focus_mode_timeline.dart';
@@ -196,7 +197,9 @@ class _ModeEditCardState extends State<ModeEditCard> {
                   Text(
                     widget.mode.isSystem ? "System Mode" : "Custom Mode",
                     style: TextStyle(
-                      color: widget.mode.isSystem ? Colors.grey : Colors.blue,
+                      color: widget.mode.isSystem
+                          ? Theme.of(context).colorScheme.onSurfaceVariant
+                          : AppTheme.taskColor,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -215,12 +218,12 @@ class _ModeEditCardState extends State<ModeEditCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    icon: const Icon(Icons.edit, color: AppTheme.taskColor),
                     tooltip: "Edit Mode",
                     onPressed: () => setState(() => _isEditing = true),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete, color: AppTheme.errorColor),
                     tooltip: "Delete Mode",
                     onPressed: _confirmDelete,
                   ),
@@ -255,7 +258,7 @@ class _ModeEditCardState extends State<ModeEditCard> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: Colors.blue,
+                color: AppTheme.taskColor,
               ),
             ),
             IconButton(icon: const Icon(Icons.close), onPressed: _cancelEdit),
@@ -300,8 +303,8 @@ class _ModeEditCardState extends State<ModeEditCard> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: phase.type == PhaseType.focus
-                              ? Colors.green
-                              : Colors.orange,
+                              ? AppTheme.focusColor
+                              : AppTheme.warningColor,
                           boxShadow: const [
                             BoxShadow(
                               color: Colors.black12,
@@ -338,14 +341,16 @@ class _ModeEditCardState extends State<ModeEditCard> {
                   height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.grey.shade200,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     border: Border.all(
-                      color: Colors.grey.shade400,
+                      color: Theme.of(context).dividerColor,
                       style: BorderStyle.solid,
                       width: 2,
                     ),
                   ),
-                  child: const Icon(Icons.add, color: Colors.grey),
+                  child: const Icon(Icons.add, color: AppTheme.wifiOffColor),
                 ),
               ),
             ],

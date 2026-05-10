@@ -1,49 +1,59 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  // ===== CORE PALETTE =====
+  static const Color taskColor = Color(0xFF2563EB);
+  static const Color focusColor = Color(0xFF16A34A);
+  static const Color habitColor = Color(0xFF7C3AED);
+  static const Color userColor = Color(0xFFDC2626);
+  static const Color warningAccent = Color(0xFFF59E0B);
+
+  static const Color inkLight = Color(0xFF111111);
+  static const Color inkDark = Color(0xFFF5F5F5);
+  static const Color paperLight = Color(0xFFFFF8EF);
+  static const Color paperAltLight = Color(0xFFF6EEDB);
+  static const Color paperDark = Color(0xFF151515);
+  static const Color paperAltDark = Color(0xFF202020);
+  static const Color borderLight = Color(0xFF111111);
+  static const Color borderDark = Color(0xFFF2E8D5);
+  static const Color shadowColor = Color(0xFF111111);
+
   // ===== SEMANTIC COLORS =====
-  static const Color successColor = Colors.green;
-  static const Color errorColor = Colors.red;
-  static const Color warningColor = Colors.amber;
-  static const Color infoColor = Colors.blue;
+  static const Color successColor = focusColor;
+  static const Color errorColor = userColor;
+  static const Color warningColor = warningAccent;
+  static const Color infoColor = taskColor;
 
   // Types colors
-  static const Color typeTaskColor = Colors.blue;
-  static const Color typeHabitColor = Colors.purple;
-  static const Color typeFocusColor = Colors.green;
+  static const Color typeTaskColor = taskColor;
+  static const Color typeHabitColor = habitColor;
+  static const Color typeFocusColor = focusColor;
 
   // Phase type colors
-  static const Color phaseFocusColor = Colors.blue;
-  static const Color phaseBreakShortColor = Colors.orange;
-  static const Color phaseBreakLongColor = Colors.orange;
-  static const Color phaseRestColor = Colors.grey;
-  static const Color phaseSnackColor = Colors.green;
-  static const Color phaseDistractedColor = Colors.red;
+  static const Color phaseFocusColor = focusColor;
+  static const Color phaseBreakShortColor = warningAccent;
+  static const Color phaseBreakLongColor = warningAccent;
+  static const Color phaseRestColor = Color(0xFF6B7280);
+  static const Color phaseSnackColor = habitColor;
+  static const Color phaseDistractedColor = userColor;
 
   // Status colors
-  static const Color statusCompleted = Colors.green;
-  static const Color statusOverdue = Colors.red;
-  static const Color statusDueToday = Color(
-    0xFFFBC02D,
-  ); // Colors.amber.shade600 equivalent
-  static const Color statusDefault = Colors.blue;
+  static const Color statusCompleted = focusColor;
+  static const Color statusOverdue = userColor;
+  static const Color statusDueToday = warningAccent;
+  static const Color statusDefault = taskColor;
 
   // Component colors
-  static const Color locationPinColor = Colors.red;
-  static const Color wifiOffColor = Colors.grey;
-  static const Color gaugeTrackLight = Color(
-    0xFF9E9E9E,
-  ); // Colors.grey.shade600
-  static const Color gaugeBgLight = Color(0xFFF5F5F5); // Colors.grey.shade100
+  static const Color locationPinColor = userColor;
+  static const Color wifiOffColor = Color(0xFF6B7280);
+  static const Color gaugeTrackLight = Color(0xFF7C7C7C);
+  static const Color gaugeBgLight = paperLight;
   static const Color gaugeWhite = Colors.white;
-  static const Color gaugeBorderLight = Color(
-    0xFFE0E0E0,
-  ); // Colors.grey.shade300
-  // Dark mode variants (use AppTheme constants instead of hardcoded colors)
-  static const Color gaugeBgDark = Color(0xFF121212);
-  static const Color gaugeBorderDark = Color(0xFF424242);
-  static const Color gaugeTrackDark = Color(0xFF757575);
-  static const Color gaugeLabelDark = Color(0xFFBDBDBD);
+  static const Color gaugeBorderLight = Color(0xFFE5DED1);
+  static const Color gaugeBgDark = paperDark;
+  static const Color gaugeBorderDark = Color(0xFF4A4A4A);
+  static const Color gaugeTrackDark = Color(0xFF8C8C8C);
+  static const Color gaugeLabelDark = Color(0xFFD4D4D4);
 
   // ===== TYPOGRAPHY =====
   // Font sizes for common components
@@ -105,6 +115,7 @@ class AppTheme {
   static const double radiusXLarge = 16;
   static const double radiusCircle = 20;
   static const double radiusCard = 25;
+  static const double radiusNeo = 14;
 
   // BorderRadius objects
   static const BorderRadius brSmall = BorderRadius.all(
@@ -125,6 +136,9 @@ class AppTheme {
   static const BorderRadius brCard = BorderRadius.all(
     Radius.circular(radiusCard),
   );
+  static const BorderRadius brNeo = BorderRadius.all(
+    Radius.circular(radiusNeo),
+  );
 
   // ===== DIMENSIONS =====
   static const double gaugeSize = 300;
@@ -136,6 +150,7 @@ class AppTheme {
   static const double listSectionIconSize = 12;
   static const double listSectionTitleSize = fsBodyLarge;
   static const double listTileBorderWidth = 2;
+  static const double neoBorderWidth = 3;
   static const double listTileTrailingSpacing = 8;
   static const double listTileSwipeIconSize = 24;
   static const EdgeInsets listTileScreenMargin = EdgeInsets.symmetric(
@@ -161,94 +176,245 @@ class AppTheme {
   static const double opacityVeryLight = 0.1;
   static const double opacityXLight = 0.2;
 
-  // Factory method to build theme dynamically based on seedColor and brightness
-  static ThemeData buildTheme({
-    required Color seedColor,
-    required Brightness brightness,
-  }) {
+  static Color _backgroundColor(Brightness brightness) {
+    return brightness == Brightness.dark ? paperDark : paperLight;
+  }
+
+  static Color _surfaceColor(Brightness brightness) {
+    return brightness == Brightness.dark ? paperAltDark : Colors.white;
+  }
+
+  static Color _surfaceAltColor(Brightness brightness) {
+    return brightness == Brightness.dark
+        ? const Color(0xFF2A2A2A)
+        : paperAltLight;
+  }
+
+  static Color _foregroundColor(Brightness brightness) {
+    return brightness == Brightness.dark ? inkDark : inkLight;
+  }
+
+  static Color _borderColor(Brightness brightness) {
+    return brightness == Brightness.dark ? borderDark : borderLight;
+  }
+
+  // Factory method to build the app theme with a Neobrutalist look.
+  static ThemeData buildTheme({required Brightness brightness}) {
     final isDark = brightness == Brightness.dark;
+    final backgroundColor = _backgroundColor(brightness);
+    final surfaceColor = _surfaceColor(brightness);
+    final surfaceAltColor = _surfaceAltColor(brightness);
+    final foregroundColor = _foregroundColor(brightness);
+    final borderColor = _borderColor(brightness);
+
+    final colorScheme = isDark
+        ? ColorScheme.dark(
+            primary: taskColor,
+            secondary: focusColor,
+            tertiary: habitColor,
+            error: userColor,
+            surface: surfaceColor,
+            onSurface: foregroundColor,
+            outline: borderColor,
+            surfaceContainerHighest: surfaceAltColor,
+            surfaceContainerHigh: surfaceAltColor,
+            surfaceContainer: surfaceColor,
+          )
+        : ColorScheme.light(
+            primary: taskColor,
+            secondary: focusColor,
+            tertiary: habitColor,
+            error: userColor,
+            surface: surfaceColor,
+            onSurface: foregroundColor,
+            outline: borderColor,
+            surfaceContainerHighest: surfaceAltColor,
+            surfaceContainerHigh: surfaceAltColor,
+            surfaceContainer: surfaceColor,
+          );
 
     return ThemeData(
       useMaterial3: true,
-      // This generates a color scheme based on your seed color
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: seedColor,
-        brightness: brightness,
+      brightness: brightness,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: backgroundColor,
+      canvasColor: backgroundColor,
+      dividerTheme: DividerThemeData(
+        color: borderColor,
+        thickness: 2,
+        space: 24,
       ),
-      // AppBar theming
+      iconTheme: IconThemeData(color: foregroundColor),
       appBarTheme: AppBarTheme(
-        backgroundColor: seedColor,
-        foregroundColor: Colors.white,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
         centerTitle: true,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          color: foregroundColor,
+          fontSize: AppTheme.fsHeadingMedium,
+          fontWeight: AppTheme.fwExtraBold,
+          letterSpacing: AppTheme.lsTight,
+        ),
+        iconTheme: IconThemeData(color: foregroundColor),
       ),
-      // FloatingActionButton theming
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: seedColor,
+        backgroundColor: taskColor,
         foregroundColor: Colors.white,
-        elevation: 2,
-      ),
-      // Card theming
-      cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: AppTheme.brLarge),
-        color: isDark ? Colors.grey.shade900 : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppTheme.brNeo,
+          side: BorderSide(color: borderColor, width: AppTheme.neoBorderWidth),
+        ),
       ),
-      // ElevatedButton theming
+      cardTheme: CardThemeData(
+        elevation: 6,
+        shadowColor: shadowColor,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppTheme.brNeo,
+          side: BorderSide(color: borderColor, width: AppTheme.neoBorderWidth),
+        ),
+        color: surfaceColor,
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
+          backgroundColor: taskColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shadowColor: shadowColor,
           padding: const EdgeInsets.symmetric(
             horizontal: AppTheme.spaceLarge,
             vertical: AppTheme.spaceMedium,
           ),
-          shape: RoundedRectangleBorder(borderRadius: AppTheme.brMedium),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppTheme.brNeo,
+            side: BorderSide(
+              color: borderColor,
+              width: AppTheme.neoBorderWidth,
+            ),
+          ),
         ),
       ),
-      // OutlinedButton theming
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
+          foregroundColor: foregroundColor,
+          side: BorderSide(color: borderColor, width: AppTheme.neoBorderWidth),
           padding: const EdgeInsets.symmetric(
             horizontal: AppTheme.spaceLarge,
             vertical: AppTheme.spaceMedium,
           ),
-          shape: RoundedRectangleBorder(borderRadius: AppTheme.brMedium),
+          shape: RoundedRectangleBorder(borderRadius: AppTheme.brNeo),
+          elevation: 0,
         ),
       ),
-      // TextButton theming
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
+          foregroundColor: foregroundColor,
           padding: const EdgeInsets.symmetric(
             horizontal: AppTheme.spaceMedium,
             vertical: AppTheme.spaceSmall,
           ),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppTheme.brNeo,
+            side: BorderSide(color: borderColor, width: 2),
+          ),
         ),
       ),
-      // Input decoration theming
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: taskColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppTheme.brNeo,
+            side: BorderSide(
+              color: borderColor,
+              width: AppTheme.neoBorderWidth,
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.spaceLarge,
+            vertical: AppTheme.spaceMedium,
+          ),
+        ),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: const WidgetStatePropertyAll(taskColor),
+        checkColor: const WidgetStatePropertyAll(Colors.white),
+        side: BorderSide(color: borderColor, width: 2),
+        shape: RoundedRectangleBorder(borderRadius: AppTheme.brSmall),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: const WidgetStatePropertyAll(Colors.white),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return taskColor;
+          return brightness == Brightness.dark
+              ? const Color(0xFF3A3A3A)
+              : const Color(0xFFBDBDBD);
+        }),
+        trackOutlineColor: WidgetStatePropertyAll(borderColor),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: backgroundColor,
+        selectedItemColor: taskColor,
+        unselectedItemColor: brightness == Brightness.dark
+            ? const Color(0xFF9A9A9A)
+            : const Color(0xFF666666),
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: surfaceAltColor,
+        selectedColor: taskColor,
+        secondarySelectedColor: focusColor,
+        disabledColor: surfaceAltColor.withValues(alpha: 0.8),
+        labelStyle: TextStyle(color: foregroundColor),
+        secondaryLabelStyle: const TextStyle(color: Colors.white),
+        side: BorderSide(color: borderColor, width: 2),
+        shape: RoundedRectangleBorder(borderRadius: AppTheme.brNeo),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spaceSmall,
+          vertical: AppTheme.spaceXSmall,
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surfaceColor,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppTheme.spaceMedium,
           vertical: AppTheme.spaceMedium,
         ),
-        border: OutlineInputBorder(borderRadius: AppTheme.brMedium),
+        border: OutlineInputBorder(
+          borderRadius: AppTheme.brNeo,
+          borderSide: BorderSide(color: borderColor, width: 2),
+        ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: AppTheme.brMedium,
-          borderSide: BorderSide(
-            color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-          ),
+          borderRadius: AppTheme.brNeo,
+          borderSide: BorderSide(color: borderColor, width: 2),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: AppTheme.brMedium,
-          borderSide: BorderSide(color: seedColor),
+          borderRadius: AppTheme.brNeo,
+          borderSide: BorderSide(color: taskColor, width: 3),
+        ),
+        labelStyle: TextStyle(color: foregroundColor),
+        hintStyle: TextStyle(color: foregroundColor.withValues(alpha: 0.65)),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: surfaceColor,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppTheme.brNeo,
+          side: BorderSide(color: borderColor, width: AppTheme.neoBorderWidth),
         ),
       ),
     );
   }
 
-  // Default light theme with blue seed color
-  static final ThemeData lightTheme = buildTheme(
-    seedColor: Colors.blue,
-    brightness: Brightness.light,
-  );
+  static final ThemeData lightTheme = buildTheme(brightness: Brightness.light);
+  static final ThemeData darkTheme = buildTheme(brightness: Brightness.dark);
 
   // Helper method to get phase color
   static Color getPhaseColor(String phaseType) {

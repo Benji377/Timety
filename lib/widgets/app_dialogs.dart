@@ -80,7 +80,7 @@ class AppDialogs {
             return AlertDialog(
               title: const Row(
                 children: [
-                  Icon(Icons.history, color: Colors.blue),
+                  Icon(Icons.history, color: AppTheme.taskColor),
                   SizedBox(width: 8),
                   Text("Log Past Session"),
                 ],
@@ -133,15 +133,13 @@ class AppDialogs {
                     ListTile(
                       shape: RoundedRectangleBorder(
                         borderRadius: AppTheme.brMedium,
-                        side: const BorderSide(
-                          color: AppTheme.gaugeBorderLight,
-                        ),
+                        side: const BorderSide(color: AppTheme.borderLight),
                       ),
                       title: const Text(
                         "Start Time",
                         style: TextStyle(
                           fontSize: AppTheme.fsLabel,
-                          color: Colors.grey,
+                          color: Colors.black54,
                         ),
                       ),
                       subtitle: Text(
@@ -180,15 +178,13 @@ class AppDialogs {
                     ListTile(
                       shape: RoundedRectangleBorder(
                         borderRadius: AppTheme.brMedium,
-                        side: const BorderSide(
-                          color: AppTheme.gaugeBorderLight,
-                        ),
+                        side: const BorderSide(color: AppTheme.borderLight),
                       ),
                       title: const Text(
                         "End Time",
                         style: TextStyle(
                           fontSize: AppTheme.fsLabel,
-                          color: Colors.grey,
+                          color: Colors.black54,
                         ),
                       ),
                       subtitle: Text(

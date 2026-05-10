@@ -63,11 +63,13 @@ class HabitListTile extends StatelessWidget {
             color: isCompleted
                 ? color
                 : (isLocked
-                      ? Colors.grey.withValues(alpha: 0.1)
+                      ? Theme.of(context).colorScheme.surfaceContainerHighest
                       : Colors.transparent),
             shape: BoxShape.circle,
             border: Border.all(
-              color: isLocked ? Colors.grey.withValues(alpha: 0.5) : color,
+              color: isLocked
+                  ? Theme.of(context).dividerColor
+                  : AppTheme.habitColor,
               width: 2,
             ),
           ),
@@ -77,7 +79,7 @@ class HabitListTile extends StatelessWidget {
                     ? const Icon(
                         Icons.lock_outline,
                         size: 14,
-                        color: Colors.grey,
+                        color: AppTheme.wifiOffColor,
                       )
                     : null),
         ),
@@ -87,7 +89,9 @@ class HabitListTile extends StatelessWidget {
           Icon(
             habit.iconData ?? Icons.circle,
             size: 18,
-            color: isCompleted ? Colors.grey : (isLocked ? Colors.grey : color),
+            color: isCompleted
+                ? Theme.of(context).colorScheme.onSurfaceVariant
+                : (isLocked ? AppTheme.wifiOffColor : AppTheme.habitColor),
           ),
           const SizedBox(width: AppTheme.spaceSmall),
           Expanded(
@@ -97,7 +101,7 @@ class HabitListTile extends StatelessWidget {
                 fontWeight: AppTheme.fwBold,
                 decoration: isCompleted ? TextDecoration.lineThrough : null,
                 color: isCompleted || isLocked
-                    ? Colors.grey
+                    ? Theme.of(context).colorScheme.onSurfaceVariant
                     : null,
               ),
             ),
@@ -116,9 +120,9 @@ class HabitListTile extends StatelessWidget {
             ),
           Text(
             subtitleText,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: AppTheme.fsLabel,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           if (progressValue != null && !isCompleted)

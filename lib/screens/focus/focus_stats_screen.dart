@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import '../../theme/app_theme.dart';
 import '../../data/focus/focus_models.dart';
 import '../../providers/focus_provider.dart';
 import '../../utils/date_utils.dart';
@@ -127,12 +128,12 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Theme.of(context).colorScheme.primary
+                                ? AppTheme.taskColor
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
+                                  ? AppTheme.taskColor
                                   : Colors.grey.shade300,
                             ),
                           ),
@@ -160,7 +161,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                     child: CustomPaint(
                       painter: _ClockPainter(
                         sessions: clockSessions,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppTheme.taskColor,
                       ),
                       child: Center(
                         child: Column(
@@ -271,8 +272,8 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                       fontSize: 12,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                       color: isToday
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey,
+                          ? AppTheme.taskColor
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );
@@ -299,8 +300,8 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
               BarChartRodData(
                 toY: dailyMins[index].toDouble(),
                 color: isToday
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.blue.shade200,
+                    ? AppTheme.taskColor
+                    : AppTheme.taskColor.withValues(alpha: 0.25),
                 width: 16,
                 borderRadius: BorderRadius.circular(4),
                 backDrawRodData: BackgroundBarChartRodData(

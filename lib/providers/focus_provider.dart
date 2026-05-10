@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
@@ -59,7 +60,7 @@ class FocusProvider extends ChangeNotifier {
       final defaultTag = FocusTag(
         id: 'default_tag',
         name: 'None',
-        colorValue: Colors.green.toARGB32(),
+        colorValue: AppTheme.focusColor.toARGB32(),
       );
       await repository.saveTag(defaultTag);
       _tags.add(defaultTag);

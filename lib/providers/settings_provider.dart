@@ -6,7 +6,6 @@ class SettingsProvider extends ChangeNotifier {
 
   // Default Values
   ThemeMode _themeMode = ThemeMode.system;
-  Color _seedColor = Colors.blue;
   bool _notificationsEnabled = true;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 8, minute: 0);
   int _dailyGoalMins = 90;
@@ -15,7 +14,6 @@ class SettingsProvider extends ChangeNotifier {
 
   // Getters
   ThemeMode get themeMode => _themeMode;
-  Color get seedColor => _seedColor;
   bool get notificationsEnabled => _notificationsEnabled;
   TimeOfDay get notificationTime => _notificationTime;
   int get dailyGoalMins => _dailyGoalMins;
@@ -33,9 +31,6 @@ class SettingsProvider extends ChangeNotifier {
     // Theme
     final themeIndex = _prefs?.getInt('themeMode') ?? ThemeMode.system.index;
     _themeMode = ThemeMode.values[themeIndex];
-
-    final colorValue = _prefs?.getInt('seedColor') ?? Colors.blue.toARGB32();
-    _seedColor = Color(colorValue);
 
     // Notifications
     _notificationsEnabled = _prefs?.getBool('notificationsEnabled') ?? true;
@@ -55,12 +50,6 @@ class SettingsProvider extends ChangeNotifier {
   void setThemeMode(ThemeMode mode) {
     _themeMode = mode;
     _prefs?.setInt('themeMode', mode.index);
-    notifyListeners();
-  }
-
-  void setSeedColor(Color color) {
-    _seedColor = color;
-    _prefs?.setInt('seedColor', color.toARGB32());
     notifyListeners();
   }
 

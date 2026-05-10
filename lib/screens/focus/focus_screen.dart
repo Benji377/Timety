@@ -26,18 +26,26 @@ class FocusScreen extends StatelessWidget {
   void _showDistractionSheet(BuildContext context, FocusProvider provider) {
     // Fixed list of possible events
     final events = [
-      {'name': 'Distracted', 'icon': Icons.warning_amber, 'color': Colors.red},
+      {
+        'name': 'Distracted',
+        'icon': Icons.warning_amber,
+        'color': AppTheme.errorColor,
+      },
       {
         'name': 'Hydrated / Drink',
         'icon': Icons.water_drop,
-        'color': Colors.blue,
+        'color': AppTheme.taskColor,
       },
       {
         'name': 'Stretched',
         'icon': Icons.accessibility_new,
-        'color': Colors.orange,
+        'color': AppTheme.warningColor,
       },
-      {'name': 'Snack', 'icon': Icons.restaurant, 'color': Colors.green},
+      {
+        'name': 'Snack',
+        'icon': Icons.restaurant,
+        'color': AppTheme.successColor,
+      },
       {'name': 'Restroom', 'icon': Icons.wc, 'color': Colors.grey},
     ];
 
@@ -124,7 +132,10 @@ class FocusScreen extends StatelessWidget {
                         ),
                       ),
                       trailing: isSelected
-                          ? const Icon(Icons.check, color: Colors.green)
+                          ? const Icon(
+                              Icons.check,
+                              color: AppTheme.successColor,
+                            )
                           : null,
                       onTap: () {
                         provider.setSelectedTag(tag);
@@ -152,7 +163,7 @@ class FocusScreen extends StatelessWidget {
 
   void _showCreateTagDialog(BuildContext context, FocusProvider provider) {
     final TextEditingController controller = TextEditingController();
-    Color selectedColor = Colors.blue;
+    Color selectedColor = AppTheme.taskColor;
 
     showDialog(
       context: context,
@@ -308,7 +319,7 @@ class FocusScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
                         color: (isRunning || isPaused)
-                            ? Colors.grey
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
                             : Theme.of(context).colorScheme.primary,
                       ),
                     ),
@@ -480,10 +491,10 @@ class FocusScreen extends StatelessWidget {
                   shape: const CircleBorder(),
                   elevation: 4,
                   backgroundColor: isRunning
-                      ? Colors.red.shade100
+                      ? AppTheme.errorColor.withValues(alpha: 0.15)
                       : Theme.of(context).colorScheme.primaryContainer,
                   foregroundColor: isRunning
-                      ? Colors.red
+                      ? AppTheme.errorColor
                       : Theme.of(context).colorScheme.primary,
                   onPressed: () {
                     if (isRunning) {

@@ -163,7 +163,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             _CalendarHeaderCell('F'),
                             _CalendarHeaderCell('S'),
                             _CalendarHeaderCell('S'),
-                            _CalendarHeaderCell('Weekly', color: Colors.blue),
+                            _CalendarHeaderCell(
+                              'Weekly',
+                              color: AppTheme.taskColor,
+                            ),
                           ],
                         ),
                         ...weeks.map((week) {
@@ -236,11 +239,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       margin: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                         color: isSelected
-                                            ? Colors.blue.withValues(alpha: 0.2)
+                                            ? AppTheme.taskColor.withValues(
+                                                alpha: 0.2,
+                                              )
                                             : Colors.transparent,
                                         border: isToday
                                             ? Border.all(
-                                                color: Colors.blue,
+                                                color: AppTheme.taskColor,
                                                 width: 2,
                                               )
                                             : null,
@@ -276,7 +281,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   height: 5,
                                                   decoration:
                                                       const BoxDecoration(
-                                                        color: Colors.blue,
+                                                        color:
+                                                            AppTheme.taskColor,
                                                         shape: BoxShape.circle,
                                                       ),
                                                 ),
@@ -290,7 +296,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   height: 5,
                                                   decoration:
                                                       const BoxDecoration(
-                                                        color: Colors.green,
+                                                        color: AppTheme
+                                                            .successColor,
                                                         shape: BoxShape.circle,
                                                       ),
                                                 ),
@@ -303,7 +310,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   height: 5,
                                                   decoration:
                                                       const BoxDecoration(
-                                                        color: Colors.purple,
+                                                        color:
+                                                            AppTheme.habitColor,
                                                         shape: BoxShape.circle,
                                                       ),
                                                 ),
@@ -335,7 +343,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           TextSpan(
                                             text: '$weeklyTaskCount',
                                             style: const TextStyle(
-                                              color: Colors.blue,
+                                              color: AppTheme.taskColor,
                                             ),
                                           ),
                                           TextSpan(
@@ -347,7 +355,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           TextSpan(
                                             text: '$weeklyHabitCount',
                                             style: const TextStyle(
-                                              color: Colors.purple,
+                                              color: AppTheme.habitColor,
                                             ),
                                           ),
                                           TextSpan(
@@ -359,7 +367,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           TextSpan(
                                             text: '$weeklyFocusCount',
                                             style: const TextStyle(
-                                              color: Colors.green,
+                                              color: AppTheme.successColor,
                                             ),
                                           ),
                                         ],
@@ -409,11 +417,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               "Habits (${selectedDayHabits.length})",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.purple,
+                                color: AppTheme.habitColor,
                               ),
                             ),
-                            iconColor: Colors.purple,
-                            collapsedIconColor: Colors.purple,
+                            iconColor: AppTheme.habitColor,
+                            collapsedIconColor: AppTheme.habitColor,
                             children: selectedDayHabits.isEmpty
                                 ? [
                                     const Padding(
@@ -437,10 +445,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                             color: isCompleted
-                                                ? Colors.purple.withValues(
-                                                    alpha: 0.3,
-                                                  )
-                                                : Colors.purple,
+                                                ? AppTheme.habitColor
+                                                      .withValues(alpha: 0.3)
+                                                : AppTheme.habitColor,
                                             width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
@@ -450,7 +457,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         child: ListTile(
                                           leading: Checkbox(
                                             value: isCompleted,
-                                            activeColor: Colors.purple,
+                                            activeColor: AppTheme.habitColor,
                                             onChanged: (_) {
                                               // Time-Travel Logging!
                                               if (isCompleted) {
@@ -507,11 +514,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               "Tasks (${selectedDayTasks.length})",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                                color: AppTheme.taskColor,
                               ),
                             ),
-                            iconColor: Colors.blue,
-                            collapsedIconColor: Colors.blue,
+                            iconColor: AppTheme.taskColor,
+                            collapsedIconColor: AppTheme.taskColor,
                             children: selectedDayTasks.isEmpty
                                 ? [
                                     const Padding(
@@ -533,8 +540,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                             color: task.isCompleted
-                                                ? Colors.green
-                                                : Colors.blue,
+                                                ? AppTheme.successColor
+                                                : AppTheme.taskColor,
                                             width: 1,
                                           ),
                                           borderRadius: BorderRadius.circular(
@@ -589,11 +596,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               "Focus Sessions (${selectedDaySessions.length})",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                                color: AppTheme.successColor,
                               ),
                             ),
-                            iconColor: Colors.green,
-                            collapsedIconColor: Colors.green,
+                            iconColor: AppTheme.successColor,
+                            collapsedIconColor: AppTheme.successColor,
                             children: selectedDaySessions.isEmpty
                                 ? [
                                     const Padding(
@@ -689,7 +696,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           trailing: Text(
                                             '${focusMins}m focus',
                                             style: const TextStyle(
-                                              color: Colors.green,
+                                              color: AppTheme.successColor,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),

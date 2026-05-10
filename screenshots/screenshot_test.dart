@@ -15,6 +15,7 @@ import 'package:timety/providers/habit_provider.dart';
 import 'package:timety/providers/settings_provider.dart';
 import 'package:timety/providers/task_provider.dart';
 import 'package:timety/providers/user_provider.dart';
+import 'package:timety/theme/app_theme.dart';
 import 'package:timety/utils/xp_calculator.dart';
 
 // How to execute:
@@ -96,7 +97,6 @@ Future<void> _seedMockData(BuildContext context) async {
   await userProvider.updateName("Bobert");
   await userProvider.addXp(-userProvider.totalXp);
   settings.setThemeMode(ThemeMode.light);
-  settings.setSeedColor(Colors.teal);
   settings.setDailyGoal(120);
   settings.setNotificationsEnabled(false);
 
@@ -115,7 +115,7 @@ Future<void> _seedMockData(BuildContext context) async {
       frequency: HabitFrequency.daily,
       stackName: 'Morning Routine',
       stackOrder: 1,
-      colorValue: Colors.blue.toARGB32(),
+      colorValue: AppTheme.habitColor.toARGB32(),
     ),
   );
 
@@ -127,7 +127,7 @@ Future<void> _seedMockData(BuildContext context) async {
       stackName: 'Morning Routine',
       stackOrder: 2,
       completions: [dayStart.add(const Duration(hours: 7, minutes: 15))],
-      colorValue: Colors.purple.toARGB32(),
+      colorValue: AppTheme.habitColor.toARGB32(),
     ),
   );
 
@@ -138,7 +138,7 @@ Future<void> _seedMockData(BuildContext context) async {
       frequency: HabitFrequency.weeklyExact,
       targetWeekdays: [today.weekday],
       notes: 'Keep the momentum going before lunch.',
-      colorValue: Colors.orange.toARGB32(),
+      colorValue: AppTheme.habitColor.toARGB32(),
     ),
   );
 
@@ -159,7 +159,7 @@ Future<void> _seedMockData(BuildContext context) async {
             .subtract(const Duration(days: 1))
             .add(const Duration(hours: 18)),
       ],
-      colorValue: Colors.green.toARGB32(),
+      colorValue: AppTheme.habitColor.toARGB32(),
     ),
   );
 

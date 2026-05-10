@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../theme/app_theme.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
 import '../../utils/date_utils.dart';
@@ -170,7 +171,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                         const Icon(
                           Icons.auto_awesome,
                           size: 32,
-                          color: Colors.amber,
+                          color: AppTheme.warningColor,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -196,14 +197,18 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.circle, size: 12, color: Colors.orange.shade300),
+                    Icon(Icons.circle, size: 12, color: AppTheme.warningColor),
                     const SizedBox(width: 4),
                     const Text(
                       "Created",
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.circle, size: 12, color: Colors.green),
+                    const Icon(
+                      Icons.circle,
+                      size: 12,
+                      color: AppTheme.successColor,
+                    ),
                     const SizedBox(width: 4),
                     const Text(
                       "Completed",
@@ -301,7 +306,9 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                      color: isToday ? Colors.blue : Colors.grey,
+                      color: isToday
+                          ? AppTheme.taskColor
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );
@@ -327,13 +334,13 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
             barRods: [
               BarChartRodData(
                 toY: velocityData[index][0].toDouble(),
-                color: Colors.orange.shade300,
+                color: AppTheme.warningColor,
                 width: 10,
                 borderRadius: BorderRadius.circular(2),
               ),
               BarChartRodData(
                 toY: velocityData[index][1].toDouble(),
-                color: Colors.green,
+                color: AppTheme.successColor,
                 width: 10,
                 borderRadius: BorderRadius.circular(2),
               ),
@@ -384,7 +391,9 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                      color: isToday ? Colors.green : Colors.grey,
+                      color: isToday
+                          ? AppTheme.successColor
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );
@@ -410,7 +419,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
             barRods: [
               BarChartRodData(
                 toY: dailyCounts[index].toDouble(),
-                color: isToday ? Colors.green : Colors.blue.shade300,
+                color: isToday ? AppTheme.successColor : AppTheme.taskColor,
                 width: 16,
                 borderRadius: BorderRadius.circular(4),
                 backDrawRodData: BackgroundBarChartRodData(
@@ -433,12 +442,12 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     }
 
     final colors = [
-      Colors.blue,
-      Colors.red,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.teal,
+      AppTheme.taskColor,
+      AppTheme.errorColor,
+      AppTheme.successColor,
+      AppTheme.warningColor,
+      AppTheme.habitColor,
+      Theme.of(context).colorScheme.primaryContainer,
     ];
     int colorIndex = 0;
 

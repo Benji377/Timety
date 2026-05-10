@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/task/task.dart';
+import '../../theme/app_theme.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/expansion_section.dart';
@@ -174,10 +175,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           hintText: 'Search title or description...',
                           prefixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: AppTheme.brNeo,
                           ),
                           contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
+                            horizontal: AppTheme.spaceMedium,
+                            vertical: AppTheme.spaceSmall,
                           ),
                         ),
                         onChanged: (val) => setState(() => _searchQuery = val),
@@ -330,16 +332,20 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     return ListView(
                       padding: const EdgeInsets.only(bottom: 80),
                       children: [
-                        _buildTaskSection('Overdue', Colors.red, overdue),
+                        _buildTaskSection(
+                          'Overdue',
+                          AppTheme.errorColor,
+                          overdue,
+                        ),
                         _buildTaskSection(
                           'Due Today',
-                          Colors.amber.shade700,
+                          AppTheme.warningColor,
                           dueToday,
                         ),
-                        _buildTaskSection('To Do', Colors.blue, todo),
+                        _buildTaskSection('To Do', AppTheme.taskColor, todo),
                         _buildTaskSection(
                           'Done',
-                          Colors.green,
+                          AppTheme.successColor,
                           done,
                           initExpanded: false,
                         ),

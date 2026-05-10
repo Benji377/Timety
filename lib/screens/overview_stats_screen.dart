@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../theme/app_theme.dart';
 import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
@@ -67,7 +68,7 @@ class OverviewStatsScreen extends StatelessWidget {
                 title: "Tasks Done",
                 value: "$tasksCompletedToday",
                 icon: Icons.task_alt,
-                color: Colors.green,
+                color: AppTheme.successColor,
               ),
             ),
             const SizedBox(width: 16),
@@ -76,7 +77,7 @@ class OverviewStatsScreen extends StatelessWidget {
                 title: "Focus Time",
                 value: "${focusMinsToday}m",
                 icon: Icons.timer,
-                color: Colors.blue,
+                color: AppTheme.taskColor,
               ),
             ),
           ],
@@ -87,7 +88,7 @@ class OverviewStatsScreen extends StatelessWidget {
           value:
               "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
           icon: Icons.track_changes,
-          color: Colors.orange,
+          color: AppTheme.warningColor,
         ),
 
         const SizedBox(height: 40),
@@ -108,7 +109,7 @@ class OverviewStatsScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.circle, size: 12, color: Colors.blue.shade400),
+            Icon(Icons.circle, size: 12, color: AppTheme.taskColor),
             const SizedBox(width: 4),
             const Text(
               "Focus Mins",
@@ -119,7 +120,7 @@ class OverviewStatsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 24),
-            Icon(Icons.circle, size: 12, color: Colors.green.shade400),
+            Icon(Icons.circle, size: 12, color: AppTheme.successColor),
             const SizedBox(width: 4),
             const Text(
               "Tasks Done",
@@ -195,7 +196,7 @@ class OverviewStatsScreen extends StatelessWidget {
                   return LineTooltipItem(
                     '${dailyFocus[dayIndex]} mins\n',
                     TextStyle(
-                      color: Colors.blue.shade300,
+                      color: AppTheme.taskColor,
                       fontWeight: FontWeight.bold,
                     ),
                   );
@@ -203,7 +204,7 @@ class OverviewStatsScreen extends StatelessWidget {
                   return LineTooltipItem(
                     '${dailyTasks[dayIndex]} tasks',
                     TextStyle(
-                      color: Colors.green.shade300,
+                      color: AppTheme.successColor,
                       fontWeight: FontWeight.bold,
                     ),
                   );
@@ -230,7 +231,7 @@ class OverviewStatsScreen extends StatelessWidget {
                       fontSize: 12,
                       color: isToday
                           ? Theme.of(context).colorScheme.primary
-                          : Colors.grey,
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
@@ -276,13 +277,13 @@ class OverviewStatsScreen extends StatelessWidget {
             spots: focusSpots,
             isCurved: true,
             preventCurveOverShooting: true,
-            color: Colors.blue.shade400,
+            color: AppTheme.taskColor,
             barWidth: 3,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.blue.withValues(alpha: 0.1),
+              color: AppTheme.taskColor.withValues(alpha: 0.1),
             ),
           ),
           // 2. TASK LINE
@@ -290,13 +291,13 @@ class OverviewStatsScreen extends StatelessWidget {
             spots: taskSpots,
             isCurved: true,
             preventCurveOverShooting: true,
-            color: Colors.green.shade400,
+            color: AppTheme.successColor,
             barWidth: 3,
             isStrokeCapRound: true,
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.green.withValues(alpha: 0.1),
+              color: AppTheme.successColor.withValues(alpha: 0.1),
             ),
           ),
         ],

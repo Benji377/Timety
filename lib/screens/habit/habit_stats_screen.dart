@@ -207,18 +207,13 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                     margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
-                        color: Color(
-                          habit.colorValue,
-                        ).withValues(alpha: AppTheme.opacityLight),
-                        width: 1,
+                        color: AppTheme.habitColor,
+                        width: AppTheme.neoBorderWidth,
                       ),
-                      borderRadius: AppTheme.brMedium,
+                      borderRadius: AppTheme.brNeo,
                     ),
                     child: ListTile(
-                      leading: Icon(
-                        Icons.stars,
-                        color: Color(habit.colorValue),
-                      ),
+                      leading: Icon(Icons.stars, color: AppTheme.habitColor),
                       title: Text(
                         habit.name,
                         style: const TextStyle(fontWeight: AppTheme.fwBold),
@@ -352,10 +347,10 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     }
 
     final colorMap = {
-      'Morning': Colors.orange.shade300,
-      'Afternoon': Colors.blue.shade400,
-      'Evening': Colors.indigo.shade400,
-      'Night': Colors.deepPurple.shade800,
+      'Morning': AppTheme.warningColor,
+      'Afternoon': AppTheme.taskColor,
+      'Evening': AppTheme.habitColor,
+      'Night': AppTheme.userColor,
     };
 
     List<PieChartSectionData> sections = [];

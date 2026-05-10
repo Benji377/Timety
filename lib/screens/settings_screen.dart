@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../theme/app_theme.dart';
 import '../providers/settings_provider.dart';
 import '../services/backup_service.dart';
 
@@ -72,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text(
         title.toUpperCase(),
         style: TextStyle(
-          color: Theme.of(context).colorScheme.primary,
+          color: AppTheme.taskColor,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
           fontSize: 12,
@@ -114,40 +115,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
-            title: const Text('Accent Color'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  [Colors.blue, Colors.green, Colors.purple, Colors.orange].map(
-                    (color) {
-                      final isSelected =
-                          settings.seedColor.toARGB32() == color.toARGB32();
-                      return GestureDetector(
-                        onTap: () => settings.setSeedColor(color),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: isSelected
-                                ? Border.all(color: Colors.white, width: 2)
-                                : null,
-                            boxShadow: isSelected
-                                ? [
-                                    const BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 4,
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                        ),
-                      );
-                    },
-                  ).toList(),
+            title: const Text('Color Roles'),
+            subtitle: const Text(
+              'Blue = Task, Green = Focus, Purple = Habit, Red = User',
             ),
+            trailing: const Icon(Icons.lock_outline),
           ),
 
           const Divider(height: 32),
@@ -232,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(
               Icons.cloud_upload_outlined,
-              color: Colors.blue,
+              color: AppTheme.taskColor,
             ),
             title: const Text('Export Backup'),
             subtitle: const Text(
@@ -241,7 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => BackupService.exportBackup(context),
           ),
           ListTile(
-            leading: const Icon(Icons.restore, color: Colors.orange),
+            leading: const Icon(Icons.restore, color: AppTheme.warningColor),
             title: const Text('Restore Backup'),
             subtitle: const Text(
               'Overwrite current data from a backup zip file',
@@ -268,7 +240,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     padding: EdgeInsets.only(top: 24.0, bottom: 8.0),
                     child: CircleAvatar(
                       radius: 30,
-                      backgroundColor: Colors.blue,
+                      backgroundColor: AppTheme.taskColor,
                       child: Icon(
                         Icons.rocket_launch,
                         size: 30,

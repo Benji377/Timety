@@ -207,7 +207,7 @@ class _LocationPickerState extends State<LocationPicker> {
                 point: _selectedPosition!,
                 child: const Icon(
                   Icons.location_pin,
-                  color: Colors.red,
+                  color: AppTheme.errorColor,
                   size: 40,
                 ),
               ),
