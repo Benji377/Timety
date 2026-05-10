@@ -89,6 +89,8 @@ class Habit {
     }
   }
 
-  // Keep persisted data compatible, but render a fixed icon to allow icon font tree-shaking.
-  IconData? get iconData => iconCodePoint != null ? Icons.circle : null;
+  // Keep persisted data compatible while rendering the saved Material icon.
+  IconData? get iconData => iconCodePoint != null
+      ? IconData(iconCodePoint!, fontFamily: 'MaterialIcons')
+      : null;
 }

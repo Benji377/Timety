@@ -113,14 +113,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.palette_outlined),
-            title: const Text('Color Roles'),
-            subtitle: const Text(
-              'Blue = Task, Green = Focus, Purple = Habit, Red = User',
-            ),
-            trailing: const Icon(Icons.lock_outline),
-          ),
 
           const Divider(height: 32),
 
@@ -180,6 +172,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Get a reminder to crush your goals'),
             value: settings.notificationsEnabled,
             activeThumbColor: Theme.of(context).colorScheme.primary,
+            activeTrackColor: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.4),
             onChanged: (val) => settings.setNotificationsEnabled(val),
           ),
           ListTile(

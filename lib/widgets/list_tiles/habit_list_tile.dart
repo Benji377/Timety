@@ -39,6 +39,7 @@ class HabitListTile extends StatelessWidget {
 
   Widget _buildCard(BuildContext context) {
     final color = _color;
+    final habitIcon = habit.iconData ?? Icons.circle;
 
     final listTile = ListTile(
       leading: InkWell(
@@ -57,37 +58,27 @@ class HabitListTile extends StatelessWidget {
             : onToggleCompleted,
         borderRadius: AppTheme.brCircle,
         child: Container(
-          width: 28,
-          height: 28,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             color: isCompleted
                 ? color
-                : (isLocked
-                      ? Theme.of(context).colorScheme.surfaceContainerHighest
-                      : Colors.transparent),
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
             shape: BoxShape.circle,
             border: Border.all(
-              color: isLocked
-                  ? Theme.of(context).dividerColor
-                  : AppTheme.habitColor,
+              color: isCompleted
+                  ? color
+                  : (isLocked ? AppTheme.warningColor : AppTheme.habitColor),
               width: 2,
             ),
           ),
-          child: isCompleted
-              ? const Icon(Icons.check, size: 18, color: Colors.white)
-              : (isLocked
-                    ? const Icon(
-                        Icons.lock_outline,
-                        size: 14,
-                        color: AppTheme.wifiOffColor,
-                      )
-                    : null),
+          child: null,
         ),
       ),
       title: Row(
         children: [
           Icon(
-            habit.iconData ?? Icons.circle,
+            habitIcon,
             size: 18,
             color: isCompleted
                 ? Theme.of(context).colorScheme.onSurfaceVariant

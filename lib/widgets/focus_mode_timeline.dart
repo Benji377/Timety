@@ -20,6 +20,10 @@ class ModeTimeline extends StatelessWidget {
 
     List<Widget> nodes = [];
     bool isCompleted = currentPhaseIndex >= phases.length;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final completionFill = isDark
+        ? AppTheme.paperLight
+        : AppTheme.paperAltLight;
 
     // Helper to build a node (dot)
     Widget buildDot(Color color, bool isActive) {
@@ -48,24 +52,46 @@ class ModeTimeline extends StatelessWidget {
       );
     }
 
+    Widget buildCompletionNode(bool isActive) {
+      return Container(
+        width: isActive ? 22 : 16,
+        height: isActive ? 22 : 16,
+        decoration: BoxDecoration(
+          color: completionFill,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline,
+            width: isActive ? 3 : 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(
+                context,
+              ).colorScheme.shadow.withValues(alpha: 0.12),
+              blurRadius: 6,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+      );
+    }
+
     // Helper to build the connecting line
     Widget buildLine(bool isPast) {
+      final lineColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
       return Container(
         width: 24,
         height: 3,
         // Only darken past lines if the timer is actually running
         color: (isRunning && isPast)
-            ? AppTheme.borderLight.withValues(alpha: 0.6)
-            : AppTheme.borderLight.withValues(alpha: 0.2),
+            ? lineColor.withValues(alpha: 0.6)
+            : lineColor.withValues(alpha: 0.2),
       );
     }
 
     // 1. Start Node
     nodes.add(
-      buildDot(
-        AppTheme.borderLight.withValues(alpha: 0.7),
-        isRunning && currentPhaseIndex == 0 && !isCompleted,
-      ),
+      buildCompletionNode(isRunning && currentPhaseIndex == 0 && !isCompleted),
     );
 
     // 2. Phase Nodes
@@ -88,12 +114,7 @@ class ModeTimeline extends StatelessWidget {
 
     // 3. End Node
     nodes.add(buildLine(isCompleted));
-    nodes.add(
-      buildDot(
-        AppTheme.borderLight.withValues(alpha: 0.7),
-        isRunning && isCompleted,
-      ),
-    );
+    nodes.add(buildCompletionNode(isRunning && isCompleted));
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

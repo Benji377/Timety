@@ -491,11 +491,9 @@ class FocusScreen extends StatelessWidget {
                   shape: const CircleBorder(),
                   elevation: 4,
                   backgroundColor: isRunning
-                      ? AppTheme.errorColor.withValues(alpha: 0.15)
-                      : Theme.of(context).colorScheme.primaryContainer,
-                  foregroundColor: isRunning
                       ? AppTheme.errorColor
-                      : Theme.of(context).colorScheme.primary,
+                      : Theme.of(context).colorScheme.primaryContainer,
+                  foregroundColor: Colors.white,
                   onPressed: () {
                     if (isRunning) {
                       focusProvider.stopSession(
@@ -506,7 +504,7 @@ class FocusScreen extends StatelessWidget {
                     }
                   },
                   child: Icon(
-                    isRunning ? Icons.stop : Icons.play_arrow,
+                    isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded,
                     size: 40,
                   ),
                 ),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/habit_icons.dart';
 
 class HabitDetailScreen extends StatefulWidget {
   final Habit? habit;
@@ -21,7 +22,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
   late TextEditingController _stackController;
 
   HabitFrequency _frequency = HabitFrequency.daily;
-  Color _selectedColor = AppTheme.habitColor;
+  IconData _selectedIcon = Icons.circle;
   TimeOfDay? _targetTime;
   int? _stackOrder;
 
@@ -42,7 +43,8 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
 
     if (widget.habit != null) {
       _frequency = widget.habit!.frequency;
-      _selectedColor = AppTheme.habitColor;
+      _selectedIcon =
+          _getIconFromCodePoint(widget.habit!.iconCodePoint) ?? Icons.circle;
       _targetTime = widget.habit!.targetTime;
       _stackOrder = widget.habit!.stackOrder; // Init stack order
       _targetDaysPerWeek = widget.habit!.targetDaysPerWeek ?? 3;
@@ -58,6 +60,19 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     _notesController.dispose();
     _stackController.dispose();
     super.dispose();
+  }
+
+  /// Convert a codePoint back to an IconData object
+  IconData? _getIconFromCodePoint(int? codePoint) {
+    if (codePoint == null) return null;
+    try {
+      return HabitIcons.availableIcons.firstWhere(
+        (icon) => icon.codePoint == codePoint,
+        orElse: () => Icons.circle,
+      );
+    } catch (e) {
+      return Icons.circle;
+    }
   }
 
   void _saveHabit() {
@@ -82,7 +97,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
           ? null
           : _stackController.text.trim(),
       stackOrder: _stackOrder,
-      iconCodePoint: Icons.circle.codePoint,
+      iconCodePoint: _selectedIcon.codePoint,
       targetDaysPerWeek: _frequency == HabitFrequency.weeklyFlexible
           ? _targetDaysPerWeek
           : null,
@@ -208,23 +223,41 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               ),
               maxLines: 2,
             ),
-            const SizedBox(height: AppTheme.spaceXLarge),
+            const SizedBox(height: AppTheme.spaceLarge),
 
-            // --- COLOR PICKER ---
+            // --- ICON SELECTOR ---
             const Text(
-              "Habit Color",
+              'Select an Icon',
               style: TextStyle(fontWeight: AppTheme.fwBold),
             ),
             const SizedBox(height: AppTheme.spaceSmall),
-            Card(
-              child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: AppTheme.habitColor,
-                ),
-                title: const Text('Habit color is standardized'),
-                subtitle: const Text(
-                  'Purple is used for habits across the app.',
-                ),
+            SizedBox(
+              height: 140,
+              child: GridView.count(
+                crossAxisCount: 6,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                children: HabitIcons.availableIcons.map((icon) {
+                  final isSelected = icon.codePoint == _selectedIcon.codePoint;
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedIcon = icon),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: isSelected
+                              ? AppTheme.taskColor
+                              : Colors.transparent,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: isSelected ? AppTheme.taskColor : null,
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
             const SizedBox(height: AppTheme.spaceXLarge),
@@ -272,7 +305,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                         min: 1,
                         max: 7,
                         divisions: 7,
-                        activeColor: _selectedColor,
+                        activeColor: AppTheme.habitColor,
                         onChanged: (val) =>
                             setState(() => _targetDaysPerWeek = val.toInt()),
                       ),
@@ -292,7 +325,9 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                       return ChoiceChip(
                         label: Text(dayLabels[day - 1]),
                         selected: isSelected,
-                        selectedColor: _selectedColor.withValues(alpha: 0.3),
+                        selectedColor: AppTheme.habitColor.withValues(
+                          alpha: 0.3,
+                        ),
                         onSelected: (selected) {
                           setState(() {
                             if (selected) {
@@ -321,7 +356,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               child: ListTile(
                 leading: Icon(
                   Icons.notifications_active,
-                  color: _selectedColor,
+                  color: AppTheme.habitColor,
                 ),
                 title: Text(
                   _targetTime != null
@@ -351,7 +386,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _saveHabit,
-        backgroundColor: _selectedColor,
+        backgroundColor: AppTheme.habitColor,
         icon: const Icon(Icons.save),
         label: const Text("Save Habit"),
       ),
