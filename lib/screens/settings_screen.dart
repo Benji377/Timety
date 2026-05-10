@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
@@ -13,7 +14,14 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  late final Future<String> _appVersionFuture = _loadAppVersion();
+
   // --- UI HELPERS ---
+  Future<String> _loadAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    return 'Version ${packageInfo.version}';
+  }
+
   void _showNumberPickerDialog(
     String title,
     int currentValue,
@@ -250,9 +258,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     "Timety",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  const Text(
-                    "Version 1.1.4",
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  FutureBuilder<String>(
+                    future: _appVersionFuture,
+                    builder: (context, snapshot) {
+                      final versionText = snapshot.data ?? 'Version';
+                      return Text(
+                        versionText,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   const ListTile(
