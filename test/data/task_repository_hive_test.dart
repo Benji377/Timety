@@ -24,11 +24,7 @@ void main() {
 
     await box.put(
       'old-task',
-      Task(
-        id: 'old-task',
-        title: 'Stale task',
-        createdAt: DateTime(2026),
-      ),
+      Task(id: 'old-task', title: 'Stale task', createdAt: DateTime(2026)),
     );
 
     await repository.saveTasks([
