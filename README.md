@@ -110,5 +110,15 @@ Want to see what's coming next or contribute to Timety?
 
 Check out the **[Timety GitHub Project Board](https://github.com/users/Benji377/projects/7)**! There, you can track the live status of all planned features, bugs, and enhancements, complete with priority tags and issue sizing.
 
+## 💬 Community & Discussions
+
+Join the conversation! Whether you need help, want to share how you use Timety, or have a brilliant idea for a new feature, our **[GitHub Discussions](https://github.com/Benji377/Timety/discussions)** is the place to be.
+
+* **📢 Announcements:** Stay up to date with the latest releases and major changes.
+* **💡 Ideas:** Suggest and vote on new features you'd love to see.
+* **🙏 Q&A:** Ask questions and get help from the community or the developer.
+* **🙌 Show and tell:** Share your productivity setups, habit streaks, or custom focus tags!
+* **💬 General & Polls:** Chat with other users and participate in community polls.
+
 ## 🔒 Privacy
 Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Hive. No accounts, no cloud sync, no tracking.
