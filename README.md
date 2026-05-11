@@ -2,14 +2,25 @@
 
 <p align="center">
   <img src="assets/banner_small.png" alt="Timety banner">
-  <p align="center">
-    <a href="https://github.com/Benji377/Timety/actions/workflows/lint.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/lint.yml?label=Lint&logo=flutter&style=for-the-badge&labelColor=555555" alt="lint">
-    </a>
-    <a href="https://github.com/Benji377/Timety/actions/workflows/test.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/test.yml?label=Tests&logo=githubactions&style=for-the-badge&labelColor=555555" alt="test">
-    </a>
-  </p>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Benji377/Timety/actions/workflows/lint.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/lint.yml?label=Lint&logo=flutter&style=for-the-badge&labelColor=555555" alt="lint">
+  </a>
+  <a href="https://github.com/Benji377/Timety/actions/workflows/test.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/test.yml?label=Tests&logo=githubactions&style=for-the-badge&labelColor=555555" alt="test">
+  </a>
+  <br>
+  <a href="https://apkpure.com/p/io.github.benji377.timety">
+    <img src="https://img.shields.io/badge/APKPure-24D668?style=for-the-badge" alt="APKPure">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/F--Droid-ffffff?style=for-the-badge" alt="F-Droid">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Uptodown-0096C7?style=for-the-badge" alt="Uptodown">
+  </a>
 </p>
 
 Timety is a comprehensive, offline-first productivity and time-management application built with Flutter. It seamlessly integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
