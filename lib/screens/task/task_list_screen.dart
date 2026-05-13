@@ -132,7 +132,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const StatisticsScreen(),
+                  builder: (context) =>
+                      const StatisticsScreen(initialTabIndex: 1),
                 ),
               );
             },
