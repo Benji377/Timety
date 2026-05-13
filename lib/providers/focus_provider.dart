@@ -358,6 +358,15 @@ class FocusProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateTag(String id, String name, Color color) async {
+    final index = _tags.indexWhere((t) => t.id == id);
+    if (index != -1) {
+      _tags[index] = FocusTag(id: id, name: name, colorValue: color.toARGB32());
+      await repository.saveTag(_tags[index]);
+      notifyListeners();
+    }
+  }
+
   Future<void> deleteTag(String id) async {
     await repository.deleteTag(id);
     _tags.removeWhere((t) => t.id == id);

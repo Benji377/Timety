@@ -100,4 +100,63 @@ class TaskProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  List<String> getAllCategories() {
+    final Set<String> categories = {};
+    for (var task in _tasks) {
+      if (task.category.isNotEmpty) {
+        categories.add(task.category);
+      }
+    }
+    return categories.toList()..sort();
+  }
+
+  Future<void> renameCategory(String oldName, String newName) async {
+    if (oldName == newName) return;
+
+    for (var i = 0; i < _tasks.length; i++) {
+      if (_tasks[i].category == oldName) {
+        _tasks[i] = Task(
+          id: _tasks[i].id,
+          title: _tasks[i].title,
+          description: _tasks[i].description,
+          dueDate: _tasks[i].dueDate,
+          location: _tasks[i].location,
+          priority: _tasks[i].priority,
+          size: _tasks[i].size,
+          reminders: _tasks[i].reminders,
+          category: newName,
+          isCompleted: _tasks[i].isCompleted,
+          completedAt: _tasks[i].completedAt,
+          createdAt: _tasks[i].createdAt,
+          subtasks: _tasks[i].subtasks,
+        );
+      }
+    }
+    await repository.saveTasks(_tasks);
+    notifyListeners();
+  }
+
+  Future<void> deleteCategory(String categoryName) async {
+    for (var i = 0; i < _tasks.length; i++) {
+      if (_tasks[i].category == categoryName) {
+        _tasks[i] = Task(
+          id: _tasks[i].id,
+          title: _tasks[i].title,
+          description: _tasks[i].description,
+          dueDate: _tasks[i].dueDate,
+          location: _tasks[i].location,
+          priority: _tasks[i].priority,
+          size: _tasks[i].size,
+          reminders: _tasks[i].reminders,
+          isCompleted: _tasks[i].isCompleted,
+          completedAt: _tasks[i].completedAt,
+          createdAt: _tasks[i].createdAt,
+          subtasks: _tasks[i].subtasks,
+        );
+      }
+    }
+    await repository.saveTasks(_tasks);
+    notifyListeners();
+  }
 }

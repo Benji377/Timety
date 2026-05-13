@@ -4,7 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../providers/settings_provider.dart';
+import '../providers/focus_provider.dart';
+import '../providers/task_provider.dart';
 import '../services/backup_service.dart';
+import '../widgets/tags_widget.dart';
+import '../widgets/categories_widget.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -92,8 +96,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch the provider here!
     final settings = context.watch<SettingsProvider>();
+    final focusProvider = context.watch<FocusProvider>();
+    final taskProvider = context.watch<TaskProvider>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
@@ -172,6 +177,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(height: 32),
 
+          // --- TAGS & CATEGORIES ---
+          _buildSectionHeader('Organization'),
+          ListTile(
+            leading: const Icon(Icons.local_offer_outlined),
+            title: const Text('Focus Tags'),
+            subtitle: Text('${focusProvider.tags.length} tags'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const TagsWidget()),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.label_outlined),
+            title: const Text('Task Categories'),
+            subtitle: Text(
+              '${taskProvider.getAllCategories().length} categories',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CategoriesWidget()),
+            ),
+          ),
+
+          const Divider(height: 32),
+
           // --- NOTIFICATIONS ---
           _buildSectionHeader('Notifications'),
           ListTile(
@@ -205,6 +237,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
 
+          const Divider(height: 32),
+
           // --- DATA & BACKUP ---
           _buildSectionHeader('Data & Backup'),
           ListTile(
@@ -224,7 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => BackupService.importBackup(context),
           ),
 
-          const SizedBox(height: 32),
+          const Divider(height: 32),
 
           // --- ABOUT & INFO SECTION ---
           Padding(
@@ -232,7 +266,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Card(
               color: Theme.of(
                 context,
-              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -266,12 +300,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   const ListTile(
-                    leading: Icon(Icons.person_outline),
-                    title: Text('Built by Benji377'), // Change to your name!
+                    leading: Icon(Icons.person, color: Colors.green),
+                    title: Text('Built by Benji377'),
                     subtitle: Text('Solo Developer & Maintainer'),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.favorite),
+                    leading: const Icon(Icons.favorite, color: Colors.red),
                     title: const Text('Donate'),
                     subtitle: const Text('GitHub Sponsors'),
                     trailing: const Icon(
@@ -280,14 +314,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: Colors.grey,
                     ),
                     onTap: () {
-                      // Add url_launcher logic here: launchUrl(Uri.parse('mailto:support@timety.app'));
                       launchUrl(
                         Uri.parse('https://github.com/sponsors/Benji377'),
                       );
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.code),
+                    leading: const Icon(Icons.code, color: Colors.blue),
                     title: const Text('Source Code'),
                     subtitle: const Text('GitHub Repository'),
                     trailing: const Icon(
@@ -296,7 +329,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       color: Colors.grey,
                     ),
                     onTap: () {
-                      // Add url_launcher logic here: launchUrl(Uri.parse('https://github.com/yourusername/timety'));
                       launchUrl(
                         Uri.parse('https://github.com/Benji377/timety'),
                       );
