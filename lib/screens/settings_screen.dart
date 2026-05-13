@@ -208,10 +208,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- DATA & BACKUP ---
           _buildSectionHeader('Data & Backup'),
           ListTile(
-            leading: const Icon(
-              Icons.cloud_upload_outlined,
-              color: AppTheme.taskColor,
-            ),
+            leading: const Icon(Icons.cloud_upload_outlined),
             title: const Text('Export Backup'),
             subtitle: const Text(
               'Save your data locally or share it to the cloud',
@@ -219,7 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => BackupService.exportBackup(context),
           ),
           ListTile(
-            leading: const Icon(Icons.restore, color: AppTheme.warningColor),
+            leading: const Icon(Icons.restore),
             title: const Text('Restore Backup'),
             subtitle: const Text(
               'Overwrite current data from a backup zip file',
@@ -246,12 +243,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     padding: EdgeInsets.only(top: 24.0, bottom: 8.0),
                     child: CircleAvatar(
                       radius: 30,
-                      backgroundColor: AppTheme.taskColor,
-                      child: Icon(
-                        Icons.rocket_launch,
-                        size: 30,
-                        color: Colors.white,
-                      ),
+                      backgroundColor: Colors.white,
+                      foregroundImage: AssetImage('assets/logo.png'),
                     ),
                   ),
                   const Text(
