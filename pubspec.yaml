@@ -11,10 +11,6 @@ dependencies:
     sdk: flutter
 
   provider: ^6.1.5+1
-  geolocator: ^14.0.2
-  connectivity_plus: ^7.1.1
-  flutter_map: ^8.3.0
-  latlong2: ^0.9.1
   flutter_local_notifications: ^21.0.0
   timezone: ^0.11.0
   flutter_timezone: ^5.0.2
@@ -30,6 +26,7 @@ dependencies:
   path_provider: ^2.1.5
   package_info_plus: ^9.0.1
   url_launcher: ^6.3.2
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:
@@ -43,19 +40,10 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
 
 
-dependency_overrides:
-  geolocator_android:
-    git:
-      url: https://github.com/onyx-lyon1/flutter-geolocator.git
-      ref: floss
-      path: geolocator_android
-
-
 flutter:
   uses-material-design: true
   assets:
     - assets/logo.png
-
 
 flutter_launcher_icons:
   android: true

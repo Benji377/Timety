@@ -53,7 +53,7 @@ android {
                 signingConfigs.getByName("debug")
             }
             
-            // Enable ProGuard/R8 code shrinking to reduce APK size
+            // Enable code shrinking to reduce APK size
             isMinifyEnabled = true
             isShrinkResources = true
         }

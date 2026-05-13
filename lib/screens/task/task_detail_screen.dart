@@ -1,8 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import '../../utils/utils.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
@@ -237,7 +235,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final disabledBorderColor = theme.dividerColor.withValues(alpha: 0.6);
-    final mapCenter = _parseLocation();
+
     final String appBarTitle = _isNewTask
         ? "Create New Task"
         : (_isEditing ? "Edit Task" : "Task Details");
@@ -432,14 +430,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               ),
               suffixIcon: _isEditing
                   ? IconButton(
-                      icon: const Icon(Icons.my_location),
-                      onPressed: _pickLocationOnMap,
+                      icon: const Icon(
+                        Icons.search,
+                      ),
+                      onPressed: _pickLocation,
                     )
                   : null,
             ),
           ),
-
-          if (mapCenter != null) _buildMapPreview(mapCenter),
 
           // --- SUBTASKS ---
           _buildSectionHeader("Checklist", Icons.checklist),
@@ -570,17 +568,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   // --- Logic Helpers ---
-  LatLng? _parseLocation() {
-    if (_locationController.text.isEmpty) return null;
-    final parts = _locationController.text.split(',');
-    if (parts.length == 2) {
-      final lat = double.tryParse(parts[0].trim());
-      final lng = double.tryParse(parts[1].trim());
-      if (lat != null && lng != null) return LatLng(lat, lng);
-    }
-    return null;
-  }
-
   Future<void> _pickDueDate() async {
     final picked = await AppDatePickers.pickDateTime(
       context: context,
@@ -589,15 +576,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     if (picked != null) setState(() => _dueDate = picked);
   }
 
-  Future<void> _pickLocationOnMap() async {
-    final result = await Navigator.push(
+  Future<void> _pickLocation() async {
+    final String? result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (c) =>
-            LocationPicker(initialLocation: _locationController.text),
-      ),
+      MaterialPageRoute(builder: (c) => const LocationPicker()),
     );
-    if (result != null) setState(() => _locationController.text = result);
+
+    if (result != null && result.isNotEmpty) {
+      setState(() {
+        _locationController.text = result;
+      });
+    }
   }
 
   Widget _buildReminderInput() {
@@ -622,45 +611,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         const SizedBox(width: AppTheme.spaceSmall),
         ElevatedButton(onPressed: _addReminder, child: const Text("Add")),
       ],
-    );
-  }
-
-  Widget _buildMapPreview(LatLng center) {
-    return Container(
-      height: 160,
-      margin: const EdgeInsets.only(
-        top: AppTheme.spaceMedium,
-        bottom: AppTheme.spaceMedium,
-      ),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.6),
-        ),
-        borderRadius: AppTheme.brLarge,
-      ),
-      child: ClipRRect(
-        borderRadius: AppTheme.brLarge,
-        child: FlutterMap(
-          options: MapOptions(initialCenter: center, initialZoom: 15.0),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: center,
-                  child: const Icon(
-                    Icons.location_pin,
-                    color: AppTheme.locationPinColor,
-                    size: 36,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 
