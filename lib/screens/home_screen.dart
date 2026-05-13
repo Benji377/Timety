@@ -188,7 +188,6 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ],
                           if (todaysHabits.isNotEmpty) ...[
-                            const SizedBox(height: AppTheme.spaceLarge),
                             Padding(
                               padding: const EdgeInsets.only(
                                 bottom: AppTheme.spaceMedium,
