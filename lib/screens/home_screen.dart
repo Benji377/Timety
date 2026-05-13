@@ -12,7 +12,6 @@ import '../theme/app_theme.dart';
 import '../widgets/interactive_gauge.dart';
 import '../widgets/grouped_habits_section.dart';
 import '../widgets/list_tiles/task_list_tile.dart';
-import '../widgets/list_section_header.dart';
 import 'task/task_detail_screen.dart';
 import 'habit/habit_detail_screen.dart';
 
@@ -140,57 +139,97 @@ class HomeScreen extends StatelessWidget {
                           bottom: 80,
                         ),
                         children: [
-                          if (todaysHabits.isNotEmpty) ...[
-                            const ListSectionHeader(
-                              title: 'Habits Today',
-                              icon: Icons.repeat,
-                              color: AppTheme.typeHabitColor,
-                            ),
-                            // --- GROUPED HABITS SECTION WIDGET ---
-                            GroupedHabitsSection(
-                              habits: todaysHabits,
-                              habitProvider: habitProvider,
-                              targetDate: today,
-                              onHabitTap: (habit) => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => HabitDetailScreen(
-                                    habit: habit,
-                                    isEditing: true,
+                          if (urgentTasks.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppTheme.spaceMedium,
+                              ),
+                              child: Theme(
+                                data: Theme.of(
+                                  context,
+                                ).copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  initiallyExpanded: true,
+                                  title: Text(
+                                    'Tasks Due (${urgentTasks.length})',
+                                    style: const TextStyle(
+                                      fontWeight: AppTheme.fwBold,
+                                      color: AppTheme.warningColor,
+                                    ),
                                   ),
+                                  iconColor: AppTheme.warningColor,
+                                  collapsedIconColor: AppTheme.warningColor,
+                                  children: [
+                                    ...urgentTasks.map(
+                                      (task) => TaskListTile(
+                                        task: task,
+                                        enableDismissible: false,
+                                        showDescription: false,
+                                        onToggleCompleted: () => context
+                                            .read<TaskProvider>()
+                                            .toggleTask(
+                                              task.id,
+                                              userProvider: context
+                                                  .read<UserProvider>(),
+                                            ),
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                TaskDetailScreen(task: task),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppTheme.spaceSmall),
+                                  ],
                                 ),
                               ),
-                              onToggleCompleted: (habit) =>
-                                  habitProvider.toggleCompletionToday(
-                                    habit,
-                                    userProvider: context.read<UserProvider>(),
-                                  ),
                             ),
-                            const SizedBox(height: AppTheme.spaceLarge),
                           ],
-                          if (urgentTasks.isNotEmpty) ...[
-                            const ListSectionHeader(
-                              title: 'Tasks Due',
-                              icon: Icons.assignment_late,
-                              color: AppTheme.warningColor,
-                            ),
-                            ...urgentTasks.map(
-                              (task) => TaskListTile(
-                                task: task,
-                                enableDismissible: false,
-                                showDescription: false,
-                                onToggleCompleted: () =>
-                                    context.read<TaskProvider>().toggleTask(
-                                      task.id,
-                                      userProvider: context
-                                          .read<UserProvider>(),
-                                    ),
-                                onTap: () => Navigator.push(
+                          if (todaysHabits.isNotEmpty) ...[
+                            const SizedBox(height: AppTheme.spaceLarge),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppTheme.spaceMedium,
+                              ),
+                              child: Theme(
+                                data: Theme.of(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        TaskDetailScreen(task: task),
+                                ).copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  title: Text(
+                                    'Habits Today (${todaysHabits.length})',
+                                    style: const TextStyle(
+                                      fontWeight: AppTheme.fwBold,
+                                      color: AppTheme.typeHabitColor,
+                                    ),
                                   ),
+                                  iconColor: AppTheme.typeHabitColor,
+                                  collapsedIconColor: AppTheme.typeHabitColor,
+                                  children: [
+                                    GroupedHabitsSection(
+                                      habits: todaysHabits,
+                                      habitProvider: habitProvider,
+                                      targetDate: today,
+                                      onHabitTap: (habit) => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => HabitDetailScreen(
+                                            habit: habit,
+                                            isEditing: true,
+                                          ),
+                                        ),
+                                      ),
+                                      onToggleCompleted: (habit) =>
+                                          habitProvider.toggleCompletionToday(
+                                            habit,
+                                            userProvider: context
+                                                .read<UserProvider>(),
+                                          ),
+                                    ),
+                                    const SizedBox(height: AppTheme.spaceSmall),
+                                  ],
                                 ),
                               ),
                             ),
