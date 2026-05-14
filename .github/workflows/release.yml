@@ -26,12 +26,16 @@ jobs:
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
+        id: flutter-action
         with:
           channel: 'stable'
           flutter-version: '3.41.9'
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Remove build id
+        run: sed -i -e 's/-Wl,/-Wl,--build-id=none,/' ${{ steps.flutter-action.outputs.PUB-CACHE-PATH }}/hosted/pub.dev/jni-*/src/CMakeLists.txt
 
       - name: Generate Hive Adapters
         run: dart run build_runner build --delete-conflicting-outputs
