@@ -1,0 +1,47 @@
+name: Debug C++ Build ID Fix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test_sed_hack:
+    name: Test Sed Replacement
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.41.9'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: DEBUG 1 - Locate the files
+        run: |
+          echo "Hunting for CMakeLists.txt inside the pub cache..."
+          find ~/.pub-cache/hosted -name "CMakeLists.txt"
+
+      - name: STRIP BUILD IDs (The Fix)
+        run: |
+          echo "Applying the sed hack..."
+          find ~/.pub-cache/hosted -name "CMakeLists.txt" -exec sed -i -e 's/-Wl,/-Wl,--build-id=none,/g' {} + || true
+
+      - name: DEBUG 2 - Verify the injection
+        run: |
+          echo "Searching the files to prove the text was injected..."
+          # This command searches all CMake files and prints the exact lines containing our injected text
+          find ~/.pub-cache/hosted -name "CMakeLists.txt" -exec grep -H "build-id=none" {} + || echo "FAILED: No files were modified."
+
+      - name: Generate Hive Adapters
+        run: dart run build_runner build --delete-conflicting-outputs
