@@ -114,8 +114,6 @@ jobs:
           path: |
             timety-v${{ github.event.inputs.version }}.aab
 
-  # iOS build removed — project no longer supports iOS
-
   upload_to_release:
     name: Upload to GitHub Release
     runs-on: ubuntu-latest
