@@ -196,6 +196,58 @@ class FocusScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _confirmStopSession(
+    BuildContext context,
+    FocusProvider focusProvider,
+  ) async {
+    if (!focusProvider.isRunning) return;
+
+    focusProvider.pauseSession();
+
+    final bool confirmed =
+        await AppDialogs.showConfirmation(
+          context: context,
+          title: 'Stop focus session?',
+          content:
+              'The timer is paused while you decide. Confirm to stop and save the session, or cancel to continue.',
+        ) ==
+        true;
+
+    if (!context.mounted) return;
+
+    if (confirmed) {
+      focusProvider.stopSession(userProvider: context.read<UserProvider>());
+    } else {
+      focusProvider.startSession();
+    }
+  }
+
+  Future<void> _confirmResetSession(
+    BuildContext context,
+    FocusProvider focusProvider,
+  ) async {
+    if (!focusProvider.isRunning) return;
+
+    focusProvider.pauseSession();
+
+    final bool confirmed =
+        await AppDialogs.showConfirmation(
+          context: context,
+          title: 'Reset focus session?',
+          content:
+              'The timer is paused while you decide. Confirm to reset the session, or cancel to continue.',
+        ) ==
+        true;
+
+    if (!context.mounted) return;
+
+    if (confirmed) {
+      focusProvider.resetSession();
+    } else {
+      focusProvider.startSession();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final focusProvider = context.watch<FocusProvider>();
@@ -481,7 +533,7 @@ class FocusScreen extends StatelessWidget {
                   iconSize: 32,
                   color: Colors.grey.shade600,
                   onPressed: (isRunning || isPaused)
-                      ? () => focusProvider.resetSession()
+                      ? () => _confirmResetSession(context, focusProvider)
                       : null,
                 ),
               ),
@@ -499,9 +551,7 @@ class FocusScreen extends StatelessWidget {
                   foregroundColor: Colors.white,
                   onPressed: () {
                     if (isRunning) {
-                      focusProvider.stopSession(
-                        userProvider: context.read<UserProvider>(),
-                      );
+                      _confirmStopSession(context, focusProvider);
                     } else {
                       focusProvider.startSession();
                     }

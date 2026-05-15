@@ -430,9 +430,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               ),
               suffixIcon: _isEditing
                   ? IconButton(
-                      icon: const Icon(
-                        Icons.search,
-                      ),
+                      icon: const Icon(Icons.search),
                       onPressed: _pickLocation,
                     )
                   : null,

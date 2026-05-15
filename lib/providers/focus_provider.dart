@@ -169,19 +169,13 @@ class FocusProvider extends ChangeNotifier {
           (!isStopwatch && _secondsRemainingInPhase > 0)
           ? _secondsRemainingInPhase
           : 1; // ensure we never pass a past time causing the chronometer to count up
+      final int targetSeconds = remainingForNotification < 1
+          ? 1
+          : remainingForNotification;
 
       final targetTime = isStopwatch
           ? DateTime.now().subtract(Duration(seconds: _currentSecondsFocussed))
-          : DateTime.now().add(
-              Duration(
-                seconds: remainingForNotification.clamp(
-                  1,
-                  isFlexible
-                      ? _flexibleDurationMinutes * 60
-                      : _currentPhaseTotalSeconds,
-                ),
-              ),
-            );
+          : DateTime.now().add(Duration(seconds: targetSeconds));
 
       NotificationService.instance.showFocusTimerNotification(
         phaseName: currentPhase.type.name,
