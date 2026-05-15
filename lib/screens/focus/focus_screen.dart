@@ -218,9 +218,7 @@ class FocusScreen extends StatelessWidget {
       final currentPhase = activeMode.phases[focusProvider.currentPhaseIndex];
 
       if (canDrag) {
-        final int currentMinutes = currentPhase.durationMinutes == -1
-            ? 25
-            : currentPhase.durationMinutes;
+        final int currentMinutes = focusProvider.flexibleDurationMinutes;
         gaugeProgress = currentMinutes / 120.0;
         label = "SET TIME";
         centerText = _formatDigitalTime(currentMinutes * 60);

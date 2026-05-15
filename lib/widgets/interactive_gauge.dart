@@ -59,7 +59,10 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
   @override
   void didUpdateWidget(covariant InteractiveGauge oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!widget.isInteractive) {
+    // If interactivity changed (entering or leaving interactive mode) or
+    // the incoming progress changed, sync the internal thumb position.
+    if (widget.isInteractive != oldWidget.isInteractive ||
+        (widget.progress != oldWidget.progress)) {
       _progress = widget.progress;
     }
     // Handle turning stopwatch animation on/off

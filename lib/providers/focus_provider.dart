@@ -27,6 +27,7 @@ class FocusProvider extends ChangeNotifier {
   DateTime? _sessionBaseTime; // anchors wall-clock time for stopwatch mode
   DateTime? _phaseBaseTime; // anchors wall-clock time for the current phase
   int _currentPhaseTotalSeconds = 0;
+  int _flexibleDurationMinutes = 25;
 
   int _currentPhaseIndex = 0;
   int _secondsRemainingInPhase = 0;
@@ -42,6 +43,7 @@ class FocusProvider extends ChangeNotifier {
   int get currentPhaseIndex => _currentPhaseIndex;
   int get secondsRemainingInPhase => _secondsRemainingInPhase;
   PhaseType get currentPhaseType => _currentPhaseType;
+  int get flexibleDurationMinutes => _flexibleDurationMinutes;
   List<FocusTag> get tags => _tags;
   FocusTag? get selectedTag => _selectedTag;
 
@@ -132,8 +134,11 @@ class FocusProvider extends ChangeNotifier {
   void setFlexibleDuration(int minutes) {
     if (_activeMode?.type == FocusModeType.flexible && !_isRunning) {
       final clamped = minutes > 120 ? 120 : minutes;
+      _flexibleDurationMinutes = clamped;
       _activeMode!.phases.first.durationMinutes = clamped;
       _secondsRemainingInPhase = clamped * 60;
+      _currentPhaseTotalSeconds = clamped * 60;
+      _phaseBaseTime = DateTime.now();
       notifyListeners();
     }
   }
@@ -143,11 +148,15 @@ class FocusProvider extends ChangeNotifier {
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
 
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
-    final isStopwatch = currentPhase.durationMinutes == -1;
+    final isFlexible = _activeMode!.type == FocusModeType.flexible;
+    final isStopwatch = currentPhase.durationMinutes == -1 && !isFlexible;
 
     if (asPaused) {
-      final mins = _secondsRemainingInPhase ~/ 60;
-      final secs = (_secondsRemainingInPhase % 60).toString().padLeft(2, '0');
+      final safeRemaining = _secondsRemainingInPhase > 0
+          ? _secondsRemainingInPhase
+          : 0;
+      final mins = safeRemaining ~/ 60;
+      final secs = (safeRemaining % 60).toString().padLeft(2, '0');
       NotificationService.instance.showFocusTimerNotification(
         phaseName: currentPhase.type.name,
         targetTime: DateTime.now(),
@@ -156,9 +165,23 @@ class FocusProvider extends ChangeNotifier {
         pausedText: isStopwatch ? "Paused" : "$mins:$secs remaining",
       );
     } else {
+      final int remainingForNotification =
+          (!isStopwatch && _secondsRemainingInPhase > 0)
+          ? _secondsRemainingInPhase
+          : 1; // ensure we never pass a past time causing the chronometer to count up
+
       final targetTime = isStopwatch
           ? DateTime.now().subtract(Duration(seconds: _currentSecondsFocussed))
-          : DateTime.now().add(Duration(seconds: _secondsRemainingInPhase));
+          : DateTime.now().add(
+              Duration(
+                seconds: remainingForNotification.clamp(
+                  1,
+                  isFlexible
+                      ? _flexibleDurationMinutes * 60
+                      : _currentPhaseTotalSeconds,
+                ),
+              ),
+            );
 
       NotificationService.instance.showFocusTimerNotification(
         phaseName: currentPhase.type.name,
@@ -194,7 +217,12 @@ class FocusProvider extends ChangeNotifier {
 
     // For timed phases, compute a phase base so remaining seconds are derived from wall-clock.
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
-    if (currentPhase.durationMinutes > 0) {
+    if (_activeMode!.type == FocusModeType.flexible) {
+      _currentPhaseTotalSeconds = _flexibleDurationMinutes * 60;
+      _phaseBaseTime = DateTime.now().subtract(
+        Duration(seconds: _currentPhaseTotalSeconds - _secondsRemainingInPhase),
+      );
+    } else if (currentPhase.durationMinutes > 0) {
       _currentPhaseTotalSeconds = currentPhase.durationMinutes * 60;
       _phaseBaseTime = DateTime.now().subtract(
         Duration(seconds: _currentPhaseTotalSeconds - _secondsRemainingInPhase),
@@ -218,23 +246,22 @@ class FocusProvider extends ChangeNotifier {
 
     final phase = _activeMode!.phases[index];
     _currentPhaseType = phase.type;
-    _currentPhaseTotalSeconds = phase.durationMinutes > 0
-        ? phase.durationMinutes * 60
-        : 0;
+    _currentPhaseTotalSeconds = _activeMode!.type == FocusModeType.flexible
+        ? _flexibleDurationMinutes * 60
+        : (phase.durationMinutes > 0 ? phase.durationMinutes * 60 : 0);
     _secondsRemainingInPhase = _currentPhaseTotalSeconds;
     _phaseBaseTime = DateTime.now();
   }
 
   void _tick(Timer timer) {
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
+    final bool isFlexible = _activeMode!.type == FocusModeType.flexible;
 
     // If this is a stopwatch (durationMinutes == -1) compute elapsed from wall-clock
-    if (currentPhase.durationMinutes == -1) {
-      if (_sessionBaseTime == null) {
-        _sessionBaseTime = DateTime.now().subtract(
-          Duration(seconds: _currentSecondsFocussed),
-        );
-      }
+    if (currentPhase.durationMinutes == -1 && !isFlexible) {
+      _sessionBaseTime ??= DateTime.now().subtract(
+        Duration(seconds: _currentSecondsFocussed),
+      );
       _currentSecondsFocussed = DateTime.now()
           .difference(_sessionBaseTime!)
           .inSeconds;
@@ -245,10 +272,12 @@ class FocusProvider extends ChangeNotifier {
         _currentSecondsFocussed++;
       }
 
-      if (currentPhase.durationMinutes > 0) {
+      if (isFlexible || currentPhase.durationMinutes > 0) {
         if (_phaseBaseTime == null) {
           _phaseBaseTime = DateTime.now();
-          _currentPhaseTotalSeconds = currentPhase.durationMinutes * 60;
+          _currentPhaseTotalSeconds = isFlexible
+              ? _flexibleDurationMinutes * 60
+              : currentPhase.durationMinutes * 60;
         }
 
         final elapsedInPhase = DateTime.now()
@@ -306,6 +335,7 @@ class FocusProvider extends ChangeNotifier {
     _currentSession = null;
     _currentSecondsFocussed = 0;
     _currentPhaseIndex = 0;
+    _flexibleDurationMinutes = 25;
     _setupPhase(0);
     notifyListeners();
   }
@@ -319,6 +349,7 @@ class FocusProvider extends ChangeNotifier {
     _currentSession = null;
     _currentSecondsFocussed = 0;
     _currentPhaseIndex = 0;
+    _flexibleDurationMinutes = 25;
     _phaseBaseTime = null;
     _currentPhaseTotalSeconds = 0;
     _setupPhase(0);
