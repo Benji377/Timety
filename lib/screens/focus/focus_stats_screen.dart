@@ -20,6 +20,41 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
   DateTime _focusedWeek = DateTime.now();
   DateTime _selectedDayForClock = DateTime.now();
 
+  Map<String, IconData> get _distractionIcons => const {
+    'Distracted': Icons.warning_amber,
+    'Hydrated / Drink': Icons.water_drop,
+    'Stretched': Icons.accessibility_new,
+    'Snack': Icons.restaurant,
+    'Restroom': Icons.wc,
+  };
+
+  List<_DistractionEntry> _getDistractionEntries(
+    List<FocusSession> sessions,
+    List<FocusTag> tags,
+  ) {
+    final tagById = {for (final tag in tags) tag.id: tag};
+
+    final entries = <_DistractionEntry>[];
+    for (final session in sessions) {
+      final sessionTagName = session.tagId == null
+          ? 'Untagged'
+          : (tagById[session.tagId!]?.name ?? 'Untagged');
+
+      for (final distraction in session.distractions) {
+        entries.add(
+          _DistractionEntry(distraction: distraction, tagName: sessionTagName),
+        );
+      }
+    }
+
+    entries.sort((a, b) => b.distraction.time.compareTo(a.distraction.time));
+    return entries;
+  }
+
+  IconData _iconForDistraction(String note) {
+    return _distractionIcons[note] ?? Icons.warning_amber;
+  }
+
   void _changeWeek(int days) {
     setState(() {
       _focusedWeek = _focusedWeek.add(Duration(days: days));
@@ -66,6 +101,18 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
   Widget build(BuildContext context) {
     final focusProvider = context.watch<FocusProvider>();
     final sessions = focusProvider.history;
+    final distractionEntries = _getDistractionEntries(
+      sessions,
+      focusProvider.tags,
+    );
+    final selectedDayDistractions = distractionEntries
+        .where(
+          (entry) => AppDateUtils.isSameDay(
+            entry.distraction.time,
+            _selectedDayForClock,
+          ),
+        )
+        .toList();
 
     final startOfWeek = AppDateUtils.startOfWeekMonday(_focusedWeek);
     final endOfWeek = startOfWeek.add(
@@ -186,6 +233,58 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 40),
+
+                // --- DISTRACTIONS LIST ---
+                const Text(
+                  "Distractions",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const Text(
+                  "Selected day, newest distractions first",
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 16),
+                selectedDayDistractions.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(
+                          child: Text("No distractions logged for this day."),
+                        ),
+                      )
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: selectedDayDistractions.length,
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final entry = selectedDayDistractions[index];
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: CircleAvatar(
+                              backgroundColor: AppTheme.warningAccent.withValues(
+                                alpha: 0.12,
+                              ),
+                              child: Icon(
+                                _iconForDistraction(entry.distraction.note),
+                                color: AppTheme.warningAccent,
+                              ),
+                            ),
+                            title: Text(
+                              entry.distraction.note.isEmpty
+                                  ? 'Distraction'
+                                  : entry.distraction.note,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '${DateFormat('hh:mm:ss').format(entry.distraction.time)} | ${entry.tagName}',
+                            ),
+                          );
+                        },
+                      ),
                 const SizedBox(height: 40),
 
                 // --- WEEKLY BAR CHART ---
@@ -350,6 +449,13 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
       PieChartData(sectionsSpace: 2, centerSpaceRadius: 40, sections: sections),
     );
   }
+}
+
+class _DistractionEntry {
+  final Distraction distraction;
+  final String tagName;
+
+  _DistractionEntry({required this.distraction, required this.tagName});
 }
 
 // --- CUSTOM 24-HOUR CLOCK PAINTER ---
