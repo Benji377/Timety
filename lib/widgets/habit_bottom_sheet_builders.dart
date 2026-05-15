@@ -145,7 +145,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
     final int daysInMonth =
         DateTime(_displayedMonth.year, _displayedMonth.month + 1, 0).day;
     final int firstWeekday =
-        DateTime(_displayedMonth.year, _displayedMonth.month, 1).weekday;
+        DateTime(_displayedMonth.year, _displayedMonth.month).weekday;
     final int emptySlotsPrefix = firstWeekday - 1;
 
     // Sort completions for the timeline (Newest first)
@@ -333,7 +333,6 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                   Positioned.fill(
                     top: 16, // Start slightly below the dot
                     child: Align(
-                      alignment: Alignment.center,
                       child: Container(
                         width: 2,
                         color: AppTheme.habitColor.withValues(alpha: 0.3),
