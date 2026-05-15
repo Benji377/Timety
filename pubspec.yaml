@@ -28,6 +28,7 @@ dependencies:
   url_launcher: ^6.3.2
   http: ^1.6.0
   flutter_colorpicker: ^1.1.0
+  audioplayers: ^6.6.0
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +46,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logo.png
+    - assets/ding.mp3
 
 flutter_launcher_icons:
   android: true

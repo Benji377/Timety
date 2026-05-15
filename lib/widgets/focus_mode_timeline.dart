@@ -6,12 +6,14 @@ class ModeTimeline extends StatelessWidget {
   final List<SessionPhase> phases;
   final int currentPhaseIndex;
   final bool isRunning;
+  final bool awaitingContinue;
 
   const ModeTimeline({
     super.key,
     required this.phases,
     required this.currentPhaseIndex,
     required this.isRunning,
+    this.awaitingContinue = false,
   });
 
   @override
@@ -24,6 +26,7 @@ class ModeTimeline extends StatelessWidget {
     final completionFill = isDark
         ? AppTheme.paperLight
         : AppTheme.paperAltLight;
+    final bool isRunningOrAwaiting = isRunning || awaitingContinue;
 
     // Helper to build a node (dot)
     Widget buildDot(Color color, bool isActive) {
@@ -82,8 +85,8 @@ class ModeTimeline extends StatelessWidget {
       return Container(
         width: 24,
         height: 3,
-        // Only darken past lines if the timer is actually running
-        color: (isRunning && isPast)
+        // Only darken past lines if the timer is actually running or awaiting
+        color: (isRunningOrAwaiting && isPast)
             ? lineColor.withValues(alpha: 0.6)
             : lineColor.withValues(alpha: 0.2),
       );
@@ -91,21 +94,24 @@ class ModeTimeline extends StatelessWidget {
 
     // Start Node
     nodes.add(
-      buildCompletionNode(isRunning && currentPhaseIndex == 0 && !isCompleted),
+      buildCompletionNode(
+        isRunningOrAwaiting && currentPhaseIndex == 0 && !isCompleted,
+      ),
     );
 
     // Phase Nodes
     for (int i = 0; i < phases.length; i++) {
       nodes.add(buildLine(currentPhaseIndex > i));
 
-      // ONLY set as active if the timer is running
-      final bool isActive = isRunning && currentPhaseIndex == i && !isCompleted;
+      // ONLY set as active if the timer is running or awaiting continuation
+      final bool isActive =
+          isRunningOrAwaiting && currentPhaseIndex == i && !isCompleted;
       Color dotColor = phases[i].type == PhaseType.focus
           ? AppTheme.focusColor
           : AppTheme.warningColor;
 
-      // ONLY fade future nodes if the timer is running (otherwise show full preview)
-      if (isRunning && currentPhaseIndex < i) {
+      // ONLY fade future nodes if the timer is running or awaiting (otherwise show full preview)
+      if (isRunningOrAwaiting && currentPhaseIndex < i) {
         dotColor = dotColor.withValues(alpha: 0.3);
       }
 
@@ -114,7 +120,7 @@ class ModeTimeline extends StatelessWidget {
 
     // End Node
     nodes.add(buildLine(isCompleted));
-    nodes.add(buildCompletionNode(isRunning && isCompleted));
+    nodes.add(buildCompletionNode(isRunningOrAwaiting && isCompleted));
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

@@ -6,6 +6,7 @@ import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
 import '../utils/xp_calculator.dart';
 import 'user_provider.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class FocusProvider extends ChangeNotifier {
   final FocusRepository repository;
@@ -27,6 +28,7 @@ class FocusProvider extends ChangeNotifier {
   DateTime? _sessionBaseTime; // anchors wall-clock time for stopwatch mode
   DateTime? _phaseBaseTime; // anchors wall-clock time for the current phase
   int _currentPhaseTotalSeconds = 0;
+  bool _awaitingPhaseContinue = false;
   int _flexibleDurationMinutes = 25;
 
   int _currentPhaseIndex = 0;
@@ -43,6 +45,7 @@ class FocusProvider extends ChangeNotifier {
   int get currentPhaseIndex => _currentPhaseIndex;
   int get secondsRemainingInPhase => _secondsRemainingInPhase;
   PhaseType get currentPhaseType => _currentPhaseType;
+  bool get awaitingPhaseContinue => _awaitingPhaseContinue;
   int get flexibleDurationMinutes => _flexibleDurationMinutes;
   List<FocusTag> get tags => _tags;
   FocusTag? get selectedTag => _selectedTag;
@@ -245,6 +248,40 @@ class FocusProvider extends ChangeNotifier {
         : (phase.durationMinutes > 0 ? phase.durationMinutes * 60 : 0);
     _secondsRemainingInPhase = _currentPhaseTotalSeconds;
     _phaseBaseTime = DateTime.now();
+    _awaitingPhaseContinue = false;
+  }
+
+  Future<void> _playDing() async {
+    try {
+      final player = AudioPlayer();
+      // Play packaged asset. Wait for completion then dispose.
+      await player.play(AssetSource('ding.mp3'));
+      await player.onPlayerComplete.first;
+      await player.dispose();
+    } catch (e) {
+      // If the sound fails to play, we don't want it to crash the app, so we catch and ignore errors.
+      debugPrint('Error playing sound: $e');
+    }
+  }
+
+  Future<void> continueToNextPhase() async {
+    if (!_awaitingPhaseContinue) return;
+    if (_activeMode == null) return;
+
+    _awaitingPhaseContinue = false;
+    _currentPhaseIndex++;
+    if (_currentPhaseIndex >= _activeMode!.phases.length) {
+      stopSession(completed: true, userProvider: _userProvider);
+      return;
+    }
+
+    _setupPhase(_currentPhaseIndex);
+    _isRunning = true;
+    _isPaused = false;
+    _updateNotification();
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), _tick);
+    notifyListeners();
   }
 
   void _tick(Timer timer) {
@@ -280,11 +317,20 @@ class FocusProvider extends ChangeNotifier {
         _secondsRemainingInPhase = _currentPhaseTotalSeconds - elapsedInPhase;
 
         if (_secondsRemainingInPhase <= 0) {
-          _currentPhaseIndex++;
-          _setupPhase(_currentPhaseIndex);
-
-          if (_isRunning) {
-            _updateNotification();
+          // If there are more phases, pause and wait for user to continue.
+          if (_currentPhaseIndex + 1 < _activeMode!.phases.length) {
+            _awaitingPhaseContinue = true;
+            _timer?.cancel();
+            _isRunning = false;
+            _isPaused = false;
+            _secondsRemainingInPhase = 0;
+            _playDing();
+            _updateNotification(asPaused: true);
+          } else {
+            // final phase finished: end session
+            _playDing();
+            stopSession(completed: true, userProvider: _userProvider);
+            return;
           }
         }
       }

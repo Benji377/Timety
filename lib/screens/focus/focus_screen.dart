@@ -200,9 +200,14 @@ class FocusScreen extends StatelessWidget {
     BuildContext context,
     FocusProvider focusProvider,
   ) async {
-    if (!focusProvider.isRunning) return;
+    final bool wasRunning = focusProvider.isRunning;
+    if (!wasRunning && !focusProvider.awaitingPhaseContinue) return;
 
-    focusProvider.pauseSession();
+    var pausedByThisCall = false;
+    if (wasRunning) {
+      focusProvider.pauseSession();
+      pausedByThisCall = true;
+    }
 
     final bool confirmed =
         await AppDialogs.showConfirmation(
@@ -217,7 +222,8 @@ class FocusScreen extends StatelessWidget {
 
     if (confirmed) {
       focusProvider.stopSession(userProvider: context.read<UserProvider>());
-    } else {
+    } else if (pausedByThisCall) {
+      // only resume if this call paused the timer
       focusProvider.startSession();
     }
   }
@@ -226,9 +232,14 @@ class FocusScreen extends StatelessWidget {
     BuildContext context,
     FocusProvider focusProvider,
   ) async {
-    if (!focusProvider.isRunning) return;
+    final bool wasRunning = focusProvider.isRunning;
+    if (!wasRunning && !focusProvider.awaitingPhaseContinue) return;
 
-    focusProvider.pauseSession();
+    var pausedByThisCall = false;
+    if (wasRunning) {
+      focusProvider.pauseSession();
+      pausedByThisCall = true;
+    }
 
     final bool confirmed =
         await AppDialogs.showConfirmation(
@@ -243,7 +254,7 @@ class FocusScreen extends StatelessWidget {
 
     if (confirmed) {
       focusProvider.resetSession();
-    } else {
+    } else if (pausedByThisCall) {
       focusProvider.startSession();
     }
   }
@@ -518,6 +529,7 @@ class FocusScreen extends StatelessWidget {
             phases: activeMode?.phases ?? [],
             currentPhaseIndex: focusProvider.currentPhaseIndex,
             isRunning: isRunning || isPaused,
+            awaitingContinue: focusProvider.awaitingPhaseContinue,
           ),
 
           const Spacer(),
@@ -527,12 +539,20 @@ class FocusScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Opacity(
-                opacity: (isRunning || isPaused) ? 1.0 : 0.0,
+                opacity:
+                    (isRunning ||
+                        isPaused ||
+                        focusProvider.awaitingPhaseContinue)
+                    ? 1.0
+                    : 0.0,
                 child: IconButton(
                   icon: const Icon(Icons.refresh),
                   iconSize: 32,
                   color: Colors.grey.shade600,
-                  onPressed: (isRunning || isPaused)
+                  onPressed:
+                      (isRunning ||
+                          isPaused ||
+                          focusProvider.awaitingPhaseContinue)
                       ? () => _confirmResetSession(context, focusProvider)
                       : null,
                 ),
@@ -552,26 +572,44 @@ class FocusScreen extends StatelessWidget {
                   onPressed: () {
                     if (isRunning) {
                       _confirmStopSession(context, focusProvider);
+                    } else if (focusProvider.awaitingPhaseContinue) {
+                      focusProvider.continueToNextPhase();
                     } else {
                       focusProvider.startSession();
                     }
                   },
                   child: Icon(
-                    isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded,
+                    isRunning
+                        ? Icons.stop_rounded
+                        : (focusProvider.awaitingPhaseContinue
+                              ? Icons.fast_forward_rounded
+                              : Icons.play_arrow_rounded),
                     size: 40,
                   ),
                 ),
               ),
               const SizedBox(width: 32),
               Opacity(
-                opacity: (isRunning || isPaused) ? 1.0 : 0.0,
+                opacity:
+                    (isRunning ||
+                        isPaused ||
+                        focusProvider.awaitingPhaseContinue)
+                    ? 1.0
+                    : 0.0,
                 child: IconButton(
-                  icon: Icon(isPaused ? Icons.play_circle_fill : Icons.pause),
+                  icon: focusProvider.awaitingPhaseContinue
+                      ? const Icon(Icons.stop)
+                      : Icon(isPaused ? Icons.play_circle_fill : Icons.pause),
                   iconSize: 32,
                   color: Colors.grey.shade600,
-                  onPressed: (isRunning || isPaused)
+                  onPressed:
+                      (isRunning ||
+                          isPaused ||
+                          focusProvider.awaitingPhaseContinue)
                       ? () {
-                          if (isPaused) {
+                          if (focusProvider.awaitingPhaseContinue) {
+                            _confirmStopSession(context, focusProvider);
+                          } else if (isPaused) {
                             focusProvider.startSession();
                           } else {
                             focusProvider.pauseSession();
