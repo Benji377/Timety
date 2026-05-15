@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timety/utils/utils.dart';
+import 'package:timety/utils/priority_utils.dart';
+import 'package:timety/utils/date_format_utils.dart';
+import 'package:timety/utils/calendar_utils.dart';
 import '../theme/app_theme.dart';
 import '../providers/task_provider.dart';
 import '../providers/user_provider.dart';
@@ -21,35 +23,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedMonth = DateTime.now();
   DateTime? _selectedDate = DateTime.now();
 
-  // --- TIME HELPER ---
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  }
-
-  List<List<DateTime>> _generateWeeks(DateTime month) {
-    final firstDayOfMonth = DateTime(month.year, month.month);
-    final lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
-
-    final int offsetToMonday = firstDayOfMonth.weekday - DateTime.monday;
-    DateTime currentDay = firstDayOfMonth.subtract(
-      Duration(days: offsetToMonday),
-    );
-
-    final List<List<DateTime>> weeks = [];
-
-    while (currentDay.isBefore(lastDayOfMonth) ||
-        currentDay.weekday != DateTime.monday) {
-      final List<DateTime> week = [];
-      for (int i = 0; i < 7; i++) {
-        week.add(currentDay);
-        currentDay = currentDay.add(const Duration(days: 1));
-      }
-      weeks.add(week);
-    }
-
-    return weeks;
-  }
-
   @override
   Widget build(BuildContext context) {
     final taskProvider = context.watch<TaskProvider>();
@@ -60,7 +33,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final allSessions = focusProvider.history;
     final allHabits = habitProvider.habits;
 
-    final weeks = _generateWeeks(_focusedMonth);
+    final weeks = CalendarUtils.generateWeeks(_focusedMonth);
 
     // --- FILTER & SORT ACCORDION DATA ---
     final selectedDayTasks = allTasks
@@ -653,12 +626,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 .firstOrNull
                                           : null;
 
-                                      String timeString = _formatTime(
-                                        session.startTime,
-                                      );
+                                      String timeString =
+                                          AppDateFormatUtils.formatTime(
+                                            session.startTime,
+                                          );
                                       if (session.endTime != null) {
                                         timeString +=
-                                            " - ${_formatTime(session.endTime!)}";
+                                            " - ${AppDateFormatUtils.formatTime(session.endTime!)}";
                                       } else {
                                         timeString += " - Ongoing";
                                       }

@@ -257,8 +257,8 @@ class NotificationService {
     bodyParts.add('Tag: $tagName');
     if (endTimeText != null) bodyParts.add(endTimeText);
 
-    final String bodyText = isPaused 
-        ? (pausedText ?? 'Paused') 
+    final String bodyText = isPaused
+        ? (pausedText ?? 'Paused')
         : bodyParts.join('  |  ');
 
     await _notificationsPlugin.show(
@@ -269,7 +269,8 @@ class NotificationService {
         android: AndroidNotificationDetails(
           'focus_timer_channel',
           'Active Focus Timer',
-          channelDescription: 'Persistent notification for active focus sessions',
+          channelDescription:
+              'Persistent notification for active focus sessions',
           importance: Importance.low, // Keeps it quiet
           priority: Priority.low,
           ongoing: true, // Prevents swiping away

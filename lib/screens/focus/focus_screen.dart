@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/screens/statistics_screen.dart';
+import 'package:timety/utils/date_format_utils.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
 import '../../providers/user_provider.dart';
@@ -8,7 +9,8 @@ import '../../providers/settings_provider.dart';
 import '../../data/focus/focus_models.dart';
 import '../../widgets/focus_mode_timeline.dart';
 import '../../widgets/interactive_gauge.dart';
-import '../../widgets/app_dialogs.dart';
+import '../../widgets/dialogs.dart';
+import '../../widgets/focus_bottom_sheet_builders.dart';
 import '../calendar_screen.dart';
 import 'focus_modes_screen.dart';
 import '../settings_screen.dart';
@@ -16,182 +18,38 @@ import '../settings_screen.dart';
 class FocusScreen extends StatelessWidget {
   const FocusScreen({super.key});
 
-  String _formatDigitalTime(int totalSeconds) {
-    final int minutes = totalSeconds ~/ 60;
-    final int seconds = totalSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
-  // --- ALERTS / DISTRACTIONS BOTTOM SHEET ---
+  // --- BOTTOM SHEETS & ALERTS ---
   void _showDistractionSheet(BuildContext context, FocusProvider provider) {
-    final events = [
-      {
-        'name': 'Distracted',
-        'icon': Icons.warning_amber,
-        'color': AppTheme.errorColor,
-      },
-      {
-        'name': 'Hydrated / Drink',
-        'icon': Icons.water_drop,
-        'color': AppTheme.taskColor,
-      },
-      {
-        'name': 'Stretched',
-        'icon': Icons.accessibility_new,
-        'color': AppTheme.warningColor,
-      },
-      {
-        'name': 'Snack',
-        'icon': Icons.restaurant,
-        'color': AppTheme.successColor,
-      },
-      {'name': 'Restroom', 'icon': Icons.wc, 'color': Colors.grey},
-    ];
-
-    showModalBottomSheet(
+    FocusBottomSheetBuilders.showDistractionSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  "Log an Event",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              ...events.map(
-                (e) => ListTile(
-                  leading: Icon(
-                    e['icon'] as IconData,
-                    color: e['color'] as Color,
-                  ),
-                  title: Text(
-                    e['name'] as String,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  onTap: () {
-                    provider.logDistraction(e['name'] as String);
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Logged: ${e['name']}'),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
+      onEventSelected: (eventName) {
+        provider.logDistraction(eventName);
       },
     );
   }
 
   // --- TAG MANAGEMENT ---
   void _showTagSelector(BuildContext context, FocusProvider provider) {
-    showModalBottomSheet(
+    FocusBottomSheetBuilders.showTagSelector(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  "Select Tag",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: provider.tags.length,
-                  itemBuilder: (context, index) {
-                    final tag = provider.tags[index];
-                    final isSelected = provider.selectedTag?.id == tag.id;
-                    return ListTile(
-                      leading: Icon(Icons.circle, color: Color(tag.colorValue)),
-                      title: Text(
-                        tag.name,
-                        style: TextStyle(
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? const Icon(
-                              Icons.check,
-                              color: AppTheme.successColor,
-                            )
-                          : null,
-                      onTap: () {
-                        provider.setSelectedTag(tag);
-                        Navigator.pop(context);
-                      },
-                    );
-                  },
-                ),
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.add_circle_outline),
-                title: const Text("Create New Tag"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showCreateTagDialog(context, provider);
-                },
-              ),
-            ],
-          ),
-        );
+      tags: provider.tags,
+      selectedTagId: provider.selectedTag?.id,
+      onTagSelected: (tag) {
+        provider.setSelectedTag(tag);
+      },
+      onCreateNewTag: () {
+        _showCreateTagDialog(context, provider);
       },
     );
   }
 
   void _showCreateTagDialog(BuildContext context, FocusProvider provider) {
-    final TextEditingController controller = TextEditingController();
     const Color selectedColor = AppTheme.taskColor;
 
-    showDialog(
+    FocusBottomSheetBuilders.showCreateTagDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("New Tag"),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: "Tag Name (e.g. Reading)",
-            ),
-            autofocus: true,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (controller.text.trim().isNotEmpty) {
-                  provider.createTag(controller.text.trim(), selectedColor);
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        );
+      onTagCreated: (tagName) {
+        provider.createTag(tagName, selectedColor);
       },
     );
   }
@@ -284,7 +142,7 @@ class FocusScreen extends StatelessWidget {
         final int currentMinutes = focusProvider.flexibleDurationMinutes;
         gaugeProgress = currentMinutes / 120.0;
         label = "SET TIME";
-        centerText = _formatDigitalTime(currentMinutes * 60);
+        centerText = AppDateFormatUtils.formatDuration(currentMinutes * 60);
       } else if (currentPhase.durationMinutes > 0 ||
           currentPhase.durationMinutes == -1) {
         int totalPhaseSeconds = currentPhase.durationMinutes > 0
@@ -296,12 +154,16 @@ class FocusScreen extends StatelessWidget {
             focusProvider.secondsRemainingInPhase / totalPhaseSeconds;
         label = currentPhase.type == PhaseType.rest ? "REST" : "FOCUS";
         isResting = currentPhase.type == PhaseType.rest;
-        centerText = _formatDigitalTime(focusProvider.secondsRemainingInPhase);
+        centerText = AppDateFormatUtils.formatDuration(
+          focusProvider.secondsRemainingInPhase,
+        );
       } else {
         isStopwatchMode = isRunning;
         gaugeProgress = 0.0;
         label = "STOPWATCH";
-        centerText = _formatDigitalTime(focusProvider.currentSecondsFocussed);
+        centerText = AppDateFormatUtils.formatDuration(
+          focusProvider.currentSecondsFocussed,
+        );
       }
     }
 

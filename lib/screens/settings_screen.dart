@@ -7,8 +7,8 @@ import '../providers/settings_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/task_provider.dart';
 import '../services/backup_service.dart';
-import '../widgets/tags_widget.dart';
-import '../widgets/categories_widget.dart';
+import '../widgets/tags.dart';
+import '../widgets/categories.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

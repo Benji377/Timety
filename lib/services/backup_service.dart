@@ -6,7 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:archive/archive_io.dart';
-import '../widgets/app_dialogs.dart';
+import '../widgets/dialogs.dart';
 
 class BackupService {
   // --- EXPORT BACKUP ---

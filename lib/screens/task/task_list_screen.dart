@@ -4,13 +4,12 @@ import '../../data/task/task.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../utils/task_filter_engine.dart';
 import '../../widgets/expansion_section.dart';
 import '../../widgets/list_tiles/task_list_tile.dart';
 import '../calendar_screen.dart';
 import '../statistics_screen.dart';
 import 'task_detail_screen.dart';
-
-enum SortOption { dueDate, priority, size, alphabetical, category }
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -23,7 +22,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   // --- Search & Sort State ---
   String _searchQuery = '';
   String? _selectedCategoryFilter;
-  SortOption _sortOption = SortOption.dueDate;
+  TaskSortOption _sortOption = TaskSortOption.dueDate;
   bool _isAscending = true;
 
   @override
@@ -37,53 +36,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   // --- DATA PIPELINE: Filter & Sort ---
   List<Task> _getProcessedTasks(List<Task> rawTasks) {
-    // Search & Category Filter
-    final processed = rawTasks.where((task) {
-      // Category Filter Check
-      if (_selectedCategoryFilter != null &&
-          _selectedCategoryFilter!.isNotEmpty) {
-        if (task.category != _selectedCategoryFilter) return false;
-      }
-
-      // Text Search Check
-      if (_searchQuery.isEmpty) return true;
-      final q = _searchQuery.toLowerCase();
-      return task.title.toLowerCase().contains(q) ||
-          task.description.toLowerCase().contains(q);
-    }).toList();
-
-    processed.sort((a, b) {
-      int result = 0;
-      switch (_sortOption) {
-        case SortOption.alphabetical:
-          result = a.title.toLowerCase().compareTo(b.title.toLowerCase());
-          break;
-        case SortOption.category:
-          result = a.category.toLowerCase().compareTo(b.category.toLowerCase());
-          break;
-        case SortOption.priority:
-          // Enums are sorted by their declaration index (0, 1, 2, 3)
-          result = a.priority.index.compareTo(b.priority.index);
-          break;
-        case SortOption.size:
-          result = a.size.index.compareTo(b.size.index);
-          break;
-        case SortOption.dueDate:
-          if (a.dueDate == null && b.dueDate == null) {
-            result = 0;
-          } else if (a.dueDate == null) {
-            result = 1; // Put tasks without due dates at the bottom
-          } else if (b.dueDate == null) {
-            result = -1;
-          } else {
-            result = a.dueDate!.compareTo(b.dueDate!);
-          }
-          break;
-      }
-      return _isAscending ? result : -result;
-    });
-
-    return processed;
+    final engine = TaskFilterEngine(
+      searchQuery: _searchQuery,
+      categoryFilter: _selectedCategoryFilter,
+      sortOption: _sortOption,
+      isAscending: _isAscending,
+    );
+    return engine.process(rawTasks);
   }
 
   Widget _buildTaskSection(
@@ -187,32 +146,32 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     const SizedBox(width: 8),
 
                     // Sort Dropdown
-                    PopupMenuButton<SortOption>(
+                    PopupMenuButton<TaskSortOption>(
                       icon: const Icon(Icons.sort),
                       tooltip: 'Sort by',
-                      onSelected: (SortOption result) {
+                      onSelected: (TaskSortOption result) {
                         setState(() => _sortOption = result);
                       },
                       itemBuilder: (BuildContext context) =>
-                          <PopupMenuEntry<SortOption>>[
+                          <PopupMenuEntry<TaskSortOption>>[
                             const PopupMenuItem(
-                              value: SortOption.dueDate,
+                              value: TaskSortOption.dueDate,
                               child: Text('Due Date'),
                             ),
                             const PopupMenuItem(
-                              value: SortOption.priority,
+                              value: TaskSortOption.priority,
                               child: Text('Priority'),
                             ),
                             const PopupMenuItem(
-                              value: SortOption.size,
+                              value: TaskSortOption.size,
                               child: Text('Size'),
                             ),
                             const PopupMenuItem(
-                              value: SortOption.category,
+                              value: TaskSortOption.category,
                               child: Text('Category'),
                             ),
                             const PopupMenuItem(
-                              value: SortOption.alphabetical,
+                              value: TaskSortOption.alphabetical,
                               child: Text('Alphabetical'),
                             ),
                           ],

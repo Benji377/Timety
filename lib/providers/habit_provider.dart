@@ -3,6 +3,7 @@ import 'package:timety/providers/settings_provider.dart';
 import '../data/habit/habit_models.dart';
 import '../data/habit/habit_repository.dart';
 import '../services/notification_service.dart';
+import '../utils/date_utils.dart';
 import '../utils/xp_calculator.dart';
 import 'user_provider.dart';
 
@@ -81,13 +82,11 @@ class HabitProvider extends ChangeNotifier {
 
   // --- CORE HABIT LOGIC ---
 
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
   // Checks if a habit was completed on a specific day
   bool isCompletedOn(Habit habit, DateTime date) {
-    return habit.completions.any((completion) => _isSameDay(completion, date));
+    return habit.completions.any(
+      (completion) => AppDateUtils.isSameDay(completion, date),
+    );
   }
 
   // Toggles completion for today
@@ -100,7 +99,7 @@ class HabitProvider extends ChangeNotifier {
 
     if (completed) {
       // Remove today's completion
-      habit.completions.removeWhere((c) => _isSameDay(c, today));
+      habit.completions.removeWhere((c) => AppDateUtils.isSameDay(c, today));
       userProvider?.addXp(-ExperienceEngine.xpPerHabit);
     } else {
       // Add completion

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timety/providers/user_provider.dart';
 import 'package:timety/screens/settings_screen.dart';
+import 'package:timety/utils/greeting_utils.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
 import '../data/task/task.dart';
@@ -19,32 +20,6 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onNavigateToFocus;
 
   const HomeScreen({super.key, required this.onNavigateToFocus});
-
-  // --- GREETING HELPER ---
-  String _getGreeting(String name) {
-    final now = DateTime.now();
-    final hour = now.hour;
-    final weekday = now.weekday;
-
-    String greeting;
-    if (hour < 12) {
-      greeting = "Good Morning, $name!";
-    } else if (hour < 17) {
-      greeting = "Good Afternoon, $name!";
-    } else {
-      greeting = "Good Evening, $name!";
-    }
-
-    if (weekday == DateTime.monday && hour < 12) {
-      return "$greeting Let's crush this week!";
-    } else if (weekday == DateTime.friday && hour > 15) {
-      return "$greeting The weekend is almost here!";
-    } else if (weekday == DateTime.sunday) {
-      return "$greeting Take it easy today!";
-    }
-
-    return greeting;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +70,7 @@ class HomeScreen extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  _getGreeting(userName),
+                  GreetingUtils.getGreeting(userName),
                   style: const TextStyle(
                     fontSize: AppTheme.fsHeadingLarge,
                     fontWeight: AppTheme.fwExtraBold,

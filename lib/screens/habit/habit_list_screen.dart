@@ -5,6 +5,7 @@ import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/habit_utils.dart';
 import '../../widgets/expansion_section.dart';
 import '../../widgets/list_tiles/habit_list_tile.dart';
 import '../calendar_screen.dart';
@@ -18,17 +19,7 @@ class HabitListScreen extends StatelessWidget {
     Habit habit,
     HabitProvider provider,
   ) {
-    var subtitle = '';
-    if (habit.frequency == HabitFrequency.daily) {
-      subtitle = 'Daily';
-    }
-    if (habit.frequency == HabitFrequency.weeklyExact) {
-      subtitle = 'Specific Days';
-    }
-    if (habit.frequency == HabitFrequency.weeklyFlexible) {
-      final doneThisWeek = provider.getCompletionsThisWeek(habit);
-      subtitle = '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
-    }
+    var subtitle = HabitUtils.buildHabitSubtitle(habit, provider);
     if (habit.targetTime != null) {
       subtitle += ' • ${habit.targetTime!.format(context)}';
     }

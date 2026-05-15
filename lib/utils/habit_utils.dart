@@ -4,11 +4,15 @@ import '../providers/habit_provider.dart';
 /// Utility functions for habit-related logic
 class HabitUtils {
   /// Builds a subtitle description for a habit based on its frequency
+  /// Does not include time formatting - handle that separately in UI layer
   static String buildHabitSubtitle(Habit habit, HabitProvider provider) {
     if (habit.frequency == HabitFrequency.daily) return 'Daily';
     if (habit.frequency == HabitFrequency.weeklyExact) return 'Specific Days';
-    final doneThisWeek = provider.getCompletionsThisWeek(habit);
-    return '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
+    if (habit.frequency == HabitFrequency.weeklyFlexible) {
+      final doneThisWeek = provider.getCompletionsThisWeek(habit);
+      return '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
+    }
+    return '';
   }
 
   /// Determines if a habit in a stack is locked based on previous habit completion
