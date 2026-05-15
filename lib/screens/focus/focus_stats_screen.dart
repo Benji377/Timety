@@ -263,9 +263,8 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
                             leading: CircleAvatar(
-                              backgroundColor: AppTheme.warningAccent.withValues(
-                                alpha: 0.12,
-                              ),
+                              backgroundColor: AppTheme.warningAccent
+                                  .withValues(alpha: 0.12),
                               child: Icon(
                                 _iconForDistraction(entry.distraction.note),
                                 color: AppTheme.warningAccent,

@@ -161,9 +161,13 @@ class FocusProvider extends ChangeNotifier {
       final mins = safeRemaining ~/ 60;
       final secs = (safeRemaining % 60).toString().padLeft(2, '0');
       NotificationService.instance.showFocusTimerNotification(
-        phaseName: currentPhase.type.name,
+        modeName: _activeMode!.name,
+        tagName: _selectedTag?.name ?? 'No Tag',
         targetTime: DateTime.now(),
         isStopwatch: isStopwatch,
+        notificationColor: currentPhase.type == PhaseType.rest
+            ? AppTheme.warningColor
+            : AppTheme.focusColor,
         isPaused: true,
         pausedText: isStopwatch ? "Paused" : "$mins:$secs remaining",
       );
@@ -181,9 +185,13 @@ class FocusProvider extends ChangeNotifier {
           : DateTime.now().add(Duration(seconds: targetSeconds));
 
       NotificationService.instance.showFocusTimerNotification(
-        phaseName: currentPhase.type.name,
+        modeName: _activeMode!.name,
+        tagName: _selectedTag?.name ?? 'No Tag',
         targetTime: targetTime,
         isStopwatch: isStopwatch,
+        notificationColor: currentPhase.type == PhaseType.rest
+            ? AppTheme.warningColor
+            : AppTheme.focusColor,
       );
     }
   }

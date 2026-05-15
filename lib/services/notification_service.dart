@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'dart:io';
 
 class NotificationService {
@@ -237,37 +238,46 @@ class NotificationService {
     await _notificationsPlugin.cancel(id: _generateId(habitId, 'habit_time'));
   }
 
-  // Shows a pinned notification that natively ticks up or down!
   Future<void> showFocusTimerNotification({
-    required String phaseName,
+    required String modeName,
+    required String tagName,
     required DateTime targetTime,
     required bool isStopwatch,
+    required Color notificationColor,
     bool isPaused = false,
     String? pausedText,
   }) async {
     if (kIsWeb) return;
 
+    final endTimeText = (!isPaused && !isStopwatch)
+        ? 'Ends at ${DateFormat('h:mm a').format(targetTime)}'
+        : null;
+
+    final List<String> bodyParts = [];
+    bodyParts.add('Tag: $tagName');
+    if (endTimeText != null) bodyParts.add(endTimeText);
+
+    final String bodyText = isPaused 
+        ? (pausedText ?? 'Paused') 
+        : bodyParts.join('  |  ');
+
     await _notificationsPlugin.show(
       id: focusTimerId,
-      title: isPaused ? 'Focus Paused' : 'Focus Active',
-      body: isPaused
-          ? 'Phase: $phaseName | $pausedText'
-          : 'Current Phase: $phaseName',
+      title: isPaused ? 'Focus Paused' : modeName,
+      body: bodyText,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'focus_timer_channel',
           'Active Focus Timer',
-          channelDescription:
-              'Persistent notification for active focus sessions',
-          importance: Importance
-              .low, // Low importance so it doesn't pop-up and interrupt
+          channelDescription: 'Persistent notification for active focus sessions',
+          importance: Importance.low, // Keeps it quiet
           priority: Priority.low,
-          ongoing: true, // User cannot swipe it away
+          ongoing: true, // Prevents swiping away
           autoCancel: false,
-          usesChronometer: !isPaused, // Android natively ticks the timer
-          chronometerCountDown:
-              !isStopwatch, // Ticks down for timers, up for stopwatches
+          usesChronometer: !isPaused, // OS handles the ticking
+          chronometerCountDown: !isStopwatch,
           when: targetTime.millisecondsSinceEpoch,
+          color: notificationColor, // Tints the app icon to match focus/rest
           icon: '@mipmap/ic_launcher',
         ),
       ),
