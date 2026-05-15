@@ -9,6 +9,7 @@ class HabitListTile extends StatelessWidget {
   final VoidCallback onToggleCompleted;
   final VoidCallback onTap;
   final VoidCallback? onDelete;
+  final VoidCallback? onMarkPastCompletion;
   final bool enableDismissible;
   final String subtitleText;
   final double? progressValue;
@@ -26,6 +27,7 @@ class HabitListTile extends StatelessWidget {
     required this.onTap,
     required this.subtitleText,
     this.onDelete,
+    this.onMarkPastCompletion,
     this.enableDismissible = true,
     this.progressValue,
     this.isStacked = false,
@@ -135,6 +137,12 @@ class HabitListTile extends StatelessWidget {
             ),
         ],
       ),
+      trailing: IconButton(
+          icon: const Icon(Icons.schedule, size: 20),
+          tooltip: 'Mark past completion',
+          onPressed: onMarkPastCompletion,
+          visualDensity: VisualDensity.compact,
+        ),
       onTap: onTap,
     );
 

@@ -7,6 +7,7 @@ import '../../providers/user_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/habit_utils.dart';
 import '../../widgets/expansion_section.dart';
+import '../../widgets/habit_bottom_sheet_builders.dart';
 import '../../widgets/list_tiles/habit_list_tile.dart';
 import '../calendar_screen.dart';
 import 'habit_detail_screen.dart';
@@ -34,6 +35,23 @@ class HabitListScreen extends StatelessWidget {
     bool isStacked = false,
     bool isLocked = false,
   }) {
+    void openInteractiveCalendar() {
+          HabitBottomSheetBuilders.showUnifiedHistorySheet(
+            context: context,
+            habit: habit,
+            onDateSelected: (date) => provider.markCompletionOnDate(
+              habit,
+              date,
+              userProvider: context.read<UserProvider>(),
+            ),
+            onDateDeselected: (date) => provider.unmarkCompletionOnDate(
+              habit,
+              date,
+              userProvider: context.read<UserProvider>(),
+            ),
+          );
+        }
+
     return HabitListTile(
       habit: habit,
       isCompleted: isDone,
@@ -48,6 +66,7 @@ class HabitListScreen extends StatelessWidget {
         habit,
         userProvider: context.read<UserProvider>(),
       ),
+      onMarkPastCompletion: openInteractiveCalendar,
       onDelete: () => provider.deleteHabit(habit.id),
       onTap: () {
         Navigator.push(

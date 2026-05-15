@@ -141,4 +141,37 @@ class HabitProvider extends ChangeNotifier {
       return false;
     }).toList();
   }
+
+  // Mark a habit as completed on a specific date
+  Future<void> markCompletionOnDate(
+    Habit habit,
+    DateTime date, {
+    UserProvider? userProvider,
+  }) async {
+    if (!isCompletedOn(habit, date)) {
+      habit.completions.add(date);
+      userProvider?.addXp(ExperienceEngine.xpPerHabit);
+      await saveHabit(habit);
+    }
+  }
+
+  // Unmark a habit completion on a specific date
+  Future<void> unmarkCompletionOnDate(
+    Habit habit,
+    DateTime date, {
+    UserProvider? userProvider,
+  }) async {
+    if (isCompletedOn(habit, date)) {
+      habit.completions.removeWhere((c) => AppDateUtils.isSameDay(c, date));
+      userProvider?.addXp(-ExperienceEngine.xpPerHabit);
+      await saveHabit(habit);
+    }
+  }
+
+  // Get completion history sorted by date (most recent first)
+  List<DateTime> getCompletionHistory(Habit habit, {int daysBack = 90}) {
+    final cutoffDate = DateTime.now().subtract(Duration(days: daysBack));
+    return habit.completions.where((c) => c.isAfter(cutoffDate)).toList()
+      ..sort((a, b) => b.compareTo(a)); // Most recent first
+  }
 }
