@@ -330,7 +330,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     onTap: () {
                       launchUrl(
-                        Uri.parse('https://github.com/Benji377/Timety/discussions'),
+                        Uri.parse(
+                          'https://github.com/Benji377/Timety/discussions',
+                        ),
                       );
                     },
                   ),

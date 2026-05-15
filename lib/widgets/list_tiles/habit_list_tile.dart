@@ -138,11 +138,11 @@ class HabitListTile extends StatelessWidget {
         ],
       ),
       trailing: IconButton(
-          icon: const Icon(Icons.schedule, size: 20),
-          tooltip: 'Mark past completion',
-          onPressed: onMarkPastCompletion,
-          visualDensity: VisualDensity.compact,
-        ),
+        icon: const Icon(Icons.schedule, size: 20),
+        tooltip: 'Mark past completion',
+        onPressed: onMarkPastCompletion,
+        visualDensity: VisualDensity.compact,
+      ),
       onTap: onTap,
     );
 

@@ -36,21 +36,21 @@ class HabitListScreen extends StatelessWidget {
     bool isLocked = false,
   }) {
     void openInteractiveCalendar() {
-          HabitBottomSheetBuilders.showUnifiedHistorySheet(
-            context: context,
-            habit: habit,
-            onDateSelected: (date) => provider.markCompletionOnDate(
-              habit,
-              date,
-              userProvider: context.read<UserProvider>(),
-            ),
-            onDateDeselected: (date) => provider.unmarkCompletionOnDate(
-              habit,
-              date,
-              userProvider: context.read<UserProvider>(),
-            ),
-          );
-        }
+      HabitBottomSheetBuilders.showUnifiedHistorySheet(
+        context: context,
+        habit: habit,
+        onDateSelected: (date) => provider.markCompletionOnDate(
+          habit,
+          date,
+          userProvider: context.read<UserProvider>(),
+        ),
+        onDateDeselected: (date) => provider.unmarkCompletionOnDate(
+          habit,
+          date,
+          userProvider: context.read<UserProvider>(),
+        ),
+      );
+    }
 
     return HabitListTile(
       habit: habit,

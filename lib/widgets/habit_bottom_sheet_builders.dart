@@ -65,17 +65,19 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
 
   void _changeMonth(int offset) {
     setState(() {
-      _displayedMonth =
-          DateTime(_displayedMonth.year, _displayedMonth.month + offset);
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month + offset,
+      );
     });
   }
 
   Future<void> _handleDateTap(DateTime date, bool isCompleted) async {
     // Prevent marking future dates
     if (date.isAfter(_today) && !AppDateUtils.isSameDay(date, _today)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cannot mark future dates")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Cannot mark future dates")));
       return;
     }
 
@@ -91,7 +93,8 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
         builder: (ctx) => AlertDialog(
           title: const Text("Edit Completion"),
           content: Text(
-              "Remove completion for ${DateFormat('MMM d, yyyy').format(date)}?"),
+            "Remove completion for ${DateFormat('MMM d, yyyy').format(date)}?",
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -142,10 +145,15 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
     final countAll = completions.length;
 
     // Calendar Math
-    final int daysInMonth =
-        DateTime(_displayedMonth.year, _displayedMonth.month + 1, 0).day;
-    final int firstWeekday =
-        DateTime(_displayedMonth.year, _displayedMonth.month).weekday;
+    final int daysInMonth = DateTime(
+      _displayedMonth.year,
+      _displayedMonth.month + 1,
+      0,
+    ).day;
+    final int firstWeekday = DateTime(
+      _displayedMonth.year,
+      _displayedMonth.month,
+    ).weekday;
     final int emptySlotsPrefix = firstWeekday - 1;
 
     // Sort completions for the timeline (Newest first)
@@ -189,7 +197,9 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                 Text(
                   DateFormat('MMMM yyyy').format(_displayedMonth),
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
@@ -201,20 +211,26 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
 
           // --- Days of the Week ---
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-                  .map((day) => SizedBox(
-                        width: 30,
-                        child: Text(
-                          day,
-                          textAlign: TextAlign.center,
-                          style:
-                              const TextStyle(fontSize: 12, color: Colors.grey),
+                  .map(
+                    (day) => SizedBox(
+                      width: 30,
+                      child: Text(
+                        day,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
                         ),
-                      ))
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -236,11 +252,15 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
 
               final dayNumber = index - emptySlotsPrefix + 1;
               final currentDate = DateTime(
-                  _displayedMonth.year, _displayedMonth.month, dayNumber);
+                _displayedMonth.year,
+                _displayedMonth.month,
+                dayNumber,
+              );
 
               final isToday = AppDateUtils.isSameDay(currentDate, _today);
-              final isCompleted =
-                  completions.any((c) => AppDateUtils.isSameDay(c, currentDate));
+              final isCompleted = completions.any(
+                (c) => AppDateUtils.isSameDay(c, currentDate),
+              );
               final isFuture = currentDate.isAfter(_today) && !isToday;
 
               return GestureDetector(
@@ -251,10 +271,8 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                   decoration: BoxDecoration(
                     color: isFuture
                         ? Colors.transparent
-                        : Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.5),
+                        : Theme.of(context).colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.5),
                     border: isToday
                         ? Border.all(color: AppTheme.habitColor, width: 2)
                         : null,
@@ -266,9 +284,12 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                       Text(
                         dayNumber.toString(),
                         style: TextStyle(
-                          fontWeight:
-                              isToday ? FontWeight.bold : FontWeight.normal,
-                          color: isFuture ? Colors.grey.withValues(alpha: 0.3) : null,
+                          fontWeight: isToday
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: isFuture
+                              ? Colors.grey.withValues(alpha: 0.3)
+                              : null,
                         ),
                       ),
                       if (isCompleted)
@@ -352,7 +373,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
               ],
             ),
           ),
-          
+
           // Right side: Data and actions
           Expanded(
             child: Padding(
@@ -383,7 +404,11 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                   ),
                   // Delete button directly on the timeline item
                   IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 20, color: Colors.grey),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      size: 20,
+                      color: Colors.grey,
+                    ),
                     tooltip: "Remove this record",
                     onPressed: () {
                       widget.onDateDeselected(completion);
