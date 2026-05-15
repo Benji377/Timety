@@ -300,7 +300,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
                   const ListTile(
-                    leading: Icon(Icons.person, color: Colors.green),
+                    leading: Icon(Icons.person, color: Colors.deepOrange),
                     title: Text('Built by Benji377'),
                     subtitle: Text('Solo Developer & Maintainer'),
                   ),
@@ -320,6 +320,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   ListTile(
+                    leading: const Icon(Icons.help, color: Colors.green),
+                    title: const Text('Need Help?'),
+                    subtitle: const Text('GitHub Discussions'),
+                    trailing: const Icon(
+                      Icons.open_in_new,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    onTap: () {
+                      launchUrl(
+                        Uri.parse('https://github.com/Benji377/Timety/discussions'),
+                      );
+                    },
+                  ),
+                  ListTile(
                     leading: const Icon(Icons.code, color: Colors.blue),
                     title: const Text('Source Code'),
                     subtitle: const Text('GitHub Repository'),
@@ -330,7 +345,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     onTap: () {
                       launchUrl(
-                        Uri.parse('https://github.com/Benji377/timety'),
+                        Uri.parse('https://github.com/Benji377/Timety'),
                       );
                     },
                   ),
