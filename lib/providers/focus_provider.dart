@@ -24,6 +24,9 @@ class FocusProvider extends ChangeNotifier {
   bool _isRunning = false;
   bool _isPaused = false;
   int _currentSecondsFocussed = 0;
+  DateTime? _sessionBaseTime; // anchors wall-clock time for stopwatch mode
+  DateTime? _phaseBaseTime; // anchors wall-clock time for the current phase
+  int _currentPhaseTotalSeconds = 0;
 
   int _currentPhaseIndex = 0;
   int _secondsRemainingInPhase = 0;
@@ -183,6 +186,23 @@ class FocusProvider extends ChangeNotifier {
     _isRunning = true;
     _isPaused = false;
 
+    // Anchor the session base time so elapsed is computed from wall-clock.
+    // This keeps both stopwatch and timed phases accurate across sleeps/locks.
+    _sessionBaseTime = DateTime.now().subtract(
+      Duration(seconds: _currentSecondsFocussed),
+    );
+
+    // For timed phases, compute a phase base so remaining seconds are derived from wall-clock.
+    final currentPhase = _activeMode!.phases[_currentPhaseIndex];
+    if (currentPhase.durationMinutes > 0) {
+      _currentPhaseTotalSeconds = currentPhase.durationMinutes * 60;
+      _phaseBaseTime = DateTime.now().subtract(
+        Duration(seconds: _currentPhaseTotalSeconds - _secondsRemainingInPhase),
+      );
+    } else {
+      _phaseBaseTime = DateTime.now();
+    }
+
     _updateNotification();
     notifyListeners();
 
@@ -198,27 +218,51 @@ class FocusProvider extends ChangeNotifier {
 
     final phase = _activeMode!.phases[index];
     _currentPhaseType = phase.type;
-    _secondsRemainingInPhase = phase.durationMinutes > 0
+    _currentPhaseTotalSeconds = phase.durationMinutes > 0
         ? phase.durationMinutes * 60
         : 0;
+    _secondsRemainingInPhase = _currentPhaseTotalSeconds;
+    _phaseBaseTime = DateTime.now();
   }
 
   void _tick(Timer timer) {
-    if (_currentPhaseType == PhaseType.focus) {
-      _currentSecondsFocussed++;
-    }
-
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
 
-    if (currentPhase.durationMinutes > 0) {
-      _secondsRemainingInPhase--;
+    // If this is a stopwatch (durationMinutes == -1) compute elapsed from wall-clock
+    if (currentPhase.durationMinutes == -1) {
+      if (_sessionBaseTime == null) {
+        _sessionBaseTime = DateTime.now().subtract(
+          Duration(seconds: _currentSecondsFocussed),
+        );
+      }
+      _currentSecondsFocussed = DateTime.now()
+          .difference(_sessionBaseTime!)
+          .inSeconds;
+    } else {
+      // Timed phase: compute remaining seconds from phase anchor so background sleeps are handled
+      if (_currentPhaseType == PhaseType.focus) {
+        // keep aggregate focused count accurate
+        _currentSecondsFocussed++;
+      }
 
-      if (_secondsRemainingInPhase <= 0) {
-        _currentPhaseIndex++;
-        _setupPhase(_currentPhaseIndex);
+      if (currentPhase.durationMinutes > 0) {
+        if (_phaseBaseTime == null) {
+          _phaseBaseTime = DateTime.now();
+          _currentPhaseTotalSeconds = currentPhase.durationMinutes * 60;
+        }
 
-        if (_isRunning) {
-          _updateNotification();
+        final elapsedInPhase = DateTime.now()
+            .difference(_phaseBaseTime!)
+            .inSeconds;
+        _secondsRemainingInPhase = _currentPhaseTotalSeconds - elapsedInPhase;
+
+        if (_secondsRemainingInPhase <= 0) {
+          _currentPhaseIndex++;
+          _setupPhase(_currentPhaseIndex);
+
+          if (_isRunning) {
+            _updateNotification();
+          }
         }
       }
     }
@@ -236,6 +280,10 @@ class FocusProvider extends ChangeNotifier {
   void stopSession({bool completed = false, UserProvider? userProvider}) async {
     _timer?.cancel();
     NotificationService.instance.cancelFocusTimerNotification();
+
+    _sessionBaseTime = null;
+    _phaseBaseTime = null;
+    _currentPhaseTotalSeconds = 0;
 
     if (_currentSession != null) {
       _currentSession!.endTime = DateTime.now();
@@ -271,6 +319,8 @@ class FocusProvider extends ChangeNotifier {
     _currentSession = null;
     _currentSecondsFocussed = 0;
     _currentPhaseIndex = 0;
+    _phaseBaseTime = null;
+    _currentPhaseTotalSeconds = 0;
     _setupPhase(0);
     notifyListeners();
   }
