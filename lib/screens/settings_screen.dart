@@ -99,6 +99,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settings = context.watch<SettingsProvider>();
     final focusProvider = context.watch<FocusProvider>();
     final taskProvider = context.watch<TaskProvider>();
+    final hiveBoxNames = [
+      'focusModesBox',
+      'focusSessionsBox',
+      'focusTagsBox',
+      'habitsBox',
+      'tasksBox',
+      'userProfileBox',
+    ];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
@@ -247,10 +255,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text(
               'Save your data locally or share it to the cloud',
             ),
-            onTap: () => BackupService.exportBackup(
-              context,
-              boxNames: ['focusModesBox', 'focusSessionsBox', 'focusTagsBox', 'habitsBox', 'tasksBox', 'userProfileBox']
-              ),
+            onTap: () =>
+                BackupService.exportBackup(context, boxNames: hiveBoxNames),
           ),
           ListTile(
             leading: const Icon(Icons.restore),
@@ -258,10 +264,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text(
               'Overwrite current data from a backup zip file',
             ),
-            onTap: () => BackupService.importBackup(
-              context,
-              boxNames: ['focusModesBox', 'focusSessionsBox', 'focusTagsBox', 'habitsBox', 'tasksBox', 'userProfileBox']
-              ),
+            onTap: () =>
+                BackupService.importBackup(context, boxNames: hiveBoxNames),
           ),
 
           const Divider(height: 32),
