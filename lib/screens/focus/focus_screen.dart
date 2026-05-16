@@ -22,32 +22,7 @@ class FocusScreen extends StatefulWidget {
   State<FocusScreen> createState() => _FocusScreenState();
 }
 
-class _FocusScreenState extends State<FocusScreen> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  /// When the app is resumed from the background, force a rebuild of the UI
-  /// to display the current elapsed time using wall-clock calculations
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      final focusProvider = context.read<FocusProvider>();
-      if (focusProvider.isRunning) {
-        // Trigger a rebuild to recalculate the displayed time
-        setState(() {});
-      }
-    }
-  }
-
+class _FocusScreenState extends State<FocusScreen> {
   // --- BOTTOM SHEETS & ALERTS ---
   void _showDistractionSheet(BuildContext context, FocusProvider provider) {
     FocusBottomSheetBuilders.showDistractionSheet(
@@ -111,7 +86,6 @@ class _FocusScreenState extends State<FocusScreen> with WidgetsBindingObserver {
     if (confirmed) {
       focusProvider.stopSession(userProvider: context.read<UserProvider>());
     } else if (pausedByThisCall) {
-      // only resume if this call paused the timer
       focusProvider.startSession();
     }
   }
@@ -168,14 +142,14 @@ class _FocusScreenState extends State<FocusScreen> with WidgetsBindingObserver {
 
     if (activeMode != null && activeMode.phases.isNotEmpty) {
       final currentPhase = activeMode.phases[focusProvider.currentPhaseIndex];
+      final bool isStopwatchPhase = activeMode.type == FocusModeType.stopwatch;
 
       if (canDrag) {
         final int currentMinutes = focusProvider.flexibleDurationMinutes;
         gaugeProgress = currentMinutes / 120.0;
         label = "SET TIME";
         centerText = AppDateFormatUtils.formatDuration(currentMinutes * 60);
-      } else if (currentPhase.durationMinutes > 0 ||
-          currentPhase.durationMinutes == -1) {
+      } else if (!isStopwatchPhase) {
         int totalPhaseSeconds = currentPhase.durationMinutes > 0
             ? currentPhase.durationMinutes * 60
             : 25 * 60;

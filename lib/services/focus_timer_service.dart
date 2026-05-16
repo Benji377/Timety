@@ -1,175 +1,155 @@
 import 'dart:async';
 import '../data/focus/focus_models.dart';
 
-/// Callback for when a phase completes
 typedef OnPhaseComplete = void Function({required bool hasMorePhases});
-
-/// Callback for timer tick
 typedef OnTimerTick =
     void Function({required int secondsRemaining, required int secondsFocused});
 
-/// Handles the core timer mechanics for focus sessions
-///
-/// This service manages:
-/// - Timer state (running, paused, stopped)
-/// - Phase progression
-/// - Elapsed time calculations (including background sleep handling)
-/// - Stopwatch vs. timed mode
 class FocusTimerService {
   Timer? _timer;
 
-  // State
   bool _isRunning = false;
-  bool _isPaused = false;
-  int _currentSecondsFocused = 0;
-  int _secondsRemainingInPhase = 0;
 
-  // Time anchors for wall-clock calculations
+  // Time Anchors
   DateTime? _sessionBaseTime;
   DateTime? _phaseBaseTime;
   int _currentPhaseTotalSeconds = 0;
+  int _totalFocusedSecondsBeforeThisPhase = 0;
 
-  // Callbacks
+  // Pause Tracking
+  Duration _accumulatedPause = Duration.zero;
+  DateTime? _pauseStartTime;
+
   final OnTimerTick? onTick;
   final OnPhaseComplete? onPhaseComplete;
 
   FocusTimerService({this.onTick, this.onPhaseComplete});
 
-  bool get isRunning => _isRunning;
-  bool get isPaused => _isPaused;
-  int get currentSecondsFocused => _currentSecondsFocused;
-  int get secondsRemainingInPhase => _secondsRemainingInPhase;
+  bool get isRunning => _isRunning && _pauseStartTime == null;
+  bool get isPaused => _pauseStartTime != null;
+  int _currentSecondsFocused = 0;
+  int _secondsRemainingInPhase = 0;
 
-  /// Starts the timer with the given phase configuration
+  DateTime get _effectiveNow {
+    final base = _pauseStartTime ?? DateTime.now();
+    return base.subtract(_accumulatedPause);
+  }
+
   void start({
+    required FocusMode mode,
     required SessionPhase phase,
-    required bool isFocusPhase,
-    required bool isFlexibleMode,
     int? flexibleDurationMinutes,
   }) {
     if (_isRunning) return;
-
     _isRunning = true;
-    _isPaused = false;
-    _sessionBaseTime ??= DateTime.now();
+    _pauseStartTime = null;
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _tick(
-        phase: phase,
-        isFocusPhase: isFocusPhase,
-        isFlexibleMode: isFlexibleMode,
-        flexibleDurationMinutes: flexibleDurationMinutes ?? 25,
-      );
-    });
+    // Anchor times using effectiveNow
+    _sessionBaseTime ??= _effectiveNow;
+    _phaseBaseTime ??= _effectiveNow;
+
+    _currentPhaseTotalSeconds = mode.type == FocusModeType.flexible
+        ? (flexibleDurationMinutes ?? 25) * 60
+        : (phase.durationMinutes > 0 ? phase.durationMinutes * 60 : 0);
+
+    _startPeriodicTimer(mode, phase, flexibleDurationMinutes ?? 25);
   }
 
-  /// Pauses the timer
   void pause() {
-    if (!_isRunning) return;
-
+    if (isPaused || !_isRunning) return;
     _timer?.cancel();
-    _isPaused = true;
-    _isRunning = false;
+    _pauseStartTime = DateTime.now();
   }
 
-  /// Resumes the paused timer
-  void resume() {
-    if (_isPaused) {
-      _isRunning = true;
-      _isPaused = false;
+  void resume({
+    required FocusMode mode,
+    required SessionPhase phase,
+    int? flexibleDurationMinutes,
+  }) {
+    if (!isPaused) return;
 
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        // Note: Caller should provide phase context
-      });
+    _accumulatedPause += DateTime.now().difference(_pauseStartTime!);
+    _pauseStartTime = null;
+
+    _startPeriodicTimer(mode, phase, flexibleDurationMinutes ?? 25);
+  }
+
+  void resuscitateDeadTimer({
+    required FocusMode mode,
+    required SessionPhase phase,
+    int? flexibleDurationMinutes,
+  }) {
+    if (_isRunning && _pauseStartTime == null) {
+      _startPeriodicTimer(mode, phase, flexibleDurationMinutes ?? 25);
+      _tick(mode, phase, flexibleDurationMinutes ?? 25);
     }
   }
 
-  /// Stops the timer and resets state
-  void stop() {
+  void _startPeriodicTimer(FocusMode mode, SessionPhase phase, int flexMins) {
     _timer?.cancel();
-    _isRunning = false;
-    _isPaused = false;
-    _sessionBaseTime = null;
-    _phaseBaseTime = null;
-    _currentPhaseTotalSeconds = 0;
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _tick(mode, phase, flexMins);
+    });
   }
 
-  /// Resets the timer to initial state
-  void reset() {
-    stop();
-    _currentSecondsFocused = 0;
-    _secondsRemainingInPhase = 0;
-  }
+  void _tick(FocusMode mode, SessionPhase phase, int flexMins) {
+    final now = _effectiveNow;
 
-  /// Core timer tick logic
-  /// Handles stopwatch mode, timed phases, and background sleep recovery
-  void _tick({
-    required SessionPhase phase,
-    required bool isFocusPhase,
-    required bool isFlexibleMode,
-    required int flexibleDurationMinutes,
-  }) {
-    final isStopwatch = phase.durationMinutes == -1 && !isFlexibleMode;
-
-    if (isStopwatch) {
-      // Stopwatch mode: compute elapsed from session start (wall-clock based)
-      _currentSecondsFocused = DateTime.now()
-          .difference(_sessionBaseTime!)
-          .inSeconds;
+    if (mode.type == FocusModeType.stopwatch) {
+      _currentSecondsFocused = now.difference(_sessionBaseTime!).inSeconds;
     } else {
-      // Timed phase: track focused time if this is a focus phase
-      if (isFocusPhase) {
-        _currentSecondsFocused++;
+      if (phase.type == PhaseType.focus) {
+        _currentSecondsFocused =
+            _totalFocusedSecondsBeforeThisPhase +
+            now.difference(_phaseBaseTime!).inSeconds;
       }
 
-      // Update phase time tracking
-      if (isFlexibleMode || phase.durationMinutes > 0) {
-        if (_phaseBaseTime == null) {
-          _phaseBaseTime = DateTime.now();
-          _currentPhaseTotalSeconds = isFlexibleMode
-              ? flexibleDurationMinutes * 60
-              : phase.durationMinutes * 60;
-        }
-
-        // Calculate remaining time from wall-clock (survives background sleeps)
-        final elapsedInPhase = DateTime.now()
-            .difference(_phaseBaseTime!)
-            .inSeconds;
+      if (mode.type == FocusModeType.flexible || phase.durationMinutes > 0) {
+        final elapsedInPhase = now.difference(_phaseBaseTime!).inSeconds;
         _secondsRemainingInPhase = _currentPhaseTotalSeconds - elapsedInPhase;
 
-        // Check if phase is complete
         if (_secondsRemainingInPhase <= 0) {
           _secondsRemainingInPhase = 0;
-          onPhaseComplete?.call(
-            hasMorePhases: true, // Caller determines if more phases exist
-          );
+          onPhaseComplete?.call(hasMorePhases: true);
           stop();
           return;
         }
       }
     }
 
-    // Notify listeners of tick
     onTick?.call(
       secondsRemaining: _secondsRemainingInPhase,
       secondsFocused: _currentSecondsFocused,
     );
   }
 
-  /// Advances to the next phase
-  void advancePhase() {
-    _phaseBaseTime = null;
+  void advancePhase(bool wasFocusPhase) {
+    if (wasFocusPhase) {
+      _totalFocusedSecondsBeforeThisPhase += _effectiveNow
+          .difference(_phaseBaseTime!)
+          .inSeconds;
+    }
+    _phaseBaseTime = _effectiveNow;
     _secondsRemainingInPhase = 0;
-    _isPaused = false;
+    _pauseStartTime = null;
     _isRunning = false;
   }
 
-  /// Sets the flexible duration for flexible phases
+  void stop() {
+    _timer?.cancel();
+    _isRunning = false;
+    _pauseStartTime = null;
+    _accumulatedPause = Duration.zero;
+    _sessionBaseTime = null;
+    _phaseBaseTime = null;
+    _totalFocusedSecondsBeforeThisPhase = 0;
+    _currentPhaseTotalSeconds = 0;
+  }
+
   void setFlexibleDuration(int minutes) {
     final clamped = minutes.clamp(1, 120);
     if (_currentPhaseTotalSeconds > 0 && _isRunning) {
-      // Adjust remaining time if timer is running
-      final elapsedInPhase = DateTime.now()
+      final elapsedInPhase = _effectiveNow
           .difference(_phaseBaseTime!)
           .inSeconds;
       _currentPhaseTotalSeconds = clamped * 60;
@@ -177,10 +157,6 @@ class FocusTimerService {
     }
   }
 
-  /// Gets the total phase duration
-  int getPhaseDurationSeconds() => _currentPhaseTotalSeconds;
-
-  /// Disposes resources
   void dispose() {
     _timer?.cancel();
   }

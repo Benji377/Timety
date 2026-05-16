@@ -9,7 +9,7 @@ import 'user_provider.dart';
 import 'settings_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-class FocusProvider extends ChangeNotifier {
+class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   final FocusRepository repository;
   UserProvider? _userProvider;
   SettingsProvider? _settingsProvider;
@@ -27,9 +27,12 @@ class FocusProvider extends ChangeNotifier {
   bool _isRunning = false;
   bool _isPaused = false;
   int _currentSecondsFocussed = 0;
-  DateTime? _sessionBaseTime; // anchors wall-clock time for stopwatch mode
-  DateTime? _phaseBaseTime; // anchors wall-clock time for the current phase
+
+  DateTime? _sessionBaseTime;
+  DateTime? _phaseBaseTime;
   int _currentPhaseTotalSeconds = 0;
+  int _accumulatedFocusSecondsBeforePhase = 0;
+
   bool _awaitingPhaseContinue = false;
   int _flexibleDurationMinutes = 25;
 
@@ -52,7 +55,6 @@ class FocusProvider extends ChangeNotifier {
   List<FocusTag> get tags => _tags;
   FocusTag? get selectedTag => _selectedTag;
 
-  // Require the repository in the constructor
   FocusProvider({required this.repository}) {
     _init();
   }
@@ -66,11 +68,12 @@ class FocusProvider extends ChangeNotifier {
   }
 
   Future<void> _init() async {
+    WidgetsBinding.instance.addObserver(this);
+
     _modes = await repository.fetchModes();
     _history = await repository.fetchSessions();
     _tags = await repository.fetchTags();
     if (_tags.isEmpty) {
-      // Create a default tag so it isn't empty
       final defaultTag = FocusTag(
         id: 'default_tag',
         name: 'None',
@@ -81,7 +84,6 @@ class FocusProvider extends ChangeNotifier {
     }
     _selectedTag = _tags.first;
 
-    // Inject System Modes if they don't exist
     if (!_modes.any((m) => m.id == 'system_stopwatch')) {
       final sw = FocusMode.stopwatch();
       await repository.saveMode(sw);
@@ -103,8 +105,28 @@ class FocusProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- MODE MANAGEMENT ---
+  // This detects when the user unlocks the screen and revives the dead timer.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_isRunning) {
+        _timer?.cancel();
+        _tick();
+        _timer = Timer.periodic(const Duration(seconds: 1), _tick);
+      } else if (_isPaused) {
+        notifyListeners();
+      }
+    }
+  }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  // --- MODE MANAGEMENT ---
   void setActiveMode(FocusMode mode) {
     if (_isRunning) return;
     _activeMode = mode;
@@ -114,9 +136,7 @@ class FocusProvider extends ChangeNotifier {
 
   Future<void> saveCustomMode(FocusMode mode) async {
     if (mode.isSystem) return;
-
     await repository.saveMode(mode);
-
     final index = _modes.indexWhere((m) => m.id == mode.id);
     if (index != -1) {
       _modes[index] = mode;
@@ -129,9 +149,7 @@ class FocusProvider extends ChangeNotifier {
   Future<void> deleteMode(String modeId) async {
     final mode = _modes.firstWhere((m) => m.id == modeId);
     if (mode.isSystem) return;
-
     await repository.deleteMode(modeId);
-
     _modes.removeWhere((m) => m.id == modeId);
     if (_activeMode?.id == modeId) {
       _activeMode = _modes.firstWhere((m) => m.id == 'system_stopwatch');
@@ -139,7 +157,6 @@ class FocusProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- FLEXIBLE TIMER SETTER ---
   void setFlexibleDuration(int minutes) {
     if (_activeMode?.type == FocusModeType.flexible && !_isRunning) {
       final clamped = minutes > 120 ? 120 : minutes;
@@ -152,7 +169,6 @@ class FocusProvider extends ChangeNotifier {
     }
   }
 
-  // --- SESSION ACTIONS ---
   void _updateNotification({bool asPaused = false}) {
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
 
@@ -181,7 +197,7 @@ class FocusProvider extends ChangeNotifier {
       final int remainingForNotification =
           (!isStopwatch && _secondsRemainingInPhase > 0)
           ? _secondsRemainingInPhase
-          : 1; // ensure we never pass a past time causing the chronometer to count up
+          : 1;
       final int targetSeconds = remainingForNotification < 1
           ? 1
           : remainingForNotification;
@@ -221,13 +237,10 @@ class FocusProvider extends ChangeNotifier {
     _isRunning = true;
     _isPaused = false;
 
-    // Anchor the session base time so elapsed is computed from wall-clock.
-    // This keeps both stopwatch and timed phases accurate across sleeps/locks.
     _sessionBaseTime = DateTime.now().subtract(
       Duration(seconds: _currentSecondsFocussed),
     );
 
-    // For timed phases, compute a phase base so remaining seconds are derived from wall-clock.
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
     if (_activeMode!.type == FocusModeType.flexible) {
       _currentPhaseTotalSeconds = _flexibleDurationMinutes * 60;
@@ -261,20 +274,20 @@ class FocusProvider extends ChangeNotifier {
     _currentPhaseTotalSeconds = _activeMode!.type == FocusModeType.flexible
         ? _flexibleDurationMinutes * 60
         : (phase.durationMinutes > 0 ? phase.durationMinutes * 60 : 0);
+
     _secondsRemainingInPhase = _currentPhaseTotalSeconds;
     _phaseBaseTime = DateTime.now();
+    _accumulatedFocusSecondsBeforePhase = _currentSecondsFocussed;
     _awaitingPhaseContinue = false;
   }
 
   Future<void> _playDing() async {
     try {
       final player = AudioPlayer();
-      // Play packaged asset. Wait for completion then dispose.
       await player.play(AssetSource('ding.mp3'));
       await player.onPlayerComplete.first;
       await player.dispose();
     } catch (e) {
-      // If the sound fails to play, we don't want it to crash the app, so we catch and ignore errors.
       debugPrint('Error playing sound: $e');
     }
   }
@@ -299,12 +312,12 @@ class FocusProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _tick(Timer timer) {
+  void _tick([Timer? timer]) {
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
     final bool isFlexible = _activeMode!.type == FocusModeType.flexible;
+    final bool isStopwatch = _activeMode!.type == FocusModeType.stopwatch;
 
-    // If this is a stopwatch (durationMinutes == -1) compute elapsed from wall-clock
-    if (currentPhase.durationMinutes == -1 && !isFlexible) {
+    if (isStopwatch) {
       _sessionBaseTime ??= DateTime.now().subtract(
         Duration(seconds: _currentSecondsFocussed),
       );
@@ -312,12 +325,6 @@ class FocusProvider extends ChangeNotifier {
           .difference(_sessionBaseTime!)
           .inSeconds;
     } else {
-      // Timed phase: compute remaining seconds from phase anchor so background sleeps are handled
-      if (_currentPhaseType == PhaseType.focus) {
-        // keep aggregate focused count accurate
-        _currentSecondsFocussed++;
-      }
-
       if (isFlexible || currentPhase.durationMinutes > 0) {
         if (_phaseBaseTime == null) {
           _phaseBaseTime = DateTime.now();
@@ -331,18 +338,33 @@ class FocusProvider extends ChangeNotifier {
             .inSeconds;
         _secondsRemainingInPhase = _currentPhaseTotalSeconds - elapsedInPhase;
 
+        if (_currentPhaseType == PhaseType.focus) {
+          _currentSecondsFocussed =
+              _accumulatedFocusSecondsBeforePhase + elapsedInPhase;
+        }
+
         if (_secondsRemainingInPhase <= 0) {
-          // If there are more phases, pause and wait for user to continue.
           if (_currentPhaseIndex + 1 < _activeMode!.phases.length) {
             _awaitingPhaseContinue = true;
             _timer?.cancel();
             _isRunning = false;
             _isPaused = false;
             _secondsRemainingInPhase = 0;
+
+            if (_currentPhaseType == PhaseType.focus) {
+              _currentSecondsFocussed =
+                  _accumulatedFocusSecondsBeforePhase +
+                  _currentPhaseTotalSeconds;
+            }
+
             _playDing();
             _updateNotification(asPaused: true);
           } else {
-            // final phase finished: end session
+            if (_currentPhaseType == PhaseType.focus) {
+              _currentSecondsFocussed =
+                  _accumulatedFocusSecondsBeforePhase +
+                  _currentPhaseTotalSeconds;
+            }
             _playDing();
             stopSession(completed: true, userProvider: _userProvider);
             return;
@@ -378,7 +400,6 @@ class FocusProvider extends ChangeNotifier {
       await repository.saveSession(_currentSession!);
       _history.add(_currentSession!);
 
-      // ADD XP based on minutes focused
       final int focusMinutes = _currentSecondsFocussed ~/ 60;
       if (focusMinutes > 0) {
         userProvider?.addXp(focusMinutes * ExperienceEngine.xpPerFocusMin);
@@ -416,11 +437,9 @@ class FocusProvider extends ChangeNotifier {
       final growableDistractions = List<Distraction>.from(
         _currentSession!.distractions,
       );
-
       growableDistractions.add(Distraction(time: DateTime.now(), note: note));
       _currentSession!.distractions = growableDistractions;
       repository.saveSession(_currentSession!);
-
       notifyListeners();
     }
   }
@@ -428,7 +447,6 @@ class FocusProvider extends ChangeNotifier {
   int getMinutesFocusedToday() {
     final today = DateTime.now();
     int totalSeconds = 0;
-
     for (var session in _history) {
       if (session.startTime.year == today.year &&
           session.startTime.month == today.month &&
@@ -442,7 +460,6 @@ class FocusProvider extends ChangeNotifier {
     return totalSeconds ~/ 60;
   }
 
-  // --- TIME MACHINE LOGGING ---
   Future<void> logPastSession({
     required FocusMode mode,
     required DateTime startTime,
@@ -458,8 +475,7 @@ class FocusProvider extends ChangeNotifier {
       modeId: mode.id,
       startTime: startTime,
       endTime: endTime,
-      totalSecondsFocused:
-          totalSeconds, // For manual logs, we assume the time block was all focus
+      totalSecondsFocused: totalSeconds,
       isCompleted: true,
       tagId: tag?.id,
     );
@@ -467,16 +483,13 @@ class FocusProvider extends ChangeNotifier {
     await repository.saveSession(session);
     _history.add(session);
 
-    // ADD XP based on minutes focused
     final int focusMinutes = totalSeconds ~/ 60;
     if (focusMinutes > 0) {
       userProvider?.addXp(focusMinutes * ExperienceEngine.xpPerFocusMin);
     }
-
     notifyListeners();
   }
 
-  // --- TAG MANAGEMENT ---
   void setSelectedTag(FocusTag tag) {
     _selectedTag = tag;
     notifyListeners();
@@ -490,7 +503,7 @@ class FocusProvider extends ChangeNotifier {
     );
     await repository.saveTag(newTag);
     _tags.add(newTag);
-    _selectedTag = newTag; // Auto-select the newly created tag
+    _selectedTag = newTag;
     notifyListeners();
   }
 
