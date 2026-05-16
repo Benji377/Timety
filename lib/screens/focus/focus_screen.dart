@@ -361,7 +361,9 @@ class _FocusScreenState extends State<FocusScreen> with WidgetsBindingObserver {
                   labelColor: isResting
                       ? AppTheme.warningColor
                       : AppTheme.focusColor,
-                  centerTextColor: AppTheme.focusColor,
+                  centerTextColor: isResting
+                      ? AppTheme.warningColor
+                      : AppTheme.focusColor,
                   centerText: centerText,
                   bottomText: focusProvider.selectedTag?.name ?? "No Tag",
                   bottomTextColor: focusProvider.selectedTag != null
