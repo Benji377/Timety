@@ -6,11 +6,13 @@ import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
 import '../utils/xp_calculator.dart';
 import 'user_provider.dart';
+import 'settings_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class FocusProvider extends ChangeNotifier {
   final FocusRepository repository;
   UserProvider? _userProvider;
+  SettingsProvider? _settingsProvider;
 
   // --- STATE ---
   List<FocusMode> _modes = [];
@@ -57,6 +59,10 @@ class FocusProvider extends ChangeNotifier {
 
   void attachUserProvider(UserProvider userProvider) {
     _userProvider = userProvider;
+  }
+
+  void attachSettingsProvider(SettingsProvider settingsProvider) {
+    _settingsProvider = settingsProvider;
   }
 
   Future<void> _init() async {
@@ -151,8 +157,7 @@ class FocusProvider extends ChangeNotifier {
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
 
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
-    final isFlexible = _activeMode!.type == FocusModeType.flexible;
-    final isStopwatch = currentPhase.durationMinutes == -1 && !isFlexible;
+    final isStopwatch = _activeMode!.type == FocusModeType.stopwatch;
 
     if (asPaused) {
       final safeRemaining = _secondsRemainingInPhase > 0
@@ -170,6 +175,7 @@ class FocusProvider extends ChangeNotifier {
             : AppTheme.focusColor,
         isPaused: true,
         pausedText: isStopwatch ? "Paused" : "$mins:$secs remaining",
+        maxStopwatchMins: _settingsProvider?.maxStopwatchMins,
       );
     } else {
       final int remainingForNotification =
@@ -192,6 +198,7 @@ class FocusProvider extends ChangeNotifier {
         notificationColor: currentPhase.type == PhaseType.rest
             ? AppTheme.warningColor
             : AppTheme.focusColor,
+        maxStopwatchMins: _settingsProvider?.maxStopwatchMins,
       );
     }
   }

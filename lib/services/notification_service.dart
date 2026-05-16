@@ -246,6 +246,7 @@ class NotificationService {
     required Color notificationColor,
     bool isPaused = false,
     String? pausedText,
+    int? maxStopwatchMins,
   }) async {
     if (kIsWeb) return;
 
@@ -255,7 +256,13 @@ class NotificationService {
 
     final List<String> bodyParts = [];
     bodyParts.add('Tag: $tagName');
-    if (endTimeText != null) bodyParts.add(endTimeText);
+
+    if (endTimeText != null) {
+      bodyParts.add(endTimeText);
+    } else if (isStopwatch && !isPaused && maxStopwatchMins != null) {
+      // In stopwatch mode, show the max stopwatch time limit instead
+      bodyParts.add('Max: $maxStopwatchMins mins');
+    }
 
     final String bodyText = isPaused
         ? (pausedText ?? 'Paused')

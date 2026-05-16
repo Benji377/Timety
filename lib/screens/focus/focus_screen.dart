@@ -151,6 +151,7 @@ class _FocusScreenState extends State<FocusScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final focusProvider = context.watch<FocusProvider>();
     focusProvider.attachUserProvider(context.read<UserProvider>());
+    focusProvider.attachSettingsProvider(context.read<SettingsProvider>());
     final isRunning = focusProvider.isRunning;
     final isPaused = focusProvider.isPaused;
     final activeMode = focusProvider.activeMode;
