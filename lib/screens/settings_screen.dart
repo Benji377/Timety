@@ -247,7 +247,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text(
               'Save your data locally or share it to the cloud',
             ),
-            onTap: () => BackupService.exportBackup(context),
+            onTap: () => BackupService.exportBackup(
+              context,
+              boxNames: ['focusModesBox', 'focusSessionsBox', 'focusTagsBox', 'habitsBox', 'tasksBox', 'userProfileBox']
+              ),
           ),
           ListTile(
             leading: const Icon(Icons.restore),
@@ -255,7 +258,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text(
               'Overwrite current data from a backup zip file',
             ),
-            onTap: () => BackupService.importBackup(context),
+            onTap: () => BackupService.importBackup(
+              context,
+              boxNames: ['focusModesBox', 'focusSessionsBox', 'focusTagsBox', 'habitsBox', 'tasksBox', 'userProfileBox']
+              ),
           ),
 
           const Divider(height: 32),

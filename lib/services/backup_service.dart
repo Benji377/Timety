@@ -5,25 +5,26 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
+import 'package:hive/hive.dart';
 import '../widgets/dialogs.dart';
 
 class BackupService {
   // --- EXPORT BACKUP ---
-  static Future<void> exportBackup(BuildContext context) async {
+  static Future<void> exportBackup(
+    BuildContext context, {
+    required List<String> boxNames,
+  }) async {
     try {
-      final appDir = await getApplicationDocumentsDirectory();
       final tempDir = await getTemporaryDirectory();
       final backupDirPath = '${tempDir.path}/timety_backup';
       final backupDir = Directory(backupDirPath);
 
-      // Create a fresh temporary backup folder
-      if (backupDir.existsSync()) {
-        backupDir.deleteSync(recursive: true);
-      }
+      if (backupDir.existsSync()) backupDir.deleteSync(recursive: true);
       backupDir.createSync();
 
-      // Export SharedPreferences to a JSON file
+      // 1. Export SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final prefsMap = <String, dynamic>{};
       for (var key in prefs.getKeys()) {
@@ -32,29 +33,70 @@ class BackupService {
       final prefsFile = File('$backupDirPath/prefs.json');
       await prefsFile.writeAsString(jsonEncode(prefsMap));
 
-      // Copy all Hive database files (.hive)
-      final files = appDir.listSync();
-      for (var file in files) {
-        if (file is File && file.path.endsWith('.hive')) {
-          final fileName = file.path.split(Platform.pathSeparator).last;
-          file.copySync('$backupDirPath/$fileName');
+      // 2. Export Hive box data by copying their database files
+      final appDir = await getApplicationDocumentsDirectory();
+      final appSupportDir = await getApplicationSupportDirectory();
+
+      // Hive boxes can be stored in different locations - try both
+      final possibleHiveDirs = [
+        appDir,
+        appSupportDir,
+        Directory('${appDir.path}/hive'),
+        Directory('${appSupportDir.path}/hive'),
+      ];
+
+      for (String boxName in boxNames) {
+        boxName = boxName.toLowerCase();
+        try {
+          bool found = false;
+          // Look for the hive file in various locations
+          for (var dir in possibleHiveDirs) {
+            if (!dir.existsSync()) continue;
+
+            final hiveFile = File('${dir.path}/$boxName.hive');
+            if (hiveFile.existsSync()) {
+              final backupFile = File('$backupDirPath/$boxName.hive');
+              hiveFile.copySync(backupFile.path);
+              found = true;
+              break;
+            }
+          }
+
+          if (!found) {
+            debugPrint('Warning: Could not find file for $boxName');
+          }
+        } catch (e) {
+          debugPrint('Error exporting $boxName: $e');
         }
       }
 
-      // Zip the folder
-      final encoder = ZipFileEncoder();
-      final zipPath =
-          '${tempDir.path}/Timety_Backup_${DateTime.now().millisecondsSinceEpoch}.zip';
-      encoder.create(zipPath);
-      encoder.addDirectory(backupDir);
-      encoder.close();
+      // 3. Zip the backup folder
+      final zipFileName =
+          'Timety_Backup_${DateTime.now().millisecondsSinceEpoch}.zip';
+      final zipPath = '${tempDir.path}/$zipFileName';
 
-      // Open native share sheet (Save to Files, Google Drive, Email, etc.)
-      final xFile = XFile(zipPath, mimeType: 'application/zip');
-      await SharePlus.instance.share(
-        ShareParams(subject: 'Timety Backup', files: [xFile]),
-      );
+      // Use Archive API for zipping
+      final archive = Archive();
+      final backupFiles = backupDir.listSync();
+
+      for (var file in backupFiles) {
+        if (file is File) {
+          final filename = file.path.split('/').last;
+          final bytes = file.readAsBytesSync();
+          archive.addFile(ArchiveFile(filename, bytes.length, bytes));
+        }
+      }
+
+      // Encode and write the archive
+      final zipBytes = ZipEncoder().encode(archive);
+      await File(zipPath).writeAsBytes(zipBytes);
+
+      if (!context.mounted) return;
+
+      // 4. Ask the user: save locally or share to cloud?
+      await _showExportOptions(context, zipPath, zipFileName);
     } catch (e) {
+      debugPrint('Error exporting backup: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -63,10 +105,119 @@ class BackupService {
     }
   }
 
-  // --- IMPORT BACKUP ---
-  static Future<void> importBackup(BuildContext context) async {
+  /// Shows a bottom sheet letting the user choose between
+  /// saving to a local folder (SAF) or sharing via another app.
+  static Future<void> _showExportOptions(
+    BuildContext context,
+    String zipPath,
+    String zipFileName,
+  ) async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ListTile(
+              title: Text(
+                'Save Backup',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder_outlined),
+              title: const Text('Save to Device'),
+              subtitle: const Text('Choose a local folder'),
+              onTap: () async {
+                Navigator.of(ctx).pop();
+                await _saveToDevice(context, zipPath, zipFileName);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.share_outlined),
+              title: const Text('Share / Upload to Cloud'),
+              subtitle: const Text('Send to Drive, Dropbox, WhatsApp…'),
+              onTap: () async {
+                Navigator.of(ctx).pop();
+                await _shareFile(context, zipPath);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// SAF "Save As" picker — reliable across all Android versions.
+  static Future<void> _saveToDevice(
+    BuildContext context,
+    String zipPath,
+    String zipFileName,
+  ) async {
     try {
-      // Pick the zip file
+      // Read the zip file bytes
+      final bytes = await File(zipPath).readAsBytes();
+
+      // Opens the Android SAF "Save As" dialog and saves the file
+      final outputPath = await FilePicker.saveFile(
+        dialogTitle: 'Choose where to save your backup',
+        fileName: zipFileName,
+        type: FileType.custom,
+        allowedExtensions: ['zip'],
+        bytes: bytes,
+      );
+
+      if (outputPath == null) return; // User cancelled
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Backup saved to: $outputPath')));
+      }
+
+      // Clean up temp file
+      File(zipPath).delete().ignore();
+    } catch (e) {
+      debugPrint('Error saving backup: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Save failed: $e')));
+      }
+      // Clean up temp file on error
+      File(zipPath).delete().ignore();
+    }
+  }
+
+  /// SharePlus for cloud/app sharing (Drive, Dropbox, etc.)
+  static Future<void> _shareFile(BuildContext context, String zipPath) async {
+    try {
+      final xFile = XFile(zipPath, mimeType: 'application/zip');
+      await SharePlus.instance.share(
+        ShareParams(subject: 'Timety Backup', files: [xFile]),
+      );
+
+      // Clean up temp file after sharing
+      await Future.delayed(const Duration(seconds: 1));
+      File(zipPath).delete().ignore();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Share failed: $e')));
+      }
+      // Clean up temp file on error
+      File(zipPath).delete().ignore();
+    }
+  }
+
+  // --- IMPORT BACKUP ---
+  static Future<void> importBackup(
+    BuildContext context, {
+    required List<String> boxNames,
+  }) async {
+    try {
       final FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['zip'],
@@ -85,11 +236,12 @@ class BackupService {
       if (confirm != true) return;
 
       final zipFile = File(result.files.single.path!);
-      final appDir = await getApplicationDocumentsDirectory();
+      await getApplicationDocumentsDirectory();
 
-      // Unzip the file
       final bytes = zipFile.readAsBytesSync();
       final archive = ZipDecoder().decodeBytes(bytes);
+
+      await Hive.close();
 
       for (final file in archive) {
         final filename = file.name;
@@ -97,11 +249,10 @@ class BackupService {
           final data = file.content as List<int>;
 
           if (filename == 'prefs.json') {
-            // Restore SharedPreferences
             final jsonStr = utf8.decode(data);
             final Map<String, dynamic> prefsMap = jsonDecode(jsonStr);
             final prefs = await SharedPreferences.getInstance();
-            await prefs.clear(); // Clear existing
+            await prefs.clear();
 
             for (var entry in prefsMap.entries) {
               if (entry.value is bool) {
@@ -120,14 +271,14 @@ class BackupService {
               }
             }
           } else if (filename.endsWith('.hive')) {
-            // Overwrite Hive files
+            // Restore Hive database files
+            final appDir = await getApplicationDocumentsDirectory();
             final outFile = File('${appDir.path}/$filename');
             outFile.writeAsBytesSync(data);
           }
         }
       }
 
-      // Force App Restart Notification
       if (context.mounted) {
         showDialog(
           context: context,
@@ -147,6 +298,7 @@ class BackupService {
         );
       }
     } catch (e) {
+      debugPrint('Error importing backup: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Import failed: Check file format')),
