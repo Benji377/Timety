@@ -15,8 +15,38 @@ import '../calendar_screen.dart';
 import 'focus_modes_screen.dart';
 import '../settings_screen.dart';
 
-class FocusScreen extends StatelessWidget {
+class FocusScreen extends StatefulWidget {
   const FocusScreen({super.key});
+
+  @override
+  State<FocusScreen> createState() => _FocusScreenState();
+}
+
+class _FocusScreenState extends State<FocusScreen> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// When the app is resumed from the background, force a rebuild of the UI
+  /// to display the current elapsed time using wall-clock calculations
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final focusProvider = context.read<FocusProvider>();
+      if (focusProvider.isRunning) {
+        // Trigger a rebuild to recalculate the displayed time
+        setState(() {});
+      }
+    }
+  }
 
   // --- BOTTOM SHEETS & ALERTS ---
   void _showDistractionSheet(BuildContext context, FocusProvider provider) {
