@@ -64,9 +64,7 @@ class HabitProvider extends ChangeNotifier {
       time: _settings!.endOfDayTime,
     );
 
-    // 2. Specific Habit Reminders
     for (var habit in _habits) {
-      // If notifications are ON and the habit has a specific time
       if (habit.targetTime != null) {
         NotificationService.instance.scheduleHabitReminder(
           habitId: habit.id,
@@ -74,7 +72,6 @@ class HabitProvider extends ChangeNotifier {
           time: habit.targetTime!,
         );
       } else {
-        // Otherwise, make sure no ghost alarms exist for this habit
         NotificationService.instance.cancelHabitReminder(habit.id);
       }
     }
@@ -98,11 +95,9 @@ class HabitProvider extends ChangeNotifier {
     final completed = isCompletedOn(habit, today);
 
     if (completed) {
-      // Remove today's completion
       habit.completions.removeWhere((c) => AppDateUtils.isSameDay(c, today));
       userProvider?.addXp(-ExperienceEngine.xpPerHabit);
     } else {
-      // Add completion
       habit.completions.add(today);
       userProvider?.addXp(ExperienceEngine.xpPerHabit);
     }
@@ -110,10 +105,8 @@ class HabitProvider extends ChangeNotifier {
     await saveHabit(habit);
   }
 
-  // Helper for WeeklyFlexible: How many times have they done it this week?
   int getCompletionsThisWeek(Habit habit) {
     final now = DateTime.now();
-    // Get start of the current week (Monday)
     final startOfWeek = DateTime(
       now.year,
       now.month,
@@ -128,12 +121,11 @@ class HabitProvider extends ChangeNotifier {
         .length;
   }
 
-  // Helper to filter habits that are scheduled for a specific day
   List<Habit> getHabitsForDay(DateTime date) {
     return _habits.where((habit) {
       if (habit.frequency == HabitFrequency.daily) return true;
       if (habit.frequency == HabitFrequency.weeklyFlexible) {
-        return true; // Flexible habits show up every day until weekly goal is met
+        return true;
       }
       if (habit.frequency == HabitFrequency.weeklyExact) {
         return habit.targetWeekdays?.contains(date.weekday) ?? false;
@@ -142,7 +134,15 @@ class HabitProvider extends ChangeNotifier {
     }).toList();
   }
 
-  // Mark a habit as completed on a specific date
+  List<Habit> getHabitsForToday() {
+    return getHabitsForDay(DateTime.now()).where((habit) {
+      final completionsThisWeek = getCompletionsThisWeek(habit);
+      final targetDays = habit.targetDaysPerWeek;
+
+      return targetDays == null || completionsThisWeek <= targetDays;
+    }).toList();
+  }
+
   Future<void> markCompletionOnDate(
     Habit habit,
     DateTime date, {

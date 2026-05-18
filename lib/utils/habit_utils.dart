@@ -1,5 +1,6 @@
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
+import 'date_utils.dart';
 
 /// Utility functions for habit-related logic
 class HabitUtils {
@@ -7,7 +8,13 @@ class HabitUtils {
   /// Does not include time formatting - handle that separately in UI layer
   static String buildHabitSubtitle(Habit habit, HabitProvider provider) {
     if (habit.frequency == HabitFrequency.daily) return 'Daily';
-    if (habit.frequency == HabitFrequency.weeklyExact) return 'Specific Days';
+    if (habit.frequency == HabitFrequency.weeklyExact) {
+      final days = habit.targetWeekdays
+              ?.map((d) => AppDateUtils.weekdayToStringShort(d))
+              .join(', ') ??
+          '';
+      return 'Weekly on $days';
+    }
     if (habit.frequency == HabitFrequency.weeklyFlexible) {
       final doneThisWeek = provider.getCompletionsThisWeek(habit);
       return '$doneThisWeek / ${habit.targetDaysPerWeek} this week';

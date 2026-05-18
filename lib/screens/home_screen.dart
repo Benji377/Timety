@@ -33,6 +33,7 @@ class HomeScreen extends StatelessWidget {
     final int dailyTarget = settings.dailyGoalMins;
     final double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
     final today = DateTime.now();
+    final List<Habit> todaysHabits = habitProvider.getHabitsForToday();
 
     // Urgent Tasks
     final List<Task> urgentTasks = taskProvider.tasks.where((task) {
@@ -45,9 +46,6 @@ class HomeScreen extends StatelessWidget {
       return dueDay.isBefore(today) || dueDay.isAtSameMomentAs(today);
     }).toList();
     urgentTasks.sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
-
-    // Habits for Today
-    final List<Habit> todaysHabits = habitProvider.getHabitsForDay(today);
 
     return Scaffold(
       appBar: AppBar(
