@@ -140,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- FOCUS & PRODUCTIVITY ---
           _buildSectionHeader('Focus & Productivity'),
           ListTile(
-            leading: const Icon(Icons.track_changes),
+            leading: const Icon(Icons.track_changes, color: AppTheme.focusColor),
             title: const Text('Daily Focus Goal'),
             subtitle: Text('${settings.dailyGoalMins} minutes'),
             trailing: const Icon(Icons.chevron_right),
@@ -153,7 +153,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.timer_outlined),
+            leading: const Icon(Icons.timer_outlined, color: AppTheme.warningAccent),
             title: const Text('Max Stopwatch Limit'),
             subtitle: Text(
               'Prevents accidentally leaving timer on\nCurrently: ${settings.maxStopwatchMins} mins',
@@ -168,7 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.linear_scale),
+            leading: const Icon(Icons.linear_scale, color: AppTheme.taskColor),
             title: const Text('Max Phase Node Time'),
             subtitle: Text(
               'Maximum length for a single focus block\nCurrently: ${settings.maxNodeMins} mins',
@@ -188,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- TAGS & CATEGORIES ---
           _buildSectionHeader('Organization'),
           ListTile(
-            leading: const Icon(Icons.local_offer_outlined),
+            leading: const Icon(Icons.local_offer_outlined, color: AppTheme.focusColor),
             title: const Text('Focus Tags'),
             subtitle: Text('${focusProvider.tags.length} tags'),
             trailing: const Icon(Icons.chevron_right),
@@ -198,7 +198,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.label_outlined),
+            leading: const Icon(Icons.label_outlined, color: AppTheme.taskColor),
             title: const Text('Task Categories'),
             subtitle: Text(
               '${taskProvider.getAllCategories().length} categories',
@@ -215,7 +215,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- NOTIFICATIONS ---
           _buildSectionHeader('Notifications'),
           ListTile(
-            leading: const Icon(Icons.schedule),
+            leading: const Icon(Icons.schedule, color: AppTheme.warningAccent),
             title: const Text('Daily Motivation Time'),
             subtitle: Text(settings.notificationTime.format(context)),
             trailing: const Icon(Icons.edit),
@@ -230,7 +230,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.nightlight_round),
+            leading: const Icon(Icons.nightlight_round, color: AppTheme.habitColor),
             title: const Text('End of Day Checkup Time'),
             subtitle: Text(settings.endOfDayTime.format(context)),
             trailing: const Icon(Icons.edit),
@@ -250,7 +250,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- DATA & BACKUP ---
           _buildSectionHeader('Data & Backup'),
           ListTile(
-            leading: const Icon(Icons.cloud_upload_outlined),
+            leading: const Icon(Icons.cloud_upload_outlined, color: AppTheme.taskColor),
             title: const Text('Export Backup'),
             subtitle: const Text(
               'Save your data locally or share it to the cloud',
@@ -259,7 +259,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 BackupService.exportBackup(context, boxNames: hiveBoxNames),
           ),
           ListTile(
-            leading: const Icon(Icons.restore),
+            leading: const Icon(Icons.restore, color: AppTheme.focusColor),
             title: const Text('Restore Backup'),
             subtitle: const Text(
               'Overwrite current data from a backup zip file',
@@ -273,7 +273,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- SUPPORT & FEEDBACK ---
           _buildSectionHeader('Support & Feedback'),
           ListTile(
-            leading: const Icon(Icons.forum_outlined, color: Colors.green),
+            leading: const Icon(Icons.forum_outlined, color: AppTheme.focusColor),
             title: const Text('Community & Help'),
             subtitle: const Text('Ask questions and share tips on GitHub'),
             trailing: const Icon(
@@ -291,10 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(
-              Icons.bug_report_outlined,
-              color: Colors.deepPurple,
-            ),
+            leading: const Icon(Icons.bug_report_outlined, color: AppTheme.habitColor),
             title: const Text('Send Feedback'),
             subtitle: const Text('Report bugs or request new features'),
             trailing: const Icon(
