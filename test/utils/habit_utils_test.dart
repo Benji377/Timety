@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:timety/data/habit/habit_models.dart';
 import 'package:timety/providers/habit_provider.dart';
+import 'package:timety/utils/date_utils.dart';
 import 'package:timety/utils/habit_utils.dart';
 
 import '../test_support/fakes.dart';
@@ -37,6 +38,7 @@ void main() {
         id: 'exact',
         name: 'Exact habit',
         frequency: HabitFrequency.weeklyExact,
+        targetWeekdays: [DateTime.monday, DateTime.wednesday],
       );
       final flexibleHabit = Habit(
         id: 'flex',
@@ -48,7 +50,7 @@ void main() {
       expect(HabitUtils.buildHabitSubtitle(dailyHabit, habitProvider), 'Daily');
       expect(
         HabitUtils.buildHabitSubtitle(exactHabit, habitProvider),
-        'Specific Days',
+        'Weekly on ${AppDateUtils.weekdayToStringShort(DateTime.monday)}, ${AppDateUtils.weekdayToStringShort(DateTime.wednesday)}',
       );
       expect(
         HabitUtils.buildHabitSubtitle(flexibleHabit, habitProvider),
