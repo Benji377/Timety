@@ -24,7 +24,7 @@ class BackupService {
       if (backupDir.existsSync()) backupDir.deleteSync(recursive: true);
       backupDir.createSync();
 
-      // 1. Export SharedPreferences
+      // Export SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final prefsMap = <String, dynamic>{};
       for (var key in prefs.getKeys()) {
@@ -33,11 +33,10 @@ class BackupService {
       final prefsFile = File('$backupDirPath/prefs.json');
       await prefsFile.writeAsString(jsonEncode(prefsMap));
 
-      // 2. Export Hive box data by copying their database files
+      // Export Hive box data by copying their database files
       final appDir = await getApplicationDocumentsDirectory();
       final appSupportDir = await getApplicationSupportDirectory();
 
-      // Hive boxes can be stored in different locations - try both
       final possibleHiveDirs = [
         appDir,
         appSupportDir,
@@ -70,12 +69,11 @@ class BackupService {
         }
       }
 
-      // 3. Zip the backup folder
+      // Zip the backup folder
       final zipFileName =
           'Timety_Backup_${DateTime.now().millisecondsSinceEpoch}.zip';
       final zipPath = '${tempDir.path}/$zipFileName';
 
-      // Use Archive API for zipping
       final archive = Archive();
       final backupFiles = backupDir.listSync();
 
@@ -93,7 +91,7 @@ class BackupService {
 
       if (!context.mounted) return;
 
-      // 4. Ask the user: save locally or share to cloud?
+      // Ask the user: save locally or share to cloud?
       await _showExportOptions(context, zipPath, zipFileName);
     } catch (e) {
       debugPrint('Error exporting backup: $e');
@@ -149,7 +147,7 @@ class BackupService {
     );
   }
 
-  /// SAF "Save As" picker — reliable across all Android versions.
+  /// SAF "Save As" picker
   static Future<void> _saveToDevice(
     BuildContext context,
     String zipPath,

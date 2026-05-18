@@ -9,7 +9,8 @@ class HabitUtils {
   static String buildHabitSubtitle(Habit habit, HabitProvider provider) {
     if (habit.frequency == HabitFrequency.daily) return 'Daily';
     if (habit.frequency == HabitFrequency.weeklyExact) {
-      final days = habit.targetWeekdays
+      final days =
+          habit.targetWeekdays
               ?.map((d) => AppDateUtils.weekdayToStringShort(d))
               .join(', ') ??
           '';

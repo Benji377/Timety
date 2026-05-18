@@ -140,7 +140,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- FOCUS & PRODUCTIVITY ---
           _buildSectionHeader('Focus & Productivity'),
           ListTile(
-            leading: const Icon(Icons.track_changes, color: AppTheme.focusColor),
+            leading: const Icon(
+              Icons.track_changes,
+              color: AppTheme.focusColor,
+            ),
             title: const Text('Daily Focus Goal'),
             subtitle: Text('${settings.dailyGoalMins} minutes'),
             trailing: const Icon(Icons.chevron_right),
@@ -153,7 +156,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.timer_outlined, color: AppTheme.warningAccent),
+            leading: const Icon(
+              Icons.timer_outlined,
+              color: AppTheme.warningAccent,
+            ),
             title: const Text('Max Stopwatch Limit'),
             subtitle: Text(
               'Prevents accidentally leaving timer on\nCurrently: ${settings.maxStopwatchMins} mins',
@@ -188,7 +194,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- TAGS & CATEGORIES ---
           _buildSectionHeader('Organization'),
           ListTile(
-            leading: const Icon(Icons.local_offer_outlined, color: AppTheme.focusColor),
+            leading: const Icon(
+              Icons.local_offer_outlined,
+              color: AppTheme.focusColor,
+            ),
             title: const Text('Focus Tags'),
             subtitle: Text('${focusProvider.tags.length} tags'),
             trailing: const Icon(Icons.chevron_right),
@@ -198,7 +207,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.label_outlined, color: AppTheme.taskColor),
+            leading: const Icon(
+              Icons.label_outlined,
+              color: AppTheme.taskColor,
+            ),
             title: const Text('Task Categories'),
             subtitle: Text(
               '${taskProvider.getAllCategories().length} categories',
@@ -230,7 +242,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.nightlight_round, color: AppTheme.habitColor),
+            leading: const Icon(
+              Icons.nightlight_round,
+              color: AppTheme.habitColor,
+            ),
             title: const Text('End of Day Checkup Time'),
             subtitle: Text(settings.endOfDayTime.format(context)),
             trailing: const Icon(Icons.edit),
@@ -250,7 +265,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- DATA & BACKUP ---
           _buildSectionHeader('Data & Backup'),
           ListTile(
-            leading: const Icon(Icons.cloud_upload_outlined, color: AppTheme.taskColor),
+            leading: const Icon(
+              Icons.cloud_upload_outlined,
+              color: AppTheme.taskColor,
+            ),
             title: const Text('Export Backup'),
             subtitle: const Text(
               'Save your data locally or share it to the cloud',
@@ -273,7 +291,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // --- SUPPORT & FEEDBACK ---
           _buildSectionHeader('Support & Feedback'),
           ListTile(
-            leading: const Icon(Icons.forum_outlined, color: AppTheme.focusColor),
+            leading: const Icon(
+              Icons.forum_outlined,
+              color: AppTheme.focusColor,
+            ),
             title: const Text('Community & Help'),
             subtitle: const Text('Ask questions and share tips on GitHub'),
             trailing: const Icon(
@@ -291,7 +312,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.bug_report_outlined, color: AppTheme.habitColor),
+            leading: const Icon(
+              Icons.bug_report_outlined,
+              color: AppTheme.habitColor,
+            ),
             title: const Text('Send Feedback'),
             subtitle: const Text('Report bugs or request new features'),
             trailing: const Icon(

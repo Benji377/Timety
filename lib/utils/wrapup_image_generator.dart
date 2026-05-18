@@ -6,23 +6,19 @@ import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 
 /// Generates a 1080×1920 (9:16) wrap-up PNG using dart:ui canvas drawing.
-///
-/// No widget tree, no screenshot package, no layout-engine surprises —
-/// just direct draw calls that produce pixel-perfect output at any resolution.
 class WrapUpImageGenerator {
-  // ── Output dimensions (standard 9:16 Story / Reel format) ──────────────
+  // Output dimensions
   static const double _w = 1080;
   static const double _h = 1920;
 
-  // ── Layout constants (all in logical pixels at 1080-wide scale) ─────────
+  // Layout constants
   static const double _pad = 88;
   static const double _iconBoxSize = 100;
   static const double _iconSize = 54;
   static const double _statRowHeight = 108;
   static const double _statRowGap = 52;
 
-  // ── Public entry point ──────────────────────────────────────────────────
-
+  // Public entry point
   static Future<Uint8List> generate({
     required String name,
     required int level,
@@ -62,8 +58,6 @@ class WrapUpImageGenerator {
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }
-
-  // ── Private draw helpers ────────────────────────────────────────────────
 
   static void _drawBackground(Canvas canvas) {
     final paint = Paint()
@@ -113,7 +107,7 @@ class WrapUpImageGenerator {
     );
     y += 52;
 
-    // Name — scale down if it won't fit on one line
+    // Name - scale down if it won't fit on one line
     y = _paintFittedText(
       canvas,
       "$name's Stats",
@@ -255,8 +249,6 @@ class WrapUpImageGenerator {
     );
   }
 
-  // ── Text utilities ──────────────────────────────────────────────────────
-
   /// Paints text and returns the bottom edge (y + measured height).
   static double _paintText(
     Canvas canvas,
@@ -310,8 +302,7 @@ class WrapUpImageGenerator {
   }
 }
 
-// ── Internal data class ─────────────────────────────────────────────────────
-
+// Internal data class
 class _StatRow {
   final IconData icon;
   final Color color;
