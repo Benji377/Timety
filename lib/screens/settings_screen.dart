@@ -270,6 +270,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(height: 32),
 
+          // --- SUPPORT & FEEDBACK ---
+          _buildSectionHeader('Support & Feedback'),
+          ListTile(
+            leading: const Icon(Icons.forum_outlined, color: Colors.green),
+            title: const Text('Community & Help'),
+            subtitle: const Text('Ask questions and share tips on GitHub'),
+            trailing: const Icon(
+              Icons.open_in_new,
+              size: 16,
+              color: Colors.grey,
+            ),
+            onTap: () async {
+              final url = Uri.parse(
+                'https://github.com/Benji377/Timety/discussions',
+              );
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.bug_report_outlined,
+              color: Colors.deepPurple,
+            ),
+            title: const Text('Send Feedback'),
+            subtitle: const Text('Report bugs or request new features'),
+            trailing: const Icon(
+              Icons.open_in_new,
+              size: 16,
+              color: Colors.grey,
+            ),
+            onTap: () async {
+              final url = Uri.parse('https://tally.so/r/ODbEoA');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+          ),
+
+          const Divider(height: 32),
+
           // --- ABOUT & INFO SECTION ---
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -309,6 +351,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
+
                   const ListTile(
                     leading: Icon(Icons.person, color: Colors.deepOrange),
                     title: Text('Built by Benji377'),
@@ -323,27 +366,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       size: 16,
                       color: Colors.grey,
                     ),
-                    onTap: () {
-                      launchUrl(
-                        Uri.parse('https://github.com/sponsors/Benji377'),
+                    onTap: () async {
+                      final url = Uri.parse(
+                        'https://github.com/sponsors/Benji377',
                       );
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.help, color: Colors.green),
-                    title: const Text('Need Help?'),
-                    subtitle: const Text('GitHub Discussions'),
-                    trailing: const Icon(
-                      Icons.open_in_new,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    onTap: () {
-                      launchUrl(
-                        Uri.parse(
-                          'https://github.com/Benji377/Timety/discussions',
-                        ),
-                      );
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      }
                     },
                   ),
                   ListTile(
@@ -355,10 +387,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       size: 16,
                       color: Colors.grey,
                     ),
-                    onTap: () {
-                      launchUrl(
-                        Uri.parse('https://github.com/Benji377/Timety'),
+                    onTap: () async {
+                      final url = Uri.parse(
+                        'https://github.com/Benji377/Timety',
                       );
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      }
                     },
                   ),
                   const SizedBox(height: 8),
