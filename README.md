@@ -29,7 +29,7 @@ Timety is a comprehensive, offline-first productivity and time-management applic
   <em>View the <a href="screenshots/output/">full screenshot gallery</a> to see the calendar, analytics, profile, and more!</em>
 </p>
 
-## ✨ Features
+## Features
 
 *   **Intelligent Task Management:** Organize one-off tasks with due dates, priority levels, and effort sizes.
 *   **Focus Engine:** A robust stopwatch and timer system tailored for deep work. Includes support for tags, custom modes, and short/long break phases.
@@ -39,27 +39,21 @@ Timety is a comprehensive, offline-first productivity and time-management applic
 *   **Smart Notifications:** Local reminders for tasks, specific habit times, and dynamic daily motivation.
 *   **Unified Calendar:** A custom micro-dot calendar view to see your tasks, focus sessions, and habits at a glance.
 
-## 📥 Download & Installation
+## Download & Installation
 
 Choose your preferred way to stay productive.
 
 <p align="left">
   <img src="https://img.shields.io/badge/Get_it_on-555555?style=for-the-badge" alt="Get it on">
-  <a href="https://apkpure.com/p/io.github.benji377.timety">
-    <img src="https://img.shields.io/badge/APKPure-24D668?style=for-the-badge&logo=android&logoColor=white" alt="APKPure">
-  </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/Uptodown-0096C7?style=for-the-badge&logo=spreadshirt&logoColor=white" alt="Uptodown">
-  </a>
   <a href="#-f-droid-coming-soon">
     <img src="https://img.shields.io/badge/F--Droid-ffffff?style=for-the-badge&logo=f-droid&logoColor=black" alt="F-Droid">
   </a>
 </p>
 
 > [!NOTE]
-> **APKPure** and **Uptodown** versions are uploaded manually and may take a few days to sync with the latest GitHub releases.
+> **FDroid** is coming soon.
 
-### 📦 Manual Installation (GitHub Releases)
+### Manual Installation (GitHub Releases)
 For the most up-to-date version, download the APK directly for your device architecture:
 
 * **[arm64-v8a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-arm64-v8a.apk)** – Most modern Android phones (64-bit). **(Recommended)**
@@ -73,15 +67,7 @@ For the most up-to-date version, download the APK directly for your device archi
 3. If prompted, enable "Install from Unknown Sources" in your settings.
 4. Follow the on-screen instructions to finish.
 
-## 🛠️ Tech Stack
-
-*   **Framework:** [Flutter](https://flutter.dev/) (Dart)
-*   **Local Storage:** [Hive](https://pub.dev/packages/hive) (Fast, NoSQL local database)
-*   **State Management:** [Provider](https://pub.dev/packages/provider)
-*   **Charts:** [fl_chart](https://pub.dev/packages/fl_chart)
-*   **Notifications:** [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 *   Flutter SDK (Stable channel)
@@ -110,13 +96,13 @@ For the most up-to-date version, download the APK directly for your device archi
    flutter run
    ```
 
-## 🗺️ Development & Roadmap
+## Development & Roadmap
 
 Want to see what's coming next or contribute to Timety?
 
 Check out the **[Timety GitHub Project Board](https://github.com/users/Benji377/projects/7)**! There, you can track the live status of all planned features, bugs, and enhancements, complete with priority tags and issue sizing.
 
-## 💬 Community & Discussions
+## Community & Discussions
 
 Join the conversation! Whether you need help, want to share how you use Timety, or have a brilliant idea for a new feature, our **[GitHub Discussions](https://github.com/Benji377/Timety/discussions)** is the place to be.
 
@@ -126,5 +112,5 @@ Join the conversation! Whether you need help, want to share how you use Timety, 
 * **🙌 Show and tell:** Share your productivity setups, habit streaks, or custom focus tags!
 * **💬 General & Polls:** Chat with other users and participate in community polls.
 
-## 🔒 Privacy
+## Privacy
 Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Hive. No accounts, no cloud sync, no tracking.
