@@ -285,7 +285,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           TextField(
             controller: _descController,
             enabled: _isEditing,
-            ignorePointers: _isEditing,
+            ignorePointers: _isEditing ? null : false,
             keyboardType: TextInputType.multiline,
             maxLines: 3,
             scrollPhysics: const BouncingScrollPhysics(),
