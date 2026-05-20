@@ -284,7 +284,10 @@ class HabitListScreen extends StatelessWidget {
                 todoToday.add(habit);
               }
             } else if (habit.frequency == HabitFrequency.weeklyFlexible) {
-              final doneThisWeek = provider.getCompletionsThisWeek(habit);
+              final doneThisWeek = provider.getCompletionsThisWeek(
+                habit,
+                includeToday: false,
+              );
               if (doneThisWeek >= (habit.targetDaysPerWeek ?? 1)) {
                 weeklyGoalsMet.add(habit);
               } else {

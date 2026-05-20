@@ -105,7 +105,7 @@ class HabitProvider extends ChangeNotifier {
     await saveHabit(habit);
   }
 
-  int getCompletionsThisWeek(Habit habit) {
+  int getCompletionsThisWeek(Habit habit, {bool includeToday = true}) {
     final now = DateTime.now();
     final startOfWeek = DateTime(
       now.year,
@@ -116,9 +116,14 @@ class HabitProvider extends ChangeNotifier {
       const Duration(days: 6, hours: 23, minutes: 59),
     );
 
-    return habit.completions
-        .where((c) => c.isAfter(startOfWeek) && c.isBefore(endOfWeek))
-        .length;
+    final today = DateTime(now.year, now.month, now.day);
+
+    return habit.completions.where((c) {
+      final isInWeek = c.isAfter(startOfWeek) && c.isBefore(endOfWeek);
+      if (!isInWeek) return false;
+      if (includeToday) return true;
+      return !AppDateUtils.isSameDay(c, today);
+    }).length;
   }
 
   List<Habit> getHabitsForDay(DateTime date) {
@@ -131,15 +136,6 @@ class HabitProvider extends ChangeNotifier {
         return habit.targetWeekdays?.contains(date.weekday) ?? false;
       }
       return false;
-    }).toList();
-  }
-
-  List<Habit> getHabitsForToday() {
-    return getHabitsForDay(DateTime.now()).where((habit) {
-      final completionsThisWeek = getCompletionsThisWeek(habit);
-      final targetDays = habit.targetDaysPerWeek;
-
-      return targetDays == null || completionsThisWeek <= targetDays;
     }).toList();
   }
 

@@ -33,7 +33,17 @@ class HomeScreen extends StatelessWidget {
     final int dailyTarget = settings.dailyGoalMins;
     final double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
     final today = DateTime.now();
-    final List<Habit> todaysHabits = habitProvider.getHabitsForToday();
+    final List<Habit> todaysHabits = habitProvider.getHabitsForDay(today).where(
+      (habit) {
+        final completionsThisWeek = habitProvider.getCompletionsThisWeek(
+          habit,
+          includeToday: false,
+        );
+        final targetDays = habit.targetDaysPerWeek;
+
+        return targetDays == null || completionsThisWeek < targetDays;
+      },
+    ).toList();
 
     // Urgent Tasks
     final List<Task> urgentTasks = taskProvider.tasks.where((task) {
