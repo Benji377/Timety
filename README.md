@@ -48,6 +48,9 @@ Choose your preferred way to stay productive.
   <a href="#-f-droid-coming-soon">
     <img src="https://img.shields.io/badge/F--Droid-ffffff?style=for-the-badge&logo=f-droid&logoColor=black" alt="F-Droid">
   </a>
+  <a href="https://sourceforge.net/p/timety/">
+    <img src="https://img.shields.io/badge/sourceforge-333333?style=for-the-badge&logo=sourceforge" alt="SourceForge">
+  </a>
 </p>
 
 > [!NOTE]
