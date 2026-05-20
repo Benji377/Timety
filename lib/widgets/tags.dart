@@ -67,11 +67,11 @@ class _TagsWidgetState extends State<TagsWidget> {
     );
   }
 
-  void _showEditTagDialog(FocusTag tag) {
-    String tagName = tag.name;
+  Future<void> _showEditTagDialog(FocusTag tag) async {
+    final controller = TextEditingController(text: tag.name);
     Color selectedColor = Color(tag.colorValue);
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
@@ -81,12 +81,11 @@ class _TagsWidgetState extends State<TagsWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: TextEditingController(text: tagName),
+                  controller: controller,
                   decoration: const InputDecoration(
                     labelText: 'Tag Name',
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (val) => tagName = val,
                 ),
                 const SizedBox(height: 16),
                 const Text('Choose Color:'),
@@ -105,6 +104,7 @@ class _TagsWidgetState extends State<TagsWidget> {
               ),
               ElevatedButton(
                 onPressed: () {
+                  final tagName = controller.text.trim();
                   if (tagName.isNotEmpty) {
                     context.read<FocusProvider>().updateTag(
                       tag.id,

@@ -123,20 +123,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   Widget _buildCategoryPicker() {
     final dividerColor = Theme.of(context).dividerColor.withValues(alpha: 0.6);
 
-    // Get unique categories from existing tasks
-    final List<String> existingCategories = context
-        .read<TaskProvider>()
-        .tasks
-        .map((t) => t.category.trim())
-        .where((c) => c.isNotEmpty)
-        .toSet()
-        .toList();
-
     if (!_isEditing) {
-      return TextField(
-        controller: TextEditingController(
-          text: _category.isEmpty ? "None" : _category,
-        ),
+      return TextFormField(
+        initialValue: _category.isEmpty ? 'None' : _category,
         enabled: false,
         decoration: InputDecoration(
           labelText: 'Category',
@@ -148,6 +137,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         ),
       );
     }
+
+    final List<String> existingCategories = context
+        .read<TaskProvider>()
+        .tasks
+        .map((t) => t.category.trim())
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

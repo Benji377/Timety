@@ -10,20 +10,19 @@ class CategoriesWidget extends StatefulWidget {
 }
 
 class _CategoriesWidgetState extends State<CategoriesWidget> {
-  void _showEditCategoryDialog(String oldName) {
-    String newName = oldName;
+  Future<void> _showEditCategoryDialog(String oldName) async {
+    final controller = TextEditingController(text: oldName);
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Edit Category'),
         content: TextField(
-          controller: TextEditingController(text: oldName),
+          controller: controller,
           decoration: const InputDecoration(
             labelText: 'Category Name',
             border: OutlineInputBorder(),
           ),
-          onChanged: (val) => newName = val,
         ),
         actions: [
           TextButton(
@@ -32,6 +31,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
           ),
           ElevatedButton(
             onPressed: () {
+              final newName = controller.text.trim();
               if (newName.isNotEmpty && newName != oldName) {
                 context.read<TaskProvider>().renameCategory(oldName, newName);
                 Navigator.pop(context);

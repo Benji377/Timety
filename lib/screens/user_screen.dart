@@ -82,9 +82,9 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   // --- NAME EDITOR ---
-  void _editName(BuildContext context, UserProvider user) {
+  Future<void> _editName(BuildContext context, UserProvider user) async {
     final controller = TextEditingController(text: user.name);
-    showDialog(
+    await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Edit Name"),
