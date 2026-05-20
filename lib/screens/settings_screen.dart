@@ -9,6 +9,7 @@ import '../providers/task_provider.dart';
 import '../services/backup_service.dart';
 import '../widgets/tags.dart';
 import '../widgets/categories.dart';
+import '../widgets/location_picker_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -219,6 +220,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const CategoriesWidget()),
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // --- API & SERVICES ---
+          _buildSectionHeader('API & Services'),
+          ListTile(
+            leading: const Icon(Icons.cloud, color: AppTheme.taskColor),
+            title: const Text('Location Search API'),
+            subtitle: Text(
+              settings.locationApiEndpoint.length > 40
+                  ? '${settings.locationApiEndpoint.substring(0, 40)}...'
+                  : settings.locationApiEndpoint,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: const Icon(Icons.edit),
+            onTap: () => showLocationApiDialog(
+              context: context,
+              isStateMounted: () => mounted,
+              settings: settings,
             ),
           ),
 

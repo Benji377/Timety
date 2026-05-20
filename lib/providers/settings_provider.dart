@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class SettingsProvider extends ChangeNotifier {
   SharedPreferences? _prefs;
@@ -11,6 +12,7 @@ class SettingsProvider extends ChangeNotifier {
   int _maxStopwatchMins = 120;
   int _maxNodeMins = 240;
   TimeOfDay _endOfDayTime = const TimeOfDay(hour: 20, minute: 0);
+  String _locationApiEndpoint = 'https://photon.komoot.io/api/';
 
   // Getters
   ThemeMode get themeMode => _themeMode;
@@ -19,6 +21,7 @@ class SettingsProvider extends ChangeNotifier {
   int get dailyGoalMins => _dailyGoalMins;
   int get maxStopwatchMins => _maxStopwatchMins;
   int get maxNodeMins => _maxNodeMins;
+  String get locationApiEndpoint => _locationApiEndpoint;
 
   SettingsProvider() {
     _loadSettings();
@@ -44,6 +47,11 @@ class SettingsProvider extends ChangeNotifier {
     _dailyGoalMins = _prefs?.getInt('dailyGoalMins') ?? 90;
     _maxStopwatchMins = _prefs?.getInt('maxStopwatchMins') ?? 120;
     _maxNodeMins = _prefs?.getInt('maxNodeMins') ?? 240;
+
+    // API & Services
+    _locationApiEndpoint =
+        _prefs?.getString('locationApiEndpoint') ??
+        'https://photon.komoot.io/api/';
 
     notifyListeners();
   }
@@ -85,5 +93,37 @@ class SettingsProvider extends ChangeNotifier {
     _maxNodeMins = mins;
     _prefs?.setInt('maxNodeMins', mins);
     notifyListeners();
+  }
+
+  void setLocationApiEndpoint(String endpoint) {
+    _locationApiEndpoint = endpoint;
+    _prefs?.setString('locationApiEndpoint', endpoint);
+    notifyListeners();
+  }
+
+  Future<bool> validateLocationApiEndpoint(String url) async {
+    if (url.isEmpty) return false;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return false;
+    }
+
+    try {
+      final testUrl = Uri.parse(
+        '${url.endsWith('/') ? url : '$url/'}?q=test&limit=1',
+      );
+      final response = await http.get(
+        testUrl,
+        headers: {
+          'User-Agent': 'timety/1.0 (io.github.benji377.timety)',
+          'Accept': 'application/json',
+        }
+      ).timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => http.Response('timeout', 408),
+          );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
   }
 }

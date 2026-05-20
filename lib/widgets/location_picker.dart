@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../providers/settings_provider.dart';
 
 class LocationPicker extends StatefulWidget {
   const LocationPicker({super.key});
@@ -47,7 +49,9 @@ class _LocationPickerState extends State<LocationPicker> {
     setState(() => _isLoading = true);
 
     try {
-      final url = Uri.parse('https://photon.komoot.io/api/?q=$query&limit=10');
+      final endpoint = context.read<SettingsProvider>().locationApiEndpoint;
+      final baseUrl = endpoint.endsWith('/') ? endpoint : '$endpoint/';
+      final url = Uri.parse('$baseUrl?q=$query&limit=10');
 
       // Inject the required headers
       final response = await http.get(
@@ -78,7 +82,9 @@ class _LocationPickerState extends State<LocationPicker> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Network error. Check your connection.'),
+            content: Text(
+              'Network error. Check your connection and location API settings.',
+            ),
           ),
         );
       }
