@@ -9,6 +9,7 @@ class TaskListTile extends StatelessWidget {
   final VoidCallback onToggleCompleted;
   final VoidCallback onTap;
   final VoidCallback? onDelete;
+  final bool isOverdue;
   final bool enableDismissible;
   final bool showDescription;
   final bool showDueDate;
@@ -23,6 +24,7 @@ class TaskListTile extends StatelessWidget {
     required this.onToggleCompleted,
     required this.onTap,
     this.onDelete,
+    this.isOverdue = false,
     this.enableDismissible = true,
     this.showDescription = true,
     this.showDueDate = true,
@@ -34,6 +36,7 @@ class TaskListTile extends StatelessWidget {
 
   Color _getBorderColor() {
     if (task.isCompleted) return AppTheme.successColor;
+    if (isOverdue) return AppTheme.errorColor;
     if (task.dueDate != null) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -42,7 +45,6 @@ class TaskListTile extends StatelessWidget {
         task.dueDate!.month,
         task.dueDate!.day,
       );
-      if (dueDay.isBefore(today)) return AppTheme.errorColor;
       if (dueDay.isAtSameMomentAs(today)) return AppTheme.warningColor;
     }
     return AppTheme.taskColor;

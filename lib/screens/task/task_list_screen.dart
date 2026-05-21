@@ -50,6 +50,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     Color color,
     List<Task> tasks, {
     bool initExpanded = true,
+    bool isOverdue = false,
   }) {
     return ExpansionSection(
       title: '$title (${tasks.length})',
@@ -59,6 +60,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           .map(
             (task) => TaskListTile(
               task: task,
+              isOverdue: isOverdue,
               onToggleCompleted: () => context.read<TaskProvider>().toggleTask(
                 task.id,
                 userProvider: context.read<UserProvider>(),
@@ -270,14 +272,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       if (task.isCompleted) {
                         done.add(task);
                       } else if (task.dueDate != null) {
-                        final dueDay = DateTime(
-                          task.dueDate!.year,
-                          task.dueDate!.month,
-                          task.dueDate!.day,
-                        );
-                        if (dueDay.isBefore(today)) {
+                        if (task.dueDate!.isBefore(now)) {
                           overdue.add(task);
-                        } else if (dueDay.isAtSameMomentAs(today)) {
+                        } else if (task.dueDate!.year == today.year &&
+                            task.dueDate!.month == today.month &&
+                            task.dueDate!.day == today.day) {
                           dueToday.add(task);
                         } else {
                           todo.add(task);
@@ -294,6 +293,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           'Overdue',
                           AppTheme.errorColor,
                           overdue,
+                          isOverdue: true,
                         ),
                         _buildTaskSection(
                           'Due Today',

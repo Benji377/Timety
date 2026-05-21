@@ -32,8 +32,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     int currentValue,
     int min,
     int max,
-    Function(int) onSave,
-  ) {
+    Function(int) onSave, {
+    String unit = 'minutes',
+  }) {
     int tempValue = currentValue;
     showDialog(
       context: context,
@@ -45,7 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "$tempValue minutes",
+                  '$tempValue $unit',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -187,6 +188,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               10,
               480,
               (val) => settings.setMaxNode(val),
+            ),
+          ),
+
+          ListTile(
+            leading: const Icon(
+              Icons.schedule_outlined,
+              color: AppTheme.taskColor,
+            ),
+            title: const Text('Upcoming Task Window'),
+            subtitle: Text('${settings.upcomingTasksDays} days ahead'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showNumberPickerDialog(
+              'Upcoming Task Window',
+              settings.upcomingTasksDays,
+              1,
+              60,
+              (val) => settings.setUpcomingTasksDays(val),
+              unit: 'days',
             ),
           ),
 

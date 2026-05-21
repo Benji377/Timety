@@ -33,6 +33,7 @@ class HomeScreen extends StatelessWidget {
     final int dailyTarget = settings.dailyGoalMins;
     final double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
     final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
     final List<Habit> todaysHabits = habitProvider.getHabitsForDay(today).where(
       (habit) {
         final completionsThisWeek = habitProvider.getCompletionsThisWeek(
@@ -56,6 +57,23 @@ class HomeScreen extends StatelessWidget {
       return dueDay.isBefore(today) || dueDay.isAtSameMomentAs(today);
     }).toList();
     urgentTasks.sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
+
+    final upcomingWindowDays = settings.upcomingTasksDays;
+    final upcomingEndDate = todayDate.add(Duration(days: upcomingWindowDays));
+    final List<Task> upcomingTasks = taskProvider.tasks.where((task) {
+      if (task.isCompleted || task.dueDate == null) return false;
+
+      final dueDay = DateTime(
+        task.dueDate!.year,
+        task.dueDate!.month,
+        task.dueDate!.day,
+      );
+
+      return dueDay.isAfter(todayDate) &&
+          (dueDay.isBefore(upcomingEndDate) ||
+              dueDay.isAtSameMomentAs(upcomingEndDate));
+    }).toList();
+    upcomingTasks.sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
 
     return Scaffold(
       appBar: AppBar(
@@ -146,6 +164,9 @@ class HomeScreen extends StatelessWidget {
                                     ...urgentTasks.map(
                                       (task) => TaskListTile(
                                         task: task,
+                                        isOverdue:
+                                            task.dueDate != null &&
+                                            task.dueDate!.isBefore(today),
                                         enableDismissible: false,
                                         showDescription: false,
                                         onToggleCompleted: () => context
@@ -209,6 +230,53 @@ class HomeScreen extends StatelessWidget {
                                             userProvider: context
                                                 .read<UserProvider>(),
                                           ),
+                                    ),
+                                    const SizedBox(height: AppTheme.spaceSmall),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                          if (upcomingTasks.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppTheme.spaceMedium,
+                              ),
+                              child: Theme(
+                                data: Theme.of(
+                                  context,
+                                ).copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  title: Text(
+                                    'Upcoming Tasks ($upcomingWindowDays days)',
+                                    style: const TextStyle(
+                                      fontWeight: AppTheme.fwBold,
+                                      color: AppTheme.typeTaskColor,
+                                    ),
+                                  ),
+                                  iconColor: AppTheme.typeTaskColor,
+                                  collapsedIconColor: AppTheme.typeTaskColor,
+                                  children: [
+                                    ...upcomingTasks.map(
+                                      (task) => TaskListTile(
+                                        task: task,
+                                        enableDismissible: false,
+                                        showDescription: false,
+                                        onToggleCompleted: () => context
+                                            .read<TaskProvider>()
+                                            .toggleTask(
+                                              task.id,
+                                              userProvider: context
+                                                  .read<UserProvider>(),
+                                            ),
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                TaskDetailScreen(task: task),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(height: AppTheme.spaceSmall),
                                   ],
