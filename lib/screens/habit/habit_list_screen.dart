@@ -15,6 +15,34 @@ import 'habit_detail_screen.dart';
 class HabitListScreen extends StatelessWidget {
   const HabitListScreen({super.key});
 
+  bool _isHabitDueToday(Habit habit, HabitProvider provider, DateTime today) {
+    if (habit.frequency == HabitFrequency.daily) return true;
+
+    if (habit.frequency == HabitFrequency.weeklyExact) {
+      return habit.targetWeekdays?.contains(today.weekday) ?? false;
+    }
+
+    if (habit.frequency == HabitFrequency.weeklyFlexible) {
+      final doneThisWeek = provider.getCompletionsThisWeek(
+        habit,
+        includeToday: false,
+      );
+      return doneThisWeek < (habit.targetDaysPerWeek ?? 1);
+    }
+
+    return false;
+  }
+
+  bool _isWeeklyGoalMet(Habit habit, HabitProvider provider) {
+    if (habit.frequency != HabitFrequency.weeklyFlexible) return false;
+
+    final doneThisWeek = provider.getCompletionsThisWeek(
+      habit,
+      includeToday: false,
+    );
+    return doneThisWeek >= (habit.targetDaysPerWeek ?? 1);
+  }
+
   String _buildSubtitle(
     BuildContext context,
     Habit habit,
@@ -83,7 +111,6 @@ class HabitListScreen extends StatelessWidget {
     BuildContext context,
     List<Habit> habits,
     HabitProvider provider,
-    bool isDone,
   ) {
     final grouped = <String, List<Habit>>{};
     final standalone = <Habit>[];
@@ -167,6 +194,7 @@ class HabitListScreen extends StatelessWidget {
               children: stackHabits.asMap().entries.map((entry) {
                 final index = entry.key;
                 final habit = entry.value;
+                final isDone = provider.isCompletedOn(habit, today);
 
                 bool isLocked = false;
                 if (index > 0 && !isDone) {
@@ -198,9 +226,10 @@ class HabitListScreen extends StatelessWidget {
 
     // Build the Standalone Habits
     widgets.addAll(
-      standalone.map(
-        (h) => _buildHabitTile(context, h, provider, isDone: isDone),
-      ),
+      standalone.map((h) {
+        final isDone = provider.isCompletedOn(h, today);
+        return _buildHabitTile(context, h, provider, isDone: isDone);
+      }),
     );
 
     return widgets;
@@ -213,7 +242,6 @@ class HabitListScreen extends StatelessWidget {
     List<Habit> habits,
     HabitProvider provider, {
     bool initiallyExpanded = true,
-    required bool isDone,
   }) {
     if (habits.isEmpty) return const SizedBox.shrink();
 
@@ -221,7 +249,7 @@ class HabitListScreen extends StatelessWidget {
       title: '$title (${habits.length})',
       color: color,
       initiallyExpanded: initiallyExpanded,
-      children: _buildGroupedHabits(context, habits, provider, isDone),
+      children: _buildGroupedHabits(context, habits, provider),
     );
   }
 
@@ -264,35 +292,20 @@ class HabitListScreen extends StatelessWidget {
             );
           }
 
-          final today = DateTime.now();
-          final todoToday = <Habit>[];
-          final doneToday = <Habit>[];
-          final weeklyGoalsMet = <Habit>[];
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final dueToday = <Habit>[];
+          final todo = <Habit>[];
+          final done = <Habit>[];
 
-          for (var habit in provider.habits) {
-            final isDoneToday = provider.isCompletedOn(habit, today);
-
-            if (isDoneToday) {
-              doneToday.add(habit);
-              continue;
-            }
-
-            if (habit.frequency == HabitFrequency.daily) {
-              todoToday.add(habit);
-            } else if (habit.frequency == HabitFrequency.weeklyExact) {
-              if (habit.targetWeekdays?.contains(today.weekday) ?? false) {
-                todoToday.add(habit);
-              }
-            } else if (habit.frequency == HabitFrequency.weeklyFlexible) {
-              final doneThisWeek = provider.getCompletionsThisWeek(
-                habit,
-                includeToday: false,
-              );
-              if (doneThisWeek >= (habit.targetDaysPerWeek ?? 1)) {
-                weeklyGoalsMet.add(habit);
-              } else {
-                todoToday.add(habit);
-              }
+          for (final habit in provider.habits) {
+            if (provider.isCompletedOn(habit, today) ||
+                _isWeeklyGoalMet(habit, provider)) {
+              done.add(habit);
+            } else if (_isHabitDueToday(habit, provider, today)) {
+              dueToday.add(habit);
+            } else {
+              todo.add(habit);
             }
           }
 
@@ -301,28 +314,26 @@ class HabitListScreen extends StatelessWidget {
             children: [
               _buildHabitSection(
                 context,
-                'To Do Today',
-                AppTheme.infoColor,
-                todoToday,
-                provider,
-                isDone: false,
-              ),
-              _buildHabitSection(
-                context,
-                'Done Today',
-                AppTheme.successColor,
-                doneToday,
-                provider,
-                isDone: true,
-              ),
-              _buildHabitSection(
-                context,
-                'Weekly Goal Met',
+                'Due Today',
                 AppTheme.warningColor,
-                weeklyGoalsMet,
+                dueToday,
+                provider,
+              ),
+              _buildHabitSection(
+                context,
+                'Upcoming',
+                AppTheme.infoColor,
+                todo,
                 provider,
                 initiallyExpanded: false,
-                isDone: false,
+              ),
+              _buildHabitSection(
+                context,
+                'Done',
+                AppTheme.successColor,
+                done,
+                provider,
+                initiallyExpanded: false,
               ),
             ],
           );
