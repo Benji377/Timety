@@ -18,7 +18,7 @@
   </p>
 </p>
 
-Timety is a comprehensive, offline-first productivity and time-management application built with Flutter. It seamlessly integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
+Timety is an offline-first productivity and time-management application built with Flutter. It integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
 
 <p align="center">
   <img src="screenshots/output/01_home_screen.png" width="32%" alt="Home Screen">
@@ -48,6 +48,9 @@ Choose your preferred way to stay productive.
   <a href="#-f-droid-coming-soon">
     <img src="https://img.shields.io/badge/F--Droid-ffffff?style=for-the-badge&logo=f-droid&logoColor=black" alt="F-Droid">
   </a>
+  <a href="https://sourceforge.net/p/timety/">
+    <img src="https://img.shields.io/badge/sourceforge-333333?style=for-the-badge&logo=sourceforge" alt="SourceForge">
+  </a>
 </p>
 
 > [!NOTE]
@@ -56,10 +59,10 @@ Choose your preferred way to stay productive.
 ### Manual Installation (GitHub Releases)
 For the most up-to-date version, download the APK directly for your device architecture:
 
-* **[arm64-v8a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-arm64-v8a.apk)** – Most modern Android phones (64-bit). **(Recommended)**
-* **[armeabi-v7a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-armeabi-v7a.apk)** – Older Android devices (32-bit).
-* **[x86_64](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-x86_64.apk)** – Android emulators and some tablets.
-* **[Universal Bundle (.aab)](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0.aab)** – Best for manual side-loading via App Bundle installers.
+* **[arm64-v8a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-arm64-v8a.apk)** - Most modern Android phones (64-bit). **(Recommended)**
+* **[armeabi-v7a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-armeabi-v7a.apk)** - Older Android devices (32-bit).
+* **[x86_64](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-x86_64.apk)** - Android emulators and some tablets.
+* **[Universal Bundle (.aab)](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0.aab)** - Best for manual side-loading via App Bundle installers.
 
 **How to install:**
 1. Download the `.apk` file corresponding to your device.
