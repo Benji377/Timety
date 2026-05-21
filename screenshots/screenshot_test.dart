@@ -325,11 +325,14 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    // Navigate to Stats from Focus screen (bar chart icon)
+    // Navigate to Profile screen
+    await _tapBottomNavItem(tester, 'Profile');
+
+    // Navigate to Stats from Profile screen (bar chart icon)
     await _tapIconButton(tester, Icons.bar_chart);
     await binding.takeScreenshot('07_stats_screen');
 
-    // Go back to Focus tab
+    // Go back to Profile tab
     await tester.pageBack();
     await tester.pumpAndSettle();
 
