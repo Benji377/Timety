@@ -45,16 +45,13 @@ Choose your preferred way to stay productive.
 
 <p align="left">
   <img src="https://img.shields.io/badge/Get_it_on-555555?style=for-the-badge" alt="Get it on">
-  <a href="#-f-droid-coming-soon">
+  <a href="https://f-droid.org/en/packages/io.github.benji377.timety/">
     <img src="https://img.shields.io/badge/F--Droid-ffffff?style=for-the-badge&logo=f-droid&logoColor=black" alt="F-Droid">
   </a>
   <a href="https://sourceforge.net/p/timety/">
     <img src="https://img.shields.io/badge/sourceforge-333333?style=for-the-badge&logo=sourceforge" alt="SourceForge">
   </a>
 </p>
-
-> [!NOTE]
-> **FDroid** is coming soon.
 
 ### Manual Installation (GitHub Releases)
 For the most up-to-date version, download the APK directly for your device architecture:
