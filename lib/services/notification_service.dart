@@ -83,6 +83,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
+          category: AndroidNotificationCategory.reminder,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -125,6 +126,7 @@ class NotificationService {
           importance: Importance.high,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
+          category: AndroidNotificationCategory.reminder,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -184,6 +186,7 @@ class NotificationService {
             '',
           ), // Allows multi-line text
           icon: '@mipmap/ic_launcher',
+          category: AndroidNotificationCategory.reminder,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -220,6 +223,7 @@ class NotificationService {
           'Evening Checkup',
           channelDescription: 'End of day reminders to log habits',
           icon: '@mipmap/ic_launcher',
+          category: AndroidNotificationCategory.reminder,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -278,15 +282,21 @@ class NotificationService {
           'Active Focus Timer',
           channelDescription:
               'Persistent notification for active focus sessions',
-          importance: Importance.low, // Keeps it quiet
-          priority: Priority.low,
-          ongoing: true, // Prevents swiping away
+          importance: Importance.low,
+          priority: Priority.high,
+          silent: true,
+          ongoing: true,
           autoCancel: false,
-          usesChronometer: !isPaused, // OS handles the ticking
+          usesChronometer: !isPaused,
           chronometerCountDown: !isStopwatch,
           when: targetTime.millisecondsSinceEpoch,
-          color: notificationColor, // Tints the app icon to match focus/rest
+          color: notificationColor,
+          colorized: true,
           icon: '@mipmap/ic_launcher',
+          category: isStopwatch
+              ? AndroidNotificationCategory.stopwatch
+              : AndroidNotificationCategory.status,
+          onlyAlertOnce: true,
         ),
       ),
     );
