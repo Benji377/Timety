@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
@@ -135,7 +136,11 @@ class HabitWidgetService {
         qualifiedAndroidName: 'io.github.benji377.timety.HabitWidgetProvider',
       );
     } catch (e) {
-      debugPrint('Error updating habit widget: $e');
+      final errorStr = e.toString();
+      if (!errorStr.contains('MissingPluginException') && 
+          !errorStr.contains('Binding has not yet been initialized')) {
+        debugPrint('Error updating habit widget: $e');
+      }
     }
   }
 

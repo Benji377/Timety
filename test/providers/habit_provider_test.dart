@@ -41,6 +41,7 @@ void main() {
       initialHabits: [dailyHabit, exactHabit, flexibleHabit],
     );
     final provider = HabitProvider(repository: repository);
+    await provider.loadHabits();
 
     await drainEventQueue();
 
