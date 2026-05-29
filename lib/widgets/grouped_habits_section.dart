@@ -75,10 +75,10 @@ class GroupedHabitsSection extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(
               side: BorderSide(
-                color: Theme.of(context).dividerColor,
-                width: AppTheme.neoBorderWidth,
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                width: AppTheme.listTileBorderWidth,
               ),
-              borderRadius: AppTheme.brNeo,
+              borderRadius: AppTheme.brMedium,
             ),
             child: Theme(
               data: Theme.of(
@@ -90,6 +90,9 @@ class GroupedHabitsSection extends StatelessWidget {
                 backgroundColor: Theme.of(
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
+                collapsedBackgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                 title: Row(
                   children: [
                     Icon(

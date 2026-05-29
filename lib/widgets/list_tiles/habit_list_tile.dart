@@ -69,7 +69,7 @@ class HabitListTile extends StatelessWidget {
             border: Border.all(
               color: isCompleted
                   ? color
-                  : (isLocked ? AppTheme.warningColor : AppTheme.habitColor),
+                  : (isLocked ? Colors.grey : AppTheme.habitColor),
               width: 2,
             ),
           ),
@@ -79,6 +79,8 @@ class HabitListTile extends StatelessWidget {
                   size: 22,
                   color: Theme.of(context).colorScheme.onPrimary,
                 )
+              : isLocked
+              ? const Icon(Icons.lock_rounded, size: 18, color: Colors.grey)
               : null,
         ),
       ),

@@ -1,6 +1,5 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../data/task/task.dart';
 import '../../widgets/android_widgets/task_widget_view.dart';
