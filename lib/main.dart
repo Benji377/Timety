@@ -65,7 +65,7 @@ class TimetyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => TaskProvider(repository: HiveTaskRepository()),
+          create: (_) => TaskProvider(repository: HiveTaskRepository())..loadTasks(),
         ),
         ChangeNotifierProvider(
           create: (_) => FocusProvider(repository: HiveFocusRepository()),

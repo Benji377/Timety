@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
+import '../services/home_widget_service.dart';
 import '../utils/xp_calculator.dart';
 import 'user_provider.dart';
 
@@ -13,6 +14,13 @@ class TaskProvider extends ChangeNotifier {
   List<Task> get tasks => _tasks;
 
   TaskProvider({required this.repository});
+
+  // Helper to notify listeners, save to repository, and update home widget
+  Future<void> _notifyAndSync() async {
+    notifyListeners();
+    await repository.saveTasks(_tasks);
+    HomeWidgetService.updateTaskWidget(_tasks);
+  }
 
   // Helper to generate a unique integer ID for a specific reminder
   int _generateNotificationId(String taskId, DateTime reminderTime) {
@@ -129,14 +137,13 @@ class TaskProvider extends ChangeNotifier {
   // Load data initially
   Future<void> loadTasks() async {
     _tasks = await repository.fetchTasks();
-    notifyListeners();
+    await _notifyAndSync();
   }
 
   Future<void> addTask(Task task) async {
     _tasks.add(task);
     _syncTaskReminders(task);
-    await repository.saveTasks(_tasks);
-    notifyListeners();
+    await _notifyAndSync();
   }
 
   Future<void> toggleTask(String id, {UserProvider? userProvider}) async {
@@ -153,8 +160,7 @@ class TaskProvider extends ChangeNotifier {
       }
 
       _syncTaskReminders(_tasks[index]);
-      await repository.saveTasks(_tasks);
-      notifyListeners();
+      await _notifyAndSync();
     }
   }
 
@@ -163,8 +169,7 @@ class TaskProvider extends ChangeNotifier {
     // Cancel all before removing
     await _cancelTaskNotifications(task);
     _tasks.removeWhere((task) => task.id == id);
-    await repository.saveTasks(_tasks);
-    notifyListeners();
+    await _notifyAndSync();
   }
 
   Future<void> updateTask(Task updatedTask) async {
@@ -173,8 +178,7 @@ class TaskProvider extends ChangeNotifier {
       final previousTask = _tasks[index];
       _tasks[index] = updatedTask;
       _syncTaskReminders(updatedTask, previousTask: previousTask);
-      await repository.saveTasks(_tasks);
-      notifyListeners();
+      await _notifyAndSync();
     }
   }
 
@@ -210,8 +214,7 @@ class TaskProvider extends ChangeNotifier {
         );
       }
     }
-    await repository.saveTasks(_tasks);
-    notifyListeners();
+    await _notifyAndSync();
   }
 
   Future<void> deleteCategory(String categoryName) async {
@@ -233,7 +236,6 @@ class TaskProvider extends ChangeNotifier {
         );
       }
     }
-    await repository.saveTasks(_tasks);
-    notifyListeners();
+    await _notifyAndSync();
   }
 }
