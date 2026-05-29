@@ -5,6 +5,7 @@ import '../data/habit/habit_repository.dart';
 import '../services/notification_service.dart';
 import '../utils/date_utils.dart';
 import '../utils/xp_calculator.dart';
+import '../services/android_widgets/habit_widget_service.dart';
 import 'user_provider.dart';
 
 class HabitProvider extends ChangeNotifier {
@@ -14,19 +15,24 @@ class HabitProvider extends ChangeNotifier {
 
   List<Habit> get habits => _habits;
 
-  HabitProvider({required this.repository}) {
-    _loadHabits();
+  HabitProvider({required this.repository});
+
+  // Helper to notify listeners and update home widget
+  void _notifyAndSync() {
+    notifyListeners();
+    HabitWidgetService.updateHabitWidget(_habits, this);
   }
 
   void updateSettings(SettingsProvider settings) {
     _settings = settings;
     syncNotifications();
+    _notifyAndSync();
   }
 
-  Future<void> _loadHabits() async {
+  Future<void> loadHabits() async {
     _habits = await repository.fetchHabits();
     syncNotifications();
-    notifyListeners();
+    _notifyAndSync();
   }
 
   Future<void> saveHabit(Habit habit) async {
@@ -38,14 +44,14 @@ class HabitProvider extends ChangeNotifier {
       _habits.add(habit);
     }
     syncNotifications();
-    notifyListeners();
+    _notifyAndSync();
   }
 
   Future<void> deleteHabit(String id) async {
     await repository.deleteHabit(id);
     _habits.removeWhere((h) => h.id == id);
     syncNotifications();
-    notifyListeners();
+    _notifyAndSync();
   }
 
   void syncNotifications() {

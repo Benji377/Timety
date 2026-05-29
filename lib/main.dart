@@ -72,7 +72,7 @@ class TimetyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProxyProvider<SettingsProvider, HabitProvider>(
-          create: (_) => HabitProvider(repository: HiveHabitRepository()),
+          create: (_) => HabitProvider(repository: HiveHabitRepository())..loadHabits(),
           update: (_, settings, habitProvider) {
             // Whenever settings change, pass them into the Habit Provider
             habitProvider?.updateSettings(settings);

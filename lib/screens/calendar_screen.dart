@@ -363,7 +363,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           // --- BOTTOM HALF: ACCORDION LISTS ---
           Expanded(
-            child: Container(
+            child: Material(
               color: Theme.of(
                 context,
               ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),

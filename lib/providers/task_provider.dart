@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
-import '../services/home_widget_service.dart';
+import '../services/android_widgets/task_widget_service.dart';
 import '../utils/xp_calculator.dart';
 import 'user_provider.dart';
 
@@ -19,7 +19,7 @@ class TaskProvider extends ChangeNotifier {
   Future<void> _notifyAndSync() async {
     notifyListeners();
     await repository.saveTasks(_tasks);
-    HomeWidgetService.updateTaskWidget(_tasks);
+    TaskWidgetService.updateTaskWidget(_tasks);
   }
 
   // Helper to generate a unique integer ID for a specific reminder

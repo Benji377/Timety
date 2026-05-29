@@ -18,6 +18,7 @@ class _MainScreenState extends State<MainScreen> {
 
   // Helper method to switch tabs
   void _switchTab(int index) {
+    if (!mounted) return;
     setState(() {
       _currentIndex = index;
     });
@@ -46,11 +47,9 @@ class _MainScreenState extends State<MainScreen> {
         break;
     }
     return Scaffold(
-      // Move the pages directly into the IndexedStack
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          // Pass the tab-switching function down to the HomeScreen
           HomeScreen(onNavigateToFocus: () => _switchTab(1)),
           const FocusScreen(),
           const TaskListScreen(),
@@ -60,7 +59,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: _switchTab, // Simplify the onTap call
+        onTap: _switchTab,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: selectedColor,
         unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,

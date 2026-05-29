@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#FFF8EF" /> <!-- AppTheme.paperLight -->
+    <stroke
+        android:width="3dp"
+        android:color="#111111" /> <!-- AppTheme.borderLight -->
+    <corners android:radius="14dp" /> <!-- AppTheme.radiusNeo -->
+</shape>

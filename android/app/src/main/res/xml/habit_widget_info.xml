@@ -5,7 +5,7 @@
     android:targetCellWidth="3"
     android:targetCellHeight="2"
     android:updatePeriodMillis="86400000"
-    android:initialLayout="@layout/task_widget"
+    android:initialLayout="@layout/habit_widget"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen">
 </appwidget-provider>

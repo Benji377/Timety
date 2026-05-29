@@ -126,7 +126,7 @@ class HomeScreen extends StatelessWidget {
             const Divider(height: 1),
             Expanded(
               flex: 6,
-              child: Container(
+              child: Material(
                 color: Theme.of(
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),

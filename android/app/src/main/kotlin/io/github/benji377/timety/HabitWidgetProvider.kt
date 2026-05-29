@@ -11,7 +11,7 @@ import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
 import java.io.File
 
-class TaskWidgetProvider : HomeWidgetProvider() {
+class HabitWidgetProvider : HomeWidgetProvider() {
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -19,9 +19,9 @@ class TaskWidgetProvider : HomeWidgetProvider() {
         widgetData: SharedPreferences
     ) {
         for (appWidgetId in appWidgetIds) {
-            val views = RemoteViews(context.packageName, R.layout.task_widget).apply {
+            val views = RemoteViews(context.packageName, R.layout.habit_widget).apply {
                 // Header Image
-                val headerPath = widgetData.getString("task_widget_header", null)
+                val headerPath = widgetData.getString("habit_widget_header", null)
                 if (headerPath != null) {
                     val file = File(headerPath)
                     if (file.exists()) {
@@ -32,7 +32,7 @@ class TaskWidgetProvider : HomeWidgetProvider() {
                 
                 // Set up the ListView
                 val intent = Intent(context, TimetyWidgetService::class.java).apply {
-                    putExtra("widget_type", "task")
+                    putExtra("widget_type", "habit")
                     data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
                 }
                 setRemoteAdapter(R.id.widget_list, intent)
