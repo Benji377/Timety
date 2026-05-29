@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
@@ -19,28 +20,107 @@ class TaskProvider extends ChangeNotifier {
     return "$taskId${reminderTime.toIso8601String()}".hashCode;
   }
 
-  // Master synchronization function
-  Future<void> _syncTaskReminders(Task task) async {
-    // Always cancel existing reminders for this task first to prevent duplicates
+  int _generateDueDateNotificationId(String taskId, DateTime dueDate) {
+    return _generateNotificationId('${taskId}_due', dueDate);
+  }
+
+  String _buildReminderBody(
+    Task task,
+    DateTime reminderTime, {
+    bool exactDueDate = false,
+  }) {
+    final taskTitle = task.title;
+    final reminderTimeText = _formatReminderDateTime(reminderTime);
+
+    if (exactDueDate) {
+      return 'It is time to do $taskTitle !';
+    }
+
+    final reminderDay = DateTime(
+      reminderTime.year,
+      reminderTime.month,
+      reminderTime.day,
+    );
+    final today = DateTime.now();
+    final todayDay = DateTime(today.year, today.month, today.day);
+    final dayDifference = reminderDay.difference(todayDay).inDays;
+
+    final reminderPrefix = dayDifference == 1
+        ? 'Tomorrow remember to do'
+        : dayDifference == 0
+        ? 'Today remember to do'
+        : 'Remember to do';
+
+    return '$reminderPrefix $taskTitle at $reminderTimeText!';
+  }
+
+  String _formatReminderDateTime(DateTime reminderTime) {
+    final reminderDay = DateTime(
+      reminderTime.year,
+      reminderTime.month,
+      reminderTime.day,
+    );
+    final today = DateTime.now();
+    final todayDay = DateTime(today.year, today.month, today.day);
+
+    if (reminderDay.year == todayDay.year &&
+        reminderDay.month == todayDay.month &&
+        reminderDay.day == todayDay.day) {
+      return DateFormat('hh:mm a').format(reminderTime);
+    }
+
+    if (reminderDay.difference(todayDay).inDays == 1) {
+      return DateFormat('hh:mm a').format(reminderTime);
+    }
+
+    return DateFormat('MMM d, yyyy hh:mm a').format(reminderTime);
+  }
+
+  Future<void> _cancelTaskNotifications(Task task) async {
     for (var reminder in task.reminders) {
       final notifId = _generateNotificationId(task.id, reminder);
       await NotificationService.instance.cancelNotification(notifId);
     }
 
+    if (task.reminders.isEmpty && task.dueDate != null) {
+      await NotificationService.instance.cancelNotification(
+        _generateDueDateNotificationId(task.id, task.dueDate!),
+      );
+    }
+  }
+
+  // Master synchronization function
+  Future<void> _syncTaskReminders(Task task, {Task? previousTask}) async {
+    if (previousTask != null) {
+      await _cancelTaskNotifications(previousTask);
+    } else {
+      await _cancelTaskNotifications(task);
+    }
+
     // If the task is completed, we don't reschedule them. We just stop here.
     if (task.isCompleted) return;
 
-    // If not completed, schedule all future reminders
+    // If not completed, schedule all future reminders and a due-date fallback.
     for (var reminder in task.reminders) {
       if (reminder.isAfter(DateTime.now())) {
         final notifId = _generateNotificationId(task.id, reminder);
         await NotificationService.instance.scheduleTaskReminder(
           notificationId: notifId,
           title: 'Reminder: ${task.title}',
-          body: task.description.isNotEmpty
-              ? task.description
-              : 'It is time for your task!',
+          body: _buildReminderBody(task, reminder),
           scheduledTime: reminder,
+        );
+      }
+    }
+
+    if (task.reminders.isEmpty && task.dueDate != null) {
+      final dueDate = task.dueDate!;
+      if (dueDate.isAfter(DateTime.now())) {
+        await NotificationService.instance.scheduleTaskReminder(
+          notificationId: _generateDueDateNotificationId(task.id, dueDate),
+          title: 'Reminder: ${task.title}',
+          body: _buildReminderBody(task, dueDate, exactDueDate: true),
+          scheduledTime: dueDate,
         );
       }
     }
@@ -81,11 +161,7 @@ class TaskProvider extends ChangeNotifier {
   Future<void> removeTask(String id) async {
     final task = _tasks.firstWhere((t) => t.id == id);
     // Cancel all before removing
-    for (var reminder in task.reminders) {
-      NotificationService.instance.cancelNotification(
-        _generateNotificationId(task.id, reminder),
-      );
-    }
+    await _cancelTaskNotifications(task);
     _tasks.removeWhere((task) => task.id == id);
     await repository.saveTasks(_tasks);
     notifyListeners();
@@ -94,8 +170,9 @@ class TaskProvider extends ChangeNotifier {
   Future<void> updateTask(Task updatedTask) async {
     final index = _tasks.indexWhere((t) => t.id == updatedTask.id);
     if (index != -1) {
+      final previousTask = _tasks[index];
       _tasks[index] = updatedTask;
-      _syncTaskReminders(updatedTask);
+      _syncTaskReminders(updatedTask, previousTask: previousTask);
       await repository.saveTasks(_tasks);
       notifyListeners();
     }
