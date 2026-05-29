@@ -70,6 +70,7 @@ class HabitProvider extends ChangeNotifier {
           habitId: habit.id,
           habitName: habit.name,
           time: habit.targetTime!,
+          targetWeekdays: habit.targetWeekdays,
         );
       } else {
         NotificationService.instance.cancelHabitReminder(habit.id);

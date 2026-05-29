@@ -61,6 +61,43 @@ class NotificationService {
     return ('${prefix}_$stringId').hashCode;
   }
 
+  int _habitReminderId(String habitId, {int? weekday}) {
+    final suffix = weekday == null ? 'daily' : 'weekday_$weekday';
+    return _generateId('${habitId}_$suffix', 'habit_time');
+  }
+
+  tz.TZDateTime _nextReminderDate({
+    required tz.TZDateTime now,
+    required TimeOfDay time,
+    int? weekday,
+  }) {
+    final scheduledDate = weekday == null
+        ? tz.TZDateTime(
+            tz.local,
+            now.year,
+            now.month,
+            now.day,
+            time.hour,
+            time.minute,
+          )
+        : tz.TZDateTime(
+            tz.local,
+            now.year,
+            now.month,
+            now.day + ((weekday - now.weekday + 7) % 7),
+            time.hour,
+            time.minute,
+          );
+
+    if (scheduledDate.isBefore(now)) {
+      return weekday == null
+          ? scheduledDate.add(const Duration(days: 1))
+          : scheduledDate.add(const Duration(days: 7));
+    }
+
+    return scheduledDate;
+  }
+
   // --- TASKS ---
   Future<void> scheduleTaskReminder({
     required int notificationId,
@@ -96,43 +133,48 @@ class NotificationService {
     required String habitId,
     required String habitName,
     required TimeOfDay time,
+    List<int>? targetWeekdays,
   }) async {
     if (kIsWeb) return;
 
+    await cancelHabitReminder(habitId);
+
     final now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      time.hour,
-      time.minute,
-    );
+    final weekdays = targetWeekdays?.toSet().toList();
+    weekdays?.sort();
+    final reminderDays = (weekdays == null || weekdays.isEmpty)
+        ? <int?>[null]
+        : weekdays.cast<int?>();
 
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
+    for (final weekday in reminderDays) {
+      final scheduledDate = _nextReminderDate(
+        now: now,
+        time: time,
+        weekday: weekday,
+      );
 
-    await _notificationsPlugin.zonedSchedule(
-      id: _generateId(habitId, 'habit_time'),
-      title: 'Habit Reminder',
-      body: 'Time to: $habitName',
-      scheduledDate: scheduledDate,
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'habit_reminders_channel',
-          'Habit Reminders',
-          channelDescription: 'Specific time reminders for your habits',
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
-          category: AndroidNotificationCategory.reminder,
+      await _notificationsPlugin.zonedSchedule(
+        id: _habitReminderId(habitId, weekday: weekday),
+        title: 'Habit Reminder',
+        body: 'Time to: $habitName',
+        scheduledDate: scheduledDate,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'habit_reminders_channel',
+            'Habit Reminders',
+            channelDescription: 'Specific time reminders for your habits',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            category: AndroidNotificationCategory.reminder,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents:
-          DateTimeComponents.time, // Repeats daily at this time!
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: weekday == null
+            ? DateTimeComponents.time
+            : DateTimeComponents.dayOfWeekAndTime,
+      );
+    }
   }
 
   // --- DAILY MOTIVATION (WITH DYNAMIC HABITS) ---
@@ -169,7 +211,7 @@ class NotificationService {
     if (includeHabits && todaysHabits.isNotEmpty) {
       String habitList = todaysHabits.take(2).join(", ");
       if (todaysHabits.length > 2) habitList += " and more";
-      body += "\nDon't forget to $habitList today!";
+      body += "\nDon't forget to do $habitList today!";
     }
 
     await _notificationsPlugin.zonedSchedule(
@@ -239,7 +281,13 @@ class NotificationService {
 
   Future<void> cancelHabitReminder(String habitId) async {
     if (kIsWeb) return;
-    await _notificationsPlugin.cancel(id: _generateId(habitId, 'habit_time'));
+
+    await _notificationsPlugin.cancel(id: _habitReminderId(habitId));
+    for (var weekday = 1; weekday <= 7; weekday++) {
+      await _notificationsPlugin.cancel(
+        id: _habitReminderId(habitId, weekday: weekday),
+      );
+    }
   }
 
   Future<void> showFocusTimerNotification({
