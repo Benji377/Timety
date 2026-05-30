@@ -12,6 +12,8 @@ class AppDialogs {
     required BuildContext context,
     required String title,
     required String content,
+    String confirmLabel = 'Confirm',
+    Color? confirmColor,
   }) {
     return showDialog<bool>(
       context: context,
@@ -24,9 +26,65 @@ class AppDialogs {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            // Material 3 style
+            style: confirmColor == null
+                ? null
+                : FilledButton.styleFrom(
+                    backgroundColor: confirmColor,
+                    foregroundColor: Colors.white,
+                  ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Confirm'),
+            child: Text(confirmLabel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Future<String?> showTextInputDialog({
+    required BuildContext context,
+    required String title,
+    required String labelText,
+    String initialValue = '',
+    String confirmLabel = 'Save',
+    String? hintText,
+    TextInputType keyboardType = TextInputType.text,
+    bool autofocus = true,
+  }) {
+    final controller = TextEditingController(text: initialValue);
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          autofocus: autofocus,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+            border: const OutlineInputBorder(),
+          ),
+          onSubmitted: (value) {
+            final trimmed = value.trim();
+            if (trimmed.isNotEmpty) {
+              Navigator.pop(context, trimmed);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final trimmed = controller.text.trim();
+              if (trimmed.isNotEmpty) {
+                Navigator.pop(context, trimmed);
+              }
+            },
+            child: Text(confirmLabel),
           ),
         ],
       ),

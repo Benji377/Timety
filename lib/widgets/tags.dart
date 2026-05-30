@@ -4,6 +4,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../theme/app_theme.dart';
 import '../providers/focus_provider.dart';
 import '../data/focus/focus_models.dart';
+import 'dialogs.dart';
 
 class TagsWidget extends StatefulWidget {
   const TagsWidget({super.key});
@@ -13,70 +14,20 @@ class TagsWidget extends StatefulWidget {
 }
 
 class _TagsWidgetState extends State<TagsWidget> {
-  void _showAddTagDialog() {
-    String tagName = '';
-    Color selectedColor = AppTheme.focusColor;
+  Future<void> _showTagDialog({FocusTag? tag}) async {
+    final isEditing = tag != null;
+    final currentTag = tag;
+    final controller = TextEditingController(text: tag?.name ?? '');
+    Color selectedColor = tag == null
+        ? AppTheme.focusColor
+        : Color(tag.colorValue);
 
-    showDialog(
+    await showDialog<void>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: const Text('Add New Tag'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Tag Name',
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (val) => tagName = val,
-                ),
-                const SizedBox(height: 16),
-                const Text('Choose Color:'),
-                const SizedBox(height: 8),
-                BlockPicker(
-                  pickerColor: selectedColor,
-                  onColorChanged: (color) =>
-                      setDialogState(() => selectedColor = color),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (tagName.isNotEmpty) {
-                    context.read<FocusProvider>().createTag(
-                      tagName,
-                      selectedColor,
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text("Add"),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Future<void> _showEditTagDialog(FocusTag tag) async {
-    final controller = TextEditingController(text: tag.name);
-    Color selectedColor = Color(tag.colorValue);
-
-    await showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: const Text('Edit Tag'),
+            title: Text(isEditing ? 'Edit Tag' : 'Add New Tag'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -100,27 +51,34 @@ class _TagsWidgetState extends State<TagsWidget> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
+                child: const Text('Cancel'),
               ),
               ElevatedButton(
                 onPressed: () {
                   final tagName = controller.text.trim();
-                  if (tagName.isNotEmpty) {
-                    context.read<FocusProvider>().updateTag(
-                      tag.id,
+                  if (tagName.isEmpty) return;
+
+                  final focusProvider = context.read<FocusProvider>();
+                  if (isEditing && currentTag != null) {
+                    focusProvider.updateTag(
+                      currentTag.id,
                       tagName,
                       selectedColor,
                     );
-                    Navigator.pop(context);
+                  } else {
+                    focusProvider.createTag(tagName, selectedColor);
                   }
+                  Navigator.pop(context);
                 },
-                child: const Text("Save"),
+                child: Text(isEditing ? 'Save' : 'Add'),
               ),
             ],
           );
         },
       ),
     );
+
+    controller.dispose();
   }
 
   @override
@@ -135,7 +93,7 @@ class _TagsWidgetState extends State<TagsWidget> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: ElevatedButton.icon(
-              onPressed: _showAddTagDialog,
+              onPressed: () => _showTagDialog(),
               icon: const Icon(Icons.add),
               label: const Text('Add New Tag'),
               style: ElevatedButton.styleFrom(
@@ -183,7 +141,7 @@ class _TagsWidgetState extends State<TagsWidget> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.edit),
-                              onPressed: () => _showEditTagDialog(tag),
+                              onPressed: () => _showTagDialog(tag: tag),
                             ),
                             if (!tag.id.startsWith('default_tag'))
                               IconButton(
@@ -191,33 +149,21 @@ class _TagsWidgetState extends State<TagsWidget> {
                                   Icons.delete,
                                   color: Colors.red,
                                 ),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: const Text('Delete Tag?'),
-                                      content: Text(
-                                        'Are you sure you want to delete "${tag.name}"?',
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text("Cancel"),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
-                                          ),
-                                          onPressed: () {
-                                            focusProvider.deleteTag(tag.id);
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("Delete"),
-                                        ),
-                                      ],
-                                    ),
-                                  );
+                                onPressed: () async {
+                                  final confirmed =
+                                      await AppDialogs.showConfirmation(
+                                        context: context,
+                                        title: 'Delete Tag?',
+                                        content:
+                                            'Are you sure you want to delete "${tag.name}"?',
+                                        confirmLabel: 'Delete',
+                                        confirmColor: Colors.red,
+                                      ) ==
+                                      true;
+
+                                  if (confirmed) {
+                                    focusProvider.deleteTag(tag.id);
+                                  }
                                 },
                               ),
                           ],

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -6,6 +5,7 @@ import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/stats_utils.dart';
 import '../../utils/streak_calculator.dart';
 import '../../widgets/stat_cards.dart';
 import '../../widgets/week_navigator.dart';
@@ -467,8 +467,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     final todayIndex = DateTime.now().weekday - 1;
     final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    double maxY = dailyCounts.reduce(max).toDouble();
-    if (maxY < 5) maxY = 5;
+    final maxY = StatsUtils.maxValue(dailyCounts, minimum: 5);
 
     return BarChart(
       BarChartData(

@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/stats_utils.dart';
 import '../../widgets/week_navigator.dart';
 
 class TaskStatsScreen extends StatefulWidget {
@@ -327,11 +328,10 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     final todayIndex = DateTime.now().weekday - 1;
     final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    double maxY = 5;
-    for (var day in velocityData) {
-      if (day[0] > maxY) maxY = day[0].toDouble();
-      if (day[1] > maxY) maxY = day[1].toDouble();
-    }
+    final maxY = StatsUtils.maxValue(
+      velocityData.expand((day) => day),
+      minimum: 5,
+    );
 
     return BarChart(
       BarChartData(

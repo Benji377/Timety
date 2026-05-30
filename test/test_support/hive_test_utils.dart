@@ -42,7 +42,7 @@ void registerAllHiveAdapters() {
   if (!Hive.isAdapterRegistered(27)) {
     Hive.registerAdapter(FocusTargetTypeAdapter());
   }
-  
+
   if (!Hive.isAdapterRegistered(30)) Hive.registerAdapter(HabitAdapter());
   if (!Hive.isAdapterRegistered(31)) {
     Hive.registerAdapter(HabitFrequencyAdapter());

@@ -5,6 +5,7 @@ import '../providers/habit_provider.dart';
 import '../data/task/task.dart';
 import '../theme/app_theme.dart';
 import '../utils/habit_utils.dart';
+import 'dialogs.dart';
 
 /// Reusable bottom sheet builders for focus-related UIs
 class FocusBottomSheetBuilders {
@@ -324,7 +325,7 @@ class FocusBottomSheetBuilders {
     void addHabitTile(Habit habit, {required bool isLocked}) {
       final isSelected =
           selectedType == FocusTargetType.habit && selectedId == habit.id;
-      
+
       final statusText = habit.frequency == HabitFrequency.daily
           ? 'Daily Habit'
           : 'Weekly Habit';
@@ -345,7 +346,8 @@ class FocusBottomSheetBuilders {
               color: isLocked ? Colors.grey : null,
             ),
           ),
-          subtitle: Text(statusText,
+          subtitle: Text(
+            statusText,
             style: TextStyle(
               color: isLocked
                   ? Colors.grey
@@ -432,37 +434,15 @@ class FocusBottomSheetBuilders {
     required BuildContext context,
     required Function(String tagName) onTagCreated,
   }) {
-    final TextEditingController controller = TextEditingController();
-
-    showDialog(
+    AppDialogs.showTextInputDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("New Tag"),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: "Tag Name (e.g. Reading)",
-            ),
-            autofocus: true,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (controller.text.trim().isNotEmpty) {
-                  onTagCreated(controller.text.trim());
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        );
-      },
-    );
+      title: 'New Tag',
+      labelText: 'Tag Name',
+      hintText: 'Tag Name (e.g. Reading)',
+    ).then((tagName) {
+      if (tagName != null) {
+        onTagCreated(tagName);
+      }
+    });
   }
 }

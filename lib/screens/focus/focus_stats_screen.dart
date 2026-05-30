@@ -7,6 +7,7 @@ import '../../theme/app_theme.dart';
 import '../../data/focus/focus_models.dart';
 import '../../providers/focus_provider.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/stats_utils.dart';
 import '../../widgets/week_navigator.dart';
 
 class FocusStatsScreen extends StatefulWidget {
@@ -507,8 +508,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     final todayIndex = DateTime.now().weekday - 1;
     final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    double maxY = dailyMins.reduce((a, b) => a > b ? a : b).toDouble();
-    if (maxY < 60) maxY = 60; // Show at least 1 hour
+    final maxY = StatsUtils.maxValue(dailyMins, minimum: 60);
 
     return BarChart(
       BarChartData(

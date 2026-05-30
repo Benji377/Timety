@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
+import 'dialogs.dart';
 
 class CategoriesWidget extends StatefulWidget {
   const CategoriesWidget({super.key});
@@ -11,37 +12,17 @@ class CategoriesWidget extends StatefulWidget {
 
 class _CategoriesWidgetState extends State<CategoriesWidget> {
   Future<void> _showEditCategoryDialog(String oldName) async {
-    final controller = TextEditingController(text: oldName);
-
-    await showDialog(
+    final taskProvider = context.read<TaskProvider>();
+    final newName = await AppDialogs.showTextInputDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Category'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Category Name',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final newName = controller.text.trim();
-              if (newName.isNotEmpty && newName != oldName) {
-                context.read<TaskProvider>().renameCategory(oldName, newName);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
+      title: 'Edit Category',
+      labelText: 'Category Name',
+      initialValue: oldName,
     );
+
+    if (newName != null && newName != oldName) {
+      taskProvider.renameCategory(oldName, newName);
+    }
   }
 
   @override
@@ -98,32 +79,21 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Delete Category?'),
-                                    content: Text(
-                                      'Are you sure you want to delete "$category"? Tasks with this category will be uncategorized.',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text("Cancel"),
-                                      ),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          taskProvider.deleteCategory(category);
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text("Delete"),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                              onPressed: () async {
+                                final confirmed =
+                                    await AppDialogs.showConfirmation(
+                                      context: context,
+                                      title: 'Delete Category?',
+                                      content:
+                                          'Are you sure you want to delete "$category"? Tasks with this category will be uncategorized.',
+                                      confirmLabel: 'Delete',
+                                      confirmColor: Colors.red,
+                                    ) ==
+                                    true;
+
+                                if (confirmed) {
+                                  taskProvider.deleteCategory(category);
+                                }
                               },
                             ),
                           ],
