@@ -4,26 +4,23 @@ class GreetingUtils {
 
   /// Generates a short contextual greeting based on time of day.
   static String getGreeting(String name) {
-    final now = DateTime.now();
-    final hour = now.hour;
+    final hour = DateTime.now().hour;
 
-    String greeting;
-    if (hour < 12) {
-      greeting = "Good Morning, $name!";
-    } else if (hour < 17) {
-      greeting = "Good Afternoon, $name!";
-    } else {
-      greeting = "Good Evening, $name!";
-    }
-
-    return greeting;
+    if (hour < 5) return "Still awake, $name?";
+    if (hour < 12) return "Good morning, $name!";
+    if (hour < 17) return "Good afternoon, $name!";
+    if (hour < 21) return "Good evening, $name!";
+    return "Good night, $name!";
   }
 
   /// Returns a short home-screen title based on the time of day.
   static String getDailyMotivationText() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Start small. Stay steady.';
-    if (hour < 17) return 'Keep moving. Keep it clean.';
-    return 'Finish strong. Reset well.';
+
+    if (hour < 5) return 'Take it easy and get some well-deserved rest.';
+    if (hour < 12) return 'Start the day with a simple task!';
+    if (hour < 17) return 'Keep going strong!';
+    if (hour < 21) return 'Take a deep breath and enjoy your evening.';
+    return 'Rest well, tomorrow is a fresh start.';
   }
 }
