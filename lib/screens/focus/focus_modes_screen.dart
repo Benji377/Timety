@@ -116,6 +116,7 @@ class _ModeEditCardState extends State<ModeEditCard> {
 
   // --- INTEGRATED APP DIALOGS ---
   void _confirmDelete() async {
+    final focusProvider = context.read<FocusProvider>();
     final confirm = await AppDialogs.showConfirmation(
       context: context,
       title: "Delete Mode?",
@@ -124,7 +125,7 @@ class _ModeEditCardState extends State<ModeEditCard> {
 
     if (confirm == true) {
       if (!mounted) return;
-      context.read<FocusProvider>().deleteMode(widget.mode.id);
+      focusProvider.deleteMode(widget.mode.id);
     }
   }
 
