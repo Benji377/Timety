@@ -26,9 +26,11 @@ void main() {
       expect(pomodoro.phases, hasLength(8));
       expect(pomodoro.phases.first.durationMinutes, 25);
       expect(pomodoro.phases.last.durationMinutes, 15);
+
+      expect(FocusTargetType.values, contains(FocusTargetType.task));
     });
 
-    test('stores focus session, tag, and distraction data', () {
+    test('stores focus session, tag, target, and distraction data', () {
       final distraction = Distraction(
         time: DateTime(2026, 5, 11, 10, 15),
         note: 'Phone check',
@@ -47,6 +49,9 @@ void main() {
         distractions: [distraction],
         isCompleted: true,
         tagId: tag.id,
+        targetType: FocusTargetType.task,
+        targetId: 'task-1',
+        targetLabel: 'Write docs',
       );
 
       expect(distraction.note, 'Phone check');
@@ -56,6 +61,9 @@ void main() {
       expect(session.distractions, hasLength(1));
       expect(session.isCompleted, isTrue);
       expect(session.tagId, tag.id);
+      expect(session.targetType, FocusTargetType.task);
+      expect(session.targetId, 'task-1');
+      expect(session.displayTargetLabel, 'Write docs');
     });
   });
 }

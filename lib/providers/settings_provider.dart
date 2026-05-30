@@ -14,6 +14,7 @@ class SettingsProvider extends ChangeNotifier {
   int _upcomingTasksDays = 7;
   TimeOfDay _endOfDayTime = const TimeOfDay(hour: 20, minute: 0);
   String _locationApiEndpoint = 'https://photon.komoot.io/api/';
+  bool _autoCompleteFocusTargetOnFinish = false;
 
   // Getters
   ThemeMode get themeMode => _themeMode;
@@ -24,6 +25,7 @@ class SettingsProvider extends ChangeNotifier {
   int get maxNodeMins => _maxNodeMins;
   int get upcomingTasksDays => _upcomingTasksDays;
   String get locationApiEndpoint => _locationApiEndpoint;
+  bool get autoCompleteFocusTargetOnFinish => _autoCompleteFocusTargetOnFinish;
 
   SettingsProvider() {
     _loadSettings();
@@ -50,6 +52,8 @@ class SettingsProvider extends ChangeNotifier {
     _maxStopwatchMins = _prefs?.getInt('maxStopwatchMins') ?? 120;
     _maxNodeMins = _prefs?.getInt('maxNodeMins') ?? 240;
     _upcomingTasksDays = _prefs?.getInt('upcomingTasksDays') ?? 7;
+    _autoCompleteFocusTargetOnFinish =
+        _prefs?.getBool('autoCompleteFocusTargetOnFinish') ?? false;
 
     // API & Services
     _locationApiEndpoint =
@@ -107,6 +111,12 @@ class SettingsProvider extends ChangeNotifier {
   void setLocationApiEndpoint(String endpoint) {
     _locationApiEndpoint = endpoint;
     _prefs?.setString('locationApiEndpoint', endpoint);
+    notifyListeners();
+  }
+
+  void setAutoCompleteFocusTargetOnFinish(bool enabled) {
+    _autoCompleteFocusTargetOnFinish = enabled;
+    _prefs?.setBool('autoCompleteFocusTargetOnFinish', enabled);
     notifyListeners();
   }
 

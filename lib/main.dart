@@ -44,6 +44,7 @@ void main() async {
   Hive.registerAdapter(PhaseTypeAdapter());
   Hive.registerAdapter(SessionPhaseAdapter());
   Hive.registerAdapter(FocusTagAdapter());
+  Hive.registerAdapter(FocusTargetTypeAdapter());
 
   // Register Habit Adapters
   Hive.registerAdapter(HabitFrequencyAdapter());
@@ -65,14 +66,16 @@ class TimetyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => TaskProvider(repository: HiveTaskRepository())..loadTasks(),
+          create: (_) =>
+              TaskProvider(repository: HiveTaskRepository())..loadTasks(),
         ),
         ChangeNotifierProvider(
           create: (_) => FocusProvider(repository: HiveFocusRepository()),
         ),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProxyProvider<SettingsProvider, HabitProvider>(
-          create: (_) => HabitProvider(repository: HiveHabitRepository())..loadHabits(),
+          create: (_) =>
+              HabitProvider(repository: HiveHabitRepository())..loadHabits(),
           update: (_, settings, habitProvider) {
             // Whenever settings change, pass them into the Habit Provider
             habitProvider?.updateSettings(settings);

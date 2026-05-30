@@ -14,6 +14,7 @@ class InteractiveGauge extends StatefulWidget {
   final Color? labelColor;
   final String bottomText;
   final Color bottomTextColor;
+  final IconData? bottomTextIcon;
   final VoidCallback? onBottomTextTapped;
   final Color? color; // optional override for gauge color
 
@@ -24,6 +25,7 @@ class InteractiveGauge extends StatefulWidget {
     required this.centerText,
     required this.bottomText,
     required this.bottomTextColor,
+    this.bottomTextIcon,
     this.onBottomTextTapped,
     this.isInteractive = true,
     this.onChanged,
@@ -196,13 +198,26 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
                               : AppTheme.gaugeBorderLight,
                         ),
                       ),
-                      child: Text(
-                        widget.bottomText,
-                        style: TextStyle(
-                          color: widget.bottomTextColor,
-                          fontSize: AppTheme.fsBodyLarge,
-                          fontWeight: AppTheme.fwBold,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.bottomTextIcon != null) ...[
+                            Icon(
+                              widget.bottomTextIcon,
+                              size: AppTheme.fsBodyLarge,
+                              color: widget.bottomTextColor,
+                            ),
+                            const SizedBox(width: 6),
+                          ],
+                          Text(
+                            widget.bottomText,
+                            style: TextStyle(
+                              color: widget.bottomTextColor,
+                              fontSize: AppTheme.fsBodyLarge,
+                              fontWeight: AppTheme.fwBold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

@@ -13,9 +13,7 @@ class TaskWidgetHeaderView extends StatelessWidget {
     return Container(
       width: 400,
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
-      ),
+      decoration: const BoxDecoration(color: Colors.transparent),
       child: Row(
         children: [
           const Icon(

@@ -6,6 +6,8 @@ import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/task_provider.dart';
+import '../../providers/habit_provider.dart';
 import '../../data/focus/focus_models.dart';
 import '../../widgets/focus_mode_timeline.dart';
 import '../../widgets/interactive_gauge.dart';
@@ -34,13 +36,22 @@ class _FocusScreenState extends State<FocusScreen> {
   }
 
   // --- TAG MANAGEMENT ---
-  void _showTagSelector(BuildContext context, FocusProvider provider) {
-    FocusBottomSheetBuilders.showTagSelector(
+  void _showTargetSelector(BuildContext context, FocusProvider provider) {
+    FocusBottomSheetBuilders.showTargetSelector(
       context: context,
       tags: provider.tags,
-      selectedTagId: provider.selectedTag?.id,
+      tasks: context.read<TaskProvider>().tasks,
+      habits: context.read<HabitProvider>().habits,
+      selectedType: provider.selectedTarget?.type ?? FocusTargetType.tag,
+      selectedId: provider.selectedTarget?.id,
       onTagSelected: (tag) {
         provider.setSelectedTag(tag);
+      },
+      onTaskSelected: (task) {
+        provider.setSelectedTask(id: task.id, label: task.title);
+      },
+      onHabitSelected: (habit) {
+        provider.setSelectedHabit(id: habit.id, label: habit.name);
       },
       onCreateNewTag: () {
         _showCreateTagDialog(context, provider);
@@ -126,6 +137,8 @@ class _FocusScreenState extends State<FocusScreen> {
     final focusProvider = context.watch<FocusProvider>();
     focusProvider.attachUserProvider(context.read<UserProvider>());
     focusProvider.attachSettingsProvider(context.read<SettingsProvider>());
+    focusProvider.attachTaskProvider(context.read<TaskProvider>());
+    focusProvider.attachHabitProvider(context.read<HabitProvider>());
     final isRunning = focusProvider.isRunning;
     final isPaused = focusProvider.isPaused;
     final activeMode = focusProvider.activeMode;
@@ -171,6 +184,14 @@ class _FocusScreenState extends State<FocusScreen> {
         );
       }
     }
+
+    final FocusTargetType? selectedTargetType =
+        focusProvider.selectedTarget?.type;
+    final IconData? bottomTextIcon = switch (selectedTargetType) {
+      FocusTargetType.task => Icons.task,
+      FocusTargetType.habit => Icons.alarm,
+      _ => null,
+    };
 
     void cycleMode(int direction) {
       if (isRunning || isPaused || activeMode == null) return;
@@ -340,13 +361,12 @@ class _FocusScreenState extends State<FocusScreen> {
                       ? AppTheme.warningColor
                       : AppTheme.focusColor,
                   centerText: centerText,
-                  bottomText: focusProvider.selectedTag?.name ?? "No Tag",
-                  bottomTextColor: focusProvider.selectedTag != null
-                      ? Color(focusProvider.selectedTag!.colorValue)
-                      : AppTheme.focusColor,
+                  bottomText: focusProvider.selectedTargetLabel,
+                  bottomTextColor: focusProvider.selectedTargetColor,
+                  bottomTextIcon: bottomTextIcon,
                   onBottomTextTapped: (isRunning || isPaused)
                       ? null
-                      : () => _showTagSelector(context, focusProvider),
+                      : () => _showTargetSelector(context, focusProvider),
                   isInteractive: canDrag,
                   label: label,
                   onChanged: (newProgress) {

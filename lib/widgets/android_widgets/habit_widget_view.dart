@@ -12,9 +12,7 @@ class HabitWidgetHeaderView extends StatelessWidget {
     return Container(
       width: 400,
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
-      decoration: const BoxDecoration(
-        color: Colors.transparent,
-      ),
+      decoration: const BoxDecoration(color: Colors.transparent),
       child: Row(
         children: [
           const Icon(
@@ -75,13 +73,18 @@ class HabitWidgetItemView extends StatelessWidget {
             ? BoxDecoration(
                 color: AppTheme.typeHabitColor.withValues(alpha: 0.05),
                 border: const Border.symmetric(
-                  vertical: BorderSide(color: AppTheme.typeHabitColor, width: 2),
+                  vertical: BorderSide(
+                    color: AppTheme.typeHabitColor,
+                    width: 2,
+                  ),
                 ),
               )
             : BoxDecoration(
                 color: Colors.white,
                 border: Border.all(
-                  color: isDone ? AppTheme.successColor : AppTheme.typeHabitColor,
+                  color: isDone
+                      ? AppTheme.successColor
+                      : AppTheme.typeHabitColor,
                   width: AppTheme.listTileBorderWidth,
                 ),
                 borderRadius: AppTheme.brMedium,
@@ -158,7 +161,9 @@ class HabitStackHeaderView extends StatelessWidget {
             left: BorderSide(color: AppTheme.typeHabitColor, width: 2),
             right: BorderSide(color: AppTheme.typeHabitColor, width: 2),
           ),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusMedium)),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppTheme.radiusMedium),
+          ),
         ),
         child: Row(
           children: [
@@ -178,7 +183,9 @@ class HabitStackHeaderView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: AppTheme.fwBold,
-                color: allDone ? AppTheme.successColor : AppTheme.typeHabitColor,
+                color: allDone
+                    ? AppTheme.successColor
+                    : AppTheme.typeHabitColor,
               ),
             ),
           ],
@@ -201,7 +208,9 @@ class HabitStackFooterView extends StatelessWidget {
         height: 2,
         decoration: const BoxDecoration(
           color: AppTheme.typeHabitColor,
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppTheme.radiusMedium)),
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(AppTheme.radiusMedium),
+          ),
         ),
       ),
     );

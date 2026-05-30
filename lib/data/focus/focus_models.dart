@@ -1,4 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+
+import '../../theme/app_theme.dart';
 
 part 'focus_models.g.dart';
 
@@ -116,6 +119,63 @@ class FocusTag {
   FocusTag({required this.id, required this.name, required this.colorValue});
 }
 
+@HiveType(typeId: 27)
+enum FocusTargetType {
+  @HiveField(0)
+  tag,
+  @HiveField(1)
+  task,
+  @HiveField(2)
+  habit,
+}
+
+class FocusTargetSelection {
+  final FocusTargetType type;
+  final String id;
+  final String label;
+  final int colorValue;
+
+  const FocusTargetSelection({
+    required this.type,
+    required this.id,
+    required this.label,
+    required this.colorValue,
+  });
+
+  factory FocusTargetSelection.tag(FocusTag tag) => FocusTargetSelection(
+    type: FocusTargetType.tag,
+    id: tag.id,
+    label: tag.name,
+    colorValue: tag.colorValue,
+  );
+
+  factory FocusTargetSelection.task({
+    required String id,
+    required String label,
+  }) {
+    return FocusTargetSelection(
+      type: FocusTargetType.task,
+      id: id,
+      label: label,
+      colorValue: AppTheme.taskColor.toARGB32(),
+    );
+  }
+
+  factory FocusTargetSelection.habit({
+    required String id,
+    required String label,
+  }) {
+    return FocusTargetSelection(
+      type: FocusTargetType.habit,
+      id: id,
+      label: label,
+      colorValue: AppTheme.habitColor.toARGB32(),
+    );
+  }
+
+  Color get color => Color(colorValue);
+}
+
 @HiveType(typeId: 20)
 class FocusSession {
   @HiveField(0)
@@ -134,6 +194,12 @@ class FocusSession {
   bool isCompleted;
   @HiveField(7)
   String? tagId;
+  @HiveField(8)
+  FocusTargetType targetType;
+  @HiveField(9)
+  String? targetId;
+  @HiveField(10)
+  String? targetLabel;
 
   FocusSession({
     required this.id,
@@ -144,5 +210,10 @@ class FocusSession {
     this.distractions = const [],
     this.isCompleted = false,
     this.tagId,
+    this.targetType = FocusTargetType.tag,
+    this.targetId,
+    this.targetLabel,
   });
+
+  String get displayTargetLabel => targetLabel ?? 'No Target';
 }

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:timety/data/focus/focus_models.dart';
 import 'package:timety/providers/focus_provider.dart';
+import 'package:timety/providers/habit_provider.dart';
+import 'package:timety/providers/settings_provider.dart';
+import 'package:timety/providers/task_provider.dart';
 import 'package:timety/providers/user_provider.dart';
 import 'package:timety/utils/xp_calculator.dart';
 
@@ -38,6 +42,76 @@ void main() {
       ]),
     );
   });
+
+  test(
+    'auto-completes linked task and habit on completed session when enabled',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+
+      final focusRepository = FakeFocusRepository(
+        initialModes: [
+          FocusMode.stopwatch(),
+          FocusMode.flexible(),
+          FocusMode.classicPomodoro(),
+        ],
+        initialTags: [
+          FocusTag(
+            id: 'tag-1',
+            name: 'Deep Work',
+            colorValue: Colors.blue.toARGB32(),
+          ),
+        ],
+      );
+      final taskRepository = FakeTaskRepository(
+        initialTasks: [buildTask(id: 'task-1', title: 'Write docs')],
+      );
+      final habitRepository = FakeHabitRepository(
+        initialHabits: [buildDailyHabit(id: 'habit-1', name: 'Drink water')],
+      );
+
+      final focusProvider = FocusProvider(repository: focusRepository);
+      final taskProvider = TaskProvider(repository: taskRepository);
+      final habitProvider = HabitProvider(repository: habitRepository);
+      final settingsProvider = SettingsProvider();
+      final userProvider = UserProvider(repository: FakeUserRepository());
+
+      await taskProvider.loadTasks();
+      await habitProvider.loadHabits();
+      await drainEventQueue();
+
+      await drainEventQueue();
+
+      focusProvider.attachTaskProvider(taskProvider);
+      focusProvider.attachHabitProvider(habitProvider);
+      focusProvider.attachSettingsProvider(settingsProvider);
+      focusProvider.attachUserProvider(userProvider);
+
+      await drainEventQueue();
+
+      settingsProvider.setAutoCompleteFocusTargetOnFinish(true);
+
+      await drainEventQueue();
+
+      focusProvider.setSelectedTask(id: 'task-1', label: 'Write docs');
+      focusProvider.startSession();
+      focusProvider.stopSession(completed: true, userProvider: userProvider);
+
+      await drainEventQueue();
+
+      expect(taskProvider.tasks.first.isCompleted, isTrue);
+
+      focusProvider.setSelectedHabit(id: 'habit-1', label: 'Drink water');
+      focusProvider.startSession();
+      focusProvider.stopSession(completed: true, userProvider: userProvider);
+
+      await drainEventQueue();
+
+      expect(
+        habitProvider.isCompletedOn(habitProvider.habits.first, DateTime.now()),
+        isTrue,
+      );
+    },
+  );
 
   test(
     'supports mode, tag, and history operations without running a timer',

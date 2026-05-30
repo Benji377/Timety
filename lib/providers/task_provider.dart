@@ -164,6 +164,22 @@ class TaskProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> markTaskCompleted(
+    String id, {
+    UserProvider? userProvider,
+  }) async {
+    final index = _tasks.indexWhere((task) => task.id == id);
+    if (index == -1 || _tasks[index].isCompleted) return;
+    await toggleTask(id, userProvider: userProvider);
+  }
+
+  Task? getTaskById(String id) {
+    for (final task in _tasks) {
+      if (task.id == id) return task;
+    }
+    return null;
+  }
+
   Future<void> removeTask(String id) async {
     final task = _tasks.firstWhere((t) => t.id == id);
     // Cancel all before removing

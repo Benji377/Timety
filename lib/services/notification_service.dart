@@ -292,7 +292,7 @@ class NotificationService {
 
   Future<void> showFocusTimerNotification({
     required String modeName,
-    required String tagName,
+    required String targetName,
     required DateTime targetTime,
     required bool isStopwatch,
     required Color notificationColor,
@@ -306,8 +306,7 @@ class NotificationService {
         ? 'Ends at ${DateFormat('h:mm a').format(targetTime)}'
         : null;
 
-    final List<String> bodyParts = [];
-    bodyParts.add('Tag: $tagName');
+    final List<String> bodyParts = ['Target: $targetName'];
 
     if (endTimeText != null) {
       bodyParts.add(endTimeText);

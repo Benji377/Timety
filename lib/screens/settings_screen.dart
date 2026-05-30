@@ -157,6 +157,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               (val) => settings.setDailyGoal(val),
             ),
           ),
+          SwitchListTile(
+            secondary: const Icon(Icons.task_alt, color: AppTheme.taskColor),
+            title: const Text('Auto-complete linked task or habit'),
+            subtitle: const Text(
+              'Marks the selected task or habit as complete when a focus timer finishes.',
+            ),
+            value: settings.autoCompleteFocusTargetOnFinish,
+            onChanged: settings.setAutoCompleteFocusTargetOnFinish,
+          ),
           ListTile(
             leading: const Icon(
               Icons.timer_outlined,

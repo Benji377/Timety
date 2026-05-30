@@ -5,6 +5,8 @@ import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
 import '../utils/xp_calculator.dart';
+import 'habit_provider.dart';
+import 'task_provider.dart';
 import 'user_provider.dart';
 import 'settings_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -13,12 +15,15 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   final FocusRepository repository;
   UserProvider? _userProvider;
   SettingsProvider? _settingsProvider;
+  TaskProvider? _taskProvider;
+  HabitProvider? _habitProvider;
 
   // --- STATE ---
   List<FocusMode> _modes = [];
   List<FocusSession> _history = [];
   List<FocusTag> _tags = [];
   FocusTag? _selectedTag;
+  FocusTargetSelection? _selectedTarget;
 
   FocusMode? _activeMode;
   FocusSession? _currentSession;
@@ -54,6 +59,11 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   int get flexibleDurationMinutes => _flexibleDurationMinutes;
   List<FocusTag> get tags => _tags;
   FocusTag? get selectedTag => _selectedTag;
+  FocusTargetSelection? get selectedTarget => _selectedTarget;
+  String get selectedTargetLabel => _selectedTarget?.label ?? 'No Target';
+  Color get selectedTargetColor => _selectedTarget == null
+      ? AppTheme.focusColor
+      : Color(_selectedTarget!.colorValue);
 
   FocusProvider({required this.repository}) {
     _init();
@@ -65,6 +75,14 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   void attachSettingsProvider(SettingsProvider settingsProvider) {
     _settingsProvider = settingsProvider;
+  }
+
+  void attachTaskProvider(TaskProvider taskProvider) {
+    _taskProvider = taskProvider;
+  }
+
+  void attachHabitProvider(HabitProvider habitProvider) {
+    _habitProvider = habitProvider;
   }
 
   Future<void> _init() async {
@@ -82,6 +100,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
       await repository.saveTag(defaultTag);
       _tags.add(defaultTag);
     }
+    _selectedTarget = FocusTargetSelection.tag(_tags.first);
     _selectedTag = _tags.first;
 
     if (!_modes.any((m) => m.id == 'system_stopwatch')) {
@@ -183,7 +202,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
       final secs = (safeRemaining % 60).toString().padLeft(2, '0');
       NotificationService.instance.showFocusTimerNotification(
         modeName: _activeMode!.name,
-        tagName: _selectedTag?.name ?? 'No Tag',
+        targetName: selectedTargetLabel,
         targetTime: DateTime.now(),
         isStopwatch: isStopwatch,
         notificationColor: currentPhase.type == PhaseType.rest
@@ -208,7 +227,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
       NotificationService.instance.showFocusTimerNotification(
         modeName: _activeMode!.name,
-        tagName: _selectedTag?.name ?? 'No Tag',
+        targetName: selectedTargetLabel,
         targetTime: targetTime,
         isStopwatch: isStopwatch,
         notificationColor: currentPhase.type == PhaseType.rest
@@ -227,10 +246,16 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
       _currentSecondsFocussed = 0;
       _setupPhase(_currentPhaseIndex);
 
+      final target = _selectedTarget ?? FocusTargetSelection.tag(_tags.first);
+
       _currentSession = FocusSession(
         id: DateTime.now().toString(),
         modeId: _activeMode!.id,
         startTime: DateTime.now(),
+        tagId: target.type == FocusTargetType.tag ? target.id : null,
+        targetType: target.type,
+        targetId: target.id,
+        targetLabel: target.label,
       );
     }
 
@@ -395,7 +420,27 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
       _currentSession!.endTime = DateTime.now();
       _currentSession!.totalSecondsFocused = _currentSecondsFocussed;
       _currentSession!.isCompleted = completed;
-      _currentSession!.tagId = _selectedTag?.id;
+      _currentSession!.tagId =
+          _currentSession!.targetType == FocusTargetType.tag
+          ? _currentSession!.targetId
+          : null;
+
+      if (completed &&
+          _settingsProvider?.autoCompleteFocusTargetOnFinish == true) {
+        if (_currentSession!.targetType == FocusTargetType.task &&
+            _currentSession!.targetId != null) {
+          await _taskProvider?.markTaskCompleted(
+            _currentSession!.targetId!,
+            userProvider: userProvider,
+          );
+        } else if (_currentSession!.targetType == FocusTargetType.habit &&
+            _currentSession!.targetId != null) {
+          await _habitProvider?.markHabitCompletedToday(
+            _currentSession!.targetId!,
+            userProvider: userProvider,
+          );
+        }
+      }
 
       await repository.saveSession(_currentSession!);
       _history.add(_currentSession!);
@@ -492,6 +537,19 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   void setSelectedTag(FocusTag tag) {
     _selectedTag = tag;
+    _selectedTarget = FocusTargetSelection.tag(tag);
+    notifyListeners();
+  }
+
+  void setSelectedTask({required String id, required String label}) {
+    _selectedTag = null;
+    _selectedTarget = FocusTargetSelection.task(id: id, label: label);
+    notifyListeners();
+  }
+
+  void setSelectedHabit({required String id, required String label}) {
+    _selectedTag = null;
+    _selectedTarget = FocusTargetSelection.habit(id: id, label: label);
     notifyListeners();
   }
 
@@ -504,6 +562,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     await repository.saveTag(newTag);
     _tags.add(newTag);
     _selectedTag = newTag;
+    _selectedTarget = FocusTargetSelection.tag(newTag);
     notifyListeners();
   }
 
@@ -519,8 +578,12 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> deleteTag(String id) async {
     await repository.deleteTag(id);
     _tags.removeWhere((t) => t.id == id);
-    if (_selectedTag?.id == id) {
+    if (_selectedTarget?.type == FocusTargetType.tag &&
+        _selectedTarget?.id == id) {
       _selectedTag = _tags.isNotEmpty ? _tags.first : null;
+      _selectedTarget = _selectedTag == null
+          ? null
+          : FocusTargetSelection.tag(_selectedTag!);
     }
     notifyListeners();
   }

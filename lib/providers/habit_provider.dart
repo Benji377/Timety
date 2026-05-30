@@ -112,6 +112,26 @@ class HabitProvider extends ChangeNotifier {
     await saveHabit(habit);
   }
 
+  Future<void> markHabitCompletedToday(
+    String id, {
+    UserProvider? userProvider,
+  }) async {
+    final habit = getHabitById(id);
+    if (habit == null || isCompletedOn(habit, DateTime.now())) return;
+    await markCompletionOnDate(
+      habit,
+      DateTime.now(),
+      userProvider: userProvider,
+    );
+  }
+
+  Habit? getHabitById(String id) {
+    for (final habit in _habits) {
+      if (habit.id == id) return habit;
+    }
+    return null;
+  }
+
   int getCompletionsThisWeek(Habit habit, {bool includeToday = true}) {
     final now = DateTime.now();
     final startOfWeek = DateTime(

@@ -16,6 +16,7 @@ void main() {
       'dailyGoalMins': 120,
       'maxStopwatchMins': 180,
       'maxNodeMins': 300,
+      'autoCompleteFocusTargetOnFinish': true,
     });
   });
 
@@ -29,6 +30,7 @@ void main() {
     expect(settings.dailyGoalMins, 120);
     expect(settings.maxStopwatchMins, 180);
     expect(settings.maxNodeMins, 300);
+    expect(settings.autoCompleteFocusTargetOnFinish, isTrue);
 
     settings.setThemeMode(ThemeMode.light);
     settings.setNotificationTime(const TimeOfDay(hour: 7, minute: 5));
@@ -36,6 +38,7 @@ void main() {
     settings.setDailyGoal(95);
     settings.setMaxStopwatch(90);
     settings.setMaxNode(210);
+    settings.setAutoCompleteFocusTargetOnFinish(false);
 
     final prefs = await SharedPreferences.getInstance();
 
@@ -47,5 +50,6 @@ void main() {
     expect(prefs.getInt('dailyGoalMins'), 95);
     expect(prefs.getInt('maxStopwatchMins'), 90);
     expect(prefs.getInt('maxNodeMins'), 210);
+    expect(prefs.getBool('autoCompleteFocusTargetOnFinish'), isFalse);
   });
 }

@@ -10,7 +10,10 @@ class HabitWidgetService {
   static const String _groupId = 'io.github.benji377.timety';
   static const String _androidWidgetName = 'HabitWidgetProvider';
 
-  static Future<void> updateHabitWidget(List<Habit> allHabits, HabitProvider provider) async {
+  static Future<void> updateHabitWidget(
+    List<Habit> allHabits,
+    HabitProvider provider,
+  ) async {
     try {
       await HomeWidget.setAppGroupId(_groupId);
 
@@ -28,7 +31,8 @@ class HabitWidgetService {
           final stackName = habit.stackName!.trim();
           stackTotals[stackName] = (stackTotals[stackName] ?? 0) + 1;
           if (isDone) {
-            stackCompletions[stackName] = (stackCompletions[stackName] ?? 0) + 1;
+            stackCompletions[stackName] =
+                (stackCompletions[stackName] ?? 0) + 1;
           }
         }
       }
@@ -54,7 +58,7 @@ class HabitWidgetService {
 
       // 2. Prepare Items to render
       final List<Widget> itemsToRender = [];
-      
+
       // Add Stacks
       for (var entry in grouped.entries) {
         final stackHabits = entry.value;
@@ -72,50 +76,57 @@ class HabitWidgetService {
           if (i == 0) {
             stackLocks[habit.id] = false;
           } else {
-            final prevDone = completionStatus[stackHabits[i-1].id] ?? false;
-            stackLocks[habit.id] = !prevDone && !(completionStatus[habit.id] ?? false);
+            final prevDone = completionStatus[stackHabits[i - 1].id] ?? false;
+            stackLocks[habit.id] =
+                !prevDone && !(completionStatus[habit.id] ?? false);
           }
         }
 
-        itemsToRender.add(Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            HabitStackHeaderView(
-              name: entry.key,
-              completed: stackCompletions[entry.key] ?? 0,
-              total: stackTotals[entry.key] ?? 0,
-            ),
-            for (var h in stackHabits)
-              HabitWidgetItemView(
-                habit: h,
-                isDone: completionStatus[h.id] ?? false,
-                isLocked: stackLocks[h.id] ?? false,
-                frequency: HabitUtils.buildHabitSubtitle(h, provider),
-                isStacked: true,
+        itemsToRender.add(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              HabitStackHeaderView(
+                name: entry.key,
+                completed: stackCompletions[entry.key] ?? 0,
+                total: stackTotals[entry.key] ?? 0,
               ),
-            const HabitStackFooterView(),
-          ],
-        ));
+              for (var h in stackHabits)
+                HabitWidgetItemView(
+                  habit: h,
+                  isDone: completionStatus[h.id] ?? false,
+                  isLocked: stackLocks[h.id] ?? false,
+                  frequency: HabitUtils.buildHabitSubtitle(h, provider),
+                  isStacked: true,
+                ),
+              const HabitStackFooterView(),
+            ],
+          ),
+        );
       }
 
       // Add Standalone
       for (var h in standalone) {
-        itemsToRender.add(HabitWidgetItemView(
-          habit: h,
-          isDone: completionStatus[h.id] ?? false,
-          isLocked: false,
-          frequency: HabitUtils.buildHabitSubtitle(h, provider),
-        ));
+        itemsToRender.add(
+          HabitWidgetItemView(
+            habit: h,
+            isDone: completionStatus[h.id] ?? false,
+            isLocked: false,
+            frequency: HabitUtils.buildHabitSubtitle(h, provider),
+          ),
+        );
       }
 
       // 3. Render Items
       for (var i = 0; i < itemsToRender.length; i++) {
         final item = itemsToRender[i];
         double height = 38; // standalone height
-        
+
         if (item is Column) {
           // It's a stack: Header (36) + (N * 26) + Footer (6)
-          final habitCount = item.children.whereType<HabitWidgetItemView>().length;
+          final habitCount = item.children
+              .whereType<HabitWidgetItemView>()
+              .length;
           height = 36.0 + (habitCount * 26.0) + 6.0;
         }
 
@@ -136,7 +147,7 @@ class HabitWidgetService {
       );
     } catch (e) {
       final errorStr = e.toString();
-      if (!errorStr.contains('MissingPluginException') && 
+      if (!errorStr.contains('MissingPluginException') &&
           !errorStr.contains('Binding has not yet been initialized')) {
         debugPrint('Error updating habit widget: $e');
       }
@@ -148,10 +159,7 @@ class HabitWidgetService {
       data: const MediaQueryData(),
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          type: MaterialType.transparency,
-          child: child,
-        ),
+        child: Material(type: MaterialType.transparency, child: child),
       ),
     );
   }

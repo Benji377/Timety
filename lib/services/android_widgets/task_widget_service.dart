@@ -14,7 +14,7 @@ class TaskWidgetService {
 
       final today = DateTime.now();
       final todayDate = DateTime(today.year, today.month, today.day);
-      
+
       final urgentTasks = tasks.where((task) {
         if (task.isCompleted || task.dueDate == null) return false;
         final dueDay = DateTime(
@@ -45,7 +45,7 @@ class TaskWidgetService {
         );
         await HomeWidget.saveWidgetData('task_item_$i', itemPath);
       }
-      
+
       // Save count for the native factory
       await HomeWidget.saveWidgetData('task_item_count', urgentTasks.length);
 
@@ -55,7 +55,7 @@ class TaskWidgetService {
       );
     } catch (e) {
       final errorStr = e.toString();
-      if (!errorStr.contains('MissingPluginException') && 
+      if (!errorStr.contains('MissingPluginException') &&
           !errorStr.contains('Binding has not yet been initialized')) {
         debugPrint('Error updating home widget: $e');
       }
@@ -67,10 +67,7 @@ class TaskWidgetService {
       data: const MediaQueryData(),
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: Material(
-          type: MaterialType.transparency,
-          child: child,
-        ),
+        child: Material(type: MaterialType.transparency, child: child),
       ),
     );
   }

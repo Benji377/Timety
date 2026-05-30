@@ -39,7 +39,10 @@ void registerAllHiveAdapters() {
   if (!Hive.isAdapterRegistered(24)) Hive.registerAdapter(FocusModeAdapter());
   if (!Hive.isAdapterRegistered(25)) Hive.registerAdapter(DistractionAdapter());
   if (!Hive.isAdapterRegistered(26)) Hive.registerAdapter(FocusTagAdapter());
-
+  if (!Hive.isAdapterRegistered(27)) {
+    Hive.registerAdapter(FocusTargetTypeAdapter());
+  }
+  
   if (!Hive.isAdapterRegistered(30)) Hive.registerAdapter(HabitAdapter());
   if (!Hive.isAdapterRegistered(31)) {
     Hive.registerAdapter(HabitFrequencyAdapter());

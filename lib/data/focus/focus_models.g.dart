@@ -99,7 +99,10 @@ class DistractionAdapter extends TypeAdapter<Distraction> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Distraction(time: fields[0] as DateTime, note: fields[1] as String);
+    return Distraction(
+      time: fields[0] as DateTime,
+      note: fields[1] as String,
+    );
   }
 
   @override
@@ -182,13 +185,16 @@ class FocusSessionAdapter extends TypeAdapter<FocusSession> {
       distractions: (fields[5] as List).cast<Distraction>(),
       isCompleted: fields[6] as bool,
       tagId: fields[7] as String?,
+      targetType: fields[8] as FocusTargetType,
+      targetId: fields[9] as String?,
+      targetLabel: fields[10] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, FocusSession obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -204,7 +210,13 @@ class FocusSessionAdapter extends TypeAdapter<FocusSession> {
       ..writeByte(6)
       ..write(obj.isCompleted)
       ..writeByte(7)
-      ..write(obj.tagId);
+      ..write(obj.tagId)
+      ..writeByte(8)
+      ..write(obj.targetType)
+      ..writeByte(9)
+      ..write(obj.targetId)
+      ..writeByte(10)
+      ..write(obj.targetLabel);
   }
 
   @override
@@ -302,6 +314,50 @@ class PhaseTypeAdapter extends TypeAdapter<PhaseType> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is PhaseTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class FocusTargetTypeAdapter extends TypeAdapter<FocusTargetType> {
+  @override
+  final int typeId = 27;
+
+  @override
+  FocusTargetType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return FocusTargetType.tag;
+      case 1:
+        return FocusTargetType.task;
+      case 2:
+        return FocusTargetType.habit;
+      default:
+        return FocusTargetType.tag;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, FocusTargetType obj) {
+    switch (obj) {
+      case FocusTargetType.tag:
+        writer.writeByte(0);
+        break;
+      case FocusTargetType.task:
+        writer.writeByte(1);
+        break;
+      case FocusTargetType.habit:
+        writer.writeByte(2);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FocusTargetTypeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
