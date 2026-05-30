@@ -42,6 +42,7 @@ class _FocusScreenState extends State<FocusScreen> {
       tags: provider.tags,
       tasks: context.read<TaskProvider>().tasks,
       habits: context.read<HabitProvider>().habits,
+      habitProvider: context.read<HabitProvider>(),
       selectedType: provider.selectedTarget?.type ?? FocusTargetType.tag,
       selectedId: provider.selectedTarget?.id,
       onTagSelected: (tag) {
@@ -95,7 +96,10 @@ class _FocusScreenState extends State<FocusScreen> {
     if (!context.mounted) return;
 
     if (confirmed) {
-      focusProvider.stopSession(userProvider: context.read<UserProvider>());
+      focusProvider.stopSession(
+        completed: true,
+        userProvider: context.read<UserProvider>(),
+      );
     } else if (pausedByThisCall) {
       focusProvider.startSession();
     }
@@ -463,6 +467,15 @@ class _FocusScreenState extends State<FocusScreen> {
                       _confirmStopSession(context, focusProvider);
                     } else if (focusProvider.awaitingPhaseContinue) {
                       focusProvider.continueToNextPhase();
+                    } else if (focusProvider.selectedTargetIsLocked) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Complete the previous habit in the stack first!',
+                          ),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
                     } else {
                       focusProvider.startSession();
                     }

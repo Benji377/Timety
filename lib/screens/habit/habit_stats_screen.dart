@@ -71,6 +71,215 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     };
   }
 
+  String _formatHabitCount(int count) {
+    if (count == 1) return '1 completion';
+    return '$count completions';
+  }
+
+  Widget _buildTimeOfDayBreakdownCard(List<Habit> habits) {
+    final data = _getTimeOfDayData(habits);
+    final total = data.values.fold<int>(0, (sum, value) => sum + value);
+
+    final buckets = [
+      _TimeOfDayBucket(
+        label: 'Morning',
+        subtitle: '5 AM - 12 PM',
+        count: data['Morning'] ?? 0,
+        color: AppTheme.warningColor,
+        icon: Icons.wb_sunny_outlined,
+      ),
+      _TimeOfDayBucket(
+        label: 'Afternoon',
+        subtitle: '12 PM - 5 PM',
+        count: data['Afternoon'] ?? 0,
+        color: AppTheme.taskColor,
+        icon: Icons.sunny,
+      ),
+      _TimeOfDayBucket(
+        label: 'Evening',
+        subtitle: '5 PM - 9 PM',
+        count: data['Evening'] ?? 0,
+        color: AppTheme.habitColor,
+        icon: Icons.nightlight_round,
+      ),
+      _TimeOfDayBucket(
+        label: 'Night',
+        subtitle: '9 PM - 5 AM',
+        count: data['Night'] ?? 0,
+        color: AppTheme.userColor,
+        icon: Icons.nights_stay_outlined,
+      ),
+    ];
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'When do you build habits?',
+                        style: TextStyle(
+                          fontSize: AppTheme.fsHeadingSmall,
+                          fontWeight: AppTheme.fwBold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Completion distribution by time of day',
+                        style: TextStyle(
+                          fontSize: AppTheme.fsBodySmall,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  _formatHabitCount(total),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: AppTheme.fwExtraBold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                height: 16,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: total == 0
+                    ? Container(color: Colors.grey.withValues(alpha: 0.12))
+                    : Row(
+                        children: buckets
+                            .where((bucket) => bucket.count > 0)
+                            .map(
+                              (bucket) => Expanded(
+                                flex: bucket.count,
+                                child: Container(color: bucket.color),
+                              ),
+                            )
+                            .toList(),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: buckets.map((bucket) {
+                final percent = total == 0
+                    ? 0
+                    : ((bucket.count / total) * 100).round();
+                return SizedBox(
+                  width: MediaQuery.of(context).size.width < 420
+                      ? double.infinity
+                      : (MediaQuery.of(context).size.width - 56) / 2,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: bucket.color.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: bucket.color.withValues(alpha: 0.22),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: bucket.color.withValues(alpha: 0.14),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            bucket.icon,
+                            color: bucket.color,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                bucket.label,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: AppTheme.fwBold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                bucket.subtitle,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${bucket.count}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: AppTheme.fwExtraBold,
+                              ),
+                            ),
+                            Text(
+                              '$percent%',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final habits = context.watch<HabitProvider>().habits;
@@ -166,23 +375,8 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                 ),
                 const SizedBox(height: AppTheme.space3XLarge),
 
-                // --- TIME OF DAY PIE CHART ---
-                const Text(
-                  "When Do You Build Habits?",
-                  style: TextStyle(
-                    fontSize: AppTheme.fsHeadingSmall,
-                    fontWeight: AppTheme.fwBold,
-                  ),
-                ),
-                const Text(
-                  "Completion distribution by time of day",
-                  style: TextStyle(
-                    fontSize: AppTheme.fsBodySmall,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: AppTheme.spaceLarge),
-                SizedBox(height: 220, child: _buildTimePieChart(habits)),
+                // --- TIME OF DAY BREAKDOWN ---
+                _buildTimeOfDayBreakdownCard(habits),
                 const SizedBox(height: AppTheme.space3XLarge),
 
                 // --- LEADERBOARD ---
@@ -335,41 +529,20 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildTimePieChart(List<Habit> habits) {
-    final data = _getTimeOfDayData(habits);
-    if (data.values.every((v) => v == 0)) {
-      return const Center(child: Text("No completion data yet."));
-    }
+class _TimeOfDayBucket {
+  final String label;
+  final String subtitle;
+  final int count;
+  final Color color;
+  final IconData icon;
 
-    final colorMap = {
-      'Morning': AppTheme.warningColor,
-      'Afternoon': AppTheme.taskColor,
-      'Evening': AppTheme.habitColor,
-      'Night': AppTheme.userColor,
-    };
-
-    final List<PieChartSectionData> sections = [];
-    data.forEach((key, value) {
-      if (value > 0) {
-        sections.add(
-          PieChartSectionData(
-            color: colorMap[key],
-            value: value.toDouble(),
-            title: '$key\n($value)',
-            radius: 70,
-            titleStyle: const TextStyle(
-              fontSize: 10,
-              fontWeight: AppTheme.fwBold,
-              color: Colors.white,
-            ),
-          ),
-        );
-      }
-    });
-
-    return PieChart(
-      PieChartData(sectionsSpace: 2, centerSpaceRadius: 30, sections: sections),
-    );
-  }
+  const _TimeOfDayBucket({
+    required this.label,
+    required this.subtitle,
+    required this.count,
+    required this.color,
+    required this.icon,
+  });
 }

@@ -427,7 +427,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const ListTile(
                     leading: Icon(Icons.person, color: Colors.deepOrange),
                     title: Text('Built by Benji377'),
-                    subtitle: Text('Solo Developer & Maintainer'),
+                    subtitle: Text('Maintainer'),
                   ),
                   ListTile(
                     leading: const Icon(Icons.favorite, color: Colors.red),

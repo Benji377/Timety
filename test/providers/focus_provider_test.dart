@@ -99,6 +99,8 @@ void main() {
       await drainEventQueue();
 
       expect(taskProvider.tasks.first.isCompleted, isTrue);
+      expect(focusProvider.selectedTarget?.type, FocusTargetType.tag);
+      expect(focusProvider.selectedTag?.id, 'tag-1');
 
       focusProvider.setSelectedHabit(id: 'habit-1', label: 'Drink water');
       focusProvider.startSession();
@@ -110,6 +112,59 @@ void main() {
         habitProvider.isCompletedOn(habitProvider.habits.first, DateTime.now()),
         isTrue,
       );
+      expect(focusProvider.selectedTarget?.type, FocusTargetType.tag);
+      expect(focusProvider.selectedTag?.id, 'tag-1');
+    },
+  );
+
+  test(
+    'does not start a session for a habit locked behind an incomplete stack item',
+    () async {
+      final focusRepository = FakeFocusRepository(
+        initialModes: [
+          FocusMode.stopwatch(),
+          FocusMode.flexible(),
+          FocusMode.classicPomodoro(),
+        ],
+        initialTags: [
+          FocusTag(
+            id: 'tag-1',
+            name: 'Deep Work',
+            colorValue: Colors.blue.toARGB32(),
+          ),
+        ],
+      );
+      final habitRepository = FakeHabitRepository(
+        initialHabits: [
+          buildDailyHabit(
+            id: 'habit-1',
+            name: 'First habit',
+            stackName: 'Morning',
+            stackOrder: 0,
+          ),
+          buildDailyHabit(
+            id: 'habit-2',
+            name: 'Second habit',
+            stackName: 'Morning',
+            stackOrder: 1,
+          ),
+        ],
+      );
+
+      final focusProvider = FocusProvider(repository: focusRepository);
+      final habitProvider = HabitProvider(repository: habitRepository);
+
+      await habitProvider.loadHabits();
+      await drainEventQueue();
+
+      focusProvider.attachHabitProvider(habitProvider);
+      await drainEventQueue();
+
+      focusProvider.setSelectedHabit(id: 'habit-2', label: 'Second habit');
+      focusProvider.startSession();
+
+      expect(focusProvider.isRunning, isFalse);
+      expect(focusProvider.selectedTarget?.id, 'habit-2');
     },
   );
 

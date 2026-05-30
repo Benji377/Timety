@@ -28,21 +28,41 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     'Restroom': Icons.wc,
   };
 
+  String _resolveSessionTargetName(FocusSession session, List<FocusTag> tags) {
+    final tagById = {for (final tag in tags) tag.id: tag};
+
+    switch (session.targetType) {
+      case FocusTargetType.task:
+      case FocusTargetType.habit:
+        return session.targetLabel?.trim().isNotEmpty == true
+            ? session.targetLabel!.trim()
+            : 'No Target';
+      case FocusTargetType.tag:
+        if (session.tagId != null) {
+          return tagById[session.tagId!]?.name ??
+              session.targetLabel ??
+              'Untagged';
+        }
+        return session.targetLabel?.trim().isNotEmpty == true
+            ? session.targetLabel!.trim()
+            : 'Untagged';
+    }
+  }
+
   List<_DistractionEntry> _getDistractionEntries(
     List<FocusSession> sessions,
     List<FocusTag> tags,
   ) {
-    final tagById = {for (final tag in tags) tag.id: tag};
-
     final entries = <_DistractionEntry>[];
     for (final session in sessions) {
-      final sessionTagName = session.tagId == null
-          ? 'Untagged'
-          : (tagById[session.tagId!]?.name ?? 'Untagged');
+      final sessionTargetName = _resolveSessionTargetName(session, tags);
 
       for (final distraction in session.distractions) {
         entries.add(
-          _DistractionEntry(distraction: distraction, tagName: sessionTagName),
+          _DistractionEntry(
+            distraction: distraction,
+            targetName: sessionTargetName,
+          ),
         );
       }
     }
@@ -81,20 +101,180 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     return dailyMins;
   }
 
-  Map<String, int> _getTagData(
-    List<FocusSession> sessions,
-    List<FocusTag> tags,
-  ) {
-    final Map<String, int> data = {};
-    for (var s in sessions) {
-      String tagName = "Untagged";
-      if (s.tagId != null) {
-        final tag = tags.where((t) => t.id == s.tagId).firstOrNull;
-        if (tag != null) tagName = tag.name;
-      }
-      data[tagName] = (data[tagName] ?? 0) + (s.totalSecondsFocused ~/ 60);
+  List<_TargetTypeStat> _getTargetTypeStats(List<FocusSession> sessions) {
+    final totals = <FocusTargetType, int>{
+      FocusTargetType.tag: 0,
+      FocusTargetType.task: 0,
+      FocusTargetType.habit: 0,
+    };
+
+    for (final session in sessions) {
+      totals[session.targetType] =
+          (totals[session.targetType] ?? 0) +
+          (session.totalSecondsFocused ~/ 60);
     }
-    return data;
+
+    return [
+      _TargetTypeStat(
+        type: FocusTargetType.tag,
+        label: 'Tags',
+        color: Colors.green,
+        icon: Icons.local_offer_outlined,
+        minutes: totals[FocusTargetType.tag] ?? 0,
+      ),
+      _TargetTypeStat(
+        type: FocusTargetType.task,
+        label: 'Tasks',
+        color: Colors.blue,
+        icon: Icons.task_alt,
+        minutes: totals[FocusTargetType.task] ?? 0,
+      ),
+      _TargetTypeStat(
+        type: FocusTargetType.habit,
+        label: 'Habits',
+        color: Colors.purple,
+        icon: Icons.favorite_outline,
+        minutes: totals[FocusTargetType.habit] ?? 0,
+      ),
+    ];
+  }
+
+  String _formatFocusMinutes(int minutes) {
+    if (minutes < 60) return '${minutes}m';
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+    if (remainingMinutes == 0) return '${hours}h';
+    return '${hours}h ${remainingMinutes}m';
+  }
+
+  Widget _buildTargetBreakdownCard(List<FocusSession> sessions) {
+    final stats = _getTargetTypeStats(sessions);
+    final totalMinutes = stats.fold<int>(0, (sum, stat) => sum + stat.minutes);
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Focus by target type',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tagged sessions, task-linked sessions, and habit-linked sessions',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  _formatFocusMinutes(totalMinutes),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                height: 16,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: totalMinutes == 0
+                    ? Container(color: Colors.grey.withValues(alpha: 0.15))
+                    : Row(
+                        children: stats
+                            .where((stat) => stat.minutes > 0)
+                            .map(
+                              (stat) => Expanded(
+                                flex: stat.minutes,
+                                child: Container(color: stat.color),
+                              ),
+                            )
+                            .toList(),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            ...stats.map(
+              (stat) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: stat.color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        stat.label,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      _formatFocusMinutes(stat.minutes),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      totalMinutes == 0
+                          ? '0%'
+                          : '${((stat.minutes / totalMinutes) * 100).round()}%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -279,7 +459,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                               ),
                             ),
                             subtitle: Text(
-                              '${DateFormat('hh:mm:ss').format(entry.distraction.time)} | ${entry.tagName}',
+                              '${DateFormat('hh:mm:ss').format(entry.distraction.time)} | ${entry.targetName}',
                             ),
                           );
                         },
@@ -308,16 +488,8 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // --- TAG BREAKDOWN (PIE CHART) ---
-                const Text(
-                  "Time by Tags",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 200,
-                  child: _buildTagPieChart(sessions, focusProvider.tags),
-                ),
+                // --- TARGET BREAKDOWN ---
+                _buildTargetBreakdownCard(sessions),
                 const SizedBox(height: 40),
               ],
             ),
@@ -410,51 +582,29 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildTagPieChart(List<FocusSession> sessions, List<FocusTag> tags) {
-    final tagData = _getTagData(sessions, tags);
-    if (tagData.isEmpty || tagData.values.every((v) => v == 0)) {
-      return const Center(child: Text("No tagged focus time."));
-    }
+class _TargetTypeStat {
+  final FocusTargetType type;
+  final String label;
+  final Color color;
+  final IconData icon;
+  final int minutes;
 
-    final List<PieChartSectionData> sections = [];
-
-    tagData.forEach((name, mins) {
-      if (mins > 0) {
-        // Find color of the tag, default to grey
-        Color color = Colors.grey;
-        if (name != "Untagged") {
-          final tag = tags.where((t) => t.name == name).firstOrNull;
-          if (tag != null) color = Color(tag.colorValue);
-        }
-
-        sections.add(
-          PieChartSectionData(
-            color: color,
-            value: mins.toDouble(),
-            title: '$name\n${mins}m',
-            radius: 60,
-            titleStyle: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        );
-      }
-    });
-
-    return PieChart(
-      PieChartData(sectionsSpace: 2, centerSpaceRadius: 40, sections: sections),
-    );
-  }
+  const _TargetTypeStat({
+    required this.type,
+    required this.label,
+    required this.color,
+    required this.icon,
+    required this.minutes,
+  });
 }
 
 class _DistractionEntry {
   final Distraction distraction;
-  final String tagName;
+  final String targetName;
 
-  _DistractionEntry({required this.distraction, required this.tagName});
+  _DistractionEntry({required this.distraction, required this.targetName});
 }
 
 // --- CUSTOM 24-HOUR CLOCK PAINTER ---

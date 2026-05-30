@@ -93,14 +93,28 @@ class HomeScreen extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppTheme.spaceXLarge),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  GreetingUtils.getGreeting(userName),
-                  style: const TextStyle(
-                    fontSize: AppTheme.fsHeadingLarge,
-                    fontWeight: AppTheme.fwExtraBold,
-                  ),
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      GreetingUtils.getGreeting(userName),
+                      style: const TextStyle(
+                        fontSize: AppTheme.fsHeadingLarge,
+                        fontWeight: AppTheme.fwExtraBold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      GreetingUtils.getDailyMotivationText(),
+                      style: const TextStyle(
+                        fontSize: AppTheme.fsBodyLarge,
+                        fontWeight: AppTheme.fwBold,
+                        color: AppTheme.taskColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -25,54 +25,6 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     });
   }
 
-  // --- DATA PROCESSING HELPERS ---
-  String _generateInsights(
-    List<Task> tasks,
-    DateTime startOfWeek,
-    DateTime endOfWeek,
-  ) {
-    if (tasks.isEmpty) return "Add some tasks to see your insights!";
-
-    int completedThisWeek = 0;
-    int createdThisWeek = 0;
-
-    for (var t in tasks) {
-      if (t.createdAt.isAfter(
-            startOfWeek.subtract(const Duration(seconds: 1)),
-          ) &&
-          t.createdAt.isBefore(endOfWeek)) {
-        createdThisWeek++;
-      }
-      if (t.isCompleted &&
-          t.completedAt != null &&
-          t.completedAt!.isAfter(
-            startOfWeek.subtract(const Duration(seconds: 1)),
-          ) &&
-          t.completedAt!.isBefore(endOfWeek)) {
-        completedThisWeek++;
-      }
-    }
-
-    // Check if the focused week is the CURRENT week in the real world
-    final bool isCurrentRealWeek =
-        DateTime.now().isAfter(startOfWeek) &&
-        DateTime.now().isBefore(endOfWeek);
-
-    if (completedThisWeek == 0 && createdThisWeek == 0) {
-      return isCurrentRealWeek
-          ? "A quiet week so far. Time to plan ahead!"
-          : "No activity recorded during this week.";
-    } else if (completedThisWeek > createdThisWeek) {
-      return "Excellent! You are clearing your backlog faster than you are adding to it.";
-    } else if (completedThisWeek > 10) {
-      return "Incredible focus! You crushed $completedThisWeek tasks this week.";
-    } else if (completedThisWeek > 0) {
-      return "Steady progress. You finished $completedThisWeek tasks this week.";
-    } else {
-      return "You added $createdThisWeek tasks this week, but haven't knocked any out yet. You've got this!";
-    }
-  }
-
   List<List<int>> _getVelocityForWeek(
     List<Task> tasks,
     DateTime startOfWeek,
@@ -131,6 +83,141 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     return categoryCounts;
   }
 
+  String _formatCount(int count) {
+    return count == 1 ? '1 task' : '$count tasks';
+  }
+
+  Widget _buildCategoryBreakdownCard(BuildContext context, List<Task> tasks) {
+    final categoryData = _getCategoryData(tasks);
+    if (categoryData.isEmpty) {
+      return const Center(child: Text("No categories used."));
+    }
+
+    final totalTasks = categoryData.values.fold<int>(
+      0,
+      (sum, value) => sum + value,
+    );
+    final entries = categoryData.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final colors = [
+      AppTheme.taskColor,
+      AppTheme.errorColor,
+      AppTheme.successColor,
+      AppTheme.warningColor,
+      AppTheme.habitColor,
+      Theme.of(context).colorScheme.primary,
+      Colors.teal,
+      Colors.deepOrange,
+    ];
+
+    Color colorForIndex(int index) => colors[index % colors.length];
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'All-Time Distribution',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Task categories across your whole workspace',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 18),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                height: 16,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Row(
+                  children: entries.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final category = entry.value;
+                    return Expanded(
+                      flex: category.value,
+                      child: Container(color: colorForIndex(index)),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            ...entries.asMap().entries.map((entry) {
+              final index = entry.key;
+              final category = entry.value;
+              final color = colorForIndex(index);
+              final percent = ((category.value / totalTasks) * 100).round();
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        category.key,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      _formatCount(category.value),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '$percent%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = context.watch<TaskProvider>().tasks;
@@ -160,36 +247,6 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                   onShiftWeek: _changeWeek,
                 ),
                 const SizedBox(height: 16),
-
-                // DYNAMIC INSIGHTS CARD
-                Card(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  elevation: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.auto_awesome,
-                          size: 32,
-                          color: AppTheme.warningColor,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            _generateInsights(tasks, startOfWeek, endOfWeek),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.paperLight,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
 
                 // TASK VELOCITY CHART
                 const Text(
@@ -250,13 +307,8 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // CATEGORY PIE CHART (ALL TIME)
-                const Text(
-                  "All-Time Distribution",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(height: 200, child: _buildPieChart(context, tasks)),
+                // CATEGORY BREAKDOWN (ALL TIME)
+                _buildCategoryBreakdownCard(context, tasks),
                 const SizedBox(height: 40),
               ],
             ),
@@ -417,46 +469,6 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
           );
         }),
       ),
-    );
-  }
-
-  Widget _buildPieChart(BuildContext context, List<Task> tasks) {
-    final categoryData = _getCategoryData(tasks);
-    if (categoryData.isEmpty) {
-      return const Center(child: Text("No categories used."));
-    }
-
-    final colors = [
-      AppTheme.taskColor,
-      AppTheme.errorColor,
-      AppTheme.successColor,
-      AppTheme.warningColor,
-      AppTheme.habitColor,
-      Theme.of(context).colorScheme.primaryContainer,
-    ];
-    int colorIndex = 0;
-
-    final List<PieChartSectionData> sections = categoryData.entries.map((
-      entry,
-    ) {
-      final color = colors[colorIndex % colors.length];
-      colorIndex++;
-
-      return PieChartSectionData(
-        color: color,
-        value: entry.value.toDouble(),
-        title: '${entry.key}\n(${entry.value})',
-        radius: 60,
-        titleStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      );
-    }).toList();
-
-    return PieChart(
-      PieChartData(sectionsSpace: 2, centerSpaceRadius: 40, sections: sections),
     );
   }
 }

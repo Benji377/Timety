@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
+import '../utils/habit_utils.dart';
 import '../utils/xp_calculator.dart';
 import 'habit_provider.dart';
 import 'task_provider.dart';
@@ -64,6 +65,11 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   Color get selectedTargetColor => _selectedTarget == null
       ? AppTheme.focusColor
       : Color(_selectedTarget!.colorValue);
+  bool get selectedTargetIsLocked {
+    final target = _selectedTarget;
+    if (target?.type != FocusTargetType.habit) return false;
+    return _isHabitTargetLocked(target!.id);
+  }
 
   FocusProvider({required this.repository}) {
     _init();
@@ -83,6 +89,47 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   void attachHabitProvider(HabitProvider habitProvider) {
     _habitProvider = habitProvider;
+  }
+
+  bool _isHabitTargetLocked(String habitId) {
+    final habitProvider = _habitProvider;
+    if (habitProvider == null) return false;
+
+    final habit = habitProvider.getHabitById(habitId);
+    if (habit == null) return false;
+
+    final stackName = habit.stackName?.trim();
+    if (stackName == null || stackName.isEmpty) return false;
+
+    final stackHabits =
+        habitProvider.habits
+            .where((item) => item.stackName?.trim() == stackName)
+            .toList()
+          ..sort((a, b) => (a.stackOrder ?? 99).compareTo(b.stackOrder ?? 99));
+
+    final index = stackHabits.indexWhere((item) => item.id == habitId);
+    if (index <= 0) return false;
+
+    final isCurrentHabitDone = habitProvider.isCompletedOn(
+      habit,
+      DateTime.now(),
+    );
+    final isPreviousHabitDone = habitProvider.isCompletedOn(
+      stackHabits[index - 1],
+      DateTime.now(),
+    );
+    return HabitUtils.isHabitLocked(
+      index: index,
+      isCurrentHabitDone: isCurrentHabitDone,
+      isPreviousHabitDone: isPreviousHabitDone,
+    );
+  }
+
+  void _resetSelectedTargetToDefaultTag() {
+    if (_tags.isEmpty) return;
+
+    _selectedTag = _tags.first;
+    _selectedTarget = FocusTargetSelection.tag(_selectedTag!);
   }
 
   Future<void> _init() async {
@@ -240,6 +287,10 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   void startSession() {
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
+    if (_selectedTarget?.type == FocusTargetType.habit &&
+        _isHabitTargetLocked(_selectedTarget!.id)) {
+      return;
+    }
 
     if (!_isRunning && !_isPaused) {
       _currentPhaseIndex = 0;
@@ -440,6 +491,8 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
             userProvider: userProvider,
           );
         }
+
+        _resetSelectedTargetToDefaultTag();
       }
 
       await repository.saveSession(_currentSession!);

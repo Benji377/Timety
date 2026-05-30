@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../data/focus/focus_models.dart';
 import '../data/habit/habit_models.dart';
+import '../providers/habit_provider.dart';
 import '../data/task/task.dart';
 import '../theme/app_theme.dart';
+import '../utils/habit_utils.dart';
 
 /// Reusable bottom sheet builders for focus-related UIs
 class FocusBottomSheetBuilders {
@@ -90,6 +92,7 @@ class FocusBottomSheetBuilders {
     required List<FocusTag> tags,
     required List<Task> tasks,
     required List<Habit> habits,
+    required HabitProvider habitProvider,
     required FocusTargetType selectedType,
     required String? selectedId,
     required Function(FocusTag tag) onTagSelected,
@@ -161,6 +164,7 @@ class FocusBottomSheetBuilders {
                         _buildHabitTab(
                           context: context,
                           habits: habits,
+                          habitProvider: habitProvider,
                           selectedType: selectedType,
                           selectedId: selectedId,
                           onHabitSelected: onHabitSelected,
@@ -294,45 +298,131 @@ class FocusBottomSheetBuilders {
   static Widget _buildHabitTab({
     required BuildContext context,
     required List<Habit> habits,
+    required HabitProvider habitProvider,
     required FocusTargetType selectedType,
     required String? selectedId,
     required Function(Habit habit) onHabitSelected,
   }) {
-    return habits.isEmpty
-        ? const Center(child: Text('No habits available.'))
-        : ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: habits.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final habit = habits[index];
-              final isSelected =
-                  selectedType == FocusTargetType.habit &&
-                  selectedId == habit.id;
-              return ListTile(
-                leading: Icon(
-                  habit.iconData ?? Icons.radio_button_unchecked,
-                  color: Color(habit.colorValue),
-                ),
-                title: Text(
-                  habit.name,
-                  style: TextStyle(
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-                subtitle: Text(habit.frequency.name),
-                trailing: isSelected
-                    ? const Icon(Icons.check, color: AppTheme.successColor)
-                    : null,
-                onTap: () {
+    if (habits.isEmpty) {
+      return const Center(child: Text('No habits available.'));
+    }
+
+    final grouped = <String, List<Habit>>{};
+    final standalone = <Habit>[];
+
+    for (final habit in habits) {
+      if (habit.stackName != null && habit.stackName!.trim().isNotEmpty) {
+        grouped.putIfAbsent(habit.stackName!.trim(), () => []).add(habit);
+      } else {
+        standalone.add(habit);
+      }
+    }
+
+    final today = DateTime.now();
+    final children = <Widget>[];
+
+    void addHabitTile(Habit habit, {required bool isLocked}) {
+      final isSelected =
+          selectedType == FocusTargetType.habit && selectedId == habit.id;
+      
+      final statusText = habit.frequency == HabitFrequency.daily
+          ? 'Daily Habit'
+          : 'Weekly Habit';
+
+      children.add(
+        ListTile(
+          enabled: !isLocked,
+          leading: Icon(
+            isLocked
+                ? Icons.lock_outline
+                : (habit.iconData ?? Icons.radio_button_unchecked),
+            color: isLocked ? Colors.grey : Color(habit.colorValue),
+          ),
+          title: Text(
+            habit.name,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isLocked ? Colors.grey : null,
+            ),
+          ),
+          subtitle: Text(statusText,
+            style: TextStyle(
+              color: isLocked
+                  ? Colors.grey
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: isLocked
+              ? const Icon(Icons.lock, color: Colors.grey)
+              : isSelected
+              ? const Icon(Icons.check, color: AppTheme.successColor)
+              : null,
+          onTap: isLocked
+              ? null
+              : () {
                   onHabitSelected(habit);
                   Navigator.pop(context);
                 },
-              );
-            },
-          );
+        ),
+      );
+    }
+
+    grouped.forEach((stackName, stackHabits) {
+      stackHabits.sort(
+        (a, b) => (a.stackOrder ?? 99).compareTo(b.stackOrder ?? 99),
+      );
+
+      if (children.isNotEmpty) {
+        children.add(const Divider(height: 1));
+      }
+
+      children.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
+            stackName.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+
+      for (var index = 0; index < stackHabits.length; index++) {
+        final habit = stackHabits[index];
+        final isDone = habitProvider.isCompletedOn(habit, today);
+        final isPreviousHabitDone = index > 0
+            ? habitProvider.isCompletedOn(stackHabits[index - 1], today)
+            : true;
+
+        addHabitTile(
+          habit,
+          isLocked: HabitUtils.isHabitLocked(
+            index: index,
+            isCurrentHabitDone: isDone,
+            isPreviousHabitDone: isPreviousHabitDone,
+          ),
+        );
+      }
+    });
+
+    if (standalone.isNotEmpty) {
+      if (children.isNotEmpty) {
+        children.add(const Divider(height: 1));
+      }
+
+      for (final habit in standalone) {
+        addHabitTile(habit, isLocked: false);
+      }
+    }
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      children: children,
+    );
   }
 
   /// Shows a dialog for creating a new focus tag
