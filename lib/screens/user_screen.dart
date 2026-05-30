@@ -6,13 +6,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timety/providers/habit_provider.dart';
 import 'package:timety/providers/user_provider.dart';
-import 'package:timety/utils/xp_calculator.dart';
 import 'package:timety/utils/wrapup_image_generator.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/streak_calculator.dart';
 import '../widgets/stat_cards.dart';
+import '../widgets/user_profile/streak_status_badge.dart';
+import '../widgets/user_profile/user_streak_timeline_card.dart';
+import '../widgets/user_profile/user_xp_breakdown_card.dart';
 import 'statistics_screen.dart';
 
 class UserScreen extends StatefulWidget {
@@ -24,6 +26,99 @@ class UserScreen extends StatefulWidget {
 
 class _UserScreenState extends State<UserScreen> {
   bool _isExporting = false;
+
+  Widget _buildAllTimeStatsSection(
+    BuildContext context,
+    int totalTasks,
+    int totalHabitsDone,
+    int totalFocusMins,
+    int totalSessions,
+    int highestStreak,
+  ) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'All-Time Stats',
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: AppTheme.fsHeadingSmall,
+                fontWeight: AppTheme.fwBold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Lifetime progress at a glance',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: AppTheme.spaceMedium,
+              runSpacing: AppTheme.spaceMedium,
+              children: [
+                StatCard(
+                  title: 'Tasks Done',
+                  value: '$totalTasks',
+                  icon: Icons.check_circle_outline,
+                  color: AppTheme.taskColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+                StatCard(
+                  title: 'Habits Met',
+                  value: '$totalHabitsDone',
+                  icon: Icons.repeat,
+                  color: AppTheme.habitColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+                StatCard(
+                  title: 'Focus Mins',
+                  value: '$totalFocusMins',
+                  icon: Icons.timer_outlined,
+                  color: AppTheme.focusColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+                StatCard(
+                  title: 'Sessions',
+                  value: '$totalSessions',
+                  icon: Icons.coffee_outlined,
+                  color: AppTheme.userColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+                StatCard(
+                  title: 'Best Streak',
+                  value: '$highestStreak',
+                  icon: Icons.military_tech,
+                  color: AppTheme.warningColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> _shareWrapUp(
     String name,
@@ -121,40 +216,55 @@ class _UserScreenState extends State<UserScreen> {
     final focus = context.watch<FocusProvider>();
     final habits = context.watch<HabitProvider>();
 
-    // Compute stats
-    final totalTasks = tasks.tasks.where((t) => t.isCompleted).length;
+    final taskDates = tasks.tasks
+        .where((task) => task.isCompleted && task.completedAt != null)
+        .map((task) => task.completedAt!)
+        .toList();
+    final focusDates = focus.history
+        .where((session) => session.totalSecondsFocused >= 60)
+        .map((session) => session.startTime)
+        .toList();
+    final habitDates = habits.habits
+        .expand((habit) => habit.completions)
+        .toList();
+    final activityDates = [...taskDates, ...focusDates, ...habitDates];
+
+    final totalTasks = taskDates.length;
     final totalSessions = focus.history.length;
     final totalFocusMins = focus.history.fold(
       0,
       (sum, s) => sum + (s.totalSecondsFocused ~/ 60),
     );
-    final totalHabitsDone = habits.habits.fold(
-      0,
-      (sum, h) => sum + h.completions.length,
-    );
-    final nextLevelXp = ExperienceEngine.getXpForLevel(
-      userProvider.currentLevel + 1,
-    );
-    final xpToNextLevel = nextLevelXp - userProvider.totalXp;
-    final activityDates = <DateTime>[
-      ...tasks.tasks
-          .where((t) => t.isCompleted && t.completedAt != null)
-          .map((t) => t.completedAt!),
-      ...focus.history
-          .where((s) => s.totalSecondsFocused >= 60)
-          .map((s) => s.startTime),
-      ...habits.habits.expand((h) => h.completions),
-    ];
+    final totalHabitsDone = habitDates.length;
     final streaks = StreakCalculator.calculateBoth(activityDates);
 
     final currentStreak = streaks.current;
     final highestStreak = streaks.highest;
+    final isStreakActive =
+        currentStreak > 0 &&
+            taskDates.any(
+              (date) =>
+                  date.year == DateTime.now().year &&
+                  date.month == DateTime.now().month &&
+                  date.day == DateTime.now().day,
+            ) ||
+        focusDates.any(
+          (date) =>
+              date.year == DateTime.now().year &&
+              date.month == DateTime.now().month &&
+              date.day == DateTime.now().day,
+        ) ||
+        habitDates.any(
+          (date) =>
+              date.year == DateTime.now().year &&
+              date.month == DateTime.now().month &&
+              date.day == DateTime.now().day,
+        );
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
         actions: [
-          // --- SHARE BUTTON ---
           IconButton(
             icon: _isExporting
                 ? const SizedBox(
@@ -232,7 +342,10 @@ class _UserScreenState extends State<UserScreen> {
 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
+                StreakStatusBadge(isActive: isStreakActive),
+                const SizedBox(width: 10),
                 Text(
                   userProvider.name,
                   style: const TextStyle(
@@ -251,182 +364,37 @@ class _UserScreenState extends State<UserScreen> {
               ],
             ),
 
-            // --- LEVEL & TITLE ---
-            Text(
-              "Level ${userProvider.currentLevel} • ${userProvider.levelTitle}",
-              style: TextStyle(
-                fontSize: AppTheme.fsBodyLarge,
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: AppTheme.spaceXLarge),
-
-            // --- ELIXIR XP BAR ---
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.space2XLarge,
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "${userProvider.totalXp} XP",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.arrow_upward,
-                            color: AppTheme.taskColor,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$xpToNextLevel XP',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: userProvider.levelProgress,
-                      minHeight: 12,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      color: AppTheme.taskColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: AppTheme.space2XLarge),
-
-            // --- STREAK BADGE ---
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spaceXLarge,
-                vertical: AppTheme.spaceMedium,
-              ),
-              decoration: BoxDecoration(
-                color: currentStreak > 0
-                    ? AppTheme.warningColor.withValues(
-                        alpha: AppTheme.opacityVeryLight,
-                      )
-                    : Theme.of(context).colorScheme.surfaceContainerHighest
-                          .withValues(alpha: AppTheme.opacityVeryLight),
-                borderRadius: AppTheme.brCircle,
-                border: Border.all(
-                  color: currentStreak > 0
-                      ? AppTheme.warningColor.withValues(
-                          alpha: AppTheme.opacityLight,
-                        )
-                      : Theme.of(context).dividerColor,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    currentStreak > 0 ? Icons.whatshot : Icons.heart_broken,
-                    size: 24,
-                    color: currentStreak > 0
-                        ? AppTheme.warningColor
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: AppTheme.spaceSmall),
-                  Text(
-                    currentStreak > 0
-                        ? "$currentStreak Day Streak!"
-                        : "Start a streak today!",
-                    style: TextStyle(
-                      fontSize: AppTheme.fsBodyLarge,
-                      fontWeight: AppTheme.fwBold,
-                      color: currentStreak > 0
-                          ? AppTheme.warningColor
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: AppTheme.space2XLarge),
-            const Divider(
-              indent: AppTheme.space2XLarge,
-              endIndent: AppTheme.space2XLarge,
-            ),
-            const SizedBox(height: AppTheme.spaceXLarge),
-
-            // --- COMPACT TOTALS OVERVIEW ---
-            const Text(
-              "All-Time Stats",
-              style: TextStyle(
-                fontSize: AppTheme.fsHeadingSmall,
-                fontWeight: AppTheme.fwBold,
-              ),
-            ),
             const SizedBox(height: AppTheme.spaceLarge),
 
-            // Replaced GridView with a centered Wrap
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spaceLarge,
-              ),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: AppTheme.spaceMedium,
-                runSpacing: AppTheme.spaceMedium,
-                children: [
-                  CompactHeaderStatCard(
-                    title: "Tasks Done",
-                    value: "$totalTasks",
-                    icon: Icons.check_circle_outline,
-                    color: AppTheme.taskColor,
-                  ),
-                  CompactHeaderStatCard(
-                    title: "Habits Met",
-                    value: "$totalHabitsDone",
-                    icon: Icons.repeat,
-                    color: AppTheme.habitColor,
-                  ),
-                  CompactHeaderStatCard(
-                    title: "Focus Mins",
-                    value: "$totalFocusMins",
-                    icon: Icons.timer_outlined,
-                    color: AppTheme.focusColor,
-                  ),
-                  CompactHeaderStatCard(
-                    title: "Sessions",
-                    value: "$totalSessions",
-                    icon: Icons.coffee_outlined,
-                    color: AppTheme.userColor,
-                  ),
-                  CompactHeaderStatCard(
-                    title: "Best Streak",
-                    value: "$highestStreak",
-                    icon: Icons.military_tech,
-                    color: AppTheme.warningColor,
-                  ),
-                ],
-              ),
+            UserXpBreakdownCard(
+              currentLevel: userProvider.currentLevel,
+              levelTitle: userProvider.levelTitle,
+              totalXp: userProvider.totalXp,
+              levelProgress: userProvider.levelProgress,
             ),
+
+            const SizedBox(height: AppTheme.spaceLarge),
+
+            UserStreakTimelineCard(
+              activityDates: activityDates,
+              taskDates: taskDates,
+              focusDates: focusDates,
+              habitDates: habitDates,
+              currentStreak: currentStreak,
+              highestStreak: highestStreak,
+            ),
+
+            const SizedBox(height: AppTheme.spaceLarge),
+
+            _buildAllTimeStatsSection(
+              context,
+              totalTasks,
+              totalHabitsDone,
+              totalFocusMins,
+              totalSessions,
+              highestStreak,
+            ),
+
             const SizedBox(height: AppTheme.space3XLarge),
           ],
         ),
