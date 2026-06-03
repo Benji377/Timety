@@ -68,7 +68,7 @@ class OverviewStatsScreen extends StatelessWidget {
                 title: "Tasks Done",
                 value: "$tasksCompletedToday",
                 icon: Icons.task_alt,
-                color: AppTheme.successColor,
+                color: AppTheme.taskColor,
               ),
             ),
             const SizedBox(width: 16),
@@ -77,7 +77,7 @@ class OverviewStatsScreen extends StatelessWidget {
                 title: "Focus Time",
                 value: "${focusMinsToday}m",
                 icon: Icons.timer,
-                color: AppTheme.taskColor,
+                color: AppTheme.focusColor,
               ),
             ),
           ],
@@ -109,7 +109,7 @@ class OverviewStatsScreen extends StatelessWidget {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.circle, size: 12, color: AppTheme.taskColor),
+            Icon(Icons.circle, size: 12, color: AppTheme.focusColor),
             SizedBox(width: 4),
             Text(
               "Focus Mins",
@@ -120,7 +120,7 @@ class OverviewStatsScreen extends StatelessWidget {
               ),
             ),
             SizedBox(width: 24),
-            Icon(Icons.circle, size: 12, color: AppTheme.successColor),
+            Icon(Icons.circle, size: 12, color: AppTheme.taskColor),
             SizedBox(width: 4),
             Text(
               "Tasks Done",

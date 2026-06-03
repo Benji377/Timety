@@ -111,172 +111,152 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
       ),
     ];
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.45),
-              Theme.of(context).colorScheme.surface,
-            ],
-          ),
-        ),
-        child: Column(
+    // Removed Card and inner background Container to unify layout styles
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'When do you build habits?',
-                        style: TextStyle(
-                          fontSize: AppTheme.fsHeadingSmall,
-                          fontWeight: AppTheme.fwBold,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Completion distribution by time of day',
-                        style: TextStyle(
-                          fontSize: AppTheme.fsBodySmall,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'When do you build habits?',
+                    style: TextStyle(
+                      fontSize: AppTheme.fsHeadingSmall,
+                      fontWeight: AppTheme.fwBold,
+                    ),
                   ),
-                ),
-                Text(
-                  _formatHabitCount(total),
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: AppTheme.fwExtraBold,
+                  SizedBox(height: 4),
+                  Text(
+                    'Completion distribution by time of day',
+                    style: TextStyle(
+                      fontSize: AppTheme.fsBodySmall,
+                      color: Colors.grey,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: Container(
-                height: 16,
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: total == 0
-                    ? Container(color: Colors.grey.withValues(alpha: 0.12))
-                    : Row(
-                        children: buckets
-                            .where((bucket) => bucket.count > 0)
-                            .map(
-                              (bucket) => Expanded(
-                                flex: bucket.count,
-                                child: Container(color: bucket.color),
-                              ),
-                            )
-                            .toList(),
-                      ),
+                ],
               ),
             ),
-            const SizedBox(height: 18),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: buckets.map((bucket) {
-                final percent = total == 0
-                    ? 0
-                    : ((bucket.count / total) * 100).round();
-                return SizedBox(
-                  width: MediaQuery.of(context).size.width < 420
-                      ? double.infinity
-                      : (MediaQuery.of(context).size.width - 56) / 2,
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: bucket.color.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: bucket.color.withValues(alpha: 0.22),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: bucket.color.withValues(alpha: 0.14),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            bucket.icon,
-                            color: bucket.color,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                bucket.label,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: AppTheme.fwBold,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                bucket.subtitle,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '${bucket.count}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: AppTheme.fwExtraBold,
-                              ),
-                            ),
-                            Text(
-                              '$percent%',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
+            const SizedBox(width: 16),
+            Text(
+              _formatHabitCount(total),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: AppTheme.fwExtraBold,
+              ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 18),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            height: 16,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: total == 0
+                ? Container(color: Colors.grey.withValues(alpha: 0.12))
+                : Row(
+                    children: buckets
+                        .where((bucket) => bucket.count > 0)
+                        .map(
+                          (bucket) => Expanded(
+                            flex: bucket.count,
+                            child: Container(color: bucket.color),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: buckets.map((bucket) {
+            final percent = total == 0
+                ? 0
+                : ((bucket.count / total) * 100).round();
+            return SizedBox(
+              width: MediaQuery.of(context).size.width < 420
+                  ? double.infinity
+                  : (MediaQuery.of(context).size.width - 56) / 2,
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: bucket.color.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: bucket.color.withValues(alpha: 0.22),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: bucket.color.withValues(alpha: 0.14),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(bucket.icon, color: bucket.color, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            bucket.label,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: AppTheme.fwBold,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            bucket.subtitle,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${bucket.count}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: AppTheme.fwExtraBold,
+                          ),
+                        ),
+                        Text(
+                          '$percent%',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -330,7 +310,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                       title: "Total Logged",
                       value: "$totalCompletions",
                       icon: Icons.timeline,
-                      color: AppTheme.infoColor,
+                      color: AppTheme.habitColor,
                     ),
                     CompactVerticalStatCard(
                       title: "Active Habits",
@@ -489,7 +469,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                     style: TextStyle(
                       fontSize: AppTheme.fsBodySmall,
                       fontWeight: isToday ? AppTheme.fwBold : AppTheme.fwNormal,
-                      color: isToday ? AppTheme.infoColor : Colors.grey,
+                      color: isToday ? AppTheme.habitColor : Colors.grey,
                     ),
                   ),
                 );
@@ -510,8 +490,8 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
               BarChartRodData(
                 toY: dailyCounts[index].toDouble(),
                 color: isToday
-                    ? AppTheme.infoColor
-                    : AppTheme.infoColor.withValues(
+                    ? AppTheme.habitColor
+                    : AppTheme.habitColor.withValues(
                         alpha: AppTheme.opacityMedium,
                       ),
                 width: 16,
