@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-
 import '../../theme/app_theme.dart';
 
 part 'focus_models.g.dart';
@@ -30,9 +29,10 @@ class SessionPhase {
   @HiveField(0)
   final PhaseType type;
 
-  // 0 = infinite (Stopwatch)
-  // -1 = set at runtime (Flexible)
-  // > 0 = exact minutes
+  /// The duration of the phase in minutes.
+  /// * `0` represents an infinite duration (Stopwatch mode).
+  /// * `-1` represents a duration set dynamically at runtime (Flexible mode).
+  /// * `> 0` represents an exact minute count.
   @HiveField(1)
   int durationMinutes;
 
