@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
@@ -35,53 +34,31 @@ class TaskProvider extends ChangeNotifier {
   String _buildReminderBody(
     Task task,
     DateTime reminderTime, {
+    DateTime? dueDate,
     bool exactDueDate = false,
   }) {
-    final taskTitle = task.title;
-    final reminderTimeText = _formatReminderDateTime(reminderTime);
-
     if (exactDueDate) {
-      return 'It is time to do $taskTitle !';
+      return 'It is time to do ${task.title}!';
     }
 
-    final reminderDay = DateTime(
-      reminderTime.year,
-      reminderTime.month,
-      reminderTime.day,
-    );
-    final today = DateTime.now();
-    final todayDay = DateTime(today.year, today.month, today.day);
-    final dayDifference = reminderDay.difference(todayDay).inDays;
+    final referenceTime = dueDate ?? reminderTime;
+    final timeUntilDue = referenceTime.difference(reminderTime);
 
-    final reminderPrefix = dayDifference == 1
-        ? 'Tomorrow remember to do'
-        : dayDifference == 0
-        ? 'Today remember to do'
-        : 'Remember to do';
-
-    return '$reminderPrefix $taskTitle at $reminderTimeText!';
-  }
-
-  String _formatReminderDateTime(DateTime reminderTime) {
-    final reminderDay = DateTime(
-      reminderTime.year,
-      reminderTime.month,
-      reminderTime.day,
-    );
-    final today = DateTime.now();
-    final todayDay = DateTime(today.year, today.month, today.day);
-
-    if (reminderDay.year == todayDay.year &&
-        reminderDay.month == todayDay.month &&
-        reminderDay.day == todayDay.day) {
-      return DateFormat('hh:mm a').format(reminderTime);
+    String reminderPrefix;
+    if (timeUntilDue.inMinutes <= 0) {
+      reminderPrefix = 'Now';
+    } else if (timeUntilDue.inMinutes < 60) {
+      reminderPrefix = 'In ${timeUntilDue.inMinutes} minutes';
+    } else if (timeUntilDue.inHours < 24) {
+      reminderPrefix = timeUntilDue.inHours == 1
+          ? 'In 1 hour'
+          : 'In ${timeUntilDue.inHours} hours';
+    } else {
+      final days = timeUntilDue.inDays;
+      reminderPrefix = days == 1 ? 'Tomorrow' : 'In $days days';
     }
 
-    if (reminderDay.difference(todayDay).inDays == 1) {
-      return DateFormat('hh:mm a').format(reminderTime);
-    }
-
-    return DateFormat('MMM d, yyyy hh:mm a').format(reminderTime);
+    return '$reminderPrefix remember to do ${task.title}!';
   }
 
   Future<void> _cancelTaskNotifications(Task task) async {
@@ -115,7 +92,7 @@ class TaskProvider extends ChangeNotifier {
         await NotificationService.instance.scheduleTaskReminder(
           notificationId: notifId,
           title: 'Reminder: ${task.title}',
-          body: _buildReminderBody(task, reminder),
+          body: _buildReminderBody(task, reminder, dueDate: task.dueDate),
           scheduledTime: reminder,
         );
       }

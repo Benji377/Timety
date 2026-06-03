@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 
 import 'package:timety/providers/task_provider.dart';
 import 'package:timety/providers/user_provider.dart';
@@ -78,4 +79,58 @@ void main() {
       expect(repository.fetchCalls, greaterThanOrEqualTo(1));
     },
   );
+
+  test('phrases task reminders relative to the due date', () async {
+    installLocalNotificationsMock();
+
+    final scheduledNotifications = <Map<String, Object?>>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(localNotificationsChannel, (
+          MethodCall methodCall,
+        ) async {
+          switch (methodCall.method) {
+            case 'initialize':
+              return true;
+            case 'zonedSchedule':
+              scheduledNotifications.add(
+                Map<String, Object?>.from(
+                  methodCall.arguments as Map<dynamic, dynamic>,
+                ),
+              );
+              return null;
+            case 'pendingNotificationRequests':
+            case 'getActiveNotifications':
+              return <Map<String, Object?>>[];
+            case 'getNotificationAppLaunchDetails':
+              return null;
+            default:
+              return null;
+          }
+        });
+
+    addTearDown(installLocalNotificationsMock);
+
+    final now = DateTime.now();
+    final dueDate = now.add(const Duration(days: 1, hours: 1));
+    final reminderTime = dueDate.subtract(const Duration(hours: 1));
+
+    final provider = TaskProvider(repository: FakeTaskRepository());
+
+    await provider.addTask(
+      buildTask(
+        id: 'task-reminder-1',
+        title: 'Write docs',
+        dueDate: dueDate,
+        reminders: [reminderTime],
+      ),
+    );
+    await drainEventQueue();
+
+    final taskReminder = scheduledNotifications.firstWhere(
+      (notification) => notification['title'] == 'Reminder: Write docs',
+    );
+
+    expect(taskReminder['body'], contains('In 1 hour'));
+    expect(taskReminder['body'], isNot(contains('Tomorrow')));
+  });
 }
