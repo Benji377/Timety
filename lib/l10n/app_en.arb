@@ -1,3 +1,43 @@
 {
-  "@@locale": "en"
+  "@@locale": "en",
+
+  "focusTitle": "Focus",
+
+  "focusTooltipCalendar": "Calendar View",
+  "focusTooltipTimeMachine": "Log Past Session",
+  "focusTooltipDistractions": "Distractions",
+  
+  "focusTargetLabel": "Target",
+  "focusTargetEmpty": "No Target",
+  
+  "focusStateActive": "Focus session active",
+  "focusStatePaused": "Paused",
+  
+  "focusLabelDefault": "Focus",
+  "focusLabelSetTime": "Set Time",
+  "focusLabelRest": "Rest",
+  "focusLabelStopwatch": "Stopwatch",
+  
+  "focusModeSelect": "Select Mode",
+  "focusLimitMax": "Max",
+  "focusEndsAt": "Ends at",
+
+  "focusSnckbarHabitLocked": "Complete the previous habit in the stack first!",
+
+  "focusDialogSessionStopTitle": "Stop Focus Session?",
+  "focusDialogSessionStopContent": "The timer is paused while you decide. Confirm to stop and save the session, or cancel to continue.",
+  "focusDialogSessionResetTitle": "Reset Focus Session?",
+  "focusDialogSessionResetContent": "The timer is paused while you decide. Confirm to reset the session, or cancel to continue.",
+
+  "notificationTimeRemaining": "{mins}:{secs} remaining",
+  "@notificationTimeRemaining": {
+    "placeholders": {
+      "mins": {
+        "type": "String"
+      },
+      "secs": {
+        "type": "String"
+      }
+    }
+  }
 }

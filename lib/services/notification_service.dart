@@ -4,7 +4,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'dart:io';
 
 class NotificationService {
@@ -290,39 +289,20 @@ class NotificationService {
     }
   }
 
-  Future<void> showFocusTimerNotification({
-    required String modeName,
-    required String targetName,
+Future<void> showFocusTimerNotification({
+    required String title,
+    required String body,
     required DateTime targetTime,
     required bool isStopwatch,
     required Color notificationColor,
     bool isPaused = false,
-    String? pausedText,
-    int? maxStopwatchMins,
   }) async {
     if (kIsWeb) return;
 
-    final endTimeText = (!isPaused && !isStopwatch)
-        ? 'Ends at ${DateFormat('h:mm a').format(targetTime)}'
-        : null;
-
-    final List<String> bodyParts = ['Target: $targetName'];
-
-    if (endTimeText != null) {
-      bodyParts.add(endTimeText);
-    } else if (isStopwatch && !isPaused && maxStopwatchMins != null) {
-      // In stopwatch mode, show the max stopwatch time limit instead
-      bodyParts.add('Max: $maxStopwatchMins mins');
-    }
-
-    final String bodyText = isPaused
-        ? (pausedText ?? 'Paused')
-        : bodyParts.join('  |  ');
-
     await _notificationsPlugin.show(
       id: focusTimerId,
-      title: isPaused ? 'Focus Paused' : modeName,
-      body: bodyText,
+      title: title,
+      body: body,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'focus_timer_channel',

@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
 import '../utils/habit_utils.dart';
 import '../utils/xp_calculator.dart';
+import '../l10n/app_localizations.dart';
 import 'habit_provider.dart';
 import 'task_provider.dart';
 import 'user_provider.dart';
 import 'settings_provider.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   final FocusRepository repository;
@@ -46,6 +48,14 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   int _secondsRemainingInPhase = 0;
   PhaseType _currentPhaseType = PhaseType.focus;
 
+  // --- LOCALIZATION CACHE ---
+  String _locFocusActive = "Focus session active";
+  String _locPaused = "Paused";
+  String _locTarget = "Target";
+  String _locMax = "Max";
+  String _locEndsAt = "Ends at";
+  String Function(String, String)? _formatRemainingTime;
+
   // --- GETTERS ---
   List<FocusMode> get modes => _modes;
   List<FocusSession> get history => _history;
@@ -61,7 +71,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   List<FocusTag> get tags => _tags;
   FocusTag? get selectedTag => _selectedTag;
   FocusTargetSelection? get selectedTarget => _selectedTarget;
-  String get selectedTargetLabel => _selectedTarget?.label ?? 'No Target';
+  String? get selectedTargetLabel => _selectedTarget?.label;
   Color get selectedTargetColor => _selectedTarget == null
       ? AppTheme.focusColor
       : Color(_selectedTarget!.colorValue);
@@ -73,6 +83,66 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   FocusProvider({required this.repository}) {
     _init();
+  }
+
+  // This detects when the user unlocks the screen and revives the dead timer.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_isRunning) {
+        _timer?.cancel();
+        _tick();
+        _timer = Timer.periodic(const Duration(seconds: 1), _tick);
+      } else if (_isPaused) {
+        notifyListeners();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _init() async {
+    WidgetsBinding.instance.addObserver(this);
+
+    _modes = await repository.fetchModes();
+    _history = await repository.fetchSessions();
+    _tags = await repository.fetchTags();
+    if (_tags.isEmpty) {
+      final defaultTag = FocusTag(
+        id: 'default_tag',
+        name: 'None',
+        colorValue: AppTheme.focusColor.toARGB32(),
+      );
+      await repository.saveTag(defaultTag);
+      _tags.add(defaultTag);
+    }
+    _selectedTarget = FocusTargetSelection.tag(_tags.first);
+    _selectedTag = _tags.first;
+
+    if (!_modes.any((m) => m.id == 'system_stopwatch')) {
+      final sw = FocusMode.stopwatch();
+      await repository.saveMode(sw);
+      _modes.add(sw);
+    }
+    if (!_modes.any((m) => m.id == 'system_flexible')) {
+      final flex = FocusMode.flexible();
+      await repository.saveMode(flex);
+      _modes.add(flex);
+    }
+    if (!_modes.any((m) => m.id == 'system_pomodoro')) {
+      final pomo = FocusMode.classicPomodoro();
+      await repository.saveMode(pomo);
+      _modes.add(pomo);
+    }
+
+    _activeMode = _modes.firstWhere((m) => m.id == 'system_stopwatch');
+    _setupPhase(0);
+    notifyListeners();
   }
 
   void attachUserProvider(UserProvider userProvider) {
@@ -132,66 +202,6 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     _selectedTarget = FocusTargetSelection.tag(_selectedTag!);
   }
 
-  Future<void> _init() async {
-    WidgetsBinding.instance.addObserver(this);
-
-    _modes = await repository.fetchModes();
-    _history = await repository.fetchSessions();
-    _tags = await repository.fetchTags();
-    if (_tags.isEmpty) {
-      final defaultTag = FocusTag(
-        id: 'default_tag',
-        name: 'None',
-        colorValue: AppTheme.focusColor.toARGB32(),
-      );
-      await repository.saveTag(defaultTag);
-      _tags.add(defaultTag);
-    }
-    _selectedTarget = FocusTargetSelection.tag(_tags.first);
-    _selectedTag = _tags.first;
-
-    if (!_modes.any((m) => m.id == 'system_stopwatch')) {
-      final sw = FocusMode.stopwatch();
-      await repository.saveMode(sw);
-      _modes.add(sw);
-    }
-    if (!_modes.any((m) => m.id == 'system_flexible')) {
-      final flex = FocusMode.flexible();
-      await repository.saveMode(flex);
-      _modes.add(flex);
-    }
-    if (!_modes.any((m) => m.id == 'system_pomodoro')) {
-      final pomo = FocusMode.classicPomodoro();
-      await repository.saveMode(pomo);
-      _modes.add(pomo);
-    }
-
-    _activeMode = _modes.firstWhere((m) => m.id == 'system_stopwatch');
-    _setupPhase(0);
-    notifyListeners();
-  }
-
-  // This detects when the user unlocks the screen and revives the dead timer.
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      if (_isRunning) {
-        _timer?.cancel();
-        _tick();
-        _timer = Timer.periodic(const Duration(seconds: 1), _tick);
-      } else if (_isPaused) {
-        notifyListeners();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _timer?.cancel();
-    super.dispose();
-  }
-
   // --- MODE MANAGEMENT ---
   void setActiveMode(FocusMode mode) {
     if (_isRunning) return;
@@ -241,24 +251,30 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
     final isStopwatch = _activeMode!.type == FocusModeType.stopwatch;
 
+    final String titleText = asPaused ? _locPaused : _activeMode!.name;
+    final List<String> bodyParts = [];
+
+    if (selectedTargetLabel != null && selectedTargetLabel!.isNotEmpty) {
+      bodyParts.add('$_locTarget: $selectedTargetLabel');
+    }
+
+    DateTime targetTime;
+
     if (asPaused) {
       final safeRemaining = _secondsRemainingInPhase > 0
           ? _secondsRemainingInPhase
           : 0;
       final mins = safeRemaining ~/ 60;
       final secs = (safeRemaining % 60).toString().padLeft(2, '0');
-      NotificationService.instance.showFocusTimerNotification(
-        modeName: _activeMode!.name,
-        targetName: selectedTargetLabel,
-        targetTime: DateTime.now(),
-        isStopwatch: isStopwatch,
-        notificationColor: currentPhase.type == PhaseType.rest
-            ? AppTheme.warningColor
-            : AppTheme.focusColor,
-        isPaused: true,
-        pausedText: isStopwatch ? "Paused" : "$mins:$secs remaining",
-        maxStopwatchMins: _settingsProvider?.maxStopwatchMins,
-      );
+
+      if (!isStopwatch) {
+        if (_formatRemainingTime != null) {
+          bodyParts.add(_formatRemainingTime!(mins.toString(), secs));
+        } else {
+          bodyParts.add('${mins.toString()}:$secs remaining');
+        }
+      }
+      targetTime = DateTime.now();
     } else {
       final int remainingForNotification =
           (!isStopwatch && _secondsRemainingInPhase > 0)
@@ -268,24 +284,53 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
           ? 1
           : remainingForNotification;
 
-      final targetTime = isStopwatch
-          ? DateTime.now().subtract(Duration(seconds: _currentSecondsFocussed))
-          : DateTime.now().add(Duration(seconds: targetSeconds));
-
-      NotificationService.instance.showFocusTimerNotification(
-        modeName: _activeMode!.name,
-        targetName: selectedTargetLabel,
-        targetTime: targetTime,
-        isStopwatch: isStopwatch,
-        notificationColor: currentPhase.type == PhaseType.rest
-            ? AppTheme.warningColor
-            : AppTheme.focusColor,
-        maxStopwatchMins: _settingsProvider?.maxStopwatchMins,
-      );
+      if (isStopwatch) {
+        targetTime = DateTime.now().subtract(
+          Duration(seconds: _currentSecondsFocussed),
+        );
+        if (_settingsProvider?.maxStopwatchMins != null) {
+          bodyParts.add(
+            '$_locMax: ${_settingsProvider!.maxStopwatchMins} mins',
+          );
+        }
+      } else {
+        targetTime = DateTime.now().add(Duration(seconds: targetSeconds));
+        final bool use24h = _settingsProvider?.use24HourFormat ?? true;
+        final timeString = use24h
+            ? DateFormat.Hm().format(targetTime)
+            : DateFormat.jm().format(targetTime);
+        bodyParts.add('$_locEndsAt $timeString');
+      }
     }
+
+    final String bodyText = bodyParts.isEmpty && !asPaused
+        ? _locFocusActive
+        : bodyParts.join('  |  ');
+
+    NotificationService.instance.showFocusTimerNotification(
+      title: titleText,
+      body: bodyText,
+      targetTime: targetTime,
+      isStopwatch: isStopwatch,
+      notificationColor: currentPhase.type == PhaseType.rest
+          ? AppTheme.warningColor
+          : AppTheme.focusColor,
+      isPaused: asPaused,
+    );
   }
 
-  void startSession() {
+  void _cacheTranslations(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    _locFocusActive = l10n.focusStateActive;
+    _locPaused = l10n.focusStatePaused;
+    _locTarget = l10n.focusTargetLabel;
+    _locMax = l10n.focusLimitMax;
+    _locEndsAt = l10n.focusEndsAt;
+    _formatRemainingTime = l10n.notificationTimeRemaining;
+  }
+
+  void startSession(BuildContext context) {
+    _cacheTranslations(context);
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
     if (_selectedTarget?.type == FocusTargetType.habit &&
         _isHabitTargetLocked(_selectedTarget!.id)) {
@@ -368,7 +413,8 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  Future<void> continueToNextPhase() async {
+  Future<void> continueToNextPhase(BuildContext context) async {
+    _cacheTranslations(context);
     if (!_awaitingPhaseContinue) return;
     if (_activeMode == null) return;
 
@@ -451,7 +497,8 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  void pauseSession() {
+  void pauseSession(BuildContext context) {
+    _cacheTranslations(context);
     _timer?.cancel();
     _isPaused = true;
     _isRunning = false;
@@ -459,7 +506,10 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  void stopSession({bool completed = false, UserProvider? userProvider}) async {
+  void stopSession({
+    bool completed = false,
+    UserProvider? userProvider,
+  }) async {
     _timer?.cancel();
     NotificationService.instance.cancelFocusTimerNotification();
 
