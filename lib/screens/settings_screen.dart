@@ -101,14 +101,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final settings = context.watch<SettingsProvider>();
     final focusProvider = context.watch<FocusProvider>();
     final taskProvider = context.watch<TaskProvider>();
-    final hiveBoxNames = [
-      'focusModesBox',
-      'focusSessionsBox',
-      'focusTagsBox',
-      'habitsBox',
-      'tasksBox',
-      'userProfileBox',
-    ];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
@@ -317,24 +309,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSectionHeader('Data & Backup'),
           ListTile(
             leading: const Icon(
-              Icons.cloud_upload_outlined,
+              Icons.upload_file_outlined,
               color: AppTheme.taskColor,
             ),
-            title: const Text('Export Backup'),
-            subtitle: const Text(
-              'Save your data locally or share it to the cloud',
-            ),
-            onTap: () =>
-                BackupService.exportBackup(context, boxNames: hiveBoxNames),
+            title: const Text('Export JSON Data'),
+            subtitle: const Text('Save a snapshot of your data'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => BackupService.exportUserData(context),
           ),
           ListTile(
-            leading: const Icon(Icons.restore, color: AppTheme.focusColor),
-            title: const Text('Restore Backup'),
-            subtitle: const Text(
-              'Overwrite current data from a backup zip file',
+            leading: const Icon(
+              Icons.download_outlined,
+              color: AppTheme.focusColor,
             ),
-            onTap: () =>
-                BackupService.importBackup(context, boxNames: hiveBoxNames),
+            title: const Text('Import JSON Data'),
+            subtitle: const Text('Restore data from a JSON export file'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => BackupService.importUserData(context),
           ),
 
           const Divider(height: 32),
