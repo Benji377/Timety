@@ -1,12 +1,14 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../utils/priority_utils.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/date_time_utils.dart';
 import '../../widgets/location_picker.dart';
+import '../../providers/settings_provider.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task? task; // NULL means "Create New Task", NOT NULL means "View/Edit"
@@ -232,6 +234,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final disabledBorderColor = theme.dividerColor.withValues(alpha: 0.6);
+    final settings = context.watch<SettingsProvider>();
 
     final String appBarTitle = _isNewTask
         ? "Create New Task"
@@ -366,26 +369,35 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
           // --- SECTION: TIME ---
           _buildSectionHeader("Schedule", Icons.calendar_today),
-          ListTile(
-            tileColor: _isEditing
-                ? colorScheme.primaryContainer.withValues(alpha: 0.45)
-                : null,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppTheme.brMedium,
-              side: BorderSide(
-                color: _isEditing
-                    ? colorScheme.primary.withValues(alpha: 0.4)
-                    : theme.dividerColor.withValues(alpha: 0.6),
+          InkWell(
+            onTap: _isEditing ? _pickDueDate : null,
+            // Ensure the ripple effect stays inside the standard border radius
+            borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+            child: InputDecorator(
+              isEmpty: _dueDate == null,
+              decoration: InputDecoration(
+                // Optional: Add labelText: 'Due Date' here if you want it to look
+                // identical to your "Location" and "Task Title" fields.
+                prefixIcon: const Icon(Icons.event),
+                suffixIcon: _isEditing ? const Icon(Icons.edit) : null,
+                border: const OutlineInputBorder(),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: disabledBorderColor),
+                ),
+                // This applies your background color when editing
+                filled: _isEditing,
+                fillColor: Colors.white,
+              ),
+              child: Text(
+                _dueDate == null
+                    ? 'No Due Date Set'
+                    : 'Due: ${settings.getFormattedDate(_dueDate!, context)} at ${settings.use24HourFormat ? DateFormat.Hm().format(_dueDate!) : DateFormat.jm().format(_dueDate!)}',
+                style: TextStyle(
+                  // Dims the text slightly if not in edit mode
+                  color: _isEditing ? null : theme.disabledColor,
+                ),
               ),
             ),
-            leading: const Icon(Icons.event),
-            title: Text(
-              _dueDate == null
-                  ? 'No Due Date Set'
-                  : 'Due: ${_dueDate!.toLocal()}'.split('.')[0],
-            ),
-            trailing: _isEditing ? const Icon(Icons.edit, size: 20) : null,
-            onTap: _isEditing ? _pickDueDate : null,
           ),
 
           // Reminders
@@ -401,7 +413,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       backgroundColor: colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.7),
                       label: Text(
-                        "${r.day}/${r.month} ${r.hour}:${r.minute.toString().padLeft(2, '0')}",
+                        "${settings.getFormattedDate(r, context)} - ${settings.use24HourFormat ? DateFormat.Hm().format(r) : DateFormat.jm().format(r)}",
                         style: const TextStyle(fontSize: AppTheme.fsBodySmall),
                       ),
                       onDeleted: _isEditing

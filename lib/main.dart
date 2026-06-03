@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'l10n/app_localizations.dart';
 
 import 'package:timety/screens/main_screen.dart';
 import 'data/user/user.dart';
@@ -94,6 +95,9 @@ class TimetyApp extends StatelessWidget {
             theme: AppTheme.buildTheme(brightness: Brightness.light),
             darkTheme: AppTheme.buildTheme(brightness: Brightness.dark),
             themeMode: settings.themeMode,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: settings.appLocale,
             home: const MainScreen(),
           );
         },

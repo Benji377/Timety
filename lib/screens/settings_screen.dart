@@ -131,6 +131,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(height: 32),
 
+          // --- LOCALIZATION & FORMATTING ---
+          _buildSectionHeader('Localization & Formatting'),
+          ListTile(
+            leading: const Icon(Icons.language, color: AppTheme.taskColor),
+            title: const Text('Language'),
+            trailing: DropdownButton<String>(
+              value: settings.appLocaleCode,
+              underline: const SizedBox(),
+              items: const [
+                DropdownMenuItem(
+                  value: 'system',
+                  child: Text('System Default'),
+                ),
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'de', child: Text('Deutsch')),
+                DropdownMenuItem(value: 'it', child: Text('Italiano')),
+                DropdownMenuItem(value: 'lld', child: Text('Ladin')),
+              ],
+              onChanged: (val) {
+                if (val != null) settings.setAppLocaleCode(val);
+              },
+            ),
+          ),
+          SwitchListTile(
+            secondary: const Icon(
+              Icons.access_time,
+              color: AppTheme.focusColor,
+            ),
+            title: const Text('Use 24-Hour Time'),
+            value: settings.use24HourFormat,
+            onChanged: settings.set24HourFormat,
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.calendar_today,
+              color: AppTheme.habitColor,
+            ),
+            title: const Text('Date Format'),
+            trailing: DropdownButton<String>(
+              value: settings.dateFormatCode,
+              underline: const SizedBox(),
+              items: const [
+                DropdownMenuItem(
+                  value: 'system',
+                  child: Text('System Default'),
+                ),
+                DropdownMenuItem(
+                  value: 'dd/MM/yyyy',
+                  child: Text('Day/Month/Year'),
+                ),
+                DropdownMenuItem(
+                  value: 'MM/dd/yyyy',
+                  child: Text('Month/Day/Year'),
+                ),
+                DropdownMenuItem(
+                  value: 'yyyy-MM-dd',
+                  child: Text('Year-Month-Day'),
+                ),
+                DropdownMenuItem(
+                  value: 'dd.MM.yyyy',
+                  child: Text('Day.Month.Year'),
+                ),
+              ],
+              onChanged: (val) {
+                if (val != null) settings.setDateFormatCode(val);
+              },
+            ),
+          ),
+
+          const Divider(height: 32),
+
           // --- FOCUS & PRODUCTIVITY ---
           _buildSectionHeader('Focus & Productivity'),
           ListTile(

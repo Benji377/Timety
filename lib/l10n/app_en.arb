@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+  "settingsTitle": "Settings",
+  "appearanceSection": "Appearance",
+  "themeTitle": "Theme",
+  "sendFeedback": "Send Feedback",
+  "sendFeedbackSubtitle": "Report bugs or request new features"
+}

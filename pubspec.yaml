@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   provider: ^6.1.5+1
   flutter_local_notifications: ^21.0.0
@@ -45,6 +47,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/logo.png
     - assets/ding.mp3

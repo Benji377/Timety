@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class SettingsProvider extends ChangeNotifier {
   SharedPreferences? _prefs;
@@ -15,6 +16,9 @@ class SettingsProvider extends ChangeNotifier {
   TimeOfDay _endOfDayTime = const TimeOfDay(hour: 20, minute: 0);
   String _locationApiEndpoint = 'https://photon.komoot.io/api/';
   bool _autoCompleteFocusTargetOnFinish = false;
+  String? _appLocaleCode;
+  bool _use24HourFormat = true;
+  String? _dateFormatCode;
 
   // Getters
   ThemeMode get themeMode => _themeMode;
@@ -26,6 +30,12 @@ class SettingsProvider extends ChangeNotifier {
   int get upcomingTasksDays => _upcomingTasksDays;
   String get locationApiEndpoint => _locationApiEndpoint;
   bool get autoCompleteFocusTargetOnFinish => _autoCompleteFocusTargetOnFinish;
+  Locale? get appLocale => _appLocaleCode != null && _appLocaleCode != 'system'
+      ? Locale(_appLocaleCode!)
+      : null;
+  String get appLocaleCode => _appLocaleCode ?? 'system';
+  bool get use24HourFormat => _use24HourFormat;
+  String get dateFormatCode => _dateFormatCode ?? 'system';
 
   SettingsProvider() {
     _loadSettings();
@@ -59,6 +69,11 @@ class SettingsProvider extends ChangeNotifier {
     _locationApiEndpoint =
         _prefs?.getString('locationApiEndpoint') ??
         'https://photon.komoot.io/api/';
+
+    // Locale & Format
+    _appLocaleCode = _prefs?.getString('appLocaleCode');
+    _use24HourFormat = _prefs?.getBool('use24HourFormat') ?? true;
+    _dateFormatCode = _prefs?.getString('dateFormatCode');
 
     notifyListeners();
   }
@@ -145,6 +160,45 @@ class SettingsProvider extends ChangeNotifier {
       return response.statusCode == 200;
     } catch (e) {
       return false;
+    }
+  }
+
+  void setAppLocaleCode(String code) {
+    _appLocaleCode = code == 'system' ? null : code;
+    if (_appLocaleCode == null) {
+      _prefs?.remove('appLocaleCode'); // Let OS decide
+    } else {
+      _prefs?.setString('appLocaleCode', _appLocaleCode!);
+    }
+    notifyListeners();
+  }
+
+  void set24HourFormat(bool use24Hour) {
+    _use24HourFormat = use24Hour;
+    _prefs?.setBool('use24HourFormat', use24Hour);
+    notifyListeners();
+  }
+
+  void setDateFormatCode(String code) {
+    _dateFormatCode = code == 'system' ? null : code;
+
+    if (_dateFormatCode == null) {
+      _prefs?.remove('dateFormatCode');
+    } else {
+      _prefs?.setString('dateFormatCode', _dateFormatCode!);
+    }
+    notifyListeners();
+  }
+
+  // Helpers
+  String getFormattedDate(DateTime date, BuildContext context) {
+    if (_dateFormatCode != null) {
+      // User explicitly picked a format
+      return DateFormat(_dateFormatCode).format(date);
+    } else {
+      // System Default: Grab the current app language/locale and format automatically
+      final localeString = Localizations.localeOf(context).toString();
+      return DateFormat.yMd(localeString).format(date);
     }
   }
 }
