@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../theme/app_theme.dart';
-import '../../utils/date_utils.dart';
+import '../../utils/date/date_utils.dart';
+
+import '../../data/user/streak_day_info.dart';
+import './timeline_legend_dot.dart';
 
 class UserStreakTimelineCard extends StatefulWidget {
   final List<DateTime> activityDates;
@@ -60,7 +63,7 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
       ).subtract(Duration(days: 6 - index));
       final key = AppDateUtils.dayKey(day);
 
-      return _StreakDayInfo(
+      return StreakDayInfo(
         date: day,
         isToday: AppDateUtils.isSameDay(day, today),
         inCurrentStreak: currentStreakKeys.contains(key),
@@ -176,10 +179,10 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
               spacing: 10,
               runSpacing: 10,
               children: [
-                _TimelineLegendDot(color: AppTheme.taskColor, label: 'Task'),
-                _TimelineLegendDot(color: AppTheme.habitColor, label: 'Habit'),
-                _TimelineLegendDot(color: AppTheme.focusColor, label: 'Focus'),
-                _TimelineLegendDot(
+                TimelineLegendDot(color: AppTheme.taskColor, label: 'Task'),
+                TimelineLegendDot(color: AppTheme.habitColor, label: 'Habit'),
+                TimelineLegendDot(color: AppTheme.focusColor, label: 'Focus'),
+                TimelineLegendDot(
                   color: AppTheme.warningColor,
                   label: 'Streak day',
                 ),
@@ -240,7 +243,7 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
     return 'Start today to build a streak that reaches forward.';
   }
 
-  Widget _buildDayTile(BuildContext context, _StreakDayInfo info) {
+  Widget _buildDayTile(BuildContext context, StreakDayInfo info) {
     final backgroundColor = info.isToday
         ? AppTheme.taskColor.withValues(alpha: 0.12)
         : info.inCurrentStreak
@@ -314,49 +317,3 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
   }
 }
 
-class _StreakDayInfo {
-  final DateTime date;
-  final bool isToday;
-  final bool inCurrentStreak;
-  final bool hasTask;
-  final bool hasFocus;
-  final bool hasHabit;
-
-  const _StreakDayInfo({
-    required this.date,
-    required this.isToday,
-    required this.inCurrentStreak,
-    required this.hasTask,
-    required this.hasFocus,
-    required this.hasHabit,
-  });
-}
-
-class _TimelineLegendDot extends StatelessWidget {
-  final Color color;
-  final String label;
-
-  const _TimelineLegendDot({required this.color, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}

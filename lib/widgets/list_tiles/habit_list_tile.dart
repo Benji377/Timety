@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/habit/habit_models.dart';
 import '../../theme/app_theme.dart';
-import '../dialogs.dart';
+import '../dialogs/app_dialogs.dart';
 
 class HabitListTile extends StatelessWidget {
   final Habit habit;

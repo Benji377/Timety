@@ -5,10 +5,10 @@ import 'package:intl/intl.dart' hide TextDirection;
 import '../../theme/app_theme.dart';
 import '../../data/focus/focus_models.dart';
 import '../../providers/focus_provider.dart';
-import '../../utils/date_utils.dart';
-import '../../utils/stats_utils.dart';
-import '../../widgets/week_navigator.dart';
-import '../../utils/clock_painter.dart';
+import '../../utils/date/date_utils.dart';
+import '../../utils/logic/stats_utils.dart';
+import '../../widgets/common/week_navigator_widget.dart';
+import '../../utils/ui/clock_painter_utils.dart';
 import '../../l10n/app_localizations.dart';
 
 class FocusStatsScreen extends StatefulWidget {

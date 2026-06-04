@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'l10n/app_localizations.dart';
+import './l10n/app_localizations.dart';
 
-import 'screens/main_screen.dart';
-import 'data/user/user.dart';
-import 'data/user/user_repository_hive.dart';
-import 'providers/settings_provider.dart';
-import 'providers/user_provider.dart';
-import 'theme/app_theme.dart';
-import 'services/notification_service.dart';
+import './screens/main_screen.dart';
+import './data/user/user.dart';
+import './data/user/user_repository_hive.dart';
+import './providers/settings_provider.dart';
+import './providers/user_provider.dart';
+import './theme/app_theme.dart';
+import './services/notification_service.dart';
 
 // Habits
-import 'data/habit/habit_models.dart';
-import 'data/habit/habit_repository_hive.dart';
-import 'providers/habit_provider.dart';
+import './data/habit/habit_models.dart';
+import './data/habit/habit_repository_hive.dart';
+import './providers/habit_provider.dart';
 
 // Tasks
-import 'data/task/task.dart';
-import 'data/task/task_repository_hive.dart';
-import 'providers/task_provider.dart';
+import './data/task/task.dart';
+import './data/task/task_repository_hive.dart';
+import './providers/task_provider.dart';
 
 // Focus
-import 'data/focus/focus_models.dart';
-import 'data/focus/focus_repository_hive.dart';
-import 'providers/focus_provider.dart';
+import './data/focus/focus_models.dart';
+import './data/focus/focus_repository_hive.dart';
+import './providers/focus_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

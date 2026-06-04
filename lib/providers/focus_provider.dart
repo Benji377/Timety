@@ -6,13 +6,13 @@ import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
-import '../utils/habit_utils.dart';
-import '../utils/xp_calculator.dart';
+import '../utils/feature/habit_utils.dart';
+import '../utils/logic/xp_utils.dart';
 import '../l10n/app_localizations.dart';
-import 'habit_provider.dart';
-import 'task_provider.dart';
-import 'user_provider.dart';
-import 'settings_provider.dart';
+import './habit_provider.dart';
+import './task_provider.dart';
+import './user_provider.dart';
+import './settings_provider.dart';
 
 /// Manages the state and logic for Focus Sessions (Timers, Stopwatches, Pomodoro).
 ///

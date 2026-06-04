@@ -2,7 +2,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../data/task/task.dart';
-import '../../widgets/android_widgets/task_widget_view.dart';
+import '../../widgets/android_widgets/task_widget_header_view.dart';
+import '../../widgets/android_widgets/task_widget_item_view.dart';
 
 class TaskWidgetService {
   static const String _groupId = 'io.github.benji377.timety';

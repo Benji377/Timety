@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import 'habit/habit_stats_screen.dart';
-import 'overview_stats_screen.dart';
-import 'task/task_stats_screen.dart';
-import 'focus/focus_stats_screen.dart';
+import './habit/habit_stats_screen.dart';
+import './overview_stats_screen.dart';
+import './task/task_stats_screen.dart';
+import './focus/focus_stats_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
   final int initialTabIndex;

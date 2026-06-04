@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/user/user.dart';
 import '../data/user/user_repository.dart';
-import '../utils/xp_calculator.dart';
+import '../utils/logic/xp_utils.dart';
 
 class UserProvider extends ChangeNotifier {
   final UserRepository repository;

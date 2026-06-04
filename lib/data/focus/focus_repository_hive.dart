@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
-import 'focus_models.dart';
-import 'focus_repository.dart';
+import './focus_models.dart';
+import './focus_repository.dart';
 
 class HiveFocusRepository implements FocusRepository {
   static const String modeBoxName = 'focusModesBox';

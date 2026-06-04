@@ -16,7 +16,7 @@ import 'package:timety/providers/settings_provider.dart';
 import 'package:timety/providers/task_provider.dart';
 import 'package:timety/providers/user_provider.dart';
 import 'package:timety/theme/app_theme.dart';
-import 'package:timety/utils/xp_calculator.dart';
+import 'package:timety/utils/logic/xp_utils.dart';
 
 // How to execute:
 // 1. Start Emulator

@@ -8,8 +8,8 @@ import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
-import '../utils/date_utils.dart';
-import '../widgets/stat_cards.dart';
+import '../utils/date/date_utils.dart';
+import '../widgets/stat_cards/kpi_stat_card_widget.dart';
 
 class OverviewStatsScreen extends StatelessWidget {
   const OverviewStatsScreen({super.key});

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/focus_provider.dart';
 import '../../data/focus/focus_models.dart';
-import '../../widgets/focus_mode_edit_card.dart';
+import '../../widgets/focus/focus_mode_edit_card_widget.dart';
 
 class FocusModesScreen extends StatelessWidget {
   const FocusModesScreen({super.key});

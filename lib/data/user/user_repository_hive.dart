@@ -1,6 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'user.dart';
-import 'user_repository.dart';
+import './user.dart';
+import './user_repository.dart';
 
 class HiveUserRepository implements UserRepository {
   static const String boxName = 'userProfileBox';

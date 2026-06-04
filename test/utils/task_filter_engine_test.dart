@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timety/data/task/task.dart';
-import 'package:timety/utils/task_filter_engine.dart';
+import 'package:timety/utils/logic/task_filter_utils.dart';
+import 'package:timety/data/task/task_sort_option.dart';
 
 void main() {
   group('TaskFilterEngine', () {

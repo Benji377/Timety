@@ -4,12 +4,13 @@ import '../../data/task/task.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../utils/task_filter_engine.dart';
-import '../../widgets/expansion_section.dart';
+import '../../utils/logic/task_filter_utils.dart';
+import '../../data/task/task_sort_option.dart';
+import '../../widgets/common/expansion_section_widget.dart';
 import '../../widgets/list_tiles/task_list_tile.dart';
 import '../calendar_screen.dart';
 import '../statistics_screen.dart';
-import 'task_detail_screen.dart';
+import './task_detail_screen.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});

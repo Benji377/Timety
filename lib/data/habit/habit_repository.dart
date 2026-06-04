@@ -1,4 +1,4 @@
-import 'habit_models.dart';
+import './habit_models.dart';
 
 /// Repository interface for managing habits
 abstract class HabitRepository {

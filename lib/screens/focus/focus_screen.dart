@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../screens/statistics_screen.dart';
-import '../../utils/date_format_utils.dart';
+import '../statistics_screen.dart';
+import '../../utils/date/date_format_utils.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
@@ -10,13 +10,13 @@ import '../../providers/settings_provider.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../data/focus/focus_models.dart';
-import '../../widgets/focus_mode_timeline.dart';
-import '../../widgets/interactive_gauge.dart';
-import '../../widgets/dialogs.dart';
-import '../../widgets/focus_bottom_sheet_builders.dart';
+import '../../widgets/focus/focus_mode_timeline_widget.dart';
+import '../../widgets/focus/interactive_gauge_widget.dart';
+import '../../widgets/dialogs/app_dialogs.dart';
+import '../../widgets/bottom_sheets/focus_bottom_sheets.dart';
 import '../calendar_screen.dart';
 import '../settings_screen.dart';
-import 'focus_modes_screen.dart';
+import './focus_modes_screen.dart';
 
 class FocusScreen extends StatefulWidget {
   const FocusScreen({super.key});

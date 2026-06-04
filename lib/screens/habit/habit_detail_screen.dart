@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/habit_icons.dart';
+import '../../utils/ui/habit_icon_utils.dart';
 
 class HabitDetailScreen extends StatefulWidget {
   final Habit? habit;

@@ -1,4 +1,4 @@
-import 'user.dart';
+import './user.dart';
 
 /// Defines the contract for user data management
 abstract class UserRepository {

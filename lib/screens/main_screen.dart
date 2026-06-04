@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import 'habit/habit_list_screen.dart';
-import 'home_screen.dart';
-import 'focus/focus_screen.dart';
-import 'task/task_list_screen.dart';
-import 'user_screen.dart';
+import './habit/habit_list_screen.dart';
+import './home_screen.dart';
+import './focus/focus_screen.dart';
+import './task/task_list_screen.dart';
+import './user_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

@@ -1,4 +1,4 @@
-import 'task.dart';
+import './task.dart';
 
 /// Repository interface for managing tasks
 abstract class TaskRepository {
