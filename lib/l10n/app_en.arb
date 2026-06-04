@@ -6,10 +6,7 @@
   "focusPhasesTitleAdd": "Add Phase",
   "focusPhasesTitleEdit": "Edit Phase",
   "focusTagsTitle": "Focus Tags",
-
-  "focusTooltipCalendar": "Calendar View",
-  "focusTooltipTimeMachine": "Log Past Session",
-  "focusTooltipDistractions": "Distractions",
+  "habitsListTitle": "My Habits",
   
   "focusTargetLabel": "Target",
   "focusTargetEmpty": "No Target",
@@ -120,6 +117,29 @@
   "habitLabelFreqDaily": "Daily Habit",
   "habitLabelFreqWeekly": "Weekly Habit",
 
+  "habitScreenEmpty": "No habits yet! Tap + to build a routine",
+
+  "habitFreqDaily": "Daily",
+  "habitFreqWeekly": "Weekly on {days}",
+  "@habitFreqWeekly": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "habitFreqFlexible": "{progress} / {target} this week",
+  "@habitFreqFlexible": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+
   "globalLabelTags": "Tags",
   "globalLabelTasks": "Tasks",
   "globalLabelTask": "Task",
@@ -130,6 +150,12 @@
   "commonLabelConfirm": "Confirm",
   "commonLabelSave": "Save",
   "commonLabelAdd": "Add",
+
+  "commonTimeDueToday": "Due Today",
+  "commonTimeUpcoming": "Upcoming",
+  "commonTimeOverdue": "Overdue",
+  "commonTimeDone": "Done",
+
   "commonWeekdayMon": "Mon",
   "commonWeekdayTue": "Tue",
   "commonWeekdayWed": "Wed",
@@ -137,6 +163,11 @@
   "commonWeekdayFri": "Fri",
   "commonWeekdaySat": "Sat",
   "commonWeekdaySun": "Sun",
+
+  "commonTooltipStats": "Statistics",
+  "commonTooltipCalendar": "Calendar View",
+  "commonTooltipTimeMachine": "Log Past Session",
+  "commonTooltipDistractions": "Distractions",
 
   "notificationTimeRemaining": "{mins}:{secs} remaining",
   "@notificationTimeRemaining": {

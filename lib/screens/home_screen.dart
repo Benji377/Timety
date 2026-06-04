@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timety/providers/user_provider.dart';
-import 'package:timety/screens/settings_screen.dart';
-import 'package:timety/utils/greeting_utils.dart';
+import '../providers/user_provider.dart';
+import '../screens/settings_screen.dart';
+import '../utils/greeting_utils.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
 import '../data/task/task.dart';

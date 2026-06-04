@@ -152,6 +152,7 @@ class GroupedHabitsSection extends StatelessWidget {
                         isLocked: isLocked,
                         enableDismissible: false,
                         subtitleText: HabitUtils.buildHabitSubtitle(
+                          context,
                           habit,
                           habitProvider,
                         ),
@@ -172,7 +173,7 @@ class GroupedHabitsSection extends StatelessWidget {
             habit: habit,
             isCompleted: isDone,
             enableDismissible: false,
-            subtitleText: HabitUtils.buildHabitSubtitle(habit, habitProvider),
+            subtitleText: HabitUtils.buildHabitSubtitle(context, habit, habitProvider),
             onToggleCompleted: () => onToggleCompleted(habit),
             onTap: () => onHabitTap(habit),
           );

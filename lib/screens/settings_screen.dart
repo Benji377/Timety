@@ -21,81 +21,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late final Future<String> _appVersionFuture = _loadAppVersion();
 
-  // --- UI HELPERS ---
-  Future<String> _loadAppVersion() async {
-    final packageInfo = await PackageInfo.fromPlatform();
-    return 'Version ${packageInfo.version}';
-  }
-
-  void _showNumberPickerDialog(
-    String title,
-    int currentValue,
-    int min,
-    int max,
-    Function(int) onSave, {
-    String unit = 'minutes',
-  }) {
-    int tempValue = currentValue;
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: Text(title),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$tempValue $unit',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Slider(
-                  value: tempValue.toDouble(),
-                  min: min.toDouble(),
-                  max: max.toDouble(),
-                  divisions: (max - min) ~/ 5,
-                  onChanged: (val) =>
-                      setDialogState(() => tempValue = val.toInt()),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  onSave(tempValue);
-                  Navigator.pop(context);
-                },
-                child: const Text("Save"),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-      child: Text(
-        title.toUpperCase(),
-        style: const TextStyle(
-          color: AppTheme.taskColor,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
@@ -539,6 +464,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // --- UI HELPERS ---
+  Future<String> _loadAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    return 'Version ${packageInfo.version}';
+  }
+
+  void _showNumberPickerDialog(
+    String title,
+    int currentValue,
+    int min,
+    int max,
+    Function(int) onSave, {
+    String unit = 'minutes',
+  }) {
+    int tempValue = currentValue;
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: Text(title),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$tempValue $unit',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Slider(
+                  value: tempValue.toDouble(),
+                  min: min.toDouble(),
+                  max: max.toDouble(),
+                  divisions: (max - min) ~/ 5,
+                  onChanged: (val) =>
+                      setDialogState(() => tempValue = val.toInt()),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  onSave(tempValue);
+                  Navigator.pop(context);
+                },
+                child: const Text("Save"),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      child: Text(
+        title.toUpperCase(),
+        style: const TextStyle(
+          color: AppTheme.taskColor,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+          fontSize: 12,
+        ),
       ),
     );
   }

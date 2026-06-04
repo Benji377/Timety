@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timety/providers/settings_provider.dart';
+import '../providers/settings_provider.dart';
 import '../data/habit/habit_models.dart';
 import '../data/habit/habit_repository.dart';
 import '../services/notification_service.dart';

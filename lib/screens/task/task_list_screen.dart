@@ -34,52 +34,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
     });
   }
 
-  // --- DATA PIPELINE: Filter & Sort ---
-  List<Task> _getProcessedTasks(List<Task> rawTasks) {
-    final engine = TaskFilterEngine(
-      searchQuery: _searchQuery,
-      categoryFilter: _selectedCategoryFilter,
-      sortOption: _sortOption,
-      isAscending: _isAscending,
-    );
-    return engine.process(rawTasks);
-  }
-
-  Widget _buildTaskSection(
-    String title,
-    Color color,
-    List<Task> tasks, {
-    bool initExpanded = true,
-    bool isOverdue = false,
-  }) {
-    return ExpansionSection(
-      title: '$title (${tasks.length})',
-      color: color,
-      initiallyExpanded: initExpanded,
-      children: tasks
-          .map(
-            (task) => TaskListTile(
-              task: task,
-              isOverdue: isOverdue,
-              onToggleCompleted: () => context.read<TaskProvider>().toggleTask(
-                task.id,
-                userProvider: context.read<UserProvider>(),
-              ),
-              onDelete: () => context.read<TaskProvider>().removeTask(task.id),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => TaskDetailScreen(task: task),
-                  ),
-                );
-              },
-            ),
-          )
-          .toList(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -326,6 +280,52 @@ class _TaskListScreenState extends State<TaskListScreen> {
         },
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  // --- DATA PIPELINE: Filter & Sort ---
+  List<Task> _getProcessedTasks(List<Task> rawTasks) {
+    final engine = TaskFilterEngine(
+      searchQuery: _searchQuery,
+      categoryFilter: _selectedCategoryFilter,
+      sortOption: _sortOption,
+      isAscending: _isAscending,
+    );
+    return engine.process(rawTasks);
+  }
+
+  Widget _buildTaskSection(
+    String title,
+    Color color,
+    List<Task> tasks, {
+    bool initExpanded = true,
+    bool isOverdue = false,
+  }) {
+    return ExpansionSection(
+      title: '$title (${tasks.length})',
+      color: color,
+      initiallyExpanded: initExpanded,
+      children: tasks
+          .map(
+            (task) => TaskListTile(
+              task: task,
+              isOverdue: isOverdue,
+              onToggleCompleted: () => context.read<TaskProvider>().toggleTask(
+                task.id,
+                userProvider: context.read<UserProvider>(),
+              ),
+              onDelete: () => context.read<TaskProvider>().removeTask(task.id),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TaskDetailScreen(task: task),
+                  ),
+                );
+              },
+            ),
+          )
+          .toList(),
     );
   }
 }

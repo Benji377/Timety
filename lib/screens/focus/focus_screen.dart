@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timety/screens/statistics_screen.dart';
-import 'package:timety/utils/date_format_utils.dart';
+import '../../screens/statistics_screen.dart';
+import '../../utils/date_format_utils.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
@@ -43,7 +43,9 @@ class _FocusScreenState extends State<FocusScreen> {
 
     double gaugeProgress = 1.0;
     bool isStopwatchMode = false;
-    String label = AppLocalizations.of(context)!.focusLabelDefault.toUpperCase();
+    String label = AppLocalizations.of(
+      context,
+    )!.focusLabelDefault.toUpperCase();
     String centerText = "25:00";
     bool isResting = false;
 
@@ -74,9 +76,7 @@ class _FocusScreenState extends State<FocusScreen> {
       } else {
         isStopwatchMode = isRunning;
         gaugeProgress = 0.0;
-        label = AppLocalizations.of(
-          context,
-        )!.focusLabelStopwatch.toUpperCase();
+        label = AppLocalizations.of(context)!.focusLabelStopwatch.toUpperCase();
         centerText = AppDateFormatUtils.formatDuration(
           focusProvider.currentSecondsFocussed,
         );
@@ -105,6 +105,7 @@ class _FocusScreenState extends State<FocusScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart),
+            tooltip: AppLocalizations.of(context)!.commonTooltipStats,
             onPressed: () {
               Navigator.push(
                 context,
@@ -117,7 +118,7 @@ class _FocusScreenState extends State<FocusScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.calendar_today),
-            tooltip: AppLocalizations.of(context)!.focusTooltipCalendar,
+            tooltip: AppLocalizations.of(context)!.commonTooltipCalendar,
             onPressed: () {
               Navigator.push(
                 context,
@@ -287,7 +288,9 @@ class _FocusScreenState extends State<FocusScreen> {
                   left: 16,
                   child: IconButton.filledTonal(
                     icon: const Icon(Icons.history),
-                    tooltip: AppLocalizations.of(context)!.focusTooltipTimeMachine,
+                    tooltip: AppLocalizations.of(
+                      context,
+                    )!.commonTooltipTimeMachine,
                     iconSize: 28,
                     padding: const EdgeInsets.all(12),
                     onPressed: (isRunning || isPaused)
@@ -305,7 +308,9 @@ class _FocusScreenState extends State<FocusScreen> {
                   right: 16,
                   child: IconButton.filledTonal(
                     icon: const Icon(Icons.warning_amber),
-                    tooltip: AppLocalizations.of(context)!.focusTooltipDistractions,
+                    tooltip: AppLocalizations.of(
+                      context,
+                    )!.commonTooltipDistractions,
                     iconSize: 28,
                     padding: const EdgeInsets.all(12),
                     onPressed: (isRunning || isPaused)
@@ -370,7 +375,9 @@ class _FocusScreenState extends State<FocusScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            AppLocalizations.of(context)!.focusSnackbarHabitLocked,
+                            AppLocalizations.of(
+                              context,
+                            )!.focusSnackbarHabitLocked,
                           ),
                           duration: const Duration(seconds: 2),
                         ),
@@ -491,8 +498,7 @@ class _FocusScreenState extends State<FocusScreen> {
         await AppDialogs.showConfirmation(
           context: context,
           title: AppLocalizations.of(context)!.focusDialogSessionStopTitle,
-          content:
-              AppLocalizations.of(context)!.focusDialogSessionStopContent,
+          content: AppLocalizations.of(context)!.focusDialogSessionStopContent,
         ) ==
         true;
 
@@ -525,8 +531,7 @@ class _FocusScreenState extends State<FocusScreen> {
         await AppDialogs.showConfirmation(
           context: context,
           title: AppLocalizations.of(context)!.focusDialogSessionResetTitle,
-          content:
-              AppLocalizations.of(context)!.focusDialogSessionResetContent,
+          content: AppLocalizations.of(context)!.focusDialogSessionResetContent,
         ) ==
         true;
 

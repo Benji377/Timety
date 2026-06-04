@@ -62,56 +62,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     super.dispose();
   }
 
-  // Convert a codePoint back to an IconData object
-  IconData? _getIconFromCodePoint(int? codePoint) {
-    if (codePoint == null) return null;
-    try {
-      return HabitIcons.availableIcons.firstWhere(
-        (icon) => icon.codePoint == codePoint,
-        orElse: () => Icons.circle,
-      );
-    } catch (e) {
-      return Icons.circle;
-    }
-  }
-
-  void _saveHabit() {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (_frequency == HabitFrequency.weeklyExact && _selectedWeekdays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one day.')),
-      );
-      return;
-    }
-
-    final newHabit = Habit(
-      id: widget.habit?.id ?? DateTime.now().toString(),
-      name: _nameController.text.trim(),
-      frequency: _frequency,
-      colorValue: AppTheme.habitColor.toARGB32(),
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
-      stackName: _stackController.text.trim().isEmpty
-          ? null
-          : _stackController.text.trim(),
-      stackOrder: _stackOrder,
-      iconCodePoint: _selectedIcon.codePoint,
-      targetDaysPerWeek: _frequency == HabitFrequency.weeklyFlexible
-          ? _targetDaysPerWeek
-          : null,
-      targetWeekdays: _frequency == HabitFrequency.weeklyExact
-          ? _selectedWeekdays.toList()
-          : null,
-      completions: widget.habit?.completions,
-      createdAt: widget.habit?.createdAt,
-    )..setTargetTime(_targetTime);
-
-    context.read<HabitProvider>().saveHabit(newHabit);
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     // Extract existing stack names for autocomplete
@@ -384,5 +334,55 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
         label: const Text("Save Habit"),
       ),
     );
+  }
+
+  // Convert a codePoint back to an IconData object
+  IconData? _getIconFromCodePoint(int? codePoint) {
+    if (codePoint == null) return null;
+    try {
+      return HabitIcons.availableIcons.firstWhere(
+        (icon) => icon.codePoint == codePoint,
+        orElse: () => Icons.circle,
+      );
+    } catch (e) {
+      return Icons.circle;
+    }
+  }
+
+  void _saveHabit() {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_frequency == HabitFrequency.weeklyExact && _selectedWeekdays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one day.')),
+      );
+      return;
+    }
+
+    final newHabit = Habit(
+      id: widget.habit?.id ?? DateTime.now().toString(),
+      name: _nameController.text.trim(),
+      frequency: _frequency,
+      colorValue: AppTheme.habitColor.toARGB32(),
+      notes: _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
+      stackName: _stackController.text.trim().isEmpty
+          ? null
+          : _stackController.text.trim(),
+      stackOrder: _stackOrder,
+      iconCodePoint: _selectedIcon.codePoint,
+      targetDaysPerWeek: _frequency == HabitFrequency.weeklyFlexible
+          ? _targetDaysPerWeek
+          : null,
+      targetWeekdays: _frequency == HabitFrequency.weeklyExact
+          ? _selectedWeekdays.toList()
+          : null,
+      completions: widget.habit?.completions,
+      createdAt: widget.habit?.createdAt,
+    )..setTargetTime(_targetTime);
+
+    context.read<HabitProvider>().saveHabit(newHabit);
+    Navigator.pop(context);
   }
 }

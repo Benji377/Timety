@@ -19,187 +19,6 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
   // This tracks which week we are currently viewing
   DateTime _focusedDate = DateTime.now();
 
-  // Helper to jump weeks
-  void _changeWeek(int days) {
-    setState(() {
-      _focusedDate = _focusedDate.add(Duration(days: days));
-    });
-  }
-
-  List<List<int>> _getVelocityForWeek(
-    List<Task> tasks,
-    DateTime startOfWeek,
-    DateTime endOfWeek,
-  ) {
-    final List<List<int>> dailyCounts = List.generate(7, (_) => [0, 0]);
-
-    for (var task in tasks) {
-      if (task.createdAt.isAfter(
-            startOfWeek.subtract(const Duration(seconds: 1)),
-          ) &&
-          task.createdAt.isBefore(endOfWeek)) {
-        dailyCounts[task.createdAt.weekday - 1][0]++;
-      }
-      if (task.isCompleted && task.completedAt != null) {
-        if (task.completedAt!.isAfter(
-              startOfWeek.subtract(const Duration(seconds: 1)),
-            ) &&
-            task.completedAt!.isBefore(endOfWeek)) {
-          dailyCounts[task.completedAt!.weekday - 1][1]++;
-        }
-      }
-    }
-    return dailyCounts;
-  }
-
-  List<int> _getTasksCompletedForWeek(
-    List<Task> tasks,
-    DateTime startOfWeek,
-    DateTime endOfWeek,
-  ) {
-    final List<int> dailyCounts = List.filled(7, 0);
-
-    for (var task in tasks) {
-      if (task.isCompleted && task.completedAt != null) {
-        if (task.completedAt!.isAfter(
-              startOfWeek.subtract(const Duration(seconds: 1)),
-            ) &&
-            task.completedAt!.isBefore(endOfWeek)) {
-          dailyCounts[task.completedAt!.weekday - 1]++;
-        }
-      }
-    }
-    return dailyCounts;
-  }
-
-  // Category data remains "All Time" to show overall distribution
-  Map<String, int> _getCategoryData(List<Task> tasks) {
-    final Map<String, int> categoryCounts = {};
-    for (var task in tasks) {
-      final String cat = task.category.isEmpty
-          ? "Uncategorized"
-          : task.category;
-      categoryCounts[cat] = (categoryCounts[cat] ?? 0) + 1;
-    }
-    return categoryCounts;
-  }
-
-  String _formatCount(int count) {
-    return count == 1 ? '1 task' : '$count tasks';
-  }
-
-  Widget _buildCategoryBreakdownCard(BuildContext context, List<Task> tasks) {
-    final categoryData = _getCategoryData(tasks);
-    if (categoryData.isEmpty) {
-      return const Center(child: Text("No categories used."));
-    }
-
-    final totalTasks = categoryData.values.fold<int>(
-      0,
-      (sum, value) => sum + value,
-    );
-    final entries = categoryData.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    final colors = [
-      AppTheme.taskColor,
-      AppTheme.errorColor,
-      AppTheme.successColor,
-      AppTheme.warningColor,
-      AppTheme.habitColor,
-      Theme.of(context).colorScheme.primary,
-      Colors.teal,
-      Colors.deepOrange,
-    ];
-
-    Color colorForIndex(int index) => colors[index % colors.length];
-
-    // Removed Card and Container background styling to fit with the rest of the screen elements
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'All-Time Distribution',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Task categories across your whole workspace',
-          style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 18),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: Container(
-            height: 16,
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Row(
-              children: entries.asMap().entries.map((entry) {
-                final index = entry.key;
-                final category = entry.value;
-                return Expanded(
-                  flex: category.value,
-                  child: Container(color: colorForIndex(index)),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        ...entries.asMap().entries.map((entry) {
-          final index = entry.key;
-          final category = entry.value;
-          final color = colorForIndex(index);
-          final percent = ((category.value / totalTasks) * 100).round();
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    category.key,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Text(
-                  _formatCount(category.value),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  '$percent%',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final tasks = context.watch<TaskProvider>().tasks;
@@ -454,6 +273,187 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
           );
         }),
       ),
+    );
+  }
+
+  // Helper to jump weeks
+  void _changeWeek(int days) {
+    setState(() {
+      _focusedDate = _focusedDate.add(Duration(days: days));
+    });
+  }
+
+  List<List<int>> _getVelocityForWeek(
+    List<Task> tasks,
+    DateTime startOfWeek,
+    DateTime endOfWeek,
+  ) {
+    final List<List<int>> dailyCounts = List.generate(7, (_) => [0, 0]);
+
+    for (var task in tasks) {
+      if (task.createdAt.isAfter(
+            startOfWeek.subtract(const Duration(seconds: 1)),
+          ) &&
+          task.createdAt.isBefore(endOfWeek)) {
+        dailyCounts[task.createdAt.weekday - 1][0]++;
+      }
+      if (task.isCompleted && task.completedAt != null) {
+        if (task.completedAt!.isAfter(
+              startOfWeek.subtract(const Duration(seconds: 1)),
+            ) &&
+            task.completedAt!.isBefore(endOfWeek)) {
+          dailyCounts[task.completedAt!.weekday - 1][1]++;
+        }
+      }
+    }
+    return dailyCounts;
+  }
+
+  List<int> _getTasksCompletedForWeek(
+    List<Task> tasks,
+    DateTime startOfWeek,
+    DateTime endOfWeek,
+  ) {
+    final List<int> dailyCounts = List.filled(7, 0);
+
+    for (var task in tasks) {
+      if (task.isCompleted && task.completedAt != null) {
+        if (task.completedAt!.isAfter(
+              startOfWeek.subtract(const Duration(seconds: 1)),
+            ) &&
+            task.completedAt!.isBefore(endOfWeek)) {
+          dailyCounts[task.completedAt!.weekday - 1]++;
+        }
+      }
+    }
+    return dailyCounts;
+  }
+
+  // Category data remains "All Time" to show overall distribution
+  Map<String, int> _getCategoryData(List<Task> tasks) {
+    final Map<String, int> categoryCounts = {};
+    for (var task in tasks) {
+      final String cat = task.category.isEmpty
+          ? "Uncategorized"
+          : task.category;
+      categoryCounts[cat] = (categoryCounts[cat] ?? 0) + 1;
+    }
+    return categoryCounts;
+  }
+
+  String _formatCount(int count) {
+    return count == 1 ? '1 task' : '$count tasks';
+  }
+
+  Widget _buildCategoryBreakdownCard(BuildContext context, List<Task> tasks) {
+    final categoryData = _getCategoryData(tasks);
+    if (categoryData.isEmpty) {
+      return const Center(child: Text("No categories used."));
+    }
+
+    final totalTasks = categoryData.values.fold<int>(
+      0,
+      (sum, value) => sum + value,
+    );
+    final entries = categoryData.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final colors = [
+      AppTheme.taskColor,
+      AppTheme.errorColor,
+      AppTheme.successColor,
+      AppTheme.warningColor,
+      AppTheme.habitColor,
+      Theme.of(context).colorScheme.primary,
+      Colors.teal,
+      Colors.deepOrange,
+    ];
+
+    Color colorForIndex(int index) => colors[index % colors.length];
+
+    // Removed Card and Container background styling to fit with the rest of the screen elements
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'All-Time Distribution',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Task categories across your whole workspace',
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 18),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            height: 16,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Row(
+              children: entries.asMap().entries.map((entry) {
+                final index = entry.key;
+                final category = entry.value;
+                return Expanded(
+                  flex: category.value,
+                  child: Container(color: colorForIndex(index)),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        ...entries.asMap().entries.map((entry) {
+          final index = entry.key;
+          final category = entry.value;
+          final color = colorForIndex(index);
+          final percent = ((category.value / totalTasks) * 100).round();
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    category.key,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  _formatCount(category.value),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '$percent%',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 }

@@ -39,6 +39,39 @@ class HabitListTile extends StatelessWidget {
 
   Color get _color => Color(habit.colorValue);
 
+  @override
+  Widget build(BuildContext context) {
+    final card = _buildCard(context);
+
+    if (!enableDismissible || onDelete == null) return card;
+
+    return Dismissible(
+      key: ValueKey(habit.id),
+      background: Container(
+        color: AppTheme.errorColor,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: AppTheme.spaceLarge),
+        margin: margin,
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+          size: AppTheme.listTileSwipeIconSize,
+        ),
+      ),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) => onDelete!(),
+      confirmDismiss: (_) async {
+        return await AppDialogs.showConfirmation(
+              context: context,
+              title: deleteTitle,
+              content: deleteContent,
+            ) ??
+            false;
+      },
+      child: card,
+    );
+  }
+
   Widget _buildCard(BuildContext context) {
     final color = _color;
     final habitIcon = habit.iconData ?? Icons.circle;
@@ -163,39 +196,6 @@ class HabitListTile extends StatelessWidget {
         borderRadius: AppTheme.brMedium,
       ),
       child: listTile,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final card = _buildCard(context);
-
-    if (!enableDismissible || onDelete == null) return card;
-
-    return Dismissible(
-      key: ValueKey(habit.id),
-      background: Container(
-        color: AppTheme.errorColor,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: AppTheme.spaceLarge),
-        margin: margin,
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-          size: AppTheme.listTileSwipeIconSize,
-        ),
-      ),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete!(),
-      confirmDismiss: (_) async {
-        return await AppDialogs.showConfirmation(
-              context: context,
-              title: deleteTitle,
-              content: deleteContent,
-            ) ??
-            false;
-      },
-      child: card,
     );
   }
 }

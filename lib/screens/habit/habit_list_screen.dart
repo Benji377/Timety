@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timety/screens/statistics_screen.dart';
+import '../../screens/statistics_screen.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/user_provider.dart';
@@ -10,10 +10,109 @@ import '../../widgets/expansion_section.dart';
 import '../../widgets/habit_bottom_sheet_builders.dart';
 import '../../widgets/list_tiles/habit_list_tile.dart';
 import '../calendar_screen.dart';
+import '../../l10n/app_localizations.dart';
 import 'habit_detail_screen.dart';
 
 class HabitListScreen extends StatelessWidget {
   const HabitListScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.habitsListTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            tooltip: AppLocalizations.of(context)!.commonTooltipStats,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const StatisticsScreen(initialTabIndex: 3),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            tooltip: AppLocalizations.of(context)!.commonTooltipCalendar,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CalendarScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Consumer<HabitProvider>(
+        builder: (context, provider, child) {
+          if (provider.habits.isEmpty) {
+            return Center(
+              child: Text(AppLocalizations.of(context)!.habitScreenEmpty),
+            );
+          }
+
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final dueToday = <Habit>[];
+          final todo = <Habit>[];
+          final done = <Habit>[];
+
+          for (final habit in provider.habits) {
+            if (provider.isCompletedOn(habit, today) ||
+                _isWeeklyGoalMet(habit, provider)) {
+              done.add(habit);
+            } else if (_isHabitDueToday(habit, provider, today)) {
+              dueToday.add(habit);
+            } else {
+              todo.add(habit);
+            }
+          }
+
+          return ListView(
+            padding: const EdgeInsets.only(bottom: 80),
+            children: [
+              _buildHabitSection(
+                context,
+                AppLocalizations.of(context)!.commonTimeDueToday,
+                AppTheme.warningColor,
+                dueToday,
+                provider,
+              ),
+              _buildHabitSection(
+                context,
+                AppLocalizations.of(context)!.commonTimeUpcoming,
+                AppTheme.infoColor,
+                todo,
+                provider,
+                initiallyExpanded: false,
+              ),
+              _buildHabitSection(
+                context,
+                AppLocalizations.of(context)!.commonTimeDone,
+                AppTheme.successColor,
+                done,
+                provider,
+                initiallyExpanded: false,
+              ),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'habit_list_add_button',
+        backgroundColor: AppTheme.habitColor,
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const HabitDetailScreen()),
+        ),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 
   bool _isHabitDueToday(Habit habit, HabitProvider provider, DateTime today) {
     if (habit.frequency == HabitFrequency.daily) return true;
@@ -48,9 +147,9 @@ class HabitListScreen extends StatelessWidget {
     Habit habit,
     HabitProvider provider,
   ) {
-    var subtitle = HabitUtils.buildHabitSubtitle(habit, provider);
+    var subtitle = HabitUtils.buildHabitSubtitle(context, habit, provider);
     if (habit.targetTime != null) {
-      subtitle += ' • ${habit.targetTime!.format(context)}';
+      subtitle += ' | ${habit.targetTime!.format(context)}';
     }
     return subtitle;
   }
@@ -250,104 +349,6 @@ class HabitListScreen extends StatelessWidget {
       color: color,
       initiallyExpanded: initiallyExpanded,
       children: _buildGroupedHabits(context, habits, provider),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Habits'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: 'Insights',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const StatisticsScreen(initialTabIndex: 3),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            tooltip: 'Calendar View',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CalendarScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer<HabitProvider>(
-        builder: (context, provider, child) {
-          if (provider.habits.isEmpty) {
-            return const Center(
-              child: Text("No habits yet! Tap + to build a routine."),
-            );
-          }
-
-          final now = DateTime.now();
-          final today = DateTime(now.year, now.month, now.day);
-          final dueToday = <Habit>[];
-          final todo = <Habit>[];
-          final done = <Habit>[];
-
-          for (final habit in provider.habits) {
-            if (provider.isCompletedOn(habit, today) ||
-                _isWeeklyGoalMet(habit, provider)) {
-              done.add(habit);
-            } else if (_isHabitDueToday(habit, provider, today)) {
-              dueToday.add(habit);
-            } else {
-              todo.add(habit);
-            }
-          }
-
-          return ListView(
-            padding: const EdgeInsets.only(bottom: 80),
-            children: [
-              _buildHabitSection(
-                context,
-                'Due Today',
-                AppTheme.warningColor,
-                dueToday,
-                provider,
-              ),
-              _buildHabitSection(
-                context,
-                'Upcoming',
-                AppTheme.infoColor,
-                todo,
-                provider,
-                initiallyExpanded: false,
-              ),
-              _buildHabitSection(
-                context,
-                'Done',
-                AppTheme.successColor,
-                done,
-                provider,
-                initiallyExpanded: false,
-              ),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'habit_list_add_button',
-        backgroundColor: AppTheme.habitColor,
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const HabitDetailScreen()),
-        ),
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }

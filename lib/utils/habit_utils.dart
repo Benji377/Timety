@@ -1,24 +1,29 @@
+import 'package:flutter/material.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'date_utils.dart';
 
 /// Utility functions for habit-related logic
 class HabitUtils {
   /// Builds a subtitle description for a habit based on its frequency
   /// Does not include time formatting - handle that separately in UI layer
-  static String buildHabitSubtitle(Habit habit, HabitProvider provider) {
-    if (habit.frequency == HabitFrequency.daily) return 'Daily';
+  static String buildHabitSubtitle(BuildContext context, Habit habit, HabitProvider provider) {
+    if (habit.frequency == HabitFrequency.daily) return AppLocalizations.of(context)!.habitFreqDaily;
     if (habit.frequency == HabitFrequency.weeklyExact) {
       final days =
           habit.targetWeekdays
               ?.map((d) => AppDateUtils.weekdayToStringShort(d))
               .join(', ') ??
           '';
-      return 'Weekly on $days';
+      return AppLocalizations.of(context)!.habitFreqWeekly(days);
     }
     if (habit.frequency == HabitFrequency.weeklyFlexible) {
       final doneThisWeek = provider.getCompletionsThisWeek(habit);
-      return '$doneThisWeek / ${habit.targetDaysPerWeek} this week';
+      return AppLocalizations.of(context)!.habitFreqFlexible(
+        doneThisWeek,
+        habit.targetDaysPerWeek ?? 0,
+      );
     }
     return '';
   }

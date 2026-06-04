@@ -46,21 +46,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     super.dispose();
   }
 
-  Color _getSignatureColor(int index) {
-    switch (index) {
-      case 0:
-        return AppTheme.warningColor;
-      case 1:
-        return AppTheme.taskColor;
-      case 2:
-        return AppTheme.focusColor;
-      case 3:
-        return AppTheme.habitColor;
-      default:
-        return Theme.of(context).colorScheme.primary;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final activeColor = _getSignatureColor(_currentTabIndex);
@@ -121,5 +106,20 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         ],
       ),
     );
+  }
+
+  Color _getSignatureColor(int index) {
+    switch (index) {
+      case 0:
+        return AppTheme.warningColor;
+      case 1:
+        return AppTheme.taskColor;
+      case 2:
+        return AppTheme.focusColor;
+      case 3:
+        return AppTheme.habitColor;
+      default:
+        return Theme.of(context).colorScheme.primary;
+    }
   }
 }

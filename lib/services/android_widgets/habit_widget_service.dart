@@ -11,6 +11,7 @@ class HabitWidgetService {
   static const String _androidWidgetName = 'HabitWidgetProvider';
 
   static Future<void> updateHabitWidget(
+    BuildContext context,
     List<Habit> allHabits,
     HabitProvider provider,
   ) async {
@@ -96,7 +97,7 @@ class HabitWidgetService {
                   habit: h,
                   isDone: completionStatus[h.id] ?? false,
                   isLocked: stackLocks[h.id] ?? false,
-                  frequency: HabitUtils.buildHabitSubtitle(h, provider),
+                  frequency: HabitUtils.buildHabitSubtitle(context, h, provider),
                   isStacked: true,
                 ),
               const HabitStackFooterView(),
@@ -112,7 +113,7 @@ class HabitWidgetService {
             habit: h,
             isDone: completionStatus[h.id] ?? false,
             isLocked: false,
-            frequency: HabitUtils.buildHabitSubtitle(h, provider),
+            frequency: HabitUtils.buildHabitSubtitle(context, h, provider),
           ),
         );
       }

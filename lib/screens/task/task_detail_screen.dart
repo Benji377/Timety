@@ -94,141 +94,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     super.dispose();
   }
 
-  Widget _buildSectionHeader(String title, IconData icon) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: AppTheme.spaceXLarge,
-        bottom: AppTheme.spaceMedium,
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: AppTheme.iconSizeSmall, color: colorScheme.primary),
-          const SizedBox(width: AppTheme.spaceSmall),
-          Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              fontSize: AppTheme.fsBodySmall,
-              fontWeight: AppTheme.fwBold,
-              color: colorScheme.primary.withValues(alpha: 0.8),
-              letterSpacing: AppTheme.lsWide,
-            ),
-          ),
-          const SizedBox(width: AppTheme.spaceSmall),
-          const Expanded(child: Divider()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryPicker() {
-    final dividerColor = Theme.of(context).dividerColor.withValues(alpha: 0.6);
-
-    if (!_isEditing) {
-      return TextFormField(
-        initialValue: _category.isEmpty ? 'None' : _category,
-        enabled: false,
-        decoration: InputDecoration(
-          labelText: 'Category',
-          prefixIcon: const Icon(Icons.label_outline),
-          border: const OutlineInputBorder(),
-          disabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: dividerColor),
-          ),
-        ),
-      );
-    }
-
-    final List<String> existingCategories = context
-        .read<TaskProvider>()
-        .tasks
-        .map((t) => t.category.trim())
-        .where((c) => c.isNotEmpty)
-        .toSet()
-        .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (!_isAddingNewCategory)
-          DropdownButtonFormField<String>(
-            initialValue: existingCategories.contains(_category)
-                ? _category
-                : null,
-            hint: Text(_category.isEmpty ? "Select Category" : _category),
-            decoration: const InputDecoration(
-              labelText: 'Category',
-              prefixIcon: Icon(Icons.label_outline),
-              border: OutlineInputBorder(),
-            ),
-            items: [
-              const DropdownMenuItem(value: "", child: Text("None")),
-              ...existingCategories.map(
-                (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
-              ),
-              const DropdownMenuItem(
-                value: "__ADD_NEW__",
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.add,
-                      size: AppTheme.iconSizeSmall,
-                      color: AppTheme.infoColor,
-                    ),
-                    SizedBox(width: AppTheme.spaceSmall),
-                    Text(
-                      "Add New Category...",
-                      style: TextStyle(color: AppTheme.infoColor),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            onChanged: (val) {
-              if (val == "__ADD_NEW__") {
-                setState(() => _isAddingNewCategory = true);
-              } else if (val != null) {
-                setState(() => _category = val);
-              }
-            },
-          )
-        else
-          TextField(
-            controller: _newCategoryController,
-            autofocus: true,
-            decoration: InputDecoration(
-              labelText: 'New Category Name',
-              prefixIcon: const Icon(Icons.label_important_outline),
-              border: const OutlineInputBorder(),
-              suffixIcon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.check, color: AppTheme.successColor),
-                    onPressed: () {
-                      if (_newCategoryController.text.trim().isNotEmpty) {
-                        setState(() {
-                          _category = _newCategoryController.text.trim();
-                          _isAddingNewCategory = false;
-                          _newCategoryController.clear();
-                        });
-                      }
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: AppTheme.errorColor),
-                    onPressed: () =>
-                        setState(() => _isAddingNewCategory = false),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -571,6 +436,141 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           const SizedBox(height: AppTheme.space3XLarge),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: AppTheme.spaceXLarge,
+        bottom: AppTheme.spaceMedium,
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: AppTheme.iconSizeSmall, color: colorScheme.primary),
+          const SizedBox(width: AppTheme.spaceSmall),
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: AppTheme.fsBodySmall,
+              fontWeight: AppTheme.fwBold,
+              color: colorScheme.primary.withValues(alpha: 0.8),
+              letterSpacing: AppTheme.lsWide,
+            ),
+          ),
+          const SizedBox(width: AppTheme.spaceSmall),
+          const Expanded(child: Divider()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryPicker() {
+    final dividerColor = Theme.of(context).dividerColor.withValues(alpha: 0.6);
+
+    if (!_isEditing) {
+      return TextFormField(
+        initialValue: _category.isEmpty ? 'None' : _category,
+        enabled: false,
+        decoration: InputDecoration(
+          labelText: 'Category',
+          prefixIcon: const Icon(Icons.label_outline),
+          border: const OutlineInputBorder(),
+          disabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: dividerColor),
+          ),
+        ),
+      );
+    }
+
+    final List<String> existingCategories = context
+        .read<TaskProvider>()
+        .tasks
+        .map((t) => t.category.trim())
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!_isAddingNewCategory)
+          DropdownButtonFormField<String>(
+            initialValue: existingCategories.contains(_category)
+                ? _category
+                : null,
+            hint: Text(_category.isEmpty ? "Select Category" : _category),
+            decoration: const InputDecoration(
+              labelText: 'Category',
+              prefixIcon: Icon(Icons.label_outline),
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              const DropdownMenuItem(value: "", child: Text("None")),
+              ...existingCategories.map(
+                (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
+              ),
+              const DropdownMenuItem(
+                value: "__ADD_NEW__",
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.add,
+                      size: AppTheme.iconSizeSmall,
+                      color: AppTheme.infoColor,
+                    ),
+                    SizedBox(width: AppTheme.spaceSmall),
+                    Text(
+                      "Add New Category...",
+                      style: TextStyle(color: AppTheme.infoColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            onChanged: (val) {
+              if (val == "__ADD_NEW__") {
+                setState(() => _isAddingNewCategory = true);
+              } else if (val != null) {
+                setState(() => _category = val);
+              }
+            },
+          )
+        else
+          TextField(
+            controller: _newCategoryController,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'New Category Name',
+              prefixIcon: const Icon(Icons.label_important_outline),
+              border: const OutlineInputBorder(),
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.check, color: AppTheme.successColor),
+                    onPressed: () {
+                      if (_newCategoryController.text.trim().isNotEmpty) {
+                        setState(() {
+                          _category = _newCategoryController.text.trim();
+                          _isAddingNewCategory = false;
+                          _newCategoryController.clear();
+                        });
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: AppTheme.errorColor),
+                    onPressed: () =>
+                        setState(() => _isAddingNewCategory = false),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 

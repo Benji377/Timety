@@ -14,32 +14,6 @@ import '../widgets/stat_cards.dart';
 class OverviewStatsScreen extends StatelessWidget {
   const OverviewStatsScreen({super.key});
 
-  // --- DATA EXTRACTORS ---
-  int _getTasksForDay(List<Task> tasks, DateTime day) {
-    return tasks
-        .where(
-          (t) =>
-              t.isCompleted &&
-              t.completedAt != null &&
-              AppDateUtils.isSameDay(t.completedAt!, day),
-        )
-        .length;
-  }
-
-  int _getFocusForDay(FocusProvider provider, DateTime day) {
-    int totalSeconds = 0;
-    for (var session in provider.history) {
-      if (AppDateUtils.isSameDay(session.startTime, day)) {
-        totalSeconds += session.totalSecondsFocused;
-      }
-    }
-    // Include actively running session time if checking today
-    if (AppDateUtils.isSameDay(DateTime.now(), day) && provider.isRunning) {
-      totalSeconds += provider.currentSecondsFocussed;
-    }
-    return totalSeconds ~/ 60;
-  }
-
   @override
   Widget build(BuildContext context) {
     final taskProvider = context.watch<TaskProvider>();
@@ -296,5 +270,31 @@ class OverviewStatsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // --- DATA EXTRACTORS ---
+  int _getTasksForDay(List<Task> tasks, DateTime day) {
+    return tasks
+        .where(
+          (t) =>
+              t.isCompleted &&
+              t.completedAt != null &&
+              AppDateUtils.isSameDay(t.completedAt!, day),
+        )
+        .length;
+  }
+
+  int _getFocusForDay(FocusProvider provider, DateTime day) {
+    int totalSeconds = 0;
+    for (var session in provider.history) {
+      if (AppDateUtils.isSameDay(session.startTime, day)) {
+        totalSeconds += session.totalSecondsFocused;
+      }
+    }
+    // Include actively running session time if checking today
+    if (AppDateUtils.isSameDay(DateTime.now(), day) && provider.isRunning) {
+      totalSeconds += provider.currentSecondsFocussed;
+    }
+    return totalSeconds ~/ 60;
   }
 }

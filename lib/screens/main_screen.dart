@@ -16,14 +16,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  // Helper method to switch tabs
-  void _switchTab(int index) {
-    if (!mounted) return;
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // Map current tab index to its active color so labels match active icon colors
@@ -92,5 +84,13 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     );
+  }
+
+  // Helper method to switch tabs
+  void _switchTab(int index) {
+    if (!mounted) return;
+    setState(() {
+      _currentIndex = index;
+    });
   }
 }

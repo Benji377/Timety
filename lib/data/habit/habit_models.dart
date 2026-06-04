@@ -97,3 +97,19 @@ class Habit {
     }
   }
 }
+
+class TimeOfDayBucket {
+  final String label;
+  final String subtitle;
+  final int count;
+  final Color color;
+  final IconData icon;
+
+  const TimeOfDayBucket({
+    required this.label,
+    required this.subtitle,
+    required this.count,
+    required this.color,
+    required this.icon,
+  });
+}
