@@ -2,6 +2,10 @@
   "@@locale": "en",
 
   "focusTitle": "Focus",
+  "focusModesTitle": "Manage Modes",
+  "focusPhasesTitleAdd": "Add Phase",
+  "focusPhasesTitleEdit": "Edit Phase",
+  "focusTagsTitle": "Focus Tags",
 
   "focusTooltipCalendar": "Calendar View",
   "focusTooltipTimeMachine": "Log Past Session",
@@ -9,6 +13,7 @@
   
   "focusTargetLabel": "Target",
   "focusTargetEmpty": "No Target",
+  "focusTargetUntagged": "Untagged",
   
   "focusStateActive": "Focus session active",
   "focusStatePaused": "Paused",
@@ -19,15 +24,119 @@
   "focusLabelStopwatch": "Stopwatch",
   
   "focusModeSelect": "Select Mode",
+  "focusModeFlex": "Flex",
   "focusLimitMax": "Max",
   "focusEndsAt": "Ends at",
 
-  "focusSnckbarHabitLocked": "Complete the previous habit in the stack first!",
+  "focusSnackbarHabitLocked": "Complete the previous habit in the stack first!",
 
   "focusDialogSessionStopTitle": "Stop Focus Session?",
   "focusDialogSessionStopContent": "The timer is paused while you decide. Confirm to stop and save the session, or cancel to continue.",
   "focusDialogSessionResetTitle": "Reset Focus Session?",
   "focusDialogSessionResetContent": "The timer is paused while you decide. Confirm to reset the session, or cancel to continue.",
+
+  "focusModeLabelNew": "New Mode",
+  "focusModeLabelEdit": "Edit Mode",
+  "focusModeLabelEditing": "Editing Mode",
+  "focusModeLabelName": "Mode Name",
+  "focusModeLabelTimeline": "Timeline Phases",
+  "focusModeLabelTimelineDesc": "Tap a phase to edit or delete it",
+  "focusModeLabelTypeSystem": "System Mode",
+  "focusModeLabelTypeCustom": "Custom Mode",
+
+  "focusModeDialogDeleteTitle": "Delete Focus Mode?",
+  "focusModeDialogDeleteContent": "Are you sure you want to delete this custom mode?",
+
+  "focusModeSnackbarSaved": "Mode saved!",
+
+  "focusPhaseLabelDuration": "Duration (minutes)",
+  "focusPhaseLabelDurationSuffix": "min",
+
+  "focusTagsLabelAdd": "Add New Tag",
+  "focusTagsLabelEdit": "Edit Tag",
+  "focusTagsLabelEmpty": "No tags yet",
+  "focusTagsLabelName": "Tag Name",
+  "focusTagsLabelColor": "Choose a Color",
+  "focusTagsLabelAll": "All Tags",
+
+  "focusTagsDialogTitleDelete": "Delete Tag?",
+  "focusTagsDialogContentDelete": "Are you sure you want to delete \"{tagName}\"?",
+  "@focusTagsDialogContentDelete": {
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "focusTagsDialogTitleAdd": "Add New Tag",
+  "focusTagsDialogLabelName": "Tag Name",
+  "focusTagsDialogLabelHint": "Tag Name (e.g. Reading)",
+
+  "focusStatsEmpty": "Complete some focus sessions to see data!",
+  "focusStatsSectionClockTitle": "Daily Focus Rhythm",
+  "focusStatsSectionClockSubtitle": "Tap a day to inspect its sessions",
+  "focusStatsSectionClockSessions": "{count} sessions",
+  "@focusStatsSectionClockSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "focusStatsSectionDistractionsTitle": "Distractions",
+  "focusStatsSectionDistractionsSubtitle": "Selected day, newest distractions first",
+  "focusStatsSectionDistractionsEmpty": "No distractions logged for this day",
+  "focusStatsSectionVolumeTitle": "Weekly Focus Volume",
+  "focusStatsSectionVolumeSubtitle": "Total focus minutes per day",
+
+  "focusStatsSectionTargetBreakdownTitle": "Focus by Target Type",
+  "focusStatsSectionTargetBreakdownSubtitle": "Tagged sessions, task-linked sessions, and habit-linked sessions",
+
+  "focusStatsSectionSessionsTitle": "Focus Sessions",
+  "focusStatsSectionSessionsSubtitle": "Each session shows the exact target and focus mode",
+
+  "distractionDistracted": "Distracted",
+  "distractionHydrated": "Hydrated / Drink",
+  "distractionStretched": "Stretched",
+  "distractionSnack": "Snack",
+  "distractionRestroom": "Restroom",
+  "distractionLogged": "Logged {distraction}",
+  "@distractionLogged": {
+    "placeholders": {
+      "distraction": {
+        "type": "String"
+      }
+    }
+  },
+
+  "distractionSheetTitle": "Log Distraction",
+  "targetSheetTitle": "Select Focus Target",
+  "taskSheetEmpty": "No tasks available",
+  "habitsSheetEmpty": "No habits available",
+
+  "taskLabelCompleted": "Completed Task",
+
+  "habitLabelFreqDaily": "Daily Habit",
+  "habitLabelFreqWeekly": "Weekly Habit",
+
+  "globalLabelTags": "Tags",
+  "globalLabelTasks": "Tasks",
+  "globalLabelTask": "Task",
+  "globalLabelHabits": "Habits",
+
+  "commonLabelDelete": "Delete",
+  "commonLabelCancel": "Cancel",
+  "commonLabelConfirm": "Confirm",
+  "commonLabelSave": "Save",
+  "commonLabelAdd": "Add",
+  "commonWeekdayMon": "Mon",
+  "commonWeekdayTue": "Tue",
+  "commonWeekdayWed": "Wed",
+  "commonWeekdayThu": "Thu",
+  "commonWeekdayFri": "Fri",
+  "commonWeekdaySat": "Sat",
+  "commonWeekdaySun": "Sun",
 
   "notificationTimeRemaining": "{mins}:{secs} remaining",
   "@notificationTimeRemaining": {

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
+import '../../l10n/app_localizations.dart';
+
+enum PhaseDialogAction { delete }
 
 class PhaseEditorDialog extends StatefulWidget {
   final SessionPhase? initialPhase;
@@ -36,21 +39,21 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
     final isNew = widget.initialPhase == null;
 
     return AlertDialog(
-      title: Text(isNew ? "Add Phase" : "Edit Phase"),
+      title: Text(isNew ? AppLocalizations.of(context)!.focusPhasesTitleAdd : AppLocalizations.of(context)!.focusPhasesTitleEdit),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SegmentedButton<PhaseType>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: PhaseType.focus,
-                label: Text("Focus"),
-                icon: Icon(Icons.center_focus_strong),
+                label: Text(AppLocalizations.of(context)!.focusLabelDefault),
+                icon: const Icon(Icons.center_focus_strong),
               ),
               ButtonSegment(
                 value: PhaseType.rest,
-                label: Text("Rest"),
-                icon: Icon(Icons.coffee),
+                label: Text(AppLocalizations.of(context)!.focusLabelRest),
+                icon: const Icon(Icons.coffee),
               ),
             ],
             selected: {_selectedType},
@@ -62,10 +65,10 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
           TextField(
             controller: _timeController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: "Duration (Minutes)",
-              border: OutlineInputBorder(),
-              suffixText: "min",
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.focusPhaseLabelDuration,
+              border: const OutlineInputBorder(),
+              suffixText: AppLocalizations.of(context)!.focusPhaseLabelDurationSuffix,
             ),
           ),
         ],
@@ -74,15 +77,15 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
         if (!isNew)
           TextButton(
             // Return a special string flag so the parent knows to delete this node
-            onPressed: () => Navigator.pop(context, 'DELETE'),
-            child: const Text(
-              "Delete",
-              style: TextStyle(color: AppTheme.errorColor),
+            onPressed: () => Navigator.pop(context, PhaseDialogAction.delete),
+            child: Text(
+              AppLocalizations.of(context)!.commonLabelDelete,
+              style: const TextStyle(color: AppTheme.errorColor),
             ),
           ),
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel"),
+          child: Text(AppLocalizations.of(context)!.commonLabelCancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -96,7 +99,7 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
               );
             }
           },
-          child: const Text("Save"),
+          child: Text(AppLocalizations.of(context)!.commonLabelSave),
         ),
       ],
     );

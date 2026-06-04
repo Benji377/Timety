@@ -370,7 +370,7 @@ class _FocusScreenState extends State<FocusScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            AppLocalizations.of(context)!.focusSnckbarHabitLocked,
+                            AppLocalizations.of(context)!.focusSnackbarHabitLocked,
                           ),
                           duration: const Duration(seconds: 2),
                         ),

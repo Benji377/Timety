@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../utils/gauge_painter.dart';
 
 class InteractiveGauge extends StatefulWidget {
   final double progress;
@@ -82,28 +83,6 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
     super.dispose();
   }
 
-  void _handlePan(Offset localPosition, Size size) {
-    if (!widget.isInteractive) return;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final dx = localPosition.dx - center.dx;
-    final dy = localPosition.dy - center.dy;
-
-    double angle = atan2(dy, dx);
-    angle += pi / 2;
-    if (angle < 0) angle += 2 * pi;
-
-    setState(() {
-      _progress = angle / (2 * pi);
-      if (_progress < 0.02) _progress = 0.0;
-      if (_progress > 0.98) _progress = 1.0;
-    });
-
-    if (widget.onChanged != null) {
-      widget.onChanged!(_progress);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).colorScheme.primary;
@@ -135,7 +114,7 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
         width: AppTheme.gaugeSize,
         height: AppTheme.gaugeSize,
         child: CustomPaint(
-          painter: _GaugePainter(
+          painter: GaugePainter(
             progress: paintProgress,
             color: gaugeColor.withValues(alpha: trackOpacity),
             isInteractive: widget.isInteractive,
@@ -229,97 +208,26 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
       ),
     );
   }
-}
 
-class _GaugePainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  final bool isInteractive;
-  final bool isDark;
+  void _handlePan(Offset localPosition, Size size) {
+    if (!widget.isInteractive) return;
 
-  _GaugePainter({
-    required this.progress,
-    required this.color,
-    required this.isInteractive,
-    required this.isDark,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = min(size.width, size.height) / 2;
-    const strokeWidth = AppTheme.gaugeStrokeWidth;
-    final innerRadius = radius - strokeWidth - 14;
+    final dx = localPosition.dx - center.dx;
+    final dy = localPosition.dy - center.dy;
 
-    final innerBackgroundPaint = Paint()
-      ..color = isDark ? AppTheme.gaugeBgDark : AppTheme.gaugeWhite
-      ..style = PaintingStyle.fill;
+    double angle = atan2(dy, dx);
+    angle += pi / 2;
+    if (angle < 0) angle += 2 * pi;
 
-    canvas.drawShadow(
-      Path()..addOval(Rect.fromCircle(center: center, radius: innerRadius)),
-      (isDark ? AppTheme.gaugeBorderDark : AppTheme.gaugeBorderLight)
-          .withValues(alpha: 0.3),
-      4.0,
-      true,
-    );
+    setState(() {
+      _progress = angle / (2 * pi);
+      if (_progress < 0.02) _progress = 0.0;
+      if (_progress > 0.98) _progress = 1.0;
+    });
 
-    canvas.drawCircle(center, innerRadius, innerBackgroundPaint);
-
-    final innerBorderPaint = Paint()
-      ..color = isDark ? AppTheme.gaugeBorderDark : AppTheme.gaugeBorderLight
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-    canvas.drawCircle(center, innerRadius, innerBorderPaint);
-
-    final trackPaint = Paint()
-      ..color = isDark ? AppTheme.gaugeTrackDark : AppTheme.gaugeBorderLight
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-    canvas.drawCircle(center, radius - strokeWidth / 2, trackPaint);
-
-    final progressPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      -pi / 2,
-      2 * pi * progress,
-      false,
-      progressPaint,
-    );
-
-    if (isInteractive) {
-      final thumbAngle = (-pi / 2) + (2 * pi * progress);
-      final thumbCenter = Offset(
-        center.dx + (radius - strokeWidth / 2) * cos(thumbAngle),
-        center.dy + (radius - strokeWidth / 2) * sin(thumbAngle),
-      );
-
-      final shadowPaint = Paint()
-        ..color = color.withValues(alpha: AppTheme.opacityLight)
-        ..style = PaintingStyle.fill;
-      canvas.drawCircle(thumbCenter, 20, shadowPaint);
-
-      final thumbPaint = Paint()
-        ..color = AppTheme.gaugeWhite
-        ..style = PaintingStyle.fill;
-      canvas.drawCircle(thumbCenter, 14, thumbPaint);
-
-      final borderPaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4;
-      canvas.drawCircle(thumbCenter, 14, borderPaint);
+    if (widget.onChanged != null) {
+      widget.onChanged!(_progress);
     }
-  }
-
-  @override
-  bool shouldRepaint(covariant _GaugePainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.isInteractive != isInteractive ||
-        oldDelegate.isDark != isDark;
   }
 }

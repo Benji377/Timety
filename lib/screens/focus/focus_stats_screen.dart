@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -9,6 +8,8 @@ import '../../providers/focus_provider.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/stats_utils.dart';
 import '../../widgets/week_navigator.dart';
+import '../../utils/clock_painter.dart';
+import '../../l10n/app_localizations.dart';
 
 class FocusStatsScreen extends StatefulWidget {
   const FocusStatsScreen({super.key});
@@ -40,13 +41,296 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     super.dispose();
   }
 
-  Map<String, IconData> get _distractionIcons => const {
-    'Distracted': Icons.warning_amber,
-    'Hydrated / Drink': Icons.water_drop,
-    'Stretched': Icons.accessibility_new,
-    'Snack': Icons.restaurant,
-    'Restroom': Icons.wc,
-  };
+  @override
+  Widget build(BuildContext context) {
+    final focusProvider = context.watch<FocusProvider>();
+    final sessions = focusProvider.history;
+    final filteredSessions = sessions.where(_sessionMatchesTagFilter).toList();
+    final distractionEntries = _getDistractionEntries(
+      filteredSessions,
+      focusProvider.tags,
+    );
+    final selectedDayDistractions = distractionEntries
+        .where(
+          (entry) => AppDateUtils.isSameDay(
+            entry.distraction.time,
+            _selectedDayForClock,
+          ),
+        )
+        .toList();
+
+    final startOfWeek = AppDateUtils.startOfWeekMonday(_focusedWeek);
+    final endOfWeek = startOfWeek.add(
+      const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
+    );
+    final bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
+      DateTime.now(),
+      startOfWeek,
+      endOfWeek,
+    );
+
+    // Filter sessions for the 24-hour clock
+    final clockSessions = filteredSessions
+        .where((s) => AppDateUtils.isSameDay(s.startTime, _selectedDayForClock))
+        .toList();
+    final int clockTotalMins = clockSessions.fold(
+      0,
+      (sum, s) => sum + (s.totalSecondsFocused ~/ 60),
+    );
+
+    return Scaffold(
+      body: sessions.isEmpty
+          ? Center(child: Text(AppLocalizations.of(context)!.focusStatsEmpty))
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                // --- WEEK NAVIGATOR ---
+                WeekNavigator(
+                  focusedDate: _focusedWeek,
+                  onShiftWeek: _changeWeek,
+                ),
+                const SizedBox(height: 24),
+
+                _buildTagFilterCard(filteredSessions, focusProvider.tags),
+                if (filteredSessions.any((session) => session.tagId != null))
+                  const SizedBox(height: 24),
+
+                // --- 24 HOUR CLOCK (CIRCULAR GAUGE) ---
+                _buildSectionHeader(
+                  AppLocalizations.of(context)!.focusStatsSectionClockTitle,
+                  subtitle: AppLocalizations.of(
+                    context,
+                  )!.focusStatsSectionClockSubtitle,
+                  padding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 16),
+
+                // Day Selector for Clock
+                _buildDayPillSelector(startOfWeek),
+                const SizedBox(height: 32),
+
+                // The Clock Painter
+                Center(
+                  child: SizedBox(
+                    width: 250,
+                    height: 250,
+                    child: CustomPaint(
+                      painter: ClockPainter(
+                        sessions: clockSessions,
+                        color: AppTheme.focusColor,
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "${clockTotalMins ~/ 60}h ${clockTotalMins % 60}m",
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.focusStatsSectionClockSessions(
+                                clockSessions.length,
+                              ),
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                _buildSessionListSection(
+                  filteredSessions,
+                  focusProvider.modes,
+                  focusProvider.tags,
+                ),
+                if (filteredSessions.isNotEmpty) const SizedBox(height: 40),
+
+                _buildSectionHeader(
+                  AppLocalizations.of(
+                    context,
+                  )!.focusStatsSectionDistractionsTitle,
+                  subtitle: AppLocalizations.of(
+                    context,
+                  )!.focusStatsSectionDistractionsSubtitle,
+                  padding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 16),
+
+                selectedDayDistractions.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Center(
+                          child: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.focusStatsSectionDistractionsEmpty,
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: selectedDayDistractions.length,
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final entry = selectedDayDistractions[index];
+                          final distractionType = DistractionType.fromDbId(
+                            entry.distraction.note,
+                          );
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: CircleAvatar(
+                              backgroundColor: AppTheme.warningAccent
+                                  .withValues(alpha: 0.12),
+                              child: Icon(
+                                distractionType.icon,
+                                color: distractionType.color,
+                              ),
+                            ),
+                            title: Text(
+                              distractionType.getLocalizedName(context),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '${DateFormat('hh:mm:ss').format(entry.distraction.time)} | ${entry.targetName}',
+                            ),
+                          );
+                        },
+                      ),
+                const SizedBox(height: 40),
+
+                _buildSectionHeader(
+                  AppLocalizations.of(context)!.focusStatsSectionVolumeTitle,
+                  subtitle: AppLocalizations.of(
+                    context,
+                  )!.focusStatsSectionVolumeSubtitle,
+                  padding: EdgeInsets.zero,
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 200,
+                  child: _buildBarChart(
+                    context,
+                    filteredSessions,
+                    startOfWeek,
+                    endOfWeek,
+                    isCurrentRealWeek,
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                _buildTargetBreakdownSection(filteredSessions),
+                const SizedBox(height: 40),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildBarChart(
+    BuildContext context,
+    List<FocusSession> sessions,
+    DateTime startOfWeek,
+    DateTime endOfWeek,
+    bool isCurrentRealWeek,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final dailyMins = _getFocusMinutesForWeek(sessions, startOfWeek, endOfWeek);
+    final todayIndex = DateTime.now().weekday - 1;
+    final weekdays = [
+      l10n.commonWeekdayMon,
+      l10n.commonWeekdayTue,
+      l10n.commonWeekdayWed,
+      l10n.commonWeekdayThu,
+      l10n.commonWeekdayFri,
+      l10n.commonWeekdaySat,
+      l10n.commonWeekdaySun,
+    ];
+
+    final maxY = StatsUtils.maxValue(dailyMins, minimum: 60);
+
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: maxY * 1.2,
+        barTouchData: BarTouchData(
+          enabled: true,
+          touchTooltipData: BarTouchTooltipData(
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              return BarTooltipItem(
+                "${rod.toY.toInt()} min",
+                const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+          ),
+        ),
+        titlesData: FlTitlesData(
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (double value, TitleMeta meta) {
+                final int dayIndex = value.toInt();
+                final bool isToday =
+                    isCurrentRealWeek && (dayIndex == todayIndex);
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    weekdays[dayIndex],
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                      color: isToday
+                          ? AppTheme.focusColor
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          leftTitles: const AxisTitles(),
+          topTitles: const AxisTitles(),
+          rightTitles: const AxisTitles(),
+        ),
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        barGroups: List.generate(7, (index) {
+          final bool isToday = isCurrentRealWeek && (index == todayIndex);
+          return BarChartGroupData(
+            x: index,
+            barRods: [
+              BarChartRodData(
+                toY: dailyMins[index].toDouble(),
+                color: isToday
+                    ? AppTheme.focusColor
+                    : AppTheme.focusColor.withValues(alpha: 0.25),
+                width: 16,
+                borderRadius: BorderRadius.circular(4),
+                backDrawRodData: BackgroundBarChartRodData(
+                  show: true,
+                  toY: maxY * 1.2,
+                  color: Colors.grey.withValues(alpha: 0.1),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
 
   String _resolveSessionTargetName(FocusSession session, List<FocusTag> tags) {
     final tagById = {for (final tag in tags) tag.id: tag};
@@ -56,39 +340,39 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
       case FocusTargetType.habit:
         return session.targetLabel?.trim().isNotEmpty == true
             ? session.targetLabel!.trim()
-            : 'No Target';
+            : AppLocalizations.of(context)!.focusTargetEmpty;
       case FocusTargetType.tag:
         if (session.tagId != null) {
           return tagById[session.tagId!]?.name ??
               session.targetLabel ??
-              'Untagged';
+              AppLocalizations.of(context)!.focusTargetUntagged;
         }
         return session.targetLabel?.trim().isNotEmpty == true
             ? session.targetLabel!.trim()
-            : 'Untagged';
+            : AppLocalizations.of(context)!.focusTargetUntagged;
     }
   }
 
   String _resolveSessionModeName(FocusSession session, List<FocusMode> modes) {
     final modeById = {for (final mode in modes) mode.id: mode};
-    return modeById[session.modeId]?.name ?? 'Focus';
+    return modeById[session.modeId]?.name ?? AppLocalizations.of(context)!.focusLabelDefault;
   }
 
   FocusTargetType _getSessionTargetType(FocusSession session) {
     return session.targetType;
   }
 
-  List<_DistractionEntry> _getDistractionEntries(
+  List<DistractionEntry> _getDistractionEntries(
     List<FocusSession> sessions,
     List<FocusTag> tags,
   ) {
-    final entries = <_DistractionEntry>[];
+    final entries = <DistractionEntry>[];
     for (final session in sessions) {
       final sessionTargetName = _resolveSessionTargetName(session, tags);
 
       for (final distraction in session.distractions) {
         entries.add(
-          _DistractionEntry(
+          DistractionEntry(
             distraction: distraction,
             targetName: sessionTargetName,
           ),
@@ -98,10 +382,6 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
 
     entries.sort((a, b) => b.distraction.time.compareTo(a.distraction.time));
     return entries;
-  }
-
-  IconData _iconForDistraction(String note) {
-    return _distractionIcons[note] ?? Icons.warning_amber;
   }
 
   DateTime _dateOnly(DateTime date) =>
@@ -211,7 +491,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     return dailyMins;
   }
 
-  List<_TargetTypeStat> _getTargetTypeStats(List<FocusSession> sessions) {
+  List<TargetTypeStat> _getTargetTypeStats(List<FocusSession> sessions) {
     final totals = <FocusTargetType, int>{
       FocusTargetType.tag: 0,
       FocusTargetType.task: 0,
@@ -225,23 +505,23 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     }
 
     return [
-      _TargetTypeStat(
+      TargetTypeStat(
         type: FocusTargetType.tag,
-        label: 'Tags',
+        label: AppLocalizations.of(context)!.globalLabelTags,
         color: AppTheme.focusColor,
         icon: Icons.local_offer_outlined,
         minutes: totals[FocusTargetType.tag] ?? 0,
       ),
-      _TargetTypeStat(
+      TargetTypeStat(
         type: FocusTargetType.task,
-        label: 'Tasks',
+        label: AppLocalizations.of(context)!.globalLabelTasks,
         color: AppTheme.taskColor,
         icon: Icons.task_alt,
         minutes: totals[FocusTargetType.task] ?? 0,
       ),
-      _TargetTypeStat(
+      TargetTypeStat(
         type: FocusTargetType.habit,
-        label: 'Habits',
+        label: AppLocalizations.of(context)!.globalLabelHabits,
         color: AppTheme.habitColor,
         icon: Icons.alarm,
         minutes: totals[FocusTargetType.habit] ?? 0,
@@ -269,9 +549,9 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
           children: [
             Expanded(
               child: _buildSectionHeader(
-                'Focus by Target Type',
+                AppLocalizations.of(context)!.focusStatsSectionTargetBreakdownTitle,
                 subtitle:
-                    'Tagged sessions, task-linked sessions, and habit-linked sessions',
+                    AppLocalizations.of(context)!.focusStatsSectionTargetBreakdownSubtitle,
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -374,7 +654,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
           itemBuilder: (context, index) {
             if (index == 0) {
               return FilterChip(
-                label: const Text('All tags'),
+                label: Text(AppLocalizations.of(context)!.focusTagsLabelAll),
                 selected: _selectedTagFilterId == null,
                 selectedColor: AppTheme.focusColor,
                 onSelected: (_) {
@@ -423,8 +703,8 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          'Focus Sessions',
-          subtitle: 'Each session shows the exact target and focus mode.',
+          AppLocalizations.of(context)!.focusStatsSectionSessionsTitle,
+          subtitle: AppLocalizations.of(context)!.focusStatsSectionSessionsSubtitle,
           padding: EdgeInsets.zero,
         ),
         const SizedBox(height: 16),
@@ -531,376 +811,4 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
       },
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    final focusProvider = context.watch<FocusProvider>();
-    final sessions = focusProvider.history;
-    final filteredSessions = sessions.where(_sessionMatchesTagFilter).toList();
-    final distractionEntries = _getDistractionEntries(
-      filteredSessions,
-      focusProvider.tags,
-    );
-    final selectedDayDistractions = distractionEntries
-        .where(
-          (entry) => AppDateUtils.isSameDay(
-            entry.distraction.time,
-            _selectedDayForClock,
-          ),
-        )
-        .toList();
-
-    final startOfWeek = AppDateUtils.startOfWeekMonday(_focusedWeek);
-    final endOfWeek = startOfWeek.add(
-      const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
-    );
-    final bool isCurrentRealWeek = AppDateUtils.isWithinInclusive(
-      DateTime.now(),
-      startOfWeek,
-      endOfWeek,
-    );
-
-    // Filter sessions for the 24-hour clock
-    final clockSessions = filteredSessions
-        .where((s) => AppDateUtils.isSameDay(s.startTime, _selectedDayForClock))
-        .toList();
-    final int clockTotalMins = clockSessions.fold(
-      0,
-      (sum, s) => sum + (s.totalSecondsFocused ~/ 60),
-    );
-
-    return Scaffold(
-      body: sessions.isEmpty
-          ? const Center(
-              child: Text("Complete some focus sessions to see data!"),
-            )
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // --- WEEK NAVIGATOR ---
-                WeekNavigator(
-                  focusedDate: _focusedWeek,
-                  onShiftWeek: _changeWeek,
-                ),
-                const SizedBox(height: 24),
-
-                _buildTagFilterCard(filteredSessions, focusProvider.tags),
-                if (filteredSessions.any((session) => session.tagId != null))
-                  const SizedBox(height: 24),
-
-                // --- 24 HOUR CLOCK (CIRCULAR GAUGE) ---
-                _buildSectionHeader(
-                  'Daily Focus Rhythm',
-                  subtitle: 'Tap a day to inspect its sessions.',
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 16),
-
-                // Day Selector for Clock
-                _buildDayPillSelector(startOfWeek),
-                const SizedBox(height: 32),
-
-                // The Clock Painter
-                Center(
-                  child: SizedBox(
-                    width: 250,
-                    height: 250,
-                    child: CustomPaint(
-                      painter: _ClockPainter(
-                        sessions: clockSessions,
-                        color: AppTheme.focusColor,
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "${clockTotalMins ~/ 60}h ${clockTotalMins % 60}m",
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            Text(
-                              "${clockSessions.length} sessions",
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                _buildSessionListSection(
-                  filteredSessions,
-                  focusProvider.modes,
-                  focusProvider.tags,
-                ),
-                if (filteredSessions.isNotEmpty) const SizedBox(height: 40),
-
-                _buildSectionHeader(
-                  'Distractions',
-                  subtitle: 'Selected day, newest distractions first',
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 16),
-
-                selectedDayDistractions.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Center(
-                          child: Text("No distractions logged for this day."),
-                        ),
-                      )
-                    : ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: selectedDayDistractions.length,
-                        separatorBuilder: (context, index) =>
-                            const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final entry = selectedDayDistractions[index];
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: CircleAvatar(
-                              backgroundColor: AppTheme.warningAccent
-                                  .withValues(alpha: 0.12),
-                              child: Icon(
-                                _iconForDistraction(entry.distraction.note),
-                                color: AppTheme.warningAccent,
-                              ),
-                            ),
-                            title: Text(
-                              entry.distraction.note.isEmpty
-                                  ? 'Distraction'
-                                  : entry.distraction.note,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            subtitle: Text(
-                              '${DateFormat('hh:mm:ss').format(entry.distraction.time)} | ${entry.targetName}',
-                            ),
-                          );
-                        },
-                      ),
-                const SizedBox(height: 40),
-
-                _buildSectionHeader(
-                  'Weekly Focus Volume',
-                  subtitle: 'Total focus minutes per day',
-                  padding: EdgeInsets.zero,
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 200,
-                  child: _buildBarChart(
-                    context,
-                    filteredSessions,
-                    startOfWeek,
-                    endOfWeek,
-                    isCurrentRealWeek,
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                _buildTargetBreakdownSection(filteredSessions),
-                const SizedBox(height: 40),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildBarChart(
-    BuildContext context,
-    List<FocusSession> sessions,
-    DateTime startOfWeek,
-    DateTime endOfWeek,
-    bool isCurrentRealWeek,
-  ) {
-    final dailyMins = _getFocusMinutesForWeek(sessions, startOfWeek, endOfWeek);
-    final todayIndex = DateTime.now().weekday - 1;
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-    final maxY = StatsUtils.maxValue(dailyMins, minimum: 60);
-
-    return BarChart(
-      BarChartData(
-        alignment: BarChartAlignment.spaceAround,
-        maxY: maxY * 1.2,
-        barTouchData: BarTouchData(
-          enabled: true,
-          touchTooltipData: BarTouchTooltipData(
-            getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              return BarTooltipItem(
-                "${rod.toY.toInt()} min",
-                const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            },
-          ),
-        ),
-        titlesData: FlTitlesData(
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (double value, TitleMeta meta) {
-                final int dayIndex = value.toInt();
-                final bool isToday =
-                    isCurrentRealWeek && (dayIndex == todayIndex);
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    weekdays[dayIndex],
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                      color: isToday
-                          ? AppTheme.focusColor
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          leftTitles: const AxisTitles(),
-          topTitles: const AxisTitles(),
-          rightTitles: const AxisTitles(),
-        ),
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        barGroups: List.generate(7, (index) {
-          final bool isToday = isCurrentRealWeek && (index == todayIndex);
-          return BarChartGroupData(
-            x: index,
-            barRods: [
-              BarChartRodData(
-                toY: dailyMins[index].toDouble(),
-                color: isToday
-                    ? AppTheme.focusColor
-                    : AppTheme.focusColor.withValues(alpha: 0.25),
-                width: 16,
-                borderRadius: BorderRadius.circular(4),
-                backDrawRodData: BackgroundBarChartRodData(
-                  show: true,
-                  toY: maxY * 1.2,
-                  color: Colors.grey.withValues(alpha: 0.1),
-                ),
-              ),
-            ],
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _TargetTypeStat {
-  final FocusTargetType type;
-  final String label;
-  final Color color;
-  final IconData icon;
-  final int minutes;
-
-  const _TargetTypeStat({
-    required this.type,
-    required this.label,
-    required this.color,
-    required this.icon,
-    required this.minutes,
-  });
-}
-
-class _DistractionEntry {
-  final Distraction distraction;
-  final String targetName;
-
-  _DistractionEntry({required this.distraction, required this.targetName});
-}
-
-// --- CUSTOM 24-HOUR CLOCK PAINTER ---
-class _ClockPainter extends CustomPainter {
-  final List<FocusSession> sessions;
-  final Color color;
-
-  _ClockPainter({required this.sessions, required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = min(size.width, size.height) / 2;
-    const strokeWidth = 24.0;
-
-    // Draw background track
-    final trackPaint = Paint()
-      ..color = Colors.grey.shade200
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-    canvas.drawCircle(center, radius - (strokeWidth / 2), trackPaint);
-
-    // Draw clock markers (0, 6, 12, 18)
-    final textPainter = TextPainter(
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.ltr,
-    );
-    void drawMarker(String text, double angle) {
-      textPainter.text = TextSpan(
-        text: text,
-        style: const TextStyle(color: Colors.grey, fontSize: 10),
-      );
-      textPainter.layout();
-      final r = radius - strokeWidth - 10;
-      final x = center.dx + r * cos(angle) - textPainter.width / 2;
-      final y = center.dy + r * sin(angle) - textPainter.height / 2;
-      textPainter.paint(canvas, Offset(x, y));
-    }
-
-    drawMarker("0", -pi / 2); // Top
-    drawMarker("6", 0); // Right
-    drawMarker("12", pi / 2); // Bottom
-    drawMarker("18", pi); // Left
-
-    // Draw Sessions
-    final sessionPaint = Paint()
-      ..color = color.withValues(alpha: 0.8)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    for (var session in sessions) {
-      // Calculate start angle (24 hours mapped to 2 * pi)
-      final double startHour =
-          session.startTime.hour + (session.startTime.minute / 60.0);
-      final double startAngle = (startHour / 24.0) * 2 * pi - (pi / 2);
-
-      // Calculate end angle
-      final DateTime end = session.endTime ?? DateTime.now();
-      double endHour = end.hour + (end.minute / 60.0);
-
-      // Handle sessions spanning past midnight (clamp at 24 for this view)
-      if (!session.startTime.isAtSameMomentAs(end) &&
-          end.day != session.startTime.day) {
-        endHour = 24.0;
-      }
-
-      final double sweepAngle = ((endHour - startHour) / 24.0) * 2 * pi;
-      if (sweepAngle <= 0) continue; // Skip bad data
-
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius - (strokeWidth / 2)),
-        startAngle,
-        sweepAngle,
-        false,
-        sessionPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _ClockPainter oldDelegate) => true;
 }

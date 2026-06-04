@@ -5,6 +5,7 @@ import '../providers/habit_provider.dart';
 import '../data/task/task.dart';
 import '../theme/app_theme.dart';
 import '../utils/habit_utils.dart';
+import '../l10n/app_localizations.dart';
 import 'dialogs.dart';
 
 /// Reusable bottom sheet builders for focus-related UIs
@@ -16,29 +17,6 @@ class FocusBottomSheetBuilders {
     required BuildContext context,
     required Function(String eventName) onEventSelected,
   }) {
-    const events = [
-      {
-        'name': 'Distracted',
-        'icon': Icons.warning_amber,
-        'color': AppTheme.errorColor,
-      },
-      {
-        'name': 'Hydrated / Drink',
-        'icon': Icons.water_drop,
-        'color': AppTheme.taskColor,
-      },
-      {
-        'name': 'Stretched',
-        'icon': Icons.accessibility_new,
-        'color': AppTheme.warningColor,
-      },
-      {
-        'name': 'Snack',
-        'icon': Icons.restaurant,
-        'color': AppTheme.successColor,
-      },
-      {'name': 'Restroom', 'icon': Icons.wc, 'color': Colors.grey},
-    ];
 
     showModalBottomSheet(
       context: context,
@@ -50,30 +28,30 @@ class FocusBottomSheetBuilders {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  "Log an Event",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  AppLocalizations.of(context)!.distractionSheetTitle,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
-              ...events.map(
-                (e) => ListTile(
+              ...DistractionType.values.map(
+                (type) => ListTile(
                   leading: Icon(
-                    e['icon'] as IconData,
-                    color: e['color'] as Color,
+                    type.icon,
+                    color: type.color,
                   ),
                   title: Text(
-                    e['name'] as String,
+                    type.getLocalizedName(context),
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   onTap: () {
-                    final eventName = e['name'] as String;
-                    onEventSelected(eventName);
+                    final eventName = type.getLocalizedName(context);
+                    onEventSelected(type.dbId);
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Logged: $eventName'),
+                        content: Text(AppLocalizations.of(context)!.distractionLogged(eventName)),
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -127,21 +105,21 @@ class FocusBottomSheetBuilders {
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
                     child: Text(
-                      'Select Focus Target',
-                      style: TextStyle(
+                      AppLocalizations.of(context)!.targetSheetTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  const TabBar(
+                  TabBar(
                     tabs: [
-                      Tab(text: 'Tags'),
-                      Tab(text: 'Tasks'),
-                      Tab(text: 'Habits'),
+                      Tab(text: AppLocalizations.of(context)!.globalLabelTags),
+                      Tab(text: AppLocalizations.of(context)!.globalLabelTasks),
+                      Tab(text: AppLocalizations.of(context)!.globalLabelHabits),
                     ],
                   ),
                   Expanded(
@@ -194,7 +172,7 @@ class FocusBottomSheetBuilders {
       children: [
         Expanded(
           child: tags.isEmpty
-              ? const Center(child: Text('No focus tags yet.'))
+              ? Center(child: Text(AppLocalizations.of(context)!.focusTagsLabelEmpty))
               : ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: tags.length,
@@ -234,7 +212,7 @@ class FocusBottomSheetBuilders {
         const Divider(height: 1),
         ListTile(
           leading: const Icon(Icons.add_circle_outline),
-          title: const Text('Create New Tag'),
+          title: Text(AppLocalizations.of(context)!.focusTagsLabelAdd),
           onTap: () {
             Navigator.pop(context);
             onCreateNewTag();
@@ -252,7 +230,7 @@ class FocusBottomSheetBuilders {
     required Function(Task task) onTaskSelected,
   }) {
     return tasks.isEmpty
-        ? const Center(child: Text('No tasks available.'))
+        ? Center(child: Text(AppLocalizations.of(context)!.taskSheetEmpty))
         : ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: tasks.length,
@@ -282,7 +260,7 @@ class FocusBottomSheetBuilders {
                 subtitle: Text(
                   task.category.isNotEmpty
                       ? task.category
-                      : (task.isCompleted ? 'Completed task' : 'Task'),
+                      : (task.isCompleted ? AppLocalizations.of(context)!.taskLabelCompleted : AppLocalizations.of(context)!.globalLabelTask),
                 ),
                 trailing: isSelected
                     ? const Icon(Icons.check, color: AppTheme.successColor)
@@ -305,7 +283,7 @@ class FocusBottomSheetBuilders {
     required Function(Habit habit) onHabitSelected,
   }) {
     if (habits.isEmpty) {
-      return const Center(child: Text('No habits available.'));
+      return Center(child: Text(AppLocalizations.of(context)!.habitsSheetEmpty));
     }
 
     final grouped = <String, List<Habit>>{};
@@ -327,8 +305,8 @@ class FocusBottomSheetBuilders {
           selectedType == FocusTargetType.habit && selectedId == habit.id;
 
       final statusText = habit.frequency == HabitFrequency.daily
-          ? 'Daily Habit'
-          : 'Weekly Habit';
+          ? AppLocalizations.of(context)!.habitLabelFreqDaily
+          : AppLocalizations.of(context)!.habitLabelFreqWeekly;
 
       children.add(
         ListTile(
@@ -436,9 +414,9 @@ class FocusBottomSheetBuilders {
   }) {
     AppDialogs.showTextInputDialog(
       context: context,
-      title: 'New Tag',
-      labelText: 'Tag Name',
-      hintText: 'Tag Name (e.g. Reading)',
+      title: AppLocalizations.of(context)!.focusTagsDialogTitleAdd,
+      labelText: AppLocalizations.of(context)!.focusTagsDialogLabelName,
+      hintText: AppLocalizations.of(context)!.focusTagsDialogLabelHint,
     ).then((tagName) {
       if (tagName != null) {
         onTagCreated(tagName);
