@@ -1,17 +1,21 @@
+import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:timety/data/habit/habit_models.dart';
 import 'package:timety/providers/habit_provider.dart';
 import 'package:timety/utils/date_utils.dart';
 import 'package:timety/utils/habit_utils.dart';
+import 'package:timety/l10n/app_localizations.dart';
 
 import '../test_support/fakes.dart';
 
 void main() {
   late FakeHabitRepository habitRepository;
   late HabitProvider habitProvider;
+  late AppLocalizations l10n;
 
   setUp(() async {
+    l10n = lookupAppLocalizations(const Locale('en'));
     habitRepository = FakeHabitRepository(
       initialHabits: [
         buildDailyHabit(id: 'daily', name: 'Daily habit'),
@@ -47,13 +51,13 @@ void main() {
         targetDaysPerWeek: 4,
       );
 
-      expect(HabitUtils.buildHabitSubtitle(dailyHabit, habitProvider), 'Daily');
+      expect(HabitUtils.buildHabitSubtitle(dailyHabit, l10n, 0), 'Daily');
       expect(
-        HabitUtils.buildHabitSubtitle(exactHabit, habitProvider),
+        HabitUtils.buildHabitSubtitle(exactHabit, l10n, 0),
         'Weekly on ${AppDateUtils.weekdayToStringShort(DateTime.monday)}, ${AppDateUtils.weekdayToStringShort(DateTime.wednesday)}',
       );
       expect(
-        HabitUtils.buildHabitSubtitle(flexibleHabit, habitProvider),
+        HabitUtils.buildHabitSubtitle(flexibleHabit, l10n, 0),
         '0 / 4 this week',
       );
     });

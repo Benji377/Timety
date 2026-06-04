@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../providers/settings_provider.dart';
 import '../data/habit/habit_models.dart';
@@ -20,7 +21,11 @@ class HabitProvider extends ChangeNotifier {
   // Helper to notify listeners and update home widget
   void _notifyAndSync() {
     notifyListeners();
-    HabitWidgetService.updateHabitWidget(_habits, this);
+
+    final locale =
+        _settings?.appLocale ?? ui.PlatformDispatcher.instance.locale;
+
+    HabitWidgetService.updateHabitWidget(_habits, this, locale);
   }
 
   void updateSettings(SettingsProvider settings) {

@@ -4,6 +4,7 @@ import '../providers/habit_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/habit_utils.dart';
 import 'list_tiles/habit_list_tile.dart';
+import '../l10n/app_localizations.dart';
 
 /// Displays a grouped view of habits organized by stacks
 ///
@@ -152,9 +153,9 @@ class GroupedHabitsSection extends StatelessWidget {
                         isLocked: isLocked,
                         enableDismissible: false,
                         subtitleText: HabitUtils.buildHabitSubtitle(
-                          context,
                           habit,
-                          habitProvider,
+                          AppLocalizations.of(context)!,
+                          habitProvider.getCompletionsThisWeek(habit),
                         ),
                         onToggleCompleted: () => onToggleCompleted(habit),
                         onTap: () => onHabitTap(habit),
@@ -173,7 +174,11 @@ class GroupedHabitsSection extends StatelessWidget {
             habit: habit,
             isCompleted: isDone,
             enableDismissible: false,
-            subtitleText: HabitUtils.buildHabitSubtitle(context, habit, habitProvider),
+            subtitleText: HabitUtils.buildHabitSubtitle(
+              habit,
+              AppLocalizations.of(context)!,
+              habitProvider.getCompletionsThisWeek(habit),
+            ),
             onToggleCompleted: () => onToggleCompleted(habit),
             onTap: () => onHabitTap(habit),
           );

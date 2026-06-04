@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -191,13 +192,13 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   // Helpers
-  String getFormattedDate(DateTime date, BuildContext context) {
+  String getFormattedDate(DateTime date) {
     if (_dateFormatCode != null) {
       // User explicitly picked a format
       return DateFormat(_dateFormatCode).format(date);
     } else {
       // System Default: Grab the current app language/locale and format automatically
-      final localeString = Localizations.localeOf(context).toString();
+      final localeString = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
       return DateFormat.yMd(localeString).format(date);
     }
   }

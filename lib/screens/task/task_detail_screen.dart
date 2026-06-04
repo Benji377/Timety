@@ -256,7 +256,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               child: Text(
                 _dueDate == null
                     ? 'No Due Date Set'
-                    : 'Due: ${settings.getFormattedDate(_dueDate!, context)} at ${settings.use24HourFormat ? DateFormat.Hm().format(_dueDate!) : DateFormat.jm().format(_dueDate!)}',
+                    : 'Due: ${settings.getFormattedDate(_dueDate!)} at ${settings.use24HourFormat ? DateFormat.Hm().format(_dueDate!) : DateFormat.jm().format(_dueDate!)}',
                 style: TextStyle(
                   // Dims the text slightly if not in edit mode
                   color: _isEditing ? null : theme.disabledColor,
@@ -278,7 +278,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       backgroundColor: colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.7),
                       label: Text(
-                        "${settings.getFormattedDate(r, context)} - ${settings.use24HourFormat ? DateFormat.Hm().format(r) : DateFormat.jm().format(r)}",
+                        "${settings.getFormattedDate(r)} - ${settings.use24HourFormat ? DateFormat.Hm().format(r) : DateFormat.jm().format(r)}",
                         style: const TextStyle(fontSize: AppTheme.fsBodySmall),
                       ),
                       onDeleted: _isEditing

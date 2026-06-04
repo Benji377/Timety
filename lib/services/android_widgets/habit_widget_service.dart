@@ -5,21 +5,23 @@ import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../utils/habit_utils.dart';
 import '../../widgets/android_widgets/habit_widget_view.dart';
+import '../../l10n/app_localizations.dart';
 
 class HabitWidgetService {
   static const String _groupId = 'io.github.benji377.timety';
   static const String _androidWidgetName = 'HabitWidgetProvider';
 
   static Future<void> updateHabitWidget(
-    BuildContext context,
     List<Habit> allHabits,
     HabitProvider provider,
+    Locale userLocale,
   ) async {
     try {
       await HomeWidget.setAppGroupId(_groupId);
 
       final now = DateTime.now();
       final todayHabits = provider.getHabitsForDay(now);
+      final l10n = lookupAppLocalizations(userLocale);
 
       final completionStatus = <String, bool>{};
       final stackCompletions = <String, int>{};
@@ -97,7 +99,7 @@ class HabitWidgetService {
                   habit: h,
                   isDone: completionStatus[h.id] ?? false,
                   isLocked: stackLocks[h.id] ?? false,
-                  frequency: HabitUtils.buildHabitSubtitle(context, h, provider),
+                  frequency: HabitUtils.buildHabitSubtitle(h, l10n, provider.getCompletionsThisWeek(h)),
                   isStacked: true,
                 ),
               const HabitStackFooterView(),
@@ -113,7 +115,7 @@ class HabitWidgetService {
             habit: h,
             isDone: completionStatus[h.id] ?? false,
             isLocked: false,
-            frequency: HabitUtils.buildHabitSubtitle(context, h, provider),
+            frequency: HabitUtils.buildHabitSubtitle(h, l10n, provider.getCompletionsThisWeek(h)),
           ),
         );
       }

@@ -345,7 +345,9 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Caches localized strings for use in background timer notifications, which cannot access BuildContext.
-  void _cacheTranslations(BuildContext context) {
+  void _cacheTranslations(BuildContext? context) {
+    if (context == null) return;
+    
     final l10n = AppLocalizations.of(context)!;
     _locFocusActive = l10n.focusStateActive;
     _locPaused = l10n.focusStatePaused;
@@ -359,7 +361,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Starts or resumes the current focus session.
   /// [context] is required to cache the UI localization strings.
-  void startSession(BuildContext context) {
+  void startSession([BuildContext? context]) {
     _cacheTranslations(context);
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
     if (_selectedTarget?.type == FocusTargetType.habit &&
