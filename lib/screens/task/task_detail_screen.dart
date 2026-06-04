@@ -2,12 +2,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../../utils/feature/priority_utils.dart';
+import '../../utils/priority_utils.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/date/date_picker_utils.dart';
-import '../../widgets/pickers/location_picker_widget.dart';
+import '../../utils/date_time_utils.dart';
+import '../../widgets/location_picker.dart';
 import '../../providers/settings_provider.dart';
 
 class TaskDetailScreen extends StatefulWidget {

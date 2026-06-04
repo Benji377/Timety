@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
-import './habit_models.dart';
-import './habit_repository.dart';
+import 'habit_models.dart';
+import 'habit_repository.dart';
 
 class HiveHabitRepository implements HabitRepository {
   static const String boxName = 'habitsBox';

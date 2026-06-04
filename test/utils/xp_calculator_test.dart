@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:timety/utils/logic/xp_utils.dart';
+import 'package:timety/utils/xp_calculator.dart';
 
 void main() {
   group('ExperienceEngine', () {

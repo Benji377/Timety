@@ -1,13 +1,13 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import './settings_provider.dart';
+import '../providers/settings_provider.dart';
 import '../data/habit/habit_models.dart';
 import '../data/habit/habit_repository.dart';
 import '../services/notification_service.dart';
-import '../utils/date/date_utils.dart';
-import '../utils/logic/xp_utils.dart';
+import '../utils/date_utils.dart';
+import '../utils/xp_calculator.dart';
 import '../services/android_widgets/habit_widget_service.dart';
-import './user_provider.dart';
+import 'user_provider.dart';
 
 class HabitProvider extends ChangeNotifier {
   final HabitRepository repository;

@@ -3,8 +3,8 @@ import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
 import '../services/android_widgets/task_widget_service.dart';
-import '../utils/logic/xp_utils.dart';
-import './user_provider.dart';
+import '../utils/xp_calculator.dart';
+import 'user_provider.dart';
 
 class TaskProvider extends ChangeNotifier {
   final TaskRepository repository;

@@ -4,11 +4,11 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/date/date_utils.dart';
-import '../../utils/logic/stats_utils.dart';
-import '../../utils/logic/streak_utils.dart';
-import '../../widgets/stat_cards/compact_vertical_stat_card_widget.dart';
-import '../../widgets/common/week_navigator_widget.dart';
+import '../../utils/date_utils.dart';
+import '../../utils/stats_utils.dart';
+import '../../utils/streak_calculator.dart';
+import '../../widgets/stat_cards.dart';
+import '../../widgets/week_navigator.dart';
 
 class HabitStatsScreen extends StatefulWidget {
   const HabitStatsScreen({super.key});

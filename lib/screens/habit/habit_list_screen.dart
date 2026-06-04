@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../statistics_screen.dart';
+import '../../screens/statistics_screen.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/feature/habit_utils.dart';
-import '../../widgets/common/expansion_section_widget.dart';
-import '../../widgets/bottom_sheets/habit_bottom_sheets.dart';
+import '../../utils/habit_utils.dart';
+import '../../widgets/expansion_section.dart';
+import '../../widgets/habit_bottom_sheet_builders.dart';
 import '../../widgets/list_tiles/habit_list_tile.dart';
 import '../calendar_screen.dart';
 import '../../l10n/app_localizations.dart';
-import './habit_detail_screen.dart';
+import 'habit_detail_screen.dart';
 
 class HabitListScreen extends StatelessWidget {
   const HabitListScreen({super.key});

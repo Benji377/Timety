@@ -4,9 +4,9 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../theme/app_theme.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
-import '../../utils/date/date_utils.dart';
-import '../../utils/logic/stats_utils.dart';
-import '../../widgets/common/week_navigator_widget.dart';
+import '../../utils/date_utils.dart';
+import '../../utils/stats_utils.dart';
+import '../../widgets/week_navigator.dart';
 
 class TaskStatsScreen extends StatefulWidget {
   const TaskStatsScreen({super.key});

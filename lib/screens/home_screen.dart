@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
-import './settings_screen.dart';
-import '../utils/ui/greeting_utils.dart';
+import '../screens/settings_screen.dart';
+import '../utils/greeting_utils.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
 import '../data/task/task.dart';
@@ -10,11 +10,11 @@ import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
-import '../widgets/focus/interactive_gauge_widget.dart';
-import '../widgets/habit/grouped_habits_section_widget.dart';
+import '../widgets/interactive_gauge.dart';
+import '../widgets/grouped_habits_section.dart';
 import '../widgets/list_tiles/task_list_tile.dart';
-import './task/task_detail_screen.dart';
-import './habit/habit_detail_screen.dart';
+import 'task/task_detail_screen.dart';
+import 'habit/habit_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback onNavigateToFocus;

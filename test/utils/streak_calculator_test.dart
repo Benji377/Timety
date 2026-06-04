@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:timety/utils/logic/streak_utils.dart';
+import 'package:timety/utils/streak_calculator.dart';
 
 void main() {
   group('StreakCalculator', () {

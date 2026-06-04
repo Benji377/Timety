@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:timety/data/habit/habit_models.dart';
-import 'package:timety/utils/ui/habit_icon_utils.dart';
+import 'package:timety/utils/habit_icons.dart';
 
 void main() {
   group('Habit model', () {

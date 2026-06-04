@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
-import './task.dart';
-import './task_repository.dart';
+import 'task.dart';
+import 'task_repository.dart';
 
 class HiveTaskRepository implements TaskRepository {
   static const String boxName = 'tasksBox';

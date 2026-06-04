@@ -6,17 +6,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import '../providers/habit_provider.dart';
 import '../providers/user_provider.dart';
-import '../utils/assets/wrapup_image_utils.dart';
+import '../utils/wrapup_image_generator.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../theme/app_theme.dart';
-import '../utils/logic/streak_utils.dart';
-import '../widgets/stat_cards/stat_cards.dart';
-import '../data/other/stat_card_style.dart';
+import '../utils/streak_calculator.dart';
+import '../widgets/stat_cards.dart';
 import '../widgets/user_profile/streak_status_badge.dart';
 import '../widgets/user_profile/user_streak_timeline_card.dart';
 import '../widgets/user_profile/user_xp_breakdown_card.dart';
-import './statistics_screen.dart';
+import 'statistics_screen.dart';
 
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});

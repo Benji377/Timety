@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:timety/data/habit/habit_models.dart';
 import 'package:timety/providers/habit_provider.dart';
-import 'package:timety/utils/date/date_utils.dart';
-import 'package:timety/utils/feature/habit_utils.dart';
+import 'package:timety/utils/date_utils.dart';
+import 'package:timety/utils/habit_utils.dart';
 import 'package:timety/l10n/app_localizations.dart';
 
 import '../test_support/fakes.dart';
