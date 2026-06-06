@@ -9,6 +9,7 @@
   "focusTagsTitle": "Focus Tags",
   "habitsListTitle": "My Habits",
   "calendarTitle": "Calendar",
+  "settingsTitle": "Settings",
   
   "focusTargetLabel": "Target",
   "focusTargetEmpty": "No Target",
@@ -420,6 +421,94 @@
   "statsLabelFocusGoal": "Daily Focus Goal",
   "statsLabelProductivity": "Productivity Synergy",
   "statsLabelSynergy": "Focus Time vs. Task Completion (Last 7 Days)",
+
+  "settingsSectionAppearance": "Appearance",
+  "settingsSectionLocaleFormat": "Localization & Formatting",
+  "settingsSectionFocusProductivity": "Focus & Productivity",
+  "settingsSectionSupport": "Support & Feedback",
+  "settingsSectionApi": "API & Services",
+  "settingsSectionDataBackup": "Data & Backup",
+  "settingsSectionNotifications": "Notifications",
+
+  "settingsLabelTheme": "App Theme",
+  "settingsLabelThemeSystem": "System Default",
+  "settingsLabelThemeLight": "Light",
+  "settingsLabelThemeDark": "Dark",
+  "settingsLabelLanguage": "Language",
+  "settingsLabelLanguageSystem": "System Default",
+  "settingsLabelTimeFormat": "Use 24-hour Time",
+  "settingsLabelDateFormat": "Date Format",
+  "settingsLabelDateFormatSystem": "System Default",
+  "settingsLabelDateFormatSystemDMY": "Day/Month/Year",
+  "settingsLabelDateFormatSystemMDY": "Month/Day/Year",
+  "settingsLabelDateFormatSystemYMD": "Year-Month-Day",
+  "settingsLabelDateFormatSystemDotDMY": "Day.Month.Year",
+  "settingsLabelFocusGoal": "Daily Focus Goal",
+  "settingsLabelFocusAutocomplete": "Auto-complete linked task or habit",
+  "settingsLabelFocusAutocompleteSubtitle": "Marks the selected task or habit as complete when a focus timer finishes",
+  "settingsLabelFocusStopwatch": "Max Stopwatch Limit",
+  "settingsLabelFocusStopwatchSubtitle": "Prevents accidentally leaving timer on",
+  "settingsLabelFocusNodeTime": "Max Phase Node Time",
+  "settingsLabelFocusNodeTimeSubtitle": "Maximum length for a single focus block",
+  "settingsLabelUpcomingTask": "Upcoming Task Window",
+  "settingsLabelUpcomingTaskSubtitle": "{days} days ahead",
+  "@settingsLabelUpcomingTaskSubtitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSectionOrganization": "Organization",
+  "settingsLabelTags": "Focus Tags",
+  "settingsLabelTagsSubtitle": "{count} tags",
+  "@settingsLabelTagsSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsLabelCategories": "Task Categories",
+  "settingsLabelCategoriesSubtitle": "{count} categories",
+  "@settingsLabelCategoriesSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsLabelLocationApi": "Location Search API",
+  "settingsLabelDailyMotivation": "Daily Motivation Time",
+  "settingsLabelEodCheckup": "End of Day Checkup Time",
+  "settingsLabelExportData": "Export JSON Data",
+  "settingsLabelExportDataSubtitle": "Save a snapshot of your data",
+  "settingsLabelImportData": "Import JSON Data",
+  "settingsLabelImportDataSubtitle": "Restore data from a JSON export file",
+  "settingsLabelCommunity": "Community & Help",
+  "settingsLabelCommunitySubtitle": "Ask questions and share tips on GitHub",
+  "settingsLabelFeedback": "Send Feedback",
+  "settingsLabelFeedbackSubtitle": "Report bugs or request new features",
+
+  "settingsLabelVersion": "Version {version}",
+  "@settingsLabelVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsLabelBuiltBy": "Built by Benji377",
+  "settingsLabelMaintainer": "Maintainer",
+  "settingsLabelDonate": "Donate",
+  "settingsLabelDonateSubtitle": "GitHub Sponsors",
+  "settingsLabelSourceCode": "Source Code",
+  "settingsLabelSourceCodeSubtitle": "GitHub Repository",
+
+  "settingsDialogUnitMinutes": "minutes",
+  "settingsDialogUnitDays": "days",
+
+
 
   "navigationHome": "Home",
   "navigationFocus": "Focus",

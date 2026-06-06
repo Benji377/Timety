@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../providers/settings_provider.dart';
 import '../providers/focus_provider.dart';
@@ -27,25 +28,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final focusProvider = context.watch<FocusProvider>();
     final taskProvider = context.watch<TaskProvider>();
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings'), centerTitle: true),
+      appBar: AppBar(title: Text(l10n.settingsTitle), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 40),
         children: [
           // --- APPEARANCE ---
-          _buildSectionHeader('Appearance'),
+          _buildSectionHeader(l10n.settingsSectionAppearance),
           ListTile(
             leading: const Icon(Icons.dark_mode_outlined),
-            title: const Text('Theme'),
+            title: Text(l10n.settingsLabelTheme),
             trailing: DropdownButton<ThemeMode>(
               value: settings.themeMode,
               underline: const SizedBox(),
-              items: const [
-                DropdownMenuItem(value: ThemeMode.light, child: Text('Light')),
-                DropdownMenuItem(value: ThemeMode.dark, child: Text('Dark')),
+              items: [
+                DropdownMenuItem(value: ThemeMode.light, child: Text(l10n.settingsLabelThemeLight)),
+                DropdownMenuItem(value: ThemeMode.dark, child: Text(l10n.settingsLabelThemeDark)),
                 DropdownMenuItem(
                   value: ThemeMode.system,
-                  child: Text('System Default'),
+                  child: Text(l10n.settingsLabelThemeSystem),
                 ),
               ],
               onChanged: (val) {
@@ -57,22 +60,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 32),
 
           // --- LOCALIZATION & FORMATTING ---
-          _buildSectionHeader('Localization & Formatting'),
+          _buildSectionHeader(l10n.settingsSectionLocaleFormat),
           ListTile(
             leading: const Icon(Icons.language, color: AppTheme.taskColor),
-            title: const Text('Language'),
+            title: Text(l10n.settingsLabelLanguage),
             trailing: DropdownButton<String>(
               value: settings.appLocaleCode,
               underline: const SizedBox(),
-              items: const [
+              items: [
                 DropdownMenuItem(
                   value: 'system',
-                  child: Text('System Default'),
+                  child: Text(l10n.settingsLabelLanguageSystem),
                 ),
-                DropdownMenuItem(value: 'en', child: Text('English')),
-                DropdownMenuItem(value: 'de', child: Text('Deutsch')),
-                DropdownMenuItem(value: 'it', child: Text('Italiano')),
-                DropdownMenuItem(value: 'lld', child: Text('Ladin')),
+                const DropdownMenuItem(value: 'en', child: Text('English')),
+                const DropdownMenuItem(value: 'de', child: Text('Deutsch')),
+                const DropdownMenuItem(value: 'it', child: Text('Italiano')),
+                const DropdownMenuItem(value: 'lld', child: Text('Ladin')),
               ],
               onChanged: (val) {
                 if (val != null) settings.setAppLocaleCode(val);
@@ -84,7 +87,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.access_time,
               color: AppTheme.focusColor,
             ),
-            title: const Text('Use 24-Hour Time'),
+            title: Text(l10n.settingsLabelTimeFormat),
             value: settings.use24HourFormat,
             onChanged: settings.set24HourFormat,
           ),
@@ -93,30 +96,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.calendar_today,
               color: AppTheme.habitColor,
             ),
-            title: const Text('Date Format'),
+            title: Text(l10n.settingsLabelDateFormat),
             trailing: DropdownButton<String>(
               value: settings.dateFormatCode,
               underline: const SizedBox(),
-              items: const [
+              items: [
                 DropdownMenuItem(
                   value: 'system',
-                  child: Text('System Default'),
+                  child: Text(l10n.settingsLabelDateFormatSystem),
                 ),
                 DropdownMenuItem(
                   value: 'dd/MM/yyyy',
-                  child: Text('Day/Month/Year'),
+                  child: Text(l10n.settingsLabelDateFormatSystemDMY),
                 ),
                 DropdownMenuItem(
                   value: 'MM/dd/yyyy',
-                  child: Text('Month/Day/Year'),
+                  child: Text(l10n.settingsLabelDateFormatSystemMDY),
                 ),
                 DropdownMenuItem(
                   value: 'yyyy-MM-dd',
-                  child: Text('Year-Month-Day'),
+                  child: Text(l10n.settingsLabelDateFormatSystemYMD),
                 ),
                 DropdownMenuItem(
                   value: 'dd.MM.yyyy',
-                  child: Text('Day.Month.Year'),
+                  child: Text(l10n.settingsLabelDateFormatSystemDotDMY),
                 ),
               ],
               onChanged: (val) {
@@ -128,17 +131,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 32),
 
           // --- FOCUS & PRODUCTIVITY ---
-          _buildSectionHeader('Focus & Productivity'),
+          _buildSectionHeader(l10n.settingsSectionFocusProductivity),
           ListTile(
             leading: const Icon(
               Icons.track_changes,
               color: AppTheme.focusColor,
             ),
-            title: const Text('Daily Focus Goal'),
-            subtitle: Text('${settings.dailyGoalMins} minutes'),
+            title: Text(l10n.settingsLabelFocusGoal),
+            subtitle: Text(l10n.nMinutesCount(settings.dailyGoalMins)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showNumberPickerDialog(
-              "Daily Goal",
+              l10n.settingsLabelFocusGoal,
               settings.dailyGoalMins,
               10,
               480,
@@ -147,10 +150,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           SwitchListTile(
             secondary: const Icon(Icons.task_alt, color: AppTheme.taskColor),
-            title: const Text('Auto-complete linked task or habit'),
-            subtitle: const Text(
-              'Marks the selected task or habit as complete when a focus timer finishes.',
-            ),
+            title: Text(l10n.settingsLabelFocusAutocomplete),
+            subtitle: Text(l10n.settingsLabelFocusAutocompleteSubtitle),
             value: settings.autoCompleteFocusTargetOnFinish,
             onChanged: settings.setAutoCompleteFocusTargetOnFinish,
           ),
@@ -159,13 +160,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.timer_outlined,
               color: AppTheme.warningAccent,
             ),
-            title: const Text('Max Stopwatch Limit'),
-            subtitle: Text(
-              'Prevents accidentally leaving timer on\nCurrently: ${settings.maxStopwatchMins} mins',
-            ),
+            title: Text(l10n.settingsLabelFocusStopwatch),
+            subtitle: Text(l10n.settingsLabelFocusStopwatchSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showNumberPickerDialog(
-              "Stopwatch Limit",
+              l10n.settingsLabelFocusStopwatch,
               settings.maxStopwatchMins,
               30,
               480,
