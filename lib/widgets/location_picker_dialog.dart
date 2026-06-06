@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 void showLocationApiDialog({
   required BuildContext context,
@@ -13,13 +14,14 @@ void showLocationApiDialog({
   );
   bool isTestingConnection = false;
   bool hasValidatedConnection = false;
+  final l10n = AppLocalizations.of(context)!;
 
   showDialog(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (dialogContext, setDialogState) {
         return AlertDialog(
-          title: const Text('Location Search API'),
+          title: Text(l10n.locationApiDialogTitle),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -27,10 +29,10 @@ void showLocationApiDialog({
               children: [
                 TextField(
                   controller: controller,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'https://photon.komoot.io/api/',
-                    labelText: 'API Endpoint URL',
-                    border: OutlineInputBorder(),
+                    labelText: l10n.locationApiDialogLabel,
+                    border: const OutlineInputBorder(),
                   ),
                   onChanged: (_) {
                     setDialogState(() {
@@ -47,8 +49,8 @@ void showLocationApiDialog({
                     _buildInfoItem(
                       context: dialogContext,
                       icon: Icons.check_circle,
-                      title: 'Supported APIs',
-                      subtitle: 'Photon-compatible endpoints',
+                      title: l10n.locationApiDialogSupported,
+                      subtitle: l10n.locationApiDialogSupportedDesc,
                     ),
                     // Learn more link
                     Padding(
@@ -62,18 +64,18 @@ void showLocationApiDialog({
                           Uri.parse('https://github.com/komoot/photon'),
                           mode: LaunchMode.externalApplication,
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.link,
                               size: 16,
                               color: AppTheme.taskColor,
                             ),
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                'Learn about Photon on GitHub',
-                                style: TextStyle(
+                                l10n.locationApiDialogLearnMore,
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: AppTheme.taskColor,
                                   decoration: TextDecoration.underline,
@@ -89,9 +91,8 @@ void showLocationApiDialog({
                     _buildInfoItem(
                       context: dialogContext,
                       icon: Icons.storage,
-                      title: 'Best Practice',
-                      subtitle:
-                          'Self-host your own Photon instance for privacy',
+                      title: l10n.locationApiDialogBestPractice,
+                      subtitle: l10n.locationApiDialogBestPracticeDesc,
                     ),
                   ],
                 ),
@@ -107,17 +108,17 @@ void showLocationApiDialog({
                       ),
                       borderRadius: AppTheme.brMedium,
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.check_circle,
                           color: AppTheme.statusCompleted,
                           size: 20,
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Text(
-                          'Connection successful',
-                          style: TextStyle(
+                          l10n.locationApiDialogSuccess,
+                          style: const TextStyle(
                             color: AppTheme.statusCompleted,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -138,7 +139,7 @@ void showLocationApiDialog({
                     hasValidatedConnection = false;
                   });
                 },
-                child: const Text('Reset to Default'),
+                child: Text(l10n.locationApiDialogReset),
               ),
             TextButton(
               onPressed: isTestingConnection
@@ -161,19 +162,19 @@ void showLocationApiDialog({
 
                         if (!isValid) {
                           messenger.showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.error,
                                     color: Colors.white,
                                     size: 20,
                                   ),
-                                  SizedBox(width: 12),
+                                  const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
-                                      'Cannot reach endpoint. Check the URL and try again.',
-                                      style: TextStyle(
+                                      l10n.locationApiDialogError,
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 12,
                                       ),
@@ -194,11 +195,11 @@ void showLocationApiDialog({
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Test Connection'),
+                  : Text(l10n.locationApiDialogTest),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+              child: Text(l10n.commonLabelCancel),
             ),
             ElevatedButton(
               onPressed:
@@ -208,7 +209,7 @@ void showLocationApiDialog({
                       Navigator.pop(dialogContext);
                     }
                   : null,
-              child: const Text('Save'),
+              child: Text(l10n.commonLabelSave),
             ),
           ],
         );

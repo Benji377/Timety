@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'dialogs.dart';
 
 class CategoriesWidget extends StatefulWidget {
@@ -15,8 +16,8 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
     final taskProvider = context.read<TaskProvider>();
     final newName = await AppDialogs.showTextInputDialog(
       context: context,
-      title: 'Edit Category',
-      labelText: 'Category Name',
+      title: AppLocalizations.of(context)!.categoryEditTitle,
+      labelText: AppLocalizations.of(context)!.categoryNameLabel,
       initialValue: oldName,
     );
 
@@ -29,9 +30,10 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
   Widget build(BuildContext context) {
     final taskProvider = context.watch<TaskProvider>();
     final categories = taskProvider.getAllCategories();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories'), centerTitle: true),
+      appBar: AppBar(title: Text(l10n.categoryTitle), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 40),
         children: [
@@ -39,7 +41,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'No categories yet. Create one by adding a task with a category.',
+                l10n.categoryEmpty,
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -65,7 +67,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                       leading: const Icon(Icons.label),
                       title: Text(category),
                       subtitle: Text(
-                        '$taskCount task${taskCount != 1 ? 's' : ''}',
+                        l10n.categoryTaskCount(taskCount),
                       ),
                       trailing: SizedBox(
                         width: 100,
@@ -83,10 +85,9 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                                 final confirmed =
                                     await AppDialogs.showConfirmation(
                                       context: context,
-                                      title: 'Delete Category?',
-                                      content:
-                                          'Are you sure you want to delete "$category"? Tasks with this category will be uncategorized.',
-                                      confirmLabel: 'Delete',
+                                      title: l10n.categoryDeleteTitle,
+                                      content: l10n.categoryDeleteContent(category),
+                                      confirmLabel: l10n.commonLabelDelete,
                                       confirmColor: Colors.red,
                                     ) ==
                                     true;

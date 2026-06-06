@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/habit/habit_models.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 import '../dialogs.dart';
 
 class HabitListTile extends StatelessWidget {
@@ -14,8 +15,6 @@ class HabitListTile extends StatelessWidget {
   final String subtitleText;
   final double? progressValue;
   final EdgeInsetsGeometry margin;
-  final String deleteTitle;
-  final String deleteContent;
   final bool isStacked;
   final bool isLocked;
 
@@ -33,15 +32,14 @@ class HabitListTile extends StatelessWidget {
     this.isStacked = false,
     this.isLocked = false,
     this.margin = AppTheme.listTileScreenMargin,
-    this.deleteTitle = 'Delete Habit',
-    this.deleteContent = 'Are you sure you want to delete this habit?',
   });
 
   Color get _color => Color(habit.colorValue);
 
   @override
   Widget build(BuildContext context) {
-    final card = _buildCard(context);
+    final l10n = AppLocalizations.of(context)!;
+    final card = _buildCard(context, l10n);
 
     if (!enableDismissible || onDelete == null) return card;
 
@@ -63,8 +61,8 @@ class HabitListTile extends StatelessWidget {
       confirmDismiss: (_) async {
         return await AppDialogs.showConfirmation(
               context: context,
-              title: deleteTitle,
-              content: deleteContent,
+              title: l10n.habitDeleteTitle,
+              content: l10n.habitDeleteContent,
             ) ??
             false;
       },
@@ -72,7 +70,7 @@ class HabitListTile extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(BuildContext context) {
+  Widget _buildCard(BuildContext context, AppLocalizations l10n) {
     final color = _color;
     final habitIcon = habit.iconData ?? Icons.circle;
 
@@ -81,11 +79,9 @@ class HabitListTile extends StatelessWidget {
         onTap: isLocked
             ? () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Complete the previous habit in the stack first!',
-                    ),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: Text(l10n.focusSnackbarHabitLocked),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               }
@@ -174,7 +170,7 @@ class HabitListTile extends StatelessWidget {
       ),
       trailing: IconButton(
         icon: const Icon(Icons.schedule, size: 20),
-        tooltip: 'Mark past completion',
+        tooltip: l10n.habitMarkPastCompletionTooltip,
         onPressed: onMarkPastCompletion,
         visualDensity: VisualDensity.compact,
       ),

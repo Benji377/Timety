@@ -776,5 +776,160 @@
         "type": "String"
       }
     }
-  }
+  },
+  "widgetHabitsToday": "Habits Today",
+  "widgetTasksDue": "Tasks Due ({count})",
+  "@widgetTasksDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryEditTitle": "Edit Category",
+  "categoryNameLabel": "Category Name",
+  "categoryTitle": "Categories",
+  "categoryEmpty": "No categories yet. Create one by adding a task with a category.",
+  "categoryTaskCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
+  "@categoryTaskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryDeleteTitle": "Delete Category?",
+  "categoryDeleteContent": "Are you sure you want to delete \"{category}\"? Tasks with this category will be uncategorized.",
+  "@categoryDeleteContent": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "dialogTimeMachineTitle": "Log Past Session",
+  "dialogTimeMachineMode": "Focus Mode",
+  "dialogTimeMachineTag": "Tag (Optional)",
+  "dialogTimeMachineNoTag": "No Tag",
+  "dialogTimeMachineStartTime": "Start Time",
+  "dialogTimeMachineEndTime": "End Time",
+  "dialogTimeMachineErrorEndBeforeStart": "End time must be after start time",
+  "dialogTimeMachineSuccess": "Session Logged!",
+  "habitHistoryRemoveCompletion": "Remove completion for {date}?",
+  "@habitHistoryRemoveCompletion": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "commonLabelRemove": "Remove",
+  "habitHistoryTimePrompt": "At what time did you complete this habit?",
+  "habitHistoryTitle": "Habit History",
+  "habitHistoryStatLast30": "Last 30d",
+  "habitHistoryStatLast90": "Last 90d",
+  "habitHistoryStatTotal": "Total",
+  "habitHistoryEmpty": "No history yet.",
+  "habitHistoryCompletedAt": "Completed at {time}",
+  "@habitHistoryCompletedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "habitHistoryRemoveTooltip": "Remove this record",
+  "habitDeleteTitle": "Delete Habit",
+  "habitDeleteContent": "Are you sure you want to delete this habit?",
+  "habitMarkPastCompletionTooltip": "Mark past completion",
+  "taskDeleteTitle": "Delete Task",
+  "taskDeleteContent": "Are you sure you want to delete this task?",
+  "locationPickerTitle": "Search Location",
+  "locationPickerHint": "e.g., Pizza Hut, London...",
+  "locationPickerServerError": "Server error: {code}",
+  "@locationPickerServerError": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "locationPickerNetworkError": "Network error. Check your connection and location API settings.",
+  "locationPickerUnknown": "Unknown Location",
+  "locationPickerStartTyping": "Start typing to search for a place",
+  "locationPickerMinChars": "Minimum 3 characters",
+  "locationPickerNoResults": "No places found for \"{query}\"",
+  "@locationPickerNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "locationApiDialogTitle": "Location Search API",
+  "locationApiDialogLabel": "API Endpoint URL",
+  "locationApiDialogSupported": "Supported APIs",
+  "locationApiDialogSupportedDesc": "Photon-compatible endpoints",
+  "locationApiDialogLearnMore": "Learn about Photon on GitHub",
+  "locationApiDialogBestPractice": "Best Practice",
+  "locationApiDialogBestPracticeDesc": "Self-host your own Photon instance for privacy",
+  "locationApiDialogSuccess": "Connection successful",
+  "locationApiDialogReset": "Reset to Default",
+  "locationApiDialogError": "Cannot reach endpoint. Check the URL and try again.",
+  "locationApiDialogTest": "Test Connection",
+  "streakTimelineTitle": "Streak timeline",
+  "streakTimelineSubtitle": "Shows last 7 days",
+  "streakTimelineCurrent": "Current streak",
+  "streakTimelineDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@streakTimelineDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakStatusNone": "No streak yet. Complete something today to start one.",
+  "streakStatusActive": "Today is active and extending your streak.",
+  "streakStatusFrozen": "Today is frozen. Yesterday still counts until you miss another day.",
+  "streakStatusBuilding": "Today counts, but the streak has not fully connected yet.",
+  "streakStatusStart": "Start today to build a streak that reaches forward.",
+  "streakDayToday": "Today",
+  "globalLabelHabit": "Habit",
+  "streakLegendStreakDay": "Streak day",
+  "xpBreakdownLevel": "Level {level} | {title}",
+  "@xpBreakdownLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "xpBreakdownProgress": "{total} XP total | {remaining} XP to next level",
+  "@xpBreakdownProgress": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "xpBreakdownHowToEarn": "How XP is earned",
+  "xpSourceTaskDesc": "Each completed task adds",
+  "xpSourceValue": "+{xp} XP",
+  "@xpSourceValue": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "xpSourceHabitDesc": "Each completed habit adds",
+  "xpSourceFocusDesc": "Every focus minute adds",
+  "weekNavThisWeek": "This Week",
+  "weekNavPastWeek": "Past Week"
 }

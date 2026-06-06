@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../data/habit/habit_models.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_utils.dart';
+import '../l10n/app_localizations.dart';
 
 /// Reusable bottom sheet builders for habit-related UIs
 class HabitBottomSheetBuilders {
@@ -73,11 +74,12 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
   }
 
   Future<void> _handleDateTap(DateTime date, bool isCompleted) async {
+    final l10n = AppLocalizations.of(context)!;
     // Prevent marking future dates
     if (date.isAfter(_today) && !AppDateUtils.isSameDay(date, _today)) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Cannot mark future dates")));
+      ).showSnackBar(SnackBar(content: Text(l10n.habitHistoryEmpty)));
       return;
     }
 
@@ -91,14 +93,14 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text("Edit Completion"),
+          title: Text("${l10n.habitHistoryRemoveCompletion("").split("for ")[0].trim()}?"),
           content: Text(
-            "Remove completion for ${DateFormat('MMM d, yyyy').format(date)}?",
+            l10n.habitHistoryRemoveCompletion(DateFormat('MMM d, yyyy').format(date)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text("Cancel"),
+              child: Text(l10n.commonLabelCancel),
             ),
             TextButton(
               onPressed: () {
@@ -106,7 +108,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                 setState(() {}); // Rebuild calendar and timeline
                 Navigator.pop(ctx);
               },
-              child: const Text("Remove", style: TextStyle(color: Colors.red)),
+              child: Text(l10n.commonLabelRemove, style: const TextStyle(color: Colors.red)),
             ),
           ],
         ),
@@ -116,7 +118,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
-        helpText: 'AT WHAT TIME DID YOU COMPLETE THIS?',
+        helpText: l10n.habitHistoryTimePrompt.toUpperCase(),
       );
 
       if (pickedTime != null) {
@@ -136,6 +138,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final completions = widget.habit.completions.toList();
     final last30 = _today.subtract(const Duration(days: 30));
     final last90 = _today.subtract(const Duration(days: 90));
@@ -162,11 +165,11 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
     return SafeArea(
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Text(
-              "Habit History",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              l10n.habitHistoryTitle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
 
@@ -176,9 +179,9 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatCard("Last 30d", count30.toString()),
-                _buildStatCard("Last 90d", count90.toString()),
-                _buildStatCard("Total", countAll.toString()),
+                _buildStatCard(l10n.habitHistoryStatLast30, count30.toString()),
+                _buildStatCard(l10n.habitHistoryStatLast90, count90.toString()),
+                _buildStatCard(l10n.habitHistoryStatTotal, countAll.toString()),
               ],
             ),
           ),
@@ -217,7 +220,15 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+              children: [
+                l10n.commonWeekdayMon,
+                l10n.commonWeekdayTue,
+                l10n.commonWeekdayWed,
+                l10n.commonWeekdayThu,
+                l10n.commonWeekdayFri,
+                l10n.commonWeekdaySat,
+                l10n.commonWeekdaySun,
+              ]
                   .map(
                     (day) => SizedBox(
                       width: 30,
@@ -317,10 +328,10 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
           // --- Timeline View ---
           Expanded(
             child: completions.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      "No history yet.",
-                      style: TextStyle(color: Colors.grey),
+                      l10n.habitHistoryEmpty,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   )
                 : ListView.builder(
@@ -329,7 +340,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                     itemBuilder: (context, index) {
                       final completion = completions[index];
                       final isLast = index == completions.length - 1;
-                      return _buildTimelineItem(completion, isLast);
+                      return _buildTimelineItem(completion, isLast, l10n);
                     },
                   ),
           ),
@@ -338,7 +349,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
     );
   }
 
-  Widget _buildTimelineItem(DateTime completion, bool isLast) {
+  Widget _buildTimelineItem(DateTime completion, bool isLast, AppLocalizations l10n) {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -393,7 +404,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Completed at ${DateFormat('h:mm a').format(completion)}',
+                          l10n.habitHistoryCompletedAt(DateFormat('h:mm a').format(completion)),
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 13,
@@ -409,7 +420,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                       size: 20,
                       color: Colors.grey,
                     ),
-                    tooltip: "Remove this record",
+                    tooltip: l10n.habitHistoryRemoveTooltip,
                     onPressed: () {
                       widget.onDateDeselected(completion);
                       setState(() {});

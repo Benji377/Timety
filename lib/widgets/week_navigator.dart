@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/date_utils.dart';
+import '../l10n/app_localizations.dart';
 
 class WeekNavigator extends StatelessWidget {
   final DateTime focusedDate;
@@ -14,6 +15,7 @@ class WeekNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final startOfWeek = AppDateUtils.startOfWeekMonday(focusedDate);
     final endOfWeek = startOfWeek.add(
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
@@ -38,7 +40,7 @@ class WeekNavigator extends StatelessWidget {
         Column(
           children: [
             Text(
-              isCurrentWeek ? 'This Week' : 'Past Week',
+              isCurrentWeek ? l10n.weekNavThisWeek : l10n.weekNavPastWeek,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             Text(

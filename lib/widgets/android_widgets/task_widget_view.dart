@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../data/task/task.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/priority_utils.dart';
+import '../../l10n/app_localizations.dart';
 
 class TaskWidgetHeaderView extends StatelessWidget {
   final int taskCount;
@@ -23,7 +24,7 @@ class TaskWidgetHeaderView extends StatelessWidget {
           ),
           const SizedBox(width: AppTheme.spaceSmall),
           Text(
-            'Tasks Due ($taskCount)',
+            AppLocalizations.of(context)!.widgetTasksDue(taskCount),
             style: const TextStyle(
               fontSize: AppTheme.fsHeadingSmall,
               fontWeight: AppTheme.fwBold,

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/settings_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class LocationPicker extends StatefulWidget {
   const LocationPicker({super.key});
@@ -73,7 +74,7 @@ class _LocationPickerState extends State<LocationPicker> {
         debugPrint('API Error: ${response.statusCode} - ${response.body}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Server error: ${response.statusCode}')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.locationPickerServerError(response.statusCode))),
           );
         }
       }
@@ -81,9 +82,9 @@ class _LocationPickerState extends State<LocationPicker> {
       debugPrint('Search error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Network error. Check your connection and location API settings.',
+              AppLocalizations.of(context)!.locationPickerNetworkError,
             ),
           ),
         );
@@ -131,7 +132,7 @@ class _LocationPickerState extends State<LocationPicker> {
   }
 
   /// Fallback name generator in case the location doesn't have a specific "name"
-  String _getPrimaryName(Map<String, dynamic> p) {
+  String _getPrimaryName(Map<String, dynamic> p, AppLocalizations l10n) {
     if (p['name'] != null && p['name'].toString().isNotEmpty) {
       return p['name'];
     }
@@ -142,15 +143,16 @@ class _LocationPickerState extends State<LocationPicker> {
       return number != null ? '$street $number' : street;
     }
     // Final fallback
-    return p['city'] ?? p['state'] ?? 'Unknown Location';
+    return p['city'] ?? p['state'] ?? l10n.locationPickerUnknown;
   }
 
   @override
   Widget build(BuildContext context) {
     final queryLength = _searchController.text.trim().length;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Search Location')),
+      appBar: AppBar(title: Text(l10n.locationPickerTitle)),
       body: Column(
         children: [
           // Search Bar
@@ -161,7 +163,7 @@ class _LocationPickerState extends State<LocationPicker> {
               onChanged: _onSearchChanged,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'e.g., Pizza Hut, London...',
+                hintText: l10n.locationPickerHint,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: queryLength > 0
                     ? IconButton(
@@ -182,13 +184,13 @@ class _LocationPickerState extends State<LocationPicker> {
           if (_isLoading) const LinearProgressIndicator(),
 
           // Main Content Area
-          Expanded(child: _buildBodyContent(queryLength)),
+          Expanded(child: _buildBodyContent(queryLength, l10n)),
         ],
       ),
     );
   }
 
-  Widget _buildBodyContent(int queryLength) {
+  Widget _buildBodyContent(int queryLength, AppLocalizations l10n) {
     // User hasn't typed enough yet
     if (queryLength < 3) {
       return Center(
@@ -197,14 +199,14 @@ class _LocationPickerState extends State<LocationPicker> {
           children: [
             Icon(Icons.search, size: 64, color: Theme.of(context).dividerColor),
             const SizedBox(height: 16),
-            const Text(
-              'Start typing to search for a place',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+            Text(
+              l10n.locationPickerStartTyping,
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Minimum 3 characters',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            Text(
+              l10n.locationPickerMinChars,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
@@ -215,7 +217,7 @@ class _LocationPickerState extends State<LocationPicker> {
     if (!_isLoading && _searchResults.isEmpty) {
       return Center(
         child: Text(
-          'No places found for "${_searchController.text.trim()}"',
+          l10n.locationPickerNoResults(_searchController.text.trim()),
           style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
       );
@@ -229,7 +231,7 @@ class _LocationPickerState extends State<LocationPicker> {
         final feature = _searchResults[index];
         final properties = feature['properties'] as Map<String, dynamic>;
 
-        final titleName = _getPrimaryName(properties);
+        final titleName = _getPrimaryName(properties, l10n);
         final detailedSubtitle = _buildDetailsString(properties);
 
         return ListTile(

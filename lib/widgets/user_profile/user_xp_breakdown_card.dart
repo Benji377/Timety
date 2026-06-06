@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
 import '../../utils/xp_calculator.dart';
+import '../../l10n/app_localizations.dart';
 
 class UserXpBreakdownCard extends StatefulWidget {
   final int currentLevel;
@@ -29,27 +30,28 @@ class _UserXpBreakdownCardState extends State<UserXpBreakdownCard>
   Widget build(BuildContext context) {
     final nextLevelXp = ExperienceEngine.getXpForLevel(widget.currentLevel + 1);
     final xpToNextLevel = nextLevelXp - widget.totalXp;
+    final l10n = AppLocalizations.of(context)!;
 
     final sources = <_XpSourceRowData>[
-      const _XpSourceRowData(
+      _XpSourceRowData(
         icon: Icons.task_alt,
-        label: 'Tasks',
-        description: 'Each completed task adds',
-        value: '+${ExperienceEngine.xpPerTask} XP',
+        label: l10n.globalLabelTasks,
+        description: l10n.xpSourceTaskDesc,
+        value: l10n.xpSourceValue(ExperienceEngine.xpPerTask),
         color: AppTheme.taskColor,
       ),
-      const _XpSourceRowData(
+      _XpSourceRowData(
         icon: Icons.favorite_outline,
-        label: 'Habits',
-        description: 'Each completed habit adds',
-        value: '+${ExperienceEngine.xpPerHabit} XP',
+        label: l10n.globalLabelHabits,
+        description: l10n.xpSourceHabitDesc,
+        value: l10n.xpSourceValue(ExperienceEngine.xpPerHabit),
         color: AppTheme.habitColor,
       ),
-      const _XpSourceRowData(
+      _XpSourceRowData(
         icon: Icons.timer,
-        label: 'Focus',
-        description: 'Every focus minute adds',
-        value: '+${ExperienceEngine.xpPerFocusMin} XP',
+        label: l10n.focusTitle,
+        description: l10n.xpSourceFocusDesc,
+        value: l10n.xpSourceValue(ExperienceEngine.xpPerFocusMin),
         color: AppTheme.focusColor,
       ),
     ];
@@ -97,7 +99,10 @@ class _UserXpBreakdownCardState extends State<UserXpBreakdownCard>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Level ${widget.currentLevel} | ${widget.levelTitle}',
+                        l10n.xpBreakdownLevel(
+                          widget.currentLevel,
+                          widget.levelTitle,
+                        ),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -108,7 +113,7 @@ class _UserXpBreakdownCardState extends State<UserXpBreakdownCard>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${widget.totalXp} XP total | $xpToNextLevel XP to next level',
+                        l10n.xpBreakdownProgress(widget.totalXp, xpToNextLevel),
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -143,7 +148,7 @@ class _UserXpBreakdownCardState extends State<UserXpBreakdownCard>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'How XP is earned',
+                      l10n.xpBreakdownHowToEarn,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,

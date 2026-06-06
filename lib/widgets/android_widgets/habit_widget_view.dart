@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/habit/habit_models.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class HabitWidgetHeaderView extends StatelessWidget {
   final int habitCount;
@@ -21,9 +22,9 @@ class HabitWidgetHeaderView extends StatelessWidget {
             size: AppTheme.iconSizeMedium,
           ),
           const SizedBox(width: AppTheme.spaceSmall),
-          const Text(
-            'Habits Today',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.widgetHabitsToday,
+            style: const TextStyle(
               fontSize: AppTheme.fsHeadingSmall,
               fontWeight: AppTheme.fwBold,
               color: AppTheme.typeHabitColor,

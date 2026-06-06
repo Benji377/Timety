@@ -6,6 +6,7 @@ import '../data/focus/focus_models.dart';
 import '../providers/focus_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/l10n_utils.dart';
+import '../l10n/app_localizations.dart';
 
 class AppDialogs {
   // Generic confirmation dialog
@@ -13,9 +14,10 @@ class AppDialogs {
     required BuildContext context,
     required String title,
     required String content,
-    String confirmLabel = 'Confirm',
+    String? confirmLabel,
     Color? confirmColor,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -24,7 +26,7 @@ class AppDialogs {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonLabelCancel),
           ),
           FilledButton(
             style: confirmColor == null
@@ -34,7 +36,7 @@ class AppDialogs {
                     foregroundColor: Colors.white,
                   ),
             onPressed: () => Navigator.pop(context, true),
-            child: Text(confirmLabel),
+            child: Text(confirmLabel ?? l10n.commonLabelConfirm),
           ),
         ],
       ),
@@ -46,12 +48,13 @@ class AppDialogs {
     required String title,
     required String labelText,
     String initialValue = '',
-    String confirmLabel = 'Save',
+    String? confirmLabel,
     String? hintText,
     TextInputType keyboardType = TextInputType.text,
     bool autofocus = true,
   }) {
     final controller = TextEditingController(text: initialValue);
+    final l10n = AppLocalizations.of(context)!;
 
     return showDialog<String>(
       context: context,
@@ -76,7 +79,7 @@ class AppDialogs {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.commonLabelCancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -85,7 +88,7 @@ class AppDialogs {
                 Navigator.pop(context, trimmed);
               }
             },
-            child: Text(confirmLabel),
+            child: Text(confirmLabel ?? l10n.commonLabelSave),
           ),
         ],
       ),
@@ -110,17 +113,19 @@ class AppDialogs {
       return "${dt.month}/${dt.day}  ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
     }
 
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Row(
+              title: Row(
                 children: [
-                  Icon(Icons.history, color: AppTheme.taskColor),
-                  SizedBox(width: 8),
-                  Text("Log Past Session"),
+                  const Icon(Icons.history, color: AppTheme.taskColor),
+                  const SizedBox(width: 8),
+                  Text(l10n.dialogTimeMachineTitle),
                 ],
               ),
               content: SingleChildScrollView(
@@ -129,9 +134,9 @@ class AppDialogs {
                   children: [
                     DropdownButtonFormField<FocusMode>(
                       initialValue: selectedMode,
-                      decoration: const InputDecoration(
-                        labelText: "Focus Mode",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.dialogTimeMachineMode,
+                        border: const OutlineInputBorder(),
                       ),
                       items: provider.modes
                           .map(
@@ -152,13 +157,13 @@ class AppDialogs {
                     const SizedBox(height: AppTheme.spaceLarge),
                     DropdownButtonFormField<FocusTag?>(
                       initialValue: selectedTag,
-                      decoration: const InputDecoration(
-                        labelText: "Tag (Optional)",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.dialogTimeMachineTag,
+                        border: const OutlineInputBorder(),
                       ),
                       items: [
-                        const DropdownMenuItem<FocusTag?>(
-                          child: Text("No Tag"),
+                        DropdownMenuItem<FocusTag?>(
+                          child: Text(l10n.dialogTimeMachineNoTag),
                         ),
                         ...provider.tags.map(
                           (t) =>
@@ -174,9 +179,9 @@ class AppDialogs {
                         borderRadius: AppTheme.brMedium,
                         side: BorderSide(color: AppTheme.borderLight),
                       ),
-                      title: const Text(
-                        "Start Time",
-                        style: TextStyle(
+                      title: Text(
+                        l10n.dialogTimeMachineStartTime,
+                        style: const TextStyle(
                           fontSize: AppTheme.fsLabel,
                           color: Colors.black54,
                         ),
@@ -219,9 +224,9 @@ class AppDialogs {
                         borderRadius: AppTheme.brMedium,
                         side: BorderSide(color: AppTheme.borderLight),
                       ),
-                      title: const Text(
-                        "End Time",
-                        style: TextStyle(
+                      title: Text(
+                        l10n.dialogTimeMachineEndTime,
+                        style: const TextStyle(
                           fontSize: AppTheme.fsLabel,
                           color: Colors.black54,
                         ),
@@ -264,14 +269,16 @@ class AppDialogs {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
+                  child: Text(l10n.commonLabelCancel),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     if (endDateTime.isBefore(startDateTime)) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("End time must be after start time"),
+                        SnackBar(
+                          content: Text(
+                            l10n.dialogTimeMachineErrorEndBeforeStart,
+                          ),
                         ),
                       );
                       return;
@@ -285,10 +292,10 @@ class AppDialogs {
                     );
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Session Logged!")),
+                      SnackBar(content: Text(l10n.dialogTimeMachineSuccess)),
                     );
                   },
-                  child: const Text("Save"),
+                  child: Text(l10n.commonLabelSave),
                 ),
               ],
             );
