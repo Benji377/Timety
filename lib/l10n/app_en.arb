@@ -303,6 +303,26 @@
 
   "taskDetailsLabelSaveEdit": "Save Changes",
 
+  "taskListTitle": "My Tasks",
+  "taskListEmpty": "No tasks yet! Tap + to add one",
+  "taskListSearchHint": "Search title or description...",
+  "taskListTooltipSort": "Sort by",
+
+  "taskListSortDueDate": "Due Date",
+  "taskListSortPriority": "Priority",
+  "taskListSortSize": "Size",
+  "taskListSortAlphabetical": "Alphabetical",
+  "taskListSortCategory": "Category",
+  "taskListSortAscending": "Ascending",
+  "taskListSortDescending": "Descending",
+
+  "taskListFilterAll": "All",
+  "taskListFilterNoMatch": "No tasks match your filters",
+
+  "taskListSectionOverdue": "Overdue",
+  "taskListSectionToday": "Due Today",
+  "taskListSectionUpcoming": "To Do",
+  "taskListSectionDone": "Done",
 
   "globalLabelTags": "Tags",
   "globalLabelTasks": "Tasks",

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/task/task.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/user_provider.dart';
@@ -36,13 +37,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Tasks'),
+        title: Text(l10n.taskListTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart),
-            tooltip: 'Insights',
+            tooltip: l10n.commonTooltipStats,
             onPressed: () {
               Navigator.push(
                 context,
@@ -55,7 +58,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.calendar_today),
-            tooltip: 'Calendar View',
+            tooltip: l10n.commonTooltipCalendar,
             onPressed: () {
               Navigator.push(
                 context,
@@ -85,13 +88,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   children: [
                     Expanded(
                       child: TextField(
-                        decoration: const InputDecoration(
-                          hintText: 'Search title or description...',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
+                        decoration: InputDecoration(
+                          hintText: l10n.taskListSearchHint,
+                          prefixIcon: const Icon(Icons.search),
+                          border: const OutlineInputBorder(
                             borderRadius: AppTheme.brNeo,
                           ),
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                             horizontal: AppTheme.spaceMedium,
                             vertical: AppTheme.spaceSmall,
                           ),
@@ -104,33 +107,19 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     // Sort Dropdown
                     PopupMenuButton<TaskSortOption>(
                       icon: const Icon(Icons.sort),
-                      tooltip: 'Sort by',
+                      tooltip: l10n.taskListTooltipSort,
                       onSelected: (TaskSortOption result) {
                         setState(() => _sortOption = result);
                       },
-                      itemBuilder: (BuildContext context) =>
-                          <PopupMenuEntry<TaskSortOption>>[
-                            const PopupMenuItem(
-                              value: TaskSortOption.dueDate,
-                              child: Text('Due Date'),
-                            ),
-                            const PopupMenuItem(
-                              value: TaskSortOption.priority,
-                              child: Text('Priority'),
-                            ),
-                            const PopupMenuItem(
-                              value: TaskSortOption.size,
-                              child: Text('Size'),
-                            ),
-                            const PopupMenuItem(
-                              value: TaskSortOption.category,
-                              child: Text('Category'),
-                            ),
-                            const PopupMenuItem(
-                              value: TaskSortOption.alphabetical,
-                              child: Text('Alphabetical'),
-                            ),
-                          ],
+                      itemBuilder: (BuildContext context) {
+                        // Iterate over all enum values dynamically
+                        return TaskSortOption.values.map((option) {
+                          return PopupMenuItem<TaskSortOption>(
+                            value: option,
+                            child: Text(option.getLocalizedLabel(context)),
+                          );
+                        }).toList();
+                      },
                     ),
 
                     // Order Toggle (Asc/Desc)
@@ -140,7 +129,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             ? Icons.arrow_upward
                             : Icons.arrow_downward,
                       ),
-                      tooltip: _isAscending ? 'Ascending' : 'Descending',
+                      tooltip: _isAscending
+                          ? l10n.taskListSortAscending
+                          : l10n.taskListSortDescending,
                       onPressed: () =>
                           setState(() => _isAscending = !_isAscending),
                     ),
@@ -164,7 +155,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         return Padding(
                           padding: const EdgeInsets.only(right: 8.0),
                           child: FilterChip(
-                            label: const Text('All'),
+                            label: Text(l10n.taskListFilterAll),
                             selected: isSelected,
                             onSelected: (_) =>
                                 setState(() => _selectedCategoryFilter = null),
@@ -199,18 +190,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 child: Builder(
                   builder: (context) {
                     if (provider.tasks.isEmpty) {
-                      return const Center(
-                        child: Text("No tasks yet! Tap + to add one."),
-                      );
+                      return Center(child: Text(l10n.taskListEmpty));
                     }
 
                     // Apply pipeline
                     final processedTasks = _getProcessedTasks(provider.tasks);
 
                     if (processedTasks.isEmpty) {
-                      return const Center(
-                        child: Text("No tasks match your filters."),
-                      );
+                      return Center(child: Text(l10n.taskListFilterNoMatch));
                     }
 
                     // Grouping Logic
@@ -244,19 +231,23 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       padding: const EdgeInsets.only(bottom: 80),
                       children: [
                         _buildTaskSection(
-                          'Overdue',
+                          l10n.taskListSectionOverdue,
                           AppTheme.errorColor,
                           overdue,
                           isOverdue: true,
                         ),
                         _buildTaskSection(
-                          'Due Today',
+                          l10n.taskListSectionToday,
                           AppTheme.warningColor,
                           dueToday,
                         ),
-                        _buildTaskSection('To Do', AppTheme.taskColor, todo),
                         _buildTaskSection(
-                          'Done',
+                          l10n.taskListSectionUpcoming,
+                          AppTheme.taskColor,
+                          todo,
+                        ),
+                        _buildTaskSection(
+                          l10n.taskListSectionDone,
                           AppTheme.successColor,
                           done,
                           initExpanded: false,

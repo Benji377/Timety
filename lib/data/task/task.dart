@@ -87,7 +87,30 @@ class Task {
 }
 
 /// Options for sorting tasks
-enum TaskSortOption { dueDate, priority, size, alphabetical, category }
+enum TaskSortOption {
+  dueDate,
+  priority,
+  size,
+  alphabetical,
+  category;
+
+  String getLocalizedLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (this) {
+      case TaskSortOption.dueDate:
+        return l10n.taskListSortDueDate;
+      case TaskSortOption.priority:
+        return l10n.taskListSortPriority;
+      case TaskSortOption.size:
+        return l10n.taskListSortSize;
+      case TaskSortOption.alphabetical:
+        return l10n.taskListSortAlphabetical;
+      case TaskSortOption.category:
+        return l10n.taskListSortCategory;
+    }
+  }
+}
 
 /// Reminder options for tasks
 enum ReminderOption {
