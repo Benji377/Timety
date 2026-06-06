@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/user_provider.dart';
 import '../screens/settings_screen.dart';
 import '../utils/greeting_utils.dart';
@@ -28,6 +29,8 @@ class HomeScreen extends StatelessWidget {
     final taskProvider = context.watch<TaskProvider>();
     final habitProvider = context.watch<HabitProvider>();
     final settings = context.watch<SettingsProvider>();
+
+    final l10n = AppLocalizations.of(context)!;
 
     final int focusMinsToday = focusProvider.getMinutesFocusedToday();
     final int dailyTarget = settings.dailyGoalMins;
@@ -77,7 +80,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Timety"),
+        title: Text(l10n.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -126,7 +129,7 @@ class HomeScreen extends StatelessWidget {
                   child: InteractiveGauge(
                     progress: focusProgress,
                     isInteractive: false,
-                    label: "DAILY GOAL",
+                    label: l10n.homeDailyGoal.toUpperCase(),
                     centerText: "${(focusProgress * 100).toInt()}%",
                     centerTextColor: AppTheme.focusColor,
                     color: AppTheme.focusColor,
@@ -145,8 +148,8 @@ class HomeScreen extends StatelessWidget {
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 child: (urgentTasks.isEmpty && todaysHabits.isEmpty)
-                    ? const Center(
-                        child: Text("You're all caught up for today!"),
+                    ? Center(
+                        child: Text(l10n.homeDailyGoalDone),
                       )
                     : ListView(
                         padding: const EdgeInsets.only(
@@ -166,7 +169,7 @@ class HomeScreen extends StatelessWidget {
                                 child: ExpansionTile(
                                   initiallyExpanded: true,
                                   title: Text(
-                                    'Tasks Due (${urgentTasks.length})',
+                                    l10n.homeSectionTasksDue(urgentTasks.length),
                                     style: const TextStyle(
                                       fontWeight: AppTheme.fwBold,
                                       color: AppTheme.warningColor,
@@ -216,7 +219,7 @@ class HomeScreen extends StatelessWidget {
                                 ).copyWith(dividerColor: Colors.transparent),
                                 child: ExpansionTile(
                                   title: Text(
-                                    'Habits Today (${todaysHabits.length})',
+                                    l10n.homeSectionHabitsDue(todaysHabits.length),
                                     style: const TextStyle(
                                       fontWeight: AppTheme.fwBold,
                                       color: AppTheme.typeHabitColor,
@@ -262,7 +265,7 @@ class HomeScreen extends StatelessWidget {
                                 ).copyWith(dividerColor: Colors.transparent),
                                 child: ExpansionTile(
                                   title: Text(
-                                    'Upcoming Tasks ($upcomingWindowDays days)',
+                                    l10n.homeSectionTasksUpcoming(upcomingTasks.length),
                                     style: const TextStyle(
                                       fontWeight: AppTheme.fwBold,
                                       color: AppTheme.typeTaskColor,

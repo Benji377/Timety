@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
 
+  "appTitle": "Timety",
   "focusTitle": "Focus",
   "focusModesTitle": "Manage Modes",
   "focusPhasesTitleAdd": "Add Phase",
@@ -384,6 +385,34 @@
   "calendarHeaderSat": "S",
   "calendarHeaderSun": "S",
   "calendarHeaderWeekly": "Weekly",
+
+  "homeDailyGoal": "Daily Goal",
+  "homeDailyGoalDone": "You're all caught up for today!",
+  "homeSectionTasksDue": "Tasks Due ({count})",
+  "@homeSectionTasksDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSectionHabitsDue": "Habits Today ({count})",
+  "@homeSectionHabitsDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSectionTasksUpcoming": "Upcoming Tasks ({count})",
+  "@homeSectionTasksUpcoming": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
 
   "nTasksCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
   "@nTasksCount": {
