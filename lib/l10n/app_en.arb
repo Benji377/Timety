@@ -533,6 +533,59 @@
   "userEditNameTitle": "Edit Name",
   "userEditNameHint": "Enter your name",
 
+  "backupExportTitle": "Save Export",
+  "backupExportSubject": "Timety Export",
+  "backupExportSuccess": "Export saved to",
+  "backupExportFailure": "Export failed: {error}",
+  "@backupExportFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "backupImportConfirmTitle": "Import JSON Data?",
+  "backupImportConfirmBody": "This will OVERWRITE all current user data and settings. This cannot be undone. Are you sure?",
+  "backupImportFailure": "Import failed: Check file format",
+  
+  "backupActionSaveDevice": "Save to Device",
+  "backupActionSaveDeviceSubtitle": "Choose a local folder",
+  "backupActionShareCloud": "Share / Upload to Cloud",
+  "backupActionShareCloudSubtitle": "Send to Drive, Dropbox, WhatsApp…",
+  
+  "backupFilePickerTitle": "Choose where to save your file",
+  "backupSaveFailure": "Save failed: {error}",
+  "@backupSaveFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "backupShareFailure": "Share failed: {error}",
+  "@backupShareFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "backupRestoreSuccessTitle": "Restore Successful!",
+  "backupRestoreSuccessBody": "Your data has been restored. Please completely close and restart Timety to load the imported data.",
+  "commonButtonGotIt": "Got it",
+
+  "notificationHabitTitle": "Habit Reminder",
+  "notificationHabitBody": "Time to: {habit}!",
+  "@notificationHabitBody": {
+    "placeholders": {
+      "habit": {
+        "type": "String"
+      }
+    }
+  },
+
   "navigationHome": "Home",
   "navigationFocus": "Focus",
   "navigationTasks": "Tasks",

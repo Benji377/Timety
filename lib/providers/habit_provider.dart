@@ -5,6 +5,7 @@ import '../data/habit/habit_models.dart';
 import '../data/habit/habit_repository.dart';
 import '../services/notification_service.dart';
 import '../utils/date_utils.dart';
+import '../utils/l10n_utils.dart';
 import '../utils/xp_calculator.dart';
 import '../services/android_widgets/habit_widget_service.dart';
 import 'user_provider.dart';
@@ -61,6 +62,7 @@ class HabitProvider extends ChangeNotifier {
 
   void syncNotifications() {
     if (_settings == null) return;
+    final l10n = getL10n(settings: _settings);
 
     final todaysHabits = getHabitsForDay(
       DateTime.now(),
@@ -80,6 +82,8 @@ class HabitProvider extends ChangeNotifier {
         NotificationService.instance.scheduleHabitReminder(
           habitId: habit.id,
           habitName: habit.name,
+          title: l10n.notificationHabitTitle,
+          body: l10n.notificationHabitBody(habit.name),
           time: habit.targetTime!,
           targetWeekdays: habit.targetWeekdays,
         );

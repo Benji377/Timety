@@ -131,6 +131,8 @@ class NotificationService {
   Future<void> scheduleHabitReminder({
     required String habitId,
     required String habitName,
+    required String title,
+    required String body,
     required TimeOfDay time,
     List<int>? targetWeekdays,
   }) async {
@@ -154,8 +156,8 @@ class NotificationService {
 
       await _notificationsPlugin.zonedSchedule(
         id: _habitReminderId(habitId, weekday: weekday),
-        title: 'Habit Reminder',
-        body: 'Time to: $habitName',
+        title: title,
+        body: body,
         scheduledDate: scheduledDate,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(

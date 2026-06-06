@@ -362,7 +362,7 @@ class _UserScreenState extends State<UserScreen> {
         ),
       );
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(errorString)));
