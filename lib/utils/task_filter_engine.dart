@@ -1,8 +1,5 @@
 import '../data/task/task.dart';
 
-/// Options for sorting tasks
-enum TaskSortOption { dueDate, priority, size, alphabetical, category }
-
 /// Utility for filtering and sorting tasks
 /// This separates business logic from UI layer concerns
 class TaskFilterEngine {

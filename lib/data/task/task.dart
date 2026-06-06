@@ -1,4 +1,6 @@
 import 'package:hive/hive.dart';
+import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 part 'task.g.dart';
 
@@ -82,4 +84,33 @@ class Task {
     required this.createdAt,
     this.subtasks = const [],
   });
+}
+
+/// Options for sorting tasks
+enum TaskSortOption { dueDate, priority, size, alphabetical, category }
+
+/// Reminder options for tasks
+enum ReminderOption {
+  onTime,
+  minutes30Before,
+  hour1Before,
+  day1Before,
+  custom;
+
+  String getLocalizedLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (this) {
+      case ReminderOption.onTime:
+        return l10n.taskDetailsReminderOptionOnce;
+      case ReminderOption.minutes30Before:
+        return l10n.taskDetailsReminderOptionHalfHour;
+      case ReminderOption.hour1Before:
+        return l10n.taskDetailsReminderOptionHour;
+      case ReminderOption.day1Before:
+        return l10n.taskDetailsReminderOptionDay;
+      case ReminderOption.custom:
+        return l10n.taskDetailsReminderOptionCustom;
+    }
+  }
 }

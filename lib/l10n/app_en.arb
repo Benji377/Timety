@@ -256,6 +256,54 @@
     }
   },
 
+  "taskDetailsTitleEdit": "Edit Task",
+  "taskDetailsTitleNew": "Create New Task",
+  "taskDetailsTitleDetails": "Task Details",
+
+  "taskDetailsSectionInfo": "Task Info",
+  "taskDetailsSectionPriorityAndEffort": "Priority & Effort",
+  "taskDetailsSectionScheduling": "Scheduling",
+  "taskDetailsSectionLocation": "Location",
+  "taskDetailsSectionChecklist": "Checklist",
+
+  "taskDetailsLabelTitle": "Task Title",
+  "taskDetailsLabelDescription": "Description",
+  "taskDetailsLabelPriority": "Priority",
+  "taskDetailsLabelEffort": "Effort",
+  "taskDetailsLabelLocation": "Location",
+  "taskDetailsLabelSubtaskHint": "Add subtasks...",
+  "taskDetailsLabelCategory": "Category",
+  "taskDetailsLabelCategoryEmpty": "None",
+  "taskDetailsLabelCategorySelect": "Select Category",
+  "taskDetailsLabelCategoryAddNew": "Add New Category",
+  "taskDetailsLabelCategoryNewName": "New Category Name",
+  "taskDetailsLabelReminderSet": "Set Reminder",
+  "taskDetailsLabelReminderTooEarly": "Custom reminder must be before the Due Date",
+  "taskDetailsLabelDueDateNone": "No Due Date Set",
+  "taskDetailsLabelDueDate": "Due: {date} at {time}",
+  "@taskDetailsLabelDueDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+
+  "taskDetailsSnackbarReminderNoDue": "Please set a Due Date first",
+  "taskDetailsSnackbarTitleRequired": "Title is required!",
+
+  "taskDetailsReminderOptionOnce": "On time",
+  "taskDetailsReminderOptionHalfHour": "30 minutes before",
+  "taskDetailsReminderOptionHour": "1 hour before",
+  "taskDetailsReminderOptionDay": "1 day before",
+  "taskDetailsReminderOptionCustom": "Custom",
+
+  "taskDetailsLabelSaveEdit": "Save Changes",
+
+
   "globalLabelTags": "Tags",
   "globalLabelTasks": "Tasks",
   "globalLabelTask": "Task",

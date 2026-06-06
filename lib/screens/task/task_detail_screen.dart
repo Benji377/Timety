@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 import '../../utils/priority_utils.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
@@ -9,6 +10,8 @@ import '../../theme/app_theme.dart';
 import '../../utils/date_time_utils.dart';
 import '../../widgets/location_picker.dart';
 import '../../providers/settings_provider.dart';
+
+enum CategoryAction { none, addNew }
 
 class TaskDetailScreen extends StatefulWidget {
   final Task? task; // NULL means "Create New Task", NOT NULL means "View/Edit"
@@ -40,15 +43,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late List<Subtask> _subtasks;
 
   bool _isAddingNewCategory = false;
-
-  final List<String> _reminderOptions = [
-    'On time',
-    '30 minutes before',
-    '1 hour before',
-    '1 day before',
-    'Custom',
-  ];
-  String _selectedReminderOption = '30 minutes before';
+  ReminderOption _selectedReminderOption = ReminderOption.minutes30Before;
 
   @override
   void initState() {
@@ -100,10 +95,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final colorScheme = theme.colorScheme;
     final disabledBorderColor = theme.dividerColor.withValues(alpha: 0.6);
     final settings = context.watch<SettingsProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     final String appBarTitle = _isNewTask
-        ? "Create New Task"
-        : (_isEditing ? "Edit Task" : "Task Details");
+        ? l10n.taskDetailsTitleNew
+        : (_isEditing
+              ? l10n.taskDetailsTitleEdit
+              : l10n.taskDetailsTitleDetails);
 
     return Scaffold(
       appBar: AppBar(
@@ -125,7 +123,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         ),
         children: [
           // --- SECTION: THE BASICS ---
-          _buildSectionHeader("Task Info", Icons.info_outline),
+          _buildSectionHeader(l10n.taskDetailsSectionInfo, Icons.info_outline),
           TextField(
             controller: _titleController,
             enabled: _isEditing,
@@ -134,7 +132,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               fontWeight: AppTheme.fwBold,
             ),
             decoration: InputDecoration(
-              labelText: 'Task Title *',
+              labelText: l10n.taskDetailsLabelTitle,
               prefixIcon: const Icon(Icons.title),
               border: const OutlineInputBorder(),
               disabledBorder: OutlineInputBorder(
@@ -155,7 +153,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             maxLines: 3,
             scrollPhysics: const BouncingScrollPhysics(),
             decoration: InputDecoration(
-              labelText: 'Description',
+              labelText: l10n.taskDetailsLabelDescription,
               prefixIcon: const Icon(Icons.notes),
               alignLabelWithHint: true,
               border: const OutlineInputBorder(),
@@ -166,16 +164,19 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           ),
 
           // --- SECTION: PRIORITY & SIZE ---
-          _buildSectionHeader("Priority & Effort", Icons.bar_chart),
+          _buildSectionHeader(
+            l10n.taskDetailsSectionPriorityAndEffort,
+            Icons.bar_chart,
+          ),
           Row(
             children: [
               Expanded(
                 child: _isEditing
                     ? DropdownButtonFormField<Priority>(
                         initialValue: _priority,
-                        decoration: const InputDecoration(
-                          labelText: 'Priority',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.taskDetailsLabelPriority,
+                          border: const OutlineInputBorder(),
                         ),
                         items: Priority.values
                             .map(
@@ -188,9 +189,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         onChanged: (val) => setState(() => _priority = val!),
                       )
                     : ListTile(
-                        title: const Text(
-                          "Priority",
-                          style: TextStyle(fontSize: AppTheme.fsBodySmall),
+                        title: Text(
+                          l10n.taskDetailsLabelPriority,
+                          style: const TextStyle(
+                            fontSize: AppTheme.fsBodySmall,
+                          ),
                         ),
                         subtitle: Text(_priority.name.toUpperCase()),
                         leading: AppUtils().getPriorityIcon(_priority),
@@ -202,9 +205,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 child: _isEditing
                     ? DropdownButtonFormField<Size>(
                         initialValue: _size,
-                        decoration: const InputDecoration(
-                          labelText: 'Size',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: l10n.taskDetailsLabelEffort,
+                          border: const OutlineInputBorder(),
                         ),
                         items: Size.values
                             .map(
@@ -217,9 +220,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         onChanged: (val) => setState(() => _size = val!),
                       )
                     : ListTile(
-                        title: const Text(
-                          "Size",
-                          style: TextStyle(fontSize: AppTheme.fsBodySmall),
+                        title: Text(
+                          l10n.taskDetailsLabelEffort,
+                          style: const TextStyle(
+                            fontSize: AppTheme.fsBodySmall,
+                          ),
                         ),
                         subtitle: Text(_size.name.toUpperCase()),
                         leading: Text(
@@ -233,7 +238,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           ),
 
           // --- SECTION: TIME ---
-          _buildSectionHeader("Schedule", Icons.calendar_today),
+          _buildSectionHeader(
+            l10n.taskDetailsSectionScheduling,
+            Icons.calendar_today,
+          ),
           InkWell(
             onTap: _isEditing ? _pickDueDate : null,
             // Ensure the ripple effect stays inside the standard border radius
@@ -255,8 +263,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               ),
               child: Text(
                 _dueDate == null
-                    ? 'No Due Date Set'
-                    : 'Due: ${settings.getFormattedDate(_dueDate!)} at ${settings.use24HourFormat ? DateFormat.Hm().format(_dueDate!) : DateFormat.jm().format(_dueDate!)}',
+                    ? l10n.taskDetailsLabelDueDateNone
+                    : l10n.taskDetailsLabelDueDate(
+                        settings.getFormattedDate(_dueDate!),
+                        settings.use24HourFormat
+                            ? DateFormat.Hm().format(_dueDate!)
+                            : DateFormat.jm().format(_dueDate!),
+                      ),
                 style: TextStyle(
                   // Dims the text slightly if not in edit mode
                   color: _isEditing ? null : theme.disabledColor,
@@ -291,12 +304,15 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           ],
 
           // --- SECTION: LOCATION ---
-          _buildSectionHeader("Location", Icons.location_on_outlined),
+          _buildSectionHeader(
+            l10n.taskDetailsSectionLocation,
+            Icons.location_on_outlined,
+          ),
           TextField(
             controller: _locationController,
             enabled: _isEditing,
             decoration: InputDecoration(
-              labelText: 'Location',
+              labelText: l10n.taskDetailsLabelLocation,
               prefixIcon: const Icon(Icons.map_outlined),
               border: const OutlineInputBorder(),
               disabledBorder: OutlineInputBorder(
@@ -312,7 +328,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           ),
 
           // --- SUBTASKS ---
-          _buildSectionHeader("Checklist", Icons.checklist),
+          _buildSectionHeader(
+            l10n.taskDetailsSectionChecklist,
+            Icons.checklist,
+          ),
 
           // Display existing subtasks
           ..._subtasks.map(
@@ -374,7 +393,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     child: TextField(
                       controller: _newSubtaskController,
                       decoration: InputDecoration(
-                        hintText: "Add subtask...",
+                        hintText: l10n.taskDetailsLabelSubtaskHint,
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -425,7 +444,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ElevatedButton.icon(
               icon: const Icon(Icons.save),
               onPressed: _saveTask,
-              label: const Text('Save Changes'),
+              label: Text(l10n.taskDetailsLabelSaveEdit),
               style: ElevatedButton.styleFrom(
                 minimumSize: const ui.Size.fromHeight(54),
                 shape: const RoundedRectangleBorder(
@@ -469,13 +488,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   Widget _buildCategoryPicker() {
     final dividerColor = Theme.of(context).dividerColor.withValues(alpha: 0.6);
+    final l10n = AppLocalizations.of(context)!;
 
     if (!_isEditing) {
       return TextFormField(
-        initialValue: _category.isEmpty ? 'None' : _category,
+        initialValue: _category.isEmpty
+            ? l10n.taskDetailsLabelCategoryEmpty
+            : _category,
         enabled: false,
         decoration: InputDecoration(
-          labelText: 'Category',
+          labelText: l10n.taskDetailsLabelCategory,
           prefixIcon: const Icon(Icons.label_outline),
           border: const OutlineInputBorder(),
           disabledBorder: OutlineInputBorder(
@@ -497,43 +519,52 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (!_isAddingNewCategory)
-          DropdownButtonFormField<String>(
-            initialValue: existingCategories.contains(_category)
-                ? _category
-                : null,
-            hint: Text(_category.isEmpty ? "Select Category" : _category),
-            decoration: const InputDecoration(
-              labelText: 'Category',
-              prefixIcon: Icon(Icons.label_outline),
-              border: OutlineInputBorder(),
+          DropdownButtonFormField<Object?>(
+            initialValue: _category.isEmpty
+                ? CategoryAction.none
+                : (existingCategories.contains(_category) ? _category : null),
+            hint: Text(
+              _category.isEmpty
+                  ? l10n.taskDetailsLabelCategorySelect
+                  : _category,
+            ),
+            decoration: InputDecoration(
+              labelText: l10n.taskDetailsLabelCategory,
+              prefixIcon: const Icon(Icons.label_outline),
+              border: const OutlineInputBorder(),
             ),
             items: [
-              const DropdownMenuItem(value: "", child: Text("None")),
+              DropdownMenuItem(
+                value: CategoryAction.none,
+                child: Text(l10n.taskDetailsLabelCategoryEmpty),
+              ),
               ...existingCategories.map(
                 (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
               ),
-              const DropdownMenuItem(
-                value: "__ADD_NEW__",
+              DropdownMenuItem(
+                value: CategoryAction.addNew,
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.add,
                       size: AppTheme.iconSizeSmall,
                       color: AppTheme.infoColor,
                     ),
-                    SizedBox(width: AppTheme.spaceSmall),
+                    const SizedBox(width: AppTheme.spaceSmall),
                     Text(
-                      "Add New Category...",
-                      style: TextStyle(color: AppTheme.infoColor),
+                      l10n.taskDetailsLabelCategoryAddNew,
+                      style: const TextStyle(color: AppTheme.infoColor),
                     ),
                   ],
                 ),
               ),
             ],
             onChanged: (val) {
-              if (val == "__ADD_NEW__") {
+              if (val == CategoryAction.addNew) {
                 setState(() => _isAddingNewCategory = true);
-              } else if (val != null) {
+              } else if (val == CategoryAction.none) {
+                setState(() => _category = "");
+              } else if (val is String) {
                 setState(() => _category = val);
               }
             },
@@ -543,7 +574,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             controller: _newCategoryController,
             autofocus: true,
             decoration: InputDecoration(
-              labelText: 'New Category Name',
+              labelText: l10n.taskDetailsLabelCategoryNewName,
               prefixIcon: const Icon(Icons.label_important_outline),
               border: const OutlineInputBorder(),
               suffixIcon: Row(
@@ -597,34 +628,44 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   Widget _buildReminderInput() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         Expanded(
-          child: DropdownButtonFormField<String>(
+          child: DropdownButtonFormField<ReminderOption>(
             initialValue: _selectedReminderOption,
-            items: _reminderOptions
-                .map((o) => DropdownMenuItem(value: o, child: Text(o)))
-                .toList(),
+            items: ReminderOption.values.map((option) {
+              return DropdownMenuItem<ReminderOption>(
+                value: option,
+                // Pass the context into the Enum here!
+                child: Text(option.getLocalizedLabel(context)),
+              );
+            }).toList(),
             onChanged: (v) => setState(() => _selectedReminderOption = v!),
-            decoration: const InputDecoration(
-              labelText: "Set Reminder",
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(
+            decoration: InputDecoration(
+              labelText: l10n.taskDetailsLabelReminderSet,
+              border: const OutlineInputBorder(),
+              contentPadding: const EdgeInsets.symmetric(
                 horizontal: AppTheme.spaceMedium,
               ),
             ),
           ),
         ),
         const SizedBox(width: AppTheme.spaceSmall),
-        ElevatedButton(onPressed: _addReminder, child: const Text("Add")),
+        ElevatedButton(
+          onPressed: _addReminder,
+          child: Text(l10n.commonLabelAdd),
+        ),
       ],
     );
   }
 
   Future<void> _addReminder() async {
+    final l10n = AppLocalizations.of(context)!;
     DateTime? reminderTime;
 
-    if (_selectedReminderOption == 'Custom') {
+    if (_selectedReminderOption == ReminderOption.custom) {
       reminderTime = await AppDatePickers.pickDateTime(
         context: context,
         lastDate: _dueDate ?? DateTime(2100),
@@ -635,9 +676,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           reminderTime.isAfter(_dueDate!)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Custom reminder must be before the Due Date.'),
-            ),
+            SnackBar(content: Text(l10n.taskDetailsLabelReminderTooEarly)),
           );
         }
         return;
@@ -646,18 +685,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       if (_dueDate == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please set a Due Date first.')),
+            SnackBar(content: Text(l10n.taskDetailsSnackbarReminderNoDue)),
           );
         }
         return;
       }
-      if (_selectedReminderOption == 'On time') {
+      if (_selectedReminderOption == ReminderOption.onTime) {
         reminderTime = _dueDate!;
-      } else if (_selectedReminderOption == '30 minutes before') {
+      } else if (_selectedReminderOption == ReminderOption.minutes30Before) {
         reminderTime = _dueDate!.subtract(const Duration(minutes: 30));
-      } else if (_selectedReminderOption == '1 hour before') {
+      } else if (_selectedReminderOption == ReminderOption.hour1Before) {
         reminderTime = _dueDate!.subtract(const Duration(hours: 1));
-      } else if (_selectedReminderOption == '1 day before') {
+      } else if (_selectedReminderOption == ReminderOption.day1Before) {
         reminderTime = _dueDate!.subtract(const Duration(days: 1));
       }
     }
@@ -675,9 +714,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   // Master Save Logic
   void _saveTask() {
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Title is required!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.taskDetailsSnackbarTitleRequired,
+          ),
+        ),
+      );
       return;
     }
 
