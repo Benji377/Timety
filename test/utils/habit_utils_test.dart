@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:timety/data/habit/habit_models.dart';
 import 'package:timety/providers/habit_provider.dart';
@@ -13,6 +14,10 @@ void main() {
   late FakeHabitRepository habitRepository;
   late HabitProvider habitProvider;
   late AppLocalizations l10n;
+
+  setUpAll(() async {
+    initializeDateFormatting('en_US', null);
+  });
 
   setUp(() async {
     l10n = lookupAppLocalizations(const Locale('en'));
