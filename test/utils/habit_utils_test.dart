@@ -54,7 +54,7 @@ void main() {
       expect(HabitUtils.buildHabitSubtitle(dailyHabit, l10n, 0), 'Daily');
       expect(
         HabitUtils.buildHabitSubtitle(exactHabit, l10n, 0),
-        'Weekly on ${AppDateUtils.weekdayToStringShort(DateTime.monday)}, ${AppDateUtils.weekdayToStringShort(DateTime.wednesday)}',
+        'Weekly on ${AppDateUtils.weekdayToStringShort("en_US", DateTime.monday)}, ${AppDateUtils.weekdayToStringShort("en_US", DateTime.wednesday)}',
       );
       expect(
         HabitUtils.buildHabitSubtitle(flexibleHabit, l10n, 0),
