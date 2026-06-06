@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'habit/habit_list_screen.dart';
 import 'home_screen.dart';
@@ -18,6 +19,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Map current tab index to its active color so labels match active icon colors
     Color selectedColor;
     switch (_currentIndex) {
@@ -55,31 +57,31 @@ class _MainScreenState extends State<MainScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: selectedColor,
         unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home, color: AppTheme.warningAccent),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home, color: AppTheme.warningAccent),
+            label: l10n.navigationHome,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.coffee_outlined),
-            activeIcon: Icon(Icons.coffee, color: AppTheme.focusColor),
-            label: 'Focus',
+            icon: const Icon(Icons.coffee_outlined),
+            activeIcon: const Icon(Icons.coffee, color: AppTheme.focusColor),
+            label: l10n.navigationFocus,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.task_outlined),
-            activeIcon: Icon(Icons.task, color: AppTheme.taskColor),
-            label: 'Tasks',
+            icon: const Icon(Icons.task_outlined),
+            activeIcon: const Icon(Icons.task, color: AppTheme.taskColor),
+            label: l10n.navigationTasks,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.alarm_outlined),
-            activeIcon: Icon(Icons.alarm, color: AppTheme.habitColor),
-            label: 'Habits',
+            icon: const Icon(Icons.alarm_outlined),
+            activeIcon: const Icon(Icons.alarm, color: AppTheme.habitColor),
+            label: l10n.navigationHabits,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person, color: AppTheme.userColor),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person, color: AppTheme.userColor),
+            label: l10n.navigationProfile,
           ),
         ],
       ),

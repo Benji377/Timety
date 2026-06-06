@@ -413,6 +413,11 @@
     }
   },
 
+  "navigationHome": "Home",
+  "navigationFocus": "Focus",
+  "navigationTasks": "Tasks",
+  "navigationHabits": "Habits",
+  "navigationProfile": "Profile",
 
   "nTasksCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
   "@nTasksCount": {
