@@ -39,7 +39,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final allHabits = habitProvider.habits;
 
     final l10n = AppLocalizations.of(context)!;
-    final localeString = settingsProvider.appLocale ?? Localizations.localeOf(context).toString();
+    final localeString =
+        settingsProvider.appLocale ??
+        Localizations.localeOf(context).toString();
     final weeks = CalendarUtils.generateWeeks(_focusedMonth);
 
     // --- FILTER & SORT ACCORDION DATA ---

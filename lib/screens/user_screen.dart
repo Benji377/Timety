@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/habit_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/wrapup_image_generator.dart';
@@ -33,6 +34,7 @@ class _UserScreenState extends State<UserScreen> {
     final tasks = context.watch<TaskProvider>();
     final focus = context.watch<FocusProvider>();
     final habits = context.watch<HabitProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     final taskDates = tasks.tasks
         .where((task) => task.isCompleted && task.completedAt != null)
@@ -81,7 +83,7 @@ class _UserScreenState extends State<UserScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(l10n.userProfileTitle),
         actions: [
           IconButton(
             icon: _isExporting
@@ -91,8 +93,9 @@ class _UserScreenState extends State<UserScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.ios_share),
-            tooltip: 'Share Weekly Wrap-up',
+            tooltip: l10n.userTooltipShareWrapUp,
             onPressed: () => _shareWrapUp(
+              context,
               userProvider.name,
               userProvider.currentLevel,
               userProvider.levelTitle,
@@ -104,7 +107,7 @@ class _UserScreenState extends State<UserScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.bar_chart),
-            tooltip: 'Statistics',
+            tooltip: l10n.userTooltipStatistics,
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const StatisticsScreen()),
@@ -228,6 +231,8 @@ class _UserScreenState extends State<UserScreen> {
     int totalSessions,
     int highestStreak,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -249,17 +254,17 @@ class _UserScreenState extends State<UserScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'All-Time Stats',
+            Text(
+              l10n.userStatsAllTimeTitle,
               textAlign: TextAlign.left,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppTheme.fsHeadingSmall,
                 fontWeight: AppTheme.fwBold,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              'Lifetime progress at a glance',
+              l10n.userStatsAllTimeSubtitle,
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -271,35 +276,35 @@ class _UserScreenState extends State<UserScreen> {
               runSpacing: AppTheme.spaceMedium,
               children: [
                 StatCard(
-                  title: 'Tasks Done',
+                  title: l10n.userStatTasksDone,
                   value: '$totalTasks',
                   icon: Icons.check_circle_outline,
                   color: AppTheme.taskColor,
                   style: StatCardStyle.compactVertical,
                 ),
                 StatCard(
-                  title: 'Habits Met',
+                  title: l10n.userStatHabitsMet,
                   value: '$totalHabitsDone',
                   icon: Icons.repeat,
                   color: AppTheme.habitColor,
                   style: StatCardStyle.compactVertical,
                 ),
                 StatCard(
-                  title: 'Focus Mins',
+                  title: l10n.userStatFocusMins,
                   value: '$totalFocusMins',
                   icon: Icons.timer_outlined,
                   color: AppTheme.focusColor,
                   style: StatCardStyle.compactVertical,
                 ),
                 StatCard(
-                  title: 'Sessions',
+                  title: l10n.userStatSessions,
                   value: '$totalSessions',
                   icon: Icons.coffee_outlined,
                   color: AppTheme.userColor,
                   style: StatCardStyle.compactVertical,
                 ),
                 StatCard(
-                  title: 'Best Streak',
+                  title: l10n.userStatBestStreak,
                   value: '$highestStreak',
                   icon: Icons.military_tech,
                   color: AppTheme.warningColor,
@@ -314,6 +319,7 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   Future<void> _shareWrapUp(
+    BuildContext context,
     String name,
     int level,
     String title,
@@ -323,6 +329,13 @@ class _UserScreenState extends State<UserScreen> {
     int streak,
   ) async {
     if (_isExporting) return;
+
+    // Grab localized strings before async gaps
+    final l10n = AppLocalizations.of(context)!;
+    final subjectString = l10n.userShareSubject;
+    final textString = l10n.userShareText;
+    final errorString = l10n.userErrorGenerateImage;
+
     setState(() => _isExporting = true);
 
     try {
@@ -343,16 +356,16 @@ class _UserScreenState extends State<UserScreen> {
 
       await SharePlus.instance.share(
         ShareParams(
-          subject: 'My Timety Wrap-Up',
+          subject: subjectString,
           files: [XFile(file.path)],
-          text: 'Master your time with Timety!',
+          text: textString,
         ),
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to generate wrap-up image.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorString)));
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -372,21 +385,23 @@ class _UserScreenState extends State<UserScreen> {
   // --- NAME EDITOR ---
   Future<void> _editName(BuildContext context, UserProvider user) async {
     final controller = TextEditingController(text: user.name);
+    final l10n = AppLocalizations.of(context)!;
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Edit Name"),
+        title: Text(l10n.userEditNameTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
           maxLength: 20,
-          decoration: const InputDecoration(hintText: "Enter your name"),
+          decoration: InputDecoration(hintText: l10n.userEditNameHint),
           textCapitalization: TextCapitalization.words,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text(l10n.commonLabelCancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -395,7 +410,7 @@ class _UserScreenState extends State<UserScreen> {
               }
               Navigator.pop(context);
             },
-            child: const Text("Save"),
+            child: Text(l10n.commonLabelSave),
           ),
         ],
       ),

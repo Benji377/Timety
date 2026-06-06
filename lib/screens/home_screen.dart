@@ -148,9 +148,7 @@ class HomeScreen extends StatelessWidget {
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 child: (urgentTasks.isEmpty && todaysHabits.isEmpty)
-                    ? Center(
-                        child: Text(l10n.homeDailyGoalDone),
-                      )
+                    ? Center(child: Text(l10n.homeDailyGoalDone))
                     : ListView(
                         padding: const EdgeInsets.only(
                           top: AppTheme.spaceLarge,
@@ -169,7 +167,9 @@ class HomeScreen extends StatelessWidget {
                                 child: ExpansionTile(
                                   initiallyExpanded: true,
                                   title: Text(
-                                    l10n.homeSectionTasksDue(urgentTasks.length),
+                                    l10n.homeSectionTasksDue(
+                                      urgentTasks.length,
+                                    ),
                                     style: const TextStyle(
                                       fontWeight: AppTheme.fwBold,
                                       color: AppTheme.warningColor,
@@ -219,7 +219,9 @@ class HomeScreen extends StatelessWidget {
                                 ).copyWith(dividerColor: Colors.transparent),
                                 child: ExpansionTile(
                                   title: Text(
-                                    l10n.homeSectionHabitsDue(todaysHabits.length),
+                                    l10n.homeSectionHabitsDue(
+                                      todaysHabits.length,
+                                    ),
                                     style: const TextStyle(
                                       fontWeight: AppTheme.fwBold,
                                       color: AppTheme.typeHabitColor,
@@ -265,7 +267,9 @@ class HomeScreen extends StatelessWidget {
                                 ).copyWith(dividerColor: Colors.transparent),
                                 child: ExpansionTile(
                                   title: Text(
-                                    l10n.homeSectionTasksUpcoming(upcomingTasks.length),
+                                    l10n.homeSectionTasksUpcoming(
+                                      upcomingTasks.length,
+                                    ),
                                     style: const TextStyle(
                                       fontWeight: AppTheme.fwBold,
                                       color: AppTheme.typeTaskColor,

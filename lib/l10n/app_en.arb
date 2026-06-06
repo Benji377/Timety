@@ -514,6 +514,25 @@
   "settingsDialogUnitMinutes": "minutes",
   "settingsDialogUnitDays": "days",
 
+  "userProfileTitle": "Profile",
+  "userTooltipShareWrapUp": "Share Weekly Wrap-up",
+  "userTooltipStatistics": "Statistics",
+  
+  "userStatsAllTimeTitle": "All-Time Stats",
+  "userStatsAllTimeSubtitle": "Lifetime progress at a glance",
+  "userStatTasksDone": "Tasks Done",
+  "userStatHabitsMet": "Habits Met",
+  "userStatFocusMins": "Focus Mins",
+  "userStatSessions": "Sessions",
+  "userStatBestStreak": "Best Streak",
+  
+  "userShareSubject": "My Timety Wrap-Up",
+  "userShareText": "Master your time with Timety!",
+  "userErrorGenerateImage": "Failed to generate wrap-up image.",
+  
+  "userEditNameTitle": "Edit Name",
+  "userEditNameHint": "Enter your name",
+
   "navigationHome": "Home",
   "navigationFocus": "Focus",
   "navigationTasks": "Tasks",

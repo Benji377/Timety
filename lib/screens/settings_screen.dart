@@ -182,9 +182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.linear_scale, color: AppTheme.taskColor),
             title: Text(l10n.settingsLabelFocusNodeTime),
-            subtitle: Text(
-              l10n.settingsLabelFocusNodeTimeSubtitle,
-            ),
+            subtitle: Text(l10n.settingsLabelFocusNodeTimeSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showNumberPickerDialog(
               l10n.settingsLabelFocusNodeTime,
@@ -409,7 +407,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   Text(
                     l10n.appTitle,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   FutureBuilder<String>(
                     future: _appVersionFuture,
