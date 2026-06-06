@@ -99,7 +99,11 @@ class HabitWidgetService {
                   habit: h,
                   isDone: completionStatus[h.id] ?? false,
                   isLocked: stackLocks[h.id] ?? false,
-                  frequency: HabitUtils.buildHabitSubtitle(h, l10n, provider.getCompletionsThisWeek(h)),
+                  frequency: HabitUtils.buildHabitSubtitle(
+                    h,
+                    l10n,
+                    provider.getCompletionsThisWeek(h),
+                  ),
                   isStacked: true,
                 ),
               const HabitStackFooterView(),
@@ -115,7 +119,11 @@ class HabitWidgetService {
             habit: h,
             isDone: completionStatus[h.id] ?? false,
             isLocked: false,
-            frequency: HabitUtils.buildHabitSubtitle(h, l10n, provider.getCompletionsThisWeek(h)),
+            frequency: HabitUtils.buildHabitSubtitle(
+              h,
+              l10n,
+              provider.getCompletionsThisWeek(h),
+            ),
           ),
         );
       }

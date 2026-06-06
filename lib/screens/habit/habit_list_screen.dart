@@ -149,8 +149,12 @@ class HabitListScreen extends StatelessWidget {
   ) {
     final l10n = AppLocalizations.of(context)!;
     final completionsThisWeek = provider.getCompletionsThisWeek(habit);
-    var subtitle = HabitUtils.buildHabitSubtitle(habit, l10n, completionsThisWeek);
-    
+    var subtitle = HabitUtils.buildHabitSubtitle(
+      habit,
+      l10n,
+      completionsThisWeek,
+    );
+
     if (habit.targetTime != null) {
       subtitle += ' | ${habit.targetTime!.format(context)}';
     }

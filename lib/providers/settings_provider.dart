@@ -198,7 +198,8 @@ class SettingsProvider extends ChangeNotifier {
       return DateFormat(_dateFormatCode).format(date);
     } else {
       // System Default: Grab the current app language/locale and format automatically
-      final localeString = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
+      final localeString =
+          _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
       return DateFormat.yMd(localeString).format(date);
     }
   }

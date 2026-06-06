@@ -39,7 +39,11 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
     final isNew = widget.initialPhase == null;
 
     return AlertDialog(
-      title: Text(isNew ? AppLocalizations.of(context)!.focusPhasesTitleAdd : AppLocalizations.of(context)!.focusPhasesTitleEdit),
+      title: Text(
+        isNew
+            ? AppLocalizations.of(context)!.focusPhasesTitleAdd
+            : AppLocalizations.of(context)!.focusPhasesTitleEdit,
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -68,7 +72,9 @@ class _PhaseEditorDialogState extends State<PhaseEditorDialog> {
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context)!.focusPhaseLabelDuration,
               border: const OutlineInputBorder(),
-              suffixText: AppLocalizations.of(context)!.focusPhaseLabelDurationSuffix,
+              suffixText: AppLocalizations.of(
+                context,
+              )!.focusPhaseLabelDurationSuffix,
             ),
           ),
         ],

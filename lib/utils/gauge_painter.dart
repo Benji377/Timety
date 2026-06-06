@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-
 class GaugePainter extends CustomPainter {
   final double progress;
   final Color color;

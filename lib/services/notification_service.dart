@@ -289,7 +289,7 @@ class NotificationService {
     }
   }
 
-Future<void> showFocusTimerNotification({
+  Future<void> showFocusTimerNotification({
     required String title,
     required String body,
     required DateTime targetTime,

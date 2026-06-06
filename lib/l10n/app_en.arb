@@ -149,6 +149,40 @@
       }
     }
   },
+  "habitDetailTitleEdit": "Edit Habit",
+  "habitDetailTitleNew": "New Habit",
+  "habitDetailLabelName": "Habit Name",
+  "habitDetailLabelNameHint": "e.g., Read 10 pages, Workout...",
+  "habitDetailLabelNameRequest": "Please enter a name",
+
+  "habitDetailLabelStack": "Habit Stack (Optional)",
+  "habitDetailLabelStackHint": "e.g., Morning Routine",
+  "habitDetailLabelStackOrder": "Stack Order",
+
+  "habitDetailLabelNotes": "Notes (Optional)",
+  "habitDetailLabelNotesHint": "Why are you building this habit?",
+
+  "habitDetailLabelIcon": "Select an Icon",
+
+  "habitDetailLabelFrequency": "Frequency",
+  "habitDetailLabelFrequencyDaily": "Daily",
+  "habitDetailLabelFrequencyFlexible": "Flexible",
+  "habitDetailLabelFrequencyExact": "Specific",
+
+  "habitDetailLabelGoal": "Goal: {count, plural, =0{Daily} =1{1 day a week} other{{count} days a week}}",
+  "@habitDetailLabelGoal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "habitDetailLabelReminder": "Reminder time (Optional)",
+  "habitDetailLabelReminderNoTime": "No specific time",
+
+  "habitDetailSnackbarSaveNoDay": "Please select at least one day",
+
 
   "taskReminderTitle": "Reminder: {task}",
   "@taskReminderTitle": {

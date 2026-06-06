@@ -135,8 +135,12 @@ class AppDialogs {
                       ),
                       items: provider.modes
                           .map(
-                            (m) =>
-                                DropdownMenuItem(value: m, child: Text(getLocalizedFocusModeName(context, m))),
+                            (m) => DropdownMenuItem(
+                              value: m,
+                              child: Text(
+                                getLocalizedFocusModeName(context, m),
+                              ),
+                            ),
                           )
                           .toList(),
                       onChanged: (val) {

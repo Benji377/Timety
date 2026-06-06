@@ -556,9 +556,12 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
           children: [
             Expanded(
               child: _buildSectionHeader(
-                AppLocalizations.of(context)!.focusStatsSectionTargetBreakdownTitle,
-                subtitle:
-                    AppLocalizations.of(context)!.focusStatsSectionTargetBreakdownSubtitle,
+                AppLocalizations.of(
+                  context,
+                )!.focusStatsSectionTargetBreakdownTitle,
+                subtitle: AppLocalizations.of(
+                  context,
+                )!.focusStatsSectionTargetBreakdownSubtitle,
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -711,7 +714,9 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
       children: [
         _buildSectionHeader(
           AppLocalizations.of(context)!.focusStatsSectionSessionsTitle,
-          subtitle: AppLocalizations.of(context)!.focusStatsSectionSessionsSubtitle,
+          subtitle: AppLocalizations.of(
+            context,
+          )!.focusStatsSectionSessionsSubtitle,
           padding: EdgeInsets.zero,
         ),
         const SizedBox(height: 16),

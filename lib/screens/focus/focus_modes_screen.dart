@@ -14,7 +14,9 @@ class FocusModesScreen extends StatelessWidget {
     final modes = focusProvider.modes;
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.focusModesTitle)),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.focusModesTitle),
+      ),
       body: ListView.builder(
         padding: const EdgeInsets.only(bottom: 100, top: 16),
         itemCount: modes.length,

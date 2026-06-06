@@ -20,7 +20,10 @@ class _TagsWidgetState extends State<TagsWidget> {
     final focusProvider = context.watch<FocusProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.focusTagsTitle), centerTitle: true),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.focusTagsTitle),
+        centerTitle: true,
+      ),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 40),
         children: [
@@ -87,9 +90,16 @@ class _TagsWidgetState extends State<TagsWidget> {
                                   final confirmed =
                                       await AppDialogs.showConfirmation(
                                         context: context,
-                                        title: AppLocalizations.of(context)!.focusTagsDialogTitleDelete,
-                                        content: AppLocalizations.of(context)!.focusTagsDialogContentDelete(tag.name),
-                                        confirmLabel: AppLocalizations.of(context)!.commonLabelDelete,
+                                        title: AppLocalizations.of(
+                                          context,
+                                        )!.focusTagsDialogTitleDelete,
+                                        content: AppLocalizations.of(context)!
+                                            .focusTagsDialogContentDelete(
+                                              tag.name,
+                                            ),
+                                        confirmLabel: AppLocalizations.of(
+                                          context,
+                                        )!.commonLabelDelete,
                                         confirmColor: Colors.red,
                                       ) ==
                                       true;
@@ -125,7 +135,11 @@ class _TagsWidgetState extends State<TagsWidget> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: Text(isEditing ? AppLocalizations.of(context)!.focusTagsLabelEdit : AppLocalizations.of(context)!.focusTagsLabelAdd),
+            title: Text(
+              isEditing
+                  ? AppLocalizations.of(context)!.focusTagsLabelEdit
+                  : AppLocalizations.of(context)!.focusTagsLabelAdd,
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -168,7 +182,11 @@ class _TagsWidgetState extends State<TagsWidget> {
                   }
                   Navigator.pop(context);
                 },
-                child: Text(isEditing ? AppLocalizations.of(context)!.commonLabelSave : AppLocalizations.of(context)!.focusTagsLabelAdd),
+                child: Text(
+                  isEditing
+                      ? AppLocalizations.of(context)!.commonLabelSave
+                      : AppLocalizations.of(context)!.focusTagsLabelAdd,
+                ),
               ),
             ],
           );

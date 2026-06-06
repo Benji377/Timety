@@ -17,7 +17,6 @@ class FocusBottomSheetBuilders {
     required BuildContext context,
     required Function(String eventName) onEventSelected,
   }) {
-
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -32,15 +31,15 @@ class FocusBottomSheetBuilders {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   AppLocalizations.of(context)!.distractionSheetTitle,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               ...DistractionType.values.map(
                 (type) => ListTile(
-                  leading: Icon(
-                    type.icon,
-                    color: type.color,
-                  ),
+                  leading: Icon(type.icon, color: type.color),
                   title: Text(
                     type.getLocalizedName(context),
                     style: const TextStyle(fontWeight: FontWeight.w500),
@@ -51,7 +50,11 @@ class FocusBottomSheetBuilders {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(AppLocalizations.of(context)!.distractionLogged(eventName)),
+                        content: Text(
+                          AppLocalizations.of(
+                            context,
+                          )!.distractionLogged(eventName),
+                        ),
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -119,7 +122,9 @@ class FocusBottomSheetBuilders {
                     tabs: [
                       Tab(text: AppLocalizations.of(context)!.globalLabelTags),
                       Tab(text: AppLocalizations.of(context)!.globalLabelTasks),
-                      Tab(text: AppLocalizations.of(context)!.globalLabelHabits),
+                      Tab(
+                        text: AppLocalizations.of(context)!.globalLabelHabits,
+                      ),
                     ],
                   ),
                   Expanded(
@@ -172,7 +177,11 @@ class FocusBottomSheetBuilders {
       children: [
         Expanded(
           child: tags.isEmpty
-              ? Center(child: Text(AppLocalizations.of(context)!.focusTagsLabelEmpty))
+              ? Center(
+                  child: Text(
+                    AppLocalizations.of(context)!.focusTagsLabelEmpty,
+                  ),
+                )
               : ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: tags.length,
@@ -260,7 +269,9 @@ class FocusBottomSheetBuilders {
                 subtitle: Text(
                   task.category.isNotEmpty
                       ? task.category
-                      : (task.isCompleted ? AppLocalizations.of(context)!.taskLabelCompleted : AppLocalizations.of(context)!.globalLabelTask),
+                      : (task.isCompleted
+                            ? AppLocalizations.of(context)!.taskLabelCompleted
+                            : AppLocalizations.of(context)!.globalLabelTask),
                 ),
                 trailing: isSelected
                     ? const Icon(Icons.check, color: AppTheme.successColor)
@@ -283,7 +294,9 @@ class FocusBottomSheetBuilders {
     required Function(Habit habit) onHabitSelected,
   }) {
     if (habits.isEmpty) {
-      return Center(child: Text(AppLocalizations.of(context)!.habitsSheetEmpty));
+      return Center(
+        child: Text(AppLocalizations.of(context)!.habitsSheetEmpty),
+      );
     }
 
     final grouped = <String, List<Habit>>{};

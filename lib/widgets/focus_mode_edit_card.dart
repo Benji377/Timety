@@ -326,9 +326,11 @@ class _ModeEditCardState extends State<ModeEditCard> {
 
     context.read<FocusProvider>().saveCustomMode(updatedMode);
     setState(() => _isEditing = false);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.focusModeSnackbarSaved)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.focusModeSnackbarSaved),
+      ),
+    );
   }
 
   void _cancelEdit() {

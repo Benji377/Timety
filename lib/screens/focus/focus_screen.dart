@@ -163,13 +163,14 @@ class _FocusScreenState extends State<FocusScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      activeMode != null ?
-                        getLocalizedFocusModeName(
-                          context, activeMode).toUpperCase()
-                          :
-                          AppLocalizations.of(
-                            context,
-                          )!.focusModeSelect.toUpperCase(),
+                      activeMode != null
+                          ? getLocalizedFocusModeName(
+                              context,
+                              activeMode,
+                            ).toUpperCase()
+                          : AppLocalizations.of(
+                              context,
+                            )!.focusModeSelect.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
