@@ -150,6 +150,61 @@
     }
   },
 
+  "taskReminderTitle": "Reminder: {task}",
+  "@taskReminderTitle": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+
+  "taskReminderBody": "{prefix} remember to do {task}!",
+  "@taskReminderBody": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      },
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+
+  "taskReminderBodyExact": "It is time to do {task}!",
+  "@taskReminderBodyExact": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "taskReminderPrefixNow": "Now: ",
+  "nTaskReminderPrefixMinutes": "In {count, plural, =1{1 minute} other{{count} minutes}}",
+  "@nTaskReminderPrefixMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nTaskReminderPrefixHours": "In {count, plural, =1{1 hour} other{{count} hours}}",
+  "@nTaskReminderPrefixHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nTaskReminderPrefixDays": "In {count, plural, =1{Tomorrow} other{{count} days}}",
+  "@nTaskReminderPrefixDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
   "globalLabelTags": "Tags",
   "globalLabelTasks": "Tasks",
   "globalLabelTask": "Task",

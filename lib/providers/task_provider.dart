@@ -3,6 +3,7 @@ import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
 import '../services/android_widgets/task_widget_service.dart';
+import '../utils/l10n_utils.dart';
 import '../utils/xp_calculator.dart';
 import 'user_provider.dart';
 
@@ -37,8 +38,9 @@ class TaskProvider extends ChangeNotifier {
     DateTime? dueDate,
     bool exactDueDate = false,
   }) {
+    final l10n = getL10n();
     if (exactDueDate) {
-      return 'It is time to do ${task.title}!';
+      return l10n.taskReminderBodyExact(task.title);
     }
 
     final referenceTime = dueDate ?? reminderTime;
@@ -46,19 +48,17 @@ class TaskProvider extends ChangeNotifier {
 
     String reminderPrefix;
     if (timeUntilDue.inMinutes <= 0) {
-      reminderPrefix = 'Now';
+      reminderPrefix = l10n.taskReminderPrefixNow;
     } else if (timeUntilDue.inMinutes < 60) {
-      reminderPrefix = 'In ${timeUntilDue.inMinutes} minutes';
+      reminderPrefix = l10n.nTaskReminderPrefixMinutes(timeUntilDue.inMinutes);
     } else if (timeUntilDue.inHours < 24) {
-      reminderPrefix = timeUntilDue.inHours == 1
-          ? 'In 1 hour'
-          : 'In ${timeUntilDue.inHours} hours';
+      reminderPrefix = l10n.nTaskReminderPrefixHours(timeUntilDue.inHours);
     } else {
       final days = timeUntilDue.inDays;
-      reminderPrefix = days == 1 ? 'Tomorrow' : 'In $days days';
+      reminderPrefix = l10n.nTaskReminderPrefixDays(days);
     }
 
-    return '$reminderPrefix remember to do ${task.title}!';
+    return l10n.taskReminderBody(reminderPrefix, task.title);
   }
 
   Future<void> _cancelTaskNotifications(Task task) async {
@@ -76,6 +76,8 @@ class TaskProvider extends ChangeNotifier {
 
   // Master synchronization function
   Future<void> _syncTaskReminders(Task task, {Task? previousTask}) async {
+    final l10n = getL10n();
+
     if (previousTask != null) {
       await _cancelTaskNotifications(previousTask);
     } else {
@@ -91,7 +93,7 @@ class TaskProvider extends ChangeNotifier {
         final notifId = _generateNotificationId(task.id, reminder);
         await NotificationService.instance.scheduleTaskReminder(
           notificationId: notifId,
-          title: 'Reminder: ${task.title}',
+          title: l10n.taskReminderTitle(task.title),
           body: _buildReminderBody(task, reminder, dueDate: task.dueDate),
           scheduledTime: reminder,
         );
@@ -103,7 +105,7 @@ class TaskProvider extends ChangeNotifier {
       if (dueDate.isAfter(DateTime.now())) {
         await NotificationService.instance.scheduleTaskReminder(
           notificationId: _generateDueDateNotificationId(task.id, dueDate),
-          title: 'Reminder: ${task.title}',
+          title: l10n.taskReminderTitle(task.title),
           body: _buildReminderBody(task, dueDate, exactDueDate: true),
           scheduledTime: dueDate,
         );
