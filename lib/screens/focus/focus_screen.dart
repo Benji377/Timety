@@ -374,7 +374,7 @@ class _FocusScreenState extends State<FocusScreen> {
                     if (isRunning) {
                       _confirmStopSession(context, focusProvider);
                     } else if (focusProvider.awaitingPhaseContinue) {
-                      focusProvider.continueToNextPhase(context);
+                      focusProvider.continueToNextPhase();
                     } else if (focusProvider.selectedTargetIsLocked) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -387,7 +387,7 @@ class _FocusScreenState extends State<FocusScreen> {
                         ),
                       );
                     } else {
-                      focusProvider.startSession(context);
+                      focusProvider.startSession();
                     }
                   },
                   child: Icon(
@@ -422,9 +422,9 @@ class _FocusScreenState extends State<FocusScreen> {
                           if (focusProvider.awaitingPhaseContinue) {
                             _confirmStopSession(context, focusProvider);
                           } else if (isPaused) {
-                            focusProvider.startSession(context);
+                            focusProvider.startSession();
                           } else {
-                            focusProvider.pauseSession(context);
+                            focusProvider.pauseSession();
                           }
                         }
                       : null,
@@ -494,7 +494,7 @@ class _FocusScreenState extends State<FocusScreen> {
 
     var pausedByThisCall = false;
     if (wasRunning) {
-      focusProvider.pauseSession(context);
+      focusProvider.pauseSession();
       pausedByThisCall = true;
     }
 
@@ -514,7 +514,7 @@ class _FocusScreenState extends State<FocusScreen> {
         userProvider: context.read<UserProvider>(),
       );
     } else if (pausedByThisCall) {
-      focusProvider.startSession(context);
+      focusProvider.startSession();
     }
   }
 
@@ -527,7 +527,7 @@ class _FocusScreenState extends State<FocusScreen> {
 
     var pausedByThisCall = false;
     if (wasRunning) {
-      focusProvider.pauseSession(context);
+      focusProvider.pauseSession();
       pausedByThisCall = true;
     }
 
@@ -544,7 +544,7 @@ class _FocusScreenState extends State<FocusScreen> {
     if (confirmed) {
       focusProvider.resetSession();
     } else if (pausedByThisCall) {
-      focusProvider.startSession(context);
+      focusProvider.startSession();
     }
   }
 }

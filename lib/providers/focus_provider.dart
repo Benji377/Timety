@@ -7,8 +7,8 @@ import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
 import '../services/notification_service.dart';
 import '../utils/habit_utils.dart';
+import '../utils/l10n_utils.dart';
 import '../utils/xp_calculator.dart';
-import '../l10n/app_localizations.dart';
 import 'habit_provider.dart';
 import 'task_provider.dart';
 import 'user_provider.dart';
@@ -52,16 +52,6 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   int _currentPhaseIndex = 0;
   int _secondsRemainingInPhase = 0;
   PhaseType _currentPhaseType = PhaseType.focus;
-
-  // --- LOCALIZATION CACHE ---
-  // Background timers cannot access BuildContext, so UI strings are cached here
-  // when the user interacts with the UI, allowing the timer to update notifications safely.
-  String _locFocusActive = "Focus session active";
-  String _locPaused = "Paused";
-  String _locTarget = "Target";
-  String _locMax = "Max";
-  String _locEndsAt = "Ends at";
-  String Function(String, String)? _formatRemainingTime;
 
   // --- GETTERS ---
   List<FocusMode> get modes => _modes;
@@ -273,14 +263,17 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   void _updateNotification({bool asPaused = false}) {
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
 
+    final l10n = getL10n(settings: _settingsProvider);
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
     final isStopwatch = _activeMode!.type == FocusModeType.stopwatch;
 
-    final String titleText = asPaused ? _locPaused : _activeMode!.getLocalizedName();
+    final String titleText = asPaused
+        ? l10n.focusStatePaused
+        : _activeMode!.getLocalizedName();
     final List<String> bodyParts = [];
 
     if (selectedTargetLabel != null && selectedTargetLabel!.isNotEmpty) {
-      bodyParts.add('$_locTarget: $selectedTargetLabel');
+      bodyParts.add('${l10n.focusTargetLabel}: $selectedTargetLabel');
     }
 
     DateTime targetTime;
@@ -293,11 +286,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
       final secs = (safeRemaining % 60).toString().padLeft(2, '0');
 
       if (!isStopwatch) {
-        if (_formatRemainingTime != null) {
-          bodyParts.add(_formatRemainingTime!(mins.toString(), secs));
-        } else {
-          bodyParts.add('${mins.toString()}:$secs remaining');
-        }
+        bodyParts.add(l10n.notificationTimeRemaining(mins.toString(), secs));
       }
       targetTime = DateTime.now();
     } else {
@@ -315,7 +304,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
         );
         if (_settingsProvider?.maxStopwatchMins != null) {
           bodyParts.add(
-            '$_locMax: ${_settingsProvider!.maxStopwatchMins} mins',
+            l10n.focusLimitMax(_settingsProvider!.maxStopwatchMins),
           );
         }
       } else {
@@ -324,12 +313,12 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
         final timeString = use24h
             ? DateFormat.Hm().format(targetTime)
             : DateFormat.jm().format(targetTime);
-        bodyParts.add('$_locEndsAt $timeString');
+        bodyParts.add('${l10n.focusEndsAt} $timeString');
       }
     }
 
     final String bodyText = bodyParts.isEmpty && !asPaused
-        ? _locFocusActive
+        ? l10n.focusStateActive
         : bodyParts.join('  |  ');
 
     NotificationService.instance.showFocusTimerNotification(
@@ -344,25 +333,11 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     );
   }
 
-  /// Caches localized strings for use in background timer notifications, which cannot access BuildContext.
-  void _cacheTranslations(BuildContext? context) {
-    if (context == null) return;
-    
-    final l10n = AppLocalizations.of(context)!;
-    _locFocusActive = l10n.focusStateActive;
-    _locPaused = l10n.focusStatePaused;
-    _locTarget = l10n.focusTargetLabel;
-    _locMax = l10n.focusLimitMax;
-    _locEndsAt = l10n.focusEndsAt;
-    _formatRemainingTime = l10n.notificationTimeRemaining;
-  }
-
   // --- CORE TIMER LOGIC ---
 
   /// Starts or resumes the current focus session.
   /// [context] is required to cache the UI localization strings.
-  void startSession([BuildContext? context]) {
-    _cacheTranslations(context);
+  void startSession() {
     if (_activeMode == null || _activeMode!.phases.isEmpty) return;
     if (_selectedTarget?.type == FocusTargetType.habit &&
         _isHabitTargetLocked(_selectedTarget!.id)) {
@@ -450,8 +425,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Moves to the next phase in the current mode. If there are no more phases, it completes the session.
-  Future<void> continueToNextPhase(BuildContext context) async {
-    _cacheTranslations(context);
+  Future<void> continueToNextPhase() async {
     if (!_awaitingPhaseContinue) return;
     if (_activeMode == null) return;
 
@@ -538,8 +512,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Pauses the session, cancelling the timer but preserving the current state to allow resuming later
-  void pauseSession(BuildContext context) {
-    _cacheTranslations(context);
+  void pauseSession() {
     _timer?.cancel();
     _isPaused = true;
     _isRunning = false;

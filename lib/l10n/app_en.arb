@@ -25,7 +25,14 @@
   "focusModeFlexible": "Flexible",
   "focusModePomodoro": "Pomodoro Classic",
   "focusModeStopwatch": "Stopwatch",
-  "focusLimitMax": "Max",
+  "focusLimitMax": "Max {minutes} mins",
+  "@focusLimitMax": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "focusEndsAt": "Ends at",
 
   "focusSnackbarHabitLocked": "Complete the previous habit in the stack first!",
