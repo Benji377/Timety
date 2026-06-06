@@ -413,6 +413,14 @@
     }
   },
 
+  "statsLabelSummary": "Today's Summary",
+  "statsLabelTasksDone": "Tasks Completed",
+  "statsLabelFocus": "Focus Time",
+  "statsLabelFocusMins": "Focus Minutes",
+  "statsLabelFocusGoal": "Daily Focus Goal",
+  "statsLabelProductivity": "Productivity Synergy",
+  "statsLabelSynergy": "Focus Time vs. Task Completion (Last 7 Days)",
+
   "navigationHome": "Home",
   "navigationFocus": "Focus",
   "navigationTasks": "Tasks",
@@ -425,6 +433,14 @@
       "count": {
         "type": "int",
         "format": "compact"
+      }
+    }
+  },
+  "nMinutesCount": "{count, plural, =0{No minutes} =1{1 minute} other{{count} minutes}}",
+  "@nMinutesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   },

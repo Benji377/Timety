@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../data/task/task.dart';
 import '../providers/task_provider.dart';
@@ -20,6 +21,8 @@ class OverviewStatsScreen extends StatelessWidget {
     final focusProvider = context.watch<FocusProvider>();
     final settings = context.watch<SettingsProvider>();
 
+    final l10n = AppLocalizations.of(context)!;
+
     final now = DateTime.now();
     final int tasksCompletedToday = _getTasksForDay(taskProvider.tasks, now);
     final int focusMinsToday = _getFocusForDay(focusProvider, now);
@@ -28,9 +31,9 @@ class OverviewStatsScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text(
-          "Today's Summary",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          l10n.statsLabelSummary,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
 
@@ -39,7 +42,7 @@ class OverviewStatsScreen extends StatelessWidget {
           children: [
             Expanded(
               child: KpiStatCard(
-                title: "Tasks Done",
+                title: l10n.statsLabelTasksDone,
                 value: "$tasksCompletedToday",
                 icon: Icons.task_alt,
                 color: AppTheme.taskColor,
@@ -48,7 +51,7 @@ class OverviewStatsScreen extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: KpiStatCard(
-                title: "Focus Time",
+                title: l10n.statsLabelFocus,
                 value: "${focusMinsToday}m",
                 icon: Icons.timer,
                 color: AppTheme.focusColor,
@@ -58,7 +61,7 @@ class OverviewStatsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         KpiStatCard(
-          title: "Daily Focus Goal",
+          title: l10n.statsLabelFocusGoal,
           value:
               "${((focusMinsToday / focusTarget).clamp(0.0, 1.0) * 100).toInt()}%",
           icon: Icons.track_changes,
@@ -68,37 +71,37 @@ class OverviewStatsScreen extends StatelessWidget {
         const SizedBox(height: 40),
 
         // --- SYNERGY HEADER ---
-        const Text(
-          "Productivity Synergy",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          l10n.statsLabelProductivity,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
-        const Text(
-          "Focus Time vs. Task Completion (Last 7 Days)",
-          style: TextStyle(fontSize: 12, color: Colors.grey),
+        Text(
+          l10n.statsLabelSynergy,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
         const SizedBox(height: 16),
 
         // --- LEGEND ---
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.circle, size: 12, color: AppTheme.focusColor),
-            SizedBox(width: 4),
+            const Icon(Icons.circle, size: 12, color: AppTheme.focusColor),
+            const SizedBox(width: 4),
             Text(
-              "Focus Mins",
-              style: TextStyle(
+              l10n.statsLabelFocusMins,
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.grey,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(width: 24),
-            Icon(Icons.circle, size: 12, color: AppTheme.taskColor),
-            SizedBox(width: 4),
+            const SizedBox(width: 24),
+            const Icon(Icons.circle, size: 12, color: AppTheme.taskColor),
+            const SizedBox(width: 4),
             Text(
-              "Tasks Done",
-              style: TextStyle(
+              l10n.statsLabelTasksDone,
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.grey,
                 fontWeight: FontWeight.bold,
@@ -124,6 +127,7 @@ class OverviewStatsScreen extends StatelessWidget {
     TaskProvider taskProvider,
     FocusProvider focusProvider,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     // Generate the last 7 days ending in today
     final last7Days = List.generate(
@@ -168,7 +172,7 @@ class OverviewStatsScreen extends StatelessWidget {
                 final dayIndex = touchedSpot.x.toInt();
                 if (touchedSpot.barIndex == 0) {
                   return LineTooltipItem(
-                    '${dailyFocus[dayIndex]} mins\n',
+                    l10n.nMinutesCount(dailyFocus[dayIndex]),
                     const TextStyle(
                       color: AppTheme.taskColor,
                       fontWeight: FontWeight.bold,
@@ -176,7 +180,7 @@ class OverviewStatsScreen extends StatelessWidget {
                   );
                 } else {
                   return LineTooltipItem(
-                    '${dailyTasks[dayIndex]} tasks',
+                    l10n.nTasksCount(dailyTasks[dayIndex]),
                     const TextStyle(
                       color: AppTheme.successColor,
                       fontWeight: FontWeight.bold,
