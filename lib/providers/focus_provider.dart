@@ -276,7 +276,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
     final isStopwatch = _activeMode!.type == FocusModeType.stopwatch;
 
-    final String titleText = asPaused ? _locPaused : _activeMode!.name;
+    final String titleText = asPaused ? _locPaused : _activeMode!.getLocalizedName();
     final List<String> bodyParts = [];
 
     if (selectedTargetLabel != null && selectedTargetLabel!.isNotEmpty) {

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../utils/priority_utils.dart';
-import '../utils/date_format_utils.dart';
-import '../utils/calendar_utils.dart';
 import '../theme/app_theme.dart';
 import '../providers/task_provider.dart';
 import '../providers/user_provider.dart';
-import 'task/task_detail_screen.dart';
 import '../providers/focus_provider.dart';
-import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
+import '../data/habit/habit_models.dart';
+import '../utils/priority_utils.dart';
+import '../utils/date_format_utils.dart';
+import '../utils/calendar_utils.dart';
 import '../utils/date_utils.dart';
+import '../utils/l10n_utils.dart';
+import 'task/task_detail_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -675,7 +676,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  mode.name,
+                                                  getLocalizedFocusModeName(
+                                                    context,
+                                                    mode,
+                                                  ),
                                                   style: const TextStyle(
                                                     fontSize: 13,
                                                   ),

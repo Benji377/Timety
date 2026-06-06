@@ -22,6 +22,9 @@
   
   "focusModeSelect": "Select Mode",
   "focusModeFlex": "Flex",
+  "focusModeFlexible": "Flexible",
+  "focusModePomodoro": "Pomodoro Classic",
+  "focusModeStopwatch": "Stopwatch",
   "focusLimitMax": "Max",
   "focusEndsAt": "Ends at",
 

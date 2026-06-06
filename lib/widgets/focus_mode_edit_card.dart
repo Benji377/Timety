@@ -7,6 +7,7 @@ import '../../data/focus/focus_models.dart';
 import '../../widgets/focus_mode_timeline.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/phase_editor.dart';
+import '../../utils/l10n_utils.dart';
 
 class ModeEditCard extends StatefulWidget {
   final FocusMode mode;
@@ -83,7 +84,7 @@ class _ModeEditCardState extends State<ModeEditCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.mode.name,
+                    getLocalizedFocusModeName(context, widget.mode),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,

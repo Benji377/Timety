@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../providers/focus_provider.dart';
 import '../providers/user_provider.dart';
+import '../utils/l10n_utils.dart';
 
 class AppDialogs {
   // Generic confirmation dialog
@@ -135,7 +136,7 @@ class AppDialogs {
                       items: provider.modes
                           .map(
                             (m) =>
-                                DropdownMenuItem(value: m, child: Text(m.name)),
+                                DropdownMenuItem(value: m, child: Text(getLocalizedFocusModeName(context, m))),
                           )
                           .toList(),
                       onChanged: (val) {

@@ -6,6 +6,7 @@ import '../../theme/app_theme.dart';
 import '../../data/focus/focus_models.dart';
 import '../../providers/focus_provider.dart';
 import '../../utils/date_utils.dart';
+import '../../utils/l10n_utils.dart';
 import '../../utils/stats_utils.dart';
 import '../../widgets/week_navigator.dart';
 import '../../utils/clock_painter.dart';
@@ -355,7 +356,13 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
 
   String _resolveSessionModeName(FocusSession session, List<FocusMode> modes) {
     final modeById = {for (final mode in modes) mode.id: mode};
-    return modeById[session.modeId]?.name ?? AppLocalizations.of(context)!.focusLabelDefault;
+    final mode = modeById[session.modeId];
+
+    if (mode != null) {
+      return getLocalizedFocusModeName(context, mode);
+    } else {
+      return AppLocalizations.of(context)!.focusLabelDefault;
+    }
   }
 
   FocusTargetType _getSessionTargetType(FocusSession session) {

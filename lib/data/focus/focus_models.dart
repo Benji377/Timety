@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/l10n_utils.dart';
 
 part 'focus_models.g.dart';
 
@@ -96,6 +97,24 @@ class FocusMode {
       SessionPhase(type: PhaseType.rest, durationMinutes: 15),
     ],
   );
+
+  String getLocalizedName() {
+    if (!isSystem) return name;
+
+    // Grab the global localizations
+    final l10n = getL10n();
+
+    switch (id) {
+      case 'system_stopwatch':
+        return l10n.focusModeStopwatch;
+      case 'system_flexible':
+        return l10n.focusModeFlexible;
+      case 'system_pomodoro':
+        return l10n.focusModePomodoro;
+      default:
+        return name;
+    }
+  }
 }
 
 @HiveType(typeId: 25)

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../screens/statistics_screen.dart';
 import '../../utils/date_format_utils.dart';
+import '../../utils/l10n_utils.dart';
 import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
@@ -162,7 +163,10 @@ class _FocusScreenState extends State<FocusScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      activeMode?.name.toUpperCase() ??
+                      activeMode != null ?
+                        getLocalizedFocusModeName(
+                          context, activeMode).toUpperCase()
+                          :
                           AppLocalizations.of(
                             context,
                           )!.focusModeSelect.toUpperCase(),
