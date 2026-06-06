@@ -585,6 +585,38 @@
       }
     }
   },
+  "notificationChannelTasksName": "Task Reminders",
+  "notificationChannelTasksDesc": "Notifications for your scheduled tasks",
+  
+  "notificationChannelHabitsName": "Habit Reminders",
+  "notificationChannelHabitsDesc": "Specific time reminders for your habits",
+  
+  "notificationChannelMotivationName": "Daily Motivation",
+  "notificationChannelMotivationDesc": "Your daily morning boost",
+  
+  "notificationChannelEveningName": "Evening Checkup",
+  "notificationChannelEveningDesc": "End of day reminders to log habits",
+  
+  "notificationChannelFocusName": "Active Focus Timer",
+  "notificationChannelFocusDesc": "Persistent notification for active focus sessions",
+
+  "notificationQuote1": "Conquer your day!",
+  "notificationQuote2": "Small steps lead to big results. Keep going!",
+  "notificationQuote3": "What's on the agenda today? Let's make it happen.",
+  "notificationGoodMorning": "Good Morning!",
+  
+  "notificationHabitListSuffix": " and more",
+  "notificationHabitReminder": "\nDon't forget to do {habitList} today!",
+  "@notificationHabitReminder": {
+    "placeholders": {
+      "habitList": {
+        "type": "String"
+      }
+    }
+  },
+
+  "notificationEveningTitle": "Evening Check-in",
+  "notificationEveningBody": "Did you complete all your habits today? Tap to log them!",
 
   "navigationHome": "Home",
   "navigationFocus": "Focus",

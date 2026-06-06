@@ -5,6 +5,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+import '../utils/l10n_utils.dart';
 
 class NotificationService {
   // Singleton pattern
@@ -55,7 +56,6 @@ class NotificationService {
   }
 
   // --- HELPER: GENERATE PREDICTABLE IDs ---
-  // We use prefixes so a task and a habit with similar data don't collide
   int _generateId(String stringId, String prefix) {
     return ('${prefix}_$stringId').hashCode;
   }
@@ -106,16 +106,18 @@ class NotificationService {
   }) async {
     if (kIsWeb || scheduledTime.isBefore(DateTime.now())) return;
 
+    final l10n = getL10n();
+
     await _notificationsPlugin.zonedSchedule(
       id: notificationId,
       title: title,
       body: body,
       scheduledDate: tz.TZDateTime.from(scheduledTime, tz.local),
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'task_reminders_channel',
-          'Task Reminders',
-          channelDescription: 'Notifications for your scheduled tasks',
+          l10n.notificationChannelTasksName,
+          channelDescription: l10n.notificationChannelTasksDesc,
           importance: Importance.max,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
@@ -127,7 +129,6 @@ class NotificationService {
   }
 
   // --- HABIT SPECIFIC TIMES ---
-  // Schedules a reminder for a habit at its designated time (e.g., 17:00)
   Future<void> scheduleHabitReminder({
     required String habitId,
     required String habitName,
@@ -140,6 +141,7 @@ class NotificationService {
 
     await cancelHabitReminder(habitId);
 
+    final l10n = getL10n();
     final now = tz.TZDateTime.now(tz.local);
     final weekdays = targetWeekdays?.toSet().toList();
     weekdays?.sort();
@@ -159,11 +161,11 @@ class NotificationService {
         title: title,
         body: body,
         scheduledDate: scheduledDate,
-        notificationDetails: const NotificationDetails(
+        notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             'habit_reminders_channel',
-            'Habit Reminders',
-            channelDescription: 'Specific time reminders for your habits',
+            l10n.notificationChannelHabitsName,
+            channelDescription: l10n.notificationChannelHabitsDesc,
             importance: Importance.high,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
@@ -179,7 +181,6 @@ class NotificationService {
   }
 
   // --- DAILY MOTIVATION (WITH DYNAMIC HABITS) ---
-  // Called every time the app opens or habits change to refresh tomorrow's message
   Future<void> scheduleDailyMotivation({
     required TimeOfDay time,
     bool includeHabits = true,
@@ -187,6 +188,7 @@ class NotificationService {
   }) async {
     if (kIsWeb) return;
 
+    final l10n = getL10n();
     final now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
@@ -201,33 +203,34 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
+    // Group the localized quotes back into a list
     final quotes = [
-      "Conquer your day!",
-      "Small steps lead to big results. Keep going!",
-      "What's on the agenda today? Let's make it happen.",
+      l10n.notificationQuote1,
+      l10n.notificationQuote2,
+      l10n.notificationQuote3,
     ];
     String body = quotes[now.day % quotes.length];
 
-    // Dynamically append habits if requested!
+    // Dynamically append habits
     if (includeHabits && todaysHabits.isNotEmpty) {
       String habitList = todaysHabits.take(2).join(", ");
-      if (todaysHabits.length > 2) habitList += " and more";
-      body += "\nDon't forget to do $habitList today!";
+      if (todaysHabits.length > 2) {
+        habitList += l10n.notificationHabitListSuffix;
+      }
+      body += l10n.notificationHabitReminder(habitList);
     }
 
     await _notificationsPlugin.zonedSchedule(
       id: dailyMotivationId,
-      title: 'Good Morning!',
+      title: l10n.notificationGoodMorning,
       body: body,
       scheduledDate: scheduledDate,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'daily_motivation_channel',
-          'Daily Motivation',
-          channelDescription: 'Your daily morning boost',
-          styleInformation: BigTextStyleInformation(
-            '',
-          ), // Allows multi-line text
+          l10n.notificationChannelMotivationName,
+          channelDescription: l10n.notificationChannelMotivationDesc,
+          styleInformation: const BigTextStyleInformation(''),
           icon: '@mipmap/ic_launcher',
           category: AndroidNotificationCategory.reminder,
         ),
@@ -241,6 +244,7 @@ class NotificationService {
   Future<void> scheduleEndOfDayCheckup({required TimeOfDay time}) async {
     if (kIsWeb) return;
 
+    final l10n = getL10n();
     final now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
@@ -257,14 +261,14 @@ class NotificationService {
 
     await _notificationsPlugin.zonedSchedule(
       id: endOfDayCheckupId,
-      title: 'Evening Check-in',
-      body: 'Did you complete all your habits today? Tap to log them!',
+      title: l10n.notificationEveningTitle,
+      body: l10n.notificationEveningBody,
       scheduledDate: scheduledDate,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'evening_checkup_channel',
-          'Evening Checkup',
-          channelDescription: 'End of day reminders to log habits',
+          l10n.notificationChannelEveningName,
+          channelDescription: l10n.notificationChannelEveningDesc,
           icon: '@mipmap/ic_launcher',
           category: AndroidNotificationCategory.reminder,
         ),
@@ -301,6 +305,8 @@ class NotificationService {
   }) async {
     if (kIsWeb) return;
 
+    final l10n = getL10n();
+
     await _notificationsPlugin.show(
       id: focusTimerId,
       title: title,
@@ -308,9 +314,8 @@ class NotificationService {
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'focus_timer_channel',
-          'Active Focus Timer',
-          channelDescription:
-              'Persistent notification for active focus sessions',
+          l10n.notificationChannelFocusName,
+          channelDescription: l10n.notificationChannelFocusDesc,
           importance: Importance.low,
           priority: Priority.high,
           silent: true,
