@@ -54,19 +54,30 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 // TASK VELOCITY CHART
                 Text(
                   l10n.taskStatsVelocity,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.circle, size: 12, color: AppTheme.warningColor),
+                    const Icon(
+                      Icons.circle,
+                      size: 12,
+                      color: AppTheme.warningColor,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       l10n.taskStatsCreated,
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.circle, size: 12, color: AppTheme.successColor),
+                    const Icon(
+                      Icons.circle,
+                      size: 12,
+                      color: AppTheme.successColor,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       l10n.taskStatsCompleted,
@@ -90,7 +101,10 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 // PRODUCTIVITY BAR CHART
                 Text(
                   l10n.taskStatsProductivity,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(

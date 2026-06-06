@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/task_provider.dart';
 import '../providers/user_provider.dart';
@@ -29,11 +32,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final taskProvider = context.watch<TaskProvider>();
     final focusProvider = context.watch<FocusProvider>();
     final habitProvider = context.watch<HabitProvider>();
+    final settingsProvider = context.watch<SettingsProvider>();
 
     final allTasks = taskProvider.tasks;
     final allSessions = focusProvider.history;
     final allHabits = habitProvider.habits;
 
+    final l10n = AppLocalizations.of(context)!;
+    final localeString = settingsProvider.appLocale ?? Localizations.localeOf(context).toString();
     final weeks = CalendarUtils.generateWeeks(_focusedMonth);
 
     // --- FILTER & SORT ACCORDION DATA ---
@@ -64,11 +70,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendar'),
+        title: Text(l10n.calendarTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.today),
-            tooltip: 'Go to Today',
+            tooltip: l10n.calendarTooltipToday,
             onPressed: () {
               setState(() {
                 _focusedMonth = DateTime.now();
@@ -100,7 +106,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       ),
                       Text(
-                        "${_monthName(_focusedMonth.month)} ${_focusedMonth.year}",
+                        DateFormat.yMMMM(localeString).format(_focusedMonth),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -124,17 +130,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       defaultVerticalAlignment:
                           TableCellVerticalAlignment.middle,
                       children: [
-                        const TableRow(
+                        TableRow(
                           children: [
-                            _CalendarHeaderCell('M'),
-                            _CalendarHeaderCell('T'),
-                            _CalendarHeaderCell('W'),
-                            _CalendarHeaderCell('T'),
-                            _CalendarHeaderCell('F'),
-                            _CalendarHeaderCell('S'),
-                            _CalendarHeaderCell('S'),
+                            _CalendarHeaderCell(l10n.calendarHeaderMon),
+                            _CalendarHeaderCell(l10n.calendarHeaderTue),
+                            _CalendarHeaderCell(l10n.calendarHeaderWed),
+                            _CalendarHeaderCell(l10n.calendarHeaderThu),
+                            _CalendarHeaderCell(l10n.calendarHeaderFri),
+                            _CalendarHeaderCell(l10n.calendarHeaderSat),
+                            _CalendarHeaderCell(l10n.calendarHeaderSun),
                             _CalendarHeaderCell(
-                              'Weekly',
+                              l10n.calendarHeaderWeekly, // Don't forget this one!
                               color: AppTheme.taskColor,
                             ),
                           ],
@@ -369,10 +375,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 context,
               ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               child: _selectedDate == null
-                  ? const Center(
+                  ? Center(
                       child: Text(
-                        "Select a day to view details.",
-                        style: TextStyle(color: Colors.grey),
+                        l10n.calendarLabelSelect,
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     )
                   : ListView(
@@ -385,7 +391,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ),
                           child: ExpansionTile(
                             title: Text(
-                              "Habits (${selectedDayHabits.length})",
+                              l10n.calendarSectionHabits(
+                                selectedDayHabits.length,
+                              ),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.habitColor,
@@ -395,11 +403,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             collapsedIconColor: AppTheme.habitColor,
                             children: selectedDayHabits.isEmpty
                                 ? [
-                                    const Padding(
-                                      padding: EdgeInsets.all(16.0),
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
                                       child: Text(
-                                        "No habits scheduled or logged.",
-                                        style: TextStyle(color: Colors.grey),
+                                        l10n.calendarSectionHabitsEmpty,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ),
                                   ]
@@ -496,7 +506,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ),
                           child: ExpansionTile(
                             title: Text(
-                              "Tasks (${selectedDayTasks.length})",
+                              l10n.calendarSectionTasks(
+                                selectedDayTasks.length,
+                              ),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.taskColor,
@@ -506,11 +518,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             collapsedIconColor: AppTheme.taskColor,
                             children: selectedDayTasks.isEmpty
                                 ? [
-                                    const Padding(
-                                      padding: EdgeInsets.all(16.0),
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
                                       child: Text(
-                                        "No tasks scheduled.",
-                                        style: TextStyle(color: Colors.grey),
+                                        l10n.calendarSectionTasksEmpty,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ),
                                   ]
@@ -593,7 +607,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ),
                           child: ExpansionTile(
                             title: Text(
-                              "Focus Sessions (${selectedDaySessions.length})",
+                              l10n.calendarSectionFocus(
+                                selectedDaySessions.length,
+                              ),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.successColor,
@@ -603,11 +619,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             collapsedIconColor: AppTheme.successColor,
                             children: selectedDaySessions.isEmpty
                                 ? [
-                                    const Padding(
-                                      padding: EdgeInsets.all(16.0),
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
                                       child: Text(
-                                        "No focus sessions logged.",
-                                        style: TextStyle(color: Colors.grey),
+                                        l10n.calendarSectionFocusEmpty,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ),
                                   ]
@@ -635,7 +653,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         timeString +=
                                             " - ${AppDateFormatUtils.formatTime(session.endTime!)}";
                                       } else {
-                                        timeString += " - Ongoing";
+                                        timeString +=
+                                            " - ${l10n.calendarLabelFocusOngoing}";
                                       }
 
                                       final int focusMins =
@@ -662,7 +681,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                 : Colors.grey.shade400,
                                           ),
                                           title: Text(
-                                            tag?.name ?? "Untagged",
+                                            tag?.name ??
+                                                l10n.focusTargetUntagged,
                                             style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -697,7 +717,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             ),
                                           ),
                                           trailing: Text(
-                                            '${focusMins}m focus',
+                                            l10n.focusMinutes(focusMins),
                                             style: const TextStyle(
                                               color: AppTheme.successColor,
                                               fontWeight: FontWeight.bold,
@@ -717,24 +737,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ],
       ),
     );
-  }
-
-  String _monthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
   }
 }
 

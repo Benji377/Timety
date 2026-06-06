@@ -7,6 +7,7 @@
   "focusPhasesTitleEdit": "Edit Phase",
   "focusTagsTitle": "Focus Tags",
   "habitsListTitle": "My Habits",
+  "calendarTitle": "Calendar",
   
   "focusTargetLabel": "Target",
   "focusTargetEmpty": "No Target",
@@ -102,6 +103,15 @@
 
   "focusStatsSectionSessionsTitle": "Focus Sessions",
   "focusStatsSectionSessionsSubtitle": "Each session shows the exact target and focus mode",
+
+  "focusMinutes": "{count}m focus",
+  "@focusMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
 
   "distractionDistracted": "Distracted",
   "distractionHydrated": "Hydrated / Drink",
@@ -334,6 +344,46 @@
   "taskStatsCategoryUnused": "No categories used",
   "taskStatsDistribution": "All-Time Distribution",
   "taskStatsDistributionSubtitle": "Task categories across your whole workspace",
+
+  "calendarTooltipToday": "Go to Today",
+  "calendarLabelSelect": "Select a day to view details",
+  "calendarLabelFocusOngoing": "Ongoing",
+  "calendarSectionHabitsEmpty": "No habits scheduled or logged",
+  "calendarSectionHabits": "Habits ({count})",
+  "@calendarSectionHabits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarSectionTasksEmpty": "No tasks scheduled or logged",
+  "calendarSectionTasks": "Tasks ({count})",
+  "@calendarSectionTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarSectionFocusEmpty": "No focus sessions logged",
+  "calendarSectionFocus": "Focus Sessions ({count})",
+  "@calendarSectionFocus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "calendarHeaderMon": "M",
+  "calendarHeaderTue": "T",
+  "calendarHeaderWed": "W",
+  "calendarHeaderThu": "T",
+  "calendarHeaderFri": "F",
+  "calendarHeaderSat": "S",
+  "calendarHeaderSun": "S",
+  "calendarHeaderWeekly": "Weekly",
 
   "nTasksCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
   "@nTasksCount": {
