@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/user_provider.dart';
 import '../screens/settings_screen.dart';
-import '../utils/greeting_utils.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
 import '../data/task/task.dart';
@@ -102,7 +101,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      GreetingUtils.getGreeting(userName),
+                      _getGreeting(l10n, userName),
                       style: const TextStyle(
                         fontSize: AppTheme.fsHeadingLarge,
                         fontWeight: AppTheme.fwExtraBold,
@@ -110,7 +109,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      GreetingUtils.getDailyMotivationText(),
+                      _getDailyMotivationText(l10n),
                       style: const TextStyle(
                         fontSize: AppTheme.fsBodyLarge,
                         fontWeight: AppTheme.fwBold,
@@ -321,5 +320,27 @@ class HomeScreen extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  // Generates a short contextual greeting based on time of day.
+  String _getGreeting(AppLocalizations l10n, String name) {
+    final hour = DateTime.now().hour;
+
+    if (hour < 5) return l10n.greetingDeepNight(name);
+    if (hour < 12) return l10n.greetingMorning(name);
+    if (hour < 17) return l10n.greetingAfternoon(name);
+    if (hour < 21) return l10n.greetingEvening(name);
+    return l10n.greetingNight(name);
+  }
+
+  /// Returns a short home-screen title based on the time of day.
+  String _getDailyMotivationText(AppLocalizations l10n) {
+    final hour = DateTime.now().hour;
+
+    if (hour < 5) return l10n.greetingDeepNightMotivation;
+    if (hour < 12) return l10n.greetingMorningMotivation;
+    if (hour < 17) return l10n.greetingAfternoonMotivation;
+    if (hour < 21) return l10n.greetingEveningMotivation;
+    return l10n.greetingNightMotivation;
   }
 }

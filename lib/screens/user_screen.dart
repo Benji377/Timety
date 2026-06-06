@@ -341,6 +341,7 @@ class _UserScreenState extends State<UserScreen> {
     try {
       // Wrap-up image generation
       final pngBytes = await WrapUpImageGenerator.generate(
+        l10n: l10n,
         name: name,
         level: level,
         levelTitle: title,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 /// Generates a 1080×1920 (9:16) wrap-up PNG using dart:ui canvas drawing.
 class WrapUpImageGenerator {
@@ -20,6 +21,7 @@ class WrapUpImageGenerator {
 
   // Public entry point
   static Future<Uint8List> generate({
+    required AppLocalizations l10n,
     required String name,
     required int level,
     required String levelTitle,
@@ -49,9 +51,9 @@ class WrapUpImageGenerator {
     double y = _h * 0.085;
 
     y = _drawLogo(canvas, logoImage, y);
-    y = _drawHeader(canvas, name, level, levelTitle, y);
-    _drawStats(canvas, streak, tasksCompleted, focusMins, habitsMet, y);
-    _drawFooter(canvas);
+    y = _drawHeader(canvas, l10n, name, level, levelTitle, y);
+    _drawStats(canvas, l10n, streak, tasksCompleted, focusMins, habitsMet, y);
+    _drawFooter(canvas, l10n);
 
     final picture = recorder.endRecording();
     final image = await picture.toImage(_w.toInt(), _h.toInt());
@@ -88,15 +90,16 @@ class WrapUpImageGenerator {
   /// Returns updated y after drawing name / level header block.
   static double _drawHeader(
     Canvas canvas,
+    AppLocalizations l10n,
     String name,
     int level,
     String levelTitle,
     double y,
   ) {
-    // "TIMETY WRAP-UP" eyebrow
+    // Draws the header decoration line
     _paintText(
       canvas,
-      'TIMETY WRAP-UP',
+      l10n.wrapUpHeaderEyebrow,
       Offset(_pad, y),
       const TextStyle(
         color: AppTheme.taskColor,
@@ -107,10 +110,10 @@ class WrapUpImageGenerator {
     );
     y += 52;
 
-    // Name - scale down if it won't fit on one line
+    // Name
     y = _paintFittedText(
       canvas,
-      "$name's Stats",
+      l10n.wrapUpHeaderTitle(name),
       Offset(_pad, y),
       const TextStyle(
         color: Colors.white,
@@ -125,7 +128,7 @@ class WrapUpImageGenerator {
     // Level badge
     _paintText(
       canvas,
-      "Level $level • $levelTitle",
+      l10n.wrapUpHeaderLevel(level, levelTitle),
       Offset(_pad, y),
       const TextStyle(
         color: AppTheme.warningColor,
@@ -141,6 +144,7 @@ class WrapUpImageGenerator {
   /// Draws the four stat rows, vertically centred in the remaining canvas space.
   static void _drawStats(
     Canvas canvas,
+    AppLocalizations l10n,
     int streak,
     int tasks,
     int focusMins,
@@ -154,22 +158,27 @@ class WrapUpImageGenerator {
       _StatRow(
         Icons.local_fire_department,
         AppTheme.warningColor,
-        '$streak Day',
-        'Active Streak',
+        l10n.wrapUpStatStreakValue(streak),
+        l10n.wrapUpStatStreakLabel,
       ),
       _StatRow(
         Icons.check_circle,
         AppTheme.taskColor,
         '$tasks',
-        'Tasks Completed',
+        l10n.wrapUpStatTasksLabel,
       ),
       _StatRow(
         Icons.timer,
         AppTheme.successColor,
         '$focusMins',
-        'Minutes Focused',
+        l10n.wrapUpStatFocusLabel,
       ),
-      _StatRow(Icons.repeat, AppTheme.habitColor, '$habits', 'Habits Built'),
+      _StatRow(
+        Icons.repeat,
+        AppTheme.habitColor,
+        '$habits',
+        l10n.wrapUpStatHabitsLabel,
+      ),
     ];
 
     double y = startY;
@@ -234,10 +243,10 @@ class WrapUpImageGenerator {
     );
   }
 
-  static void _drawFooter(Canvas canvas) {
+  static void _drawFooter(Canvas canvas, AppLocalizations l10n) {
     _paintText(
       canvas,
-      'Master your time with Timety',
+      l10n.wrapUpFooter,
       const Offset(_w / 2 - 100, _h - 550),
       const TextStyle(
         color: Colors.white54,

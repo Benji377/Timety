@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class AppDateUtils {
   const AppDateUtils._();
 
@@ -23,24 +25,12 @@ class AppDateUtils {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  static String weekdayToStringShort(int weekday) {
-    switch (weekday) {
-      case DateTime.monday:
-        return 'Mon';
-      case DateTime.tuesday:
-        return 'Tue';
-      case DateTime.wednesday:
-        return 'Wed';
-      case DateTime.thursday:
-        return 'Thu';
-      case DateTime.friday:
-        return 'Fri';
-      case DateTime.saturday:
-        return 'Sat';
-      case DateTime.sunday:
-        return 'Sun';
-      default:
-        return '';
-    }
+  static String weekdayToStringShort(String locale, int weekday) {
+    // Jan 1, 2024 was a Monday. 
+    // This perfectly maps 1 -> Mon, 2 -> Tue, ... 7 -> Sun.
+    final dummyDate = DateTime(2024, 1, weekday);
+
+    // .E() gives the abbreviated weekday (Mon, Tue, Wed...)
+    return DateFormat.E(locale).format(dummyDate);
   }
 }

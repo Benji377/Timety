@@ -624,6 +624,92 @@
   "navigationHabits": "Habits",
   "navigationProfile": "Profile",
 
+  "greetingMorning": "Good morning {user}!",
+  "@greetingMorning": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingAfternoon": "Good afternoon {user}!",
+  "@greetingAfternoon": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingEvening": "Good evening {user}!",
+  "@greetingEvening": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingDeepNight": "Still awake {user}?",
+  "@greetingDeepNight": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingNight": "Good night {user}!",
+  "@greetingNight": {
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
+  },
+
+  "greetingMorningMotivation": "Rise and shine! Let's make today productive.",
+  "greetingAfternoonMotivation": "Keep up the great work! You've got this",
+  "greetingEveningMotivation": "Take a deep breath and enjoy your evening",
+  "greetingDeepNightMotivation": "Take it easy and get some well-deserved rest",
+  "greetingNightMotivation": "It's getting late! Consider wrapping up soon.",
+
+  "wrapUpHeaderEyebrow": "TIMETY WRAP-UP",
+  
+  "wrapUpHeaderTitle": "{name}'s Stats",
+  "@wrapUpHeaderTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "wrapUpHeaderLevel": "Level {level} | {title}",
+  "@wrapUpHeaderLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "wrapUpStatStreakValue": "{streak} Day",
+  "@wrapUpStatStreakValue": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "wrapUpStatStreakLabel": "Active Streak",
+  "wrapUpStatTasksLabel": "Tasks Completed",
+  "wrapUpStatFocusLabel": "Minutes Focused",
+  "wrapUpStatHabitsLabel": "Habits Built",
+  
+  "wrapUpFooter": "Master your time with Timety",
+
   "nTasksCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
   "@nTasksCount": {
     "placeholders": {
