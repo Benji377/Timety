@@ -10,6 +10,7 @@
   "habitsListTitle": "My Habits",
   "calendarTitle": "Calendar",
   "settingsTitle": "Settings",
+  "statsTitle": "Insights & Statistics",
   
   "focusTargetLabel": "Target",
   "focusTargetEmpty": "No Target",
@@ -422,6 +423,11 @@
   "statsLabelProductivity": "Productivity Synergy",
   "statsLabelSynergy": "Focus Time vs. Task Completion (Last 7 Days)",
 
+  "statsTabOverview": "Overview",
+  "statsTabTasks": "Tasks",
+  "statsTabFocus": "Focus",
+  "statsTabHabits": "Habits",
+
   "settingsSectionAppearance": "Appearance",
   "settingsSectionLocaleFormat": "Localization & Formatting",
   "settingsSectionFocusProductivity": "Focus & Productivity",
@@ -507,8 +513,6 @@
 
   "settingsDialogUnitMinutes": "minutes",
   "settingsDialogUnitDays": "days",
-
-
 
   "navigationHome": "Home",
   "navigationFocus": "Focus",
