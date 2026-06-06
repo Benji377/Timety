@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../data/task/task.dart';
@@ -114,7 +113,7 @@ class OverviewStatsScreen extends StatelessWidget {
         // --- CHART ---
         SizedBox(
           height: 250,
-          child: _buildSynergyChart(context, taskProvider, focusProvider),
+          child: _buildSynergyChart(context, taskProvider, focusProvider, settings),
         ),
         const SizedBox(height: 40),
       ],
@@ -126,6 +125,7 @@ class OverviewStatsScreen extends StatelessWidget {
     BuildContext context,
     TaskProvider taskProvider,
     FocusProvider focusProvider,
+    SettingsProvider settings,
   ) {
     final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
@@ -203,7 +203,7 @@ class OverviewStatsScreen extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Text(
-                    DateFormat('EEE').format(day),
+                    settings.getFormattedWeekday(day),
                     style: TextStyle(
                       fontSize: 12,
                       color: isToday

@@ -203,4 +203,53 @@ class SettingsProvider extends ChangeNotifier {
       return DateFormat.yMd(localeString).format(date);
     }
   }
+
+  String getFormattedTime(DateTime date) {
+    if (_use24HourFormat) {
+      return DateFormat.Hm().format(date);
+    } else {
+      return DateFormat.jm().format(date);
+    }
+  }
+
+  String getFormattedTimeWithSeconds(DateTime date) {
+    if (_use24HourFormat) {
+      return DateFormat.Hms().format(date);
+    } else {
+      return DateFormat.jms().format(date);
+    }
+  }
+
+  String getFormattedDateTime(DateTime date) {
+    return '${getFormattedDate(date)} ${getFormattedTime(date)}';
+  }
+
+  String getFormattedShortDate(DateTime date) {
+    if (_dateFormatCode != null) {
+      if (_dateFormatCode == 'dd/MM/yyyy') return DateFormat('dd/MM').format(date);
+      if (_dateFormatCode == 'MM/dd/yyyy') return DateFormat('MM/dd').format(date);
+      if (_dateFormatCode == 'yyyy-MM-dd') return DateFormat('MM-dd').format(date);
+      if (_dateFormatCode == 'dd.MM.yyyy') return DateFormat('dd.MM').format(date);
+      return DateFormat('MMM d').format(date);
+    } else {
+      final localeString =
+          _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
+      return DateFormat.Md(localeString).format(date);
+    }
+  }
+
+  String getFormattedMonthYear(DateTime date) {
+    final localeString = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
+    return DateFormat.yMMMM(localeString).format(date);
+  }
+
+  String getFormattedWeekday(DateTime date) {
+    final localeString = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
+    return DateFormat.E(localeString).format(date);
+  }
+
+  String getFormattedWeekdayDay(DateTime date) {
+    final localeString = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
+    return '${DateFormat.E(localeString).format(date)} ${DateFormat.d(localeString).format(date)}';
+  }
 }

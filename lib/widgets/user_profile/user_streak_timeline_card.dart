@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme/app_theme.dart';
 import '../../utils/date_utils.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/settings_provider.dart';
 
 class UserStreakTimelineCard extends StatefulWidget {
   final List<DateTime> activityDates;
@@ -245,6 +246,7 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
   }
 
   Widget _buildDayTile(BuildContext context, _StreakDayInfo info, AppLocalizations l10n) {
+    final settings = context.watch<SettingsProvider>();
     final backgroundColor = info.isToday
         ? AppTheme.taskColor.withValues(alpha: 0.12)
         : info.inCurrentStreak
@@ -274,7 +276,7 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            info.isToday ? l10n.streakDayToday : DateFormat('EEE').format(info.date),
+            info.isToday ? l10n.streakDayToday : settings.getFormattedWeekday(info.date),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

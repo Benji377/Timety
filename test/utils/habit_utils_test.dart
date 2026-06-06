@@ -16,7 +16,7 @@ void main() {
   late AppLocalizations l10n;
 
   setUpAll(() async {
-    initializeDateFormatting('en_US', null);
+    initializeDateFormatting('en_US');
   });
 
   setUp(() async {

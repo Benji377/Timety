@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
@@ -10,7 +9,6 @@ import '../providers/focus_provider.dart';
 import '../providers/habit_provider.dart';
 import '../data/habit/habit_models.dart';
 import '../utils/priority_utils.dart';
-import '../utils/date_format_utils.dart';
 import '../utils/calendar_utils.dart';
 import '../utils/date_utils.dart';
 import '../utils/l10n_utils.dart';
@@ -39,9 +37,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final allHabits = habitProvider.habits;
 
     final l10n = AppLocalizations.of(context)!;
-    final localeString =
-        settingsProvider.appLocale ??
-        Localizations.localeOf(context).toString();
     final weeks = CalendarUtils.generateWeeks(_focusedMonth);
 
     // --- FILTER & SORT ACCORDION DATA ---
@@ -108,7 +103,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       ),
                       Text(
-                        DateFormat.yMMMM(localeString).format(_focusedMonth),
+                        settingsProvider.getFormattedMonthYear(_focusedMonth),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -648,12 +643,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           : null;
 
                                       String timeString =
-                                          AppDateFormatUtils.formatTime(
+                                          settingsProvider.getFormattedTime(
                                             session.startTime,
                                           );
                                       if (session.endTime != null) {
                                         timeString +=
-                                            " - ${AppDateFormatUtils.formatTime(session.endTime!)}";
+                                            " - ${settingsProvider.getFormattedTime(session.endTime!)}";
                                       } else {
                                         timeString +=
                                             " - ${l10n.calendarLabelFocusOngoing}";

@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/priority_utils.dart';
 import '../../data/task/task.dart';
@@ -266,9 +265,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     ? l10n.taskDetailsLabelDueDateNone
                     : l10n.taskDetailsLabelDueDate(
                         settings.getFormattedDate(_dueDate!),
-                        settings.use24HourFormat
-                            ? DateFormat.Hm().format(_dueDate!)
-                            : DateFormat.jm().format(_dueDate!),
+                        settings.getFormattedTime(_dueDate!),
                       ),
                 style: TextStyle(
                   // Dims the text slightly if not in edit mode
@@ -291,7 +288,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       backgroundColor: colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.7),
                       label: Text(
-                        "${settings.getFormattedDate(r)} - ${settings.use24HourFormat ? DateFormat.Hm().format(r) : DateFormat.jm().format(r)}",
+                        "${settings.getFormattedDate(r)} - ${settings.getFormattedTime(r)}",
                         style: const TextStyle(fontSize: AppTheme.fsBodySmall),
                       ),
                       onDeleted: _isEditing

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 import '../../theme/app_theme.dart';
 import '../../data/focus/focus_models.dart';
 import '../../providers/focus_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../utils/date_utils.dart';
 import '../../utils/l10n_utils.dart';
 import '../../utils/stats_utils.dart';
@@ -45,6 +45,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
   @override
   Widget build(BuildContext context) {
     final focusProvider = context.watch<FocusProvider>();
+    final settingsProvider = context.watch<SettingsProvider>();
     final sessions = focusProvider.history;
     final filteredSessions = sessions.where(_sessionMatchesTagFilter).toList();
     final distractionEntries = _getDistractionEntries(
@@ -204,7 +205,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                               ),
                             ),
                             subtitle: Text(
-                              '${DateFormat('hh:mm:ss').format(entry.distraction.time)} | ${entry.targetName}',
+                              '${settingsProvider.getFormattedTimeWithSeconds(entry.distraction.time)} | ${entry.targetName}',
                             ),
                           );
                         },
@@ -701,6 +702,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
     List<FocusMode> modes,
     List<FocusTag> tags,
   ) {
+    final settingsProvider = context.watch<SettingsProvider>();
     if (sessions.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -755,7 +757,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                 ),
               ),
               subtitle: Text(
-                '${DateFormat('EEE, MMM d | hh:mm a').format(session.startTime)} | ${_formatFocusMinutes(session.totalSecondsFocused ~/ 60)} | $sessionModeName',
+                '${settingsProvider.getFormattedDate(session.startTime)} | ${settingsProvider.getFormattedTime(session.startTime)} | ${_formatFocusMinutes(session.totalSecondsFocused ~/ 60)} | $sessionModeName',
               ),
             );
           },
@@ -765,6 +767,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
   }
 
   Widget _buildDayPillSelector(DateTime startOfWeek) {
+    final settingsProvider = context.watch<SettingsProvider>();
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
@@ -804,7 +807,7 @@ class _FocusStatsScreenState extends State<FocusStatsScreen> {
                         ),
                       ),
                       child: Text(
-                        DateFormat('EEE d').format(day),
+                        settingsProvider.getFormattedWeekdayDay(day),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: isSelected

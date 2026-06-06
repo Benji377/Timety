@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../data/habit/habit_models.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_utils.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/settings_provider.dart';
 
 /// Reusable bottom sheet builders for habit-related UIs
 class HabitBottomSheetBuilders {
@@ -95,7 +96,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
         builder: (ctx) => AlertDialog(
           title: Text("${l10n.habitHistoryRemoveCompletion("").split("for ")[0].trim()}?"),
           content: Text(
-            l10n.habitHistoryRemoveCompletion(DateFormat('MMM d, yyyy').format(date)),
+            l10n.habitHistoryRemoveCompletion(context.read<SettingsProvider>().getFormattedDate(date)),
           ),
           actions: [
             TextButton(
@@ -198,7 +199,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                   onPressed: () => _changeMonth(-1),
                 ),
                 Text(
-                  DateFormat('MMMM yyyy').format(_displayedMonth),
+                  context.watch<SettingsProvider>().getFormattedMonthYear(_displayedMonth),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -396,7 +397,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          DateFormat('EEEE, MMM d').format(completion),
+                          context.watch<SettingsProvider>().getFormattedDate(completion),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -404,7 +405,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          l10n.habitHistoryCompletedAt(DateFormat('h:mm a').format(completion)),
+                          l10n.habitHistoryCompletedAt(context.watch<SettingsProvider>().getFormattedTime(completion)),
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 13,

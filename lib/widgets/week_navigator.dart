@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../utils/date_utils.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/settings_provider.dart';
 
 class WeekNavigator extends StatelessWidget {
   final DateTime focusedDate;
@@ -16,6 +17,7 @@ class WeekNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final settings = context.watch<SettingsProvider>();
     final startOfWeek = AppDateUtils.startOfWeekMonday(focusedDate);
     final endOfWeek = startOfWeek.add(
       const Duration(days: 6, hours: 23, minutes: 59, seconds: 59),
@@ -28,7 +30,7 @@ class WeekNavigator extends StatelessWidget {
       endOfWeek,
     );
     final weekRangeLabel =
-        '${DateFormat('MMM d').format(startOfWeek)} - ${DateFormat('MMM d, yyyy').format(endOfWeek)}';
+        '${settings.getFormattedShortDate(startOfWeek)} - ${settings.getFormattedDate(endOfWeek)}';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
