@@ -183,6 +183,23 @@
 
   "habitDetailSnackbarSaveNoDay": "Please select at least one day",
 
+  "habitStatsLabelEmpty": "Create and complete habits to unlock insights!",
+  "habitStatsLabelTotal": "Total Logged",
+  "habitStatsLabelActive": "Active Habits",
+  "habitStatsLabelBestStreak": "Best Streak",
+  "habitStatsLabelBest": "Best: {streak}",
+  "@habitStatsLabelBest": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      }
+    }
+  },
+  "habitStatsLabelCurrentStreak": "Current Streak",
+  "habitStatsLabelVelocity": "Weekly Velocity",
+  "habitStatsLabelCompletionsDaily": "Total habit completions per day",
+  "habitStatsLabelCompletionsTime": "When do you build habits?",
+  "habitStatsLabelCompletionsDistribution": "Completion distribution by time of day",
 
   "taskReminderTitle": "Reminder: {task}",
   "@taskReminderTitle": {
@@ -262,6 +279,15 @@
   "commonWeekdayFri": "Fri",
   "commonWeekdaySat": "Sat",
   "commonWeekdaySun": "Sun",
+
+  "commonDaytimeMorning": "Morning",
+  "commonDaytimeMorningRange": "5 AM - 12 PM",
+  "commonDaytimeAfternoon": "Afternoon",
+  "commonDaytimeAfternoonRange": "12 PM - 5 PM",
+  "commonDaytimeEvening": "Evening",
+  "commonDaytimeEveningRange": "5 PM - 9 PM",
+  "commonDaytimeNight": "Night",
+  "commonDaytimeNightRange": "9 PM - 5 AM",
 
   "commonTooltipStats": "Statistics",
   "commonTooltipCalendar": "Calendar View",

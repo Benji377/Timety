@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../data/habit/habit_models.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/date_utils.dart';
@@ -9,6 +10,8 @@ import '../../utils/stats_utils.dart';
 import '../../utils/streak_calculator.dart';
 import '../../widgets/stat_cards.dart';
 import '../../widgets/week_navigator.dart';
+
+enum DayTimeName { morning, afternoon, evening, night }
 
 class HabitStatsScreen extends StatefulWidget {
   const HabitStatsScreen({super.key});
@@ -23,6 +26,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
   @override
   Widget build(BuildContext context) {
     final habits = context.watch<HabitProvider>().habits;
+    final l10n = AppLocalizations.of(context)!;
 
     final startOfWeek = AppDateUtils.startOfWeekMonday(_focusedDate);
     final endOfWeek = startOfWeek.add(
@@ -47,9 +51,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
 
     return Scaffold(
       body: habits.isEmpty
-          ? const Center(
-              child: Text("Create and complete habits to unlock insights!"),
-            )
+          ? Center(child: Text(l10n.habitStatsLabelEmpty))
           : ListView(
               padding: AppTheme.paddingScreenVertical,
               children: [
@@ -67,19 +69,19 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                   runSpacing: AppTheme.spaceMedium,
                   children: [
                     CompactVerticalStatCard(
-                      title: "Total Logged",
+                      title: l10n.habitStatsLabelTotal,
                       value: "$totalCompletions",
                       icon: Icons.timeline,
                       color: AppTheme.habitColor,
                     ),
                     CompactVerticalStatCard(
-                      title: "Active Habits",
+                      title: l10n.habitStatsLabelActive,
                       value: "${habits.length}",
                       icon: Icons.all_inclusive,
                       color: AppTheme.successColor,
                     ),
                     CompactVerticalStatCard(
-                      title: "Best Streak",
+                      title: l10n.habitStatsLabelBestStreak,
                       value: "$allTimeBestStreak",
                       icon: Icons.military_tech,
                       color: AppTheme.warningColor,
@@ -89,16 +91,16 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                 const SizedBox(height: AppTheme.space3XLarge),
 
                 // --- WEEKLY VOLUME CHART ---
-                const Text(
-                  "Weekly Velocity",
-                  style: TextStyle(
+                Text(
+                  l10n.habitStatsLabelVelocity,
+                  style: const TextStyle(
                     fontSize: AppTheme.fsHeadingSmall,
                     fontWeight: AppTheme.fwBold,
                   ),
                 ),
-                const Text(
-                  "Total habit completions per day",
-                  style: TextStyle(
+                Text(
+                  l10n.habitStatsLabelCompletionsDaily,
+                  style: const TextStyle(
                     fontSize: AppTheme.fsBodySmall,
                     color: Colors.grey,
                   ),
@@ -120,9 +122,9 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                 const SizedBox(height: AppTheme.space3XLarge),
 
                 // --- LEADERBOARD ---
-                const Text(
-                  "Current Streaks",
-                  style: TextStyle(
+                Text(
+                  l10n.habitStatsLabelCurrentStreak,
+                  style: const TextStyle(
                     fontSize: AppTheme.fsHeadingSmall,
                     fontWeight: AppTheme.fwBold,
                   ),
@@ -179,7 +181,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
                             ],
                           ),
                           Text(
-                            "Best: $bestStreak",
+                            l10n.habitStatsLabelBest(bestStreak),
                             style: const TextStyle(
                               fontSize: 10,
                               color: Colors.grey,
@@ -203,9 +205,18 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     DateTime endOfWeek,
     bool isCurrentRealWeek,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final dailyCounts = _getCompletionsForWeek(habits, startOfWeek, endOfWeek);
     final todayIndex = DateTime.now().weekday - 1;
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final weekdays = [
+      l10n.commonWeekdayMon,
+      l10n.commonWeekdayTue,
+      l10n.commonWeekdayWed,
+      l10n.commonWeekdayThu,
+      l10n.commonWeekdayFri,
+      l10n.commonWeekdaySat,
+      l10n.commonWeekdaySun,
+    ];
 
     final maxY = StatsUtils.maxValue(dailyCounts, minimum: 5);
 
@@ -293,7 +304,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     return dailyCounts;
   }
 
-  Map<String, int> _getTimeOfDayData(List<Habit> habits) {
+  Map<DayTimeName, int> _getTimeOfDayData(List<Habit> habits) {
     int morning = 0; // 5 AM - 12 PM
     int afternoon = 0; // 12 PM - 5 PM
     int evening = 0; // 5 PM - 9 PM
@@ -313,10 +324,10 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
       }
     }
     return {
-      'Morning': morning,
-      'Afternoon': afternoon,
-      'Evening': evening,
-      'Night': night,
+      DayTimeName.morning: morning,
+      DayTimeName.afternoon: afternoon,
+      DayTimeName.evening: evening,
+      DayTimeName.night: night,
     };
   }
 
@@ -328,33 +339,34 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
   Widget _buildTimeOfDayBreakdownCard(List<Habit> habits) {
     final data = _getTimeOfDayData(habits);
     final total = data.values.fold<int>(0, (sum, value) => sum + value);
+    final l10n = AppLocalizations.of(context)!;
 
     final buckets = [
       TimeOfDayBucket(
-        label: 'Morning',
-        subtitle: '5 AM - 12 PM',
-        count: data['Morning'] ?? 0,
+        label: l10n.commonDaytimeMorning,
+        subtitle: l10n.commonDaytimeMorningRange,
+        count: data[DayTimeName.morning] ?? 0,
         color: AppTheme.warningColor,
         icon: Icons.wb_sunny_outlined,
       ),
       TimeOfDayBucket(
-        label: 'Afternoon',
-        subtitle: '12 PM - 5 PM',
-        count: data['Afternoon'] ?? 0,
+        label: l10n.commonDaytimeAfternoon,
+        subtitle: l10n.commonDaytimeAfternoonRange,
+        count: data[DayTimeName.afternoon] ?? 0,
         color: AppTheme.taskColor,
         icon: Icons.sunny,
       ),
       TimeOfDayBucket(
-        label: 'Evening',
-        subtitle: '5 PM - 9 PM',
-        count: data['Evening'] ?? 0,
+        label: l10n.commonDaytimeEvening,
+        subtitle: l10n.commonDaytimeEveningRange,
+        count: data[DayTimeName.evening] ?? 0,
         color: AppTheme.habitColor,
         icon: Icons.nightlight_round,
       ),
       TimeOfDayBucket(
-        label: 'Night',
-        subtitle: '9 PM - 5 AM',
-        count: data['Night'] ?? 0,
+        label: l10n.commonDaytimeNight,
+        subtitle: l10n.commonDaytimeNightRange,
+        count: data[DayTimeName.night] ?? 0,
         color: AppTheme.userColor,
         icon: Icons.nights_stay_outlined,
       ),
@@ -367,21 +379,21 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'When do you build habits?',
-                    style: TextStyle(
+                    l10n.habitStatsLabelCompletionsTime,
+                    style: const TextStyle(
                       fontSize: AppTheme.fsHeadingSmall,
                       fontWeight: AppTheme.fwBold,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Completion distribution by time of day',
-                    style: TextStyle(
+                    l10n.habitStatsLabelCompletionsDistribution,
+                    style: const TextStyle(
                       fontSize: AppTheme.fsBodySmall,
                       color: Colors.grey,
                     ),
