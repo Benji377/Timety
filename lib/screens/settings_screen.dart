@@ -44,8 +44,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: settings.themeMode,
               underline: const SizedBox(),
               items: [
-                DropdownMenuItem(value: ThemeMode.light, child: Text(l10n.settingsLabelThemeLight)),
-                DropdownMenuItem(value: ThemeMode.dark, child: Text(l10n.settingsLabelThemeDark)),
+                DropdownMenuItem(
+                  value: ThemeMode.light,
+                  child: Text(l10n.settingsLabelThemeLight),
+                ),
+                DropdownMenuItem(
+                  value: ThemeMode.dark,
+                  child: Text(l10n.settingsLabelThemeDark),
+                ),
                 DropdownMenuItem(
                   value: ThemeMode.system,
                   child: Text(l10n.settingsLabelThemeSystem),
@@ -146,6 +152,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               10,
               480,
               (val) => settings.setDailyGoal(val),
+              unit: l10n.settingsDialogUnitMinutes,
             ),
           ),
           SwitchListTile(
@@ -169,53 +176,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
               30,
               480,
               (val) => settings.setMaxStopwatch(val),
+              unit: l10n.settingsDialogUnitMinutes,
             ),
           ),
           ListTile(
             leading: const Icon(Icons.linear_scale, color: AppTheme.taskColor),
-            title: const Text('Max Phase Node Time'),
+            title: Text(l10n.settingsLabelFocusNodeTime),
             subtitle: Text(
-              'Maximum length for a single focus block\nCurrently: ${settings.maxNodeMins} mins',
+              l10n.settingsLabelFocusNodeTimeSubtitle,
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showNumberPickerDialog(
-              "Max Node Time",
+              l10n.settingsLabelFocusNodeTime,
               settings.maxNodeMins,
               10,
               480,
               (val) => settings.setMaxNode(val),
+              unit: l10n.settingsDialogUnitMinutes,
             ),
           ),
-
           ListTile(
             leading: const Icon(
               Icons.schedule_outlined,
               color: AppTheme.taskColor,
             ),
-            title: const Text('Upcoming Task Window'),
-            subtitle: Text('${settings.upcomingTasksDays} days ahead'),
+            title: Text(l10n.settingsLabelUpcomingTask),
+            subtitle: Text(
+              l10n.settingsLabelUpcomingTaskSubtitle(
+                settings.upcomingTasksDays,
+              ),
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showNumberPickerDialog(
-              'Upcoming Task Window',
+              l10n.settingsLabelUpcomingTask,
               settings.upcomingTasksDays,
               1,
               60,
               (val) => settings.setUpcomingTasksDays(val),
-              unit: 'days',
+              unit: l10n.settingsDialogUnitDays,
             ),
           ),
 
           const Divider(height: 32),
 
           // --- TAGS & CATEGORIES ---
-          _buildSectionHeader('Organization'),
+          _buildSectionHeader(l10n.settingsSectionOrganization),
           ListTile(
             leading: const Icon(
               Icons.local_offer_outlined,
               color: AppTheme.focusColor,
             ),
-            title: const Text('Focus Tags'),
-            subtitle: Text('${focusProvider.tags.length} tags'),
+            title: Text(l10n.settingsLabelTags),
+            subtitle: Text(
+              l10n.settingsLabelTagsSubtitle(focusProvider.tags.length),
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.push(
               context,
@@ -227,9 +241,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.label_outlined,
               color: AppTheme.taskColor,
             ),
-            title: const Text('Task Categories'),
+            title: Text(l10n.settingsLabelCategories),
             subtitle: Text(
-              '${taskProvider.getAllCategories().length} categories',
+              l10n.settingsLabelCategoriesSubtitle(
+                taskProvider.getAllCategories().length,
+              ),
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.push(
@@ -241,10 +257,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 32),
 
           // --- API & SERVICES ---
-          _buildSectionHeader('API & Services'),
+          _buildSectionHeader(l10n.settingsSectionApi),
           ListTile(
             leading: const Icon(Icons.cloud, color: AppTheme.taskColor),
-            title: const Text('Location Search API'),
+            title: Text(l10n.settingsLabelLocationApi),
             subtitle: Text(
               settings.locationApiEndpoint.length > 40
                   ? '${settings.locationApiEndpoint.substring(0, 40)}...'
@@ -263,10 +279,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 32),
 
           // --- NOTIFICATIONS ---
-          _buildSectionHeader('Notifications'),
+          _buildSectionHeader(l10n.settingsSectionNotifications),
           ListTile(
             leading: const Icon(Icons.schedule, color: AppTheme.warningAccent),
-            title: const Text('Daily Motivation Time'),
+            title: Text(l10n.settingsLabelDailyMotivation),
             subtitle: Text(settings.notificationTime.format(context)),
             trailing: const Icon(Icons.edit),
             onTap: () async {
@@ -284,7 +300,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.nightlight_round,
               color: AppTheme.habitColor,
             ),
-            title: const Text('End of Day Checkup Time'),
+            title: Text(l10n.settingsLabelEodCheckup),
             subtitle: Text(settings.endOfDayTime.format(context)),
             trailing: const Icon(Icons.edit),
             onTap: () async {
@@ -301,14 +317,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 32),
 
           // --- DATA & BACKUP ---
-          _buildSectionHeader('Data & Backup'),
+          _buildSectionHeader(l10n.settingsSectionDataBackup),
           ListTile(
             leading: const Icon(
               Icons.upload_file_outlined,
               color: AppTheme.taskColor,
             ),
-            title: const Text('Export JSON Data'),
-            subtitle: const Text('Save a snapshot of your data'),
+            title: Text(l10n.settingsLabelExportData),
+            subtitle: Text(l10n.settingsLabelExportDataSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => BackupService.exportUserData(context),
           ),
@@ -317,8 +333,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.download_outlined,
               color: AppTheme.focusColor,
             ),
-            title: const Text('Import JSON Data'),
-            subtitle: const Text('Restore data from a JSON export file'),
+            title: Text(l10n.settingsLabelImportData),
+            subtitle: Text(l10n.settingsLabelImportDataSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => BackupService.importUserData(context),
           ),
@@ -326,14 +342,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(height: 32),
 
           // --- SUPPORT & FEEDBACK ---
-          _buildSectionHeader('Support & Feedback'),
+          _buildSectionHeader(l10n.settingsSectionSupport),
           ListTile(
             leading: const Icon(
               Icons.forum_outlined,
               color: AppTheme.focusColor,
             ),
-            title: const Text('Community & Help'),
-            subtitle: const Text('Ask questions and share tips on GitHub'),
+            title: Text(l10n.settingsLabelCommunity),
+            subtitle: Text(l10n.settingsLabelCommunitySubtitle),
             trailing: const Icon(
               Icons.open_in_new,
               size: 16,
@@ -353,8 +369,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.bug_report_outlined,
               color: AppTheme.habitColor,
             ),
-            title: const Text('Send Feedback'),
-            subtitle: const Text('Report bugs or request new features'),
+            title: Text(l10n.settingsLabelFeedback),
+            subtitle: Text(l10n.settingsLabelFeedbackSubtitle),
             trailing: const Icon(
               Icons.open_in_new,
               size: 16,
@@ -391,16 +407,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       foregroundImage: AssetImage('assets/logo.png'),
                     ),
                   ),
-                  const Text(
-                    "Timety",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.appTitle,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   FutureBuilder<String>(
                     future: _appVersionFuture,
                     builder: (context, snapshot) {
-                      final versionText = snapshot.data ?? 'Version';
+                      // Fallback if loading, then inject into the localized string
+                      final rawVersion = snapshot.data ?? '...';
                       return Text(
-                        versionText,
+                        l10n.settingsLabelVersion(rawVersion),
                         style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 12,
@@ -410,15 +427,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  const ListTile(
-                    leading: Icon(Icons.person, color: Colors.deepOrange),
-                    title: Text('Built by Benji377'),
-                    subtitle: Text('Maintainer'),
+                  ListTile(
+                    leading: const Icon(Icons.person, color: Colors.deepOrange),
+                    title: Text(l10n.settingsLabelBuiltBy),
+                    subtitle: Text(l10n.settingsLabelMaintainer),
                   ),
                   ListTile(
                     leading: const Icon(Icons.favorite, color: Colors.red),
-                    title: const Text('Donate'),
-                    subtitle: const Text('GitHub Sponsors'),
+                    title: Text(l10n.settingsLabelDonate),
+                    subtitle: Text(l10n.settingsLabelDonateSubtitle),
                     trailing: const Icon(
                       Icons.open_in_new,
                       size: 16,
@@ -438,8 +455,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.code, color: Colors.blue),
-                    title: const Text('Source Code'),
-                    subtitle: const Text('GitHub Repository'),
+                    title: Text(l10n.settingsLabelSourceCode),
+                    subtitle: Text(l10n.settingsLabelSourceCodeSubtitle),
                     trailing: const Icon(
                       Icons.open_in_new,
                       size: 16,
@@ -470,7 +487,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // --- UI HELPERS ---
   Future<String> _loadAppVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
-    return 'Version ${packageInfo.version}';
+    return packageInfo.version;
   }
 
   void _showNumberPickerDialog(
@@ -479,8 +496,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     int min,
     int max,
     Function(int) onSave, {
-    String unit = 'minutes',
+    required String unit,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     int tempValue = currentValue;
     showDialog(
       context: context,
@@ -511,14 +529,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
+                child: Text(l10n.commonLabelCancel),
               ),
               ElevatedButton(
                 onPressed: () {
                   onSave(tempValue);
                   Navigator.pop(context);
                 },
-                child: const Text("Save"),
+                child: Text(l10n.commonLabelSave),
               ),
             ],
           );
