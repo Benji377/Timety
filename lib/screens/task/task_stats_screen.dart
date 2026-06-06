@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
@@ -22,6 +23,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
   @override
   Widget build(BuildContext context) {
     final tasks = context.watch<TaskProvider>().tasks;
+    final l10n = AppLocalizations.of(context)!;
 
     // Calculate week bounds
     final startOfWeek = AppDateUtils.startOfWeekMonday(_focusedDate);
@@ -38,7 +40,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
 
     return Scaffold(
       body: tasks.isEmpty
-          ? const Center(child: Text("No data to display yet."))
+          ? Center(child: Text(l10n.taskStatsEmpty))
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -50,25 +52,25 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 const SizedBox(height: 16),
 
                 // TASK VELOCITY CHART
-                const Text(
-                  "Task Velocity",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.taskStatsVelocity,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.circle, size: 12, color: AppTheme.warningColor),
-                    SizedBox(width: 4),
+                    const Icon(Icons.circle, size: 12, color: AppTheme.warningColor),
+                    const SizedBox(width: 4),
                     Text(
-                      "Created",
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      l10n.taskStatsCreated,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
-                    SizedBox(width: 16),
-                    Icon(Icons.circle, size: 12, color: AppTheme.successColor),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 16),
+                    const Icon(Icons.circle, size: 12, color: AppTheme.successColor),
+                    const SizedBox(width: 4),
                     Text(
-                      "Completed",
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      l10n.taskStatsCompleted,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -86,14 +88,14 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                 const SizedBox(height: 40),
 
                 // PRODUCTIVITY BAR CHART
-                const Text(
-                  "Productivity",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.taskStatsProductivity,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  "Total tasks finished per day",
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                Text(
+                  l10n.taskStatsCompletedDaily,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
@@ -126,7 +128,16 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
   ) {
     final velocityData = _getVelocityForWeek(tasks, startOfWeek, endOfWeek);
     final todayIndex = DateTime.now().weekday - 1;
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final l10n = AppLocalizations.of(context)!;
+    final weekdays = [
+      l10n.commonWeekdayMon,
+      l10n.commonWeekdayTue,
+      l10n.commonWeekdayWed,
+      l10n.commonWeekdayThu,
+      l10n.commonWeekdayFri,
+      l10n.commonWeekdaySat,
+      l10n.commonWeekdaySun,
+    ];
 
     final maxY = StatsUtils.maxValue(
       velocityData.expand((day) => day),
@@ -207,7 +218,16 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
       endOfWeek,
     );
     final todayIndex = DateTime.now().weekday - 1;
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final l10n = AppLocalizations.of(context)!;
+    final weekdays = [
+      l10n.commonWeekdayMon,
+      l10n.commonWeekdayTue,
+      l10n.commonWeekdayWed,
+      l10n.commonWeekdayThu,
+      l10n.commonWeekdayFri,
+      l10n.commonWeekdaySat,
+      l10n.commonWeekdaySun,
+    ];
 
     double maxY = dailyCounts.reduce((a, b) => a > b ? a : b).toDouble();
     if (maxY < 5) maxY = 5;
@@ -334,21 +354,18 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     final Map<String, int> categoryCounts = {};
     for (var task in tasks) {
       final String cat = task.category.isEmpty
-          ? "Uncategorized"
+          ? AppLocalizations.of(context)!.taskStatsCategoryUncategorized
           : task.category;
       categoryCounts[cat] = (categoryCounts[cat] ?? 0) + 1;
     }
     return categoryCounts;
   }
 
-  String _formatCount(int count) {
-    return count == 1 ? '1 task' : '$count tasks';
-  }
-
   Widget _buildCategoryBreakdownCard(BuildContext context, List<Task> tasks) {
     final categoryData = _getCategoryData(tasks);
+    final l10n = AppLocalizations.of(context)!;
     if (categoryData.isEmpty) {
-      return const Center(child: Text("No categories used."));
+      return Center(child: Text(l10n.taskStatsCategoryUnused));
     }
 
     final totalTasks = categoryData.values.fold<int>(
@@ -374,13 +391,13 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'All-Time Distribution',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          l10n.taskStatsDistribution,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Text(
-          'Task categories across your whole workspace',
+          l10n.taskStatsDistributionSubtitle,
           style: TextStyle(
             fontSize: 12,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -435,7 +452,7 @@ class _TaskStatsScreenState extends State<TaskStatsScreen> {
                   ),
                 ),
                 Text(
-                  _formatCount(category.value),
+                  l10n.nTasksCount(category.value),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
