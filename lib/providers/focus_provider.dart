@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
@@ -309,9 +308,10 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
         }
       } else {
         targetTime = DateTime.now().add(Duration(seconds: targetSeconds));
-        final bool use24h = _settingsProvider?.use24HourFormat ?? true;
-        final timeString = _settingsProvider?.getFormattedTime(targetTime) ??
-            (use24h ? DateFormat.Hm().format(targetTime) : DateFormat.jm().format(targetTime));
+        final timeString = _settingsProvider != null
+            ? _settingsProvider!.getFormattedTime(targetTime)
+            : "${targetTime.hour.toString().padLeft(2, '0')}:${targetTime.minute.toString().padLeft(2, '0')}";
+
         bodyParts.add('${l10n.focusEndsAt} $timeString');
       }
     }

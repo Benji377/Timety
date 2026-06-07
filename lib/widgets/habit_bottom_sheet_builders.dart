@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/habit/habit_models.dart';
 import '../theme/app_theme.dart';
+import '../utils/date_time_utils.dart';
 import '../utils/date_utils.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
@@ -94,7 +95,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text("${l10n.habitHistoryRemoveCompletion("").split("for ")[0].trim()}?"),
+          title: Text(l10n.habitHistoryRemoveTitle),
           content: Text(
             l10n.habitHistoryRemoveCompletion(context.read<SettingsProvider>().getFormattedDate(date)),
           ),
@@ -116,7 +117,7 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
       );
     } else {
       // Prompt user for the time of completion
-      final TimeOfDay? pickedTime = await showTimePicker(
+      final TimeOfDay? pickedTime = await AppDatePickers.pickTime(
         context: context,
         initialTime: TimeOfDay.now(),
         helpText: l10n.habitHistoryTimePrompt.toUpperCase(),

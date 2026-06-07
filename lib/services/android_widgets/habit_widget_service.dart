@@ -50,7 +50,7 @@ class HabitWidgetService {
         }
       }
 
-      // 1. Render Header
+      // Render Header
       final headerPath = await HomeWidget.renderFlutterWidget(
         _wrap(HabitWidgetHeaderView(habitCount: todayHabits.length, title: l10n.widgetHabitsToday)),
         key: 'habit_widget_header',
@@ -59,7 +59,7 @@ class HabitWidgetService {
       );
       await HomeWidget.saveWidgetData('habit_widget_header', headerPath);
 
-      // 2. Prepare Items to render
+      // Prepare Items to render
       final List<Widget> itemsToRender = [];
 
       // Add Stacks
@@ -128,7 +128,7 @@ class HabitWidgetService {
         );
       }
 
-      // 3. Render Items
+      // Render Items
       for (var i = 0; i < itemsToRender.length; i++) {
         final item = itemsToRender[i];
         double height = 38; // standalone height

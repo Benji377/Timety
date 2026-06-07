@@ -838,6 +838,7 @@
       }
     }
   },
+  "habitHistoryRemoveTitle": "Remove completion?",
   "habitHistoryRemoveTooltip": "Remove this record",
   "habitDeleteTitle": "Delete Habit",
   "habitDeleteContent": "Are you sure you want to delete this habit?",

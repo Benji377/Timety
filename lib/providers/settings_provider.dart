@@ -38,6 +38,9 @@ class SettingsProvider extends ChangeNotifier {
   bool get use24HourFormat => _use24HourFormat;
   String get dateFormatCode => _dateFormatCode ?? 'system';
 
+  String get _resolvedLocale =>
+      _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
+
   SettingsProvider() {
     _loadSettings();
   }
@@ -192,64 +195,51 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   // Helpers
-  String getFormattedDate(DateTime date) {
-    if (_dateFormatCode != null) {
-      // User explicitly picked a format
-      return DateFormat(_dateFormatCode).format(date);
-    } else {
-      // System Default: Grab the current app language/locale and format automatically
-      final localeString =
-          _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
-      return DateFormat.yMd(localeString).format(date);
-    }
+  String getFormattedDate(DateTime date) => _dateFormatCode != null
+      ? DateFormat(_dateFormatCode).format(date)
+      : DateFormat.yMd(_resolvedLocale).format(date);
+
+  String getFormattedTime(DateTime date) => _use24HourFormat
+      ? DateFormat.Hm(_resolvedLocale).format(date)
+      : DateFormat.jm(_resolvedLocale).format(date);
+
+  String getFormattedTimeOfDay(TimeOfDay time) {
+    return getFormattedTime(DateTime(2000, 1, 1, time.hour, time.minute));
   }
 
-  String getFormattedTime(DateTime date) {
-    if (_use24HourFormat) {
-      return DateFormat.Hm().format(date);
-    } else {
-      return DateFormat.jm().format(date);
-    }
-  }
+  String getFormattedTimeWithSeconds(DateTime date) => _use24HourFormat
+      ? DateFormat.Hms(_resolvedLocale).format(date)
+      : DateFormat.jms(_resolvedLocale).format(date);
 
-  String getFormattedTimeWithSeconds(DateTime date) {
-    if (_use24HourFormat) {
-      return DateFormat.Hms().format(date);
-    } else {
-      return DateFormat.jms().format(date);
-    }
-  }
+  String getFormattedDateTime(DateTime date) =>
+      '${getFormattedDate(date)} ${getFormattedTime(date)}';
 
-  String getFormattedDateTime(DateTime date) {
-    return '${getFormattedDate(date)} ${getFormattedTime(date)}';
-  }
+  String getFormattedMonthYear(DateTime date) =>
+      DateFormat.yMMMM(_resolvedLocale).format(date);
 
+  String getFormattedWeekday(DateTime date) =>
+      DateFormat.E(_resolvedLocale).format(date);
+
+  String getFormattedWeekdayDay(DateTime date) =>
+      '${DateFormat.E(_resolvedLocale).format(date)} ${DateFormat.d(_resolvedLocale).format(date)}';
+
+  // For the short date, a standard method is still best due to the custom logic
   String getFormattedShortDate(DateTime date) {
     if (_dateFormatCode != null) {
-      if (_dateFormatCode == 'dd/MM/yyyy') return DateFormat('dd/MM').format(date);
-      if (_dateFormatCode == 'MM/dd/yyyy') return DateFormat('MM/dd').format(date);
-      if (_dateFormatCode == 'yyyy-MM-dd') return DateFormat('MM-dd').format(date);
-      if (_dateFormatCode == 'dd.MM.yyyy') return DateFormat('dd.MM').format(date);
+      if (_dateFormatCode == 'dd/MM/yyyy') {
+        return DateFormat('dd/MM').format(date);
+      }
+      if (_dateFormatCode == 'MM/dd/yyyy') {
+        return DateFormat('MM/dd').format(date);
+      }
+      if (_dateFormatCode == 'yyyy-MM-dd') {
+        return DateFormat('MM-dd').format(date);
+      }
+      if (_dateFormatCode == 'dd.MM.yyyy') {
+        return DateFormat('dd.MM').format(date);
+      }
       return DateFormat('MMM d').format(date);
-    } else {
-      final localeString =
-          _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
-      return DateFormat.Md(localeString).format(date);
     }
-  }
-
-  String getFormattedMonthYear(DateTime date) {
-    final localeString = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
-    return DateFormat.yMMMM(localeString).format(date);
-  }
-
-  String getFormattedWeekday(DateTime date) {
-    final localeString = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
-    return DateFormat.E(localeString).format(date);
-  }
-
-  String getFormattedWeekdayDay(DateTime date) {
-    final localeString = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
-    return '${DateFormat.E(localeString).format(date)} ${DateFormat.d(localeString).format(date)}';
+    return DateFormat.Md(_resolvedLocale).format(date);
   }
 }

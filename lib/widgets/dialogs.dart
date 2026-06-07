@@ -5,6 +5,8 @@ import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../providers/focus_provider.dart';
 import '../providers/user_provider.dart';
+import '../providers/settings_provider.dart';
+import '../utils/date_time_utils.dart';
 import '../utils/l10n_utils.dart';
 import '../l10n/app_localizations.dart';
 
@@ -109,11 +111,8 @@ class AppDialogs {
     );
     DateTime endDateTime = DateTime.now();
 
-    String formatDT(DateTime dt) {
-      return "${dt.month}/${dt.day}  ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
-    }
-
     final l10n = AppLocalizations.of(context)!;
+    final settings = context.read<SettingsProvider>();
 
     showDialog(
       context: context,
@@ -174,6 +173,8 @@ class AppDialogs {
                           setDialogState(() => selectedTag = val),
                     ),
                     const SizedBox(height: AppTheme.spaceLarge),
+
+                    // -- Start Time --
                     ListTile(
                       shape: const RoundedRectangleBorder(
                         borderRadius: AppTheme.brMedium,
@@ -187,38 +188,27 @@ class AppDialogs {
                         ),
                       ),
                       subtitle: Text(
-                        formatDT(startDateTime),
+                        settings.getFormattedDateTime(startDateTime),
                         style: const TextStyle(fontWeight: AppTheme.fwBold),
                       ),
                       trailing: const Icon(Icons.edit_calendar),
                       onTap: () async {
-                        final d = await showDatePicker(
+                        final picked = await AppDatePickers.pickDateTime(
                           context: context,
                           initialDate: startDateTime,
-                          firstDate: DateTime(2020),
+                          initialTime: TimeOfDay.fromDateTime(startDateTime),
+                          firstDate: DateTime(2000),
                           lastDate: DateTime.now(),
                         );
-                        if (!context.mounted) return;
-                        if (d != null) {
-                          final t = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.fromDateTime(startDateTime),
-                          );
-                          if (t != null) {
-                            setDialogState(
-                              () => startDateTime = DateTime(
-                                d.year,
-                                d.month,
-                                d.day,
-                                t.hour,
-                                t.minute,
-                              ),
-                            );
-                          }
+
+                        if (picked != null && context.mounted) {
+                          setDialogState(() => startDateTime = picked);
                         }
                       },
                     ),
                     const SizedBox(height: AppTheme.spaceSmall),
+
+                    // -- End Time --
                     ListTile(
                       shape: const RoundedRectangleBorder(
                         borderRadius: AppTheme.brMedium,
@@ -232,34 +222,21 @@ class AppDialogs {
                         ),
                       ),
                       subtitle: Text(
-                        formatDT(endDateTime),
+                        settings.getFormattedDateTime(endDateTime),
                         style: const TextStyle(fontWeight: AppTheme.fwBold),
                       ),
                       trailing: const Icon(Icons.edit_calendar),
                       onTap: () async {
-                        final d = await showDatePicker(
+                        final picked = await AppDatePickers.pickDateTime(
                           context: context,
                           initialDate: endDateTime,
-                          firstDate: DateTime(2020),
+                          initialTime: TimeOfDay.fromDateTime(endDateTime),
+                          firstDate: DateTime(2000),
                           lastDate: DateTime.now(),
                         );
-                        if (!context.mounted) return;
-                        if (d != null) {
-                          final t = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.fromDateTime(endDateTime),
-                          );
-                          if (t != null) {
-                            setDialogState(
-                              () => endDateTime = DateTime(
-                                d.year,
-                                d.month,
-                                d.day,
-                                t.hour,
-                                t.minute,
-                              ),
-                            );
-                          }
+
+                        if (picked != null && context.mounted) {
+                          setDialogState(() => endDateTime = picked);
                         }
                       },
                     ),

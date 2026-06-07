@@ -9,6 +9,7 @@ import '../providers/settings_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/task_provider.dart';
 import '../services/backup_service.dart';
+import '../utils/date_time_utils.dart';
 import '../widgets/tags.dart';
 import '../widgets/categories.dart';
 import '../widgets/location_picker_dialog.dart';
@@ -288,10 +289,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.schedule, color: AppTheme.warningAccent),
             title: Text(l10n.settingsLabelDailyMotivation),
-            subtitle: Text(settings.notificationTime.format(context)),
+            subtitle: Text(settings.getFormattedTimeOfDay(settings.notificationTime),),
             trailing: const Icon(Icons.edit),
             onTap: () async {
-              final TimeOfDay? time = await showTimePicker(
+              final TimeOfDay? time = await AppDatePickers.pickTime(
                 context: context,
                 initialTime: settings.notificationTime,
               );
@@ -306,10 +307,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: AppTheme.habitColor,
             ),
             title: Text(l10n.settingsLabelEodCheckup),
-            subtitle: Text(settings.endOfDayTime.format(context)),
+            subtitle: Text(settings.getFormattedTimeOfDay(settings.endOfDayTime),),
             trailing: const Icon(Icons.edit),
             onTap: () async {
-              final TimeOfDay? time = await showTimePicker(
+              final TimeOfDay? time = await AppDatePickers.pickTime(
                 context: context,
                 initialTime: settings.endOfDayTime,
               );

@@ -248,15 +248,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             child: InputDecorator(
               isEmpty: _dueDate == null,
               decoration: InputDecoration(
-                // Optional: Add labelText: 'Due Date' here if you want it to look
-                // identical to your "Location" and "Task Title" fields.
                 prefixIcon: const Icon(Icons.event),
                 suffixIcon: _isEditing ? const Icon(Icons.edit) : null,
                 border: const OutlineInputBorder(),
                 disabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: disabledBorderColor),
                 ),
-                // This applies your background color when editing
+                // This applies the background color when editing
                 filled: _isEditing,
                 fillColor: Colors.white,
               ),

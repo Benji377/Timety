@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../../data/habit/habit_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/habit_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/date_time_utils.dart';
 import '../../utils/habit_icons.dart';
 
 class HabitDetailScreen extends StatefulWidget {
@@ -311,7 +313,16 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 ),
                 title: Text(
                   _targetTime != null
-                      ? _targetTime!.format(context)
+                      ? context.read<SettingsProvider>().getFormattedTime(
+                          // Dummy date trick to let the SettingsProvider format the TimeOfDay
+                          DateTime(
+                            2000,
+                            1,
+                            1,
+                            _targetTime!.hour,
+                            _targetTime!.minute,
+                          ),
+                        )
                       : l10n.habitDetailLabelReminderNoTime,
                 ),
                 trailing: _targetTime != null
@@ -321,7 +332,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                       )
                     : const Icon(Icons.edit),
                 onTap: () async {
-                  final time = await showTimePicker(
+                  final time = await AppDatePickers.pickTime(
                     context: context,
                     initialTime:
                         _targetTime ?? const TimeOfDay(hour: 8, minute: 0),

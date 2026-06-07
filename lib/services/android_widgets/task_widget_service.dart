@@ -28,7 +28,7 @@ class TaskWidgetService {
       }).toList();
       urgentTasks.sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
 
-      // 1. Render Header
+      // Render Header
       final headerPath = await HomeWidget.renderFlutterWidget(
         _wrap(TaskWidgetHeaderView(taskCount: urgentTasks.length, title: l10n.widgetTasksDue(urgentTasks.length))),
         key: 'task_widget_header',
@@ -37,7 +37,7 @@ class TaskWidgetService {
       );
       await HomeWidget.saveWidgetData('task_widget_header', headerPath);
 
-      // 2. Render Items
+      // Render Items
       for (var i = 0; i < urgentTasks.length; i++) {
         final itemPath = await HomeWidget.renderFlutterWidget(
           _wrap(TaskWidgetItemView(task: urgentTasks[i])),

@@ -4,6 +4,7 @@ import '../../screens/statistics_screen.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/habit_utils.dart';
 import '../../widgets/expansion_section.dart';
@@ -148,6 +149,7 @@ class HabitListScreen extends StatelessWidget {
     HabitProvider provider,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    final settings = context.read<SettingsProvider>();
     final completionsThisWeek = provider.getCompletionsThisWeek(habit);
     var subtitle = HabitUtils.buildHabitSubtitle(
       habit,
@@ -156,7 +158,8 @@ class HabitListScreen extends StatelessWidget {
     );
 
     if (habit.targetTime != null) {
-      subtitle += ' | ${habit.targetTime!.format(context)}';
+      final time = habit.targetTime!;
+      subtitle += ' | ${settings.getFormattedTimeOfDay(time)}';
     }
     return subtitle;
   }

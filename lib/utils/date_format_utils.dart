@@ -2,13 +2,6 @@
 class AppDateFormatUtils {
   const AppDateFormatUtils._();
 
-  /// Formats time in HH:MM format
-  ///
-  /// Example: DateTime(2024, 1, 15, 14, 30) → "14:30"
-  static String formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  }
-
   /// Formats duration in MM:SS format
   ///
   /// Useful for displaying timer values
