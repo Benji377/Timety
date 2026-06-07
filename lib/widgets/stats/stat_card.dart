@@ -101,21 +101,32 @@ class StatCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(icon, color: color, size: AppTheme.iconSizeSmall),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: AppTheme.fsHeadingMedium,
-            fontWeight: AppTheme.fwExtraBold,
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: AppTheme.fsHeadingMedium,
+              fontWeight: AppTheme.fwExtraBold,
+            ),
           ),
         ),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: AppTheme.fsCaption,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: AppTheme.fwBold,
+        const SizedBox(height: 4),
+        Expanded(
+          child: Center(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppTheme.fsCaption,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: AppTheme.fwBold,
+                height: 1.1,
+              ),
+            ),
           ),
         ),
       ],
@@ -125,28 +136,37 @@ class StatCard extends StatelessWidget {
   Widget _buildCompactHeaderContent(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(icon, color: color, size: AppTheme.iconSizeSmall),
             const SizedBox(width: AppTheme.spaceXSmall),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: AppTheme.fsCaption,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: AppTheme.fwBold,
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: AppTheme.fsCaption,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: AppTheme.fwBold,
+                  height: 1.1,
+                ),
               ),
             ),
           ],
         ),
         const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: AppTheme.fsHeadingMedium,
-            fontWeight: AppTheme.fwExtraBold,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: AppTheme.fsHeadingMedium,
+              fontWeight: AppTheme.fwExtraBold,
+            ),
           ),
         ),
       ],

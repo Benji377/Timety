@@ -673,11 +673,14 @@ class _CalendarHeaderCell extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: color ?? Colors.grey,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            text,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: color ?? Colors.grey,
+            ),
           ),
         ),
       ),

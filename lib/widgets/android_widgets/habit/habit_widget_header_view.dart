@@ -21,16 +21,20 @@ class HabitWidgetHeaderView extends StatelessWidget {
             size: AppTheme.iconSizeMedium,
           ),
           const SizedBox(width: AppTheme.spaceSmall),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: AppTheme.fsHeadingSmall,
-              fontWeight: AppTheme.fwBold,
-              color: AppTheme.typeHabitColor,
-              letterSpacing: AppTheme.lsTight,
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: AppTheme.fsHeadingSmall,
+                fontWeight: AppTheme.fwBold,
+                color: AppTheme.typeHabitColor,
+                letterSpacing: AppTheme.lsTight,
+              ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 8),
           Text(
             '$habitCount',
             style: const TextStyle(

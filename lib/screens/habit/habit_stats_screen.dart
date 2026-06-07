@@ -332,11 +332,6 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
     };
   }
 
-  String _formatHabitCount(int count) {
-    if (count == 1) return '1 completion';
-    return '$count completions';
-  }
-
   Widget _buildTimeOfDayBreakdownCard(List<Habit> habits) {
     final data = _getTimeOfDayData(habits);
     final total = data.values.fold<int>(0, (sum, value) => sum + value);
@@ -404,7 +399,7 @@ class _HabitStatsScreenState extends State<HabitStatsScreen> {
             ),
             const SizedBox(width: 16),
             Text(
-              _formatHabitCount(total),
+              l10n.nHabitsCount(total),
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: AppTheme.fwExtraBold,

@@ -38,15 +38,19 @@ class HabitStackHeaderView extends StatelessWidget {
           children: [
             const Icon(Icons.layers, size: 12, color: AppTheme.typeHabitColor),
             const SizedBox(width: 4),
-            Text(
-              name.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: AppTheme.fwBold,
-                color: AppTheme.typeHabitColor,
+            Expanded(
+              child: Text(
+                name.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: AppTheme.fwBold,
+                  color: AppTheme.typeHabitColor,
+                ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(width: 8),
             Text(
               '$completed / $total',
               style: TextStyle(
