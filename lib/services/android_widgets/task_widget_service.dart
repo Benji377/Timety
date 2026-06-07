@@ -3,17 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../data/task/task.dart';
 import '../../widgets/android_widgets/task_widget_view.dart';
+import '../../l10n/app_localizations.dart';
 
 class TaskWidgetService {
   static const String _groupId = 'io.github.benji377.timety';
   static const String _androidWidgetName = 'TaskWidgetProvider';
 
-  static Future<void> updateTaskWidget(List<Task> tasks) async {
+  static Future<void> updateTaskWidget(List<Task> tasks, Locale userLocale,) async {
     try {
       await HomeWidget.setAppGroupId(_groupId);
 
       final today = DateTime.now();
       final todayDate = DateTime(today.year, today.month, today.day);
+      final l10n = lookupAppLocalizations(userLocale);
 
       final urgentTasks = tasks.where((task) {
         if (task.isCompleted || task.dueDate == null) return false;
@@ -28,7 +30,7 @@ class TaskWidgetService {
 
       // 1. Render Header
       final headerPath = await HomeWidget.renderFlutterWidget(
-        _wrap(TaskWidgetHeaderView(taskCount: urgentTasks.length)),
+        _wrap(TaskWidgetHeaderView(taskCount: urgentTasks.length, title: l10n.widgetTasksDue(urgentTasks.length))),
         key: 'task_widget_header',
         logicalSize: const ui.Size(400, 60),
         pixelRatio: 2.0,

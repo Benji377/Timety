@@ -71,10 +71,12 @@ class HabitProvider extends ChangeNotifier {
     NotificationService.instance.scheduleDailyMotivation(
       time: _settings!.notificationTime,
       todaysHabits: todaysHabits,
+      l10n: l10n,
     );
 
     NotificationService.instance.scheduleEndOfDayCheckup(
       time: _settings!.endOfDayTime,
+      l10n: l10n,
     );
 
     for (var habit in _habits) {
@@ -86,6 +88,7 @@ class HabitProvider extends ChangeNotifier {
           body: l10n.notificationHabitBody(habit.name),
           time: habit.targetTime!,
           targetWeekdays: habit.targetWeekdays,
+          l10n: l10n,
         );
       } else {
         NotificationService.instance.cancelHabitReminder(habit.id);

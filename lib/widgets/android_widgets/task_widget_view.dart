@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import '../../data/task/task.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/priority_utils.dart';
-import '../../l10n/app_localizations.dart';
 
 class TaskWidgetHeaderView extends StatelessWidget {
   final int taskCount;
+  final String title;
 
-  const TaskWidgetHeaderView({super.key, required this.taskCount});
+  const TaskWidgetHeaderView({super.key, required this.taskCount, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class TaskWidgetHeaderView extends StatelessWidget {
           ),
           const SizedBox(width: AppTheme.spaceSmall),
           Text(
-            AppLocalizations.of(context)!.widgetTasksDue(taskCount),
+            title,
             style: const TextStyle(
               fontSize: AppTheme.fsHeadingSmall,
               fontWeight: AppTheme.fwBold,

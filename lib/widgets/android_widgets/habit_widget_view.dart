@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../data/habit/habit_models.dart';
 import '../../theme/app_theme.dart';
-import '../../l10n/app_localizations.dart';
 
 class HabitWidgetHeaderView extends StatelessWidget {
   final int habitCount;
+  final String title;
 
-  const HabitWidgetHeaderView({super.key, required this.habitCount});
+  const HabitWidgetHeaderView({super.key, required this.habitCount, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class HabitWidgetHeaderView extends StatelessWidget {
           ),
           const SizedBox(width: AppTheme.spaceSmall),
           Text(
-            AppLocalizations.of(context)!.widgetHabitsToday,
+            title,
             style: const TextStyle(
               fontSize: AppTheme.fsHeadingSmall,
               fontWeight: AppTheme.fwBold,

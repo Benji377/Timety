@@ -5,7 +5,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import '../utils/l10n_utils.dart';
+import '../l10n/app_localizations.dart';
 
 class NotificationService {
   // Singleton pattern
@@ -103,10 +103,9 @@ class NotificationService {
     required String title,
     required String body,
     required DateTime scheduledTime,
+    required AppLocalizations l10n,
   }) async {
     if (kIsWeb || scheduledTime.isBefore(DateTime.now())) return;
-
-    final l10n = getL10n();
 
     await _notificationsPlugin.zonedSchedule(
       id: notificationId,
@@ -135,13 +134,13 @@ class NotificationService {
     required String title,
     required String body,
     required TimeOfDay time,
+    required AppLocalizations l10n,
     List<int>? targetWeekdays,
   }) async {
     if (kIsWeb) return;
 
     await cancelHabitReminder(habitId);
 
-    final l10n = getL10n();
     final now = tz.TZDateTime.now(tz.local);
     final weekdays = targetWeekdays?.toSet().toList();
     weekdays?.sort();
@@ -183,12 +182,12 @@ class NotificationService {
   // --- DAILY MOTIVATION (WITH DYNAMIC HABITS) ---
   Future<void> scheduleDailyMotivation({
     required TimeOfDay time,
+    required AppLocalizations l10n,
     bool includeHabits = true,
     List<String> todaysHabits = const [],
   }) async {
     if (kIsWeb) return;
 
-    final l10n = getL10n();
     final now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
@@ -241,10 +240,12 @@ class NotificationService {
   }
 
   // --- END OF DAY CHECKUP ---
-  Future<void> scheduleEndOfDayCheckup({required TimeOfDay time}) async {
+  Future<void> scheduleEndOfDayCheckup({
+    required TimeOfDay time,
+    required AppLocalizations l10n,
+  }) async {
     if (kIsWeb) return;
 
-    final l10n = getL10n();
     final now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
@@ -301,11 +302,10 @@ class NotificationService {
     required DateTime targetTime,
     required bool isStopwatch,
     required Color notificationColor,
+    required AppLocalizations l10n,
     bool isPaused = false,
   }) async {
     if (kIsWeb) return;
-
-    final l10n = getL10n();
 
     await _notificationsPlugin.show(
       id: focusTimerId,

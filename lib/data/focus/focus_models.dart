@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_localizations.dart';
-import '../../utils/l10n_utils.dart';
 
 part 'focus_models.g.dart';
 
@@ -98,11 +97,8 @@ class FocusMode {
     ],
   );
 
-  String getLocalizedName() {
+  String getLocalizedName(AppLocalizations l10n) {
     if (!isSystem) return name;
-
-    // Grab the global localizations
-    final l10n = getL10n();
 
     switch (id) {
       case 'system_stopwatch':

@@ -269,7 +269,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     final String titleText = asPaused
         ? l10n.focusStatePaused
-        : _activeMode!.getLocalizedName();
+        : _activeMode!.getLocalizedName(l10n);
     final List<String> bodyParts = [];
 
     if (selectedTargetLabel != null && selectedTargetLabel!.isNotEmpty) {
@@ -329,6 +329,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
           ? AppTheme.warningColor
           : AppTheme.focusColor,
       isPaused: asPaused,
+      l10n: l10n,
     );
   }
 

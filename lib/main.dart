@@ -66,13 +66,6 @@ class TimetyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) =>
-              TaskProvider(repository: HiveTaskRepository())..loadTasks(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => FocusProvider(repository: HiveFocusRepository()),
-        ),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProxyProvider<SettingsProvider, HabitProvider>(
           create: (_) =>
@@ -82,6 +75,17 @@ class TimetyApp extends StatelessWidget {
             habitProvider?.updateSettings(settings);
             return habitProvider!;
           },
+        ),
+        ChangeNotifierProxyProvider<SettingsProvider, TaskProvider>(
+          create: (_) =>
+              TaskProvider(repository: HiveTaskRepository())..loadTasks(),
+          update: (_, settings, taskProvider) {
+            taskProvider?.updateSettings(settings);
+            return taskProvider!;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FocusProvider(repository: HiveFocusRepository()),
         ),
         ChangeNotifierProvider(
           create: (_) => UserProvider(repository: HiveUserRepository()),

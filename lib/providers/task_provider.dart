@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
@@ -5,21 +6,32 @@ import '../services/notification_service.dart';
 import '../services/android_widgets/task_widget_service.dart';
 import '../utils/l10n_utils.dart';
 import '../utils/xp_calculator.dart';
+import 'settings_provider.dart';
 import 'user_provider.dart';
 
 class TaskProvider extends ChangeNotifier {
   final TaskRepository repository;
   List<Task> _tasks = [];
+  SettingsProvider? _settings;
 
   List<Task> get tasks => _tasks;
 
   TaskProvider({required this.repository});
 
+  void updateSettings(SettingsProvider settings) {
+    _settings = settings;
+    _notifyAndSync();
+  }
+
   // Helper to notify listeners, save to repository, and update home widget
   Future<void> _notifyAndSync() async {
     notifyListeners();
     await repository.saveTasks(_tasks);
-    TaskWidgetService.updateTaskWidget(_tasks);
+
+    final locale =
+        _settings?.appLocale ?? ui.PlatformDispatcher.instance.locale;
+
+    TaskWidgetService.updateTaskWidget(_tasks, locale);
   }
 
   // Helper to generate a unique integer ID for a specific reminder
@@ -38,7 +50,7 @@ class TaskProvider extends ChangeNotifier {
     DateTime? dueDate,
     bool exactDueDate = false,
   }) {
-    final l10n = getL10n();
+    final l10n = getL10n(settings: _settings);
     if (exactDueDate) {
       return l10n.taskReminderBodyExact(task.title);
     }
@@ -76,7 +88,7 @@ class TaskProvider extends ChangeNotifier {
 
   // Master synchronization function
   Future<void> _syncTaskReminders(Task task, {Task? previousTask}) async {
-    final l10n = getL10n();
+    final l10n = getL10n(settings: _settings);
 
     if (previousTask != null) {
       await _cancelTaskNotifications(previousTask);
@@ -96,6 +108,7 @@ class TaskProvider extends ChangeNotifier {
           title: l10n.taskReminderTitle(task.title),
           body: _buildReminderBody(task, reminder, dueDate: task.dueDate),
           scheduledTime: reminder,
+          l10n: l10n,
         );
       }
     }
@@ -108,6 +121,7 @@ class TaskProvider extends ChangeNotifier {
           title: l10n.taskReminderTitle(task.title),
           body: _buildReminderBody(task, dueDate, exactDueDate: true),
           scheduledTime: dueDate,
+          l10n: l10n,
         );
       }
     }
