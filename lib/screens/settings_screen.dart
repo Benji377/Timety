@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../providers/settings_provider.dart';
@@ -74,14 +75,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: settings.appLocaleCode,
               underline: const SizedBox(),
               items: [
-                DropdownMenuItem(
-                  value: 'system',
-                  child: Text(l10n.settingsLabelLanguageSystem),
+                // System Default (Uses an icon instead of a flag)
+                _buildLangItem(
+                  'system',
+                  l10n.settingsLabelLanguageSystem,
+                  isSystem: true,
                 ),
-                const DropdownMenuItem(value: 'en', child: Text('English')),
-                const DropdownMenuItem(value: 'de', child: Text('Deutsch')),
-                const DropdownMenuItem(value: 'it', child: Text('Italiano')),
-                const DropdownMenuItem(value: 'lld', child: Text('Ladin')),
+                _buildLangItem('en', 'English', asset: 'assets/flags/gb.svg'),
+                _buildLangItem('de', 'Deutsch', asset: 'assets/flags/de.svg'),
+                _buildLangItem('it', 'Italiano', asset: 'assets/flags/it.svg'),
+                _buildLangItem('lld', 'Ladin', asset: 'assets/flags/lld.svg'),
               ],
               onChanged: (val) {
                 if (val != null) settings.setAppLocaleCode(val);
@@ -96,6 +99,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(l10n.settingsLabelTimeFormat),
             value: settings.use24HourFormat,
             onChanged: settings.set24HourFormat,
+            activeTrackColor: Colors.green,
+            inactiveTrackColor: Colors.redAccent,
           ),
           ListTile(
             leading: const Icon(
@@ -161,6 +166,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: Text(l10n.settingsLabelFocusAutocompleteSubtitle),
             value: settings.autoCompleteFocusTargetOnFinish,
             onChanged: settings.setAutoCompleteFocusTargetOnFinish,
+            activeTrackColor: Colors.green,
+            inactiveTrackColor: Colors.redAccent,
           ),
           ListTile(
             leading: const Icon(
@@ -557,6 +564,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
           letterSpacing: 1.2,
           fontSize: 12,
         ),
+      ),
+    );
+  }
+
+  DropdownMenuItem<String> _buildLangItem(
+    String val,
+    String text, {
+    String? asset,
+    bool isSystem = false,
+  }) {
+    return DropdownMenuItem(
+      value: val,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (asset != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: 
+                SvgPicture.asset(
+                  asset,
+                  width: 24,
+                  height: 16,
+                  fit: BoxFit.cover,
+                  semanticsLabel: "$text flag",
+                ),
+            )
+
+          else
+            const SizedBox(width: 24),
+          const SizedBox(width: 12),
+          Text(text),
+        ],
       ),
     );
   }

@@ -32,6 +32,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   audioplayers: ^6.7.0
   home_widget: ^0.9.2
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +52,7 @@ flutter:
   assets:
     - assets/logo.png
     - assets/ding.mp3
+    - assets/flags/
 
 flutter_launcher_icons:
   android: true
