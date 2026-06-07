@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/settings_provider.dart';
 
+/// Utility class for showing date and time picker dialogs.
 class AppDatePickers {
-  // Opens a DatePicker followed by a TimePicker and returns the combined DateTime.
+  /// Opens a DatePicker followed by a TimePicker and returns the combined DateTime.
   static Future<DateTime?> pickDateTime({
     required BuildContext context,
     DateTime? initialDate,
@@ -55,6 +56,7 @@ class AppDatePickers {
     );
   }
 
+  /// Opens a TimePicker dialog.
   static Future<TimeOfDay?> pickTime({
     required BuildContext context,
     TimeOfDay? initialTime,

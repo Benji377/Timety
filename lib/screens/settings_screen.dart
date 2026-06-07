@@ -14,6 +14,7 @@ import '../widgets/focus/focus_tags_widget.dart';
 import '../widgets/task/task_categories_widget.dart';
 import '../widgets/location/location_picker_dialog.dart';
 
+/// Application settings for theme, notifications, API, and backups.
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 

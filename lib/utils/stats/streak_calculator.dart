@@ -1,8 +1,10 @@
 import '../datetime/date_utils.dart';
 
+/// Utility class for calculating habit and activity streaks.
 class StreakCalculator {
   const StreakCalculator._();
 
+  /// Calculates the longest consecutive streak of active days.
   static int calculateBestStreak(Iterable<DateTime> completions) {
     final sortedUniqueDates = _sortedUniqueDayKeys(completions);
     if (sortedUniqueDates.isEmpty) return 0;
@@ -25,6 +27,7 @@ class StreakCalculator {
     return highest;
   }
 
+  /// Calculates the current ongoing consecutive streak of active days.
   static int calculateCurrentStreak(Iterable<DateTime> completions) {
     final dayKeys = completions.map(AppDateUtils.dayKey).toSet();
     if (dayKeys.isEmpty) return 0;
@@ -46,6 +49,7 @@ class StreakCalculator {
     return current;
   }
 
+  /// Calculates both the current and best streaks simultaneously.
   static ({int current, int highest}) calculateBoth(Iterable<DateTime> dates) {
     return (
       current: calculateCurrentStreak(dates),

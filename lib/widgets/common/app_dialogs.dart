@@ -10,8 +10,10 @@ import '../../utils/datetime/date_time_pickers.dart';
 import '../../utils/ui/l10n_utils.dart';
 import '../../l10n/app_localizations.dart';
 
+/// A collection of reusable, stylized alert dialogs.
 class AppDialogs {
   // Generic confirmation dialog
+  /// Shows a standard confirmation dialog (Yes/No).
   static Future<bool?> showConfirmation({
     required BuildContext context,
     required String title,
@@ -45,6 +47,7 @@ class AppDialogs {
     );
   }
 
+  /// Shows a dialog with a text input field for capturing user input.
   static Future<String?> showTextInputDialog({
     required BuildContext context,
     required String title,
@@ -97,6 +100,7 @@ class AppDialogs {
     );
   }
 
+  /// Shows the "Time Machine" dialog for logging past focus sessions.
   static void showTimeMachineDialog(
     BuildContext context,
     FocusProvider provider,

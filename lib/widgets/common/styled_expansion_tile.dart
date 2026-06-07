@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 
+/// A consistently styled expansion tile used across the app.
 class StyledExpansionTile extends StatelessWidget {
   final Widget title;
   final Color iconColor;

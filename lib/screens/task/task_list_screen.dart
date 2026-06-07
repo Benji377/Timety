@@ -12,6 +12,7 @@ import '../calendar_screen.dart';
 import '../statistics_screen.dart';
 import 'task_detail_screen.dart';
 
+/// Displays a searchable, filterable, and sortable list of all tasks.
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
 
@@ -81,7 +82,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
           return Column(
             children: [
-              // --- TOP BAR: SEARCH & SORT ---
+              // --- SEARCH & SORT HEADER ---
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Row(
@@ -185,7 +186,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   ),
                 ),
 
-              // --- MAIN LIST AREA ---
+              // --- TASKS SCROLLABLE LIST ---
               Expanded(
                 child: Builder(
                   builder: (context) {

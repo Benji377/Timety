@@ -14,6 +14,7 @@ enum StatCardStyle {
 }
 
 /// Unified stat card widget supporting multiple layout styles
+/// A flexible, stylized card for displaying statistics and KPIs.
 class StatCard extends StatelessWidget {
   final String title;
   final String value;

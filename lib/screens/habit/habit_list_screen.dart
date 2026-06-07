@@ -14,6 +14,7 @@ import '../calendar_screen.dart';
 import '../../l10n/app_localizations.dart';
 import 'habit_detail_screen.dart';
 
+/// Displays a categorized list of all habits (Due Today, Upcoming, Done).
 class HabitListScreen extends StatelessWidget {
   const HabitListScreen({super.key});
 
@@ -73,6 +74,7 @@ class HabitListScreen extends StatelessWidget {
             }
           }
 
+          // --- HABITS SCROLLABLE LIST ---
           return ListView(
             padding: const EdgeInsets.only(bottom: 80),
             children: [

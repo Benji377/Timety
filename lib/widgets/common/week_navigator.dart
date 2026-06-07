@@ -4,6 +4,7 @@ import '../../utils/datetime/date_utils.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/settings_provider.dart';
 
+/// A navigation widget for switching between weeks in statistics screens.
 class WeekNavigator extends StatelessWidget {
   final DateTime focusedDate;
   final ValueChanged<int> onShiftWeek;

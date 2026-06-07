@@ -17,6 +17,7 @@ import 'task/task_detail_screen.dart';
 import 'habit/habit_detail_screen.dart';
 import '../widgets/common/styled_expansion_tile.dart';
 
+/// The main dashboard screen showing today's overview, goals, and upcoming tasks.
 class HomeScreen extends StatelessWidget {
   final VoidCallback onNavigateToFocus;
 
@@ -94,6 +95,7 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            // --- GREETING & MOTIVATION SECTION ---
             Padding(
               padding: const EdgeInsets.all(AppTheme.spaceXLarge),
               child: SizedBox(
@@ -121,6 +123,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+            // --- DAILY GOAL GAUGE SECTION ---
             Expanded(
               flex: 5,
               child: Center(
@@ -141,6 +144,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Divider(height: 1),
+            // --- TASKS & HABITS LIST SECTION ---
             Expanded(
               flex: 6,
               child: Material(
@@ -155,6 +159,7 @@ class HomeScreen extends StatelessWidget {
                           bottom: 80,
                         ),
                         children: [
+                          // --- DUE TASKS ACCORDION ---
                           if (urgentTasks.isNotEmpty) ...[
                             StyledExpansionTile(
                                   initiallyExpanded: true,
@@ -197,6 +202,7 @@ class HomeScreen extends StatelessWidget {
                                   ],
                                 ),
                           ],
+                          // --- TODAY'S HABITS ACCORDION ---
                           if (todaysHabits.isNotEmpty) ...[
                             StyledExpansionTile(
                                   title: Text(
@@ -234,6 +240,7 @@ class HomeScreen extends StatelessWidget {
                                   ],
                                 ),
                           ],
+                          // --- UPCOMING TASKS ACCORDION ---
                           if (upcomingTasks.isNotEmpty) ...[
                             StyledExpansionTile(
                                   title: Text(

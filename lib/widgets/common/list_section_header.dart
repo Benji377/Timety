@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 
+/// A stylized header row for list sections (e.g., inside ExpansionTiles).
 class ListSectionHeader extends StatelessWidget {
   final String title;
   final IconData icon;

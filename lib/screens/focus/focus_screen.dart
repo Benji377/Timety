@@ -19,6 +19,7 @@ import '../calendar_screen.dart';
 import '../settings_screen.dart';
 import 'focus_modes_screen.dart';
 
+/// The main focus timer screen with interactive gauge and mode selection.
 class FocusScreen extends StatefulWidget {
   const FocusScreen({super.key});
 
@@ -134,7 +135,7 @@ class _FocusScreenState extends State<FocusScreen> {
         children: [
           const SizedBox(height: 10),
 
-          // --- MODE SELECTOR ---
+          // --- FOCUS MODE SELECTOR ---
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -247,7 +248,7 @@ class _FocusScreenState extends State<FocusScreen> {
             ),
           ),
 
-          // --- GAUGE & SIDE BUTTONS ---
+          // --- INTERACTIVE TIMER GAUGE ---
           SizedBox(
             height: 320,
             width: double.infinity,
@@ -327,6 +328,7 @@ class _FocusScreenState extends State<FocusScreen> {
             ),
           ),
 
+          // --- PHASE TIMELINE ---
           ModeTimeline(
             phases: activeMode?.phases ?? [],
             currentPhaseIndex: focusProvider.currentPhaseIndex,
@@ -336,7 +338,7 @@ class _FocusScreenState extends State<FocusScreen> {
 
           const Spacer(),
 
-          // --- BOTTOM CONTROLS ---
+          // --- PLAY/PAUSE CONTROLS ---
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

@@ -18,6 +18,7 @@ import '../widgets/user_profile/user_streak_timeline_card.dart';
 import '../widgets/user_profile/user_xp_breakdown_card.dart';
 import 'statistics_screen.dart';
 
+/// Displays the user's profile, XP progress, and all-time statistics.
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});
 
@@ -120,7 +121,7 @@ class _UserScreenState extends State<UserScreen> {
           children: [
             const SizedBox(height: AppTheme.space2XLarge),
 
-            // --- PROFILE HEADER ---
+            // --- AVATAR & NAME SECTION ---
             GestureDetector(
               onTap: () => _pickImage(userProvider),
               child: Stack(
@@ -187,6 +188,7 @@ class _UserScreenState extends State<UserScreen> {
 
             const SizedBox(height: AppTheme.spaceLarge),
 
+            // --- XP BREAKDOWN SECTION ---
             UserXpBreakdownCard(
               currentLevel: userProvider.currentLevel,
               levelTitle: userProvider.levelTitle,
@@ -196,6 +198,7 @@ class _UserScreenState extends State<UserScreen> {
 
             const SizedBox(height: AppTheme.spaceLarge),
 
+            // --- STREAK TIMELINE SECTION ---
             UserStreakTimelineCard(
               activityDates: activityDates,
               taskDates: taskDates,

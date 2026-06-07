@@ -4,22 +4,23 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
 
+/// Engine for calculating user experience points (XP), levels, and titles.
 class ExperienceEngine {
   static const int xpPerTask = 15;
   static const int xpPerHabit = 10;
   static const int xpPerFocusMin = 1;
 
-  // Formula: Level = floor(sqrt(XP / 100)) + 1
+  /// Calculates the user level based on total XP.
   static int calculateLevel(int totalXp) {
     return (sqrt(totalXp / 100)).floor() + 1;
   }
 
-  // Formula: XP = 100 * (Level - 1)^2
+  /// Calculates the required XP to reach a specific level.
   static int getXpForLevel(int level) {
     return 100 * pow(level - 1, 2).toInt();
   }
 
-  // Infinite Title Generator
+  /// Generates a descriptive title based on the user level.
   static String getTitle(int level) {
     if (level < 5) return "Novice Planner";
     if (level < 10) return "Focus Apprentice";
@@ -30,6 +31,7 @@ class ExperienceEngine {
     return "Time God"; // For the absolute madmen who reach level 100+
   }
 
+  /// Returns the corresponding icon for the user level.
   static IconData getTitleIcon(int level) {
     if (level < 5) return Icons.emoji_events_outlined;
     if (level < 10) return Icons.auto_awesome;
@@ -40,6 +42,7 @@ class ExperienceEngine {
     return Icons.star_rounded;
   }
 
+  /// Returns the corresponding color theme for the user level.
   static Color getTitleColor(int level) {
     if (level < 5) return AppTheme.warningColor;
     if (level < 10) return const Color(0xFF8E6CFF);
@@ -50,7 +53,7 @@ class ExperienceEngine {
     return const Color(0xFF1E88E5);
   }
 
-  // Returns progress to the NEXT level as a double (0.0 to 1.0)
+  /// Returns progress to the NEXT level as a double (0.0 to 1.0).
   static double getLevelProgress(int totalXp) {
     final int currentLevel = calculateLevel(totalXp);
     final int currentTierXp = getXpForLevel(currentLevel);

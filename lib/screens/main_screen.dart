@@ -7,6 +7,7 @@ import 'focus/focus_screen.dart';
 import 'task/task_list_screen.dart';
 import 'user_screen.dart';
 
+/// The root navigation screen containing the BottomNavigationBar.
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -41,6 +42,7 @@ class _MainScreenState extends State<MainScreen> {
         break;
     }
     return Scaffold(
+      // --- MAIN CONTENT AREA ---
       body: IndexedStack(
         index: _currentIndex,
         children: [
@@ -51,6 +53,7 @@ class _MainScreenState extends State<MainScreen> {
           const UserScreen(),
         ],
       ),
+      // --- BOTTOM NAVIGATION BAR ---
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _switchTab,

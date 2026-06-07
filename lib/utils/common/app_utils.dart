@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../data/task/task.dart';
 import '../../theme/app_theme.dart';
 
+/// General utility functions for the application.
 class AppUtils {
+  /// Returns the corresponding Icon for a given [Priority].
   Icon getPriorityIcon(Priority p) {
     switch (p) {
       case Priority.low:
@@ -20,6 +22,7 @@ class AppUtils {
     }
   }
 
+  /// Returns a short string representation (emoji/letters) for a given task [Size].
   String getSizeEmoji(Size s) {
     switch (s) {
       case Size.small:
