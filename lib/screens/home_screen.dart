@@ -15,6 +15,7 @@ import '../widgets/habit/grouped_habits_section.dart';
 import '../widgets/list_tiles/task_list_tile.dart';
 import 'task/task_detail_screen.dart';
 import 'habit/habit_detail_screen.dart';
+import '../widgets/common/styled_expansion_tile.dart';
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback onNavigateToFocus;
@@ -155,15 +156,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         children: [
                           if (urgentTasks.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppTheme.spaceMedium,
-                              ),
-                              child: Theme(
-                                data: Theme.of(
-                                  context,
-                                ).copyWith(dividerColor: Colors.transparent),
-                                child: ExpansionTile(
+                            StyledExpansionTile(
                                   initiallyExpanded: true,
                                   title: Text(
                                     l10n.homeSectionTasksDue(
@@ -175,7 +168,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   iconColor: AppTheme.warningColor,
-                                  collapsedIconColor: AppTheme.warningColor,
                                   children: [
                                     ...urgentTasks.map(
                                       (task) => TaskListTile(
@@ -204,19 +196,9 @@ class HomeScreen extends StatelessWidget {
                                     const SizedBox(height: AppTheme.spaceSmall),
                                   ],
                                 ),
-                              ),
-                            ),
                           ],
                           if (todaysHabits.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppTheme.spaceMedium,
-                              ),
-                              child: Theme(
-                                data: Theme.of(
-                                  context,
-                                ).copyWith(dividerColor: Colors.transparent),
-                                child: ExpansionTile(
+                            StyledExpansionTile(
                                   title: Text(
                                     l10n.homeSectionHabitsDue(
                                       todaysHabits.length,
@@ -227,7 +209,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   iconColor: AppTheme.typeHabitColor,
-                                  collapsedIconColor: AppTheme.typeHabitColor,
                                   children: [
                                     GroupedHabitsSection(
                                       habits: todaysHabits,
@@ -252,19 +233,9 @@ class HomeScreen extends StatelessWidget {
                                     const SizedBox(height: AppTheme.spaceSmall),
                                   ],
                                 ),
-                              ),
-                            ),
                           ],
                           if (upcomingTasks.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppTheme.spaceMedium,
-                              ),
-                              child: Theme(
-                                data: Theme.of(
-                                  context,
-                                ).copyWith(dividerColor: Colors.transparent),
-                                child: ExpansionTile(
+                            StyledExpansionTile(
                                   title: Text(
                                     l10n.homeSectionTasksUpcoming(
                                       upcomingTasks.length,
@@ -275,7 +246,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   iconColor: AppTheme.typeTaskColor,
-                                  collapsedIconColor: AppTheme.typeTaskColor,
                                   children: [
                                     ...upcomingTasks.map(
                                       (task) => TaskListTile(
@@ -301,8 +271,6 @@ class HomeScreen extends StatelessWidget {
                                     const SizedBox(height: AppTheme.spaceSmall),
                                   ],
                                 ),
-                              ),
-                            ),
                           ],
                         ],
                       ),

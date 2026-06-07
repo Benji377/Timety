@@ -8,11 +8,14 @@ import '../providers/user_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/habit_provider.dart';
 import '../data/habit/habit_models.dart';
+import '../data/focus/focus_models.dart';
+import '../data/task/task.dart';
 import '../utils/common/app_utils.dart';
 import '../utils/datetime/calendar_utils.dart';
 import '../utils/datetime/date_utils.dart';
 import '../utils/ui/l10n_utils.dart';
 import 'task/task_detail_screen.dart';
+import '../widgets/common/styled_expansion_tile.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -90,272 +93,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.chevron_left),
-                        onPressed: () => setState(
-                          () => _focusedMonth = DateTime(
-                            _focusedMonth.year,
-                            _focusedMonth.month - 1,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        settingsProvider.getFormattedMonthYear(_focusedMonth),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right),
-                        onPressed: () => setState(
-                          () => _focusedMonth = DateTime(
-                            _focusedMonth.year,
-                            _focusedMonth.month + 1,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildMonthNavigator(settingsProvider),
                   const SizedBox(height: 16),
-
                   Expanded(
-                    child: Table(
-                      defaultVerticalAlignment:
-                          TableCellVerticalAlignment.middle,
-                      children: [
-                        TableRow(
-                          children: [
-                            _CalendarHeaderCell(l10n.calendarHeaderMon),
-                            _CalendarHeaderCell(l10n.calendarHeaderTue),
-                            _CalendarHeaderCell(l10n.calendarHeaderWed),
-                            _CalendarHeaderCell(l10n.calendarHeaderThu),
-                            _CalendarHeaderCell(l10n.calendarHeaderFri),
-                            _CalendarHeaderCell(l10n.calendarHeaderSat),
-                            _CalendarHeaderCell(l10n.calendarHeaderSun),
-                            _CalendarHeaderCell(
-                              l10n.calendarHeaderWeekly, // Don't forget this one!
-                              color: AppTheme.taskColor,
-                            ),
-                          ],
-                        ),
-                        ...weeks.map((week) {
-                          final weekStart = week.first.subtract(
-                            const Duration(seconds: 1),
-                          );
-                          final weekEnd = week.last.add(
-                            const Duration(days: 1),
-                          );
-
-                          // Weekly Analytics Calculations
-                          final int weeklyTaskCount = allTasks
-                              .where(
-                                (t) =>
-                                    t.dueDate != null &&
-                                    t.dueDate!.isAfter(weekStart) &&
-                                    t.dueDate!.isBefore(weekEnd),
-                              )
-                              .length;
-
-                          final int weeklyFocusCount = allSessions
-                              .where(
-                                (s) =>
-                                    s.startTime.isAfter(weekStart) &&
-                                    s.startTime.isBefore(weekEnd),
-                              )
-                              .length;
-
-                          final int weeklyHabitCount = allHabits.fold(0, (
-                            sum,
-                            h,
-                          ) {
-                            return sum +
-                                h.completions
-                                    .where(
-                                      (c) =>
-                                          c.isAfter(weekStart) &&
-                                          c.isBefore(weekEnd),
-                                    )
-                                    .length;
-                          });
-
-                          return TableRow(
-                            children: [
-                              ...week.map((day) {
-                                final isCurrentMonth =
-                                    day.month == _focusedMonth.month;
-                                final isSelected = AppDateUtils.isSameDay(
-                                  day,
-                                  _selectedDate,
-                                );
-                                final isToday = AppDateUtils.isSameDay(
-                                  day,
-                                  DateTime.now(),
-                                );
-
-                                final hasTasks = allTasks.any(
-                                  (t) => AppDateUtils.isSameDay(t.dueDate, day),
-                                );
-                                final hasFocus = allSessions.any(
-                                  (s) =>
-                                      AppDateUtils.isSameDay(s.startTime, day),
-                                );
-                                final hasHabits = allHabits.any(
-                                  (h) => habitProvider.isCompletedOn(h, day),
-                                );
-
-                                return TableCell(
-                                  child: GestureDetector(
-                                    onTap: () =>
-                                        setState(() => _selectedDate = day),
-                                    child: Container(
-                                      margin: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? AppTheme.taskColor.withValues(
-                                                alpha: 0.2,
-                                              )
-                                            : Colors.transparent,
-                                        border: isToday
-                                            ? Border.all(
-                                                color: AppTheme.taskColor,
-                                                width: 2,
-                                              )
-                                            : null,
-                                        borderRadius: AppTheme.brMedium,
-                                      ),
-                                      height: 45,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '${day.day}',
-                                            style: TextStyle(
-                                              fontWeight: isSelected || isToday
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                              color: isCurrentMonth
-                                                  ? Theme.of(
-                                                      context,
-                                                    ).textTheme.bodyLarge?.color
-                                                  : Colors.grey.shade400,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          // --- MICRO DOTS ---
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              if (hasTasks)
-                                                Container(
-                                                  width: 5,
-                                                  height: 5,
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                        color:
-                                                            AppTheme.taskColor,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                ),
-                                              if (hasTasks &&
-                                                  (hasFocus || hasHabits))
-                                                const SizedBox(width: 2),
-
-                                              if (hasFocus)
-                                                Container(
-                                                  width: 5,
-                                                  height: 5,
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                        color: AppTheme
-                                                            .successColor,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                ),
-                                              if (hasFocus && hasHabits)
-                                                const SizedBox(width: 2),
-
-                                              if (hasHabits)
-                                                Container(
-                                                  width: 5,
-                                                  height: 5,
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                        color:
-                                                            AppTheme.habitColor,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                ),
-
-                                              if (!hasTasks &&
-                                                  !hasFocus &&
-                                                  !hasHabits)
-                                                const SizedBox(height: 5),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }),
-                              // --- WEEKLY SUMMARY COLUMN ---
-                              TableCell(
-                                child: Center(
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                            text: '$weeklyTaskCount',
-                                            style: const TextStyle(
-                                              color: AppTheme.taskColor,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: ' | ',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: '$weeklyHabitCount',
-                                            style: const TextStyle(
-                                              color: AppTheme.habitColor,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: ' | ',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: '$weeklyFocusCount',
-                                            style: const TextStyle(
-                                              color: AppTheme.successColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
-                      ],
+                    child: _buildCalendarGrid(
+                      weeks,
+                      allTasks,
+                      allSessions,
+                      allHabits,
+                      habitProvider,
+                      l10n,
                     ),
                   ),
                 ],
@@ -381,351 +128,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   : ListView(
                       padding: const EdgeInsets.all(8),
                       children: [
-                        // --- HABITS ACCORDION ---
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppTheme.spaceMedium,
-                          ),
-                          child: ExpansionTile(
-                            title: Text(
-                              l10n.calendarSectionHabits(
-                                selectedDayHabits.length,
-                              ),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.habitColor,
-                              ),
-                            ),
-                            iconColor: AppTheme.habitColor,
-                            collapsedIconColor: AppTheme.habitColor,
-                            children: selectedDayHabits.isEmpty
-                                ? [
-                                    Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Text(
-                                        l10n.calendarSectionHabitsEmpty,
-                                        style: const TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  ]
-                                : [
-                                    ...selectedDayHabits.map((habit) {
-                                      final isCompleted = habitProvider
-                                          .isCompletedOn(habit, _selectedDate!);
-                                      return Card(
-                                        margin: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: isCompleted
-                                                ? AppTheme.habitColor
-                                                      .withValues(alpha: 0.3)
-                                                : AppTheme.habitColor,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: ListTile(
-                                          leading: Checkbox(
-                                            value: isCompleted,
-                                            fillColor:
-                                                WidgetStateProperty.resolveWith(
-                                                  (states) {
-                                                    if (states.contains(
-                                                      WidgetState.selected,
-                                                    )) {
-                                                      return AppTheme
-                                                          .successColor;
-                                                    }
-                                                    return Colors.transparent;
-                                                  },
-                                                ),
-                                            checkColor: Colors.white,
-                                            side: const BorderSide(
-                                              color: AppTheme.habitColor,
-                                              width: 2,
-                                            ),
-                                            onChanged: (_) {
-                                              // Time-Travel Logging!
-                                              if (isCompleted) {
-                                                habit.completions.removeWhere(
-                                                  (c) => AppDateUtils.isSameDay(
-                                                    c,
-                                                    _selectedDate!,
-                                                  ),
-                                                );
-                                              } else {
-                                                // Keep the current time, but force the date to be the selected calendar date
-                                                final now = DateTime.now();
-                                                final retroDate = DateTime(
-                                                  _selectedDate!.year,
-                                                  _selectedDate!.month,
-                                                  _selectedDate!.day,
-                                                  now.hour,
-                                                  now.minute,
-                                                );
-                                                habit.completions.add(
-                                                  retroDate,
-                                                );
-                                              }
-                                              habitProvider.saveHabit(habit);
-                                            },
-                                          ),
-                                          title: Text(
-                                            habit.name,
-                                            style: TextStyle(
-                                              decoration: isCompleted
-                                                  ? TextDecoration.lineThrough
-                                                  : null,
-                                              color: isCompleted
-                                                  ? Colors.grey
-                                                  : null,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                    const SizedBox(height: AppTheme.spaceSmall),
-                                  ],
-                          ),
+                        _HabitsAccordion(
+                          selectedDayHabits: selectedDayHabits,
+                          selectedDate: _selectedDate!,
+                          l10n: l10n,
+                          habitProvider: habitProvider,
                         ),
-
-                        // --- TASKS ACCORDION ---
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppTheme.spaceMedium,
-                          ),
-                          child: ExpansionTile(
-                            title: Text(
-                              l10n.calendarSectionTasks(
-                                selectedDayTasks.length,
-                              ),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.taskColor,
-                              ),
-                            ),
-                            iconColor: AppTheme.taskColor,
-                            collapsedIconColor: AppTheme.taskColor,
-                            children: selectedDayTasks.isEmpty
-                                ? [
-                                    Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Text(
-                                        l10n.calendarSectionTasksEmpty,
-                                        style: const TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  ]
-                                : [
-                                    ...selectedDayTasks.map((task) {
-                                      return Card(
-                                        margin: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: task.isCompleted
-                                                ? AppTheme.successColor
-                                                : AppTheme.taskColor,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: ListTile(
-                                          leading: Checkbox(
-                                            value: task.isCompleted,
-                                            fillColor:
-                                                WidgetStateProperty.resolveWith(
-                                                  (states) {
-                                                    if (states.contains(
-                                                      WidgetState.selected,
-                                                    )) {
-                                                      return AppTheme
-                                                          .successColor;
-                                                    }
-                                                    return Colors.transparent;
-                                                  },
-                                                ),
-                                            checkColor: Colors.white,
-                                            side: const BorderSide(
-                                              color: AppTheme.taskColor,
-                                              width: 2,
-                                            ),
-                                            onChanged: (_) => context
-                                                .read<TaskProvider>()
-                                                .toggleTask(
-                                                  task.id,
-                                                  userProvider: context
-                                                      .read<UserProvider>(),
-                                                ),
-                                          ),
-                                          title: Text(
-                                            task.title,
-                                            style: TextStyle(
-                                              decoration: task.isCompleted
-                                                  ? TextDecoration.lineThrough
-                                                  : null,
-                                            ),
-                                          ),
-                                          trailing: AppUtils().getPriorityIcon(
-                                            task.priority,
-                                          ),
-                                          onTap: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  TaskDetailScreen(task: task),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                    const SizedBox(height: AppTheme.spaceSmall),
-                                  ],
-                          ),
+                        _TasksAccordion(
+                          selectedDayTasks: selectedDayTasks,
+                          l10n: l10n,
+                          taskProvider: taskProvider,
                         ),
-
-                        // --- FOCUS SESSIONS ACCORDION ---
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppTheme.spaceMedium,
-                          ),
-                          child: ExpansionTile(
-                            title: Text(
-                              l10n.calendarSectionFocus(
-                                selectedDaySessions.length,
-                              ),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.successColor,
-                              ),
-                            ),
-                            iconColor: AppTheme.successColor,
-                            collapsedIconColor: AppTheme.successColor,
-                            children: selectedDaySessions.isEmpty
-                                ? [
-                                    Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Text(
-                                        l10n.calendarSectionFocusEmpty,
-                                        style: const TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ),
-                                  ]
-                                : [
-                                    ...selectedDaySessions.map((session) {
-                                      final mode = focusProvider.modes
-                                          .firstWhere(
-                                            (m) => m.id == session.modeId,
-                                            orElse: () =>
-                                                focusProvider.modes.first,
-                                          );
-                                      final tag = session.tagId != null
-                                          ? focusProvider.tags
-                                                .where(
-                                                  (t) => t.id == session.tagId,
-                                                )
-                                                .firstOrNull
-                                          : null;
-
-                                      String timeString =
-                                          settingsProvider.getFormattedTime(
-                                            session.startTime,
-                                          );
-                                      if (session.endTime != null) {
-                                        timeString +=
-                                            " - ${settingsProvider.getFormattedTime(session.endTime!)}";
-                                      } else {
-                                        timeString +=
-                                            " - ${l10n.calendarLabelFocusOngoing}";
-                                      }
-
-                                      final int focusMins =
-                                          session.totalSecondsFocused ~/ 60;
-                                      return Card(
-                                        margin: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                            color: Colors.grey.shade300,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: ListTile(
-                                          leading: Icon(
-                                            Icons.circle,
-                                            color: tag != null
-                                                ? Color(tag.colorValue)
-                                                : Colors.grey.shade400,
-                                          ),
-                                          title: Text(
-                                            tag?.name ??
-                                                l10n.focusTargetUntagged,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          subtitle: Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 4.0,
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  getLocalizedFocusModeName(
-                                                    context,
-                                                    mode,
-                                                  ),
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  timeString,
-                                                  style: TextStyle(
-                                                    color: Colors.grey.shade600,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          trailing: Text(
-                                            l10n.focusMinutes(focusMins),
-                                            style: const TextStyle(
-                                              color: AppTheme.successColor,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                    const SizedBox(height: AppTheme.spaceSmall),
-                                  ],
-                          ),
+                        _FocusSessionsAccordion(
+                          selectedDaySessions: selectedDaySessions,
+                          l10n: l10n,
+                          focusProvider: focusProvider,
+                          settingsProvider: settingsProvider,
                         ),
                       ],
                     ),
@@ -733,6 +151,513 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMonthNavigator(SettingsProvider settingsProvider) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.chevron_left),
+          onPressed: () => setState(
+            () => _focusedMonth = DateTime(
+              _focusedMonth.year,
+              _focusedMonth.month - 1,
+            ),
+          ),
+        ),
+        Text(
+          settingsProvider.getFormattedMonthYear(_focusedMonth),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.chevron_right),
+          onPressed: () => setState(
+            () => _focusedMonth = DateTime(
+              _focusedMonth.year,
+              _focusedMonth.month + 1,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalendarGrid(
+    List<List<DateTime>> weeks,
+    List<Task> allTasks,
+    List<FocusSession> allSessions,
+    List<Habit> allHabits,
+    HabitProvider habitProvider,
+    AppLocalizations l10n,
+  ) {
+    return Table(
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        TableRow(
+          children: [
+            _CalendarHeaderCell(l10n.calendarHeaderMon),
+            _CalendarHeaderCell(l10n.calendarHeaderTue),
+            _CalendarHeaderCell(l10n.calendarHeaderWed),
+            _CalendarHeaderCell(l10n.calendarHeaderThu),
+            _CalendarHeaderCell(l10n.calendarHeaderFri),
+            _CalendarHeaderCell(l10n.calendarHeaderSat),
+            _CalendarHeaderCell(l10n.calendarHeaderSun),
+            _CalendarHeaderCell(
+              l10n.calendarHeaderWeekly,
+              color: AppTheme.taskColor,
+            ),
+          ],
+        ),
+        ...weeks.map((week) {
+          final weekStart = week.first.subtract(const Duration(seconds: 1));
+          final weekEnd = week.last.add(const Duration(days: 1));
+
+          final int weeklyTaskCount = allTasks
+              .where(
+                (t) =>
+                    t.dueDate != null &&
+                    t.dueDate!.isAfter(weekStart) &&
+                    t.dueDate!.isBefore(weekEnd),
+              )
+              .length;
+
+          final int weeklyFocusCount = allSessions
+              .where(
+                (s) =>
+                    s.startTime.isAfter(weekStart) &&
+                    s.startTime.isBefore(weekEnd),
+              )
+              .length;
+
+          final int weeklyHabitCount = allHabits.fold(0, (sum, h) {
+            return sum +
+                h.completions
+                    .where(
+                      (c) => c.isAfter(weekStart) && c.isBefore(weekEnd),
+                    )
+                    .length;
+          });
+
+          return TableRow(
+            children: [
+              ...week.map((day) {
+                final isCurrentMonth = day.month == _focusedMonth.month;
+                final isSelected = AppDateUtils.isSameDay(day, _selectedDate);
+                final isToday = AppDateUtils.isSameDay(day, DateTime.now());
+
+                final hasTasks = allTasks.any(
+                  (t) => AppDateUtils.isSameDay(t.dueDate, day),
+                );
+                final hasFocus = allSessions.any(
+                  (s) => AppDateUtils.isSameDay(s.startTime, day),
+                );
+                final hasHabits = allHabits.any(
+                  (h) => habitProvider.isCompletedOn(h, day),
+                );
+
+                return TableCell(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedDate = day),
+                    child: Container(
+                      margin: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppTheme.taskColor.withValues(alpha: 0.2)
+                            : Colors.transparent,
+                        border: isToday
+                            ? Border.all(color: AppTheme.taskColor, width: 2)
+                            : null,
+                        borderRadius: AppTheme.brMedium,
+                      ),
+                      height: 45,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${day.day}',
+                            style: TextStyle(
+                              fontWeight: isSelected || isToday
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isCurrentMonth
+                                  ? Theme.of(context).textTheme.bodyLarge?.color
+                                  : Colors.grey.shade400,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (hasTasks) _buildDot(AppTheme.taskColor),
+                              if (hasTasks && (hasFocus || hasHabits))
+                                const SizedBox(width: 2),
+                              if (hasFocus) _buildDot(AppTheme.successColor),
+                              if (hasFocus && hasHabits)
+                                const SizedBox(width: 2),
+                              if (hasHabits) _buildDot(AppTheme.habitColor),
+                              if (!hasTasks && !hasFocus && !hasHabits)
+                                const SizedBox(height: 5),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              TableCell(
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '$weeklyTaskCount',
+                            style: const TextStyle(color: AppTheme.taskColor),
+                          ),
+                          TextSpan(
+                            text: ' | ',
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                          TextSpan(
+                            text: '$weeklyHabitCount',
+                            style: const TextStyle(color: AppTheme.habitColor),
+                          ),
+                          TextSpan(
+                            text: ' | ',
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                          TextSpan(
+                            text: '$weeklyFocusCount',
+                            style: const TextStyle(color: AppTheme.successColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildDot(Color color) {
+    return Container(
+      width: 5,
+      height: 5,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+}
+
+// --- ACCORDION WIDGETS ---
+
+class _HabitsAccordion extends StatelessWidget {
+  final List<Habit> selectedDayHabits;
+  final DateTime selectedDate;
+  final AppLocalizations l10n;
+  final HabitProvider habitProvider;
+
+  const _HabitsAccordion({
+    required this.selectedDayHabits,
+    required this.selectedDate,
+    required this.l10n,
+    required this.habitProvider,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StyledExpansionTile(
+      title: Text(
+        l10n.calendarSectionHabits(selectedDayHabits.length),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: AppTheme.habitColor,
+        ),
+      ),
+      iconColor: AppTheme.habitColor,
+      children: selectedDayHabits.isEmpty
+          ? [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  l10n.calendarSectionHabitsEmpty,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ),
+            ]
+          : [
+              ...selectedDayHabits.map((habit) {
+                final isCompleted =
+                    habitProvider.isCompletedOn(habit, selectedDate);
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      color: isCompleted
+                          ? AppTheme.habitColor.withValues(alpha: 0.3)
+                          : AppTheme.habitColor,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ListTile(
+                    leading: Checkbox(
+                      value: isCompleted,
+                      fillColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppTheme.successColor;
+                        }
+                        return Colors.transparent;
+                      }),
+                      checkColor: Colors.white,
+                      side: const BorderSide(
+                        color: AppTheme.habitColor,
+                        width: 2,
+                      ),
+                      onChanged: (_) {
+                        if (isCompleted) {
+                          habit.completions.removeWhere(
+                            (c) => AppDateUtils.isSameDay(c, selectedDate),
+                          );
+                        } else {
+                          final now = DateTime.now();
+                          final retroDate = DateTime(
+                            selectedDate.year,
+                            selectedDate.month,
+                            selectedDate.day,
+                            now.hour,
+                            now.minute,
+                          );
+                          habit.completions.add(retroDate);
+                        }
+                        habitProvider.saveHabit(habit);
+                      },
+                    ),
+                    title: Text(
+                      habit.name,
+                      style: TextStyle(
+                        decoration:
+                            isCompleted ? TextDecoration.lineThrough : null,
+                        color: isCompleted ? Colors.grey : null,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: AppTheme.spaceSmall),
+            ],
+    );
+  }
+}
+
+class _TasksAccordion extends StatelessWidget {
+  final List<Task> selectedDayTasks;
+  final AppLocalizations l10n;
+  final TaskProvider taskProvider;
+
+  const _TasksAccordion({
+    required this.selectedDayTasks,
+    required this.l10n,
+    required this.taskProvider,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StyledExpansionTile(
+      title: Text(
+        l10n.calendarSectionTasks(selectedDayTasks.length),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: AppTheme.taskColor,
+        ),
+      ),
+      iconColor: AppTheme.taskColor,
+      children: selectedDayTasks.isEmpty
+          ? [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  l10n.calendarSectionTasksEmpty,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ),
+            ]
+          : [
+              ...selectedDayTasks.map((task) {
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      color: task.isCompleted
+                          ? AppTheme.successColor
+                          : AppTheme.taskColor,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ListTile(
+                    leading: Checkbox(
+                      value: task.isCompleted,
+                      fillColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppTheme.successColor;
+                        }
+                        return Colors.transparent;
+                      }),
+                      checkColor: Colors.white,
+                      side: const BorderSide(
+                        color: AppTheme.taskColor,
+                        width: 2,
+                      ),
+                      onChanged: (_) => taskProvider.toggleTask(
+                        task.id,
+                        userProvider: context.read<UserProvider>(),
+                      ),
+                    ),
+                    title: Text(
+                      task.title,
+                      style: TextStyle(
+                        decoration:
+                            task.isCompleted ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    trailing: AppUtils().getPriorityIcon(task.priority),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TaskDetailScreen(task: task),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: AppTheme.spaceSmall),
+            ],
+    );
+  }
+}
+
+class _FocusSessionsAccordion extends StatelessWidget {
+  final List<FocusSession> selectedDaySessions;
+  final AppLocalizations l10n;
+  final FocusProvider focusProvider;
+  final SettingsProvider settingsProvider;
+
+  const _FocusSessionsAccordion({
+    required this.selectedDaySessions,
+    required this.l10n,
+    required this.focusProvider,
+    required this.settingsProvider,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StyledExpansionTile(
+      title: Text(
+        l10n.calendarSectionFocus(selectedDaySessions.length),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: AppTheme.successColor,
+        ),
+      ),
+      iconColor: AppTheme.successColor,
+      children: selectedDaySessions.isEmpty
+          ? [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  l10n.calendarSectionFocusEmpty,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ),
+            ]
+          : [
+              ...selectedDaySessions.map((session) {
+                final mode = focusProvider.modes.firstWhere(
+                  (m) => m.id == session.modeId,
+                  orElse: () => focusProvider.modes.first,
+                );
+                final tag = session.tagId != null
+                    ? focusProvider.tags
+                          .where((t) => t.id == session.tagId)
+                          .firstOrNull
+                    : null;
+
+                String timeString =
+                    settingsProvider.getFormattedTime(session.startTime);
+                if (session.endTime != null) {
+                  timeString +=
+                      " - ${settingsProvider.getFormattedTime(session.endTime!)}";
+                } else {
+                  timeString += " - ${l10n.calendarLabelFocusOngoing}";
+                }
+
+                final int focusMins = session.totalSecondsFocused ~/ 60;
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.circle,
+                      color: tag != null
+                          ? Color(tag.colorValue)
+                          : Colors.grey.shade400,
+                    ),
+                    title: Text(
+                      tag?.name ?? l10n.focusTargetUntagged,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            getLocalizedFocusModeName(context, mode),
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            timeString,
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    trailing: Text(
+                      l10n.focusMinutes(focusMins),
+                      style: const TextStyle(
+                        color: AppTheme.successColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: AppTheme.spaceSmall),
+            ],
     );
   }
 }

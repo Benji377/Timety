@@ -34,26 +34,8 @@ class CalendarUtils {
     return weeks;
   }
 
-  /// Checks if a date is in the current month
-  static bool isInMonth(DateTime date, DateTime month) {
-    return date.year == month.year && date.month == month.month;
-  }
-
   /// Gets the number of days in a month
   static int daysInMonth(DateTime date) {
     return DateTime(date.year, date.month + 1, 0).day;
-  }
-
-  /// Checks if two dates are in the same week (Monday to Sunday)
-  static bool isInSameWeek(DateTime date1, DateTime date2) {
-    final week1Start = date1.subtract(
-      Duration(days: date1.weekday - DateTime.monday),
-    );
-    final week2Start = date2.subtract(
-      Duration(days: date2.weekday - DateTime.monday),
-    );
-    return week1Start.year == week2Start.year &&
-        week1Start.month == week2Start.month &&
-        week1Start.day == week2Start.day;
   }
 }

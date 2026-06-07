@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import './list_section_header.dart';
+import 'styled_expansion_tile.dart';
 
 class ExpansionSection extends StatelessWidget {
   final String title;
@@ -22,21 +23,17 @@ class ExpansionSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (children.isEmpty) return const SizedBox.shrink();
 
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        initiallyExpanded: initiallyExpanded,
-        iconColor: color,
-        collapsedIconColor: color,
-        title: ListSectionHeader(
-          title: title,
-          icon: icon,
-          color: color,
-          padding: EdgeInsets.zero,
-          iconSize: AppTheme.listSectionIconSize,
-        ),
-        children: children,
+    return StyledExpansionTile(
+      initiallyExpanded: initiallyExpanded,
+      iconColor: color,
+      title: ListSectionHeader(
+        title: title,
+        icon: icon,
+        color: color,
+        padding: EdgeInsets.zero,
+        iconSize: AppTheme.listSectionIconSize,
       ),
+      children: children,
     );
   }
 }
