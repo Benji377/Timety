@@ -2,404 +2,107 @@
   "@@locale": "en",
 
   "appTitle": "Timety",
-  "focusTitle": "Focus",
-  "focusModesTitle": "Manage Modes",
-  "focusPhasesTitleAdd": "Add Phase",
-  "focusPhasesTitleEdit": "Edit Phase",
-  "focusTagsTitle": "Focus Tags",
-  "habitsListTitle": "My Habits",
-  "calendarTitle": "Calendar",
-  "settingsTitle": "Settings",
-  "statsTitle": "Insights & Statistics",
-  
-  "focusTargetLabel": "Target",
-  "focusTargetEmpty": "No Target",
-  "focusTargetUntagged": "Untagged",
-  
-  "focusStateActive": "Focus session active",
-  "focusStatePaused": "Paused",
-  
-  "focusLabelDefault": "Focus",
-  "focusLabelSetTime": "Set Time",
-  "focusLabelRest": "Rest",
-  "focusLabelStopwatch": "Stopwatch",
-  
-  "focusModeSelect": "Select Mode",
-  "focusModeFlex": "Flex",
-  "focusModeFlexible": "Flexible",
-  "focusModePomodoro": "Pomodoro Classic",
-  "focusModeStopwatch": "Stopwatch",
-  "focusLimitMax": "Max {minutes} mins",
-  "@focusLimitMax": {
+
+  "globalLabelHabit": "Habit",
+  "globalLabelHabits": "Habits",
+  "globalLabelTags": "Tags",
+  "globalLabelTask": "Task",
+  "globalLabelTasks": "Tasks",
+
+  "commonButtonGotIt": "Got it",
+  "commonDaytimeAfternoon": "Afternoon",
+  "commonDaytimeAfternoonRange": "12 PM - 5 PM",
+  "commonDaytimeEvening": "Evening",
+  "commonDaytimeEveningRange": "5 PM - 9 PM",
+  "commonDaytimeMorning": "Morning",
+  "commonDaytimeMorningRange": "5 AM - 12 PM",
+  "commonDaytimeNight": "Night",
+  "commonDaytimeNightRange": "9 PM - 5 AM",
+  "commonLabelAdd": "Add",
+  "commonLabelCancel": "Cancel",
+  "commonLabelConfirm": "Confirm",
+  "commonLabelDelete": "Delete",
+  "commonLabelRemove": "Remove",
+  "commonLabelSave": "Save",
+  "commonTimeDone": "Done",
+  "commonTimeDueToday": "Due Today",
+  "commonTimeUpcoming": "Upcoming",
+  "commonTooltipCalendar": "Calendar View",
+  "commonTooltipDistractions": "Distractions",
+  "commonTooltipStats": "Statistics",
+  "commonTooltipTimeMachine": "Log Past Session",
+  "commonWeekdayFri": "Fri",
+  "commonWeekdayMon": "Mon",
+  "commonWeekdaySat": "Sat",
+  "commonWeekdaySun": "Sun",
+  "commonWeekdayThu": "Thu",
+  "commonWeekdayTue": "Tue",
+  "commonWeekdayWed": "Wed",
+
+  "navigationFocus": "Focus",
+  "navigationHabits": "Habits",
+  "navigationHome": "Home",
+  "navigationProfile": "Profile",
+  "navigationTasks": "Tasks",
+
+  "greetingAfternoon": "Good afternoon {user}!",
+  "@greetingAfternoon": {
     "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "focusEndsAt": "Ends at",
-
-  "focusSnackbarHabitLocked": "Complete the previous habit in the stack first!",
-
-  "focusDialogSessionStopTitle": "Stop Focus Session?",
-  "focusDialogSessionStopContent": "The timer is paused while you decide. Confirm to stop and save the session, or cancel to continue.",
-  "focusDialogSessionResetTitle": "Reset Focus Session?",
-  "focusDialogSessionResetContent": "The timer is paused while you decide. Confirm to reset the session, or cancel to continue.",
-
-  "focusModeLabelNew": "New Mode",
-  "focusModeLabelEdit": "Edit Mode",
-  "focusModeLabelEditing": "Editing Mode",
-  "focusModeLabelName": "Mode Name",
-  "focusModeLabelTimeline": "Timeline Phases",
-  "focusModeLabelTimelineDesc": "Tap a phase to edit or delete it",
-  "focusModeLabelTypeSystem": "System Mode",
-  "focusModeLabelTypeCustom": "Custom Mode",
-
-  "focusModeDialogDeleteTitle": "Delete Focus Mode?",
-  "focusModeDialogDeleteContent": "Are you sure you want to delete this custom mode?",
-
-  "focusModeSnackbarSaved": "Mode saved!",
-
-  "focusPhaseLabelDuration": "Duration (minutes)",
-  "focusPhaseLabelDurationSuffix": "min",
-
-  "focusTagsLabelAdd": "Add New Tag",
-  "focusTagsLabelEdit": "Edit Tag",
-  "focusTagsLabelEmpty": "No tags yet",
-  "focusTagsLabelName": "Tag Name",
-  "focusTagsLabelColor": "Choose a Color",
-  "focusTagsLabelAll": "All Tags",
-
-  "focusTagsDialogTitleDelete": "Delete Tag?",
-  "focusTagsDialogContentDelete": "Are you sure you want to delete \"{tagName}\"?",
-  "@focusTagsDialogContentDelete": {
-    "placeholders": {
-      "tagName": {
+      "user": {
         "type": "String"
       }
     }
   },
-
-  "focusTagsDialogTitleAdd": "Add New Tag",
-  "focusTagsDialogLabelName": "Tag Name",
-  "focusTagsDialogLabelHint": "Tag Name (e.g. Reading)",
-
-  "focusStatsEmpty": "Complete some focus sessions to see data!",
-  "focusStatsSectionClockTitle": "Daily Focus Rhythm",
-  "focusStatsSectionClockSubtitle": "Tap a day to inspect its sessions",
-  "focusStatsSectionClockSessions": "{count} sessions",
-  "@focusStatsSectionClockSessions": {
+  "greetingAfternoonMotivation": "Keep up the great work! You've got this",
+  "greetingDeepNight": "Still awake {user}?",
+  "@greetingDeepNight": {
     "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "focusStatsSectionDistractionsTitle": "Distractions",
-  "focusStatsSectionDistractionsSubtitle": "Selected day, newest distractions first",
-  "focusStatsSectionDistractionsEmpty": "No distractions logged for this day",
-  "focusStatsSectionVolumeTitle": "Weekly Focus Volume",
-  "focusStatsSectionVolumeSubtitle": "Total focus minutes per day",
-
-  "focusStatsSectionTargetBreakdownTitle": "Focus by Target Type",
-  "focusStatsSectionTargetBreakdownSubtitle": "Tagged sessions, task-linked sessions, and habit-linked sessions",
-
-  "focusStatsSectionSessionsTitle": "Focus Sessions",
-  "focusStatsSectionSessionsSubtitle": "Each session shows the exact target and focus mode",
-
-  "focusMinutes": "{count}m focus",
-  "@focusMinutes": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-
-  "distractionDistracted": "Distracted",
-  "distractionHydrated": "Hydrated / Drink",
-  "distractionStretched": "Stretched",
-  "distractionSnack": "Snack",
-  "distractionRestroom": "Restroom",
-  "distractionLogged": "Logged {distraction}",
-  "@distractionLogged": {
-    "placeholders": {
-      "distraction": {
+      "user": {
         "type": "String"
       }
     }
   },
-
-  "distractionSheetTitle": "Log Distraction",
-  "targetSheetTitle": "Select Focus Target",
-  "taskSheetEmpty": "No tasks available",
-  "habitsSheetEmpty": "No habits available",
-
-  "taskLabelCompleted": "Completed Task",
-
-  "habitLabelFreqDaily": "Daily Habit",
-  "habitLabelFreqWeekly": "Weekly Habit",
-
-  "habitScreenEmpty": "No habits yet! Tap + to build a routine",
-
-  "habitFreqDaily": "Daily",
-  "habitFreqWeekly": "Weekly on {days}",
-  "@habitFreqWeekly": {
+  "greetingDeepNightMotivation": "Take it easy and get some well-deserved rest",
+  "greetingEvening": "Good evening {user}!",
+  "@greetingEvening": {
     "placeholders": {
-      "days": {
+      "user": {
         "type": "String"
       }
     }
   },
-  "habitFreqFlexible": "{progress} / {target} this week",
-  "@habitFreqFlexible": {
+  "greetingEveningMotivation": "Take a deep breath and enjoy your evening",
+  "greetingMorning": "Good morning {user}!",
+  "@greetingMorning": {
     "placeholders": {
-      "progress": {
-        "type": "int"
-      },
-      "target": {
-        "type": "int"
-      }
-    }
-  },
-  "habitDetailTitleEdit": "Edit Habit",
-  "habitDetailTitleNew": "New Habit",
-  "habitDetailLabelName": "Habit Name",
-  "habitDetailLabelNameHint": "e.g., Read 10 pages, Workout...",
-  "habitDetailLabelNameRequest": "Please enter a name",
-
-  "habitDetailLabelStack": "Habit Stack (Optional)",
-  "habitDetailLabelStackHint": "e.g., Morning Routine",
-  "habitDetailLabelStackOrder": "Stack Order",
-
-  "habitDetailLabelNotes": "Notes (Optional)",
-  "habitDetailLabelNotesHint": "Why are you building this habit?",
-
-  "habitDetailLabelIcon": "Select an Icon",
-
-  "habitDetailLabelFrequency": "Frequency",
-  "habitDetailLabelFrequencyDaily": "Daily",
-  "habitDetailLabelFrequencyFlexible": "Flexible",
-  "habitDetailLabelFrequencyExact": "Specific",
-
-  "habitDetailLabelGoal": "Goal: {count, plural, =0{Daily} =1{1 day a week} other{{count} days a week}}",
-  "@habitDetailLabelGoal": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-
-  "habitDetailLabelReminder": "Reminder time (Optional)",
-  "habitDetailLabelReminderNoTime": "No specific time",
-
-  "habitDetailSnackbarSaveNoDay": "Please select at least one day",
-
-  "habitStatsLabelEmpty": "Create and complete habits to unlock insights!",
-  "habitStatsLabelTotal": "Total Logged",
-  "habitStatsLabelActive": "Active Habits",
-  "habitStatsLabelBestStreak": "Best Streak",
-  "habitStatsLabelBest": "Best: {streak}",
-  "@habitStatsLabelBest": {
-    "placeholders": {
-      "streak": {
-        "type": "int"
-      }
-    }
-  },
-  "habitStatsLabelCurrentStreak": "Current Streak",
-  "habitStatsLabelVelocity": "Weekly Velocity",
-  "habitStatsLabelCompletionsDaily": "Total habit completions per day",
-  "habitStatsLabelCompletionsTime": "When do you build habits?",
-  "habitStatsLabelCompletionsDistribution": "Completion distribution by time of day",
-
-  "taskReminderTitle": "Reminder: {task}",
-  "@taskReminderTitle": {
-    "placeholders": {
-      "task": {
+      "user": {
         "type": "String"
       }
     }
   },
-
-  "taskReminderBody": "{prefix} remember to do {task}!",
-  "@taskReminderBody": {
+  "greetingMorningMotivation": "Rise and shine! Let's make today productive.",
+  "greetingNight": "Good night {user}!",
+  "@greetingNight": {
     "placeholders": {
-      "prefix": {
-        "type": "String"
-      },
-      "task": {
+      "user": {
         "type": "String"
       }
     }
   },
-
-  "taskReminderBodyExact": "It is time to do {task}!",
-  "@taskReminderBodyExact": {
-    "placeholders": {
-      "task": {
-        "type": "String"
-      }
-    }
-  },
-  "taskReminderPrefixNow": "Now: ",
-  "nTaskReminderPrefixMinutes": "In {count, plural, =1{1 minute} other{{count} minutes}}",
-  "@nTaskReminderPrefixMinutes": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "nTaskReminderPrefixHours": "In {count, plural, =1{1 hour} other{{count} hours}}",
-  "@nTaskReminderPrefixHours": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "nTaskReminderPrefixDays": "In {count, plural, =1{Tomorrow} other{{count} days}}",
-  "@nTaskReminderPrefixDays": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-
-  "taskDetailsTitleEdit": "Edit Task",
-  "taskDetailsTitleNew": "Create New Task",
-  "taskDetailsTitleDetails": "Task Details",
-
-  "taskDetailsSectionInfo": "Task Info",
-  "taskDetailsSectionPriorityAndEffort": "Priority & Effort",
-  "taskDetailsSectionScheduling": "Scheduling",
-  "taskDetailsSectionLocation": "Location",
-  "taskDetailsSectionChecklist": "Checklist",
-
-  "taskDetailsLabelTitle": "Task Title",
-  "taskDetailsLabelDescription": "Description",
-  "taskDetailsLabelPriority": "Priority",
-  "taskDetailsLabelEffort": "Effort",
-  "taskDetailsLabelLocation": "Location",
-  "taskDetailsLabelSubtaskHint": "Add subtasks...",
-  "taskDetailsLabelCategory": "Category",
-  "taskDetailsLabelCategoryEmpty": "None",
-  "taskDetailsLabelCategorySelect": "Select Category",
-  "taskDetailsLabelCategoryAddNew": "Add New Category",
-  "taskDetailsLabelCategoryNewName": "New Category Name",
-  "taskDetailsLabelReminderSet": "Set Reminder",
-  "taskDetailsLabelReminderTooEarly": "Custom reminder must be before the Due Date",
-  "taskDetailsLabelDueDateNone": "No Due Date Set",
-  "taskDetailsLabelDueDate": "Due: {date} at {time}",
-  "@taskDetailsLabelDueDate": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-
-  "taskDetailsSnackbarReminderNoDue": "Please set a Due Date first",
-  "taskDetailsSnackbarTitleRequired": "Title is required!",
-
-  "taskDetailsReminderOptionOnce": "On time",
-  "taskDetailsReminderOptionHalfHour": "30 minutes before",
-  "taskDetailsReminderOptionHour": "1 hour before",
-  "taskDetailsReminderOptionDay": "1 day before",
-  "taskDetailsReminderOptionCustom": "Custom",
-
-  "taskDetailsLabelSaveEdit": "Save Changes",
-
-  "taskListTitle": "My Tasks",
-  "taskListEmpty": "No tasks yet! Tap + to add one",
-  "taskListSearchHint": "Search title or description...",
-  "taskListTooltipSort": "Sort by",
-
-  "taskListSortDueDate": "Due Date",
-  "taskListSortPriority": "Priority",
-  "taskListSortSize": "Size",
-  "taskListSortAlphabetical": "Alphabetical",
-  "taskListSortCategory": "Category",
-  "taskListSortAscending": "Ascending",
-  "taskListSortDescending": "Descending",
-
-  "taskListFilterAll": "All",
-  "taskListFilterNoMatch": "No tasks match your filters",
-
-  "taskListSectionOverdue": "Overdue",
-  "taskListSectionToday": "Due Today",
-  "taskListSectionUpcoming": "To Do",
-  "taskListSectionDone": "Done",
-
-  "taskStatsEmpty": "No data to display yet",
-  "taskStatsVelocity": "Task Velocity",
-  "taskStatsCreated": "Created",
-  "taskStatsCompleted": "Completed",
-  "taskStatsCompletedDaily": "Total tasks completed per day",
-  "taskStatsProductivity": "Productivity",
-  "taskStatsCategoryUncategorized": "Uncategorized",
-  "taskStatsCategoryUnused": "No categories used",
-  "taskStatsDistribution": "All-Time Distribution",
-  "taskStatsDistributionSubtitle": "Task categories across your whole workspace",
-
-  "calendarTooltipToday": "Go to Today",
-  "calendarLabelSelect": "Select a day to view details",
-  "calendarLabelFocusOngoing": "Ongoing",
-  "calendarSectionHabitsEmpty": "No habits scheduled or logged",
-  "calendarSectionHabits": "Habits ({count})",
-  "@calendarSectionHabits": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "calendarSectionTasksEmpty": "No tasks scheduled or logged",
-  "calendarSectionTasks": "Tasks ({count})",
-  "@calendarSectionTasks": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "calendarSectionFocusEmpty": "No focus sessions logged",
-  "calendarSectionFocus": "Focus Sessions ({count})",
-  "@calendarSectionFocus": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-
-  "calendarHeaderMon": "M",
-  "calendarHeaderTue": "T",
-  "calendarHeaderWed": "W",
-  "calendarHeaderThu": "T",
-  "calendarHeaderFri": "F",
-  "calendarHeaderSat": "S",
-  "calendarHeaderSun": "S",
-  "calendarHeaderWeekly": "Weekly",
+  "greetingNightMotivation": "It's getting late! Consider wrapping up soon.",
 
   "homeDailyGoal": "Daily Goal",
   "homeDailyGoalDone": "You're all caught up for today!",
-  "homeSectionTasksDue": "Tasks Due ({count})",
-  "@homeSectionTasksDue": {
+  "homeSectionHabitsDue": "Habits Today ({count})",
+  "@homeSectionHabitsDue": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "homeSectionHabitsDue": "Habits Today ({count})",
-  "@homeSectionHabitsDue": {
+  "homeSectionTasksDue": "Tasks Due ({count})",
+  "@homeSectionTasksDue": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -415,66 +118,351 @@
     }
   },
 
-  "statsLabelSummary": "Today's Summary",
-  "statsLabelTasksDone": "Tasks Completed",
-  "statsLabelFocus": "Focus Time",
-  "statsLabelFocusMins": "Focus Minutes",
-  "statsLabelFocusGoal": "Daily Focus Goal",
-  "statsLabelProductivity": "Productivity Synergy",
-  "statsLabelSynergy": "Focus Time vs. Task Completion (Last 7 Days)",
-
-  "statsTabOverview": "Overview",
-  "statsTabTasks": "Tasks",
-  "statsTabFocus": "Focus",
-  "statsTabHabits": "Habits",
-
-  "settingsSectionAppearance": "Appearance",
-  "settingsSectionLocaleFormat": "Localization & Formatting",
-  "settingsSectionFocusProductivity": "Focus & Productivity",
-  "settingsSectionSupport": "Support & Feedback",
-  "settingsSectionApi": "API & Services",
-  "settingsSectionDataBackup": "Data & Backup",
-  "settingsSectionNotifications": "Notifications",
-
-  "settingsLabelTheme": "App Theme",
-  "settingsLabelThemeSystem": "System Default",
-  "settingsLabelThemeLight": "Light",
-  "settingsLabelThemeDark": "Dark",
-  "settingsLabelLanguage": "Language",
-  "settingsLabelLanguageSystem": "System Default",
-  "settingsLabelTimeFormat": "Use 24-hour Time",
-  "settingsLabelDateFormat": "Date Format",
-  "settingsLabelDateFormatSystem": "System Default",
-  "settingsLabelDateFormatSystemDMY": "Day/Month/Year",
-  "settingsLabelDateFormatSystemMDY": "Month/Day/Year",
-  "settingsLabelDateFormatSystemYMD": "Year-Month-Day",
-  "settingsLabelDateFormatSystemDotDMY": "Day.Month.Year",
-  "settingsLabelFocusGoal": "Daily Focus Goal",
-  "settingsLabelFocusAutocomplete": "Auto-complete linked task or habit",
-  "settingsLabelFocusAutocompleteSubtitle": "Marks the selected task or habit as complete when a focus timer finishes",
-  "settingsLabelFocusStopwatch": "Max Stopwatch Limit",
-  "settingsLabelFocusStopwatchSubtitle": "Prevents accidentally leaving timer on",
-  "settingsLabelFocusNodeTime": "Max Phase Node Time",
-  "settingsLabelFocusNodeTimeSubtitle": "Maximum length for a single focus block",
-  "settingsLabelUpcomingTask": "Upcoming Task Window",
-  "settingsLabelUpcomingTaskSubtitle": "{days} days ahead",
-  "@settingsLabelUpcomingTaskSubtitle": {
+  "focusDialogSessionResetContent": "The timer is paused while you decide. Confirm to reset the session, or cancel to continue.",
+  "focusDialogSessionResetTitle": "Reset Focus Session?",
+  "focusDialogSessionStopContent": "The timer is paused while you decide. Confirm to stop and save the session, or cancel to continue.",
+  "focusDialogSessionStopTitle": "Stop Focus Session?",
+  "focusEndsAt": "Ends at",
+  "focusLabelDefault": "Focus",
+  "focusLabelRest": "Rest",
+  "focusLabelSetTime": "Set Time",
+  "focusLabelStopwatch": "Stopwatch",
+  "focusLimitMax": "Max {minutes} mins",
+  "@focusLimitMax": {
     "placeholders": {
-      "days": {
+      "minutes": {
         "type": "int"
       }
     }
   },
-  "settingsSectionOrganization": "Organization",
-  "settingsLabelTags": "Focus Tags",
-  "settingsLabelTagsSubtitle": "{count} tags",
-  "@settingsLabelTagsSubtitle": {
+  "focusMinutes": "{count}m focus",
+  "@focusMinutes": {
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
+  "focusModeDialogDeleteContent": "Are you sure you want to delete this custom mode?",
+  "focusModeDialogDeleteTitle": "Delete Focus Mode?",
+  "focusModeFlex": "Flex",
+  "focusModeFlexible": "Flexible",
+  "focusModeLabelEdit": "Edit Mode",
+  "focusModeLabelEditing": "Editing Mode",
+  "focusModeLabelNew": "New Mode",
+  "focusModeLabelTimeline": "Timeline Phases",
+  "focusModeLabelTimelineDesc": "Tap a phase to edit or delete it",
+  "focusModeLabelTypeCustom": "Custom Mode",
+  "focusModeLabelTypeSystem": "System Mode",
+  "focusModePomodoro": "Pomodoro Classic",
+  "focusModeSelect": "Select Mode",
+  "focusModeSnackbarSaved": "Mode saved!",
+  "focusModeStopwatch": "Stopwatch",
+  "focusModesTitle": "Manage Modes",
+  "focusPhaseLabelDuration": "Duration (minutes)",
+  "focusPhaseLabelDurationSuffix": "min",
+  "focusPhasesTitleAdd": "Add Phase",
+  "focusPhasesTitleEdit": "Edit Phase",
+  "focusSnackbarHabitLocked": "Complete the previous habit in the stack first!",
+  "focusStateActive": "Focus session active",
+  "focusStatePaused": "Paused",
+  "focusStatsEmpty": "Complete some focus sessions to see data!",
+  "focusStatsSectionClockSessions": "{count} sessions",
+  "@focusStatsSectionClockSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "focusStatsSectionClockSubtitle": "Tap a day to inspect its sessions",
+  "focusStatsSectionClockTitle": "Daily Focus Rhythm",
+  "focusStatsSectionDistractionsEmpty": "No distractions logged for this day",
+  "focusStatsSectionDistractionsSubtitle": "Selected day, newest distractions first",
+  "focusStatsSectionDistractionsTitle": "Distractions",
+  "focusStatsSectionSessionsSubtitle": "Each session shows the exact target and focus mode",
+  "focusStatsSectionSessionsTitle": "Focus Sessions",
+  "focusStatsSectionTargetBreakdownSubtitle": "Tagged sessions, task-linked sessions, and habit-linked sessions",
+  "focusStatsSectionTargetBreakdownTitle": "Focus by Target Type",
+  "focusStatsSectionVolumeSubtitle": "Total focus minutes per day",
+  "focusStatsSectionVolumeTitle": "Weekly Focus Volume",
+  "focusTagsDialogContentDelete": "Are you sure you want to delete \"{tagName}\"?",
+  "@focusTagsDialogContentDelete": {
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "focusTagsDialogLabelHint": "Tag Name (e.g. Reading)",
+  "focusTagsDialogLabelName": "Tag Name",
+  "focusTagsDialogTitleAdd": "Add New Tag",
+  "focusTagsDialogTitleDelete": "Delete Tag?",
+  "focusTagsLabelAdd": "Add New Tag",
+  "focusTagsLabelAll": "All Tags",
+  "focusTagsLabelColor": "Choose a Color",
+  "focusTagsLabelEdit": "Edit Tag",
+  "focusTagsLabelEmpty": "No tags yet",
+  "focusTagsLabelName": "Tag Name",
+  "focusTagsTitle": "Focus Tags",
+  "focusTargetEmpty": "No Target",
+  "focusTargetLabel": "Target",
+  "focusTargetUntagged": "Untagged",
+  "focusTitle": "Focus",
+
+  "habitDeleteContent": "Are you sure you want to delete this habit?",
+  "habitDeleteTitle": "Delete Habit",
+  "habitDetailLabelFrequency": "Frequency",
+  "habitDetailLabelFrequencyDaily": "Daily",
+  "habitDetailLabelFrequencyExact": "Specific",
+  "habitDetailLabelFrequencyFlexible": "Flexible",
+  "habitDetailLabelGoal": "Goal: {count, plural, =0{Daily} =1{1 day a week} other{{count} days a week}}",
+  "@habitDetailLabelGoal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitDetailLabelIcon": "Select an Icon",
+  "habitDetailLabelName": "Habit Name",
+  "habitDetailLabelNameHint": "e.g., Read 10 pages, Workout...",
+  "habitDetailLabelNameRequest": "Please enter a name",
+  "habitDetailLabelNotes": "Notes (Optional)",
+  "habitDetailLabelNotesHint": "Why are you building this habit?",
+  "habitDetailLabelReminder": "Reminder time (Optional)",
+  "habitDetailLabelReminderNoTime": "No specific time",
+  "habitDetailLabelStack": "Habit Stack (Optional)",
+  "habitDetailLabelStackHint": "e.g., Morning Routine",
+  "habitDetailLabelStackOrder": "Stack Order",
+  "habitDetailSnackbarSaveNoDay": "Please select at least one day",
+  "habitDetailTitleEdit": "Edit Habit",
+  "habitDetailTitleNew": "New Habit",
+  "habitFreqDaily": "Daily",
+  "habitFreqFlexible": "{progress} / {target} this week",
+  "@habitFreqFlexible": {
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "habitFreqWeekly": "Weekly on {days}",
+  "@habitFreqWeekly": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "habitHistoryCompletedAt": "Completed at {time}",
+  "@habitHistoryCompletedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "habitHistoryEmpty": "No history yet.",
+  "habitHistoryRemoveCompletion": "Remove completion for {date}?",
+  "@habitHistoryRemoveCompletion": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "habitHistoryRemoveTitle": "Remove completion?",
+  "habitHistoryRemoveTooltip": "Remove this record",
+  "habitHistoryStatLast30": "Last 30d",
+  "habitHistoryStatLast90": "Last 90d",
+  "habitHistoryStatTotal": "Total",
+  "habitHistoryTimePrompt": "At what time did you complete this habit?",
+  "habitHistoryTitle": "Habit History",
+  "habitLabelFreqDaily": "Daily Habit",
+  "habitLabelFreqWeekly": "Weekly Habit",
+  "habitMarkPastCompletionTooltip": "Mark past completion",
+  "habitScreenEmpty": "No habits yet! Tap + to build a routine",
+  "habitStatsLabelActive": "Active Habits",
+  "habitStatsLabelBest": "Best: {streak}",
+  "@habitStatsLabelBest": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      }
+    }
+  },
+  "habitStatsLabelBestStreak": "Best Streak",
+  "habitStatsLabelCompletionsDaily": "Total habit completions per day",
+  "habitStatsLabelCompletionsDistribution": "Completion distribution by time of day",
+  "habitStatsLabelCompletionsTime": "When do you build habits?",
+  "habitStatsLabelCurrentStreak": "Current Streak",
+  "habitStatsLabelEmpty": "Create and complete habits to unlock insights!",
+  "habitStatsLabelTotal": "Total Logged",
+  "habitStatsLabelVelocity": "Weekly Velocity",
+  "habitsListTitle": "My Habits",
+  "habitsSheetEmpty": "No habits available",
+
+  "taskDeleteContent": "Are you sure you want to delete this task?",
+  "taskDeleteTitle": "Delete Task",
+  "taskDetailsLabelCategory": "Category",
+  "taskDetailsLabelCategoryAddNew": "Add New Category",
+  "taskDetailsLabelCategoryEmpty": "None",
+  "taskDetailsLabelCategoryNewName": "New Category Name",
+  "taskDetailsLabelCategorySelect": "Select Category",
+  "taskDetailsLabelDescription": "Description",
+  "taskDetailsLabelDueDate": "Due: {date} at {time}",
+  "@taskDetailsLabelDueDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "taskDetailsLabelDueDateNone": "No Due Date Set",
+  "taskDetailsLabelEffort": "Effort",
+  "taskDetailsLabelLocation": "Location",
+  "taskDetailsLabelPriority": "Priority",
+  "taskDetailsLabelReminderSet": "Set Reminder",
+  "taskDetailsLabelReminderTooEarly": "Custom reminder must be before the Due Date",
+  "taskDetailsLabelSaveEdit": "Save Changes",
+  "taskDetailsLabelSubtaskHint": "Add subtasks...",
+  "taskDetailsLabelTitle": "Task Title",
+  "taskDetailsReminderOptionCustom": "Custom",
+  "taskDetailsReminderOptionDay": "1 day before",
+  "taskDetailsReminderOptionHalfHour": "30 minutes before",
+  "taskDetailsReminderOptionHour": "1 hour before",
+  "taskDetailsReminderOptionOnce": "On time",
+  "taskDetailsSectionChecklist": "Checklist",
+  "taskDetailsSectionInfo": "Task Info",
+  "taskDetailsSectionLocation": "Location",
+  "taskDetailsSectionPriorityAndEffort": "Priority & Effort",
+  "taskDetailsSectionScheduling": "Scheduling",
+  "taskDetailsSnackbarReminderNoDue": "Please set a Due Date first",
+  "taskDetailsSnackbarTitleRequired": "Title is required!",
+  "taskDetailsTitleDetails": "Task Details",
+  "taskDetailsTitleEdit": "Edit Task",
+  "taskDetailsTitleNew": "Create New Task",
+  "taskLabelCompleted": "Completed Task",
+  "taskListEmpty": "No tasks yet! Tap + to add one",
+  "taskListFilterAll": "All",
+  "taskListFilterNoMatch": "No tasks match your filters",
+  "taskListSearchHint": "Search title or description...",
+  "taskListSectionDone": "Done",
+  "taskListSectionOverdue": "Overdue",
+  "taskListSectionToday": "Due Today",
+  "taskListSectionUpcoming": "To Do",
+  "taskListSortAlphabetical": "Alphabetical",
+  "taskListSortAscending": "Ascending",
+  "taskListSortCategory": "Category",
+  "taskListSortDescending": "Descending",
+  "taskListSortDueDate": "Due Date",
+  "taskListSortPriority": "Priority",
+  "taskListSortSize": "Size",
+  "taskListTitle": "My Tasks",
+  "taskListTooltipSort": "Sort by",
+  "taskReminderBody": "{prefix} remember to do {task}!",
+  "@taskReminderBody": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      },
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "taskReminderBodyExact": "It is time to do {task}!",
+  "@taskReminderBodyExact": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "taskReminderPrefixNow": "Now: ",
+  "taskReminderTitle": "Reminder: {task}",
+  "@taskReminderTitle": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "taskSheetEmpty": "No tasks available",
+  "taskStatsCategoryUncategorized": "Uncategorized",
+  "taskStatsCategoryUnused": "No categories used",
+  "taskStatsCompleted": "Completed",
+  "taskStatsCompletedDaily": "Total tasks completed per day",
+  "taskStatsCreated": "Created",
+  "taskStatsDistribution": "All-Time Distribution",
+  "taskStatsDistributionSubtitle": "Task categories across your whole workspace",
+  "taskStatsEmpty": "No data to display yet",
+  "taskStatsProductivity": "Productivity",
+  "taskStatsVelocity": "Task Velocity",
+
+  "calendarHeaderFri": "F",
+  "calendarHeaderMon": "M",
+  "calendarHeaderSat": "S",
+  "calendarHeaderSun": "S",
+  "calendarHeaderThu": "T",
+  "calendarHeaderTue": "T",
+  "calendarHeaderWed": "W",
+  "calendarHeaderWeekly": "Weekly",
+  "calendarLabelFocusOngoing": "Ongoing",
+  "calendarLabelSelect": "Select a day to view details",
+  "calendarSectionFocus": "Focus Sessions ({count})",
+  "@calendarSectionFocus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarSectionFocusEmpty": "No focus sessions logged",
+  "calendarSectionHabits": "Habits ({count})",
+  "@calendarSectionHabits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarSectionHabitsEmpty": "No habits scheduled or logged",
+  "calendarSectionTasks": "Tasks ({count})",
+  "@calendarSectionTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarSectionTasksEmpty": "No tasks scheduled or logged",
+  "calendarTitle": "Calendar",
+  "calendarTooltipToday": "Go to Today",
+
+  "statsLabelFocus": "Focus Time",
+  "statsLabelFocusGoal": "Daily Focus Goal",
+  "statsLabelFocusMins": "Focus Minutes",
+  "statsLabelProductivity": "Productivity Synergy",
+  "statsLabelSummary": "Today's Summary",
+  "statsLabelSynergy": "Focus Time vs. Task Completion (Last 7 Days)",
+  "statsLabelTasksDone": "Tasks Completed",
+  "statsTabFocus": "Focus",
+  "statsTabHabits": "Habits",
+  "statsTabOverview": "Overview",
+  "statsTabTasks": "Tasks",
+  "statsTitle": "Insights & Statistics",
+
+  "settingsDialogUnitDays": "days",
+  "settingsDialogUnitMinutes": "minutes",
+  "settingsLabelBuiltBy": "Built by Benji377",
   "settingsLabelCategories": "Task Categories",
   "settingsLabelCategoriesSubtitle": "{count} categories",
   "@settingsLabelCategoriesSubtitle": {
@@ -484,18 +472,60 @@
       }
     }
   },
-  "settingsLabelLocationApi": "Location Search API",
+  "settingsLabelCommunity": "Community & Help",
+  "settingsLabelCommunitySubtitle": "Ask questions and share tips on GitHub",
   "settingsLabelDailyMotivation": "Daily Motivation Time",
+  "settingsLabelDateFormat": "Date Format",
+  "settingsLabelDateFormatSystem": "System Default",
+  "settingsLabelDateFormatSystemDMY": "Day/Month/Year",
+  "settingsLabelDateFormatSystemDotDMY": "Day.Month.Year",
+  "settingsLabelDateFormatSystemMDY": "Month/Day/Year",
+  "settingsLabelDateFormatSystemYMD": "Year-Month-Day",
+  "settingsLabelDonate": "Donate",
+  "settingsLabelDonateSubtitle": "GitHub Sponsors",
   "settingsLabelEodCheckup": "End of Day Checkup Time",
   "settingsLabelExportData": "Export JSON Data",
   "settingsLabelExportDataSubtitle": "Save a snapshot of your data",
-  "settingsLabelImportData": "Import JSON Data",
-  "settingsLabelImportDataSubtitle": "Restore data from a JSON export file",
-  "settingsLabelCommunity": "Community & Help",
-  "settingsLabelCommunitySubtitle": "Ask questions and share tips on GitHub",
   "settingsLabelFeedback": "Send Feedback",
   "settingsLabelFeedbackSubtitle": "Report bugs or request new features",
-
+  "settingsLabelFocusAutocomplete": "Auto-complete linked task or habit",
+  "settingsLabelFocusAutocompleteSubtitle": "Marks the selected task or habit as complete when a focus timer finishes",
+  "settingsLabelFocusGoal": "Daily Focus Goal",
+  "settingsLabelFocusNodeTime": "Max Phase Node Time",
+  "settingsLabelFocusNodeTimeSubtitle": "Maximum length for a single focus block",
+  "settingsLabelFocusStopwatch": "Max Stopwatch Limit",
+  "settingsLabelFocusStopwatchSubtitle": "Prevents accidentally leaving timer on",
+  "settingsLabelImportData": "Import JSON Data",
+  "settingsLabelImportDataSubtitle": "Restore data from a JSON export file",
+  "settingsLabelLanguage": "Language",
+  "settingsLabelLanguageSystem": "System Default",
+  "settingsLabelLocationApi": "Location Search API",
+  "settingsLabelMaintainer": "Maintainer",
+  "settingsLabelSourceCode": "Source Code",
+  "settingsLabelSourceCodeSubtitle": "GitHub Repository",
+  "settingsLabelTags": "Focus Tags",
+  "settingsLabelTagsSubtitle": "{count} tags",
+  "@settingsLabelTagsSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsLabelTheme": "App Theme",
+  "settingsLabelThemeDark": "Dark",
+  "settingsLabelThemeLight": "Light",
+  "settingsLabelThemeSystem": "System Default",
+  "settingsLabelTimeFormat": "Use 24-hour Time",
+  "settingsLabelUpcomingTask": "Upcoming Task Window",
+  "settingsLabelUpcomingTaskSubtitle": "{days} days ahead",
+  "@settingsLabelUpcomingTaskSubtitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "settingsLabelVersion": "Version {version}",
   "@settingsLabelVersion": {
     "placeholders": {
@@ -504,38 +534,36 @@
       }
     }
   },
-  "settingsLabelBuiltBy": "Built by Benji377",
-  "settingsLabelMaintainer": "Maintainer",
-  "settingsLabelDonate": "Donate",
-  "settingsLabelDonateSubtitle": "GitHub Sponsors",
-  "settingsLabelSourceCode": "Source Code",
-  "settingsLabelSourceCodeSubtitle": "GitHub Repository",
+  "settingsSectionApi": "API & Services",
+  "settingsSectionAppearance": "Appearance",
+  "settingsSectionDataBackup": "Data & Backup",
+  "settingsSectionFocusProductivity": "Focus & Productivity",
+  "settingsSectionLocaleFormat": "Localization & Formatting",
+  "settingsSectionNotifications": "Notifications",
+  "settingsSectionOrganization": "Organization",
+  "settingsSectionSupport": "Support & Feedback",
+  "settingsTitle": "Settings",
 
-  "settingsDialogUnitMinutes": "minutes",
-  "settingsDialogUnitDays": "days",
-
+  "userEditNameHint": "Enter your name",
+  "userEditNameTitle": "Edit Name",
+  "userErrorGenerateImage": "Failed to generate wrap-up image.",
   "userProfileTitle": "Profile",
-  "userTooltipShareWrapUp": "Share Weekly Wrap-up",
-  "userTooltipStatistics": "Statistics",
-  
-  "userStatsAllTimeTitle": "All-Time Stats",
-  "userStatsAllTimeSubtitle": "Lifetime progress at a glance",
-  "userStatTasksDone": "Tasks Done",
-  "userStatHabitsMet": "Habits Met",
-  "userStatFocusMins": "Focus Mins",
-  "userStatSessions": "Sessions",
-  "userStatBestStreak": "Best Streak",
-  
   "userShareSubject": "My Timety Wrap-Up",
   "userShareText": "Master your time with Timety!",
-  "userErrorGenerateImage": "Failed to generate wrap-up image.",
-  
-  "userEditNameTitle": "Edit Name",
-  "userEditNameHint": "Enter your name",
+  "userStatBestStreak": "Best Streak",
+  "userStatFocusMins": "Focus Mins",
+  "userStatHabitsMet": "Habits Met",
+  "userStatSessions": "Sessions",
+  "userStatTasksDone": "Tasks Done",
+  "userStatsAllTimeSubtitle": "Lifetime progress at a glance",
+  "userStatsAllTimeTitle": "All-Time Stats",
+  "userTooltipShareWrapUp": "Share Weekly Wrap-up",
+  "userTooltipStatistics": "Statistics",
 
-  "backupExportTitle": "Save Export",
-  "backupExportSubject": "Timety Export",
-  "backupExportSuccess": "Export saved to",
+  "backupActionSaveDevice": "Save to Device",
+  "backupActionSaveDeviceSubtitle": "Choose a local folder",
+  "backupActionShareCloud": "Share / Upload to Cloud",
+  "backupActionShareCloudSubtitle": "Send to Drive, Dropbox, WhatsApp…",
   "backupExportFailure": "Export failed: {error}",
   "@backupExportFailure": {
     "placeholders": {
@@ -544,17 +572,15 @@
       }
     }
   },
-
-  "backupImportConfirmTitle": "Import JSON Data?",
-  "backupImportConfirmBody": "This will OVERWRITE all current user data and settings. This cannot be undone. Are you sure?",
-  "backupImportFailure": "Import failed: Check file format",
-  
-  "backupActionSaveDevice": "Save to Device",
-  "backupActionSaveDeviceSubtitle": "Choose a local folder",
-  "backupActionShareCloud": "Share / Upload to Cloud",
-  "backupActionShareCloudSubtitle": "Send to Drive, Dropbox, WhatsApp…",
-  
+  "backupExportSubject": "Timety Export",
+  "backupExportSuccess": "Export saved to",
+  "backupExportTitle": "Save Export",
   "backupFilePickerTitle": "Choose where to save your file",
+  "backupImportConfirmBody": "This will OVERWRITE all current user data and settings. This cannot be undone. Are you sure?",
+  "backupImportConfirmTitle": "Import JSON Data?",
+  "backupImportFailure": "Import failed: Check file format",
+  "backupRestoreSuccessBody": "Your data has been restored. Please completely close and restart Timety to load the imported data.",
+  "backupRestoreSuccessTitle": "Restore Successful!",
   "backupSaveFailure": "Save failed: {error}",
   "@backupSaveFailure": {
     "placeholders": {
@@ -572,11 +598,19 @@
     }
   },
 
-  "backupRestoreSuccessTitle": "Restore Successful!",
-  "backupRestoreSuccessBody": "Your data has been restored. Please completely close and restart Timety to load the imported data.",
-  "commonButtonGotIt": "Got it",
-
-  "notificationHabitTitle": "Habit Reminder",
+  "notificationChannelEveningDesc": "End of day reminders to log habits",
+  "notificationChannelEveningName": "Evening Checkup",
+  "notificationChannelFocusDesc": "Persistent notification for active focus sessions",
+  "notificationChannelFocusName": "Active Focus Timer",
+  "notificationChannelHabitsDesc": "Specific time reminders for your habits",
+  "notificationChannelHabitsName": "Habit Reminders",
+  "notificationChannelMotivationDesc": "Your daily morning boost",
+  "notificationChannelMotivationName": "Daily Motivation",
+  "notificationChannelTasksDesc": "Notifications for your scheduled tasks",
+  "notificationChannelTasksName": "Task Reminders",
+  "notificationEveningBody": "Did you complete all your habits today? Tap to log them!",
+  "notificationEveningTitle": "Evening Check-in",
+  "notificationGoodMorning": "Good Morning!",
   "notificationHabitBody": "Time to: {habit}!",
   "@notificationHabitBody": {
     "placeholders": {
@@ -585,26 +619,6 @@
       }
     }
   },
-  "notificationChannelTasksName": "Task Reminders",
-  "notificationChannelTasksDesc": "Notifications for your scheduled tasks",
-  
-  "notificationChannelHabitsName": "Habit Reminders",
-  "notificationChannelHabitsDesc": "Specific time reminders for your habits",
-  
-  "notificationChannelMotivationName": "Daily Motivation",
-  "notificationChannelMotivationDesc": "Your daily morning boost",
-  
-  "notificationChannelEveningName": "Evening Checkup",
-  "notificationChannelEveningDesc": "End of day reminders to log habits",
-  
-  "notificationChannelFocusName": "Active Focus Timer",
-  "notificationChannelFocusDesc": "Persistent notification for active focus sessions",
-
-  "notificationQuote1": "Conquer your day!",
-  "notificationQuote2": "Small steps lead to big results. Keep going!",
-  "notificationQuote3": "What's on the agenda today? Let's make it happen.",
-  "notificationGoodMorning": "Good Morning!",
-  
   "notificationHabitListSuffix": " and more",
   "notificationHabitReminder": "\nDon't forget to do {habitList} today!",
   "@notificationHabitReminder": {
@@ -614,158 +628,10 @@
       }
     }
   },
-
-  "notificationEveningTitle": "Evening Check-in",
-  "notificationEveningBody": "Did you complete all your habits today? Tap to log them!",
-
-  "navigationHome": "Home",
-  "navigationFocus": "Focus",
-  "navigationTasks": "Tasks",
-  "navigationHabits": "Habits",
-  "navigationProfile": "Profile",
-
-  "greetingMorning": "Good morning {user}!",
-  "@greetingMorning": {
-    "placeholders": {
-      "user": {
-        "type": "String"
-      }
-    }
-  },
-  "greetingAfternoon": "Good afternoon {user}!",
-  "@greetingAfternoon": {
-    "placeholders": {
-      "user": {
-        "type": "String"
-      }
-    }
-  },
-  "greetingEvening": "Good evening {user}!",
-  "@greetingEvening": {
-    "placeholders": {
-      "user": {
-        "type": "String"
-      }
-    }
-  },
-  "greetingDeepNight": "Still awake {user}?",
-  "@greetingDeepNight": {
-    "placeholders": {
-      "user": {
-        "type": "String"
-      }
-    }
-  },
-  "greetingNight": "Good night {user}!",
-  "@greetingNight": {
-    "placeholders": {
-      "user": {
-        "type": "String"
-      }
-    }
-  },
-
-  "greetingMorningMotivation": "Rise and shine! Let's make today productive.",
-  "greetingAfternoonMotivation": "Keep up the great work! You've got this",
-  "greetingEveningMotivation": "Take a deep breath and enjoy your evening",
-  "greetingDeepNightMotivation": "Take it easy and get some well-deserved rest",
-  "greetingNightMotivation": "It's getting late! Consider wrapping up soon.",
-
-  "wrapUpHeaderEyebrow": "TIMETY WRAP-UP",
-  
-  "wrapUpHeaderTitle": "{name}'s Stats",
-  "@wrapUpHeaderTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  
-  "wrapUpHeaderLevel": "Level {level} | {title}",
-  "@wrapUpHeaderLevel": {
-    "placeholders": {
-      "level": {
-        "type": "int"
-      },
-      "title": {
-        "type": "String"
-      }
-    }
-  },
-  
-  "wrapUpStatStreakValue": "{streak} Day",
-  "@wrapUpStatStreakValue": {
-    "placeholders": {
-      "streak": {
-        "type": "int"
-      }
-    }
-  },
-  
-  "wrapUpStatStreakLabel": "Active Streak",
-  "wrapUpStatTasksLabel": "Tasks Completed",
-  "wrapUpStatFocusLabel": "Minutes Focused",
-  "wrapUpStatHabitsLabel": "Habits Built",
-  
-  "wrapUpFooter": "Master your time with Timety",
-
-  "nTasksCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
-  "@nTasksCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "format": "compact"
-      }
-    }
-  },
-  "nMinutesCount": "{count, plural, =0{No minutes} =1{1 minute} other{{count} minutes}}",
-  "@nMinutesCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-
-  "globalLabelTags": "Tags",
-  "globalLabelTasks": "Tasks",
-  "globalLabelTask": "Task",
-  "globalLabelHabits": "Habits",
-
-  "commonLabelDelete": "Delete",
-  "commonLabelCancel": "Cancel",
-  "commonLabelConfirm": "Confirm",
-  "commonLabelSave": "Save",
-  "commonLabelAdd": "Add",
-
-  "commonTimeDueToday": "Due Today",
-  "commonTimeUpcoming": "Upcoming",
-  "commonTimeOverdue": "Overdue",
-  "commonTimeDone": "Done",
-
-  "commonWeekdayMon": "Mon",
-  "commonWeekdayTue": "Tue",
-  "commonWeekdayWed": "Wed",
-  "commonWeekdayThu": "Thu",
-  "commonWeekdayFri": "Fri",
-  "commonWeekdaySat": "Sat",
-  "commonWeekdaySun": "Sun",
-
-  "commonDaytimeMorning": "Morning",
-  "commonDaytimeMorningRange": "5 AM - 12 PM",
-  "commonDaytimeAfternoon": "Afternoon",
-  "commonDaytimeAfternoonRange": "12 PM - 5 PM",
-  "commonDaytimeEvening": "Evening",
-  "commonDaytimeEveningRange": "5 PM - 9 PM",
-  "commonDaytimeNight": "Night",
-  "commonDaytimeNightRange": "9 PM - 5 AM",
-
-  "commonTooltipStats": "Statistics",
-  "commonTooltipCalendar": "Calendar View",
-  "commonTooltipTimeMachine": "Log Past Session",
-  "commonTooltipDistractions": "Distractions",
-
+  "notificationHabitTitle": "Habit Reminder",
+  "notificationQuote1": "Conquer your day!",
+  "notificationQuote2": "Small steps lead to big results. Keep going!",
+  "notificationQuote3": "What's on the agenda today? Let's make it happen.",
   "notificationTimeRemaining": "{mins}:{secs} remaining",
   "@notificationTimeRemaining": {
     "placeholders": {
@@ -777,28 +643,41 @@
       }
     }
   },
-  "widgetHabitsToday": "Habits Today",
-  "widgetTasksDue": "Tasks Due ({count})",
-  "@widgetTasksDue": {
+
+  "wrapUpFooter": "Master your time with Timety",
+  "wrapUpHeaderEyebrow": "TIMETY WRAP-UP",
+  "wrapUpHeaderLevel": "Level {level} | {title}",
+  "@wrapUpHeaderLevel": {
     "placeholders": {
-      "count": {
+      "level": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "wrapUpHeaderTitle": "{name}'s Stats",
+  "@wrapUpHeaderTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wrapUpStatFocusLabel": "Minutes Focused",
+  "wrapUpStatHabitsLabel": "Habits Built",
+  "wrapUpStatStreakLabel": "Active Streak",
+  "wrapUpStatStreakValue": "{streak} Day",
+  "@wrapUpStatStreakValue": {
+    "placeholders": {
+      "streak": {
         "type": "int"
       }
     }
   },
-  "categoryEditTitle": "Edit Category",
-  "categoryNameLabel": "Category Name",
-  "categoryTitle": "Categories",
-  "categoryEmpty": "No categories yet. Create one by adding a task with a category.",
-  "categoryTaskCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
-  "@categoryTaskCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "categoryDeleteTitle": "Delete Category?",
+  "wrapUpStatTasksLabel": "Tasks Completed",
+
   "categoryDeleteContent": "Are you sure you want to delete \"{category}\"? Tasks with this category will be uncategorized.",
   "@categoryDeleteContent": {
     "placeholders": {
@@ -807,58 +686,43 @@
       }
     }
   },
-  "dialogTimeMachineTitle": "Log Past Session",
-  "dialogTimeMachineMode": "Focus Mode",
-  "dialogTimeMachineTag": "Tag (Optional)",
-  "dialogTimeMachineNoTag": "No Tag",
-  "dialogTimeMachineStartTime": "Start Time",
-  "dialogTimeMachineEndTime": "End Time",
-  "dialogTimeMachineErrorEndBeforeStart": "End time must be after start time",
-  "dialogTimeMachineSuccess": "Session Logged!",
-  "habitHistoryRemoveCompletion": "Remove completion for {date}?",
-  "@habitHistoryRemoveCompletion": {
+  "categoryDeleteTitle": "Delete Category?",
+  "categoryEditTitle": "Edit Category",
+  "categoryEmpty": "No categories yet. Create one by adding a task with a category.",
+  "categoryNameLabel": "Category Name",
+  "categoryTaskCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
+  "@categoryTaskCount": {
     "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
-  "commonLabelRemove": "Remove",
-  "habitHistoryTimePrompt": "At what time did you complete this habit?",
-  "habitHistoryTitle": "Habit History",
-  "habitHistoryStatLast30": "Last 30d",
-  "habitHistoryStatLast90": "Last 90d",
-  "habitHistoryStatTotal": "Total",
-  "habitHistoryEmpty": "No history yet.",
-  "habitHistoryCompletedAt": "Completed at {time}",
-  "@habitHistoryCompletedAt": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "habitHistoryRemoveTitle": "Remove completion?",
-  "habitHistoryRemoveTooltip": "Remove this record",
-  "habitDeleteTitle": "Delete Habit",
-  "habitDeleteContent": "Are you sure you want to delete this habit?",
-  "habitMarkPastCompletionTooltip": "Mark past completion",
-  "taskDeleteTitle": "Delete Task",
-  "taskDeleteContent": "Are you sure you want to delete this task?",
-  "locationPickerTitle": "Search Location",
-  "locationPickerHint": "e.g., Pizza Hut, London...",
-  "locationPickerServerError": "Server error: {code}",
-  "@locationPickerServerError": {
-    "placeholders": {
-      "code": {
+      "count": {
         "type": "int"
       }
     }
   },
-  "locationPickerNetworkError": "Network error. Check your connection and location API settings.",
-  "locationPickerUnknown": "Unknown Location",
-  "locationPickerStartTyping": "Start typing to search for a place",
+  "categoryTitle": "Categories",
+
+  "dialogTimeMachineEndTime": "End Time",
+  "dialogTimeMachineErrorEndBeforeStart": "End time must be after start time",
+  "dialogTimeMachineMode": "Focus Mode",
+  "dialogTimeMachineNoTag": "No Tag",
+  "dialogTimeMachineStartTime": "Start Time",
+  "dialogTimeMachineSuccess": "Session Logged!",
+  "dialogTimeMachineTag": "Tag (Optional)",
+  "dialogTimeMachineTitle": "Log Past Session",
+
+  "locationApiDialogBestPractice": "Best Practice",
+  "locationApiDialogBestPracticeDesc": "Self-host your own Photon instance for privacy",
+  "locationApiDialogError": "Cannot reach endpoint. Check the URL and try again.",
+  "locationApiDialogLabel": "API Endpoint URL",
+  "locationApiDialogLearnMore": "Learn about Photon on GitHub",
+  "locationApiDialogReset": "Reset to Default",
+  "locationApiDialogSuccess": "Connection successful",
+  "locationApiDialogSupported": "Supported APIs",
+  "locationApiDialogSupportedDesc": "Photon-compatible endpoints",
+  "locationApiDialogTest": "Test Connection",
+  "locationApiDialogTitle": "Location Search API",
+  "locationPickerHint": "e.g., Pizza Hut, London...",
   "locationPickerMinChars": "Minimum 3 characters",
+  "locationPickerNetworkError": "Network error. Check your connection and location API settings.",
   "locationPickerNoResults": "No places found for \"{query}\"",
   "@locationPickerNoResults": {
     "placeholders": {
@@ -867,19 +731,25 @@
       }
     }
   },
-  "locationApiDialogTitle": "Location Search API",
-  "locationApiDialogLabel": "API Endpoint URL",
-  "locationApiDialogSupported": "Supported APIs",
-  "locationApiDialogSupportedDesc": "Photon-compatible endpoints",
-  "locationApiDialogLearnMore": "Learn about Photon on GitHub",
-  "locationApiDialogBestPractice": "Best Practice",
-  "locationApiDialogBestPracticeDesc": "Self-host your own Photon instance for privacy",
-  "locationApiDialogSuccess": "Connection successful",
-  "locationApiDialogReset": "Reset to Default",
-  "locationApiDialogError": "Cannot reach endpoint. Check the URL and try again.",
-  "locationApiDialogTest": "Test Connection",
-  "streakTimelineTitle": "Streak timeline",
-  "streakTimelineSubtitle": "Shows last 7 days",
+  "locationPickerServerError": "Server error: {code}",
+  "@locationPickerServerError": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "locationPickerStartTyping": "Start typing to search for a place",
+  "locationPickerTitle": "Search Location",
+  "locationPickerUnknown": "Unknown Location",
+
+  "streakDayToday": "Today",
+  "streakLegendStreakDay": "Streak day",
+  "streakStatusActive": "Today is active and extending your streak.",
+  "streakStatusBuilding": "Today counts, but the streak has not fully connected yet.",
+  "streakStatusFrozen": "Today is frozen. Yesterday still counts until you miss another day.",
+  "streakStatusNone": "No streak yet. Complete something today to start one.",
+  "streakStatusStart": "Start today to build a streak that reaches forward.",
   "streakTimelineCurrent": "Current streak",
   "streakTimelineDays": "{count, plural, =1{1 day} other{{count} days}}",
   "@streakTimelineDays": {
@@ -889,14 +759,10 @@
       }
     }
   },
-  "streakStatusNone": "No streak yet. Complete something today to start one.",
-  "streakStatusActive": "Today is active and extending your streak.",
-  "streakStatusFrozen": "Today is frozen. Yesterday still counts until you miss another day.",
-  "streakStatusBuilding": "Today counts, but the streak has not fully connected yet.",
-  "streakStatusStart": "Start today to build a streak that reaches forward.",
-  "streakDayToday": "Today",
-  "globalLabelHabit": "Habit",
-  "streakLegendStreakDay": "Streak day",
+  "streakTimelineSubtitle": "Shows last 7 days",
+  "streakTimelineTitle": "Streak timeline",
+
+  "xpBreakdownHowToEarn": "How XP is earned",
   "xpBreakdownLevel": "Level {level} | {title}",
   "@xpBreakdownLevel": {
     "placeholders": {
@@ -919,7 +785,8 @@
       }
     }
   },
-  "xpBreakdownHowToEarn": "How XP is earned",
+  "xpSourceFocusDesc": "Every focus minute adds",
+  "xpSourceHabitDesc": "Each completed habit adds",
   "xpSourceTaskDesc": "Each completed task adds",
   "xpSourceValue": "+{xp} XP",
   "@xpSourceValue": {
@@ -929,8 +796,77 @@
       }
     }
   },
-  "xpSourceHabitDesc": "Each completed habit adds",
-  "xpSourceFocusDesc": "Every focus minute adds",
+
+  "weekNavPastWeek": "Past Week",
   "weekNavThisWeek": "This Week",
-  "weekNavPastWeek": "Past Week"
+
+  "widgetHabitsToday": "Habits Today",
+  "widgetTasksDue": "Tasks Due ({count})",
+  "@widgetTasksDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "nTaskReminderPrefixDays": "In {count, plural, =1{Tomorrow} other{{count} days}}",
+  "@nTaskReminderPrefixDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nTaskReminderPrefixHours": "In {count, plural, =1{1 hour} other{{count} hours}}",
+  "@nTaskReminderPrefixHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nTaskReminderPrefixMinutes": "In {count, plural, =1{1 minute} other{{count} minutes}}",
+  "@nTaskReminderPrefixMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nTasksCount": "{count, plural, =0{No tasks} =1{1 task} other{{count} tasks}}",
+  "@nTasksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+
+  "nMinutesCount": "{count, plural, =0{No minutes} =1{1 minute} other{{count} minutes}}",
+  "@nMinutesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "distractionDistracted": "Distracted",
+  "distractionHydrated": "Hydrated / Drink",
+  "distractionLogged": "Logged {distraction}",
+  "@distractionLogged": {
+    "placeholders": {
+      "distraction": {
+        "type": "String"
+      }
+    }
+  },
+  "distractionRestroom": "Restroom",
+  "distractionSheetTitle": "Log Distraction",
+  "distractionSnack": "Snack",
+  "distractionStretched": "Stretched",
+
+  "targetSheetTitle": "Select Focus Target"
 }
