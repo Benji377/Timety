@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
-import '../../utils/habit_utils.dart';
-import '../../widgets/android_widgets/habit_widget_view.dart';
+import '../../utils/habit/habit_utils.dart';
+import '../../widgets/android_widgets/habit/habit_widget_header_view.dart';
+import '../../widgets/android_widgets/habit/habit_widget_item_view.dart';
+import '../../widgets/android_widgets/habit/habit_stack_header_view.dart';
+import '../../widgets/android_widgets/habit/habit_stack_footer_view.dart';
 import '../../l10n/app_localizations.dart';
 
 class HabitWidgetService {

@@ -8,10 +8,10 @@ import '../providers/user_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/habit_provider.dart';
 import '../data/habit/habit_models.dart';
-import '../utils/priority_utils.dart';
-import '../utils/calendar_utils.dart';
-import '../utils/date_utils.dart';
-import '../utils/l10n_utils.dart';
+import '../utils/common/app_utils.dart';
+import '../utils/datetime/calendar_utils.dart';
+import '../utils/datetime/date_utils.dart';
+import '../utils/ui/l10n_utils.dart';
 import 'task/task_detail_screen.dart';
 
 class CalendarScreen extends StatefulWidget {

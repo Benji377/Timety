@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../data/task/task.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/priority_utils.dart';
+import '../../utils/common/app_utils.dart';
 import '../../l10n/app_localizations.dart';
-import '../dialogs.dart';
+import '../common/app_dialogs.dart';
 
 class TaskListTile extends StatelessWidget {
   final Task task;

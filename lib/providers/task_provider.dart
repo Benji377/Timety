@@ -4,8 +4,8 @@ import '../data/task/task.dart';
 import '../data/task/task_repository.dart';
 import '../services/notification_service.dart';
 import '../services/android_widgets/task_widget_service.dart';
-import '../utils/l10n_utils.dart';
-import '../utils/xp_calculator.dart';
+import '../utils/ui/l10n_utils.dart';
+import '../utils/stats/xp_calculator.dart';
 import 'settings_provider.dart';
 import 'user_provider.dart';
 

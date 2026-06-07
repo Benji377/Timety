@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
-import '../../utils/xp_calculator.dart';
+import '../../utils/stats/xp_calculator.dart';
 import '../../l10n/app_localizations.dart';
 
 class UserXpBreakdownCard extends StatefulWidget {

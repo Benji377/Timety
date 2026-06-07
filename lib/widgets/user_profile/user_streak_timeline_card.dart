@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../theme/app_theme.dart';
-import '../../utils/date_utils.dart';
+import '../../utils/datetime/date_utils.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/settings_provider.dart';
 

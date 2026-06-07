@@ -5,9 +5,9 @@ import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
-import '../../utils/date_utils.dart';
-import '../../utils/stats_utils.dart';
-import '../../widgets/week_navigator.dart';
+import '../../utils/datetime/date_utils.dart';
+import '../../utils/stats/stats_utils.dart';
+import '../../widgets/common/week_navigator.dart';
 
 class TaskStatsScreen extends StatefulWidget {
   const TaskStatsScreen({super.key});

@@ -9,10 +9,10 @@ import '../providers/settings_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/task_provider.dart';
 import '../services/backup_service.dart';
-import '../utils/date_time_utils.dart';
-import '../widgets/tags.dart';
-import '../widgets/categories.dart';
-import '../widgets/location_picker_dialog.dart';
+import '../utils/datetime/date_time_pickers.dart';
+import '../widgets/focus/focus_tags_widget.dart';
+import '../widgets/task/task_categories_widget.dart';
+import '../widgets/location/location_picker_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

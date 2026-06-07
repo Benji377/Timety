@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/habit_icons.dart';
+import '../../utils/habit/habit_icons.dart';
 
 part 'habit_models.g.dart';
 

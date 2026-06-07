@@ -2,7 +2,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../data/task/task.dart';
-import '../../widgets/android_widgets/task_widget_view.dart';
+import '../../widgets/android_widgets/task/task_widget_header_view.dart';
+import '../../widgets/android_widgets/task/task_widget_item_view.dart';
 import '../../l10n/app_localizations.dart';
 
 class TaskWidgetService {

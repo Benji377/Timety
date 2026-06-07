@@ -5,8 +5,8 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/date_time_utils.dart';
-import '../../utils/habit_icons.dart';
+import '../../utils/datetime/date_time_pickers.dart';
+import '../../utils/habit/habit_icons.dart';
 
 class HabitDetailScreen extends StatefulWidget {
   final Habit? habit;

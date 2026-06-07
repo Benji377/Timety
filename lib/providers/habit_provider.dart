@@ -4,9 +4,9 @@ import '../providers/settings_provider.dart';
 import '../data/habit/habit_models.dart';
 import '../data/habit/habit_repository.dart';
 import '../services/notification_service.dart';
-import '../utils/date_utils.dart';
-import '../utils/l10n_utils.dart';
-import '../utils/xp_calculator.dart';
+import '../utils/datetime/date_utils.dart';
+import '../utils/ui/l10n_utils.dart';
+import '../utils/stats/xp_calculator.dart';
 import '../services/android_widgets/habit_widget_service.dart';
 import 'user_provider.dart';
 

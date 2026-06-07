@@ -18,7 +18,7 @@ import '../data/task/task_repository_hive.dart';
 import '../data/user/user.dart';
 import '../data/user/user_repository_hive.dart';
 import '../l10n/app_localizations.dart';
-import '../widgets/dialogs.dart';
+import '../widgets/common/app_dialogs.dart';
 
 class BackupService {
   static const int _schemaVersion = 1;

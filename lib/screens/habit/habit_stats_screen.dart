@@ -5,11 +5,12 @@ import '../../data/habit/habit_models.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/date_utils.dart';
-import '../../utils/stats_utils.dart';
-import '../../utils/streak_calculator.dart';
-import '../../widgets/stat_cards.dart';
-import '../../widgets/week_navigator.dart';
+import '../../utils/datetime/date_utils.dart';
+import '../../utils/stats/stats_utils.dart';
+import '../../utils/stats/streak_calculator.dart';
+import '../../widgets/stats/compact_vertical_stat_card.dart';
+
+import '../../widgets/common/week_navigator.dart';
 
 enum DayTimeName { morning, afternoon, evening, night }
 
