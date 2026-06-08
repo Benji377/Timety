@@ -22,10 +22,19 @@ import 'package:timety/utils/stats/xp_calculator.dart';
 // 1. Start Emulator
 // 2. Execute: flutter drive --driver=screenshots/test_driver.dart --target=screenshots/screenshot_test.dart
 
+// --- Pump Loop ---
+// Fast-forwards the clock in 50ms increments to allow animations/charts to render
+Future<void> _pumpDuration(WidgetTester tester, Duration duration) async {
+  final int frameCount = (duration.inMilliseconds / 50).round();
+  for (int i = 0; i < frameCount; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
 Future<void> _waitForCondition(
   WidgetTester tester,
   bool Function() condition, {
-  Duration timeout = const Duration(seconds: 10),
+  Duration timeout = const Duration(seconds: 30),
 }) async {
   final stopwatch = Stopwatch()..start();
 
@@ -44,7 +53,8 @@ Future<void> _tapBottomNavItem(WidgetTester tester, String label) async {
   );
 
   await tester.tap(finder.first);
-  await tester.pumpAndSettle();
+  // Replaced static pump with the pump loop (1.5 seconds is perfect for page transitions)
+  await _pumpDuration(tester, const Duration(milliseconds: 1500));
 }
 
 Future<void> _tapIconButton(
@@ -58,7 +68,8 @@ Future<void> _tapIconButton(
   }
 
   await tester.tap(finder.at(index));
-  await tester.pumpAndSettle();
+  // Replaced static pump with the pump loop
+  await _pumpDuration(tester, const Duration(milliseconds: 1500));
 }
 
 Future<void> _tapText(WidgetTester tester, String text) async {
@@ -68,7 +79,8 @@ Future<void> _tapText(WidgetTester tester, String text) async {
   }
 
   await tester.tap(finder.first);
-  await tester.pumpAndSettle();
+  // Replaced static pump with the pump loop
+  await _pumpDuration(tester, const Duration(milliseconds: 1500));
 }
 
 Future<void> _resetPersistentData() async {
@@ -187,7 +199,7 @@ Future<void> _seedMockData(BuildContext context) async {
       description:
           'Answer the questions from yesterday'
           's review.',
-      dueDate: dayStart.add(const Duration(hours: 11)),
+      dueDate: dayStart.add(const Duration(hours: 23)),
       location: 'Inbox',
       priority: Priority.veryHigh,
       size: Size.small,
@@ -297,7 +309,7 @@ void main() {
     });
 
     // Settle any remaining initial entry animations
-    await tester.pumpAndSettle();
+    await _pumpDuration(tester, const Duration(milliseconds: 1000));
 
     await _resetPersistentData();
 
@@ -309,7 +321,7 @@ void main() {
 
     // Wait for the UI to visually update with the new data
     await binding.convertFlutterSurfaceToImage();
-    await tester.pumpAndSettle();
+    await _pumpDuration(tester, const Duration(milliseconds: 1000));
 
     // 3. Capture the major app screens.
     await binding.takeScreenshot('01_home_screen');
@@ -323,7 +335,7 @@ void main() {
 
     // Go back to Focus tab
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
     // Navigate to Profile screen
     await _tapBottomNavItem(tester, 'Profile');
@@ -334,7 +346,7 @@ void main() {
 
     // Go back to Profile tab
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
     await _tapBottomNavItem(tester, 'Tasks');
     await binding.takeScreenshot('03_tasks_screen');
@@ -345,7 +357,7 @@ void main() {
 
     // Go back to Tasks
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
     // Tap on the first task to see detail view (the overdue proposal task)
     await _tapText(tester, 'Finish project proposal');
@@ -353,7 +365,7 @@ void main() {
 
     // Go back to Tasks
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
     await _tapBottomNavItem(tester, 'Habits');
     await binding.takeScreenshot('04_habits_screen');
@@ -364,7 +376,7 @@ void main() {
 
     // Go back to Habits
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
     await _tapBottomNavItem(tester, 'Profile');
     await binding.takeScreenshot('05_profile_screen');
