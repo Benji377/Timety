@@ -1,0 +1,12 @@
+<p>Timety è un'app completa per la produttività e la gestione del tempo, offline-first. Integra perfettamente la gestione delle attività, le sessioni di focus e il monitoraggio delle abitudini in un'unica e bellissima esperienza gamificata.</p>
+
+<b>Funzionalità</b>
+<ul>
+  <li><b>Gestione intelligente delle attività:</b> Organizza singole attività con scadenze, livelli di priorità e stime di impegno.</li>
+  <li><b>Motore di Focus:</b> Un robusto sistema di cronometro e timer progettato per il deep work. Include il supporto per tag, modalità personalizzate e fasi di pausa brevi/lunghe.</li>
+  <li><b>Monitoraggio delle abitudini:</b> Costruisci routine durature con frequenze flessibili (giornaliere, giorni specifici della settimana o obiettivi settimanali flessibili).</li>
+  <li><b>Analisi dettagliate:</b> Visualizza la tua produttività con grafici interattivi, metriche di velocità settimanali e analisi delle abitudini in base all'ora del giorno.</li>
+  <li><b>Gamification:</b> Tieni traccia dei tuoi giorni attivi, costruisci serie (streak) e fai salire di livello il tuo profilo di produttività.</li>
+  <li><b>Notifiche intelligenti:</b> Promemoria locali per le attività, orari specifici per le abitudini e motivazione quotidiana dinamica.</li>
+  <li><b>Calendario unificato:</b> Una vista calendario personalizzata a micro-punti per vedere a colpo d'occhio le tue attività, le sessioni di focus e le abitudini.</li>
+</ul>
