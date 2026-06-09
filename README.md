@@ -12,8 +12,12 @@
     <a href="https://github.com/Benji377/Timety/releases">
       <img src="https://img.shields.io/github/downloads/Benji377/Timety/total?label=Downloads&logo=github&style=for-the-badge&labelColor=555555" alt="downloads">
     </a>
+    <br>
     <a href="https://tally.so/r/ODbEoA">
       <img src="https://img.shields.io/badge/Feedback-Tally-8B5CF6?style=for-the-badge&labelColor=555555" alt="feedback">
+    </a>
+    <a href="https://crowdin.com/project/timety">
+      <img src="https://img.shields.io/badge/Translate-Crowdin-2E3340?style=for-the-badge&logo=crowdin&logoColor=white&labelColor=555555" alt="translate">
     </a>
   </p>
 </p>
