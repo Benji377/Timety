@@ -820,6 +820,13 @@
     }
   },
   "nHabitsCount": "{count, plural, =0{Nessun completamento} =1{1 completamento} other{{count} completamenti}}",
+  "@nHabitsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nMinutesCount": "{count, plural, =0{Nessun minuto} =1{1 minuto} other{{count} minuti}}",
   "@nMinutesCount": {
     "placeholders": {
