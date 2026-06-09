@@ -38,8 +38,16 @@ class SettingsProvider extends ChangeNotifier {
   bool get use24HourFormat => _use24HourFormat;
   String get dateFormatCode => _dateFormatCode ?? 'system';
 
-  String get _resolvedLocale =>
-      _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.toString();
+  String get _resolvedLocale {
+    final locale = _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.languageCode;
+    
+    // The intl package crashes on Ladin, so we fall back to Italian for date formatting
+    if (locale.startsWith('lld')) {
+      return 'it';
+    }
+    
+    return locale;
+  }
 
   SettingsProvider() {
     _loadSettings();

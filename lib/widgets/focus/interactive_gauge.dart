@@ -130,11 +130,15 @@ class _InteractiveGaugeState extends State<InteractiveGauge>
                 children: [
                   const SizedBox(height: AppTheme.fsGaugeLabel),
                   Text(
-                    widget.label,
+                    widget.label.length > 12 
+                        ? widget.label.replaceAll(' ', '\n') 
+                        : widget.label,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: AppTheme.fsGaugeLabel,
                       fontWeight: AppTheme.fwBold,
                       letterSpacing: AppTheme.lsExtraWide,
+                      height: widget.label.length > 12 ? 1.1 : null,
                       color:
                           widget.labelColor ??
                           (isDark

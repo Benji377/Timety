@@ -44,6 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.dark_mode_outlined),
             title: Text(l10n.settingsLabelTheme),
             trailing: DropdownButton<ThemeMode>(
+              alignment: AlignmentDirectional.centerEnd,
               value: settings.themeMode,
               underline: const SizedBox(),
               items: [
@@ -74,6 +75,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.language, color: AppTheme.taskColor),
             title: Text(l10n.settingsLabelLanguage),
             trailing: DropdownButton<String>(
+              alignment: AlignmentDirectional.centerEnd,
               value: settings.appLocaleCode,
               underline: const SizedBox(),
               items: [
@@ -112,6 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(l10n.settingsLabelDateFormat),
             trailing: DropdownButton<String>(
               value: settings.dateFormatCode,
+              alignment: AlignmentDirectional.centerEnd,
               underline: const SizedBox(),
               items: [
                 DropdownMenuItem(

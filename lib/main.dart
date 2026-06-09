@@ -10,6 +10,7 @@ import 'providers/settings_provider.dart';
 import 'providers/user_provider.dart';
 import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
+import 'utils/common/lld_fallback_delegates.dart';
 
 // Habits
 import 'data/habit/habit_models.dart';
@@ -99,7 +100,11 @@ class TimetyApp extends StatelessWidget {
             theme: AppTheme.buildTheme(brightness: Brightness.light),
             darkTheme: AppTheme.buildTheme(brightness: Brightness.dark),
             themeMode: settings.themeMode,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            localizationsDelegates: const [
+              LldMaterialLocalizationsDelegate(),
+              LldCupertinoLocalizationsDelegate(),
+              ...AppLocalizations.localizationsDelegates,
+            ],
             supportedLocales: AppLocalizations.supportedLocales,
             locale: settings.appLocale,
             home: const MainScreen(),
