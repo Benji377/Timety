@@ -112,5 +112,16 @@ Join the conversation! Whether you need help, want to share how you use Timety, 
 * **🙌 Show and tell:** Share your productivity setups, habit streaks, or custom focus tags!
 * **💬 General & Polls:** Chat with other users and participate in community polls.
 
+## Translations
+
+Help us bring Timety to your native language! We use Crowdin to manage our localization, making it incredibly easy to contribute translations without touching any code.
+
+How to contribute:
+1. Visit the **[Timety Crowdin Project](https://crowdin.com/project/timety)**.
+2. Select your language and start translating!
+3. If your language isn't listed, feel free to request it directly on Crowdin.
+
+*Note: If you ever need context for a specific word or phrase, drop by our GitHub Discussions and ask!*
+
 ## Privacy
 Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Hive. No accounts, no cloud sync, no tracking.
