@@ -1,0 +1,18 @@
+name: Task / Maintenance
+description: For internal chores, documentation updates, or refactoring (Not for bugs or features)
+title: '[CHORE] <Brief description>'
+labels: ['maintenance']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for actionable maintenance tasks, documentation updates, or codebase chores. 
+        **If you need help, have a question, or want to share feedback, please use [GitHub Discussions](https://github.com/Benji377/Timety/discussions) instead.**
+  - type: textarea
+    id: task-description
+    attributes:
+      label: Task Description
+      description: What specifically needs to be updated, refactored, or maintained?
+      placeholder: e.g., Update the README screenshots to reflect version 1.2.0
+    validations:
+      required: true
