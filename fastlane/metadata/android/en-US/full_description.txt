@@ -1,4 +1,4 @@
-<p>Timety is a comprehensive, offline-first productivity and time-management application built with Flutter. It seamlessly integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.</p>
+<p>Timety is a comprehensive, offline-first productivity and time-management application. It seamlessly integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.</p>
 
 <b>Features</b>
 <ul>

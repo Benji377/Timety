@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
-import '../../utils/habit_utils.dart';
-import '../../widgets/android_widgets/habit_widget_view.dart';
+import '../../utils/habit/habit_utils.dart';
+import '../../widgets/android_widgets/habit/habit_widget_header_view.dart';
+import '../../widgets/android_widgets/habit/habit_widget_item_view.dart';
+import '../../widgets/android_widgets/habit/habit_stack_header_view.dart';
+import '../../widgets/android_widgets/habit/habit_stack_footer_view.dart';
+import '../../l10n/app_localizations.dart';
 
 class HabitWidgetService {
   static const String _groupId = 'io.github.benji377.timety';
@@ -13,12 +17,14 @@ class HabitWidgetService {
   static Future<void> updateHabitWidget(
     List<Habit> allHabits,
     HabitProvider provider,
+    Locale userLocale,
   ) async {
     try {
       await HomeWidget.setAppGroupId(_groupId);
 
       final now = DateTime.now();
       final todayHabits = provider.getHabitsForDay(now);
+      final l10n = lookupAppLocalizations(userLocale);
 
       final completionStatus = <String, bool>{};
       final stackCompletions = <String, int>{};
@@ -47,16 +53,21 @@ class HabitWidgetService {
         }
       }
 
-      // 1. Render Header
+      // Render Header
       final headerPath = await HomeWidget.renderFlutterWidget(
-        _wrap(HabitWidgetHeaderView(habitCount: todayHabits.length)),
+        _wrap(
+          HabitWidgetHeaderView(
+            habitCount: todayHabits.length,
+            title: l10n.widgetHabitsToday,
+          ),
+        ),
         key: 'habit_widget_header',
         logicalSize: const ui.Size(400, 56),
         pixelRatio: 2.0,
       );
       await HomeWidget.saveWidgetData('habit_widget_header', headerPath);
 
-      // 2. Prepare Items to render
+      // Prepare Items to render
       final List<Widget> itemsToRender = [];
 
       // Add Stacks
@@ -96,7 +107,11 @@ class HabitWidgetService {
                   habit: h,
                   isDone: completionStatus[h.id] ?? false,
                   isLocked: stackLocks[h.id] ?? false,
-                  frequency: HabitUtils.buildHabitSubtitle(h, provider),
+                  frequency: HabitUtils.buildHabitSubtitle(
+                    h,
+                    l10n,
+                    provider.getCompletionsThisWeek(h),
+                  ),
                   isStacked: true,
                 ),
               const HabitStackFooterView(),
@@ -112,12 +127,16 @@ class HabitWidgetService {
             habit: h,
             isDone: completionStatus[h.id] ?? false,
             isLocked: false,
-            frequency: HabitUtils.buildHabitSubtitle(h, provider),
+            frequency: HabitUtils.buildHabitSubtitle(
+              h,
+              l10n,
+              provider.getCompletionsThisWeek(h),
+            ),
           ),
         );
       }
 
-      // 3. Render Items
+      // Render Items
       for (var i = 0; i < itemsToRender.length; i++) {
         final item = itemsToRender[i];
         double height = 38; // standalone height

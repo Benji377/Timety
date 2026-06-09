@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 part 'focus_models.g.dart';
 
@@ -30,9 +30,10 @@ class SessionPhase {
   @HiveField(0)
   final PhaseType type;
 
-  // 0 = infinite (Stopwatch)
-  // -1 = set at runtime (Flexible)
-  // > 0 = exact minutes
+  /// The duration of the phase in minutes.
+  /// * `0` represents an infinite duration (Stopwatch mode).
+  /// * `-1` represents a duration set dynamically at runtime (Flexible mode).
+  /// * `> 0` represents an exact minute count.
   @HiveField(1)
   int durationMinutes;
 
@@ -95,6 +96,21 @@ class FocusMode {
       SessionPhase(type: PhaseType.rest, durationMinutes: 15),
     ],
   );
+
+  String getLocalizedName(AppLocalizations l10n) {
+    if (!isSystem) return name;
+
+    switch (id) {
+      case 'system_stopwatch':
+        return l10n.focusModeStopwatch;
+      case 'system_flexible':
+        return l10n.focusModeFlexible;
+      case 'system_pomodoro':
+        return l10n.focusModePomodoro;
+      default:
+        return name;
+    }
+  }
 }
 
 @HiveType(typeId: 25)
@@ -214,6 +230,66 @@ class FocusSession {
     this.targetId,
     this.targetLabel,
   });
+}
 
-  String get displayTargetLabel => targetLabel ?? 'No Target';
+enum DistractionType {
+  distracted('Distracted', Icons.warning_amber, AppTheme.errorColor),
+  hydrated('Hydrated / Drink', Icons.water_drop, AppTheme.taskColor),
+  stretched('Stretched', Icons.accessibility_new, AppTheme.warningColor),
+  snack('Snack', Icons.restaurant, AppTheme.successColor),
+  restroom('Restroom', Icons.wc, Colors.grey);
+
+  final String dbId;
+  final IconData icon;
+  final Color color;
+
+  const DistractionType(this.dbId, this.icon, this.color);
+
+  // Helper to safely parse strings from the database back into Enums
+  static DistractionType fromDbId(String id) {
+    return DistractionType.values.firstWhere(
+      (type) => type.dbId == id,
+      // Fallback if somehow a weird string got saved
+      orElse: () => DistractionType.distracted,
+    );
+  }
+
+  String getLocalizedName(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (this) {
+      case DistractionType.distracted:
+        return l10n.distractionDistracted;
+      case DistractionType.hydrated:
+        return l10n.distractionHydrated;
+      case DistractionType.stretched:
+        return l10n.distractionStretched;
+      case DistractionType.snack:
+        return l10n.distractionSnack;
+      case DistractionType.restroom:
+        return l10n.distractionRestroom;
+    }
+  }
+}
+
+class TargetTypeStat {
+  final FocusTargetType type;
+  final String label;
+  final Color color;
+  final IconData icon;
+  final int minutes;
+
+  const TargetTypeStat({
+    required this.type,
+    required this.label,
+    required this.color,
+    required this.icon,
+    required this.minutes,
+  });
+}
+
+class DistractionEntry {
+  final Distraction distraction;
+  final String targetName;
+
+  DistractionEntry({required this.distraction, required this.targetName});
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timety/screens/statistics_screen.dart';
-import 'package:timety/utils/date_format_utils.dart';
+import '../../screens/statistics_screen.dart';
+import '../../utils/datetime/date_format_utils.dart';
+import '../../utils/ui/l10n_utils.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/focus_provider.dart';
 import '../../providers/user_provider.dart';
@@ -9,14 +11,15 @@ import '../../providers/settings_provider.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/habit_provider.dart';
 import '../../data/focus/focus_models.dart';
-import '../../widgets/focus_mode_timeline.dart';
-import '../../widgets/interactive_gauge.dart';
-import '../../widgets/dialogs.dart';
-import '../../widgets/focus_bottom_sheet_builders.dart';
+import '../../widgets/focus/focus_mode_timeline.dart';
+import '../../widgets/focus/interactive_gauge.dart';
+import '../../widgets/common/app_dialogs.dart';
+import '../../widgets/focus/focus_bottom_sheet.dart';
 import '../calendar_screen.dart';
-import 'focus_modes_screen.dart';
 import '../settings_screen.dart';
+import 'focus_modes_screen.dart';
 
+/// The main focus timer screen with interactive gauge and mode selection.
 class FocusScreen extends StatefulWidget {
   const FocusScreen({super.key});
 
@@ -25,117 +28,6 @@ class FocusScreen extends StatefulWidget {
 }
 
 class _FocusScreenState extends State<FocusScreen> {
-  // --- BOTTOM SHEETS & ALERTS ---
-  void _showDistractionSheet(BuildContext context, FocusProvider provider) {
-    FocusBottomSheetBuilders.showDistractionSheet(
-      context: context,
-      onEventSelected: (eventName) {
-        provider.logDistraction(eventName);
-      },
-    );
-  }
-
-  // --- TAG MANAGEMENT ---
-  void _showTargetSelector(BuildContext context, FocusProvider provider) {
-    FocusBottomSheetBuilders.showTargetSelector(
-      context: context,
-      tags: provider.tags,
-      tasks: context.read<TaskProvider>().tasks,
-      habits: context.read<HabitProvider>().habits,
-      habitProvider: context.read<HabitProvider>(),
-      selectedType: provider.selectedTarget?.type ?? FocusTargetType.tag,
-      selectedId: provider.selectedTarget?.id,
-      onTagSelected: (tag) {
-        provider.setSelectedTag(tag);
-      },
-      onTaskSelected: (task) {
-        provider.setSelectedTask(id: task.id, label: task.title);
-      },
-      onHabitSelected: (habit) {
-        provider.setSelectedHabit(id: habit.id, label: habit.name);
-      },
-      onCreateNewTag: () {
-        _showCreateTagDialog(context, provider);
-      },
-    );
-  }
-
-  void _showCreateTagDialog(BuildContext context, FocusProvider provider) {
-    const Color selectedColor = AppTheme.taskColor;
-
-    FocusBottomSheetBuilders.showCreateTagDialog(
-      context: context,
-      onTagCreated: (tagName) {
-        provider.createTag(tagName, selectedColor);
-      },
-    );
-  }
-
-  Future<void> _confirmStopSession(
-    BuildContext context,
-    FocusProvider focusProvider,
-  ) async {
-    final bool wasRunning = focusProvider.isRunning;
-    if (!wasRunning && !focusProvider.awaitingPhaseContinue) return;
-
-    var pausedByThisCall = false;
-    if (wasRunning) {
-      focusProvider.pauseSession();
-      pausedByThisCall = true;
-    }
-
-    final bool confirmed =
-        await AppDialogs.showConfirmation(
-          context: context,
-          title: 'Stop focus session?',
-          content:
-              'The timer is paused while you decide. Confirm to stop and save the session, or cancel to continue.',
-        ) ==
-        true;
-
-    if (!context.mounted) return;
-
-    if (confirmed) {
-      focusProvider.stopSession(
-        completed: true,
-        userProvider: context.read<UserProvider>(),
-      );
-    } else if (pausedByThisCall) {
-      focusProvider.startSession();
-    }
-  }
-
-  Future<void> _confirmResetSession(
-    BuildContext context,
-    FocusProvider focusProvider,
-  ) async {
-    final bool wasRunning = focusProvider.isRunning;
-    if (!wasRunning && !focusProvider.awaitingPhaseContinue) return;
-
-    var pausedByThisCall = false;
-    if (wasRunning) {
-      focusProvider.pauseSession();
-      pausedByThisCall = true;
-    }
-
-    final bool confirmed =
-        await AppDialogs.showConfirmation(
-          context: context,
-          title: 'Reset focus session?',
-          content:
-              'The timer is paused while you decide. Confirm to reset the session, or cancel to continue.',
-        ) ==
-        true;
-
-    if (!context.mounted) return;
-
-    if (confirmed) {
-      focusProvider.resetSession();
-    } else if (pausedByThisCall) {
-      focusProvider.startSession();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final focusProvider = context.watch<FocusProvider>();
@@ -153,7 +45,9 @@ class _FocusScreenState extends State<FocusScreen> {
 
     double gaugeProgress = 1.0;
     bool isStopwatchMode = false;
-    String label = "FOCUS";
+    String label = AppLocalizations.of(
+      context,
+    )!.focusLabelDefault.toUpperCase();
     String centerText = "25:00";
     bool isResting = false;
 
@@ -164,7 +58,7 @@ class _FocusScreenState extends State<FocusScreen> {
       if (canDrag) {
         final int currentMinutes = focusProvider.flexibleDurationMinutes;
         gaugeProgress = currentMinutes / 120.0;
-        label = "SET TIME";
+        label = AppLocalizations.of(context)!.focusLabelSetTime.toUpperCase();
         centerText = AppDateFormatUtils.formatDuration(currentMinutes * 60);
       } else if (!isStopwatchPhase) {
         int totalPhaseSeconds = currentPhase.durationMinutes > 0
@@ -174,7 +68,9 @@ class _FocusScreenState extends State<FocusScreen> {
 
         gaugeProgress =
             focusProvider.secondsRemainingInPhase / totalPhaseSeconds;
-        label = currentPhase.type == PhaseType.rest ? "REST" : "FOCUS";
+        label = currentPhase.type == PhaseType.rest
+            ? AppLocalizations.of(context)!.focusLabelRest.toUpperCase()
+            : AppLocalizations.of(context)!.focusLabelDefault.toUpperCase();
         isResting = currentPhase.type == PhaseType.rest;
         centerText = AppDateFormatUtils.formatDuration(
           focusProvider.secondsRemainingInPhase,
@@ -182,7 +78,7 @@ class _FocusScreenState extends State<FocusScreen> {
       } else {
         isStopwatchMode = isRunning;
         gaugeProgress = 0.0;
-        label = "STOPWATCH";
+        label = AppLocalizations.of(context)!.focusLabelStopwatch.toUpperCase();
         centerText = AppDateFormatUtils.formatDuration(
           focusProvider.currentSecondsFocussed,
         );
@@ -207,10 +103,11 @@ class _FocusScreenState extends State<FocusScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Focus'),
+        title: Text(AppLocalizations.of(context)!.focusTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart),
+            tooltip: AppLocalizations.of(context)!.commonTooltipStats,
             onPressed: () {
               Navigator.push(
                 context,
@@ -223,7 +120,7 @@ class _FocusScreenState extends State<FocusScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.calendar_today),
-            tooltip: 'Calendar View',
+            tooltip: AppLocalizations.of(context)!.commonTooltipCalendar,
             onPressed: () {
               Navigator.push(
                 context,
@@ -238,7 +135,7 @@ class _FocusScreenState extends State<FocusScreen> {
         children: [
           const SizedBox(height: 10),
 
-          // --- MODE SELECTOR ---
+          // --- FOCUS MODE SELECTOR ---
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -267,7 +164,14 @@ class _FocusScreenState extends State<FocusScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      activeMode?.name.toUpperCase() ?? 'SELECT MODE',
+                      activeMode != null
+                          ? getLocalizedFocusModeName(
+                              context,
+                              activeMode,
+                            ).toUpperCase()
+                          : AppLocalizations.of(
+                              context,
+                            )!.focusModeSelect.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
@@ -344,7 +248,7 @@ class _FocusScreenState extends State<FocusScreen> {
             ),
           ),
 
-          // --- GAUGE & SIDE BUTTONS ---
+          // --- INTERACTIVE TIMER GAUGE ---
           SizedBox(
             height: 320,
             width: double.infinity,
@@ -365,7 +269,9 @@ class _FocusScreenState extends State<FocusScreen> {
                       ? AppTheme.warningColor
                       : AppTheme.focusColor,
                   centerText: centerText,
-                  bottomText: focusProvider.selectedTargetLabel,
+                  bottomText:
+                      focusProvider.selectedTargetLabel ??
+                      AppLocalizations.of(context)!.focusTargetEmpty,
                   bottomTextColor: focusProvider.selectedTargetColor,
                   bottomTextIcon: bottomTextIcon,
                   onBottomTextTapped: (isRunning || isPaused)
@@ -388,7 +294,9 @@ class _FocusScreenState extends State<FocusScreen> {
                   left: 16,
                   child: IconButton.filledTonal(
                     icon: const Icon(Icons.history),
-                    tooltip: "Log Past Session",
+                    tooltip: AppLocalizations.of(
+                      context,
+                    )!.commonTooltipTimeMachine,
                     iconSize: 28,
                     padding: const EdgeInsets.all(12),
                     onPressed: (isRunning || isPaused)
@@ -406,7 +314,9 @@ class _FocusScreenState extends State<FocusScreen> {
                   right: 16,
                   child: IconButton.filledTonal(
                     icon: const Icon(Icons.warning_amber),
-                    tooltip: "Log Distraction/Event",
+                    tooltip: AppLocalizations.of(
+                      context,
+                    )!.commonTooltipDistractions,
                     iconSize: 28,
                     padding: const EdgeInsets.all(12),
                     onPressed: (isRunning || isPaused)
@@ -418,6 +328,7 @@ class _FocusScreenState extends State<FocusScreen> {
             ),
           ),
 
+          // --- PHASE TIMELINE ---
           ModeTimeline(
             phases: activeMode?.phases ?? [],
             currentPhaseIndex: focusProvider.currentPhaseIndex,
@@ -427,7 +338,7 @@ class _FocusScreenState extends State<FocusScreen> {
 
           const Spacer(),
 
-          // --- BOTTOM CONTROLS ---
+          // --- PLAY/PAUSE CONTROLS ---
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -469,11 +380,13 @@ class _FocusScreenState extends State<FocusScreen> {
                       focusProvider.continueToNextPhase();
                     } else if (focusProvider.selectedTargetIsLocked) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            'Complete the previous habit in the stack first!',
+                            AppLocalizations.of(
+                              context,
+                            )!.focusSnackbarHabitLocked,
                           ),
-                          duration: Duration(seconds: 2),
+                          duration: const Duration(seconds: 2),
                         ),
                       );
                     } else {
@@ -527,5 +440,114 @@ class _FocusScreenState extends State<FocusScreen> {
         ],
       ),
     );
+  }
+
+  // --- BOTTOM SHEETS & ALERTS ---
+  void _showDistractionSheet(BuildContext context, FocusProvider provider) {
+    FocusBottomSheetBuilders.showDistractionSheet(
+      context: context,
+      onEventSelected: (eventName) {
+        provider.logDistraction(eventName);
+      },
+    );
+  }
+
+  // --- TAG MANAGEMENT ---
+  void _showTargetSelector(BuildContext context, FocusProvider provider) {
+    FocusBottomSheetBuilders.showTargetSelector(
+      context: context,
+      tags: provider.tags,
+      tasks: context.read<TaskProvider>().tasks,
+      habits: context.read<HabitProvider>().habits,
+      habitProvider: context.read<HabitProvider>(),
+      selectedType: provider.selectedTarget?.type ?? FocusTargetType.tag,
+      selectedId: provider.selectedTarget?.id,
+      onTagSelected: (tag) {
+        provider.setSelectedTag(tag);
+      },
+      onTaskSelected: (task) {
+        provider.setSelectedTask(id: task.id, label: task.title);
+      },
+      onHabitSelected: (habit) {
+        provider.setSelectedHabit(id: habit.id, label: habit.name);
+      },
+      onCreateNewTag: () {
+        _showCreateTagDialog(context, provider);
+      },
+    );
+  }
+
+  void _showCreateTagDialog(BuildContext context, FocusProvider provider) {
+    const Color selectedColor = AppTheme.taskColor;
+
+    FocusBottomSheetBuilders.showCreateTagDialog(
+      context: context,
+      onTagCreated: (tagName) {
+        provider.createTag(tagName, selectedColor);
+      },
+    );
+  }
+
+  Future<void> _confirmStopSession(
+    BuildContext context,
+    FocusProvider focusProvider,
+  ) async {
+    final bool wasRunning = focusProvider.isRunning;
+    if (!wasRunning && !focusProvider.awaitingPhaseContinue) return;
+
+    var pausedByThisCall = false;
+    if (wasRunning) {
+      focusProvider.pauseSession();
+      pausedByThisCall = true;
+    }
+
+    final bool confirmed =
+        await AppDialogs.showConfirmation(
+          context: context,
+          title: AppLocalizations.of(context)!.focusDialogSessionStopTitle,
+          content: AppLocalizations.of(context)!.focusDialogSessionStopContent,
+        ) ==
+        true;
+
+    if (!context.mounted) return;
+
+    if (confirmed) {
+      focusProvider.stopSession(
+        completed: true,
+        userProvider: context.read<UserProvider>(),
+      );
+    } else if (pausedByThisCall) {
+      focusProvider.startSession();
+    }
+  }
+
+  Future<void> _confirmResetSession(
+    BuildContext context,
+    FocusProvider focusProvider,
+  ) async {
+    final bool wasRunning = focusProvider.isRunning;
+    if (!wasRunning && !focusProvider.awaitingPhaseContinue) return;
+
+    var pausedByThisCall = false;
+    if (wasRunning) {
+      focusProvider.pauseSession();
+      pausedByThisCall = true;
+    }
+
+    final bool confirmed =
+        await AppDialogs.showConfirmation(
+          context: context,
+          title: AppLocalizations.of(context)!.focusDialogSessionResetTitle,
+          content: AppLocalizations.of(context)!.focusDialogSessionResetContent,
+        ) ==
+        true;
+
+    if (!context.mounted) return;
+
+    if (confirmed) {
+      focusProvider.resetSession();
+    } else if (pausedByThisCall) {
+      focusProvider.startSession();
+    }
   }
 }

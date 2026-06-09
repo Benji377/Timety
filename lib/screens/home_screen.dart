@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timety/providers/user_provider.dart';
-import 'package:timety/screens/settings_screen.dart';
-import 'package:timety/utils/greeting_utils.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/user_provider.dart';
+import '../screens/settings_screen.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
 import '../data/task/task.dart';
@@ -10,12 +10,14 @@ import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
-import '../widgets/interactive_gauge.dart';
-import '../widgets/grouped_habits_section.dart';
+import '../widgets/focus/interactive_gauge.dart';
+import '../widgets/habit/grouped_habits_section.dart';
 import '../widgets/list_tiles/task_list_tile.dart';
 import 'task/task_detail_screen.dart';
 import 'habit/habit_detail_screen.dart';
+import '../widgets/common/styled_expansion_tile.dart';
 
+/// The main dashboard screen showing today's overview, goals, and upcoming tasks.
 class HomeScreen extends StatelessWidget {
   final VoidCallback onNavigateToFocus;
 
@@ -28,6 +30,8 @@ class HomeScreen extends StatelessWidget {
     final taskProvider = context.watch<TaskProvider>();
     final habitProvider = context.watch<HabitProvider>();
     final settings = context.watch<SettingsProvider>();
+
+    final l10n = AppLocalizations.of(context)!;
 
     final int focusMinsToday = focusProvider.getMinutesFocusedToday();
     final int dailyTarget = settings.dailyGoalMins;
@@ -77,7 +81,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Timety"),
+        title: Text(l10n.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -91,6 +95,7 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
+            // --- GREETING & MOTIVATION SECTION ---
             Padding(
               padding: const EdgeInsets.all(AppTheme.spaceXLarge),
               child: SizedBox(
@@ -99,7 +104,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      GreetingUtils.getGreeting(userName),
+                      _getGreeting(l10n, userName),
                       style: const TextStyle(
                         fontSize: AppTheme.fsHeadingLarge,
                         fontWeight: AppTheme.fwExtraBold,
@@ -107,7 +112,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      GreetingUtils.getDailyMotivationText(),
+                      _getDailyMotivationText(l10n),
                       style: const TextStyle(
                         fontSize: AppTheme.fsBodyLarge,
                         fontWeight: AppTheme.fwBold,
@@ -118,6 +123,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+            // --- DAILY GOAL GAUGE SECTION ---
             Expanded(
               flex: 5,
               child: Center(
@@ -126,7 +132,7 @@ class HomeScreen extends StatelessWidget {
                   child: InteractiveGauge(
                     progress: focusProgress,
                     isInteractive: false,
-                    label: "DAILY GOAL",
+                    label: l10n.homeDailyGoal.toUpperCase(),
                     centerText: "${(focusProgress * 100).toInt()}%",
                     centerTextColor: AppTheme.focusColor,
                     color: AppTheme.focusColor,
@@ -138,6 +144,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Divider(height: 1),
+            // --- TASKS & HABITS LIST SECTION ---
             Expanded(
               flex: 6,
               child: Material(
@@ -145,157 +152,125 @@ class HomeScreen extends StatelessWidget {
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                 child: (urgentTasks.isEmpty && todaysHabits.isEmpty)
-                    ? const Center(
-                        child: Text("You're all caught up for today!"),
-                      )
+                    ? Center(child: Text(l10n.homeDailyGoalDone))
                     : ListView(
                         padding: const EdgeInsets.only(
                           top: AppTheme.spaceLarge,
                           bottom: 80,
                         ),
                         children: [
+                          // --- DUE TASKS ACCORDION ---
                           if (urgentTasks.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppTheme.spaceMedium,
-                              ),
-                              child: Theme(
-                                data: Theme.of(
-                                  context,
-                                ).copyWith(dividerColor: Colors.transparent),
-                                child: ExpansionTile(
-                                  initiallyExpanded: true,
-                                  title: Text(
-                                    'Tasks Due (${urgentTasks.length})',
-                                    style: const TextStyle(
-                                      fontWeight: AppTheme.fwBold,
-                                      color: AppTheme.warningColor,
-                                    ),
-                                  ),
-                                  iconColor: AppTheme.warningColor,
-                                  collapsedIconColor: AppTheme.warningColor,
-                                  children: [
-                                    ...urgentTasks.map(
-                                      (task) => TaskListTile(
-                                        task: task,
-                                        isOverdue:
-                                            task.dueDate != null &&
-                                            task.dueDate!.isBefore(today),
-                                        enableDismissible: false,
-                                        showDescription: false,
-                                        onToggleCompleted: () => context
-                                            .read<TaskProvider>()
-                                            .toggleTask(
-                                              task.id,
-                                              userProvider: context
-                                                  .read<UserProvider>(),
-                                            ),
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                TaskDetailScreen(task: task),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: AppTheme.spaceSmall),
-                                  ],
+                            StyledExpansionTile(
+                              initiallyExpanded: true,
+                              title: Text(
+                                l10n.homeSectionTasksDue(urgentTasks.length),
+                                style: const TextStyle(
+                                  fontWeight: AppTheme.fwBold,
+                                  color: AppTheme.warningColor,
                                 ),
                               ),
+                              iconColor: AppTheme.warningColor,
+                              children: [
+                                ...urgentTasks.map(
+                                  (task) => TaskListTile(
+                                    task: task,
+                                    isOverdue:
+                                        task.dueDate != null &&
+                                        task.dueDate!.isBefore(today),
+                                    enableDismissible: false,
+                                    showDescription: false,
+                                    onToggleCompleted: () =>
+                                        context.read<TaskProvider>().toggleTask(
+                                          task.id,
+                                          userProvider: context
+                                              .read<UserProvider>(),
+                                        ),
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            TaskDetailScreen(task: task),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: AppTheme.spaceSmall),
+                              ],
                             ),
                           ],
+                          // --- TODAY'S HABITS ACCORDION ---
                           if (todaysHabits.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppTheme.spaceMedium,
-                              ),
-                              child: Theme(
-                                data: Theme.of(
-                                  context,
-                                ).copyWith(dividerColor: Colors.transparent),
-                                child: ExpansionTile(
-                                  title: Text(
-                                    'Habits Today (${todaysHabits.length})',
-                                    style: const TextStyle(
-                                      fontWeight: AppTheme.fwBold,
-                                      color: AppTheme.typeHabitColor,
-                                    ),
-                                  ),
-                                  iconColor: AppTheme.typeHabitColor,
-                                  collapsedIconColor: AppTheme.typeHabitColor,
-                                  children: [
-                                    GroupedHabitsSection(
-                                      habits: todaysHabits,
-                                      habitProvider: habitProvider,
-                                      targetDate: today,
-                                      onHabitTap: (habit) => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => HabitDetailScreen(
-                                            habit: habit,
-                                            isEditing: true,
-                                          ),
-                                        ),
-                                      ),
-                                      onToggleCompleted: (habit) =>
-                                          habitProvider.toggleCompletionToday(
-                                            habit,
-                                            userProvider: context
-                                                .read<UserProvider>(),
-                                          ),
-                                    ),
-                                    const SizedBox(height: AppTheme.spaceSmall),
-                                  ],
+                            StyledExpansionTile(
+                              title: Text(
+                                l10n.homeSectionHabitsDue(todaysHabits.length),
+                                style: const TextStyle(
+                                  fontWeight: AppTheme.fwBold,
+                                  color: AppTheme.typeHabitColor,
                                 ),
                               ),
+                              iconColor: AppTheme.typeHabitColor,
+                              children: [
+                                GroupedHabitsSection(
+                                  habits: todaysHabits,
+                                  habitProvider: habitProvider,
+                                  targetDate: today,
+                                  onHabitTap: (habit) => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => HabitDetailScreen(
+                                        habit: habit,
+                                        isEditing: true,
+                                      ),
+                                    ),
+                                  ),
+                                  onToggleCompleted: (habit) =>
+                                      habitProvider.toggleCompletionToday(
+                                        habit,
+                                        userProvider: context
+                                            .read<UserProvider>(),
+                                      ),
+                                ),
+                                const SizedBox(height: AppTheme.spaceSmall),
+                              ],
                             ),
                           ],
+                          // --- UPCOMING TASKS ACCORDION ---
                           if (upcomingTasks.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppTheme.spaceMedium,
-                              ),
-                              child: Theme(
-                                data: Theme.of(
-                                  context,
-                                ).copyWith(dividerColor: Colors.transparent),
-                                child: ExpansionTile(
-                                  title: Text(
-                                    'Upcoming Tasks ($upcomingWindowDays days)',
-                                    style: const TextStyle(
-                                      fontWeight: AppTheme.fwBold,
-                                      color: AppTheme.typeTaskColor,
-                                    ),
-                                  ),
-                                  iconColor: AppTheme.typeTaskColor,
-                                  collapsedIconColor: AppTheme.typeTaskColor,
-                                  children: [
-                                    ...upcomingTasks.map(
-                                      (task) => TaskListTile(
-                                        task: task,
-                                        enableDismissible: false,
-                                        showDescription: false,
-                                        onToggleCompleted: () => context
-                                            .read<TaskProvider>()
-                                            .toggleTask(
-                                              task.id,
-                                              userProvider: context
-                                                  .read<UserProvider>(),
-                                            ),
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                TaskDetailScreen(task: task),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: AppTheme.spaceSmall),
-                                  ],
+                            StyledExpansionTile(
+                              title: Text(
+                                l10n.homeSectionTasksUpcoming(
+                                  upcomingTasks.length,
+                                ),
+                                style: const TextStyle(
+                                  fontWeight: AppTheme.fwBold,
+                                  color: AppTheme.typeTaskColor,
                                 ),
                               ),
+                              iconColor: AppTheme.typeTaskColor,
+                              children: [
+                                ...upcomingTasks.map(
+                                  (task) => TaskListTile(
+                                    task: task,
+                                    enableDismissible: false,
+                                    showDescription: false,
+                                    onToggleCompleted: () =>
+                                        context.read<TaskProvider>().toggleTask(
+                                          task.id,
+                                          userProvider: context
+                                              .read<UserProvider>(),
+                                        ),
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            TaskDetailScreen(task: task),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: AppTheme.spaceSmall),
+                              ],
                             ),
                           ],
                         ],
@@ -314,5 +289,27 @@ class HomeScreen extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  // Generates a short contextual greeting based on time of day.
+  String _getGreeting(AppLocalizations l10n, String name) {
+    final hour = DateTime.now().hour;
+
+    if (hour < 5) return l10n.greetingDeepNight(name);
+    if (hour < 12) return l10n.greetingMorning(name);
+    if (hour < 17) return l10n.greetingAfternoon(name);
+    if (hour < 21) return l10n.greetingEvening(name);
+    return l10n.greetingNight(name);
+  }
+
+  /// Returns a short home-screen title based on the time of day.
+  String _getDailyMotivationText(AppLocalizations l10n) {
+    final hour = DateTime.now().hour;
+
+    if (hour < 5) return l10n.greetingDeepNightMotivation;
+    if (hour < 12) return l10n.greetingMorningMotivation;
+    if (hour < 17) return l10n.greetingAfternoonMotivation;
+    if (hour < 21) return l10n.greetingEveningMotivation;
+    return l10n.greetingNightMotivation;
   }
 }

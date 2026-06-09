@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:timety/providers/task_provider.dart';
 import 'package:timety/providers/user_provider.dart';
-import 'package:timety/utils/xp_calculator.dart';
+import 'package:timety/utils/stats/xp_calculator.dart';
 
 import '../test_support/fakes.dart';
 import '../test_support/notifications_mock.dart';

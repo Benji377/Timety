@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-
 import '../../theme/app_theme.dart';
-import '../../utils/habit_icons.dart';
+import '../../utils/habit/habit_icons.dart';
 
 part 'habit_models.g.dart';
 
@@ -30,7 +29,7 @@ class Habit {
   @HiveField(4)
   List<int>? targetWeekdays;
 
-  // Stored as minutes from midnight (e.g., 08:00 = 480). Null means anytime today.
+  /// Stored as minutes from midnight (e.g., 08:00 = 480). Null means anytime today.
   @HiveField(5)
   int? targetTimeMinutes;
 
@@ -97,4 +96,20 @@ class Habit {
       return null;
     }
   }
+}
+
+class TimeOfDayBucket {
+  final String label;
+  final String subtitle;
+  final int count;
+  final Color color;
+  final IconData icon;
+
+  const TimeOfDayBucket({
+    required this.label,
+    required this.subtitle,
+    required this.count,
+    required this.color,
+    required this.icon,
+  });
 }

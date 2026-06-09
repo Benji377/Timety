@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'l10n/app_localizations.dart';
 
-import 'package:timety/screens/main_screen.dart';
+import 'screens/main_screen.dart';
 import 'data/user/user.dart';
 import 'data/user/user_repository_hive.dart';
 import 'providers/settings_provider.dart';
 import 'providers/user_provider.dart';
 import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
+import 'utils/common/lld_fallback_delegates.dart';
 
 // Habits
 import 'data/habit/habit_models.dart';
@@ -65,13 +67,6 @@ class TimetyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) =>
-              TaskProvider(repository: HiveTaskRepository())..loadTasks(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => FocusProvider(repository: HiveFocusRepository()),
-        ),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProxyProvider<SettingsProvider, HabitProvider>(
           create: (_) =>
@@ -81,6 +76,17 @@ class TimetyApp extends StatelessWidget {
             habitProvider?.updateSettings(settings);
             return habitProvider!;
           },
+        ),
+        ChangeNotifierProxyProvider<SettingsProvider, TaskProvider>(
+          create: (_) =>
+              TaskProvider(repository: HiveTaskRepository())..loadTasks(),
+          update: (_, settings, taskProvider) {
+            taskProvider?.updateSettings(settings);
+            return taskProvider!;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FocusProvider(repository: HiveFocusRepository()),
         ),
         ChangeNotifierProvider(
           create: (_) => UserProvider(repository: HiveUserRepository()),
@@ -94,6 +100,13 @@ class TimetyApp extends StatelessWidget {
             theme: AppTheme.buildTheme(brightness: Brightness.light),
             darkTheme: AppTheme.buildTheme(brightness: Brightness.dark),
             themeMode: settings.themeMode,
+            localizationsDelegates: const [
+              LldMaterialLocalizationsDelegate(),
+              LldCupertinoLocalizationsDelegate(),
+              ...AppLocalizations.localizationsDelegates,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: settings.appLocale,
             home: const MainScreen(),
           );
         },

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme/app_theme.dart';
-import '../../utils/date_utils.dart';
+import '../../utils/datetime/date_utils.dart';
+import '../../l10n/app_localizations.dart';
+import '../../providers/settings_provider.dart';
 
 class UserStreakTimelineCard extends StatefulWidget {
   final List<DateTime> activityDates;
@@ -52,6 +54,8 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
   Widget build(BuildContext context) {
     final today = DateTime.now();
     final currentStreakKeys = _buildCurrentStreakDayKeys(widget.activityDates);
+    final l10n = AppLocalizations.of(context)!;
+
     final days = List.generate(7, (index) {
       final day = DateTime(
         today.year,
@@ -73,6 +77,7 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
     final statusText = _streakStatusText(
       widget.activityDates,
       widget.currentStreak,
+      l10n,
     );
 
     return Card(
@@ -107,16 +112,16 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Streak timeline',
-                        style: TextStyle(
+                      Text(
+                        l10n.streakTimelineTitle,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Shows last 7 days',
+                        l10n.streakTimelineSubtitle,
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -129,14 +134,14 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'Current streak',
+                      l10n.streakTimelineCurrent,
                       style: TextStyle(
                         fontSize: 11,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     Text(
-                      '${widget.currentStreak} days',
+                      l10n.streakTimelineDays(widget.currentStreak),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -166,22 +171,31 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
                 itemBuilder: (context, index) {
                   return SizedBox(
                     width: 56,
-                    child: _buildDayTile(context, days[index]),
+                    child: _buildDayTile(context, days[index], l10n),
                   );
                 },
               ),
             ),
             const SizedBox(height: 14),
-            const Wrap(
+            Wrap(
               spacing: 10,
               runSpacing: 10,
               children: [
-                _TimelineLegendDot(color: AppTheme.taskColor, label: 'Task'),
-                _TimelineLegendDot(color: AppTheme.habitColor, label: 'Habit'),
-                _TimelineLegendDot(color: AppTheme.focusColor, label: 'Focus'),
+                _TimelineLegendDot(
+                  color: AppTheme.taskColor,
+                  label: l10n.globalLabelTask,
+                ),
+                _TimelineLegendDot(
+                  color: AppTheme.habitColor,
+                  label: l10n.globalLabelHabit,
+                ),
+                _TimelineLegendDot(
+                  color: AppTheme.focusColor,
+                  label: l10n.focusTitle,
+                ),
                 _TimelineLegendDot(
                   color: AppTheme.warningColor,
-                  label: 'Streak day',
+                  label: l10n.streakLegendStreakDay,
                 ),
               ],
             ),
@@ -214,9 +228,13 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
     return streakKeys;
   }
 
-  String _streakStatusText(List<DateTime> activityDates, int currentStreak) {
+  String _streakStatusText(
+    List<DateTime> activityDates,
+    int currentStreak,
+    AppLocalizations l10n,
+  ) {
     if (activityDates.isEmpty) {
-      return 'No streak yet. Complete something today to start one.';
+      return l10n.streakStatusNone;
     }
 
     final todayKey = AppDateUtils.dayKey(DateTime.now());
@@ -226,21 +244,26 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
     final dayKeys = activityDates.map(AppDateUtils.dayKey).toSet();
 
     if (dayKeys.contains(todayKey) && currentStreak > 0) {
-      return 'Today is active and extending your streak.';
+      return l10n.streakStatusActive;
     }
 
     if (dayKeys.contains(yesterdayKey) && currentStreak > 0) {
-      return 'Today is frozen. Yesterday still counts until you miss another day.';
+      return l10n.streakStatusFrozen;
     }
 
     if (dayKeys.contains(todayKey)) {
-      return 'Today counts, but the streak has not fully connected yet.';
+      return l10n.streakStatusBuilding;
     }
 
-    return 'Start today to build a streak that reaches forward.';
+    return l10n.streakStatusStart;
   }
 
-  Widget _buildDayTile(BuildContext context, _StreakDayInfo info) {
+  Widget _buildDayTile(
+    BuildContext context,
+    _StreakDayInfo info,
+    AppLocalizations l10n,
+  ) {
+    final settings = context.watch<SettingsProvider>();
     final backgroundColor = info.isToday
         ? AppTheme.taskColor.withValues(alpha: 0.12)
         : info.inCurrentStreak
@@ -270,7 +293,9 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            info.isToday ? 'Today' : DateFormat('EEE').format(info.date),
+            info.isToday
+                ? l10n.streakDayToday
+                : settings.getFormattedWeekday(info.date),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

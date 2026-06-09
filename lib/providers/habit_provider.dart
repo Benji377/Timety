@@ -1,10 +1,12 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:timety/providers/settings_provider.dart';
+import '../providers/settings_provider.dart';
 import '../data/habit/habit_models.dart';
 import '../data/habit/habit_repository.dart';
 import '../services/notification_service.dart';
-import '../utils/date_utils.dart';
-import '../utils/xp_calculator.dart';
+import '../utils/datetime/date_utils.dart';
+import '../utils/ui/l10n_utils.dart';
+import '../utils/stats/xp_calculator.dart';
 import '../services/android_widgets/habit_widget_service.dart';
 import 'user_provider.dart';
 
@@ -20,7 +22,11 @@ class HabitProvider extends ChangeNotifier {
   // Helper to notify listeners and update home widget
   void _notifyAndSync() {
     notifyListeners();
-    HabitWidgetService.updateHabitWidget(_habits, this);
+
+    final locale =
+        _settings?.appLocale ?? ui.PlatformDispatcher.instance.locale;
+
+    HabitWidgetService.updateHabitWidget(_habits, this, locale);
   }
 
   void updateSettings(SettingsProvider settings) {
@@ -56,6 +62,7 @@ class HabitProvider extends ChangeNotifier {
 
   void syncNotifications() {
     if (_settings == null) return;
+    final l10n = getL10n(settings: _settings);
 
     final todaysHabits = getHabitsForDay(
       DateTime.now(),
@@ -64,10 +71,12 @@ class HabitProvider extends ChangeNotifier {
     NotificationService.instance.scheduleDailyMotivation(
       time: _settings!.notificationTime,
       todaysHabits: todaysHabits,
+      l10n: l10n,
     );
 
     NotificationService.instance.scheduleEndOfDayCheckup(
       time: _settings!.endOfDayTime,
+      l10n: l10n,
     );
 
     for (var habit in _habits) {
@@ -75,8 +84,11 @@ class HabitProvider extends ChangeNotifier {
         NotificationService.instance.scheduleHabitReminder(
           habitId: habit.id,
           habitName: habit.name,
+          title: l10n.notificationHabitTitle,
+          body: l10n.notificationHabitBody(habit.name),
           time: habit.targetTime!,
           targetWeekdays: habit.targetWeekdays,
+          l10n: l10n,
         );
       } else {
         NotificationService.instance.cancelHabitReminder(habit.id);

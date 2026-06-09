@@ -17,7 +17,8 @@ import '../data/task/task.dart';
 import '../data/task/task_repository_hive.dart';
 import '../data/user/user.dart';
 import '../data/user/user_repository_hive.dart';
-import '../widgets/dialogs.dart';
+import '../l10n/app_localizations.dart';
+import '../widgets/common/app_dialogs.dart';
 
 class BackupService {
   static const int _schemaVersion = 1;
@@ -31,20 +32,15 @@ class BackupService {
       final jsonPath = await _writeJsonToTempFile(payload, fileName);
 
       if (!context.mounted) return;
-      await _showFileActions(
-        context,
-        filePath: jsonPath,
-        fileName: fileName,
-        dialogTitle: 'Save Export',
-        shareSubject: 'Timety Export',
-        successLabel: 'Export saved to',
-      );
+
+      await _showFileActions(context, filePath: jsonPath, fileName: fileName);
     } catch (e) {
       debugPrint('Error exporting user data: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupExportFailure(e.toString()))),
+        );
       }
     }
   }
@@ -59,11 +55,11 @@ class BackupService {
       if (result == null || result.files.single.path == null) return;
       if (!context.mounted) return;
 
+      final l10n = AppLocalizations.of(context)!;
       final confirm = await AppDialogs.showConfirmation(
         context: context,
-        title: 'Import JSON Data?',
-        content:
-            'This will OVERWRITE all current user data and settings. This cannot be undone. Are you sure?',
+        title: l10n.backupImportConfirmTitle,
+        content: l10n.backupImportConfirmBody,
       );
 
       if (confirm != true) return;
@@ -77,9 +73,10 @@ class BackupService {
     } catch (e) {
       debugPrint('Error importing user data: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Import failed: Check file format')),
-        );
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.backupImportFailure)));
       }
     }
   }
@@ -88,53 +85,50 @@ class BackupService {
     BuildContext context, {
     required String filePath,
     required String fileName,
-    required String dialogTitle,
-    required String shareSubject,
-    required String successLabel,
   }) async {
     await showModalBottomSheet(
       context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(
-                dialogTitle,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+      builder: (ctx) {
+        // Safe to get l10n here because ctx is fresh from the builder
+        final l10n = AppLocalizations.of(ctx)!;
+
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(
+                  l10n.backupExportTitle,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.folder_outlined),
-              title: const Text('Save to Device'),
-              subtitle: const Text('Choose a local folder'),
-              onTap: () async {
-                Navigator.of(ctx).pop();
-                await _saveToDevice(
-                  context,
-                  filePath: filePath,
-                  fileName: fileName,
-                  successLabel: successLabel,
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.share_outlined),
-              title: const Text('Share / Upload to Cloud'),
-              subtitle: const Text('Send to Drive, Dropbox, WhatsApp…'),
-              onTap: () async {
-                Navigator.of(ctx).pop();
-                await _shareFile(
-                  context,
-                  filePath: filePath,
-                  shareSubject: shareSubject,
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(l10n.backupActionSaveDevice),
+                subtitle: Text(l10n.backupActionSaveDeviceSubtitle),
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  await _saveToDevice(
+                    context,
+                    filePath: filePath,
+                    fileName: fileName,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share_outlined),
+                title: Text(l10n.backupActionShareCloud),
+                subtitle: Text(l10n.backupActionShareCloudSubtitle),
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  await _shareFile(context, filePath: filePath);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -142,13 +136,15 @@ class BackupService {
     BuildContext context, {
     required String filePath,
     required String fileName,
-    required String successLabel,
   }) async {
+    // Grab the title before the async FilePicker call
+    final pickerTitle = AppLocalizations.of(context)!.backupFilePickerTitle;
+
     try {
       final bytes = await File(filePath).readAsBytes();
 
       final outputPath = await FilePicker.saveFile(
-        dialogTitle: 'Choose where to save your file',
+        dialogTitle: pickerTitle,
         fileName: fileName,
         type: FileType.custom,
         allowedExtensions: ['json'],
@@ -158,18 +154,20 @@ class BackupService {
       if (outputPath == null) return;
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$successLabel: $outputPath')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${l10n.backupExportSuccess}: $outputPath')),
+        );
       }
 
       File(filePath).delete().ignore();
     } catch (e) {
       debugPrint('Error saving file: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Save failed: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupSaveFailure(e.toString()))),
+        );
       }
       File(filePath).delete().ignore();
     }
@@ -178,8 +176,10 @@ class BackupService {
   static Future<void> _shareFile(
     BuildContext context, {
     required String filePath,
-    required String shareSubject,
   }) async {
+    // Grab the subject before the async Share call
+    final shareSubject = AppLocalizations.of(context)!.backupExportSubject;
+
     try {
       final xFile = XFile(filePath, mimeType: 'application/json');
       await SharePlus.instance.share(
@@ -190,9 +190,10 @@ class BackupService {
       File(filePath).delete().ignore();
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Share failed: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupShareFailure(e.toString()))),
+        );
       }
       File(filePath).delete().ignore();
     }
@@ -754,18 +755,19 @@ class BackupService {
   static Future<void> _showRestoreSuccessDialog(BuildContext context) async {
     if (!context.mounted) return;
 
+    // Guaranteed safe since we already checked context.mounted
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Restore Successful!'),
-        content: const Text(
-          'Your data has been restored. Please completely close and restart Timety to load the imported data.',
-        ),
+        title: Text(l10n.backupRestoreSuccessTitle),
+        content: Text(l10n.backupRestoreSuccessBody),
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Got it'),
+            child: Text(l10n.commonButtonGotIt),
           ),
         ],
       ),

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/task/task.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../utils/task_filter_engine.dart';
-import '../../widgets/expansion_section.dart';
+import '../../utils/task/task_filter_engine.dart';
+import '../../widgets/common/expansion_section.dart';
 import '../../widgets/list_tiles/task_list_tile.dart';
 import '../calendar_screen.dart';
 import '../statistics_screen.dart';
 import 'task_detail_screen.dart';
 
+/// Displays a searchable, filterable, and sortable list of all tasks.
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
 
@@ -32,6 +34,245 @@ class _TaskListScreenState extends State<TaskListScreen> {
       if (!mounted) return;
       context.read<TaskProvider>().loadTasks();
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.taskListTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            tooltip: l10n.commonTooltipStats,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const StatisticsScreen(initialTabIndex: 1),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            tooltip: l10n.commonTooltipCalendar,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CalendarScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Consumer<TaskProvider>(
+        builder: (context, provider, child) {
+          // Extract unique categories from tasks
+          final allCategories =
+              provider.tasks
+                  .map((t) => t.category.trim())
+                  .where((c) => c.isNotEmpty)
+                  .toSet()
+                  .toList()
+                ..sort();
+
+          return Column(
+            children: [
+              // --- SEARCH & SORT HEADER ---
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: l10n.taskListSearchHint,
+                          prefixIcon: const Icon(Icons.search),
+                          border: const OutlineInputBorder(
+                            borderRadius: AppTheme.brNeo,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.spaceMedium,
+                            vertical: AppTheme.spaceSmall,
+                          ),
+                        ),
+                        onChanged: (val) => setState(() => _searchQuery = val),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Sort Dropdown
+                    PopupMenuButton<TaskSortOption>(
+                      icon: const Icon(Icons.sort),
+                      tooltip: l10n.taskListTooltipSort,
+                      onSelected: (TaskSortOption result) {
+                        setState(() => _sortOption = result);
+                      },
+                      itemBuilder: (BuildContext context) {
+                        // Iterate over all enum values dynamically
+                        return TaskSortOption.values.map((option) {
+                          return PopupMenuItem<TaskSortOption>(
+                            value: option,
+                            child: Text(option.getLocalizedLabel(context)),
+                          );
+                        }).toList();
+                      },
+                    ),
+
+                    // Order Toggle (Asc/Desc)
+                    IconButton(
+                      icon: Icon(
+                        _isAscending
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
+                      ),
+                      tooltip: _isAscending
+                          ? l10n.taskListSortAscending
+                          : l10n.taskListSortDescending,
+                      onPressed: () =>
+                          setState(() => _isAscending = !_isAscending),
+                    ),
+                  ],
+                ),
+              ),
+
+              // --- CATEGORY PILLS ---
+              if (allCategories.isNotEmpty)
+                Container(
+                  height: 56,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    itemCount:
+                        allCategories.length + 1, // +1 for the "All" pill
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        final isSelected = _selectedCategoryFilter == null;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: FilterChip(
+                            label: Text(l10n.taskListFilterAll),
+                            selected: isSelected,
+                            onSelected: (_) =>
+                                setState(() => _selectedCategoryFilter = null),
+                          ),
+                        );
+                      }
+
+                      final category = allCategories[index - 1];
+                      final isSelected = _selectedCategoryFilter == category;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: FilterChip(
+                          label: Text(category),
+                          selected: isSelected,
+                          onSelected: (_) {
+                            setState(() {
+                              // If tapped again, clear the filter. Otherwise, select it.
+                              _selectedCategoryFilter = isSelected
+                                  ? null
+                                  : category;
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+              // --- TASKS SCROLLABLE LIST ---
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    if (provider.tasks.isEmpty) {
+                      return Center(child: Text(l10n.taskListEmpty));
+                    }
+
+                    // Apply pipeline
+                    final processedTasks = _getProcessedTasks(provider.tasks);
+
+                    if (processedTasks.isEmpty) {
+                      return Center(child: Text(l10n.taskListFilterNoMatch));
+                    }
+
+                    // Grouping Logic
+                    final overdue = <Task>[];
+                    final dueToday = <Task>[];
+                    final todo = <Task>[];
+                    final done = <Task>[];
+
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+
+                    for (var task in processedTasks) {
+                      if (task.isCompleted) {
+                        done.add(task);
+                      } else if (task.dueDate != null) {
+                        if (task.dueDate!.isBefore(now)) {
+                          overdue.add(task);
+                        } else if (task.dueDate!.year == today.year &&
+                            task.dueDate!.month == today.month &&
+                            task.dueDate!.day == today.day) {
+                          dueToday.add(task);
+                        } else {
+                          todo.add(task);
+                        }
+                      } else {
+                        todo.add(task);
+                      }
+                    }
+
+                    return ListView(
+                      padding: const EdgeInsets.only(bottom: 80),
+                      children: [
+                        _buildTaskSection(
+                          l10n.taskListSectionOverdue,
+                          AppTheme.errorColor,
+                          overdue,
+                          isOverdue: true,
+                        ),
+                        _buildTaskSection(
+                          l10n.taskListSectionToday,
+                          AppTheme.warningColor,
+                          dueToday,
+                        ),
+                        _buildTaskSection(
+                          l10n.taskListSectionUpcoming,
+                          AppTheme.taskColor,
+                          todo,
+                        ),
+                        _buildTaskSection(
+                          l10n.taskListSectionDone,
+                          AppTheme.successColor,
+                          done,
+                          initExpanded: false,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'task_list_add_button',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const TaskDetailScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
   }
 
   // --- DATA PIPELINE: Filter & Sort ---
@@ -77,255 +318,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
           )
           .toList(),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Tasks'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: 'Insights',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const StatisticsScreen(initialTabIndex: 1),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            tooltip: 'Calendar View',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CalendarScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer<TaskProvider>(
-        builder: (context, provider, child) {
-          // Extract unique categories from tasks
-          final allCategories =
-              provider.tasks
-                  .map((t) => t.category.trim())
-                  .where((c) => c.isNotEmpty)
-                  .toSet()
-                  .toList()
-                ..sort();
-
-          return Column(
-            children: [
-              // --- TOP BAR: SEARCH & SORT ---
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          hintText: 'Search title or description...',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: AppTheme.brNeo,
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: AppTheme.spaceMedium,
-                            vertical: AppTheme.spaceSmall,
-                          ),
-                        ),
-                        onChanged: (val) => setState(() => _searchQuery = val),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-
-                    // Sort Dropdown
-                    PopupMenuButton<TaskSortOption>(
-                      icon: const Icon(Icons.sort),
-                      tooltip: 'Sort by',
-                      onSelected: (TaskSortOption result) {
-                        setState(() => _sortOption = result);
-                      },
-                      itemBuilder: (BuildContext context) =>
-                          <PopupMenuEntry<TaskSortOption>>[
-                            const PopupMenuItem(
-                              value: TaskSortOption.dueDate,
-                              child: Text('Due Date'),
-                            ),
-                            const PopupMenuItem(
-                              value: TaskSortOption.priority,
-                              child: Text('Priority'),
-                            ),
-                            const PopupMenuItem(
-                              value: TaskSortOption.size,
-                              child: Text('Size'),
-                            ),
-                            const PopupMenuItem(
-                              value: TaskSortOption.category,
-                              child: Text('Category'),
-                            ),
-                            const PopupMenuItem(
-                              value: TaskSortOption.alphabetical,
-                              child: Text('Alphabetical'),
-                            ),
-                          ],
-                    ),
-
-                    // Order Toggle (Asc/Desc)
-                    IconButton(
-                      icon: Icon(
-                        _isAscending
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                      ),
-                      tooltip: _isAscending ? 'Ascending' : 'Descending',
-                      onPressed: () =>
-                          setState(() => _isAscending = !_isAscending),
-                    ),
-                  ],
-                ),
-              ),
-
-              // --- CATEGORY PILLS ---
-              if (allCategories.isNotEmpty)
-                Container(
-                  height: 56,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    itemCount:
-                        allCategories.length + 1, // +1 for the "All" pill
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        final isSelected = _selectedCategoryFilter == null;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: FilterChip(
-                            label: const Text('All'),
-                            selected: isSelected,
-                            onSelected: (_) =>
-                                setState(() => _selectedCategoryFilter = null),
-                          ),
-                        );
-                      }
-
-                      final category = allCategories[index - 1];
-                      final isSelected = _selectedCategoryFilter == category;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: FilterChip(
-                          label: Text(category),
-                          selected: isSelected,
-                          onSelected: (_) {
-                            setState(() {
-                              // If tapped again, clear the filter. Otherwise, select it.
-                              _selectedCategoryFilter = isSelected
-                                  ? null
-                                  : category;
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-              // --- MAIN LIST AREA ---
-              Expanded(
-                child: Builder(
-                  builder: (context) {
-                    if (provider.tasks.isEmpty) {
-                      return const Center(
-                        child: Text("No tasks yet! Tap + to add one."),
-                      );
-                    }
-
-                    // Apply pipeline
-                    final processedTasks = _getProcessedTasks(provider.tasks);
-
-                    if (processedTasks.isEmpty) {
-                      return const Center(
-                        child: Text("No tasks match your filters."),
-                      );
-                    }
-
-                    // Grouping Logic
-                    final overdue = <Task>[];
-                    final dueToday = <Task>[];
-                    final todo = <Task>[];
-                    final done = <Task>[];
-
-                    final now = DateTime.now();
-                    final today = DateTime(now.year, now.month, now.day);
-
-                    for (var task in processedTasks) {
-                      if (task.isCompleted) {
-                        done.add(task);
-                      } else if (task.dueDate != null) {
-                        if (task.dueDate!.isBefore(now)) {
-                          overdue.add(task);
-                        } else if (task.dueDate!.year == today.year &&
-                            task.dueDate!.month == today.month &&
-                            task.dueDate!.day == today.day) {
-                          dueToday.add(task);
-                        } else {
-                          todo.add(task);
-                        }
-                      } else {
-                        todo.add(task);
-                      }
-                    }
-
-                    return ListView(
-                      padding: const EdgeInsets.only(bottom: 80),
-                      children: [
-                        _buildTaskSection(
-                          'Overdue',
-                          AppTheme.errorColor,
-                          overdue,
-                          isOverdue: true,
-                        ),
-                        _buildTaskSection(
-                          'Due Today',
-                          AppTheme.warningColor,
-                          dueToday,
-                        ),
-                        _buildTaskSection('To Do', AppTheme.taskColor, todo),
-                        _buildTaskSection(
-                          'Done',
-                          AppTheme.successColor,
-                          done,
-                          initExpanded: false,
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'task_list_add_button',
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TaskDetailScreen()),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }

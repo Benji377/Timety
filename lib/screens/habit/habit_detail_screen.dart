@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/habit/habit_models.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/habit_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/habit_icons.dart';
+import '../../utils/datetime/date_time_pickers.dart';
+import '../../utils/habit/habit_icons.dart';
 
 class HabitDetailScreen extends StatefulWidget {
   final Habit? habit;
@@ -62,56 +65,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     super.dispose();
   }
 
-  // Convert a codePoint back to an IconData object
-  IconData? _getIconFromCodePoint(int? codePoint) {
-    if (codePoint == null) return null;
-    try {
-      return HabitIcons.availableIcons.firstWhere(
-        (icon) => icon.codePoint == codePoint,
-        orElse: () => Icons.circle,
-      );
-    } catch (e) {
-      return Icons.circle;
-    }
-  }
-
-  void _saveHabit() {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (_frequency == HabitFrequency.weeklyExact && _selectedWeekdays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one day.')),
-      );
-      return;
-    }
-
-    final newHabit = Habit(
-      id: widget.habit?.id ?? DateTime.now().toString(),
-      name: _nameController.text.trim(),
-      frequency: _frequency,
-      colorValue: AppTheme.habitColor.toARGB32(),
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
-      stackName: _stackController.text.trim().isEmpty
-          ? null
-          : _stackController.text.trim(),
-      stackOrder: _stackOrder,
-      iconCodePoint: _selectedIcon.codePoint,
-      targetDaysPerWeek: _frequency == HabitFrequency.weeklyFlexible
-          ? _targetDaysPerWeek
-          : null,
-      targetWeekdays: _frequency == HabitFrequency.weeklyExact
-          ? _selectedWeekdays.toList()
-          : null,
-      completions: widget.habit?.completions,
-      createdAt: widget.habit?.createdAt,
-    )..setTargetTime(_targetTime);
-
-    context.read<HabitProvider>().saveHabit(newHabit);
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     // Extract existing stack names for autocomplete
@@ -123,10 +76,15 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
         .where((s) => s.isNotEmpty)
         .toSet()
         .toList();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Habit' : 'New Habit'),
+        title: Text(
+          widget.isEditing
+              ? l10n.habitDetailTitleEdit
+              : l10n.habitDetailTitleNew,
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -136,13 +94,13 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             // --- HABIT NAME ---
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Habit Name',
-                hintText: 'e.g., Read 10 pages, Workout...',
-                prefixIcon: Icon(Icons.stars),
+              decoration: InputDecoration(
+                labelText: l10n.habitDetailLabelName,
+                hintText: l10n.habitDetailLabelNameHint,
+                prefixIcon: const Icon(Icons.stars),
               ),
               validator: (val) => val == null || val.trim().isEmpty
-                  ? 'Please enter a name'
+                  ? l10n.habitDetailLabelNameRequest
                   : null,
             ),
             const SizedBox(height: AppTheme.spaceLarge),
@@ -173,10 +131,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                             controller: controller,
                             focusNode: focusNode,
                             onChanged: (val) => _stackController.text = val,
-                            decoration: const InputDecoration(
-                              labelText: 'Habit Stack (Optional)',
-                              hintText: 'e.g., Morning Routine',
-                              prefixIcon: Icon(Icons.layers),
+                            decoration: InputDecoration(
+                              labelText: l10n.habitDetailLabelStack,
+                              hintText: l10n.habitDetailLabelStackHint,
+                              prefixIcon: const Icon(Icons.layers),
                             ),
                           );
                         },
@@ -186,9 +144,11 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 Expanded(
                   child: DropdownButtonFormField<int>(
                     initialValue: _stackOrder,
-                    decoration: const InputDecoration(
-                      labelText: 'Order',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: InputDecoration(
+                      labelText: l10n.habitDetailLabelStackOrder,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                      ),
                     ),
                     items: [
                       const DropdownMenuItem<int>(child: Text("-")),
@@ -209,19 +169,19 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             // --- NOTES ---
             TextFormField(
               controller: _notesController,
-              decoration: const InputDecoration(
-                labelText: 'Notes (Optional)',
-                hintText: 'Why are you building this habit?',
-                prefixIcon: Icon(Icons.notes),
+              decoration: InputDecoration(
+                labelText: l10n.habitDetailLabelNotes,
+                hintText: l10n.habitDetailLabelNotesHint,
+                prefixIcon: const Icon(Icons.notes),
               ),
               maxLines: 2,
             ),
             const SizedBox(height: AppTheme.spaceLarge),
 
             // --- ICON SELECTOR ---
-            const Text(
-              'Select an Icon',
-              style: TextStyle(fontWeight: AppTheme.fwBold),
+            Text(
+              l10n.habitDetailLabelIcon,
+              style: const TextStyle(fontWeight: AppTheme.fwBold),
             ),
             const SizedBox(height: AppTheme.spaceSmall),
             SizedBox(
@@ -256,24 +216,24 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             const SizedBox(height: AppTheme.spaceXLarge),
 
             // --- FREQUENCY ---
-            const Text(
-              "Frequency",
-              style: TextStyle(fontWeight: AppTheme.fwBold),
+            Text(
+              l10n.habitDetailLabelFrequency,
+              style: const TextStyle(fontWeight: AppTheme.fwBold),
             ),
             const SizedBox(height: AppTheme.spaceSmall),
             SegmentedButton<HabitFrequency>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: HabitFrequency.daily,
-                  label: Text("Daily"),
+                  label: Text(l10n.habitDetailLabelFrequencyDaily),
                 ),
                 ButtonSegment(
                   value: HabitFrequency.weeklyFlexible,
-                  label: Text("Flexible"),
+                  label: Text(l10n.habitDetailLabelFrequencyFlexible),
                 ),
                 ButtonSegment(
                   value: HabitFrequency.weeklyExact,
-                  label: Text("Specific"),
+                  label: Text(l10n.habitDetailLabelFrequencyExact),
                 ),
               ],
               selected: {_frequency},
@@ -290,7 +250,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                   child: Column(
                     children: [
                       Text(
-                        "Goal: $_targetDaysPerWeek days a week",
+                        l10n.habitDetailLabelGoal(_targetDaysPerWeek),
                         style: const TextStyle(fontWeight: AppTheme.fwBold),
                       ),
                       Slider(
@@ -340,9 +300,9 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             const SizedBox(height: AppTheme.spaceXLarge),
 
             // --- TIME REMINDER ---
-            const Text(
-              "Reminder Time (Optional)",
-              style: TextStyle(fontWeight: AppTheme.fwBold),
+            Text(
+              l10n.habitDetailLabelReminder,
+              style: const TextStyle(fontWeight: AppTheme.fwBold),
             ),
             const SizedBox(height: AppTheme.spaceSmall),
             Card(
@@ -353,8 +313,17 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 ),
                 title: Text(
                   _targetTime != null
-                      ? _targetTime!.format(context)
-                      : "No specific time",
+                      ? context.read<SettingsProvider>().getFormattedTime(
+                          // Dummy date trick to let the SettingsProvider format the TimeOfDay
+                          DateTime(
+                            2000,
+                            1,
+                            1,
+                            _targetTime!.hour,
+                            _targetTime!.minute,
+                          ),
+                        )
+                      : l10n.habitDetailLabelReminderNoTime,
                 ),
                 trailing: _targetTime != null
                     ? IconButton(
@@ -363,7 +332,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                       )
                     : const Icon(Icons.edit),
                 onTap: () async {
-                  final time = await showTimePicker(
+                  final time = await AppDatePickers.pickTime(
                     context: context,
                     initialTime:
                         _targetTime ?? const TimeOfDay(hour: 8, minute: 0),
@@ -381,8 +350,62 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
         onPressed: _saveHabit,
         backgroundColor: AppTheme.habitColor,
         icon: const Icon(Icons.save),
-        label: const Text("Save Habit"),
+        label: Text(l10n.commonLabelSave),
       ),
     );
+  }
+
+  // Convert a codePoint back to an IconData object
+  IconData? _getIconFromCodePoint(int? codePoint) {
+    if (codePoint == null) return null;
+    try {
+      return HabitIcons.availableIcons.firstWhere(
+        (icon) => icon.codePoint == codePoint,
+        orElse: () => Icons.circle,
+      );
+    } catch (e) {
+      return Icons.circle;
+    }
+  }
+
+  void _saveHabit() {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_frequency == HabitFrequency.weeklyExact && _selectedWeekdays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.habitDetailSnackbarSaveNoDay,
+          ),
+        ),
+      );
+      return;
+    }
+
+    final newHabit = Habit(
+      id: widget.habit?.id ?? DateTime.now().toString(),
+      name: _nameController.text.trim(),
+      frequency: _frequency,
+      colorValue: AppTheme.habitColor.toARGB32(),
+      notes: _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
+      stackName: _stackController.text.trim().isEmpty
+          ? null
+          : _stackController.text.trim(),
+      stackOrder: _stackOrder,
+      iconCodePoint: _selectedIcon.codePoint,
+      targetDaysPerWeek: _frequency == HabitFrequency.weeklyFlexible
+          ? _targetDaysPerWeek
+          : null,
+      targetWeekdays: _frequency == HabitFrequency.weeklyExact
+          ? _selectedWeekdays.toList()
+          : null,
+      completions: widget.habit?.completions,
+      createdAt: widget.habit?.createdAt,
+    )..setTargetTime(_targetTime);
+
+    context.read<HabitProvider>().saveHabit(newHabit);
+    Navigator.pop(context);
   }
 }

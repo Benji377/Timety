@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../data/task/task.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/priority_utils.dart';
-import '../dialogs.dart';
+import '../../utils/common/app_utils.dart';
+import '../../l10n/app_localizations.dart';
+import '../common/app_dialogs.dart';
 
 class TaskListTile extends StatelessWidget {
   final Task task;
@@ -15,8 +16,6 @@ class TaskListTile extends StatelessWidget {
   final bool showDueDate;
   final bool showTrailing;
   final EdgeInsetsGeometry margin;
-  final String deleteTitle;
-  final String deleteContent;
 
   const TaskListTile({
     super.key,
@@ -30,8 +29,6 @@ class TaskListTile extends StatelessWidget {
     this.showDueDate = true,
     this.showTrailing = true,
     this.margin = AppTheme.listTileScreenMargin,
-    this.deleteTitle = 'Delete Task',
-    this.deleteContent = 'Are you sure you want to delete this task?',
   });
 
   Color _getBorderColor() {
@@ -186,6 +183,8 @@ class TaskListTile extends StatelessWidget {
 
     if (!enableDismissible || onDelete == null) return card;
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Dismissible(
       key: ValueKey(task.id),
       background: Container(
@@ -204,8 +203,8 @@ class TaskListTile extends StatelessWidget {
       confirmDismiss: (_) async {
         return await AppDialogs.showConfirmation(
               context: context,
-              title: deleteTitle,
-              content: deleteContent,
+              title: l10n.taskDeleteTitle,
+              content: l10n.taskDeleteContent,
             ) ??
             false;
       },

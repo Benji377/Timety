@@ -1,6 +1,8 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class SettingsProvider extends ChangeNotifier {
   SharedPreferences? _prefs;
@@ -15,6 +17,9 @@ class SettingsProvider extends ChangeNotifier {
   TimeOfDay _endOfDayTime = const TimeOfDay(hour: 20, minute: 0);
   String _locationApiEndpoint = 'https://photon.komoot.io/api/';
   bool _autoCompleteFocusTargetOnFinish = false;
+  String? _appLocaleCode;
+  bool _use24HourFormat = true;
+  String? _dateFormatCode;
 
   // Getters
   ThemeMode get themeMode => _themeMode;
@@ -26,6 +31,24 @@ class SettingsProvider extends ChangeNotifier {
   int get upcomingTasksDays => _upcomingTasksDays;
   String get locationApiEndpoint => _locationApiEndpoint;
   bool get autoCompleteFocusTargetOnFinish => _autoCompleteFocusTargetOnFinish;
+  Locale? get appLocale => _appLocaleCode != null && _appLocaleCode != 'system'
+      ? Locale(_appLocaleCode!)
+      : null;
+  String get appLocaleCode => _appLocaleCode ?? 'system';
+  bool get use24HourFormat => _use24HourFormat;
+  String get dateFormatCode => _dateFormatCode ?? 'system';
+
+  String get _resolvedLocale {
+    final locale =
+        _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.languageCode;
+
+    // The intl package crashes on Ladin, so we fall back to Italian for date formatting
+    if (locale.startsWith('lld')) {
+      return 'it';
+    }
+
+    return locale;
+  }
 
   SettingsProvider() {
     _loadSettings();
@@ -59,6 +82,11 @@ class SettingsProvider extends ChangeNotifier {
     _locationApiEndpoint =
         _prefs?.getString('locationApiEndpoint') ??
         'https://photon.komoot.io/api/';
+
+    // Locale & Format
+    _appLocaleCode = _prefs?.getString('appLocaleCode');
+    _use24HourFormat = _prefs?.getBool('use24HourFormat') ?? true;
+    _dateFormatCode = _prefs?.getString('dateFormatCode');
 
     notifyListeners();
   }
@@ -146,5 +174,81 @@ class SettingsProvider extends ChangeNotifier {
     } catch (e) {
       return false;
     }
+  }
+
+  void setAppLocaleCode(String code) {
+    _appLocaleCode = code == 'system' ? null : code;
+    if (_appLocaleCode == null) {
+      _prefs?.remove('appLocaleCode'); // Let OS decide
+    } else {
+      _prefs?.setString('appLocaleCode', _appLocaleCode!);
+    }
+    notifyListeners();
+  }
+
+  void set24HourFormat(bool use24Hour) {
+    _use24HourFormat = use24Hour;
+    _prefs?.setBool('use24HourFormat', use24Hour);
+    notifyListeners();
+  }
+
+  void setDateFormatCode(String code) {
+    _dateFormatCode = code == 'system' ? null : code;
+
+    if (_dateFormatCode == null) {
+      _prefs?.remove('dateFormatCode');
+    } else {
+      _prefs?.setString('dateFormatCode', _dateFormatCode!);
+    }
+    notifyListeners();
+  }
+
+  // Helpers
+  String getFormattedDate(DateTime date) => _dateFormatCode != null
+      ? DateFormat(_dateFormatCode).format(date)
+      : DateFormat.yMd(_resolvedLocale).format(date);
+
+  String getFormattedTime(DateTime date) => _use24HourFormat
+      ? DateFormat.Hm(_resolvedLocale).format(date)
+      : DateFormat.jm(_resolvedLocale).format(date);
+
+  String getFormattedTimeOfDay(TimeOfDay time) {
+    return getFormattedTime(DateTime(2000, 1, 1, time.hour, time.minute));
+  }
+
+  String getFormattedTimeWithSeconds(DateTime date) => _use24HourFormat
+      ? DateFormat.Hms(_resolvedLocale).format(date)
+      : DateFormat.jms(_resolvedLocale).format(date);
+
+  String getFormattedDateTime(DateTime date) =>
+      '${getFormattedDate(date)} ${getFormattedTime(date)}';
+
+  String getFormattedMonthYear(DateTime date) =>
+      DateFormat.yMMMM(_resolvedLocale).format(date);
+
+  String getFormattedWeekday(DateTime date) =>
+      DateFormat.E(_resolvedLocale).format(date);
+
+  String getFormattedWeekdayDay(DateTime date) =>
+      '${DateFormat.E(_resolvedLocale).format(date)} ${DateFormat.d(_resolvedLocale).format(date)}';
+
+  // For the short date, a standard method is still best due to the custom logic
+  String getFormattedShortDate(DateTime date) {
+    if (_dateFormatCode != null) {
+      if (_dateFormatCode == 'dd/MM/yyyy') {
+        return DateFormat('dd/MM').format(date);
+      }
+      if (_dateFormatCode == 'MM/dd/yyyy') {
+        return DateFormat('MM/dd').format(date);
+      }
+      if (_dateFormatCode == 'yyyy-MM-dd') {
+        return DateFormat('MM-dd').format(date);
+      }
+      if (_dateFormatCode == 'dd.MM.yyyy') {
+        return DateFormat('dd.MM').format(date);
+      }
+      return DateFormat('MMM d').format(date);
+    }
+    return DateFormat.Md(_resolvedLocale).format(date);
   }
 }

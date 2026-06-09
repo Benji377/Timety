@@ -4,19 +4,21 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:timety/providers/habit_provider.dart';
-import 'package:timety/providers/user_provider.dart';
-import 'package:timety/utils/wrapup_image_generator.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/habit_provider.dart';
+import '../providers/user_provider.dart';
+import '../utils/ui/wrapup_image_generator.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../theme/app_theme.dart';
-import '../utils/streak_calculator.dart';
-import '../widgets/stat_cards.dart';
+import '../utils/stats/streak_calculator.dart';
+import '../widgets/stats/stat_card.dart';
 import '../widgets/user_profile/streak_status_badge.dart';
 import '../widgets/user_profile/user_streak_timeline_card.dart';
 import '../widgets/user_profile/user_xp_breakdown_card.dart';
 import 'statistics_screen.dart';
 
+/// Displays the user's profile, XP progress, and all-time statistics.
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});
 
@@ -27,194 +29,13 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   bool _isExporting = false;
 
-  Widget _buildAllTimeStatsSection(
-    BuildContext context,
-    int totalTasks,
-    int totalHabitsDone,
-    int totalFocusMins,
-    int totalSessions,
-    int highestStreak,
-  ) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
-              Theme.of(context).colorScheme.surface,
-            ],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'All-Time Stats',
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                fontSize: AppTheme.fsHeadingSmall,
-                fontWeight: AppTheme.fwBold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Lifetime progress at a glance',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: AppTheme.spaceMedium,
-              runSpacing: AppTheme.spaceMedium,
-              children: [
-                StatCard(
-                  title: 'Tasks Done',
-                  value: '$totalTasks',
-                  icon: Icons.check_circle_outline,
-                  color: AppTheme.taskColor,
-                  style: StatCardStyle.compactVertical,
-                ),
-                StatCard(
-                  title: 'Habits Met',
-                  value: '$totalHabitsDone',
-                  icon: Icons.repeat,
-                  color: AppTheme.habitColor,
-                  style: StatCardStyle.compactVertical,
-                ),
-                StatCard(
-                  title: 'Focus Mins',
-                  value: '$totalFocusMins',
-                  icon: Icons.timer_outlined,
-                  color: AppTheme.focusColor,
-                  style: StatCardStyle.compactVertical,
-                ),
-                StatCard(
-                  title: 'Sessions',
-                  value: '$totalSessions',
-                  icon: Icons.coffee_outlined,
-                  color: AppTheme.userColor,
-                  style: StatCardStyle.compactVertical,
-                ),
-                StatCard(
-                  title: 'Best Streak',
-                  value: '$highestStreak',
-                  icon: Icons.military_tech,
-                  color: AppTheme.warningColor,
-                  style: StatCardStyle.compactVertical,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _shareWrapUp(
-    String name,
-    int level,
-    String title,
-    int tasks,
-    int habits,
-    int focus,
-    int streak,
-  ) async {
-    if (_isExporting) return;
-    setState(() => _isExporting = true);
-
-    try {
-      // Wrap-up image generation
-      final pngBytes = await WrapUpImageGenerator.generate(
-        name: name,
-        level: level,
-        levelTitle: title,
-        streak: streak,
-        tasksCompleted: tasks,
-        focusMins: focus,
-        habitsMet: habits,
-      );
-
-      final directory = await getTemporaryDirectory();
-      final file = File('${directory.path}/timety_wrap_up.png');
-      await file.writeAsBytes(pngBytes);
-
-      await SharePlus.instance.share(
-        ShareParams(
-          subject: 'My Timety Wrap-Up',
-          files: [XFile(file.path)],
-          text: 'Master your time with Timety!',
-        ),
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to generate wrap-up image.')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isExporting = false);
-    }
-  }
-
-  // --- IMAGE PICKER ---
-  Future<void> _pickImage(UserProvider user) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null && mounted) {
-      user.updateProfileImage(pickedFile.path);
-    }
-  }
-
-  // --- NAME EDITOR ---
-  Future<void> _editName(BuildContext context, UserProvider user) async {
-    final controller = TextEditingController(text: user.name);
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Edit Name"),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 20,
-          decoration: const InputDecoration(hintText: "Enter your name"),
-          textCapitalization: TextCapitalization.words,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                user.updateName(controller.text.trim());
-              }
-              Navigator.pop(context);
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
     final tasks = context.watch<TaskProvider>();
     final focus = context.watch<FocusProvider>();
     final habits = context.watch<HabitProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     final taskDates = tasks.tasks
         .where((task) => task.isCompleted && task.completedAt != null)
@@ -263,7 +84,7 @@ class _UserScreenState extends State<UserScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(l10n.userProfileTitle),
         actions: [
           IconButton(
             icon: _isExporting
@@ -273,8 +94,9 @@ class _UserScreenState extends State<UserScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.ios_share),
-            tooltip: 'Share Weekly Wrap-up',
+            tooltip: l10n.userTooltipShareWrapUp,
             onPressed: () => _shareWrapUp(
+              context,
               userProvider.name,
               userProvider.currentLevel,
               userProvider.levelTitle,
@@ -286,7 +108,7 @@ class _UserScreenState extends State<UserScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.bar_chart),
-            tooltip: 'Statistics',
+            tooltip: l10n.userTooltipStatistics,
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const StatisticsScreen()),
@@ -299,7 +121,7 @@ class _UserScreenState extends State<UserScreen> {
           children: [
             const SizedBox(height: AppTheme.space2XLarge),
 
-            // --- PROFILE HEADER ---
+            // --- AVATAR & NAME SECTION ---
             GestureDetector(
               onTap: () => _pickImage(userProvider),
               child: Stack(
@@ -366,6 +188,7 @@ class _UserScreenState extends State<UserScreen> {
 
             const SizedBox(height: AppTheme.spaceLarge),
 
+            // --- XP BREAKDOWN SECTION ---
             UserXpBreakdownCard(
               currentLevel: userProvider.currentLevel,
               levelTitle: userProvider.levelTitle,
@@ -375,6 +198,7 @@ class _UserScreenState extends State<UserScreen> {
 
             const SizedBox(height: AppTheme.spaceLarge),
 
+            // --- STREAK TIMELINE SECTION ---
             UserStreakTimelineCard(
               activityDates: activityDates,
               taskDates: taskDates,
@@ -398,6 +222,201 @@ class _UserScreenState extends State<UserScreen> {
             const SizedBox(height: AppTheme.space3XLarge),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAllTimeStatsSection(
+    BuildContext context,
+    int totalTasks,
+    int totalHabitsDone,
+    int totalFocusMins,
+    int totalSessions,
+    int highestStreak,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.42),
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.userStatsAllTimeTitle,
+              textAlign: TextAlign.left,
+              style: const TextStyle(
+                fontSize: AppTheme.fsHeadingSmall,
+                fontWeight: AppTheme.fwBold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.userStatsAllTimeSubtitle,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: AppTheme.spaceMedium,
+              runSpacing: AppTheme.spaceMedium,
+              children: [
+                StatCard(
+                  title: l10n.userStatTasksDone,
+                  value: '$totalTasks',
+                  icon: Icons.check_circle_outline,
+                  color: AppTheme.taskColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+                StatCard(
+                  title: l10n.userStatHabitsMet,
+                  value: '$totalHabitsDone',
+                  icon: Icons.repeat,
+                  color: AppTheme.habitColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+                StatCard(
+                  title: l10n.userStatFocusMins,
+                  value: '$totalFocusMins',
+                  icon: Icons.timer_outlined,
+                  color: AppTheme.focusColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+                StatCard(
+                  title: l10n.userStatSessions,
+                  value: '$totalSessions',
+                  icon: Icons.coffee_outlined,
+                  color: AppTheme.userColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+                StatCard(
+                  title: l10n.userStatBestStreak,
+                  value: '$highestStreak',
+                  icon: Icons.military_tech,
+                  color: AppTheme.warningColor,
+                  style: StatCardStyle.compactVertical,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _shareWrapUp(
+    BuildContext context,
+    String name,
+    int level,
+    String title,
+    int tasks,
+    int habits,
+    int focus,
+    int streak,
+  ) async {
+    if (_isExporting) return;
+
+    // Grab localized strings before async gaps
+    final l10n = AppLocalizations.of(context)!;
+    final subjectString = l10n.userShareSubject;
+    final textString = l10n.userShareText;
+    final errorString = l10n.userErrorGenerateImage;
+
+    setState(() => _isExporting = true);
+
+    try {
+      // Wrap-up image generation
+      final pngBytes = await WrapUpImageGenerator.generate(
+        l10n: l10n,
+        name: name,
+        level: level,
+        levelTitle: title,
+        streak: streak,
+        tasksCompleted: tasks,
+        focusMins: focus,
+        habitsMet: habits,
+      );
+
+      final directory = await getTemporaryDirectory();
+      final file = File('${directory.path}/timety_wrap_up.png');
+      await file.writeAsBytes(pngBytes);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          subject: subjectString,
+          files: [XFile(file.path)],
+          text: textString,
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorString)));
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
+  // --- IMAGE PICKER ---
+  Future<void> _pickImage(UserProvider user) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null && mounted) {
+      user.updateProfileImage(pickedFile.path);
+    }
+  }
+
+  // --- NAME EDITOR ---
+  Future<void> _editName(BuildContext context, UserProvider user) async {
+    final controller = TextEditingController(text: user.name);
+    final l10n = AppLocalizations.of(context)!;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.userEditNameTitle),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 20,
+          decoration: InputDecoration(hintText: l10n.userEditNameHint),
+          textCapitalization: TextCapitalization.words,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.commonLabelCancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                user.updateName(controller.text.trim());
+              }
+              Navigator.pop(context);
+            },
+            child: Text(l10n.commonLabelSave),
+          ),
+        ],
       ),
     );
   }

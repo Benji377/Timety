@@ -63,7 +63,7 @@ void main() {
       expect(session.tagId, tag.id);
       expect(session.targetType, FocusTargetType.task);
       expect(session.targetId, 'task-1');
-      expect(session.displayTargetLabel, 'Write docs');
+      expect(session.targetLabel, 'Write docs');
     });
   });
 }

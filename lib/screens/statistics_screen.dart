@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'habit/habit_stats_screen.dart';
 import 'overview_stats_screen.dart';
@@ -46,28 +47,14 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     super.dispose();
   }
 
-  Color _getSignatureColor(int index) {
-    switch (index) {
-      case 0:
-        return AppTheme.warningColor;
-      case 1:
-        return AppTheme.taskColor;
-      case 2:
-        return AppTheme.focusColor;
-      case 3:
-        return AppTheme.habitColor;
-      default:
-        return Theme.of(context).colorScheme.primary;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final activeColor = _getSignatureColor(_currentTabIndex);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Insights & Statistics'),
+        title: Text(l10n.statsTitle),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(64.0),
           child: Padding(
@@ -100,11 +87,11 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                   context,
                 ).colorScheme.onSurfaceVariant,
                 labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                tabs: const [
-                  Tab(text: 'Overview'),
-                  Tab(text: 'Tasks'),
-                  Tab(text: 'Focus'),
-                  Tab(text: 'Habits'),
+                tabs: [
+                  Tab(text: l10n.statsTabOverview),
+                  Tab(text: l10n.statsTabTasks),
+                  Tab(text: l10n.statsTabFocus),
+                  Tab(text: l10n.statsTabHabits),
                 ],
               ),
             ),
@@ -121,5 +108,20 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         ],
       ),
     );
+  }
+
+  Color _getSignatureColor(int index) {
+    switch (index) {
+      case 0:
+        return AppTheme.warningColor;
+      case 1:
+        return AppTheme.taskColor;
+      case 2:
+        return AppTheme.focusColor;
+      case 3:
+        return AppTheme.habitColor;
+      default:
+        return Theme.of(context).colorScheme.primary;
+    }
   }
 }
