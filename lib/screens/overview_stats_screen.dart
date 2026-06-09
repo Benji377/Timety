@@ -11,7 +11,6 @@ import '../providers/settings_provider.dart';
 import '../utils/datetime/date_utils.dart';
 import '../widgets/stats/kpi_stat_card.dart';
 
-
 class OverviewStatsScreen extends StatelessWidget {
   const OverviewStatsScreen({super.key});
 
@@ -114,7 +113,12 @@ class OverviewStatsScreen extends StatelessWidget {
         // --- CHART ---
         SizedBox(
           height: 250,
-          child: _buildSynergyChart(context, taskProvider, focusProvider, settings),
+          child: _buildSynergyChart(
+            context,
+            taskProvider,
+            focusProvider,
+            settings,
+          ),
         ),
         const SizedBox(height: 40),
       ],

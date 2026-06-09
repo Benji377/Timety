@@ -3,7 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 /// Provides Italian Material localizations as a fallback for Ladin
-class LldMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+class LldMaterialLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
   const LldMaterialLocalizationsDelegate();
 
   @override
@@ -16,11 +17,14 @@ class LldMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
   }
 
   @override
-  bool shouldReload(covariant LocalizationsDelegate<MaterialLocalizations> old) => false;
+  bool shouldReload(
+    covariant LocalizationsDelegate<MaterialLocalizations> old,
+  ) => false;
 }
 
 /// Provides Italian Cupertino localizations as a fallback for Ladin
-class LldCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
+class LldCupertinoLocalizationsDelegate
+    extends LocalizationsDelegate<CupertinoLocalizations> {
   const LldCupertinoLocalizationsDelegate();
 
   @override
@@ -32,5 +36,7 @@ class LldCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoL
   }
 
   @override
-  bool shouldReload(covariant LocalizationsDelegate<CupertinoLocalizations> old) => false;
+  bool shouldReload(
+    covariant LocalizationsDelegate<CupertinoLocalizations> old,
+  ) => false;
 }

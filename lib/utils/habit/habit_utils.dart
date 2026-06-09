@@ -18,7 +18,9 @@ class HabitUtils {
     if (habit.frequency == HabitFrequency.weeklyExact) {
       final days =
           habit.targetWeekdays
-              ?.map((d) => AppDateUtils.weekdayToStringShort(l10n.localeName, d))
+              ?.map(
+                (d) => AppDateUtils.weekdayToStringShort(l10n.localeName, d),
+              )
               .join(', ') ??
           '';
       return l10n.habitFreqWeekly(days);

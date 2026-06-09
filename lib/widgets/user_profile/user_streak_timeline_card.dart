@@ -55,7 +55,7 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
     final today = DateTime.now();
     final currentStreakKeys = _buildCurrentStreakDayKeys(widget.activityDates);
     final l10n = AppLocalizations.of(context)!;
-    
+
     final days = List.generate(7, (index) {
       final day = DateTime(
         today.year,
@@ -181,9 +181,18 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
               spacing: 10,
               runSpacing: 10,
               children: [
-                _TimelineLegendDot(color: AppTheme.taskColor, label: l10n.globalLabelTask),
-                _TimelineLegendDot(color: AppTheme.habitColor, label: l10n.globalLabelHabit),
-                _TimelineLegendDot(color: AppTheme.focusColor, label: l10n.focusTitle),
+                _TimelineLegendDot(
+                  color: AppTheme.taskColor,
+                  label: l10n.globalLabelTask,
+                ),
+                _TimelineLegendDot(
+                  color: AppTheme.habitColor,
+                  label: l10n.globalLabelHabit,
+                ),
+                _TimelineLegendDot(
+                  color: AppTheme.focusColor,
+                  label: l10n.focusTitle,
+                ),
                 _TimelineLegendDot(
                   color: AppTheme.warningColor,
                   label: l10n.streakLegendStreakDay,
@@ -219,7 +228,11 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
     return streakKeys;
   }
 
-  String _streakStatusText(List<DateTime> activityDates, int currentStreak, AppLocalizations l10n) {
+  String _streakStatusText(
+    List<DateTime> activityDates,
+    int currentStreak,
+    AppLocalizations l10n,
+  ) {
     if (activityDates.isEmpty) {
       return l10n.streakStatusNone;
     }
@@ -245,7 +258,11 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
     return l10n.streakStatusStart;
   }
 
-  Widget _buildDayTile(BuildContext context, _StreakDayInfo info, AppLocalizations l10n) {
+  Widget _buildDayTile(
+    BuildContext context,
+    _StreakDayInfo info,
+    AppLocalizations l10n,
+  ) {
     final settings = context.watch<SettingsProvider>();
     final backgroundColor = info.isToday
         ? AppTheme.taskColor.withValues(alpha: 0.12)
@@ -276,7 +293,9 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            info.isToday ? l10n.streakDayToday : settings.getFormattedWeekday(info.date),
+            info.isToday
+                ? l10n.streakDayToday
+                : settings.getFormattedWeekday(info.date),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

@@ -5,7 +5,11 @@ class HabitWidgetHeaderView extends StatelessWidget {
   final int habitCount;
   final String title;
 
-  const HabitWidgetHeaderView({super.key, required this.habitCount, required this.title});
+  const HabitWidgetHeaderView({
+    super.key,
+    required this.habitCount,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {

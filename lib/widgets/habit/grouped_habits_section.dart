@@ -95,27 +95,27 @@ class GroupedHabitsSection extends StatelessWidget {
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                 title: Row(
-                children: [
-                  Icon(
-                    Icons.layers,
-                    size: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      stackName.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                        letterSpacing: 1,
+                  children: [
+                    Icon(
+                      Icons.layers,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        stackName.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          letterSpacing: 1,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
+                    const SizedBox(width: 8),
+                    Text(
                       '$completedCount / ${globalStack.length}',
                       style: TextStyle(
                         fontSize: 11,

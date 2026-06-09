@@ -66,9 +66,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                     child: ListTile(
                       leading: const Icon(Icons.label),
                       title: Text(category),
-                      subtitle: Text(
-                        l10n.categoryTaskCount(taskCount),
-                      ),
+                      subtitle: Text(l10n.categoryTaskCount(taskCount)),
                       trailing: SizedBox(
                         width: 100,
                         child: Row(
@@ -86,7 +84,9 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                                     await AppDialogs.showConfirmation(
                                       context: context,
                                       title: l10n.categoryDeleteTitle,
-                                      content: l10n.categoryDeleteContent(category),
+                                      content: l10n.categoryDeleteContent(
+                                        category,
+                                      ),
                                       confirmLabel: l10n.commonLabelDelete,
                                       confirmColor: Colors.red,
                                     ) ==

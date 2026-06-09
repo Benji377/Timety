@@ -74,7 +74,13 @@ class _LocationPickerState extends State<LocationPicker> {
         debugPrint('API Error: ${response.statusCode} - ${response.body}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.locationPickerServerError(response.statusCode))),
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                )!.locationPickerServerError(response.statusCode),
+              ),
+            ),
           );
         }
       }

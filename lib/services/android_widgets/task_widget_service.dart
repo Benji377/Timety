@@ -10,7 +10,10 @@ class TaskWidgetService {
   static const String _groupId = 'io.github.benji377.timety';
   static const String _androidWidgetName = 'TaskWidgetProvider';
 
-  static Future<void> updateTaskWidget(List<Task> tasks, Locale userLocale,) async {
+  static Future<void> updateTaskWidget(
+    List<Task> tasks,
+    Locale userLocale,
+  ) async {
     try {
       await HomeWidget.setAppGroupId(_groupId);
 
@@ -31,7 +34,12 @@ class TaskWidgetService {
 
       // Render Header
       final headerPath = await HomeWidget.renderFlutterWidget(
-        _wrap(TaskWidgetHeaderView(taskCount: urgentTasks.length, title: l10n.widgetTasksDue(urgentTasks.length))),
+        _wrap(
+          TaskWidgetHeaderView(
+            taskCount: urgentTasks.length,
+            title: l10n.widgetTasksDue(urgentTasks.length),
+          ),
+        ),
         key: 'task_widget_header',
         logicalSize: const ui.Size(400, 60),
         pixelRatio: 2.0,

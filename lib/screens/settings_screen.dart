@@ -293,7 +293,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.schedule, color: AppTheme.warningAccent),
             title: Text(l10n.settingsLabelDailyMotivation),
-            subtitle: Text(settings.getFormattedTimeOfDay(settings.notificationTime),),
+            subtitle: Text(
+              settings.getFormattedTimeOfDay(settings.notificationTime),
+            ),
             trailing: const Icon(Icons.edit),
             onTap: () async {
               final TimeOfDay? time = await AppDatePickers.pickTime(
@@ -311,7 +313,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: AppTheme.habitColor,
             ),
             title: Text(l10n.settingsLabelEodCheckup),
-            subtitle: Text(settings.getFormattedTimeOfDay(settings.endOfDayTime),),
+            subtitle: Text(
+              settings.getFormattedTimeOfDay(settings.endOfDayTime),
+            ),
             trailing: const Icon(Icons.edit),
             onTap: () async {
               final TimeOfDay? time = await AppDatePickers.pickTime(
@@ -587,16 +591,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           if (asset != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(2),
-              child: 
-                SvgPicture.asset(
-                  asset,
-                  width: 24,
-                  height: 16,
-                  fit: BoxFit.cover,
-                  semanticsLabel: "$text flag",
-                ),
+              child: SvgPicture.asset(
+                asset,
+                width: 24,
+                height: 16,
+                fit: BoxFit.cover,
+                semanticsLabel: "$text flag",
+              ),
             )
-
           else
             const SizedBox(width: 24),
           const SizedBox(width: 12),

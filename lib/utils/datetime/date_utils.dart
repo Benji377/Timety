@@ -32,7 +32,7 @@ class AppDateUtils {
 
   /// Converts a weekday integer to its short localized string representation.
   static String weekdayToStringShort(String locale, int weekday) {
-    // Jan 1, 2024 was a Monday. 
+    // Jan 1, 2024 was a Monday.
     // This perfectly maps 1 -> Mon, 2 -> Tue, ... 7 -> Sun.
     final dummyDate = DateTime(2024, 1, weekday);
 

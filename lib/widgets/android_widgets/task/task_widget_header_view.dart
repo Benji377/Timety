@@ -5,7 +5,11 @@ class TaskWidgetHeaderView extends StatelessWidget {
   final int taskCount;
   final String title;
 
-  const TaskWidgetHeaderView({super.key, required this.taskCount, required this.title});
+  const TaskWidgetHeaderView({
+    super.key,
+    required this.taskCount,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {

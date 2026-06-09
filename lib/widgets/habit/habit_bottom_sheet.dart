@@ -97,7 +97,9 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
         builder: (ctx) => AlertDialog(
           title: Text(l10n.habitHistoryRemoveTitle),
           content: Text(
-            l10n.habitHistoryRemoveCompletion(context.read<SettingsProvider>().getFormattedDate(date)),
+            l10n.habitHistoryRemoveCompletion(
+              context.read<SettingsProvider>().getFormattedDate(date),
+            ),
           ),
           actions: [
             TextButton(
@@ -110,7 +112,10 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                 setState(() {}); // Rebuild calendar and timeline
                 Navigator.pop(ctx);
               },
-              child: Text(l10n.commonLabelRemove, style: const TextStyle(color: Colors.red)),
+              child: Text(
+                l10n.commonLabelRemove,
+                style: const TextStyle(color: Colors.red),
+              ),
             ),
           ],
         ),
@@ -200,7 +205,9 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                   onPressed: () => _changeMonth(-1),
                 ),
                 Text(
-                  context.watch<SettingsProvider>().getFormattedMonthYear(_displayedMonth),
+                  context.watch<SettingsProvider>().getFormattedMonthYear(
+                    _displayedMonth,
+                  ),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -222,29 +229,30 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                l10n.commonWeekdayMon,
-                l10n.commonWeekdayTue,
-                l10n.commonWeekdayWed,
-                l10n.commonWeekdayThu,
-                l10n.commonWeekdayFri,
-                l10n.commonWeekdaySat,
-                l10n.commonWeekdaySun,
-              ]
-                  .map(
-                    (day) => SizedBox(
-                      width: 30,
-                      child: Text(
-                        day,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+              children:
+                  [
+                        l10n.commonWeekdayMon,
+                        l10n.commonWeekdayTue,
+                        l10n.commonWeekdayWed,
+                        l10n.commonWeekdayThu,
+                        l10n.commonWeekdayFri,
+                        l10n.commonWeekdaySat,
+                        l10n.commonWeekdaySun,
+                      ]
+                      .map(
+                        (day) => SizedBox(
+                          width: 30,
+                          child: Text(
+                            day,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  )
-                  .toList(),
+                      )
+                      .toList(),
             ),
           ),
 
@@ -351,7 +359,11 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
     );
   }
 
-  Widget _buildTimelineItem(DateTime completion, bool isLast, AppLocalizations l10n) {
+  Widget _buildTimelineItem(
+    DateTime completion,
+    bool isLast,
+    AppLocalizations l10n,
+  ) {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -398,7 +410,9 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          context.watch<SettingsProvider>().getFormattedDate(completion),
+                          context.watch<SettingsProvider>().getFormattedDate(
+                            completion,
+                          ),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -406,7 +420,11 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          l10n.habitHistoryCompletedAt(context.watch<SettingsProvider>().getFormattedTime(completion)),
+                          l10n.habitHistoryCompletedAt(
+                            context.watch<SettingsProvider>().getFormattedTime(
+                              completion,
+                            ),
+                          ),
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 13,

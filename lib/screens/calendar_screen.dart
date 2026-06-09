@@ -169,10 +169,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
         Text(
           settingsProvider.getFormattedMonthYear(_focusedMonth),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         IconButton(
           icon: const Icon(Icons.chevron_right),
@@ -237,9 +234,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           final int weeklyHabitCount = allHabits.fold(0, (sum, h) {
             return sum +
                 h.completions
-                    .where(
-                      (c) => c.isAfter(weekStart) && c.isBefore(weekEnd),
-                    )
+                    .where((c) => c.isAfter(weekStart) && c.isBefore(weekEnd))
                     .length;
           });
 
@@ -339,7 +334,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ),
                           TextSpan(
                             text: '$weeklyFocusCount',
-                            style: const TextStyle(color: AppTheme.successColor),
+                            style: const TextStyle(
+                              color: AppTheme.successColor,
+                            ),
                           ),
                         ],
                       ),
@@ -401,10 +398,15 @@ class _HabitsAccordion extends StatelessWidget {
             ]
           : [
               ...selectedDayHabits.map((habit) {
-                final isCompleted =
-                    habitProvider.isCompletedOn(habit, selectedDate);
+                final isCompleted = habitProvider.isCompletedOn(
+                  habit,
+                  selectedDate,
+                );
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
@@ -450,8 +452,9 @@ class _HabitsAccordion extends StatelessWidget {
                     title: Text(
                       habit.name,
                       style: TextStyle(
-                        decoration:
-                            isCompleted ? TextDecoration.lineThrough : null,
+                        decoration: isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
                         color: isCompleted ? Colors.grey : null,
                       ),
                     ),
@@ -499,7 +502,10 @@ class _TasksAccordion extends StatelessWidget {
           : [
               ...selectedDayTasks.map((task) {
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
@@ -531,8 +537,9 @@ class _TasksAccordion extends StatelessWidget {
                     title: Text(
                       task.title,
                       style: TextStyle(
-                        decoration:
-                            task.isCompleted ? TextDecoration.lineThrough : null,
+                        decoration: task.isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
                     ),
                     trailing: AppUtils().getPriorityIcon(task.priority),
@@ -597,8 +604,9 @@ class _FocusSessionsAccordion extends StatelessWidget {
                           .firstOrNull
                     : null;
 
-                String timeString =
-                    settingsProvider.getFormattedTime(session.startTime);
+                String timeString = settingsProvider.getFormattedTime(
+                  session.startTime,
+                );
                 if (session.endTime != null) {
                   timeString +=
                       " - ${settingsProvider.getFormattedTime(session.endTime!)}";
@@ -608,7 +616,10 @@ class _FocusSessionsAccordion extends StatelessWidget {
 
                 final int focusMins = session.totalSecondsFocused ~/ 60;
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     side: BorderSide(color: Colors.grey.shade300),

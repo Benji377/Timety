@@ -55,7 +55,12 @@ class HabitWidgetService {
 
       // Render Header
       final headerPath = await HomeWidget.renderFlutterWidget(
-        _wrap(HabitWidgetHeaderView(habitCount: todayHabits.length, title: l10n.widgetHabitsToday)),
+        _wrap(
+          HabitWidgetHeaderView(
+            habitCount: todayHabits.length,
+            title: l10n.widgetHabitsToday,
+          ),
+        ),
         key: 'habit_widget_header',
         logicalSize: const ui.Size(400, 56),
         pixelRatio: 2.0,
