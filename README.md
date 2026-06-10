@@ -58,14 +58,17 @@ Choose your preferred way to stay productive.
 </p>
 
 ### Manual Installation (GitHub Releases)
-For the most up-to-date version, download the APK directly for your device architecture:
 
-* **[arm64-v8a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-arm64-v8a.apk)** - Most modern Android phones (64-bit). **(Recommended)**
-* **[armeabi-v7a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-armeabi-v7a.apk)** - Older Android devices (32-bit).
-* **[x86_64](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-x86_64.apk)** - Android emulators and some tablets.
-* **[Universal Bundle (.aab)](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0.aab)** - Best for manual side-loading via App Bundle installers.
+1. Go to the **[GitHub Latest Release Page](https://github.com/Benji377/Timety/releases/latest)**.
+2. Scroll down to the **Assets** section.
+3. Download the correct file for your device based on the guide below:
 
-**How to install:**
+* **`arm64-v8a`** - Most modern Android phones (64-bit) **(Recommended for almost all newer devices)**
+* **`armeabi-v7a`** - Older or budget Android phones and devices (32-bit)
+* **`x86_64`** - Android emulators running on a PC, or specific Intel/AMD-based tablets
+* **`.aab` (Universal Bundle)** - A single file containing all architectures, best if you use a dedicated App Bundle installer app
+
+#### **How to install:**
 1. Download the `.apk` file corresponding to your device.
 2. Open the file on your Android device.
 3. If prompted, enable "Install from Unknown Sources" in your settings.
