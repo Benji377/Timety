@@ -48,12 +48,20 @@ Timety is an offline-first productivity and time-management application built wi
 Choose your preferred way to stay productive.
 
 <p align="left">
-  <img src="https://img.shields.io/badge/Get_it_on-555555?style=for-the-badge" alt="Get it on">
-  <a href="https://f-droid.org/en/packages/io.github.benji377.timety/">
-    <img src="https://img.shields.io/badge/F--Droid-ffffff?style=for-the-badge&logo=f-droid&logoColor=black" alt="F-Droid">
+  <a href="https://f-droid.org/packages/io.github.benji377.timety">
+    <img src="assets/badges/badge_fdroid.png"
+      alt="Get it on F-Droid"
+      height="50">
+  </a>
+  <a href="https://github.com/Benji377/Timety/releases/latest">
+    <img src="assets/badges/badge_github.png"
+      alt="Get it on GitHub"
+      height="50">
   </a>
   <a href="https://sourceforge.net/p/timety/">
-    <img src="https://img.shields.io/badge/sourceforge-333333?style=for-the-badge&logo=sourceforge" alt="SourceForge">
+    <img src="assets/badges/badge_sourceforge.png" 
+      alt="Get it on SourceForge" 
+      height="50">
   </a>
 </p>
 
