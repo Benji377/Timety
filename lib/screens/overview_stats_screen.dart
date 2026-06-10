@@ -179,7 +179,7 @@ class OverviewStatsScreen extends StatelessWidget {
                   return LineTooltipItem(
                     l10n.nMinutesCount(dailyFocus[dayIndex]),
                     const TextStyle(
-                      color: AppTheme.taskColor,
+                      color: AppTheme.focusColor,
                       fontWeight: FontWeight.bold,
                     ),
                   );
@@ -187,7 +187,7 @@ class OverviewStatsScreen extends StatelessWidget {
                   return LineTooltipItem(
                     l10n.nTasksCount(dailyTasks[dayIndex]),
                     const TextStyle(
-                      color: AppTheme.successColor,
+                      color: AppTheme.taskColor,
                       fontWeight: FontWeight.bold,
                     ),
                   );
@@ -255,12 +255,12 @@ class OverviewStatsScreen extends StatelessWidget {
             spots: focusSpots,
             isCurved: true,
             preventCurveOverShooting: true,
-            color: AppTheme.taskColor,
+            color: AppTheme.focusColor,
             barWidth: 3,
             isStrokeCapRound: true,
             belowBarData: BarAreaData(
               show: true,
-              color: AppTheme.taskColor.withValues(alpha: 0.1),
+              color: AppTheme.focusColor.withValues(alpha: 0.1),
             ),
           ),
           // TASK LINE
@@ -268,12 +268,12 @@ class OverviewStatsScreen extends StatelessWidget {
             spots: taskSpots,
             isCurved: true,
             preventCurveOverShooting: true,
-            color: AppTheme.successColor,
+            color: AppTheme.taskColor,
             barWidth: 3,
             isStrokeCapRound: true,
             belowBarData: BarAreaData(
               show: true,
-              color: AppTheme.successColor.withValues(alpha: 0.1),
+              color: AppTheme.taskColor.withValues(alpha: 0.1),
             ),
           ),
         ],
