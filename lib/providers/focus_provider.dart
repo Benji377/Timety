@@ -81,7 +81,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   FocusProvider({required this.repository}) {
-    _init();
+    loadFocusData();
   }
 
   /// Detects when the user unlocks the screen and returns to the app.
@@ -108,7 +108,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Loads saved data from Hive and ensures the three core system modes exist.
-  Future<void> _init() async {
+  Future<void> loadFocusData() async {
     WidgetsBinding.instance.addObserver(this);
 
     _modes = await repository.fetchModes();

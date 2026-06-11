@@ -4,26 +4,30 @@ import 'task_repository.dart';
 
 class HiveTaskRepository implements TaskRepository {
   static const String boxName = 'tasksBox';
+  
+  Future<Box<Task>> get _box async => await Hive.openBox<Task>(boxName);
 
   @override
   Future<List<Task>> fetchTasks() async {
-    final box = await Hive.openBox<Task>(boxName);
+    final box = await _box;
     return box.values.toList();
   }
 
   @override
-  Future<void> saveTasks(List<Task> tasks) async {
-    final box = await Hive.openBox<Task>(boxName);
-    final Map<String, Task> taskMap = {for (var t in tasks) t.id: t};
+  Future<void> saveTask(Task task) async {
+    final box = await _box;
+    await box.put(task.id, task);
+  }
 
-    final keysToDelete = box.keys
-        .where((key) => !taskMap.containsKey(key))
-        .toList();
+  @override
+  Future<void> deleteTask(String id) async {
+    final box = await _box;
+    await box.delete(id);
+  }
 
-    if (keysToDelete.isNotEmpty) {
-      await box.deleteAll(keysToDelete);
-    }
-
-    await box.putAll(taskMap);
+  @override
+  Future<void> clearAll() async {
+    final box = await _box;
+    await box.clear();
   }
 }

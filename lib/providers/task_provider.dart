@@ -26,7 +26,6 @@ class TaskProvider extends ChangeNotifier {
   // Helper to notify listeners, save to repository, and update home widget
   Future<void> _notifyAndSync() async {
     notifyListeners();
-    await repository.saveTasks(_tasks);
 
     final locale =
         _settings?.appLocale ?? ui.PlatformDispatcher.instance.locale;
@@ -136,6 +135,7 @@ class TaskProvider extends ChangeNotifier {
   Future<void> addTask(Task task) async {
     _tasks.add(task);
     _syncTaskReminders(task);
+    await repository.saveTask(task);
     await _notifyAndSync();
   }
 
@@ -153,6 +153,7 @@ class TaskProvider extends ChangeNotifier {
       }
 
       _syncTaskReminders(_tasks[index]);
+      await repository.saveTask(_tasks[index]);
       await _notifyAndSync();
     }
   }
@@ -178,6 +179,7 @@ class TaskProvider extends ChangeNotifier {
     // Cancel all before removing
     await _cancelTaskNotifications(task);
     _tasks.removeWhere((task) => task.id == id);
+    await repository.deleteTask(id);
     await _notifyAndSync();
   }
 
@@ -187,6 +189,7 @@ class TaskProvider extends ChangeNotifier {
       final previousTask = _tasks[index];
       _tasks[index] = updatedTask;
       _syncTaskReminders(updatedTask, previousTask: previousTask);
+      await repository.saveTask(updatedTask);
       await _notifyAndSync();
     }
   }
@@ -221,6 +224,7 @@ class TaskProvider extends ChangeNotifier {
           createdAt: _tasks[i].createdAt,
           subtasks: _tasks[i].subtasks,
         );
+        await repository.saveTask(_tasks[i]);
       }
     }
     await _notifyAndSync();
@@ -243,6 +247,7 @@ class TaskProvider extends ChangeNotifier {
           createdAt: _tasks[i].createdAt,
           subtasks: _tasks[i].subtasks,
         );
+        await repository.saveTask(_tasks[i]);
       }
     }
     await _notifyAndSync();

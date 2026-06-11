@@ -8,6 +8,8 @@ import '../theme/app_theme.dart';
 import '../providers/settings_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/task_provider.dart';
+import '../providers/habit_provider.dart';
+import '../providers/user_provider.dart';
 import '../services/backup_service.dart';
 import '../utils/datetime/date_time_pickers.dart';
 import '../widgets/focus/focus_tags_widget.dart';
@@ -350,7 +352,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(l10n.settingsLabelImportData),
             subtitle: Text(l10n.settingsLabelImportDataSubtitle),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => BackupService.importUserData(context),
+            onTap: () async {
+              final taskProvider = context.read<TaskProvider>();
+              final habitProvider = context.read<HabitProvider>();
+              final focusProvider = context.read<FocusProvider>();
+              final userProvider = context.read<UserProvider>();
+              final settingsProvider = context.read<SettingsProvider>();
+              // Wait for the import to finish
+              final success = await BackupService.importUserData(context);
+
+              if (!mounted) return;
+              
+              // If successful reload all state
+              if (success) {
+                // Using context.read() inside async callbacks to avoid Provider errors
+                await taskProvider.loadTasks();
+                await habitProvider.loadHabits();
+                await focusProvider.loadFocusData();
+                await userProvider.loadUserData();
+                await settingsProvider.loadSettings();
+                
+              }
+            },
           ),
 
           const Divider(height: 32),

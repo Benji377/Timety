@@ -11,7 +11,7 @@ class FakeTaskRepository implements TaskRepository {
   FakeTaskRepository({List<Task>? initialTasks})
     : _tasks = List<Task>.from(initialTasks ?? []);
 
-  List<Task> _tasks;
+  final List<Task> _tasks;
   int fetchCalls = 0;
   int saveCalls = 0;
   List<Task> lastSavedTasks = const [];
@@ -23,10 +23,27 @@ class FakeTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<void> saveTasks(List<Task> tasks) async {
+  Future<void> saveTask(Task task) async {
     saveCalls++;
-    _tasks = List<Task>.from(tasks);
-    lastSavedTasks = List<Task>.from(tasks);
+    final index = _tasks.indexWhere((existing) => existing.id == task.id);
+    if (index == -1) {
+      _tasks.add(task);
+    } else {
+      _tasks[index] = task;
+    }
+    lastSavedTasks = List<Task>.from(_tasks);
+  }
+  
+  @override
+  Future<void> clearAll() {
+    _tasks.clear();
+    return Future.value();
+  }
+  
+  @override
+  Future<void> deleteTask(String id) {
+    _tasks.removeWhere((task) => task.id == id);
+    return Future.value();
   }
 }
 

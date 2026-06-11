@@ -51,11 +51,11 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   SettingsProvider() {
-    _loadSettings();
+    loadSettings();
   }
 
   // --- INIT / LOAD ---
-  Future<void> _loadSettings() async {
+  Future<void> loadSettings() async {
     _prefs = await SharedPreferences.getInstance();
 
     // Theme
