@@ -28,7 +28,7 @@ void main() {
     Hive.registerAdapter(HabitAdapter());
     Hive.registerAdapter(HabitFrequencyAdapter());
     Hive.registerAdapter(UserProfileAdapter());
-    
+
     // Focus adapters
     Hive.registerAdapter(FocusModeAdapter());
     Hive.registerAdapter(FocusModeTypeAdapter());
@@ -63,33 +63,45 @@ void main() {
     // ==========================================
     // PHASE 1: Populate the database
     // ==========================================
-    
+
     // Create a User
     final userBox = await Hive.openBox<UserProfile>(HiveUserRepository.boxName);
-    await userBox.add(UserProfile(name: 'TestUser', totalXp: 500, accountCreated: DateTime(2026)));
+    await userBox.add(
+      UserProfile(
+        name: 'TestUser',
+        totalXp: 500,
+        accountCreated: DateTime(2026),
+      ),
+    );
 
     // Create a Task
     final taskBox = await Hive.openBox<Task>(HiveTaskRepository.boxName);
-    await taskBox.put('task-1', Task(
-      id: 'task-1',
-      title: 'Important Test Task',
-      priority: Priority.high,
-      createdAt: DateTime(2026),
-    ));
+    await taskBox.put(
+      'task-1',
+      Task(
+        id: 'task-1',
+        title: 'Important Test Task',
+        priority: Priority.high,
+        createdAt: DateTime(2026),
+      ),
+    );
 
     // Create a Habit
     final habitBox = await Hive.openBox<Habit>(HiveHabitRepository.boxName);
-    await habitBox.put('habit-1', Habit(
-      id: 'habit-1',
-      name: 'Drink Water',
-      frequency: HabitFrequency.daily,
-      createdAt: DateTime(2026),
-    ));
+    await habitBox.put(
+      'habit-1',
+      Habit(
+        id: 'habit-1',
+        name: 'Drink Water',
+        frequency: HabitFrequency.daily,
+        createdAt: DateTime(2026),
+      ),
+    );
 
     // ==========================================
     // PHASE 2: Export Data
     // ==========================================
-    
+
     // Generate the JSON payload
     final exportPayload = await BackupService.buildPayloadForTest();
 
@@ -114,14 +126,14 @@ void main() {
     // ==========================================
     // PHASE 4: Import Data
     // ==========================================
-    
+
     // Restore from the JSON payload we generated in Phase 2
     await BackupService.restorePayloadForTest(exportPayload);
 
     // ==========================================
     // PHASE 5: Verify Data Integrity
     // ==========================================
-    
+
     // 1. Check Preferences
     final restoredPrefs = await SharedPreferences.getInstance();
     expect(restoredPrefs.getString('themeMode'), 'dark');

@@ -362,7 +362,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final success = await BackupService.importUserData(context);
 
               if (!mounted) return;
-              
+
               // If successful reload all state
               if (success) {
                 // Using context.read() inside async callbacks to avoid Provider errors
@@ -371,7 +371,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 await focusProvider.loadFocusData();
                 await userProvider.loadUserData();
                 await settingsProvider.loadSettings();
-                
               }
             },
           ),

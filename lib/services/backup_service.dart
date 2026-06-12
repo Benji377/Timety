@@ -89,7 +89,9 @@ class BackupService {
   }
 
   @visibleForTesting
-  static Future<void> restorePayloadForTest(Map<String, dynamic> payload) async {
+  static Future<void> restorePayloadForTest(
+    Map<String, dynamic> payload,
+  ) async {
     await _restorePayload(payload);
   }
 

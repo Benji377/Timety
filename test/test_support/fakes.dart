@@ -33,13 +33,13 @@ class FakeTaskRepository implements TaskRepository {
     }
     lastSavedTasks = List<Task>.from(_tasks);
   }
-  
+
   @override
   Future<void> clearAll() {
     _tasks.clear();
     return Future.value();
   }
-  
+
   @override
   Future<void> deleteTask(String id) {
     _tasks.removeWhere((task) => task.id == id);

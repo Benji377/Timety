@@ -4,7 +4,7 @@ import 'task_repository.dart';
 
 class HiveTaskRepository implements TaskRepository {
   static const String boxName = 'tasksBox';
-  
+
   Future<Box<Task>> get _box async => await Hive.openBox<Task>(boxName);
 
   @override

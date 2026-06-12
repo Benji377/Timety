@@ -241,37 +241,40 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             l10n.taskDetailsSectionScheduling,
             Icons.calendar_today,
           ),
-          InkWell(
-            onTap: _isEditing ? _pickDueDate : null,
-            // Ensure the ripple effect stays inside the standard border radius
-            borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-            child: InputDecorator(
-              isEmpty: _dueDate == null,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.event),
-                suffixIcon: _isEditing ? const Icon(Icons.edit) : null,
-                border: const OutlineInputBorder(),
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: disabledBorderColor),
+          _isEditing
+              ? InkWell(
+                  onTap: _pickDueDate,
+                  borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                  child: InputDecorator(
+                    isEmpty: _dueDate == null,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.event),
+                      suffixIcon: Icon(Icons.edit),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                    ),
+                    child: Text(
+                      _dueDate == null
+                          ? l10n.taskDetailsLabelDueDateNone
+                          : l10n.taskDetailsLabelDueDate(
+                              settings.getFormattedDate(_dueDate!),
+                              settings.getFormattedTime(_dueDate!),
+                            ),
+                    ),
+                  ),
+                )
+              : ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.event),
+                  title: Text(
+                    _dueDate == null
+                        ? l10n.taskDetailsLabelDueDateNone
+                        : l10n.taskDetailsLabelDueDate(
+                            settings.getFormattedDate(_dueDate!),
+                            settings.getFormattedTime(_dueDate!),
+                          ),
+                  ),
                 ),
-                // This applies the background color when editing
-                filled: _isEditing,
-                fillColor: Colors.white,
-              ),
-              child: Text(
-                _dueDate == null
-                    ? l10n.taskDetailsLabelDueDateNone
-                    : l10n.taskDetailsLabelDueDate(
-                        settings.getFormattedDate(_dueDate!),
-                        settings.getFormattedTime(_dueDate!),
-                      ),
-                style: TextStyle(
-                  // Dims the text slightly if not in edit mode
-                  color: _isEditing ? null : theme.disabledColor,
-                ),
-              ),
-            ),
-          ),
 
           // Reminders
           if (_isEditing || _reminders.isNotEmpty) ...[
@@ -389,11 +392,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       controller: _newSubtaskController,
                       decoration: InputDecoration(
                         hintText: l10n.taskDetailsLabelSubtaskHint,
+                        alignLabelWithHint: true,
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         disabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
                         suffixIcon: IconButton(
                           icon: const Icon(
                             Icons.add_circle,
