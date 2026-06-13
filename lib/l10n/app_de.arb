@@ -820,6 +820,13 @@
     }
   },
   "nHabitsCount": "{count, plural, =0{Keine Erledigungen} =1{1 Erledigung} other{{count} Erledigungen}}",
+  "@nHabitsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nMinutesCount": "{count, plural, =0{Keine Minuten} =1{1 Minute} other{{count} Minuten}}",
   "@nMinutesCount": {
     "placeholders": {
