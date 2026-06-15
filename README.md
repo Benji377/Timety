@@ -46,7 +46,7 @@ Timety is an offline-first productivity and time-management application built wi
 ## Download & Installation
 
 > [!TIP]
-> 🇨🇳 **中国用户 (Users in China):** 无法正常下载或更新？请查看 [国内下载与安装指南 (F-Droid 镜像源配置)](https://github.com/Benji377/Timety/discussions/81)
+> 🇨🇳 **Users in China:** Having trouble downloading or updating? See the [China Download & Update Guide (F-Droid Mirrors)](https://github.com/Benji377/Timety/discussions/81)
 
 Choose your preferred way to stay productive.
 
