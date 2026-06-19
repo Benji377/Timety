@@ -7,7 +7,7 @@ Welcome to the full gallery of Timety's interface! Here is a closer look at the 
 
 ---
 
-### 🏠 Dashboard & Overview
+## Dashboard & Overview
 <p align="center">
   <img src="01_home_screen.png" width="45%" alt="Home Screen">
   <img src="08_calendar_screen.png" width="45%" alt="Calendar Screen">
@@ -19,7 +19,7 @@ Welcome to the full gallery of Timety's interface! Here is a closer look at the 
 
 ---
 
-### ⏱️ Focus Sessions
+## Focus Sessions
 <p align="center">
   <img src="02_focus_screen.png" width="45%" alt="Focus Screen">
   <img src="06_focus_modes_screen.png" width="45%" alt="Focus Modes Screen">
@@ -27,7 +27,7 @@ Welcome to the full gallery of Timety's interface! Here is a closer look at the 
 
 ---
 
-### 📋 Task Management
+## Task Management
 <p align="center">
   <img src="03_tasks_screen.png" width="45%" alt="Tasks Screen">
   <img src="09_task_detail_screen.png" width="45%" alt="Task Detail Screen">
@@ -35,7 +35,7 @@ Welcome to the full gallery of Timety's interface! Here is a closer look at the 
 
 ---
 
-### 🌱 Habit Tracking
+## Habit Tracking
 <p align="center">
   <img src="04_habits_screen.png" width="45%" alt="Habits Screen">
   <img src="10_habit_detail_screen.png" width="45%" alt="Habit Detail Screen">
