@@ -1,4 +1,3 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
@@ -7,6 +6,7 @@ import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/datetime/date_time_pickers.dart';
+import '../../widgets/common/app_dialogs.dart';
 import '../../widgets/location/location_picker.dart';
 import '../../providers/settings_provider.dart';
 
@@ -48,7 +48,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void initState() {
     super.initState();
     _isNewTask = widget.task == null;
-    _isEditing = _isNewTask ? true : widget.isEditing;
+    _isEditing = _isNewTask || widget.isEditing;
 
     _titleController = TextEditingController(text: widget.task?.title ?? '');
     _descController = TextEditingController(
@@ -106,13 +106,26 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       appBar: AppBar(
         title: Text(appBarTitle),
         actions: [
-          if (!_isEditing)
+          if (!_isEditing) ...[
+            IconButton(
+              icon: const Icon(
+                Icons.delete_outline,
+                color: AppTheme.errorColor,
+              ),
+              onPressed: _confirmAndDelete,
+            ),
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => setState(() => _isEditing = true),
             ),
-          if (_isNewTask)
-            IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
+          ]
+          else ...[
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: _saveTask,
+              tooltip: l10n.commonLabelSave,
+            ),
+          ],
         ],
       ),
       body: ListView(
@@ -437,20 +450,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ),
 
           const SizedBox(height: AppTheme.space3XLarge),
-
-          if (_isEditing && !_isNewTask)
-            ElevatedButton.icon(
-              icon: const Icon(Icons.save),
-              onPressed: _saveTask,
-              label: Text(l10n.taskDetailsLabelSaveEdit),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const ui.Size.fromHeight(54),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: AppTheme.brLarge,
-                ),
-              ),
-            ),
-          const SizedBox(height: AppTheme.space3XLarge),
         ],
       ),
     );
@@ -746,6 +745,23 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     } else {
       context.read<TaskProvider>().updateTask(taskToSave);
       setState(() => _isEditing = false); // Just exit edit mode
+    }
+  }
+
+  Future<void> _confirmAndDelete() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirm = await AppDialogs.showConfirmation(
+      context: context,
+      title: l10n.taskDeleteTitle,
+      content: l10n.taskDeleteContent,
+    );
+
+    if (confirm == true && mounted) {
+      if (widget.task != null) {
+        context.read<TaskProvider>().removeTask(widget.task!.id);
+      }
+      Navigator.pop(context);
     }
   }
 }

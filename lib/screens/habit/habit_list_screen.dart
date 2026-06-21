@@ -206,12 +206,12 @@ class HabitListScreen extends StatelessWidget {
         userProvider: context.read<UserProvider>(),
       ),
       onMarkPastCompletion: openInteractiveCalendar,
-      onDelete: () => provider.deleteHabit(habit.id),
+      onDelete: () => provider.removeHabit(habit.id),
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => HabitDetailScreen(habit: habit, isEditing: true),
+            builder: (_) => HabitDetailScreen(habit: habit),
           ),
         );
       },

@@ -7,6 +7,7 @@ import '../../providers/settings_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/datetime/date_time_pickers.dart';
 import '../../utils/habit/habit_icons.dart';
+import '../../widgets/common/app_dialogs.dart';
 
 class HabitDetailScreen extends StatefulWidget {
   final Habit? habit;
@@ -19,42 +20,44 @@ class HabitDetailScreen extends StatefulWidget {
 }
 
 class _HabitDetailScreenState extends State<HabitDetailScreen> {
+  late bool _isEditing;
+  late bool _isNewHabit;
+
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _notesController;
   late TextEditingController _stackController;
 
-  HabitFrequency _frequency = HabitFrequency.daily;
-  IconData _selectedIcon = Icons.circle;
+  late HabitFrequency _frequency;
+  late IconData _selectedIcon;
   TimeOfDay? _targetTime;
   int? _stackOrder;
 
-  // For Weekly Flexible
-  int _targetDaysPerWeek = 3;
-
-  // For Weekly Exact (1 = Mon, 7 = Sun)
-  Set<int> _selectedWeekdays = {1, 3, 5};
+  late int _targetDaysPerWeek;
+  late Set<int> _selectedWeekdays;
 
   @override
   void initState() {
     super.initState();
+    _isNewHabit = widget.habit == null;
+    _isEditing = _isNewHabit || widget.isEditing;
+
     _nameController = TextEditingController(text: widget.habit?.name ?? '');
     _notesController = TextEditingController(text: widget.habit?.notes ?? '');
     _stackController = TextEditingController(
       text: widget.habit?.stackName ?? '',
     );
 
-    if (widget.habit != null) {
-      _frequency = widget.habit!.frequency;
-      _selectedIcon =
-          _getIconFromCodePoint(widget.habit!.iconCodePoint) ?? Icons.circle;
-      _targetTime = widget.habit!.targetTime;
-      _stackOrder = widget.habit!.stackOrder;
-      _targetDaysPerWeek = widget.habit!.targetDaysPerWeek ?? 3;
-      if (widget.habit!.targetWeekdays != null) {
-        _selectedWeekdays = widget.habit!.targetWeekdays!.toSet();
-      }
-    }
+    _frequency = widget.habit?.frequency ?? HabitFrequency.daily;
+    _targetTime = widget.habit?.targetTime;
+    _stackOrder = widget.habit?.stackOrder;
+    _targetDaysPerWeek = widget.habit?.targetDaysPerWeek ?? 3;
+
+    _selectedWeekdays = widget.habit?.targetWeekdays?.toSet() ?? {1, 3, 5};
+
+    _selectedIcon = widget.habit != null
+        ? _getIconFromCodePoint(widget.habit!.iconCodePoint) ?? Icons.circle
+        : Icons.circle;
   }
 
   @override
@@ -67,6 +70,9 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final disabledBorderColor = theme.dividerColor.withValues(alpha: 0.6);
+
     // Extract existing stack names for autocomplete
     final existingStacks = context
         .read<HabitProvider>()
@@ -76,15 +82,38 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
         .where((s) => s.isNotEmpty)
         .toSet()
         .toList();
+
     final l10n = AppLocalizations.of(context)!;
+
+    final String appBarTitle = _isNewHabit
+        ? l10n.habitDetailTitleNew
+        : (_isEditing ? l10n.habitDetailTitleEdit : l10n.habitDetailTitleView);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.isEditing
-              ? l10n.habitDetailTitleEdit
-              : l10n.habitDetailTitleNew,
-        ),
+        title: Text(appBarTitle),
+        actions: [
+          if (!_isEditing && !_isNewHabit) ...[
+            IconButton(
+              icon: const Icon(
+                Icons.delete_outline,
+                color: AppTheme.errorColor,
+              ),
+              onPressed: _confirmAndDelete,
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => setState(() => _isEditing = true),
+            ),
+          ]
+          else ...[
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: _saveHabit,
+              tooltip: l10n.commonLabelSave,
+            ),
+          ],
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -94,10 +123,14 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             // --- HABIT NAME ---
             TextFormField(
               controller: _nameController,
+              enabled: _isEditing,
               decoration: InputDecoration(
                 labelText: l10n.habitDetailLabelName,
                 hintText: l10n.habitDetailLabelNameHint,
                 prefixIcon: const Icon(Icons.stars),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: disabledBorderColor),
+                ),
               ),
               validator: (val) => val == null || val.trim().isEmpty
                   ? l10n.habitDetailLabelNameRequest
@@ -110,35 +143,59 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Autocomplete<String>(
-                    initialValue: TextEditingValue(text: _stackController.text),
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty) {
-                        return existingStacks;
-                      }
-                      return existingStacks.where((String option) {
-                        return option.toLowerCase().contains(
-                          textEditingValue.text.toLowerCase(),
-                        );
-                      });
-                    },
-                    onSelected: (String selection) {
-                      _stackController.text = selection;
-                    },
-                    fieldViewBuilder:
-                        (context, controller, focusNode, onEditingComplete) {
-                          return TextFormField(
-                            controller: controller,
-                            focusNode: focusNode,
-                            onChanged: (val) => _stackController.text = val,
-                            decoration: InputDecoration(
-                              labelText: l10n.habitDetailLabelStack,
-                              hintText: l10n.habitDetailLabelStackHint,
-                              prefixIcon: const Icon(Icons.layers),
+                  child: _isEditing
+                      ? Autocomplete<String>(
+                          initialValue: TextEditingValue(
+                            text: _stackController.text,
+                          ),
+                          optionsBuilder: (TextEditingValue textEditingValue) {
+                            if (textEditingValue.text.isEmpty) {
+                              return existingStacks;
+                            }
+                            return existingStacks.where((String option) {
+                              return option.toLowerCase().contains(
+                                textEditingValue.text.toLowerCase(),
+                              );
+                            });
+                          },
+                          onSelected: (String selection) {
+                            _stackController.text = selection;
+                          },
+                          fieldViewBuilder:
+                              (
+                                context,
+                                controller,
+                                focusNode,
+                                onEditingComplete,
+                              ) {
+                                return TextFormField(
+                                  controller: controller,
+                                  focusNode: focusNode,
+                                  onChanged: (val) =>
+                                      _stackController.text = val,
+                                  decoration: InputDecoration(
+                                    labelText: l10n.habitDetailLabelStack,
+                                    hintText: l10n.habitDetailLabelStackHint,
+                                    prefixIcon: const Icon(Icons.layers),
+                                  ),
+                                );
+                              },
+                        )
+                      : TextFormField(
+                          initialValue: _stackController.text.isEmpty
+                              ? "-"
+                              : _stackController.text,
+                          enabled: false,
+                          decoration: InputDecoration(
+                            labelText: l10n.habitDetailLabelStack,
+                            prefixIcon: const Icon(Icons.layers),
+                            disabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: disabledBorderColor,
+                              ),
                             ),
-                          );
-                        },
-                  ),
+                          ),
+                        ),
                 ),
                 const SizedBox(width: AppTheme.spaceMedium),
                 Expanded(
@@ -148,6 +205,9 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                       labelText: l10n.habitDetailLabelStackOrder,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 10,
+                      ),
+                      disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: disabledBorderColor),
                       ),
                     ),
                     items: [
@@ -159,7 +219,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                         ),
                       ),
                     ],
-                    onChanged: (val) => setState(() => _stackOrder = val),
+                    // Setting onChanged to null disables the dropdown automatically
+                    onChanged: _isEditing
+                        ? (val) => setState(() => _stackOrder = val)
+                        : null,
                   ),
                 ),
               ],
@@ -169,10 +232,14 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             // --- NOTES ---
             TextFormField(
               controller: _notesController,
+              enabled: _isEditing,
               decoration: InputDecoration(
                 labelText: l10n.habitDetailLabelNotes,
                 hintText: l10n.habitDetailLabelNotesHint,
                 prefixIcon: const Icon(Icons.notes),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: disabledBorderColor),
+                ),
               ),
               maxLines: 2,
             ),
@@ -193,7 +260,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 children: HabitIcons.availableIcons.map((icon) {
                   final isSelected = icon.codePoint == _selectedIcon.codePoint;
                   return GestureDetector(
-                    onTap: () => setState(() => _selectedIcon = icon),
+                    // Only allow tapping if editing
+                    onTap: _isEditing
+                        ? () => setState(() => _selectedIcon = icon)
+                        : null,
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(
@@ -206,7 +276,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                       ),
                       child: Icon(
                         icon,
-                        color: isSelected ? AppTheme.taskColor : null,
+                        color: isSelected
+                            ? AppTheme.taskColor
+                            // Dim the unselected icons slightly when not editing
+                            : (_isEditing ? null : theme.disabledColor),
                       ),
                     ),
                   );
@@ -237,8 +310,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 ),
               ],
               selected: {_frequency},
-              onSelectionChanged: (set) =>
-                  setState(() => _frequency = set.first),
+              // Setting onSelectionChanged to null disables the SegmentedButton
+              onSelectionChanged: _isEditing
+                  ? (set) => setState(() => _frequency = set.first)
+                  : null,
             ),
             const SizedBox(height: AppTheme.spaceLarge),
 
@@ -259,8 +334,12 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                         max: 7,
                         divisions: 7,
                         activeColor: AppTheme.habitColor,
-                        onChanged: (val) =>
-                            setState(() => _targetDaysPerWeek = val.toInt()),
+                        // Null disables the slider
+                        onChanged: _isEditing
+                            ? (val) => setState(
+                                () => _targetDaysPerWeek = val.toInt(),
+                              )
+                            : null,
                       ),
                     ],
                   ),
@@ -281,15 +360,18 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                         selectedColor: AppTheme.habitColor.withValues(
                           alpha: 0.3,
                         ),
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedWeekdays.add(day);
-                            } else {
-                              _selectedWeekdays.remove(day);
-                            }
-                          });
-                        },
+                        // Null disables the choice chips
+                        onSelected: _isEditing
+                            ? (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedWeekdays.add(day);
+                                  } else {
+                                    _selectedWeekdays.remove(day);
+                                  }
+                                });
+                              }
+                            : null,
                       );
                     }).toList(),
                   ),
@@ -307,9 +389,9 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             const SizedBox(height: AppTheme.spaceSmall),
             Card(
               child: ListTile(
-                leading: const Icon(
+                leading: Icon(
                   Icons.notifications_active,
-                  color: AppTheme.habitColor,
+                  color: _isEditing ? AppTheme.habitColor : theme.disabledColor,
                 ),
                 title: Text(
                   _targetTime != null
@@ -324,33 +406,36 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                           ),
                         )
                       : l10n.habitDetailLabelReminderNoTime,
+                  style: TextStyle(
+                    color: _isEditing ? null : theme.disabledColor,
+                  ),
                 ),
-                trailing: _targetTime != null
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () => setState(() => _targetTime = null),
-                      )
-                    : const Icon(Icons.edit),
-                onTap: () async {
-                  final time = await AppDatePickers.pickTime(
-                    context: context,
-                    initialTime:
-                        _targetTime ?? const TimeOfDay(hour: 8, minute: 0),
-                  );
-                  if (time != null) setState(() => _targetTime = time);
-                },
+                trailing: _isEditing
+                    ? (_targetTime != null
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () =>
+                                  setState(() => _targetTime = null),
+                            )
+                          : const Icon(Icons.edit))
+                    : null, // Hide edit icons when just viewing
+                onTap: _isEditing
+                    ? () async {
+                        final time = await AppDatePickers.pickTime(
+                          context: context,
+                          initialTime:
+                              _targetTime ??
+                              const TimeOfDay(hour: 8, minute: 0),
+                        );
+                        if (time != null) setState(() => _targetTime = time);
+                      }
+                    : null,
               ),
             ),
 
             const SizedBox(height: AppTheme.space3XLarge),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _saveHabit,
-        backgroundColor: AppTheme.habitColor,
-        icon: const Icon(Icons.save),
-        label: Text(l10n.commonLabelSave),
       ),
     );
   }
@@ -406,6 +491,30 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     )..setTargetTime(_targetTime);
 
     context.read<HabitProvider>().saveHabit(newHabit);
-    Navigator.pop(context);
+
+    // If it's a brand new habit, pop back to the list screen.
+    // If it's an edit, just smoothly drop back into View mode!
+    if (_isNewHabit) {
+      Navigator.pop(context);
+    } else {
+      setState(() => _isEditing = false);
+    }
+  }
+
+  Future<void> _confirmAndDelete() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirm = await AppDialogs.showConfirmation(
+      context: context,
+      title: l10n.habitDeleteTitle,
+      content: l10n.habitDeleteContent,
+    );
+
+    if (confirm == true && mounted) {
+      if (widget.habit != null) {
+        context.read<HabitProvider>().removeHabit(widget.habit!.id);
+      }
+      Navigator.pop(context);
+    }
   }
 }

@@ -93,7 +93,7 @@ class _UserScreenState extends State<UserScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.ios_share),
+                : const Icon(Icons.share),
             tooltip: l10n.userTooltipShareWrapUp,
             onPressed: () => _shareWrapUp(
               context,

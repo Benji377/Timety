@@ -229,6 +229,7 @@
   "habitDetailLabelStackOrder": "Stack Order",
   "habitDetailSnackbarSaveNoDay": "Please select at least one day",
   "habitDetailTitleEdit": "Edit Habit",
+  "habitDetailTitleView": "Habit Details",
   "habitDetailTitleNew": "New Habit",
   "habitFreqDaily": "Daily",
   "habitFreqFlexible": "{progress} / {target} this week",

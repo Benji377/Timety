@@ -53,7 +53,7 @@ class HabitProvider extends ChangeNotifier {
     _notifyAndSync();
   }
 
-  Future<void> deleteHabit(String id) async {
+  Future<void> removeHabit(String id) async {
     await repository.deleteHabit(id);
     _habits.removeWhere((h) => h.id == id);
     syncNotifications();
