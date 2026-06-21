@@ -135,6 +135,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 disabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: disabledBorderColor),
                 ),
+                filled: _isEditing,
               ),
               validator: (val) => val == null || val.trim().isEmpty
                   ? l10n.habitDetailLabelNameRequest
@@ -198,6 +199,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                                 color: disabledBorderColor,
                               ),
                             ),
+                            filled: false,
                           ),
                         ),
                 ),
@@ -213,6 +215,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                       disabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: disabledBorderColor),
                       ),
+                      filled: _isEditing,
                     ),
                     items: [
                       const DropdownMenuItem<int>(child: Text("-")),
@@ -236,72 +239,58 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _isEditing
-                      ? InkWell(
-                          onTap: _pickIcon,
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(4.0),
-                          ),
-                          child: InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: l10n.habitDetailLabelIcon,
-                              border: const OutlineInputBorder(),
-                              filled: true,
-                            ),
-                            child: Icon(_selectedIcon, color: _selectedColor),
-                          ),
-                        )
-                      : ListTile(
-                          title: Text(
-                            l10n.habitDetailLabelIcon,
-                            style: const TextStyle(
-                              fontSize: AppTheme.fsBodySmall,
-                            ),
-                          ),
-                          leading: Icon(_selectedIcon, color: _selectedColor),
-                          contentPadding: EdgeInsets.zero,
+                  child: InkWell(
+                    // InkWell naturally disables if onTap is null
+                    onTap: _isEditing ? _pickIcon : null,
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: l10n.habitDetailLabelIcon,
+                        border: const OutlineInputBorder(),
+                        disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: disabledBorderColor),
                         ),
+                        enabled: _isEditing,
+                        filled: _isEditing,
+                      ),
+                      child: Icon(
+                        _selectedIcon,
+                        color: _isEditing
+                            ? _selectedColor
+                            : _selectedColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: AppTheme.spaceLarge),
                 Expanded(
-                  child: _isEditing
-                      ? InkWell(
-                          onTap: _pickColor,
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(4.0),
-                          ),
-                          child: InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: l10n.habitDetailLabelColor,
-                              border: const OutlineInputBorder(),
-                              filled: true,
-                            ),
-                            child: Container(
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: _selectedColor,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                        )
-                      : ListTile(
-                          title: Text(
-                            l10n.habitDetailLabelColor,
-                            style: const TextStyle(
-                              fontSize: AppTheme.fsBodySmall,
-                            ),
-                          ),
-                          leading: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: _selectedColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          contentPadding: EdgeInsets.zero,
+                  child: InkWell(
+                    onTap: _isEditing ? _pickColor : null,
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: l10n.habitDetailLabelColor,
+                        border: const OutlineInputBorder(),
+                        disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: disabledBorderColor),
                         ),
+                        enabled: _isEditing,
+                        filled: _isEditing,
+                      ),
+                      child: Align(
+                        child: Container(
+                          height: 24,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            // Slightly dim the color circle if not editing
+                            color: _isEditing
+                                ? _selectedColor
+                                : _selectedColor.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -314,14 +303,17 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               decoration: InputDecoration(
                 labelText: l10n.habitDetailLabelNotes,
                 hintText: l10n.habitDetailLabelNotesHint,
+                alignLabelWithHint: true,
                 prefixIcon: const Icon(Icons.notes),
                 disabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: disabledBorderColor),
                 ),
+                filled: _isEditing,
               ),
-              maxLines: 2,
+              minLines: 3,
+              maxLines: 6,
             ),
-            const SizedBox(height: AppTheme.spaceXLarge),
+            const SizedBox(height: AppTheme.spaceLarge),
 
             // --- FREQUENCY ---
             Text(
@@ -417,7 +409,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               ),
             ],
 
-            const SizedBox(height: AppTheme.spaceXLarge),
+            const SizedBox(height: AppTheme.spaceLarge),
 
             // --- TIME REMINDER ---
             Text(
@@ -425,57 +417,48 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               style: const TextStyle(fontWeight: AppTheme.fwBold),
             ),
             const SizedBox(height: AppTheme.spaceSmall),
-            _isEditing
-                ? InkWell(
-                    onTap: () async {
+            InkWell(
+              onTap: _isEditing
+                  ? () async {
                       final time = await AppDatePickers.pickTime(
                         context: context,
                         initialTime:
                             _targetTime ?? const TimeOfDay(hour: 8, minute: 0),
                       );
                       if (time != null) setState(() => _targetTime = time);
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-                    child: InputDecorator(
-                      isEmpty: _targetTime == null,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.notifications_active),
-                        suffixIcon: Icon(Icons.edit),
-                        border: OutlineInputBorder(),
-                        filled: true,
-                      ),
-                      child: Text(
-                        _targetTime != null
-                            ? context.read<SettingsProvider>().getFormattedTime(
-                                DateTime(
-                                  2000,
-                                  1,
-                                  1,
-                                  _targetTime!.hour,
-                                  _targetTime!.minute,
-                                ),
-                              )
-                            : l10n.habitDetailLabelReminderNoTime,
-                      ),
-                    ),
-                  )
-                : ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.notifications_active),
-                    title: Text(
-                      _targetTime != null
-                          ? context.read<SettingsProvider>().getFormattedTime(
-                              DateTime(
-                                2000,
-                                1,
-                                1,
-                                _targetTime!.hour,
-                                _targetTime!.minute,
-                              ),
-                            )
-                          : l10n.habitDetailLabelReminderNoTime,
-                    ),
+                    }
+                  : null,
+              borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+              child: InputDecorator(
+                isEmpty: _targetTime == null,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.notifications_active),
+                  suffixIcon: _isEditing ? const Icon(Icons.edit) : null,
+                  border: const OutlineInputBorder(),
+                  disabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: disabledBorderColor),
                   ),
+                  enabled: _isEditing,
+                  filled: _isEditing,
+                ),
+                child: Text(
+                  _targetTime != null
+                      ? context.read<SettingsProvider>().getFormattedTime(
+                          DateTime(
+                            2000,
+                            1,
+                            1,
+                            _targetTime!.hour,
+                            _targetTime!.minute,
+                          ),
+                        )
+                      : l10n.habitDetailLabelReminderNoTime,
+                  style: TextStyle(
+                    color: _isEditing ? null : theme.disabledColor,
+                  ),
+                ),
+              ),
+            ),
 
             const SizedBox(height: AppTheme.space3XLarge),
           ],

@@ -320,6 +320,7 @@
     }
   },
   "taskDetailsLabelDueDateNone": "No Due Date Set",
+  "taskDetailsLabelDueDateSet": "Set Due Date",
   "taskDetailsLabelEffort": "Effort",
   "taskDetailsLabelLocation": "Location",
   "taskDetailsLabelPriority": "Priority",
