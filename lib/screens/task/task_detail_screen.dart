@@ -190,96 +190,58 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             l10n.taskDetailsSectionPriorityAndEffort,
             Icons.bar_chart,
           ),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<Priority>(
-                  initialValue: _priority,
-                  decoration: InputDecoration(
-                    labelText: l10n.taskDetailsLabelPriority,
-                    border: const OutlineInputBorder(),
-                    disabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: disabledBorderColor),
-                    ),
-                    filled: _isEditing,
-                    prefixIcon: IconTheme(
-                      data: IconThemeData(
-                        color: _isEditing ? null : theme.disabledColor,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: AppUtils().getPriorityIcon(_priority),
-                      ),
-                    ),
-                  ),
-                  style: TextStyle(
-                    color: _isEditing
-                        ? colorScheme.onSurface
-                        : theme.disabledColor,
-                    fontSize: AppTheme.fsBodyLarge,
-                  ),
-                  items: Priority.values
-                      .map(
-                        (p) => DropdownMenuItem(
-                          value: p,
-                          child: Text(p.name.toUpperCase()),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: _isEditing
-                      ? (val) => setState(() => _priority = val!)
-                      : null,
-                  icon: _isEditing
-                      ? null
-                      : const SizedBox.shrink(), // Hides arrow in View Mode
-                ),
+
+          // --- PRIORITY ---
+          Text(
+            l10n.taskDetailsLabelPriority,
+            style: const TextStyle(fontWeight: AppTheme.fwBold),
+          ),
+          const SizedBox(height: AppTheme.spaceSmall),
+          _buildAccordionSelector<Priority>(
+            values: Priority.values,
+            selectedValue: _priority,
+            onSelected: (val) => setState(() => _priority = val),
+
+            activeBgColorBuilder: (_) =>
+                AppTheme.taskColor.withValues(alpha: 0.15),
+            activeTextColorBuilder: (_) => AppTheme.taskColor,
+
+            iconBuilder: (p, isSelected) => Opacity(
+              opacity: (!_isEditing || !isSelected) ? 0.5 : 1.0,
+              child: AppUtils().getPriorityIcon(
+                p,
               ),
-              const SizedBox(width: AppTheme.spaceLarge),
-              Expanded(
-                child: DropdownButtonFormField<Size>(
-                  initialValue: _size,
-                  decoration: InputDecoration(
-                    labelText: l10n.taskDetailsLabelEffort,
-                    border: const OutlineInputBorder(),
-                    disabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: disabledBorderColor),
-                    ),
-                    filled: _isEditing,
-                    prefixIcon: Opacity(
-                      opacity: _isEditing
-                          ? 1.0
-                          : 0.5, // Dims the emoji in View Mode
-                      child: Container(
-                        width: 48,
-                        alignment: Alignment.center,
-                        child: Text(
-                          AppUtils().getSizeEmoji(_size),
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      ),
-                    ),
-                  ),
-                  style: TextStyle(
-                    color: _isEditing
-                        ? colorScheme.onSurface
-                        : theme.disabledColor,
-                    fontSize: AppTheme.fsBodyLarge,
-                  ),
-                  items: Size.values
-                      .map(
-                        (s) => DropdownMenuItem(
-                          value: s,
-                          child: Text(s.name.toUpperCase()),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: _isEditing
-                      ? (val) => setState(() => _size = val!)
-                      : null,
-                  icon: _isEditing ? null : const SizedBox.shrink(),
-                ),
+            ),
+            labelBuilder: (p) => p.name.toUpperCase(),
+          ),
+
+          const SizedBox(height: AppTheme.spaceLarge),
+
+          // --- EFFORT / SIZE ---
+          Text(
+            l10n.taskDetailsLabelEffort,
+            style: const TextStyle(fontWeight: AppTheme.fwBold),
+          ),
+          const SizedBox(height: AppTheme.spaceSmall),
+          _buildAccordionSelector<Size>(
+            values: Size.values,
+            selectedValue: _size,
+            onSelected: (val) => setState(() => _size = val),
+
+            activeBgColorBuilder: (_) =>
+                AppTheme.taskColor.withValues(alpha: 0.15),
+            activeTextColorBuilder: (_) => AppTheme.taskColor,
+
+            iconBuilder: (s, isSelected) => Text(
+              AppUtils().getSizeEmoji(s),
+              style: TextStyle(
+                fontSize: 16,
+                color: (!_isEditing || !isSelected)
+                    ? theme.disabledColor
+                    : null,
               ),
-            ],
+            ),
+            labelBuilder: (s) => s.name.toUpperCase(),
           ),
 
           // --- SECTION: TIME ---
@@ -806,5 +768,114 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       }
       Navigator.pop(context);
     }
+  }
+
+  Widget _buildAccordionSelector<T>({
+    required List<T> values,
+    required T selectedValue,
+    required Widget Function(T, bool isSelected) iconBuilder,
+    required String Function(T) labelBuilder,
+    required void Function(T) onSelected,
+    Color Function(T)? activeBgColorBuilder,
+    Color Function(T)? activeTextColorBuilder,
+  }) {
+    final theme = Theme.of(context);
+    final disabledColor = theme.disabledColor;
+
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: _isEditing
+              ? theme.dividerColor
+              : disabledColor.withValues(alpha: 0.3),
+        ),
+        borderRadius: BorderRadius.circular(24),
+        color: _isEditing ? theme.colorScheme.surface : Colors.transparent,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(23),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final totalParts = values.length + 2;
+            final baseWidth = (constraints.maxWidth - 0.1) / totalParts;
+
+            return Row(
+              children: values.asMap().entries.map((entry) {
+                final index = entry.key;
+                final value = entry.value;
+                final isSelected = selectedValue == value;
+                final isLast = index == values.length - 1;
+
+                // Evaluate our custom colors, falling back to defaults if not provided
+                final bgColor = activeBgColorBuilder != null
+                    ? activeBgColorBuilder(value)
+                    : AppTheme.taskColor.withValues(alpha: 0.9);
+                final textColor = activeTextColorBuilder != null
+                    ? activeTextColorBuilder(value)
+                    : Colors.white;
+
+                return GestureDetector(
+                  onTap: _isEditing ? () => onSelected(value) : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    width: isSelected ? (baseWidth * 3) : baseWidth,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? (_isEditing
+                                ? bgColor
+                                : disabledColor.withValues(alpha: 0.2))
+                          : Colors.transparent,
+                      border: isLast
+                          ? null
+                          : Border(
+                              right: BorderSide(
+                                color: _isEditing
+                                    ? theme.dividerColor
+                                    : disabledColor.withValues(alpha: 0.3),
+                              ),
+                            ),
+                    ),
+                    child: Center(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const NeverScrollableScrollPhysics(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            iconBuilder(value, isSelected),
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOutCubic,
+                              child: isSelected
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Text(
+                                        labelBuilder(value),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: _isEditing
+                                              ? textColor
+                                              : disabledColor,
+                                          fontSize: 11,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ),
+    );
   }
 }
