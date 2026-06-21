@@ -8,6 +8,7 @@ import '../../providers/settings_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/habit/habit_utils.dart';
 import '../../widgets/common/expansion_section.dart';
+import '../../widgets/habit/grouped_habits_section.dart';
 import '../../widgets/habit/habit_bottom_sheet.dart';
 import '../../widgets/list_tiles/habit_list_tile.dart';
 import '../calendar_screen.dart';
@@ -210,140 +211,10 @@ class HabitListScreen extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => HabitDetailScreen(habit: habit),
-          ),
+          MaterialPageRoute(builder: (_) => HabitDetailScreen(habit: habit)),
         );
       },
     );
-  }
-
-  List<Widget> _buildGroupedHabits(
-    BuildContext context,
-    List<Habit> habits,
-    HabitProvider provider,
-  ) {
-    final grouped = <String, List<Habit>>{};
-    final standalone = <Habit>[];
-    final today = DateTime.now(); // Get today for global completion checks
-
-    // Sort into stacks vs standalone
-    for (var h in habits) {
-      if (h.stackName != null && h.stackName!.trim().isNotEmpty) {
-        grouped.putIfAbsent(h.stackName!.trim(), () => []).add(h);
-      } else {
-        standalone.add(h);
-      }
-    }
-
-    final widgets = <Widget>[];
-
-    grouped.forEach((stackName, stackHabits) {
-      stackHabits.sort(
-        (a, b) => (a.stackOrder ?? 99).compareTo(b.stackOrder ?? 99),
-      );
-
-      // --- Global Stack Calculations for the X/Y indicator ---
-      final globalStack = provider.habits
-          .where((h) => h.stackName?.trim() == stackName)
-          .toList();
-      final total = globalStack.length;
-      final completed = globalStack
-          .where((h) => provider.isCompletedOn(h, today))
-          .length;
-      final allDone = total > 0 && total == completed;
-
-      widgets.add(
-        Card(
-          margin: AppTheme.listTileScreenMargin,
-          elevation: 0,
-          clipBehavior: Clip
-              .antiAlias, // Ensures ExpansionTile doesn't bleed out of rounded corners
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-              width: AppTheme.listTileBorderWidth,
-            ),
-            borderRadius: AppTheme.brMedium,
-          ),
-          // Theme wrapper hides the ugly default borders of ExpansionTile
-          child: Theme(
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-            child: ExpansionTile(
-              initiallyExpanded: true,
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
-              collapsedBackgroundColor: Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-              // --- THE HEADER ROW ---
-              title: Row(
-                children: [
-                  const Icon(Icons.layers, size: 16, color: Colors.grey),
-                  const SizedBox(width: 8),
-                  Text(
-                    stackName.toUpperCase(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '$completed / $total',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: allDone ? AppTheme.successColor : Colors.grey,
-                    ),
-                  ),
-                ],
-              ),
-              // --- THE HABITS INSIDE ---
-              children: stackHabits.asMap().entries.map((entry) {
-                final index = entry.key;
-                final habit = entry.value;
-                final isDone = provider.isCompletedOn(habit, today);
-
-                bool isLocked = false;
-                if (index > 0 && !isDone) {
-                  final previousHabit = stackHabits[index - 1];
-                  if (!provider.isCompletedOn(previousHabit, today)) {
-                    isLocked = true;
-                  }
-                }
-
-                return Column(
-                  children: [
-                    if (index > 0) const Divider(height: 1, indent: 56),
-                    _buildHabitTile(
-                      context,
-                      habit,
-                      provider,
-                      isDone: isDone,
-                      isStacked: true,
-                      isLocked: isLocked,
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-      );
-    });
-
-    // Build the Standalone Habits
-    widgets.addAll(
-      standalone.map((h) {
-        final isDone = provider.isCompletedOn(h, today);
-        return _buildHabitTile(context, h, provider, isDone: isDone);
-      }),
-    );
-
-    return widgets;
   }
 
   Widget _buildHabitSection(
@@ -360,7 +231,23 @@ class HabitListScreen extends StatelessWidget {
       title: '$title (${habits.length})',
       color: color,
       initiallyExpanded: initiallyExpanded,
-      children: _buildGroupedHabits(context, habits, provider),
+      children: [
+        GroupedHabitsSection(
+          habits: habits,
+          habitProvider: provider,
+          targetDate: DateTime.now(),
+          habitBuilder: (habit, isDone, isStacked, isLocked) {
+            return _buildHabitTile(
+              context,
+              habit,
+              provider,
+              isDone: isDone,
+              isStacked: isStacked,
+              isLocked: isLocked,
+            );
+          },
+        ),
+      ],
     );
   }
 }

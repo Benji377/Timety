@@ -118,8 +118,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               icon: const Icon(Icons.edit),
               onPressed: () => setState(() => _isEditing = true),
             ),
-          ]
-          else ...[
+          ] else ...[
             IconButton(
               icon: const Icon(Icons.check),
               onPressed: _saveTask,

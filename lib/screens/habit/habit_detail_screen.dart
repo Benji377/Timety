@@ -30,6 +30,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
 
   late HabitFrequency _frequency;
   late IconData _selectedIcon;
+  late Color _selectedColor;
   TimeOfDay? _targetTime;
   int? _stackOrder;
 
@@ -58,6 +59,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
     _selectedIcon = widget.habit != null
         ? _getIconFromCodePoint(widget.habit!.iconCodePoint) ?? Icons.circle
         : Icons.circle;
+
+    _selectedColor = widget.habit != null
+        ? Color(widget.habit!.colorValue)
+        : AppTheme.habitColor;
   }
 
   @override
@@ -105,8 +110,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               icon: const Icon(Icons.edit),
               onPressed: () => setState(() => _isEditing = true),
             ),
-          ]
-          else ...[
+          ] else ...[
             IconButton(
               icon: const Icon(Icons.check),
               onPressed: _saveHabit,
@@ -127,7 +131,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               decoration: InputDecoration(
                 labelText: l10n.habitDetailLabelName,
                 hintText: l10n.habitDetailLabelNameHint,
-                prefixIcon: const Icon(Icons.stars),
+                prefixIcon: Icon(Icons.stars, color: _selectedColor),
                 disabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: disabledBorderColor),
                 ),
@@ -219,11 +223,85 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                         ),
                       ),
                     ],
-                    // Setting onChanged to null disables the dropdown automatically
                     onChanged: _isEditing
                         ? (val) => setState(() => _stackOrder = val)
                         : null,
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppTheme.spaceLarge),
+
+            // --- APPEARANCE (ICON & COLOR) ---
+            Row(
+              children: [
+                Expanded(
+                  child: _isEditing
+                      ? InkWell(
+                          onTap: _pickIcon,
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(4.0),
+                          ),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: l10n.habitDetailLabelIcon,
+                              border: const OutlineInputBorder(),
+                              filled: true,
+                            ),
+                            child: Icon(_selectedIcon, color: _selectedColor),
+                          ),
+                        )
+                      : ListTile(
+                          title: Text(
+                            l10n.habitDetailLabelIcon,
+                            style: const TextStyle(
+                              fontSize: AppTheme.fsBodySmall,
+                            ),
+                          ),
+                          leading: Icon(_selectedIcon, color: _selectedColor),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                ),
+                const SizedBox(width: AppTheme.spaceLarge),
+                Expanded(
+                  child: _isEditing
+                      ? InkWell(
+                          onTap: _pickColor,
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(4.0),
+                          ),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: l10n.habitDetailLabelColor,
+                              border: const OutlineInputBorder(),
+                              filled: true,
+                            ),
+                            child: Container(
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: _selectedColor,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        )
+                      : ListTile(
+                          title: Text(
+                            l10n.habitDetailLabelColor,
+                            style: const TextStyle(
+                              fontSize: AppTheme.fsBodySmall,
+                            ),
+                          ),
+                          leading: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: _selectedColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          contentPadding: EdgeInsets.zero,
+                        ),
                 ),
               ],
             ),
@@ -242,49 +320,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 ),
               ),
               maxLines: 2,
-            ),
-            const SizedBox(height: AppTheme.spaceLarge),
-
-            // --- ICON SELECTOR ---
-            Text(
-              l10n.habitDetailLabelIcon,
-              style: const TextStyle(fontWeight: AppTheme.fwBold),
-            ),
-            const SizedBox(height: AppTheme.spaceSmall),
-            SizedBox(
-              height: 140,
-              child: GridView.count(
-                crossAxisCount: 6,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                children: HabitIcons.availableIcons.map((icon) {
-                  final isSelected = icon.codePoint == _selectedIcon.codePoint;
-                  return GestureDetector(
-                    // Only allow tapping if editing
-                    onTap: _isEditing
-                        ? () => setState(() => _selectedIcon = icon)
-                        : null,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: isSelected
-                              ? AppTheme.taskColor
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        icon,
-                        color: isSelected
-                            ? AppTheme.taskColor
-                            // Dim the unselected icons slightly when not editing
-                            : (_isEditing ? null : theme.disabledColor),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
             ),
             const SizedBox(height: AppTheme.spaceXLarge),
 
@@ -310,7 +345,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                 ),
               ],
               selected: {_frequency},
-              // Setting onSelectionChanged to null disables the SegmentedButton
               onSelectionChanged: _isEditing
                   ? (set) => setState(() => _frequency = set.first)
                   : null,
@@ -333,8 +367,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                         min: 1,
                         max: 7,
                         divisions: 7,
-                        activeColor: AppTheme.habitColor,
-                        // Null disables the slider
+                        activeColor: _selectedColor,
                         onChanged: _isEditing
                             ? (val) => setState(
                                 () => _targetDaysPerWeek = val.toInt(),
@@ -353,14 +386,19 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
                     spacing: AppTheme.spaceSmall,
                     children: [1, 2, 3, 4, 5, 6, 7].map((day) {
                       final isSelected = _selectedWeekdays.contains(day);
-                      final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+                      final dayLabels = [
+                        l10n.calendarHeaderMon,
+                        l10n.calendarHeaderTue,
+                        l10n.calendarHeaderWed,
+                        l10n.calendarHeaderThu,
+                        l10n.calendarHeaderFri,
+                        l10n.calendarHeaderSat,
+                        l10n.calendarHeaderSun,
+                      ];
                       return ChoiceChip(
                         label: Text(dayLabels[day - 1]),
                         selected: isSelected,
-                        selectedColor: AppTheme.habitColor.withValues(
-                          alpha: 0.3,
-                        ),
-                        // Null disables the choice chips
+                        selectedColor: _selectedColor.withValues(alpha: 0.3),
                         onSelected: _isEditing
                             ? (selected) {
                                 setState(() {
@@ -387,57 +425,162 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
               style: const TextStyle(fontWeight: AppTheme.fwBold),
             ),
             const SizedBox(height: AppTheme.spaceSmall),
-            Card(
-              child: ListTile(
-                leading: Icon(
-                  Icons.notifications_active,
-                  color: _isEditing ? AppTheme.habitColor : theme.disabledColor,
-                ),
-                title: Text(
-                  _targetTime != null
-                      ? context.read<SettingsProvider>().getFormattedTime(
-                          // Dummy date trick to let the SettingsProvider format the TimeOfDay
-                          DateTime(
-                            2000,
-                            1,
-                            1,
-                            _targetTime!.hour,
-                            _targetTime!.minute,
-                          ),
-                        )
-                      : l10n.habitDetailLabelReminderNoTime,
-                  style: TextStyle(
-                    color: _isEditing ? null : theme.disabledColor,
-                  ),
-                ),
-                trailing: _isEditing
-                    ? (_targetTime != null
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () =>
-                                  setState(() => _targetTime = null),
+            _isEditing
+                ? InkWell(
+                    onTap: () async {
+                      final time = await AppDatePickers.pickTime(
+                        context: context,
+                        initialTime:
+                            _targetTime ?? const TimeOfDay(hour: 8, minute: 0),
+                      );
+                      if (time != null) setState(() => _targetTime = time);
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                    child: InputDecorator(
+                      isEmpty: _targetTime == null,
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.notifications_active),
+                        suffixIcon: Icon(Icons.edit),
+                        border: OutlineInputBorder(),
+                        filled: true,
+                      ),
+                      child: Text(
+                        _targetTime != null
+                            ? context.read<SettingsProvider>().getFormattedTime(
+                                DateTime(
+                                  2000,
+                                  1,
+                                  1,
+                                  _targetTime!.hour,
+                                  _targetTime!.minute,
+                                ),
+                              )
+                            : l10n.habitDetailLabelReminderNoTime,
+                      ),
+                    ),
+                  )
+                : ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.notifications_active),
+                    title: Text(
+                      _targetTime != null
+                          ? context.read<SettingsProvider>().getFormattedTime(
+                              DateTime(
+                                2000,
+                                1,
+                                1,
+                                _targetTime!.hour,
+                                _targetTime!.minute,
+                              ),
                             )
-                          : const Icon(Icons.edit))
-                    : null, // Hide edit icons when just viewing
-                onTap: _isEditing
-                    ? () async {
-                        final time = await AppDatePickers.pickTime(
-                          context: context,
-                          initialTime:
-                              _targetTime ??
-                              const TimeOfDay(hour: 8, minute: 0),
-                        );
-                        if (time != null) setState(() => _targetTime = time);
-                      }
-                    : null,
-              ),
-            ),
+                          : l10n.habitDetailLabelReminderNoTime,
+                    ),
+                  ),
 
             const SizedBox(height: AppTheme.space3XLarge),
           ],
         ),
       ),
     );
+  }
+
+  // --- POPUP DIALOGS ---
+  Future<void> _pickIcon() async {
+    final l10n = AppLocalizations.of(context)!;
+    final IconData? picked = await showDialog<IconData>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.habitDetailLabelIcon),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.count(
+            crossAxisCount: 5,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            shrinkWrap: true,
+            children: HabitIcons.availableIcons.map((icon) {
+              final isSelected = icon.codePoint == _selectedIcon.codePoint;
+              return InkWell(
+                onTap: () => Navigator.pop(context, icon),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? _selectedColor.withValues(alpha: 0.2)
+                        : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: isSelected ? _selectedColor : null),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    if (picked != null && mounted) {
+      setState(() => _selectedIcon = picked);
+    }
+  }
+
+  Future<void> _pickColor() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final List<Color> colors = [
+      AppTheme.habitColor,
+      Colors.red,
+      Colors.pink,
+      Colors.amber,
+      Colors.orange,
+      Colors.green,
+      Colors.lightGreen,
+      Colors.teal,
+      Colors.blue,
+      Colors.cyan,
+      Colors.indigo,
+      Colors.purple,
+      Colors.deepPurple,
+      Colors.brown,
+      Colors.blueGrey,
+    ];
+
+    final Color? picked = await showDialog<Color>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.habitDetailLabelColorPicker),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: GridView.count(
+            crossAxisCount: 4,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            shrinkWrap: true,
+            children: colors.map((color) {
+              final isSelected = color == _selectedColor;
+              return InkWell(
+                onTap: () => Navigator.pop(context, color),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: isSelected
+                        ? Border.all(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            width: 3,
+                          )
+                        : null,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    if (picked != null && mounted) {
+      setState(() => _selectedColor = picked);
+    }
   }
 
   // Convert a codePoint back to an IconData object
@@ -471,7 +614,7 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
       id: widget.habit?.id ?? DateTime.now().toString(),
       name: _nameController.text.trim(),
       frequency: _frequency,
-      colorValue: AppTheme.habitColor.toARGB32(),
+      colorValue: _selectedColor.toARGB32(), // Saves your chosen color!
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -492,8 +635,6 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> {
 
     context.read<HabitProvider>().saveHabit(newHabit);
 
-    // If it's a brand new habit, pop back to the list screen.
-    // If it's an edit, just smoothly drop back into View mode!
     if (_isNewHabit) {
       Navigator.pop(context);
     } else {

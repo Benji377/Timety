@@ -224,6 +224,8 @@
   "habitDetailLabelNotesHint": "Why are you building this habit?",
   "habitDetailLabelReminder": "Reminder time (Optional)",
   "habitDetailLabelReminderNoTime": "No specific time",
+  "habitDetailLabelColor": "Color",
+  "habitDetailLabelColorPicker": "Choose a Color",
   "habitDetailLabelStack": "Habit Stack (Optional)",
   "habitDetailLabelStackHint": "e.g., Morning Routine",
   "habitDetailLabelStackOrder": "Stack Order",

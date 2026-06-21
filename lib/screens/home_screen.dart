@@ -10,8 +10,10 @@ import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/habit/habit_utils.dart';
 import '../widgets/focus/interactive_gauge.dart';
 import '../widgets/habit/grouped_habits_section.dart';
+import '../widgets/list_tiles/habit_list_tile.dart';
 import '../widgets/list_tiles/task_list_tile.dart';
 import 'task/task_detail_screen.dart';
 import 'habit/habit_detail_screen.dart';
@@ -215,21 +217,39 @@ class HomeScreen extends StatelessWidget {
                                   habits: todaysHabits,
                                   habitProvider: habitProvider,
                                   targetDate: today,
-                                  onHabitTap: (habit) => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => HabitDetailScreen(
-                                        habit: habit,
-                                        isEditing: true,
-                                      ),
-                                    ),
-                                  ),
-                                  onToggleCompleted: (habit) =>
-                                      habitProvider.toggleCompletionToday(
-                                        habit,
-                                        userProvider: context
-                                            .read<UserProvider>(),
-                                      ),
+                                  habitBuilder:
+                                      (habit, isDone, isStacked, isLocked) {
+                                        return HabitListTile(
+                                          habit: habit,
+                                          isCompleted: isDone,
+                                          isStacked: isStacked,
+                                          isLocked: isLocked,
+                                          enableDismissible: false,
+                                          subtitleText:
+                                              HabitUtils.buildHabitSubtitle(
+                                                habit,
+                                                l10n,
+                                                habitProvider
+                                                    .getCompletionsThisWeek(
+                                                      habit,
+                                                    ),
+                                              ),
+                                          onToggleCompleted: () => habitProvider
+                                              .toggleCompletionToday(
+                                                habit,
+                                                userProvider: context
+                                                    .read<UserProvider>(),
+                                              ),
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => HabitDetailScreen(
+                                                habit: habit,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
                                 ),
                                 const SizedBox(height: AppTheme.spaceSmall),
                               ],
