@@ -7,16 +7,6 @@ class UserProvider extends ChangeNotifier {
   final UserRepository repository;
   UserProfile? _profile;
 
-  UserProvider({required this.repository}) {
-    _init();
-  }
-
-  Future<void> _init() async {
-    await repository.init();
-    _profile = repository.getUser();
-    notifyListeners();
-  }
-
   // --- GETTERS ---
   String get name => _profile?.name ?? "Bobert";
   String? get profileImagePath => _profile?.profileImagePath;
@@ -25,6 +15,16 @@ class UserProvider extends ChangeNotifier {
   int get currentLevel => ExperienceEngine.calculateLevel(totalXp);
   String get levelTitle => ExperienceEngine.getTitle(currentLevel);
   double get levelProgress => ExperienceEngine.getLevelProgress(totalXp);
+
+  UserProvider({required this.repository}) {
+    loadUserData();
+  }
+
+  Future<void> loadUserData() async {
+    await repository.init();
+    _profile = repository.getUser();
+    notifyListeners();
+  }
 
   // --- ACTIONS ---
   Future<void> updateName(String newName) async {

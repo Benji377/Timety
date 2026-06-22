@@ -12,8 +12,12 @@
     <a href="https://github.com/Benji377/Timety/releases">
       <img src="https://img.shields.io/github/downloads/Benji377/Timety/total?label=Downloads&logo=github&style=for-the-badge&labelColor=555555" alt="downloads">
     </a>
+    <br>
     <a href="https://tally.so/r/ODbEoA">
       <img src="https://img.shields.io/badge/Feedback-Tally-8B5CF6?style=for-the-badge&labelColor=555555" alt="feedback">
+    </a>
+    <a href="https://crowdin.com/project/timety">
+      <img src="https://img.shields.io/badge/Translate-Crowdin-2E3340?style=for-the-badge&logo=crowdin&logoColor=white&labelColor=555555" alt="translate">
     </a>
   </p>
 </p>
@@ -41,27 +45,41 @@ Timety is an offline-first productivity and time-management application built wi
 
 ## Download & Installation
 
+> [!TIP]
+> 🇨🇳 **Users in China:** Having trouble downloading or updating? See the [China Download & Update Guide (F-Droid Mirrors)](https://github.com/Benji377/Timety/discussions/81)
+
 Choose your preferred way to stay productive.
 
 <p align="left">
-  <img src="https://img.shields.io/badge/Get_it_on-555555?style=for-the-badge" alt="Get it on">
-  <a href="https://f-droid.org/en/packages/io.github.benji377.timety/">
-    <img src="https://img.shields.io/badge/F--Droid-ffffff?style=for-the-badge&logo=f-droid&logoColor=black" alt="F-Droid">
+  <a href="https://f-droid.org/packages/io.github.benji377.timety">
+    <img src="assets/badges/badge_fdroid.png"
+      alt="Get it on F-Droid"
+      height="50">
+  </a>
+  <a href="https://github.com/Benji377/Timety/releases/latest">
+    <img src="assets/badges/badge_github.png"
+      alt="Get it on GitHub"
+      height="50">
   </a>
   <a href="https://sourceforge.net/p/timety/">
-    <img src="https://img.shields.io/badge/sourceforge-333333?style=for-the-badge&logo=sourceforge" alt="SourceForge">
+    <img src="assets/badges/badge_sourceforge.png" 
+      alt="Get it on SourceForge" 
+      height="50">
   </a>
 </p>
 
 ### Manual Installation (GitHub Releases)
-For the most up-to-date version, download the APK directly for your device architecture:
 
-* **[arm64-v8a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-arm64-v8a.apk)** - Most modern Android phones (64-bit). **(Recommended)**
-* **[armeabi-v7a](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-armeabi-v7a.apk)** - Older Android devices (32-bit).
-* **[x86_64](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0-x86_64.apk)** - Android emulators and some tablets.
-* **[Universal Bundle (.aab)](https://github.com/Benji377/Timety/releases/download/v1.2.0/timety-v1.2.0.aab)** - Best for manual side-loading via App Bundle installers.
+1. Go to the **[GitHub Latest Release Page](https://github.com/Benji377/Timety/releases/latest)**.
+2. Scroll down to the **Assets** section.
+3. Download the correct file for your device based on the guide below:
 
-**How to install:**
+* **`arm64-v8a`** - Most modern Android phones (64-bit) **(Recommended for almost all newer devices)**
+* **`armeabi-v7a`** - Older or budget Android phones and devices (32-bit)
+* **`x86_64`** - Android emulators running on a PC, or specific Intel/AMD-based tablets
+* **`.aab` (Universal Bundle)** - A single file containing all architectures, best if you use a dedicated App Bundle installer app
+
+#### **How to install:**
 1. Download the `.apk` file corresponding to your device.
 2. Open the file on your Android device.
 3. If prompted, enable "Install from Unknown Sources" in your settings.
@@ -109,8 +127,17 @@ Join the conversation! Whether you need help, want to share how you use Timety, 
 * **📢 Announcements:** Stay up to date with the latest releases and major changes.
 * **💡 Ideas:** Suggest and vote on new features you'd love to see.
 * **🙏 Q&A:** Ask questions and get help from the community or the developer.
-* **🙌 Show and tell:** Share your productivity setups, habit streaks, or custom focus tags!
-* **💬 General & Polls:** Chat with other users and participate in community polls.
+
+## Translations
+
+Help us bring Timety to your native language! We use Crowdin to manage our localization, making it incredibly easy to contribute translations without touching any code.
+
+How to contribute:
+1. Visit the **[Timety Crowdin Project](https://crowdin.com/project/timety)**.
+2. Select your language and start translating!
+3. If your language isn't listed, feel free to request it directly on Crowdin.
+
+*Note: If you ever need context for a specific word or phrase, drop by our GitHub Discussions and ask!*
 
 ## Privacy
 Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Hive. No accounts, no cloud sync, no tracking.

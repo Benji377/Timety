@@ -18,41 +18,46 @@ void main() {
     await disposeHiveTestDir(hiveDir);
   });
 
-  test('fetches and saves tasks while removing stale entries', () async {
+  test('saves, updates, and deletes individual tasks', () async {
     final repository = HiveTaskRepository();
     final box = await Hive.openBox<Task>(HiveTaskRepository.boxName);
+    await box.clear(); // Start clean
 
-    await box.put(
-      'old-task',
-      Task(id: 'old-task', title: 'Stale task', createdAt: DateTime(2026)),
+    // 1. Save individual tasks
+    await repository.saveTask(
+      Task(id: 'task-1', title: 'First task', createdAt: DateTime(2026, 1, 2)),
+    );
+    await repository.saveTask(
+      Task(id: 'task-2', title: 'Second task', createdAt: DateTime(2026, 1, 3)),
     );
 
-    await repository.saveTasks([
-      Task(id: 'task-1', title: 'First task', createdAt: DateTime(2026, 1, 2)),
-      Task(id: 'task-2', title: 'Second task', createdAt: DateTime(2026, 1, 3)),
-    ]);
-
-    final savedTasks = await repository.fetchTasks();
-
+    var savedTasks = await repository.fetchTasks();
     expect(savedTasks, hasLength(2));
     expect(
       savedTasks.map((task) => task.id),
       containsAll(['task-1', 'task-2']),
     );
-    expect(box.containsKey('old-task'), isFalse);
 
-    await repository.saveTasks([
+    // 2. Update an existing task
+    await repository.saveTask(
       Task(
         id: 'task-2',
         title: 'Updated second task',
         createdAt: DateTime(2026, 1, 3),
       ),
-    ]);
+    );
 
-    final updatedTasks = await repository.fetchTasks();
+    savedTasks = await repository.fetchTasks();
+    expect(savedTasks, hasLength(2)); // Still 2 tasks! No accidental deletions.
 
-    expect(updatedTasks, hasLength(1));
-    expect(updatedTasks.single.id, 'task-2');
-    expect(updatedTasks.single.title, 'Updated second task');
+    final updatedTask = savedTasks.firstWhere((t) => t.id == 'task-2');
+    expect(updatedTask.title, 'Updated second task');
+
+    // 3. Delete a task explicitly
+    await repository.deleteTask('task-1');
+
+    savedTasks = await repository.fetchTasks();
+    expect(savedTasks, hasLength(1));
+    expect(savedTasks.single.id, 'task-2');
   });
 }

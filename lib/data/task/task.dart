@@ -84,6 +84,38 @@ class Task {
     required this.createdAt,
     this.subtasks = const [],
   });
+
+  Task copyWith({
+    String? id,
+    String? title,
+    String? description,
+    DateTime? dueDate,
+    String? location,
+    Priority? priority,
+    Size? size,
+    List<DateTime>? reminders,
+    String? category,
+    bool? isCompleted,
+    DateTime? completedAt,
+    DateTime? createdAt,
+    List<Subtask>? subtasks,
+  }) {
+    return Task(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      dueDate: dueDate ?? this.dueDate,
+      location: location ?? this.location,
+      priority: priority ?? this.priority,
+      size: size ?? this.size,
+      reminders: reminders ?? this.reminders,
+      category: category ?? this.category,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAt: completedAt ?? this.completedAt,
+      createdAt: createdAt ?? this.createdAt,
+      subtasks: subtasks ?? this.subtasks,
+    );
+  }
 }
 
 /// Options for sorting tasks

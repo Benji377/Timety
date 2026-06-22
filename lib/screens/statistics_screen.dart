@@ -7,9 +7,8 @@ import 'task/task_stats_screen.dart';
 import 'focus/focus_stats_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  final int initialTabIndex;
 
-  const StatisticsScreen({super.key, this.initialTabIndex = 0});
+  const StatisticsScreen({super.key});
 
   @override
   State<StatisticsScreen> createState() => _StatisticsScreenState();
@@ -23,7 +22,6 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   @override
   void initState() {
     super.initState();
-    _currentTabIndex = widget.initialTabIndex;
     _tabController = TabController(
       length: 4,
       vsync: this,

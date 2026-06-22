@@ -5,6 +5,12 @@ abstract class TaskRepository {
   /// Fetches all tasks from the data source.
   Future<List<Task>> fetchTasks();
 
-  /// Saves a list of tasks to the data source. Existing tasks will be updated.
-  Future<void> saveTasks(List<Task> tasks);
+  /// Saves or updates a single task.
+  Future<void> saveTask(Task task);
+
+  /// Deletes a single task by ID.
+  Future<void> deleteTask(String id);
+
+  /// Clears all tasks (useful for testing or data resets).
+  Future<void> clearAll();
 }

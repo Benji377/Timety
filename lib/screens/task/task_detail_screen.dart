@@ -1,4 +1,3 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
@@ -7,6 +6,7 @@ import '../../data/task/task.dart';
 import '../../providers/task_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/datetime/date_time_pickers.dart';
+import '../../widgets/common/app_dialogs.dart';
 import '../../widgets/location/location_picker.dart';
 import '../../providers/settings_provider.dart';
 
@@ -48,7 +48,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void initState() {
     super.initState();
     _isNewTask = widget.task == null;
-    _isEditing = _isNewTask ? true : widget.isEditing;
+    _isEditing = _isNewTask || widget.isEditing;
 
     _titleController = TextEditingController(text: widget.task?.title ?? '');
     _descController = TextEditingController(
@@ -106,13 +106,25 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       appBar: AppBar(
         title: Text(appBarTitle),
         actions: [
-          if (!_isEditing)
+          if (!_isEditing && !_isNewTask) ...[
+            IconButton(
+              icon: const Icon(
+                Icons.delete_outline,
+                color: AppTheme.errorColor,
+              ),
+              onPressed: _confirmAndDelete,
+            ),
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => setState(() => _isEditing = true),
             ),
-          if (_isNewTask)
-            IconButton(icon: const Icon(Icons.check), onPressed: _saveTask),
+          ] else ...[
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: _saveTask,
+              tooltip: l10n.commonLabelSave,
+            ),
+          ],
         ],
       ),
       body: ListView(
@@ -126,17 +138,22 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           TextField(
             controller: _titleController,
             enabled: _isEditing,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: AppTheme.fsHeadingSmall,
               fontWeight: AppTheme.fwBold,
+              color: _isEditing ? null : theme.disabledColor,
             ),
             decoration: InputDecoration(
               labelText: l10n.taskDetailsLabelTitle,
-              prefixIcon: const Icon(Icons.title),
+              prefixIcon: Icon(
+                Icons.title,
+                color: _isEditing ? colorScheme.primary : theme.disabledColor,
+              ),
               border: const OutlineInputBorder(),
               disabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: disabledBorderColor),
               ),
+              filled: _isEditing,
             ),
           ),
           const SizedBox(height: AppTheme.spaceLarge),
@@ -149,16 +166,22 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             enabled: _isEditing,
             ignorePointers: _isEditing ? null : false,
             keyboardType: TextInputType.multiline,
-            maxLines: 3,
+            minLines: 3,
+            maxLines: 6,
             scrollPhysics: const BouncingScrollPhysics(),
+            style: TextStyle(color: _isEditing ? null : theme.disabledColor),
             decoration: InputDecoration(
               labelText: l10n.taskDetailsLabelDescription,
-              prefixIcon: const Icon(Icons.notes),
-              alignLabelWithHint: true,
+              prefixIcon: Icon(
+                Icons.notes,
+                color: _isEditing ? null : theme.disabledColor,
+              ),
+              alignLabelWithHint: true, // Forces prefix icon to top-left
               border: const OutlineInputBorder(),
               disabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: disabledBorderColor),
               ),
+              filled: _isEditing,
             ),
           ),
 
@@ -167,73 +190,58 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             l10n.taskDetailsSectionPriorityAndEffort,
             Icons.bar_chart,
           ),
-          Row(
-            children: [
-              Expanded(
-                child: _isEditing
-                    ? DropdownButtonFormField<Priority>(
-                        initialValue: _priority,
-                        decoration: InputDecoration(
-                          labelText: l10n.taskDetailsLabelPriority,
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: Priority.values
-                            .map(
-                              (p) => DropdownMenuItem(
-                                value: p,
-                                child: Text(p.name.toUpperCase()),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (val) => setState(() => _priority = val!),
-                      )
-                    : ListTile(
-                        title: Text(
-                          l10n.taskDetailsLabelPriority,
-                          style: const TextStyle(
-                            fontSize: AppTheme.fsBodySmall,
-                          ),
-                        ),
-                        subtitle: Text(_priority.name.toUpperCase()),
-                        leading: AppUtils().getPriorityIcon(_priority),
-                        contentPadding: EdgeInsets.zero,
-                      ),
+
+          // --- PRIORITY ---
+          Text(
+            l10n.taskDetailsLabelPriority,
+            style: const TextStyle(fontWeight: AppTheme.fwBold),
+          ),
+          const SizedBox(height: AppTheme.spaceSmall),
+          _buildAccordionSelector<Priority>(
+            values: Priority.values,
+            selectedValue: _priority,
+            onSelected: (val) => setState(() => _priority = val),
+
+            activeBgColorBuilder: (_) =>
+                AppTheme.taskColor.withValues(alpha: 0.15),
+            activeTextColorBuilder: (_) => AppTheme.taskColor,
+
+            iconBuilder: (p, isSelected) => Opacity(
+              opacity: (!_isEditing || !isSelected) ? 0.5 : 1.0,
+              child: AppUtils().getPriorityIcon(
+                p,
               ),
-              const SizedBox(width: AppTheme.spaceLarge),
-              Expanded(
-                child: _isEditing
-                    ? DropdownButtonFormField<Size>(
-                        initialValue: _size,
-                        decoration: InputDecoration(
-                          labelText: l10n.taskDetailsLabelEffort,
-                          border: const OutlineInputBorder(),
-                        ),
-                        items: Size.values
-                            .map(
-                              (s) => DropdownMenuItem(
-                                value: s,
-                                child: Text(s.name.toUpperCase()),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (val) => setState(() => _size = val!),
-                      )
-                    : ListTile(
-                        title: Text(
-                          l10n.taskDetailsLabelEffort,
-                          style: const TextStyle(
-                            fontSize: AppTheme.fsBodySmall,
-                          ),
-                        ),
-                        subtitle: Text(_size.name.toUpperCase()),
-                        leading: Text(
-                          AppUtils().getSizeEmoji(_size),
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        contentPadding: EdgeInsets.zero,
-                      ),
+            ),
+            labelBuilder: (p) => p.name.toUpperCase(),
+          ),
+
+          const SizedBox(height: AppTheme.spaceLarge),
+
+          // --- EFFORT / SIZE ---
+          Text(
+            l10n.taskDetailsLabelEffort,
+            style: const TextStyle(fontWeight: AppTheme.fwBold),
+          ),
+          const SizedBox(height: AppTheme.spaceSmall),
+          _buildAccordionSelector<Size>(
+            values: Size.values,
+            selectedValue: _size,
+            onSelected: (val) => setState(() => _size = val),
+
+            activeBgColorBuilder: (_) =>
+                AppTheme.taskColor.withValues(alpha: 0.15),
+            activeTextColorBuilder: (_) => AppTheme.taskColor,
+
+            iconBuilder: (s, isSelected) => Text(
+              AppUtils().getSizeEmoji(s),
+              style: TextStyle(
+                fontSize: 16,
+                color: (!_isEditing || !isSelected)
+                    ? theme.disabledColor
+                    : null,
               ),
-            ],
+            ),
+            labelBuilder: (s) => s.name.toUpperCase(),
           ),
 
           // --- SECTION: TIME ---
@@ -243,30 +251,31 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           ),
           InkWell(
             onTap: _isEditing ? _pickDueDate : null,
-            // Ensure the ripple effect stays inside the standard border radius
             borderRadius: const BorderRadius.all(Radius.circular(4.0)),
             child: InputDecorator(
               isEmpty: _dueDate == null,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.event),
+                labelText: l10n.taskDetailsLabelDueDateSet,
+                prefixIcon: Icon(
+                  Icons.event,
+                  color: _isEditing ? null : theme.disabledColor,
+                ),
                 suffixIcon: _isEditing ? const Icon(Icons.edit) : null,
                 border: const OutlineInputBorder(),
                 disabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: disabledBorderColor),
                 ),
-                // This applies the background color when editing
+                enabled: _isEditing,
                 filled: _isEditing,
-                fillColor: Colors.white,
               ),
               child: Text(
                 _dueDate == null
-                    ? l10n.taskDetailsLabelDueDateNone
+                    ? ""
                     : l10n.taskDetailsLabelDueDate(
                         settings.getFormattedDate(_dueDate!),
                         settings.getFormattedTime(_dueDate!),
                       ),
                 style: TextStyle(
-                  // Dims the text slightly if not in edit mode
                   color: _isEditing ? null : theme.disabledColor,
                 ),
               ),
@@ -306,13 +315,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           TextField(
             controller: _locationController,
             enabled: _isEditing,
+            style: TextStyle(color: _isEditing ? null : theme.disabledColor),
             decoration: InputDecoration(
               labelText: l10n.taskDetailsLabelLocation,
-              prefixIcon: const Icon(Icons.map_outlined),
+              prefixIcon: Icon(
+                Icons.map_outlined,
+                color: _isEditing ? null : theme.disabledColor,
+              ),
               border: const OutlineInputBorder(),
               disabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: disabledBorderColor),
               ),
+              filled: _isEditing,
               suffixIcon: _isEditing
                   ? IconButton(
                       icon: const Icon(Icons.search),
@@ -389,11 +403,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       controller: _newSubtaskController,
                       decoration: InputDecoration(
                         hintText: l10n.taskDetailsLabelSubtaskHint,
+                        alignLabelWithHint: true,
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         disabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
+                        filled: false,
                         suffixIcon: IconButton(
                           icon: const Icon(
                             Icons.add_circle,
@@ -434,20 +449,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ),
 
           const SizedBox(height: AppTheme.space3XLarge),
-
-          if (_isEditing && !_isNewTask)
-            ElevatedButton.icon(
-              icon: const Icon(Icons.save),
-              onPressed: _saveTask,
-              label: Text(l10n.taskDetailsLabelSaveEdit),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const ui.Size.fromHeight(54),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: AppTheme.brLarge,
-                ),
-              ),
-            ),
-          const SizedBox(height: AppTheme.space3XLarge),
         ],
       ),
     );
@@ -482,7 +483,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   Widget _buildCategoryPicker() {
-    final dividerColor = Theme.of(context).dividerColor.withValues(alpha: 0.6);
+    final theme = Theme.of(context);
+    final disabledBorderColor = theme.dividerColor.withValues(alpha: 0.6);
     final l10n = AppLocalizations.of(context)!;
 
     if (!_isEditing) {
@@ -491,13 +493,15 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ? l10n.taskDetailsLabelCategoryEmpty
             : _category,
         enabled: false,
+        style: TextStyle(color: theme.disabledColor),
         decoration: InputDecoration(
           labelText: l10n.taskDetailsLabelCategory,
-          prefixIcon: const Icon(Icons.label_outline),
+          prefixIcon: Icon(Icons.label_outline, color: theme.disabledColor),
           border: const OutlineInputBorder(),
           disabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: dividerColor),
+            borderSide: BorderSide(color: disabledBorderColor),
           ),
+          filled: false,
         ),
       );
     }
@@ -527,6 +531,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               labelText: l10n.taskDetailsLabelCategory,
               prefixIcon: const Icon(Icons.label_outline),
               border: const OutlineInputBorder(),
+              filled: true,
             ),
             items: [
               DropdownMenuItem(
@@ -572,6 +577,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               labelText: l10n.taskDetailsLabelCategoryNewName,
               prefixIcon: const Icon(Icons.label_important_outline),
               border: const OutlineInputBorder(),
+              filled: true,
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -641,6 +647,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             decoration: InputDecoration(
               labelText: l10n.taskDetailsLabelReminderSet,
               border: const OutlineInputBorder(),
+              filled: true,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: AppTheme.spaceMedium,
               ),
@@ -744,5 +751,131 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       context.read<TaskProvider>().updateTask(taskToSave);
       setState(() => _isEditing = false); // Just exit edit mode
     }
+  }
+
+  Future<void> _confirmAndDelete() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirm = await AppDialogs.showConfirmation(
+      context: context,
+      title: l10n.taskDeleteTitle,
+      content: l10n.taskDeleteContent,
+    );
+
+    if (confirm == true && mounted) {
+      if (widget.task != null) {
+        context.read<TaskProvider>().removeTask(widget.task!.id);
+      }
+      Navigator.pop(context);
+    }
+  }
+
+  Widget _buildAccordionSelector<T>({
+    required List<T> values,
+    required T selectedValue,
+    required Widget Function(T, bool isSelected) iconBuilder,
+    required String Function(T) labelBuilder,
+    required void Function(T) onSelected,
+    Color Function(T)? activeBgColorBuilder,
+    Color Function(T)? activeTextColorBuilder,
+  }) {
+    final theme = Theme.of(context);
+    final disabledColor = theme.disabledColor;
+
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: _isEditing
+              ? theme.dividerColor
+              : disabledColor.withValues(alpha: 0.3),
+        ),
+        borderRadius: BorderRadius.circular(24),
+        color: _isEditing ? theme.colorScheme.surface : Colors.transparent,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(23),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final totalParts = values.length + 2;
+            final baseWidth = (constraints.maxWidth - 0.1) / totalParts;
+
+            return Row(
+              children: values.asMap().entries.map((entry) {
+                final index = entry.key;
+                final value = entry.value;
+                final isSelected = selectedValue == value;
+                final isLast = index == values.length - 1;
+
+                // Evaluate our custom colors, falling back to defaults if not provided
+                final bgColor = activeBgColorBuilder != null
+                    ? activeBgColorBuilder(value)
+                    : AppTheme.taskColor.withValues(alpha: 0.9);
+                final textColor = activeTextColorBuilder != null
+                    ? activeTextColorBuilder(value)
+                    : Colors.white;
+
+                return GestureDetector(
+                  onTap: _isEditing ? () => onSelected(value) : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    width: isSelected ? (baseWidth * 3) : baseWidth,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? (_isEditing
+                                ? bgColor
+                                : disabledColor.withValues(alpha: 0.2))
+                          : Colors.transparent,
+                      border: isLast
+                          ? null
+                          : Border(
+                              right: BorderSide(
+                                color: _isEditing
+                                    ? theme.dividerColor
+                                    : disabledColor.withValues(alpha: 0.3),
+                              ),
+                            ),
+                    ),
+                    child: Center(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const NeverScrollableScrollPhysics(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            iconBuilder(value, isSelected),
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOutCubic,
+                              child: isSelected
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Text(
+                                        labelBuilder(value),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: _isEditing
+                                              ? textColor
+                                              : disabledColor,
+                                          fontSize: 11,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ),
+    );
   }
 }

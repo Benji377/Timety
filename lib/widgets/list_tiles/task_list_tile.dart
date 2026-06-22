@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../data/task/task.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/common/app_utils.dart';
@@ -50,6 +52,7 @@ class TaskListTile extends StatelessWidget {
   Widget _buildCard(BuildContext context) {
     final borderColor = _getBorderColor();
     final theme = Theme.of(context);
+    final settings = context.watch<SettingsProvider>();
 
     final List<Subtask> safeSubtasks =
         (task.subtasks as dynamic) ?? <Subtask>[];
@@ -147,7 +150,7 @@ class TaskListTile extends StatelessWidget {
                     Icon(Icons.access_time, size: 14, color: borderColor),
                     const SizedBox(width: 4),
                     Text(
-                      '${task.dueDate!.month.toString().padLeft(2, '0')}/${task.dueDate!.day.toString().padLeft(2, '0')} ${task.dueDate!.hour.toString().padLeft(2, '0')}:${task.dueDate!.minute.toString().padLeft(2, '0')}',
+                      settings.getFormattedDateTime(task.dueDate!),
                       style: TextStyle(
                         fontSize: AppTheme.fsLabel,
                         color: borderColor,

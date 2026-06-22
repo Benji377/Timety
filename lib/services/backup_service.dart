@@ -45,15 +45,15 @@ class BackupService {
     }
   }
 
-  static Future<void> importUserData(BuildContext context) async {
+  static Future<bool> importUserData(BuildContext context) async {
     try {
       final FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
 
-      if (result == null || result.files.single.path == null) return;
-      if (!context.mounted) return;
+      if (result == null || result.files.single.path == null) return false;
+      if (!context.mounted) return false;
 
       final l10n = AppLocalizations.of(context)!;
       final confirm = await AppDialogs.showConfirmation(
@@ -62,7 +62,7 @@ class BackupService {
         content: l10n.backupImportConfirmBody,
       );
 
-      if (confirm != true) return;
+      if (confirm != true) return false;
 
       final payload = await _readJsonPayloadFromFile(result.files.single.path!);
       await _restorePayload(payload);
@@ -70,6 +70,7 @@ class BackupService {
       if (context.mounted) {
         _showRestoreSuccessDialog(context);
       }
+      return true;
     } catch (e) {
       debugPrint('Error importing user data: $e');
       if (context.mounted) {
@@ -78,7 +79,20 @@ class BackupService {
           context,
         ).showSnackBar(SnackBar(content: Text(l10n.backupImportFailure)));
       }
+      return false;
     }
+  }
+
+  @visibleForTesting
+  static Future<Map<String, dynamic>> buildPayloadForTest() async {
+    return await _buildPayload(payloadType: _userDataType);
+  }
+
+  @visibleForTesting
+  static Future<void> restorePayloadForTest(
+    Map<String, dynamic> payload,
+  ) async {
+    await _restorePayload(payload);
   }
 
   static Future<void> _showFileActions(
@@ -229,7 +243,6 @@ class BackupService {
       );
     }
 
-    await Hive.close();
     await _restorePreferences(_readMap(payload['preferences']));
     await _restoreUserProfile(_readMap(payload['userProfile']));
 

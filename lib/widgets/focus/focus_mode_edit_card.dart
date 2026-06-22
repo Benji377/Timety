@@ -11,8 +11,17 @@ import '../../utils/ui/l10n_utils.dart';
 
 class ModeEditCard extends StatefulWidget {
   final FocusMode mode;
+  final bool isNewMode; // Tells the card to immediately open in Edit mode
+  final VoidCallback? onCancelNew; // Callback to remove the card if canceled
+  final VoidCallback? onSaveNew; // Callback to remove the pending state after saving
 
-  const ModeEditCard({super.key, required this.mode});
+  const ModeEditCard({
+    super.key, 
+    required this.mode,
+    this.isNewMode = false,
+    this.onCancelNew,
+    this.onSaveNew,
+  });
 
   @override
   State<ModeEditCard> createState() => _ModeEditCardState();
@@ -21,12 +30,16 @@ class ModeEditCard extends StatefulWidget {
 class _ModeEditCardState extends State<ModeEditCard> {
   late TextEditingController _nameController;
   late List<SessionPhase> _tempPhases;
-  bool _isEditing = false;
+  late bool _isEditing;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.mode.name);
+    _isEditing = widget.isNewMode;
+    _nameController = TextEditingController(
+      text: widget.isNewMode ? "" : widget.mode.name
+    );
+    
     _tempPhases = widget.mode.phases
         .map(
           (p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
@@ -169,6 +182,7 @@ class _ModeEditCardState extends State<ModeEditCard> {
 
         TextField(
           controller: _nameController,
+          autofocus: widget.isNewMode,
           decoration: const InputDecoration(
             labelText: "Mode Name",
             border: OutlineInputBorder(),
@@ -278,13 +292,11 @@ class _ModeEditCardState extends State<ModeEditCard> {
   void _showPhaseDialog({int? index}) async {
     final initialPhase = index != null ? _tempPhases[index] : null;
 
-    // Await the result from our standalone widget
     final result = await showDialog<dynamic>(
       context: context,
       builder: (context) => PhaseEditorDialog(initialPhase: initialPhase),
     );
 
-    // Process the result
     if (result == PhaseDialogAction.delete && index != null) {
       setState(() => _tempPhases.removeAt(index));
     } else if (result is SessionPhase) {
@@ -298,7 +310,6 @@ class _ModeEditCardState extends State<ModeEditCard> {
     }
   }
 
-  // --- INTEGRATED APP DIALOGS ---
   void _confirmDelete() async {
     final focusProvider = context.read<FocusProvider>();
     final confirm = await AppDialogs.showConfirmation(
@@ -325,21 +336,31 @@ class _ModeEditCardState extends State<ModeEditCard> {
     );
 
     context.read<FocusProvider>().saveCustomMode(updatedMode);
-    setState(() => _isEditing = false);
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.focusModeSnackbarSaved),
       ),
     );
+
+    if (widget.isNewMode && widget.onSaveNew != null) {
+      widget.onSaveNew!();
+    } else {
+      setState(() => _isEditing = false);
+    }
   }
 
   void _cancelEdit() {
-    _nameController.text = widget.mode.name;
-    _tempPhases = widget.mode.phases
-        .map(
-          (p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
-        )
-        .toList();
-    setState(() => _isEditing = false);
+    if (widget.isNewMode && widget.onCancelNew != null) {
+      widget.onCancelNew!();
+    } else {
+      _nameController.text = widget.mode.name;
+      _tempPhases = widget.mode.phases
+          .map(
+            (p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
+          )
+          .toList();
+      setState(() => _isEditing = false);
+    }
   }
 }
