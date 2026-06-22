@@ -38,7 +38,7 @@ class HomeScreen extends StatelessWidget {
 
     final int focusMinsToday = focusProvider.getMinutesFocusedToday();
     final int dailyTarget = settings.dailyGoalMins;
-    final double focusProgress = (focusMinsToday / dailyTarget).clamp(0.0, 1.0);
+    final double focusProgress = (focusMinsToday / dailyTarget);
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
     final List<Habit> todaysHabits = habitProvider.getHabitsForDay(today).where(
