@@ -474,7 +474,7 @@
   "settingsLabelDateFormatSystemMDY": "Mese/Giorno/Anno",
   "settingsLabelDateFormatSystemYMD": "Anno-Mese-Giorno",
   "settingsLabelDonate": "Dona",
-  "settingsLabelDonateSubtitle": "Github Sponsors",
+  "settingsLabelDonateSubtitle": "GitHub Sponsors",
   "settingsLabelEodCheckup": "Orario controllo serale",
   "settingsLabelExportData": "Esporta dati JSON",
   "settingsLabelExportDataSubtitle": "Salva uno snapshot dei tuoi dati",
