@@ -28,7 +28,10 @@ class HiveFocusRepository implements FocusRepository {
   @override
   Future<List<FocusSession>> fetchSessions() async {
     final box = await Hive.openBox<FocusSession>(sessionBoxName);
-    return box.values.toList();
+    final sessions = box.values.toList();
+    // Sort by startTime (oldest first, newest last)
+    sessions.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return sessions;
   }
 
   @override

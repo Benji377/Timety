@@ -63,7 +63,7 @@ void main() {
     );
     expect(provider.habits, hasLength(4));
 
-    await provider.deleteHabit('new');
+    await provider.removeHabit('new');
     expect(provider.habits, hasLength(3));
   });
 }

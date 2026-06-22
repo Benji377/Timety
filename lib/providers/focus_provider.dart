@@ -610,13 +610,19 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Calculates the total focused minutes for today by summing completed sessions and the current session if it's active.
   int getMinutesFocusedToday() {
-    final today = DateTime.now();
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day);
     int totalSeconds = 0;
-    for (var session in _history) {
-      if (session.startTime.year == today.year &&
-          session.startTime.month == today.month &&
-          session.startTime.day == today.day) {
+
+    for (int i = _history.length - 1; i >= 0; i--) {
+      final session = _history[i];
+
+      if (session.startTime.year == now.year &&
+          session.startTime.month == now.month &&
+          session.startTime.day == now.day) {
         totalSeconds += session.totalSecondsFocused;
+      } else if (session.startTime.isBefore(startOfToday)) {
+        break;
       }
     }
     if (_isRunning) {

@@ -3,30 +3,22 @@ import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/habit/habit_utils.dart';
-import '../list_tiles/habit_list_tile.dart';
-import '../../l10n/app_localizations.dart';
 
 /// Displays a grouped view of habits organized by stacks
-///
-/// This widget handles:
-/// - Grouping habits by stack name
-/// - Displaying stacked habits in ExpansionTiles
-/// - Showing standalone habits
-/// - Lock logic for sequential habit completion
 class GroupedHabitsSection extends StatelessWidget {
   final List<Habit> habits;
   final HabitProvider habitProvider;
   final DateTime targetDate;
-  final Function(Habit) onHabitTap;
-  final Function(Habit) onToggleCompleted;
+  // Builder function to render each habit tile, allowing for custom UI
+  final Widget Function(Habit habit, bool isDone, bool isStacked, bool isLocked)
+  habitBuilder;
 
   const GroupedHabitsSection({
     super.key,
     required this.habits,
     required this.habitProvider,
     required this.targetDate,
-    required this.onHabitTap,
-    required this.onToggleCompleted,
+    required this.habitBuilder,
   });
 
   @override
@@ -86,8 +78,7 @@ class GroupedHabitsSection extends StatelessWidget {
                 context,
               ).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
-                initiallyExpanded:
-                    !allDone, // Auto-collapse if the whole stack is finished
+                initiallyExpanded: !allDone,
                 backgroundColor: Theme.of(
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
@@ -149,21 +140,9 @@ class GroupedHabitsSection extends StatelessWidget {
 
                   return Column(
                     children: [
-                      if (index > 0) const Divider(height: 1, indent: 56),
-                      HabitListTile(
-                        habit: habit,
-                        isCompleted: isDone,
-                        isStacked: true,
-                        isLocked: isLocked,
-                        enableDismissible: false,
-                        subtitleText: HabitUtils.buildHabitSubtitle(
-                          habit,
-                          AppLocalizations.of(context)!,
-                          habitProvider.getCompletionsThisWeek(habit),
-                        ),
-                        onToggleCompleted: () => onToggleCompleted(habit),
-                        onTap: () => onHabitTap(habit),
-                      ),
+                      if (index > 0)
+                        const Divider(height: 1, indent: 16, endIndent: 16),
+                      habitBuilder(habit, isDone, true, isLocked),
                     ],
                   );
                 }).toList(),
@@ -174,18 +153,7 @@ class GroupedHabitsSection extends StatelessWidget {
         // Render standalone habits
         ...standalone.map((habit) {
           final isDone = habitProvider.isCompletedOn(habit, targetDate);
-          return HabitListTile(
-            habit: habit,
-            isCompleted: isDone,
-            enableDismissible: false,
-            subtitleText: HabitUtils.buildHabitSubtitle(
-              habit,
-              AppLocalizations.of(context)!,
-              habitProvider.getCompletionsThisWeek(habit),
-            ),
-            onToggleCompleted: () => onToggleCompleted(habit),
-            onTap: () => onHabitTap(habit),
-          );
+          return habitBuilder(habit, isDone, false, false);
         }),
       ],
     );

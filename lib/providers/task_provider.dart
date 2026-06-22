@@ -19,6 +19,9 @@ class TaskProvider extends ChangeNotifier {
   TaskProvider({required this.repository});
 
   void updateSettings(SettingsProvider settings) {
+    if (_settings?.appLocale == settings.appLocale && _settings?.use24HourFormat == settings.use24HourFormat) {
+      return;
+    }
     _settings = settings;
     _notifyAndSync();
   }
@@ -207,49 +210,26 @@ class TaskProvider extends ChangeNotifier {
   Future<void> renameCategory(String oldName, String newName) async {
     if (oldName == newName) return;
 
+    final futures = <Future>[];
     for (var i = 0; i < _tasks.length; i++) {
       if (_tasks[i].category == oldName) {
-        _tasks[i] = Task(
-          id: _tasks[i].id,
-          title: _tasks[i].title,
-          description: _tasks[i].description,
-          dueDate: _tasks[i].dueDate,
-          location: _tasks[i].location,
-          priority: _tasks[i].priority,
-          size: _tasks[i].size,
-          reminders: _tasks[i].reminders,
-          category: newName,
-          isCompleted: _tasks[i].isCompleted,
-          completedAt: _tasks[i].completedAt,
-          createdAt: _tasks[i].createdAt,
-          subtasks: _tasks[i].subtasks,
-        );
-        await repository.saveTask(_tasks[i]);
+        _tasks[i] = _tasks[i].copyWith(category: newName);
+        futures.add(repository.saveTask(_tasks[i]));
       }
     }
+    await Future.wait(futures);
     await _notifyAndSync();
   }
 
   Future<void> deleteCategory(String categoryName) async {
+    final futures = <Future>[];
     for (var i = 0; i < _tasks.length; i++) {
       if (_tasks[i].category == categoryName) {
-        _tasks[i] = Task(
-          id: _tasks[i].id,
-          title: _tasks[i].title,
-          description: _tasks[i].description,
-          dueDate: _tasks[i].dueDate,
-          location: _tasks[i].location,
-          priority: _tasks[i].priority,
-          size: _tasks[i].size,
-          reminders: _tasks[i].reminders,
-          isCompleted: _tasks[i].isCompleted,
-          completedAt: _tasks[i].completedAt,
-          createdAt: _tasks[i].createdAt,
-          subtasks: _tasks[i].subtasks,
-        );
-        await repository.saveTask(_tasks[i]);
+        _tasks[i] = _tasks[i].copyWith(category: "");
+        futures.add(repository.saveTask(_tasks[i]));
       }
     }
+    await Future.wait(futures);
     await _notifyAndSync();
   }
 }

@@ -120,7 +120,7 @@ class HabitListTile extends StatelessWidget {
             size: 18,
             color: isCompleted
                 ? Theme.of(context).colorScheme.onSurfaceVariant
-                : (isLocked ? AppTheme.wifiOffColor : AppTheme.habitColor),
+                : (isLocked ? AppTheme.wifiOffColor : color),
           ),
           const SizedBox(width: AppTheme.spaceSmall),
           Expanded(
@@ -177,7 +177,21 @@ class HabitListTile extends StatelessWidget {
       onTap: onTap,
     );
 
-    if (isStacked) return listTile;
+    if (isStacked) {
+      return Container(
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: isCompleted
+                  ? color.withValues(alpha: AppTheme.opacityLight)
+                  : color,
+              width: 4,
+            ),
+          ),
+        ),
+        child: listTile,
+      );
+    }
 
     return Card(
       margin: margin,
