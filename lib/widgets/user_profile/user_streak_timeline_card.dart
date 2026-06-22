@@ -56,6 +56,10 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
     final currentStreakKeys = _buildCurrentStreakDayKeys(widget.activityDates);
     final l10n = AppLocalizations.of(context)!;
 
+    final taskKeys = widget.taskDates.map(AppDateUtils.dayKey).toSet();
+    final focusKeys = widget.focusDates.map(AppDateUtils.dayKey).toSet();
+    final habitKeys = widget.habitDates.map(AppDateUtils.dayKey).toSet();
+
     final days = List.generate(7, (index) {
       final day = DateTime(
         today.year,
@@ -68,9 +72,9 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
         date: day,
         isToday: AppDateUtils.isSameDay(day, today),
         inCurrentStreak: currentStreakKeys.contains(key),
-        hasTask: _hasActivity(widget.taskDates, day),
-        hasFocus: _hasActivity(widget.focusDates, day),
-        hasHabit: _hasActivity(widget.habitDates, day),
+        hasTask: taskKeys.contains(key),
+        hasFocus: focusKeys.contains(key),
+        hasHabit: habitKeys.contains(key),
       );
     });
 
@@ -203,10 +207,6 @@ class _UserStreakTimelineCardState extends State<UserStreakTimelineCard> {
         ),
       ),
     );
-  }
-
-  bool _hasActivity(List<DateTime> dates, DateTime day) {
-    return dates.any((date) => AppDateUtils.isSameDay(date, day));
   }
 
   Set<String> _buildCurrentStreakDayKeys(List<DateTime> dates) {

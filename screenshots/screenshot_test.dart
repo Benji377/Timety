@@ -353,10 +353,8 @@ void main() {
     await tester.pageBack();
     await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
-
     await _tapBottomNavItem(tester, 'Tasks');
     await binding.takeScreenshot('03_tasks_screen');
-
 
     // Tap on the first task to see detail view (the overdue proposal task)
     await _tapText(tester, 'Finish project proposal');

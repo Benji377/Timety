@@ -7,7 +7,6 @@ import 'task/task_stats_screen.dart';
 import 'focus/focus_stats_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
-
   const StatisticsScreen({super.key});
 
   @override

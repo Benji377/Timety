@@ -208,9 +208,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
             iconBuilder: (p, isSelected) => Opacity(
               opacity: (!_isEditing || !isSelected) ? 0.5 : 1.0,
-              child: AppUtils().getPriorityIcon(
-                p,
-              ),
+              child: AppUtils().getPriorityIcon(p),
             ),
             labelBuilder: (p) => p.name.toUpperCase(),
           ),

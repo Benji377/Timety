@@ -53,7 +53,8 @@ class _FocusScreenState extends State<FocusScreen> {
           final activeMode = focusProvider.activeMode;
           final modes = focusProvider.modes;
 
-          final bool isFlexibleMode = activeMode?.type == FocusModeType.flexible;
+          final bool isFlexibleMode =
+              activeMode?.type == FocusModeType.flexible;
           final bool canDrag = isFlexibleMode && !isRunning && !isPaused;
 
           double gaugeProgress = 1.0;
@@ -65,14 +66,20 @@ class _FocusScreenState extends State<FocusScreen> {
           bool isResting = false;
 
           if (activeMode != null && activeMode.phases.isNotEmpty) {
-            final currentPhase = activeMode.phases[focusProvider.currentPhaseIndex];
-            final bool isStopwatchPhase = activeMode.type == FocusModeType.stopwatch;
+            final currentPhase =
+                activeMode.phases[focusProvider.currentPhaseIndex];
+            final bool isStopwatchPhase =
+                activeMode.type == FocusModeType.stopwatch;
 
             if (canDrag) {
               final int currentMinutes = focusProvider.flexibleDurationMinutes;
               gaugeProgress = currentMinutes / 120.0;
-              label = AppLocalizations.of(context)!.focusLabelSetTime.toUpperCase();
-              centerText = AppDateFormatUtils.formatDuration(currentMinutes * 60);
+              label = AppLocalizations.of(
+                context,
+              )!.focusLabelSetTime.toUpperCase();
+              centerText = AppDateFormatUtils.formatDuration(
+                currentMinutes * 60,
+              );
             } else if (!isStopwatchPhase) {
               int totalPhaseSeconds = currentPhase.durationMinutes > 0
                   ? currentPhase.durationMinutes * 60
@@ -83,7 +90,9 @@ class _FocusScreenState extends State<FocusScreen> {
                   focusProvider.secondsRemainingInPhase / totalPhaseSeconds;
               label = currentPhase.type == PhaseType.rest
                   ? AppLocalizations.of(context)!.focusLabelRest.toUpperCase()
-                  : AppLocalizations.of(context)!.focusLabelDefault.toUpperCase();
+                  : AppLocalizations.of(
+                      context,
+                    )!.focusLabelDefault.toUpperCase();
               isResting = currentPhase.type == PhaseType.rest;
               centerText = AppDateFormatUtils.formatDuration(
                 focusProvider.secondsRemainingInPhase,
@@ -91,7 +100,9 @@ class _FocusScreenState extends State<FocusScreen> {
             } else {
               isStopwatchMode = isRunning;
               gaugeProgress = 0.0;
-              label = AppLocalizations.of(context)!.focusLabelStopwatch.toUpperCase();
+              label = AppLocalizations.of(
+                context,
+              )!.focusLabelStopwatch.toUpperCase();
               centerText = AppDateFormatUtils.formatDuration(
                 focusProvider.currentSecondsFocussed,
               );
@@ -108,323 +119,334 @@ class _FocusScreenState extends State<FocusScreen> {
 
           void cycleMode(int direction) {
             if (isRunning || isPaused || activeMode == null) return;
-            final int currentIndex = modes.indexWhere((m) => m.id == activeMode.id);
+            final int currentIndex = modes.indexWhere(
+              (m) => m.id == activeMode.id,
+            );
             int nextIndex = (currentIndex + direction) % modes.length;
             if (nextIndex < 0) nextIndex = modes.length - 1;
             focusProvider.setActiveMode(modes[nextIndex]);
           }
 
           return Column(
-        children: [
-          const SizedBox(height: 10),
-
-          // --- FOCUS MODE SELECTOR ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  size: 20,
-                  color: Colors.grey,
-                ),
-                onPressed: (isRunning || isPaused) ? null : () => cycleMode(-1),
-              ),
-              SizedBox(
-                width: 180,
-                child: InkWell(
-                  onTap: (isRunning || isPaused)
-                      ? null
-                      : () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const FocusModesScreen(),
-                            ),
-                          );
-                        },
-                  borderRadius: AppTheme.brMedium,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      activeMode != null
-                          ? getLocalizedFocusModeName(
-                              context,
-                              activeMode,
-                            ).toUpperCase()
-                          : AppLocalizations.of(
-                              context,
-                            )!.focusModeSelect.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                        color: (isRunning || isPaused)
-                            ? Theme.of(context).colorScheme.onSurfaceVariant
-                            : AppTheme.focusColor,
-                      ),
+              const SizedBox(height: 10),
+
+              // --- FOCUS MODE SELECTOR ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      size: 20,
+                      color: Colors.grey,
                     ),
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 20,
-                  color: Colors.grey,
-                ),
-                onPressed: (isRunning || isPaused) ? null : () => cycleMode(1),
-              ),
-            ],
-          ),
-
-          const Spacer(),
-
-          // --- DAILY GOAL BADGE ---
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.focusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppTheme.focusColor.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.track_changes,
-                        size: 18,
-                        color: AppTheme.focusColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${focusProvider.getMinutesFocusedToday()} / ${context.watch<SettingsProvider>().dailyGoalMins} m',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15,
-                          color: AppTheme.focusColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // --- INTERACTIVE TIMER GAUGE ---
-          SizedBox(
-            height: 320,
-            width: double.infinity,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                InteractiveGauge(
-                  key: ValueKey(activeMode?.id),
-                  progress: gaugeProgress,
-                  isStopwatch: isStopwatchMode,
-                  color: isResting
-                      ? AppTheme.warningColor
-                      : AppTheme.focusColor,
-                  labelColor: isResting
-                      ? AppTheme.warningColor
-                      : AppTheme.focusColor,
-                  centerTextColor: isResting
-                      ? AppTheme.warningColor
-                      : AppTheme.focusColor,
-                  centerText: centerText,
-                  bottomText:
-                      focusProvider.selectedTargetLabel ??
-                      AppLocalizations.of(context)!.focusTargetEmpty,
-                  bottomTextColor: focusProvider.selectedTargetColor,
-                  bottomTextIcon: bottomTextIcon,
-                  onBottomTextTapped: (isRunning || isPaused)
-                      ? null
-                      : () => _showTargetSelector(context, focusProvider),
-                  isInteractive: canDrag,
-                  label: label,
-                  onChanged: (newProgress) {
-                    if (canDrag) {
-                      int newMins = (newProgress * 120).round();
-                      if (newMins < 1) newMins = 1;
-                      focusProvider.setFlexibleDuration(newMins);
-                    }
-                  },
-                ),
-
-                // TIME MACHINE BUTTON
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: IconButton.filledTonal(
-                    icon: const Icon(Icons.history),
-                    tooltip: AppLocalizations.of(
-                      context,
-                    )!.commonTooltipTimeMachine,
-                    iconSize: 28,
-                    padding: const EdgeInsets.all(12),
                     onPressed: (isRunning || isPaused)
                         ? null
-                        : () => AppDialogs.showTimeMachineDialog(
-                            context,
-                            focusProvider,
-                          ),
+                        : () => cycleMode(-1),
                   ),
-                ),
-
-                // DISTRACTIONS BUTTON
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: IconButton.filledTonal(
-                    icon: const Icon(Icons.warning_amber),
-                    tooltip: AppLocalizations.of(
-                      context,
-                    )!.commonTooltipDistractions,
-                    iconSize: 28,
-                    padding: const EdgeInsets.all(12),
+                  SizedBox(
+                    width: 180,
+                    child: InkWell(
+                      onTap: (isRunning || isPaused)
+                          ? null
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const FocusModesScreen(),
+                                ),
+                              );
+                            },
+                      borderRadius: AppTheme.brMedium,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          activeMode != null
+                              ? getLocalizedFocusModeName(
+                                  context,
+                                  activeMode,
+                                ).toUpperCase()
+                              : AppLocalizations.of(
+                                  context,
+                                )!.focusModeSelect.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                            color: (isRunning || isPaused)
+                                ? Theme.of(context).colorScheme.onSurfaceVariant
+                                : AppTheme.focusColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 20,
+                      color: Colors.grey,
+                    ),
                     onPressed: (isRunning || isPaused)
-                        ? () => _showDistractionSheet(context, focusProvider)
-                        : null,
+                        ? null
+                        : () => cycleMode(1),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // --- PHASE TIMELINE ---
-          ModeTimeline(
-            phases: activeMode?.phases ?? [],
-            currentPhaseIndex: focusProvider.currentPhaseIndex,
-            isRunning: isRunning || isPaused,
-            awaitingContinue: focusProvider.awaitingPhaseContinue,
-          ),
-
-          const Spacer(),
-
-          // --- PLAY/PAUSE CONTROLS ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Opacity(
-                opacity:
-                    (isRunning ||
-                        isPaused ||
-                        focusProvider.awaitingPhaseContinue)
-                    ? 1.0
-                    : 0.0,
-                child: IconButton(
-                  icon: const Icon(Icons.refresh),
-                  iconSize: 32,
-                  color: Colors.grey.shade600,
-                  onPressed:
-                      (isRunning ||
-                          isPaused ||
-                          focusProvider.awaitingPhaseContinue)
-                      ? () => _confirmResetSession(context, focusProvider)
-                      : null,
-                ),
+                ],
               ),
-              const SizedBox(width: 32),
-              SizedBox(
-                height: 80,
-                width: 80,
-                child: FloatingActionButton(
-                  heroTag: "focus_main_button",
-                  shape: const CircleBorder(),
-                  elevation: 4,
-                  backgroundColor: isRunning
-                      ? AppTheme.errorColor
-                      : AppTheme.focusColor,
-                  foregroundColor: Colors.white,
-                  onPressed: () {
-                    if (isRunning) {
-                      _confirmStopSession(context, focusProvider);
-                    } else if (focusProvider.awaitingPhaseContinue) {
-                      focusProvider.continueToNextPhase();
-                    } else if (focusProvider.selectedTargetIsLocked) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            AppLocalizations.of(
-                              context,
-                            )!.focusSnackbarHabitLocked,
-                          ),
-                          duration: const Duration(seconds: 2),
+
+              const Spacer(),
+
+              // --- DAILY GOAL BADGE ---
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
                         ),
                       );
-                    } else {
-                      focusProvider.startSession();
-                    }
-                  },
-                  child: Icon(
-                    isRunning
-                        ? Icons.stop_rounded
-                        : (focusProvider.awaitingPhaseContinue
-                              ? Icons.fast_forward_rounded
-                              : Icons.play_arrow_rounded),
-                    size: 40,
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.focusColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppTheme.focusColor.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.track_changes,
+                            size: 18,
+                            color: AppTheme.focusColor,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${focusProvider.getMinutesFocusedToday()} / ${context.watch<SettingsProvider>().dailyGoalMins} m',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 15,
+                              color: AppTheme.focusColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 32),
-              Opacity(
-                opacity:
-                    (isRunning ||
-                        isPaused ||
-                        focusProvider.awaitingPhaseContinue)
-                    ? 1.0
-                    : 0.0,
-                child: IconButton(
-                  icon: focusProvider.awaitingPhaseContinue
-                      ? const Icon(Icons.stop)
-                      : Icon(isPaused ? Icons.play_circle_fill : Icons.pause),
-                  iconSize: 32,
-                  color: Colors.grey.shade600,
-                  onPressed:
-                      (isRunning ||
-                          isPaused ||
-                          focusProvider.awaitingPhaseContinue)
-                      ? () {
-                          if (focusProvider.awaitingPhaseContinue) {
-                            _confirmStopSession(context, focusProvider);
-                          } else if (isPaused) {
-                            focusProvider.startSession();
-                          } else {
-                            focusProvider.pauseSession();
-                          }
+
+              // --- INTERACTIVE TIMER GAUGE ---
+              SizedBox(
+                height: 320,
+                width: double.infinity,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    InteractiveGauge(
+                      key: ValueKey(activeMode?.id),
+                      progress: gaugeProgress,
+                      isStopwatch: isStopwatchMode,
+                      color: isResting
+                          ? AppTheme.warningColor
+                          : AppTheme.focusColor,
+                      labelColor: isResting
+                          ? AppTheme.warningColor
+                          : AppTheme.focusColor,
+                      centerTextColor: isResting
+                          ? AppTheme.warningColor
+                          : AppTheme.focusColor,
+                      centerText: centerText,
+                      bottomText:
+                          focusProvider.selectedTargetLabel ??
+                          AppLocalizations.of(context)!.focusTargetEmpty,
+                      bottomTextColor: focusProvider.selectedTargetColor,
+                      bottomTextIcon: bottomTextIcon,
+                      onBottomTextTapped: (isRunning || isPaused)
+                          ? null
+                          : () => _showTargetSelector(context, focusProvider),
+                      isInteractive: canDrag,
+                      label: label,
+                      onChanged: (newProgress) {
+                        if (canDrag) {
+                          int newMins = (newProgress * 120).round();
+                          if (newMins < 1) newMins = 1;
+                          focusProvider.setFlexibleDuration(newMins);
                         }
-                      : null,
+                      },
+                    ),
+
+                    // TIME MACHINE BUTTON
+                    Positioned(
+                      top: 16,
+                      left: 16,
+                      child: IconButton.filledTonal(
+                        icon: const Icon(Icons.history),
+                        tooltip: AppLocalizations.of(
+                          context,
+                        )!.commonTooltipTimeMachine,
+                        iconSize: 28,
+                        padding: const EdgeInsets.all(12),
+                        onPressed: (isRunning || isPaused)
+                            ? null
+                            : () => AppDialogs.showTimeMachineDialog(
+                                context,
+                                focusProvider,
+                              ),
+                      ),
+                    ),
+
+                    // DISTRACTIONS BUTTON
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: IconButton.filledTonal(
+                        icon: const Icon(Icons.warning_amber),
+                        tooltip: AppLocalizations.of(
+                          context,
+                        )!.commonTooltipDistractions,
+                        iconSize: 28,
+                        padding: const EdgeInsets.all(12),
+                        onPressed: (isRunning || isPaused)
+                            ? () =>
+                                  _showDistractionSheet(context, focusProvider)
+                            : null,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+
+              // --- PHASE TIMELINE ---
+              ModeTimeline(
+                phases: activeMode?.phases ?? [],
+                currentPhaseIndex: focusProvider.currentPhaseIndex,
+                isRunning: isRunning || isPaused,
+                awaitingContinue: focusProvider.awaitingPhaseContinue,
+              ),
+
+              const Spacer(),
+
+              // --- PLAY/PAUSE CONTROLS ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Opacity(
+                    opacity:
+                        (isRunning ||
+                            isPaused ||
+                            focusProvider.awaitingPhaseContinue)
+                        ? 1.0
+                        : 0.0,
+                    child: IconButton(
+                      icon: const Icon(Icons.refresh),
+                      iconSize: 32,
+                      color: Colors.grey.shade600,
+                      onPressed:
+                          (isRunning ||
+                              isPaused ||
+                              focusProvider.awaitingPhaseContinue)
+                          ? () => _confirmResetSession(context, focusProvider)
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 32),
+                  SizedBox(
+                    height: 80,
+                    width: 80,
+                    child: FloatingActionButton(
+                      heroTag: "focus_main_button",
+                      shape: const CircleBorder(),
+                      elevation: 4,
+                      backgroundColor: isRunning
+                          ? AppTheme.errorColor
+                          : AppTheme.focusColor,
+                      foregroundColor: Colors.white,
+                      onPressed: () {
+                        if (isRunning) {
+                          _confirmStopSession(context, focusProvider);
+                        } else if (focusProvider.awaitingPhaseContinue) {
+                          focusProvider.continueToNextPhase();
+                        } else if (focusProvider.selectedTargetIsLocked) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                AppLocalizations.of(
+                                  context,
+                                )!.focusSnackbarHabitLocked,
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        } else {
+                          focusProvider.startSession();
+                        }
+                      },
+                      child: Icon(
+                        isRunning
+                            ? Icons.stop_rounded
+                            : (focusProvider.awaitingPhaseContinue
+                                  ? Icons.fast_forward_rounded
+                                  : Icons.play_arrow_rounded),
+                        size: 40,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 32),
+                  Opacity(
+                    opacity:
+                        (isRunning ||
+                            isPaused ||
+                            focusProvider.awaitingPhaseContinue)
+                        ? 1.0
+                        : 0.0,
+                    child: IconButton(
+                      icon: focusProvider.awaitingPhaseContinue
+                          ? const Icon(Icons.stop)
+                          : Icon(
+                              isPaused ? Icons.play_circle_fill : Icons.pause,
+                            ),
+                      iconSize: 32,
+                      color: Colors.grey.shade600,
+                      onPressed:
+                          (isRunning ||
+                              isPaused ||
+                              focusProvider.awaitingPhaseContinue)
+                          ? () {
+                              if (focusProvider.awaitingPhaseContinue) {
+                                _confirmStopSession(context, focusProvider);
+                              } else if (isPaused) {
+                                focusProvider.startSession();
+                              } else {
+                                focusProvider.pauseSession();
+                              }
+                            }
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
             ],
-          ),
-          const SizedBox(height: 40),
-        ],
-      );
-    },
-  ),
-);
-}
+          );
+        },
+      ),
+    );
+  }
+
   // --- BOTTOM SHEETS & ALERTS ---
   void _showDistractionSheet(BuildContext context, FocusProvider provider) {
     FocusBottomSheetBuilders.showDistractionSheet(

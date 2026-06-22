@@ -4,11 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
-import '../data/task/task.dart';
 import '../providers/task_provider.dart';
 import '../providers/focus_provider.dart';
 import '../providers/settings_provider.dart';
-import '../utils/datetime/date_utils.dart';
 import '../widgets/stats/kpi_stat_card.dart';
 
 class OverviewStatsScreen extends StatelessWidget {
@@ -23,9 +21,19 @@ class OverviewStatsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     final now = DateTime.now();
-    final int tasksCompletedToday = _getTasksForDay(taskProvider.tasks, now);
-    final int focusMinsToday =
-        focusProvider.getMinutesFocusedOnDay(now);
+
+    final tasksPerDay = <String, int>{};
+    for (final t in taskProvider.tasks) {
+      if (t.isCompleted && t.completedAt != null) {
+        final key =
+            '${t.completedAt!.year}-${t.completedAt!.month}-${t.completedAt!.day}';
+        tasksPerDay[key] = (tasksPerDay[key] ?? 0) + 1;
+      }
+    }
+
+    final int tasksCompletedToday =
+        tasksPerDay['${now.year}-${now.month}-${now.day}'] ?? 0;
+    final int focusMinsToday = focusProvider.getMinutesFocusedOnDay(now);
     final int focusTarget = settings.dailyGoalMins;
 
     return ListView(
@@ -119,6 +127,7 @@ class OverviewStatsScreen extends StatelessWidget {
             taskProvider,
             focusProvider,
             settings,
+            tasksPerDay,
           ),
         ),
         const SizedBox(height: 40),
@@ -132,6 +141,7 @@ class OverviewStatsScreen extends StatelessWidget {
     TaskProvider taskProvider,
     FocusProvider focusProvider,
     SettingsProvider settings,
+    Map<String, int> tasksPerDay,
   ) {
     final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
@@ -146,7 +156,7 @@ class OverviewStatsScreen extends StatelessWidget {
         .map((d) => focusProvider.getMinutesFocusedOnDay(d))
         .toList();
     final dailyTasks = last7Days
-        .map((d) => _getTasksForDay(taskProvider.tasks, d))
+        .map((d) => tasksPerDay['${d.year}-${d.month}-${d.day}'] ?? 0)
         .toList();
 
     // Normalization logic: find the highest value in both lists
@@ -280,17 +290,5 @@ class OverviewStatsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  // --- DATA EXTRACTORS ---
-  int _getTasksForDay(List<Task> tasks, DateTime day) {
-    return tasks
-        .where(
-          (t) =>
-              t.isCompleted &&
-              t.completedAt != null &&
-              AppDateUtils.isSameDay(t.completedAt!, day),
-        )
-        .length;
   }
 }

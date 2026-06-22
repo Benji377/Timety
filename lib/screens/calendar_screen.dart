@@ -196,13 +196,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final taskDates = <String>{};
     for (final t in allTasks) {
       if (t.dueDate != null) {
-        taskDates.add('${t.dueDate!.year}-${t.dueDate!.month}-${t.dueDate!.day}');
+        taskDates.add(
+          '${t.dueDate!.year}-${t.dueDate!.month}-${t.dueDate!.day}',
+        );
       }
     }
 
     final sessionDates = <String>{};
     for (final s in allSessions) {
-      sessionDates.add('${s.startTime.year}-${s.startTime.month}-${s.startTime.day}');
+      sessionDates.add(
+        '${s.startTime.year}-${s.startTime.month}-${s.startTime.day}',
+      );
+    }
+
+    final habitDates = <String>{};
+    for (final h in allHabits) {
+      for (final c in h.completions) {
+        habitDates.add('${c.year}-${c.month}-${c.day}');
+      }
     }
 
     return Table(
@@ -261,9 +272,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 final dateKey = '${day.year}-${day.month}-${day.day}';
                 final hasTasks = taskDates.contains(dateKey);
                 final hasFocus = sessionDates.contains(dateKey);
-                final hasHabits = allHabits.any(
-                  (h) => habitProvider.isCompletedOn(h, day),
-                );
+                final hasHabits = habitDates.contains(dateKey);
 
                 return TableCell(
                   child: GestureDetector(

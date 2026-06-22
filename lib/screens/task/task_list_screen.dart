@@ -39,9 +39,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.taskListTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.taskListTitle)),
       body: Consumer<TaskProvider>(
         builder: (context, provider, child) {
           // Extract unique categories from tasks

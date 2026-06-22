@@ -169,6 +169,9 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
     // Sort completions for the timeline (Newest first)
     completions.sort((a, b) => b.compareTo(a));
 
+    // Precompute Set of completion dates for lookups in grid builder
+    final completionKeys = completions.map(AppDateUtils.dayKey).toSet();
+
     return SafeArea(
       child: Column(
         children: [
@@ -279,8 +282,8 @@ class _UnifiedCalendarSheetState extends State<_UnifiedCalendarSheet> {
               );
 
               final isToday = AppDateUtils.isSameDay(currentDate, _today);
-              final isCompleted = completions.any(
-                (c) => AppDateUtils.isSameDay(c, currentDate),
+              final isCompleted = completionKeys.contains(
+                AppDateUtils.dayKey(currentDate),
               );
               final isFuture = currentDate.isAfter(_today) && !isToday;
 

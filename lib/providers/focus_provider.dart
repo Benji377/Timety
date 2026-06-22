@@ -613,7 +613,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     return getMinutesFocusedOnDay(DateTime.now());
   }
 
-  /// Calculates the total focused minutes for a specific day by summing completed sessions using efficient short-circuiting.
+  /// Calculates the total focused minutes for a specific day by summing completed sessions using short-circuiting.
   int getMinutesFocusedOnDay(DateTime day) {
     final startOfDay = DateTime(day.year, day.month, day.day);
     int totalSeconds = 0;
@@ -629,10 +629,12 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
         break;
       }
     }
-    
+
     if (_isRunning) {
       final now = DateTime.now();
-      if (now.year == day.year && now.month == day.month && now.day == day.day) {
+      if (now.year == day.year &&
+          now.month == day.month &&
+          now.day == day.day) {
         totalSeconds += _currentSecondsFocussed;
       }
     }

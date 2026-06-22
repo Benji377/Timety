@@ -19,7 +19,8 @@ class TaskProvider extends ChangeNotifier {
   TaskProvider({required this.repository});
 
   void updateSettings(SettingsProvider settings) {
-    if (_settings?.appLocale == settings.appLocale && _settings?.use24HourFormat == settings.use24HourFormat) {
+    if (_settings?.appLocale == settings.appLocale &&
+        _settings?.use24HourFormat == settings.use24HourFormat) {
       return;
     }
     _settings = settings;

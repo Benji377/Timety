@@ -13,10 +13,11 @@ class ModeEditCard extends StatefulWidget {
   final FocusMode mode;
   final bool isNewMode; // Tells the card to immediately open in Edit mode
   final VoidCallback? onCancelNew; // Callback to remove the card if canceled
-  final VoidCallback? onSaveNew; // Callback to remove the pending state after saving
+  final VoidCallback?
+  onSaveNew; // Callback to remove the pending state after saving
 
   const ModeEditCard({
-    super.key, 
+    super.key,
     required this.mode,
     this.isNewMode = false,
     this.onCancelNew,
@@ -37,9 +38,9 @@ class _ModeEditCardState extends State<ModeEditCard> {
     super.initState();
     _isEditing = widget.isNewMode;
     _nameController = TextEditingController(
-      text: widget.isNewMode ? "" : widget.mode.name
+      text: widget.isNewMode ? "" : widget.mode.name,
     );
-    
+
     _tempPhases = widget.mode.phases
         .map(
           (p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
@@ -336,7 +337,7 @@ class _ModeEditCardState extends State<ModeEditCard> {
     );
 
     context.read<FocusProvider>().saveCustomMode(updatedMode);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.focusModeSnackbarSaved),
@@ -357,7 +358,8 @@ class _ModeEditCardState extends State<ModeEditCard> {
       _nameController.text = widget.mode.name;
       _tempPhases = widget.mode.phases
           .map(
-            (p) => SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
+            (p) =>
+                SessionPhase(type: p.type, durationMinutes: p.durationMinutes),
           )
           .toList();
       setState(() => _isEditing = false);
