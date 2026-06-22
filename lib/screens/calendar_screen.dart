@@ -192,6 +192,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
     HabitProvider habitProvider,
     AppLocalizations l10n,
   ) {
+    // Pre-compute sets of dates with activity for O(1) lookup during grid generation
+    final taskDates = <String>{};
+    for (final t in allTasks) {
+      if (t.dueDate != null) {
+        taskDates.add('${t.dueDate!.year}-${t.dueDate!.month}-${t.dueDate!.day}');
+      }
+    }
+
+    final sessionDates = <String>{};
+    for (final s in allSessions) {
+      sessionDates.add('${s.startTime.year}-${s.startTime.month}-${s.startTime.day}');
+    }
+
     return Table(
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
       children: [
@@ -245,12 +258,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 final isSelected = AppDateUtils.isSameDay(day, _selectedDate);
                 final isToday = AppDateUtils.isSameDay(day, DateTime.now());
 
-                final hasTasks = allTasks.any(
-                  (t) => AppDateUtils.isSameDay(t.dueDate, day),
-                );
-                final hasFocus = allSessions.any(
-                  (s) => AppDateUtils.isSameDay(s.startTime, day),
-                );
+                final dateKey = '${day.year}-${day.month}-${day.day}';
+                final hasTasks = taskDates.contains(dateKey);
+                final hasFocus = sessionDates.contains(dateKey);
                 final hasHabits = allHabits.any(
                   (h) => habitProvider.isCompletedOn(h, day),
                 );

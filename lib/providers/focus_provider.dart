@@ -610,23 +610,31 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Calculates the total focused minutes for today by summing completed sessions and the current session if it's active.
   int getMinutesFocusedToday() {
-    final now = DateTime.now();
-    final startOfToday = DateTime(now.year, now.month, now.day);
+    return getMinutesFocusedOnDay(DateTime.now());
+  }
+
+  /// Calculates the total focused minutes for a specific day by summing completed sessions using efficient short-circuiting.
+  int getMinutesFocusedOnDay(DateTime day) {
+    final startOfDay = DateTime(day.year, day.month, day.day);
     int totalSeconds = 0;
 
     for (int i = _history.length - 1; i >= 0; i--) {
       final session = _history[i];
 
-      if (session.startTime.year == now.year &&
-          session.startTime.month == now.month &&
-          session.startTime.day == now.day) {
+      if (session.startTime.year == day.year &&
+          session.startTime.month == day.month &&
+          session.startTime.day == day.day) {
         totalSeconds += session.totalSecondsFocused;
-      } else if (session.startTime.isBefore(startOfToday)) {
+      } else if (session.startTime.isBefore(startOfDay)) {
         break;
       }
     }
+    
     if (_isRunning) {
-      totalSeconds += _currentSecondsFocussed;
+      final now = DateTime.now();
+      if (now.year == day.year && now.month == day.month && now.day == day.day) {
+        totalSeconds += _currentSecondsFocussed;
+      }
     }
     return totalSeconds ~/ 60;
   }
@@ -654,6 +662,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     await repository.saveSession(session);
     _history.add(session);
+    _history.sort((a, b) => a.startTime.compareTo(b.startTime));
 
     final int focusMinutes = totalSeconds ~/ 60;
     if (focusMinutes > 0) {

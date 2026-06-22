@@ -24,7 +24,8 @@ class OverviewStatsScreen extends StatelessWidget {
 
     final now = DateTime.now();
     final int tasksCompletedToday = _getTasksForDay(taskProvider.tasks, now);
-    final int focusMinsToday = _getFocusForDay(focusProvider, now);
+    final int focusMinsToday =
+        focusProvider.getMinutesFocusedOnDay(now);
     final int focusTarget = settings.dailyGoalMins;
 
     return ListView(
@@ -142,7 +143,7 @@ class OverviewStatsScreen extends StatelessWidget {
 
     // Extract actual real-world data
     final dailyFocus = last7Days
-        .map((d) => _getFocusForDay(focusProvider, d))
+        .map((d) => focusProvider.getMinutesFocusedOnDay(d))
         .toList();
     final dailyTasks = last7Days
         .map((d) => _getTasksForDay(taskProvider.tasks, d))
@@ -291,19 +292,5 @@ class OverviewStatsScreen extends StatelessWidget {
               AppDateUtils.isSameDay(t.completedAt!, day),
         )
         .length;
-  }
-
-  int _getFocusForDay(FocusProvider provider, DateTime day) {
-    int totalSeconds = 0;
-    for (var session in provider.history) {
-      if (AppDateUtils.isSameDay(session.startTime, day)) {
-        totalSeconds += session.totalSecondsFocused;
-      }
-    }
-    // Include actively running session time if checking today
-    if (AppDateUtils.isSameDay(DateTime.now(), day) && provider.isRunning) {
-      totalSeconds += provider.currentSecondsFocussed;
-    }
-    return totalSeconds ~/ 60;
   }
 }

@@ -326,6 +326,22 @@ void main() {
     // 3. Capture the major app screens.
     await binding.takeScreenshot('01_home_screen');
 
+    // Navigate to Stats from Home screen (bar chart icon)
+    await _tapIconButton(tester, Icons.bar_chart);
+    await binding.takeScreenshot('07_stats_screen');
+
+    // Go back to Home tab
+    await tester.pageBack();
+    await _pumpDuration(tester, const Duration(milliseconds: 1500));
+
+    // Navigate to Calendar from Home screen
+    await _tapIconButton(tester, Icons.calendar_today);
+    await binding.takeScreenshot('08_calendar_screen');
+
+    // Go back to Home tab
+    await tester.pageBack();
+    await _pumpDuration(tester, const Duration(milliseconds: 1500));
+
     await _tapBottomNavItem(tester, 'Focus');
     await binding.takeScreenshot('02_focus_screen');
 
@@ -337,27 +353,10 @@ void main() {
     await tester.pageBack();
     await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
-    // Navigate to Profile screen
-    await _tapBottomNavItem(tester, 'Profile');
-
-    // Navigate to Stats from Profile screen (bar chart icon)
-    await _tapIconButton(tester, Icons.bar_chart);
-    await binding.takeScreenshot('07_stats_screen');
-
-    // Go back to Profile tab
-    await tester.pageBack();
-    await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
     await _tapBottomNavItem(tester, 'Tasks');
     await binding.takeScreenshot('03_tasks_screen');
 
-    // Navigate to Calendar from Tasks
-    await _tapIconButton(tester, Icons.calendar_today);
-    await binding.takeScreenshot('08_calendar_screen');
-
-    // Go back to Tasks
-    await tester.pageBack();
-    await _pumpDuration(tester, const Duration(milliseconds: 1500));
 
     // Tap on the first task to see detail view (the overdue proposal task)
     await _tapText(tester, 'Finish project proposal');
