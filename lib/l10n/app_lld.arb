@@ -1,13 +1,11 @@
 {
   "@@locale": "lld",
   "appTitle": "Timety",
-  
   "globalLabelHabit": "Usanza",
   "globalLabelHabits": "Usanzes",
   "globalLabelTags": "Etichetes",
   "globalLabelTask": "Ncëria",
   "globalLabelTasks": "Ncëries",
-  
   "commonButtonGotIt": "Capì",
   "commonDaytimeAfternoon": "Domesdì",
   "commonDaytimeAfternoonRange": "12:00 - 17:00",
@@ -17,7 +15,6 @@
   "commonDaytimeMorningRange": "05:00 - 12:00",
   "commonDaytimeNight": "Nuet",
   "commonDaytimeNightRange": "21:00 - 05:00",
-  
   "commonLabelAdd": "Njunté",
   "commonLabelCancel": "Anulé",
   "commonLabelConfirm": "Cunfermé",
@@ -31,7 +28,6 @@
   "commonTooltipDistractions": "Distrazions",
   "commonTooltipStats": "Statistiches",
   "commonTooltipTimeMachine": "Registré sescion passeda",
-  
   "commonWeekdayFri": "Vën",
   "commonWeekdayMon": "Lun",
   "commonWeekdaySat": "Sad",
@@ -39,54 +35,82 @@
   "commonWeekdayThu": "Jue",
   "commonWeekdayTue": "Mer",
   "commonWeekdayWed": "Mie",
-  
   "navigationFocus": "Focus",
   "navigationHabits": "Abitudins",
   "navigationHome": "Cësa",
   "navigationProfile": "Profil",
   "navigationTasks": "Ncëries",
-  
   "greetingAfternoon": "Bon domesdì {user}!",
   "@greetingAfternoon": {
-    "placeholders": { "user": { "type": "String" } }
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
   },
   "greetingAfternoonMotivation": "Tira inant nscì! Te la fejes",
   "greetingDeepNight": "Niamò dessëid {user}?",
   "@greetingDeepNight": {
-    "placeholders": { "user": { "type": "String" } }
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
   },
   "greetingDeepNightMotivation": "Tòtela saurida y polsete n pue'",
   "greetingEvening": "Bona sëira {user}!",
   "@greetingEvening": {
-    "placeholders": { "user": { "type": "String" } }
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
   },
   "greetingEveningMotivation": "Tra n flé y gòdete la sëira",
   "greetingMorning": "Bon di {user}!",
   "@greetingMorning": {
-    "placeholders": { "user": { "type": "String" } }
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
   },
   "greetingMorningMotivation": "Leva su! Fajon de ncuei n di produtif.",
   "greetingNight": "Bona nuet {user}!",
   "@greetingNight": {
-    "placeholders": { "user": { "type": "String" } }
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
   },
   "greetingNightMotivation": "L se fej tert! Pënsa a stlù ju tosc.",
-  
   "homeDailyGoal": "Travert dl di",
   "homeDailyGoalDone": "Te es finà dut per ncuei!",
   "homeSectionHabitsDue": "Abitudins de ncuei ({count})",
   "@homeSectionHabitsDue": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "homeSectionTasksDue": "Ncëries da finé ({count})",
   "@homeSectionTasksDue": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "homeSectionTasksUpcoming": "Proscima ncëries ({count})",
   "@homeSectionTasksUpcoming": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  
   "focusDialogSessionResetContent": "L cronometer ie pausà. Cunfermea per taché da nuev, o anulea per jì inant.",
   "focusDialogSessionResetTitle": "Taché da nuev la sescion?",
   "focusDialogSessionStopContent": "L cronometer ie pausà. Cunfermea per stlù ju y salvé, o anulea per jì inant.",
@@ -98,16 +122,23 @@
   "focusLabelStopwatch": "Cronometer",
   "focusLimitMax": "Masc. {minutes} min",
   "@focusLimitMax": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "focusMinutes": "{count} min focus",
   "@focusMinutes": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  
   "focusModeDialogDeleteContent": "T'es segur de ulëi scancelé chësta modalità persunalisheda?",
   "focusModeDialogDeleteTitle": "Scancelé modalità focus?",
-  "focusModeFlex": "Flex",
+  "focusModeFlex": "Flexibl",
   "focusModeFlexible": "Flessibl",
   "focusModeLabelEdit": "Mudé modalità",
   "focusModeLabelEditing": "Ntan a mudé modalità",
@@ -126,13 +157,16 @@
   "focusPhasesTitleAdd": "Njunté fasa",
   "focusPhasesTitleEdit": "Mudé fasa",
   "focusSnackbarHabitLocked": "Fina prima l'abitudin dant te la rënga!",
-  
   "focusStateActive": "Sescion focus ativa",
   "focusStatePaused": "Pausà",
   "focusStatsEmpty": "Fina n valguna sescions per udëi i dac!",
   "focusStatsSectionClockSessions": "{count} sescions",
   "@focusStatsSectionClockSessions": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "focusStatsSectionClockSubtitle": "Clica n di per cialé si sescions",
   "focusStatsSectionClockTitle": "Ritm de focus al di",
@@ -145,10 +179,13 @@
   "focusStatsSectionTargetBreakdownTitle": "Focus aldò dl travert",
   "focusStatsSectionVolumeSubtitle": "Menuc de focus de ndut al di",
   "focusStatsSectionVolumeTitle": "Volum de focus de l'ena",
-  
   "focusTagsDialogContentDelete": "T'es segur de ulëi scancelé \"{tagName}\"?",
   "@focusTagsDialogContentDelete": {
-    "placeholders": { "tagName": { "type": "String" } }
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
   },
   "focusTagsDialogLabelHint": "Inuem eticheta (ej. Lejer)",
   "focusTagsDialogLabelName": "Inuem eticheta",
@@ -165,7 +202,6 @@
   "focusTargetLabel": "Travert",
   "focusTargetUntagged": "Zënza eticheta",
   "focusTitle": "Focus",
-  
   "habitDeleteContent": "T'es segur de ulëi scancelé chësta abitudin?",
   "habitDeleteTitle": "Scancelé abitudin",
   "habitDetailLabelFrequency": "Frequënza",
@@ -174,7 +210,11 @@
   "habitDetailLabelFrequencyFlexible": "Flessibl",
   "habitDetailLabelGoal": "Travert: {count, plural, =0{A uni di} =1{1 di a l'ena} other{{count} dis a l'ena}}",
   "@habitDetailLabelGoal": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "habitDetailLabelIcon": "Cëria ora n'icona",
   "habitDetailLabelName": "Inuem abitudin",
@@ -184,29 +224,51 @@
   "habitDetailLabelNotesHint": "Cie mutivazions es'a per chësta abitudin?",
   "habitDetailLabelReminder": "Ora dl lezit (Zënza ubligh)",
   "habitDetailLabelReminderNoTime": "Deguna ora zessa",
+  "habitDetailLabelColor": "Culëur",
+  "habitDetailLabelColorPicker": "Chir ora n culëur",
   "habitDetailLabelStack": "Rënga de abitudins (Zënza ubligh)",
   "habitDetailLabelStackHint": "ej. Routine da duman",
   "habitDetailLabelStackOrder": "Orden te la rënga",
   "habitDetailSnackbarSaveNoDay": "Cëria ora almanco n di",
   "habitDetailTitleEdit": "Mudé abitudin",
+  "habitDetailTitleView": "Detail dla usanza",
   "habitDetailTitleNew": "Nueva abitudin",
   "habitFreqDaily": "A uni di",
   "habitFreqFlexible": "{progress} / {target} chësta ena",
   "@habitFreqFlexible": {
-    "placeholders": { "progress": { "type": "int" }, "target": { "type": "int" } }
+    "placeholders": {
+      "progress": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
   },
   "habitFreqWeekly": "Dl'ena de {days}",
   "@habitFreqWeekly": {
-    "placeholders": { "days": { "type": "String" } }
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
   },
   "habitHistoryCompletedAt": "Finà dala {time}",
   "@habitHistoryCompletedAt": {
-    "placeholders": { "time": { "type": "String" } }
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "habitHistoryEmpty": "Niamò deguna storia.",
   "habitHistoryRemoveCompletion": "Tò demez l finé per l {date}?",
   "@habitHistoryRemoveCompletion": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "habitHistoryRemoveTitle": "Tò demez l finé?",
   "habitHistoryRemoveTooltip": "Tò demez chësc record",
@@ -222,7 +284,11 @@
   "habitStatsLabelActive": "Abitudins atives",
   "habitStatsLabelBest": "Mëio: {streak}",
   "@habitStatsLabelBest": {
-    "placeholders": { "streak": { "type": "int" } }
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      }
+    }
   },
   "habitStatsLabelBestStreak": "Sëria miëura",
   "habitStatsLabelCompletionsDaily": "Abitudins fati al di",
@@ -234,7 +300,6 @@
   "habitStatsLabelVelocity": "Velozità dl'ena",
   "habitsListTitle": "Mi abitudins",
   "habitsSheetEmpty": "Deguna abitudins de ndisposizion",
-  
   "taskDeleteContent": "T'es segur de ulëi scancelé chësta ncëria?",
   "taskDeleteTitle": "Scancelé ncëria",
   "taskDetailsLabelCategory": "Categoria",
@@ -245,9 +310,17 @@
   "taskDetailsLabelDescription": "Descrizion",
   "taskDetailsLabelDueDate": "Scadënza: {date} dala {time}",
   "@taskDetailsLabelDueDate": {
-    "placeholders": { "date": { "type": "String" }, "time": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "taskDetailsLabelDueDateNone": "Deguna data de scadënza metuda",
+  "taskDetailsLabelDueDateSet": "Met data de scadenza",
   "taskDetailsLabelEffort": "Sforz",
   "taskDetailsLabelLocation": "Luelg",
   "taskDetailsLabelPriority": "Priorità",
@@ -289,19 +362,33 @@
   "taskListSortSize": "Grandëza",
   "taskListTitle": "Mi ncëries",
   "taskListTooltipSort": "Urdiné aldò",
-  
   "taskReminderBody": "{prefix} lezite de fé {task}!",
   "@taskReminderBody": {
-    "placeholders": { "prefix": { "type": "String" }, "task": { "type": "String" } }
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      },
+      "task": {
+        "type": "String"
+      }
+    }
   },
   "taskReminderBodyExact": "L'ie l'ëura de fé {task}!",
   "@taskReminderBodyExact": {
-    "placeholders": { "task": { "type": "String" } }
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
   },
   "taskReminderPrefixNow": "Sën: ",
   "taskReminderTitle": "Lezit: {task}",
   "@taskReminderTitle": {
-    "placeholders": { "task": { "type": "String" } }
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
   },
   "taskSheetEmpty": "Deguna ncëries de ndisposizion",
   "taskStatsCategoryUncategorized": "Zënza categoria",
@@ -314,7 +401,6 @@
   "taskStatsEmpty": "Niamò degun dac da mustré",
   "taskStatsProductivity": "Produtività",
   "taskStatsVelocity": "Velozità dla ncëries",
-  
   "calendarHeaderFri": "V",
   "calendarHeaderMon": "L",
   "calendarHeaderSat": "S",
@@ -327,22 +413,33 @@
   "calendarLabelSelect": "Cëria ora n di per i detaies",
   "calendarSectionFocus": "Sescions de focus ({count})",
   "@calendarSectionFocus": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "calendarSectionFocusEmpty": "Deguna sescions de focus registredes",
   "calendarSectionHabits": "Abitudins ({count})",
   "@calendarSectionHabits": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "calendarSectionHabitsEmpty": "Deguna abitudins metudes o registredes",
   "calendarSectionTasks": "Ncëries ({count})",
   "@calendarSectionTasks": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "calendarSectionTasksEmpty": "Deguna ncëries metudes o registredes",
   "calendarTitle": "Calënder",
   "calendarTooltipToday": "Va al Ncuei",
-  
   "statsLabelFocus": "Tëmp de focus",
   "statsLabelFocusGoal": "Travert de focus dl di",
   "statsLabelFocusMins": "Menuc de focus",
@@ -355,14 +452,17 @@
   "statsTabOverview": "Sëuravijiun",
   "statsTabTasks": "Ncëries",
   "statsTitle": "Dac y Statistiches",
-  
   "settingsDialogUnitDays": "dis",
   "settingsDialogUnitMinutes": "menuc",
   "settingsLabelBuiltBy": "Fat da Benji377",
   "settingsLabelCategories": "Categories ncëries",
-  "settingsLabelCategoriesSubtitle": "{count} categories",
+  "settingsLabelCategoriesSubtitle": "{count} categuries",
   "@settingsLabelCategoriesSubtitle": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "settingsLabelCommunity": "Cumunità y Aiut",
   "settingsLabelCommunitySubtitle": "Fà dumandes y cunsëies sun GitHub",
@@ -398,7 +498,11 @@
   "settingsLabelTags": "Etichetes de focus",
   "settingsLabelTagsSubtitle": "{count} etichetes",
   "@settingsLabelTagsSubtitle": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "settingsLabelTheme": "Tema",
   "settingsLabelThemeDark": "Scur",
@@ -408,11 +512,19 @@
   "settingsLabelUpcomingTask": "Fënestra per ncëries proscimes",
   "settingsLabelUpcomingTaskSubtitle": "{days} dis inant",
   "@settingsLabelUpcomingTaskSubtitle": {
-    "placeholders": { "days": { "type": "int" } }
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
   },
   "settingsLabelVersion": "Verscion {version}",
   "@settingsLabelVersion": {
-    "placeholders": { "version": { "type": "String" } }
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
   },
   "settingsSectionApi": "API y Servijes",
   "settingsSectionAppearance": "Ududa",
@@ -423,7 +535,6 @@
   "settingsSectionOrganization": "Urganisazion",
   "settingsSectionSupport": "Sustëni y Feedback",
   "settingsTitle": "Mpustazions",
-  
   "userEditNameHint": "Nserësc ti inuem",
   "userEditNameTitle": "Mudé Inuem",
   "userErrorGenerateImage": "Feter de generé l cheder di resultac.",
@@ -439,14 +550,17 @@
   "userStatsAllTimeTitle": "Statistiches de dut l tëmp",
   "userTooltipShareWrapUp": "Përti l result dl'ena",
   "userTooltipStatistics": "Statistiches",
-  
   "backupActionSaveDevice": "Salvé sun l'aparat",
   "backupActionSaveDeviceSubtitle": "Cëria ora na cartela",
   "backupActionShareCloud": "Përti / Ciarié sun l Cloud",
   "backupActionShareCloudSubtitle": "Mëna a Drive, Dropbox, WhatsApp...",
   "backupExportFailure": "Esportazion faleda: {error}",
   "@backupExportFailure": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "backupExportSubject": "Esportazion Timety",
   "backupExportSuccess": "Esportazion saveda te",
@@ -459,13 +573,20 @@
   "backupRestoreSuccessTitle": "Tornà de reviers cun suzes!",
   "backupSaveFailure": "Salvatage falà: {error}",
   "@backupSaveFailure": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "backupShareFailure": "Scipartida faleda: {error}",
   "@backupShareFailure": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
-  
   "notificationChannelEveningDesc": "Lezic de fin di per registré la abitudins",
   "notificationChannelEveningName": "Cuntrol dla Sëira",
   "notificationChannelFocusDesc": "Notificazion per sescions de focus atives",
@@ -481,12 +602,20 @@
   "notificationGoodMorning": "Bon di!",
   "notificationHabitBody": "Tëmp de: {habit}!",
   "@notificationHabitBody": {
-    "placeholders": { "habit": { "type": "String" } }
+    "placeholders": {
+      "habit": {
+        "type": "String"
+      }
+    }
   },
   "notificationHabitListSuffix": " y auter inò",
   "notificationHabitReminder": "\nNo te desmincë per ncuei de fé {habitList}!",
   "@notificationHabitReminder": {
-    "placeholders": { "habitList": { "type": "String" } }
+    "placeholders": {
+      "habitList": {
+        "type": "String"
+      }
+    }
   },
   "notificationHabitTitle": "Lezit Abitudin",
   "notificationQuote1": "Dumineia ti di!",
@@ -494,31 +623,55 @@
   "notificationQuote3": "Cie ies'l in dro ncuei? Lajons taché.",
   "notificationTimeRemaining": "L mancia {mins}:{secs}",
   "@notificationTimeRemaining": {
-    "placeholders": { "mins": { "type": "String" }, "secs": { "type": "String" } }
+    "placeholders": {
+      "mins": {
+        "type": "String"
+      },
+      "secs": {
+        "type": "String"
+      }
+    }
   },
-  
   "wrapUpFooter": "Dumineia ti tëmp cun Timety",
   "wrapUpHeaderEyebrow": "SOMA DE TIMETY",
   "wrapUpHeaderLevel": "Livèl {level} | {title}",
   "@wrapUpHeaderLevel": {
-    "placeholders": { "level": { "type": "int" }, "title": { "type": "String" } }
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
   },
   "wrapUpHeaderTitle": "Statistiches de {name}",
   "@wrapUpHeaderTitle": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "wrapUpStatFocusLabel": "Menuc cunzentrei",
   "wrapUpStatHabitsLabel": "Abitudins fates",
   "wrapUpStatStreakLabel": "Sëria ativa",
   "wrapUpStatStreakValue": "{streak} Di",
   "@wrapUpStatStreakValue": {
-    "placeholders": { "streak": { "type": "int" } }
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      }
+    }
   },
   "wrapUpStatTasksLabel": "Ncëries finedes",
-  
   "categoryDeleteContent": "T'es segur de ulëi scancelé \"{category}\"? La ncëries cun chësta categoria restarà zënza.",
   "@categoryDeleteContent": {
-    "placeholders": { "category": { "type": "String" } }
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
   },
   "categoryDeleteTitle": "Scancelé la categoria?",
   "categoryEditTitle": "Mudé categoria",
@@ -526,10 +679,13 @@
   "categoryNameLabel": "Inuem dla categoria",
   "categoryTaskCount": "{count, plural, =0{Deguna ncëries} =1{1 ncëria} other{{count} ncëries}}",
   "@categoryTaskCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  "categoryTitle": "Categories",
-  
+  "categoryTitle": "Categuries",
   "dialogTimeMachineEndTime": "Ora de fin",
   "dialogTimeMachineErrorEndBeforeStart": "L'ora de fin muessa vester do l'ora de taché",
   "dialogTimeMachineMode": "Modalità de Focus",
@@ -538,7 +694,6 @@
   "dialogTimeMachineSuccess": "Sescion registreda!",
   "dialogTimeMachineTag": "Eticheta (Zënza ubligh)",
   "dialogTimeMachineTitle": "Registré sescion passeda",
-  
   "locationApiDialogBestPractice": "Pruzess Miëur",
   "locationApiDialogBestPracticeDesc": "Aministrea la tia istyanza Photon per ti privacy",
   "locationApiDialogError": "Nia rujenà al endpoint. Cuntrulea l'URL y prò inò.",
@@ -555,16 +710,23 @@
   "locationPickerNetworkError": "Fal dla rë. Cuntrulea l liant y la mpustazions API di luesc.",
   "locationPickerNoResults": "Degun luesc abinei per \"{query}\"",
   "@locationPickerNoResults": {
-    "placeholders": { "query": { "type": "String" } }
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "locationPickerServerError": "Fal dl Server: {code}",
   "@locationPickerServerError": {
-    "placeholders": { "code": { "type": "int" } }
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
   },
   "locationPickerStartTyping": "Taca a scrì per crì n luelg",
   "locationPickerTitle": "Cëria Luelg",
   "locationPickerUnknown": "Luelg descunësciu",
-  
   "streakDayToday": "Ncuei",
   "streakLegendStreakDay": "Di de sëria",
   "streakStatusActive": "Ncuei iel atif y l prolungëia ti sëria.",
@@ -575,63 +737,117 @@
   "streakTimelineCurrent": "Sëria atuëla",
   "streakTimelineDays": "{count, plural, =1{1 di} other{{count} dis}}",
   "@streakTimelineDays": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "streakTimelineSubtitle": "Mustra l'ultimi 7 dis",
   "streakTimelineTitle": "Cronologia dla sëria",
-  
   "xpBreakdownHowToEarn": "Coche se vadanië XP",
   "xpBreakdownLevel": "Livèl {level} | {title}",
   "@xpBreakdownLevel": {
-    "placeholders": { "level": { "type": "int" }, "title": { "type": "String" } }
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
   },
   "xpBreakdownProgress": "{total} XP de ndut | {remaining} XP per l proscimo livèl",
   "@xpBreakdownProgress": {
-    "placeholders": { "total": { "type": "int" }, "remaining": { "type": "int" } }
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
   },
   "xpSourceFocusDesc": "Uni menut de focus njunta",
   "xpSourceHabitDesc": "Uni abitudin finada njunta",
   "xpSourceTaskDesc": "Uni ncëria finada njunta",
   "xpSourceValue": "+{xp} XP",
   "@xpSourceValue": {
-    "placeholders": { "xp": { "type": "int" } }
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
   },
-  
   "weekNavPastWeek": "Ena passeda",
   "weekNavThisWeek": "Chësta ena",
   "widgetHabitsToday": "Abitudins de ncuei",
   "widgetTasksDue": "Ncëries da finé ({count})",
   "@widgetTasksDue": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  
   "nTaskReminderPrefixDays": "Te {count, plural, =1{Duman} other{{count} dis}}",
   "@nTaskReminderPrefixDays": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "nTaskReminderPrefixHours": "Te {count, plural, =1{1 ëura} other{{count} ëures}}",
   "@nTaskReminderPrefixHours": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "nTaskReminderPrefixMinutes": "Te {count, plural, =1{1 menut} other{{count} menuc}}",
   "@nTaskReminderPrefixMinutes": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "nTasksCount": "{count, plural, =0{Deguna ncëries} =1{1 ncëria} other{{count} ncëries}}",
   "@nTasksCount": {
-    "placeholders": { "count": { "type": "int", "format": "compact" } }
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
   },
   "nHabitsCount": "{count, plural, =0{Degun abitudins finades} =1{1 abitudin finada} other{{count} abitudins finades}}",
+  "@nHabitsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nMinutesCount": "{count, plural, =0{Degun menuc} =1{1 menut} other{{count} menuc}}",
   "@nMinutesCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-  
   "distractionDistracted": "Daujin (Distrat/a)",
   "distractionHydrated": "Bëivut (Idratà/eda)",
   "distractionLogged": "Registrà: {distraction}",
   "@distractionLogged": {
-    "placeholders": { "distraction": { "type": "String" } }
+    "placeholders": {
+      "distraction": {
+        "type": "String"
+      }
+    }
   },
   "distractionRestroom": "Bani",
   "distractionSheetTitle": "Registré distrazion",
