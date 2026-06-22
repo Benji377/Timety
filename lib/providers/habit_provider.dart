@@ -30,6 +30,12 @@ class HabitProvider extends ChangeNotifier {
   }
 
   void updateSettings(SettingsProvider settings) {
+    if (_settings?.appLocale == settings.appLocale &&
+        _settings?.use24HourFormat == settings.use24HourFormat &&
+        _settings?.notificationTime == settings.notificationTime &&
+        _settings?.endOfDayTime == settings.endOfDayTime) {
+      return;
+    }
     _settings = settings;
     syncNotifications();
     _notifyAndSync();
@@ -151,18 +157,23 @@ class HabitProvider extends ChangeNotifier {
       now.month,
       now.day,
     ).subtract(Duration(days: now.weekday - 1));
-    final endOfWeek = startOfWeek.add(
-      const Duration(days: 6, hours: 23, minutes: 59),
-    );
-
+    final startOfNextWeek = startOfWeek.add(const Duration(days: 7));
     final today = DateTime(now.year, now.month, now.day);
+    int count = 0;
 
-    return habit.completions.where((c) {
-      final isInWeek = c.isAfter(startOfWeek) && c.isBefore(endOfWeek);
-      if (!isInWeek) return false;
-      if (includeToday) return true;
-      return !AppDateUtils.isSameDay(c, today);
-    }).length;
+    for (int i = habit.completions.length - 1; i >= 0; i--) {
+      final c = habit.completions[i];
+      final isInWeek = !c.isBefore(startOfWeek) && c.isBefore(startOfNextWeek);
+
+      if (isInWeek) {
+        if (includeToday || !AppDateUtils.isSameDay(c, today)) {
+          count++;
+        }
+      } else if (c.isBefore(startOfWeek)) {
+        break;
+      }
+    }
+    return count;
   }
 
   List<Habit> getHabitsForDay(DateTime date) {
@@ -185,6 +196,9 @@ class HabitProvider extends ChangeNotifier {
   }) async {
     if (!isCompletedOn(habit, date)) {
       habit.completions.add(date);
+      // Chronological order (oldest first, newest last)
+      habit.completions.sort((a, b) => a.compareTo(b));
+
       userProvider?.addXp(ExperienceEngine.xpPerHabit);
       await saveHabit(habit);
     }

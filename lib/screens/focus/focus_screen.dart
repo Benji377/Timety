@@ -28,77 +28,6 @@ class FocusScreen extends StatefulWidget {
 class _FocusScreenState extends State<FocusScreen> {
   @override
   Widget build(BuildContext context) {
-    final focusProvider = context.watch<FocusProvider>();
-    focusProvider.attachUserProvider(context.read<UserProvider>());
-    focusProvider.attachSettingsProvider(context.read<SettingsProvider>());
-    focusProvider.attachTaskProvider(context.read<TaskProvider>());
-    focusProvider.attachHabitProvider(context.read<HabitProvider>());
-    final isRunning = focusProvider.isRunning;
-    final isPaused = focusProvider.isPaused;
-    final activeMode = focusProvider.activeMode;
-    final modes = focusProvider.modes;
-
-    final bool isFlexibleMode = activeMode?.type == FocusModeType.flexible;
-    final bool canDrag = isFlexibleMode && !isRunning && !isPaused;
-
-    double gaugeProgress = 1.0;
-    bool isStopwatchMode = false;
-    String label = AppLocalizations.of(
-      context,
-    )!.focusLabelDefault.toUpperCase();
-    String centerText = "25:00";
-    bool isResting = false;
-
-    if (activeMode != null && activeMode.phases.isNotEmpty) {
-      final currentPhase = activeMode.phases[focusProvider.currentPhaseIndex];
-      final bool isStopwatchPhase = activeMode.type == FocusModeType.stopwatch;
-
-      if (canDrag) {
-        final int currentMinutes = focusProvider.flexibleDurationMinutes;
-        gaugeProgress = currentMinutes / 120.0;
-        label = AppLocalizations.of(context)!.focusLabelSetTime.toUpperCase();
-        centerText = AppDateFormatUtils.formatDuration(currentMinutes * 60);
-      } else if (!isStopwatchPhase) {
-        int totalPhaseSeconds = currentPhase.durationMinutes > 0
-            ? currentPhase.durationMinutes * 60
-            : 25 * 60;
-        if (totalPhaseSeconds == 0) totalPhaseSeconds = 1;
-
-        gaugeProgress =
-            focusProvider.secondsRemainingInPhase / totalPhaseSeconds;
-        label = currentPhase.type == PhaseType.rest
-            ? AppLocalizations.of(context)!.focusLabelRest.toUpperCase()
-            : AppLocalizations.of(context)!.focusLabelDefault.toUpperCase();
-        isResting = currentPhase.type == PhaseType.rest;
-        centerText = AppDateFormatUtils.formatDuration(
-          focusProvider.secondsRemainingInPhase,
-        );
-      } else {
-        isStopwatchMode = isRunning;
-        gaugeProgress = 0.0;
-        label = AppLocalizations.of(context)!.focusLabelStopwatch.toUpperCase();
-        centerText = AppDateFormatUtils.formatDuration(
-          focusProvider.currentSecondsFocussed,
-        );
-      }
-    }
-
-    final FocusTargetType? selectedTargetType =
-        focusProvider.selectedTarget?.type;
-    final IconData? bottomTextIcon = switch (selectedTargetType) {
-      FocusTargetType.task => Icons.task,
-      FocusTargetType.habit => Icons.alarm,
-      _ => null,
-    };
-
-    void cycleMode(int direction) {
-      if (isRunning || isPaused || activeMode == null) return;
-      final int currentIndex = modes.indexWhere((m) => m.id == activeMode.id);
-      int nextIndex = (currentIndex + direction) % modes.length;
-      if (nextIndex < 0) nextIndex = modes.length - 1;
-      focusProvider.setActiveMode(modes[nextIndex]);
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.focusTitle),
@@ -117,7 +46,75 @@ class _FocusScreenState extends State<FocusScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: Column(
+      body: Consumer<FocusProvider>(
+        builder: (context, focusProvider, child) {
+          final isRunning = focusProvider.isRunning;
+          final isPaused = focusProvider.isPaused;
+          final activeMode = focusProvider.activeMode;
+          final modes = focusProvider.modes;
+
+          final bool isFlexibleMode = activeMode?.type == FocusModeType.flexible;
+          final bool canDrag = isFlexibleMode && !isRunning && !isPaused;
+
+          double gaugeProgress = 1.0;
+          bool isStopwatchMode = false;
+          String label = AppLocalizations.of(
+            context,
+          )!.focusLabelDefault.toUpperCase();
+          String centerText = "25:00";
+          bool isResting = false;
+
+          if (activeMode != null && activeMode.phases.isNotEmpty) {
+            final currentPhase = activeMode.phases[focusProvider.currentPhaseIndex];
+            final bool isStopwatchPhase = activeMode.type == FocusModeType.stopwatch;
+
+            if (canDrag) {
+              final int currentMinutes = focusProvider.flexibleDurationMinutes;
+              gaugeProgress = currentMinutes / 120.0;
+              label = AppLocalizations.of(context)!.focusLabelSetTime.toUpperCase();
+              centerText = AppDateFormatUtils.formatDuration(currentMinutes * 60);
+            } else if (!isStopwatchPhase) {
+              int totalPhaseSeconds = currentPhase.durationMinutes > 0
+                  ? currentPhase.durationMinutes * 60
+                  : 25 * 60;
+              if (totalPhaseSeconds == 0) totalPhaseSeconds = 1;
+
+              gaugeProgress =
+                  focusProvider.secondsRemainingInPhase / totalPhaseSeconds;
+              label = currentPhase.type == PhaseType.rest
+                  ? AppLocalizations.of(context)!.focusLabelRest.toUpperCase()
+                  : AppLocalizations.of(context)!.focusLabelDefault.toUpperCase();
+              isResting = currentPhase.type == PhaseType.rest;
+              centerText = AppDateFormatUtils.formatDuration(
+                focusProvider.secondsRemainingInPhase,
+              );
+            } else {
+              isStopwatchMode = isRunning;
+              gaugeProgress = 0.0;
+              label = AppLocalizations.of(context)!.focusLabelStopwatch.toUpperCase();
+              centerText = AppDateFormatUtils.formatDuration(
+                focusProvider.currentSecondsFocussed,
+              );
+            }
+          }
+
+          final FocusTargetType? selectedTargetType =
+              focusProvider.selectedTarget?.type;
+          final IconData? bottomTextIcon = switch (selectedTargetType) {
+            FocusTargetType.task => Icons.task,
+            FocusTargetType.habit => Icons.alarm,
+            _ => null,
+          };
+
+          void cycleMode(int direction) {
+            if (isRunning || isPaused || activeMode == null) return;
+            final int currentIndex = modes.indexWhere((m) => m.id == activeMode.id);
+            int nextIndex = (currentIndex + direction) % modes.length;
+            if (nextIndex < 0) nextIndex = modes.length - 1;
+            focusProvider.setActiveMode(modes[nextIndex]);
+          }
+
+          return Column(
         children: [
           const SizedBox(height: 10),
 
@@ -421,13 +418,13 @@ class _FocusScreenState extends State<FocusScreen> {
               ),
             ],
           ),
-
           const SizedBox(height: 40),
         ],
-      ),
-    );
-  }
-
+      );
+    },
+  ),
+);
+}
   // --- BOTTOM SHEETS & ALERTS ---
   void _showDistractionSheet(BuildContext context, FocusProvider provider) {
     FocusBottomSheetBuilders.showDistractionSheet(
