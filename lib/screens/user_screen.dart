@@ -16,7 +16,7 @@ import '../widgets/stats/stat_card.dart';
 import '../widgets/user_profile/streak_status_badge.dart';
 import '../widgets/user_profile/user_streak_timeline_card.dart';
 import '../widgets/user_profile/user_xp_breakdown_card.dart';
-import 'statistics_screen.dart';
+import 'settings_screen.dart';
 
 /// Displays the user's profile, XP progress, and all-time statistics.
 class UserScreen extends StatefulWidget {
@@ -107,11 +107,10 @@ class _UserScreenState extends State<UserScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: l10n.userTooltipStatistics,
+            icon: const Icon(Icons.settings),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const StatisticsScreen()),
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
             ),
           ),
         ],

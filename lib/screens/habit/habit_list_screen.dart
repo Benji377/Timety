@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../screens/statistics_screen.dart';
 import '../../data/habit/habit_models.dart';
 import '../../providers/habit_provider.dart';
 import '../../providers/user_provider.dart';
@@ -11,7 +10,6 @@ import '../../widgets/common/expansion_section.dart';
 import '../../widgets/habit/grouped_habits_section.dart';
 import '../../widgets/habit/habit_bottom_sheet.dart';
 import '../../widgets/list_tiles/habit_list_tile.dart';
-import '../calendar_screen.dart';
 import '../../l10n/app_localizations.dart';
 import 'habit_detail_screen.dart';
 
@@ -24,31 +22,6 @@ class HabitListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.habitsListTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: AppLocalizations.of(context)!.commonTooltipStats,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const StatisticsScreen(initialTabIndex: 3),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            tooltip: AppLocalizations.of(context)!.commonTooltipCalendar,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CalendarScreen()),
-              );
-            },
-          ),
-        ],
       ),
       body: Consumer<HabitProvider>(
         builder: (context, provider, child) {

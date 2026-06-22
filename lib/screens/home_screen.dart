@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/user_provider.dart';
-import '../screens/settings_screen.dart';
 import '../data/habit/habit_models.dart';
 import '../providers/habit_provider.dart';
 import '../data/task/task.dart';
@@ -15,6 +14,8 @@ import '../widgets/focus/interactive_gauge.dart';
 import '../widgets/habit/grouped_habits_section.dart';
 import '../widgets/list_tiles/habit_list_tile.dart';
 import '../widgets/list_tiles/task_list_tile.dart';
+import 'calendar_screen.dart';
+import 'statistics_screen.dart';
 import 'task/task_detail_screen.dart';
 import 'habit/habit_detail_screen.dart';
 import '../widgets/common/styled_expansion_tile.dart';
@@ -86,11 +87,27 @@ class HomeScreen extends StatelessWidget {
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            ),
+            icon: const Icon(Icons.bar_chart),
+            tooltip: l10n.commonTooltipStats,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      const StatisticsScreen(),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            tooltip: l10n.commonTooltipCalendar,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CalendarScreen()),
+              );
+            },
           ),
         ],
       ),

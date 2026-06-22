@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../screens/statistics_screen.dart';
 import '../../utils/datetime/date_format_utils.dart';
 import '../../utils/ui/l10n_utils.dart';
 import '../../l10n/app_localizations.dart';
@@ -15,7 +14,6 @@ import '../../widgets/focus/focus_mode_timeline.dart';
 import '../../widgets/focus/interactive_gauge.dart';
 import '../../widgets/common/app_dialogs.dart';
 import '../../widgets/focus/focus_bottom_sheet.dart';
-import '../calendar_screen.dart';
 import '../settings_screen.dart';
 import 'focus_modes_screen.dart';
 
@@ -106,25 +104,13 @@ class _FocusScreenState extends State<FocusScreen> {
         title: Text(AppLocalizations.of(context)!.focusTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: AppLocalizations.of(context)!.commonTooltipStats,
+            icon: const Icon(Icons.dashboard_customize),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      const StatisticsScreen(initialTabIndex: 2),
+                  builder: (context) => const FocusModesScreen(),
                 ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            tooltip: AppLocalizations.of(context)!.commonTooltipCalendar,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CalendarScreen()),
               );
             },
           ),

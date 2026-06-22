@@ -8,8 +8,6 @@ import '../../providers/user_provider.dart';
 import '../../utils/task/task_filter_engine.dart';
 import '../../widgets/common/expansion_section.dart';
 import '../../widgets/list_tiles/task_list_tile.dart';
-import '../calendar_screen.dart';
-import '../statistics_screen.dart';
 import 'task_detail_screen.dart';
 
 /// Displays a searchable, filterable, and sortable list of all tasks.
@@ -43,31 +41,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.taskListTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: l10n.commonTooltipStats,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      const StatisticsScreen(initialTabIndex: 1),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            tooltip: l10n.commonTooltipCalendar,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CalendarScreen()),
-              );
-            },
-          ),
-        ],
       ),
       body: Consumer<TaskProvider>(
         builder: (context, provider, child) {
