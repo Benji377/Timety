@@ -138,7 +138,7 @@
   },
   "focusModeDialogDeleteContent": "T'es segur de ulëi scancelé chësta modalità persunalisheda?",
   "focusModeDialogDeleteTitle": "Scancelé modalità focus?",
-  "focusModeFlex": "Flex",
+  "focusModeFlex": "Flexibl",
   "focusModeFlexible": "Flessibl",
   "focusModeLabelEdit": "Mudé modalità",
   "focusModeLabelEditing": "Ntan a mudé modalità",
@@ -224,14 +224,14 @@
   "habitDetailLabelNotesHint": "Cie mutivazions es'a per chësta abitudin?",
   "habitDetailLabelReminder": "Ora dl lezit (Zënza ubligh)",
   "habitDetailLabelReminderNoTime": "Deguna ora zessa",
-  "habitDetailLabelColor": "Color",
-  "habitDetailLabelColorPicker": "Choose a Color",
+  "habitDetailLabelColor": "Culëur",
+  "habitDetailLabelColorPicker": "Chir ora n culëur",
   "habitDetailLabelStack": "Rënga de abitudins (Zënza ubligh)",
   "habitDetailLabelStackHint": "ej. Routine da duman",
   "habitDetailLabelStackOrder": "Orden te la rënga",
   "habitDetailSnackbarSaveNoDay": "Cëria ora almanco n di",
   "habitDetailTitleEdit": "Mudé abitudin",
-  "habitDetailTitleView": "Habit Details",
+  "habitDetailTitleView": "Detail dla usanza",
   "habitDetailTitleNew": "Nueva abitudin",
   "habitFreqDaily": "A uni di",
   "habitFreqFlexible": "{progress} / {target} chësta ena",
@@ -320,7 +320,7 @@
     }
   },
   "taskDetailsLabelDueDateNone": "Deguna data de scadënza metuda",
-  "taskDetailsLabelDueDateSet": "Set Due Date",
+  "taskDetailsLabelDueDateSet": "Met data de scadenza",
   "taskDetailsLabelEffort": "Sforz",
   "taskDetailsLabelLocation": "Luelg",
   "taskDetailsLabelPriority": "Priorità",
@@ -456,7 +456,7 @@
   "settingsDialogUnitMinutes": "menuc",
   "settingsLabelBuiltBy": "Fat da Benji377",
   "settingsLabelCategories": "Categories ncëries",
-  "settingsLabelCategoriesSubtitle": "{count} categories",
+  "settingsLabelCategoriesSubtitle": "{count} categuries",
   "@settingsLabelCategoriesSubtitle": {
     "placeholders": {
       "count": {
@@ -685,7 +685,7 @@
       }
     }
   },
-  "categoryTitle": "Categories",
+  "categoryTitle": "Categuries",
   "dialogTimeMachineEndTime": "Ora de fin",
   "dialogTimeMachineErrorEndBeforeStart": "L'ora de fin muessa vester do l'ora de taché",
   "dialogTimeMachineMode": "Modalità de Focus",
