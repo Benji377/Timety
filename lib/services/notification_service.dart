@@ -316,8 +316,8 @@ class NotificationService {
           'focus_timer_channel',
           l10n.notificationChannelFocusName,
           channelDescription: l10n.notificationChannelFocusDesc,
-          importance: Importance.low,
-          priority: Priority.high,
+          importance: Importance.max,
+          priority: Priority.max,
           silent: true,
           ongoing: true,
           autoCancel: false,
@@ -325,8 +325,8 @@ class NotificationService {
           chronometerCountDown: !isStopwatch,
           when: targetTime.millisecondsSinceEpoch,
           color: notificationColor,
-          colorized: true,
-          icon: '@mipmap/ic_launcher',
+          icon: '@drawable/ic_stat_logo',
+          visibility: NotificationVisibility.public,
           category: isStopwatch
               ? AndroidNotificationCategory.stopwatch
               : AndroidNotificationCategory.status,
