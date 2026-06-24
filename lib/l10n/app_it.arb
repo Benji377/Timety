@@ -157,7 +157,9 @@
   "focusPhasesTitleAdd": "Aggiungi fase",
   "focusPhasesTitleEdit": "Modifica fase",
   "focusSnackbarHabitLocked": "Completa prima l'abitudine precedente nella sequenza!",
-  "focusStateActive": "Sessione di focus attiva",
+  "focusStateActive": "Focus",
+  "focusStateResting": "Riposo",
+  "focusStateReady": "Pronto a continuare",
   "focusStatePaused": "In pausa",
   "focusStatsEmpty": "Completa alcune sessioni di focus per vedere i dati!",
   "focusStatsSectionClockSessions": "{count} sessioni",
@@ -790,7 +792,7 @@
       }
     }
   },
-  "nTaskReminderPrefixDays": "{count, plural, =1{Tomorrow} other{In {count} days}}",
+  "nTaskReminderPrefixDays": "{count, plural, =1{Domani} other{Tra {count} giorni}}",
   "@nTaskReminderPrefixDays": {
     "placeholders": {
       "count": {
