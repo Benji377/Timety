@@ -790,7 +790,7 @@
       }
     }
   },
-  "nTaskReminderPrefixDays": "In {count, plural, =1{Morgen} other{{count} Tagen}}",
+  "nTaskReminderPrefixDays": "{count, plural, =1{Tomorrow} other{In {count} days}}",
   "@nTaskReminderPrefixDays": {
     "placeholders": {
       "count": {
