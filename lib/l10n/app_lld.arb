@@ -790,7 +790,7 @@
       }
     }
   },
-  "nTaskReminderPrefixDays": "Te {count, plural, =1{Duman} other{{count} dis}}",
+  "nTaskReminderPrefixDays": "{count, plural, =1{Duman} other{Te {count} dis}}",
   "@nTaskReminderPrefixDays": {
     "placeholders": {
       "count": {

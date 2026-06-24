@@ -6,11 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import '../l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
 
 class NotificationService {
   // Singleton pattern
   static final NotificationService instance = NotificationService._internal();
   NotificationService._internal();
+
+  static const MethodChannel _timerChannel = MethodChannel('com.timety/timer_notification');
 
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -307,38 +310,28 @@ class NotificationService {
   }) async {
     if (kIsWeb) return;
 
-    await _notificationsPlugin.show(
-      id: focusTimerId,
-      title: title,
-      body: body,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          'focus_timer_channel',
-          l10n.notificationChannelFocusName,
-          channelDescription: l10n.notificationChannelFocusDesc,
-          importance: Importance.max,
-          priority: Priority.max,
-          silent: true,
-          ongoing: true,
-          autoCancel: false,
-          usesChronometer: !isPaused,
-          chronometerCountDown: !isStopwatch,
-          when: targetTime.millisecondsSinceEpoch,
-          color: notificationColor,
-          icon: '@drawable/ic_stat_logo',
-          visibility: NotificationVisibility.public,
-          category: isStopwatch
-              ? AndroidNotificationCategory.stopwatch
-              : AndroidNotificationCategory.status,
-          onlyAlertOnce: true,
-        ),
-      ),
-    );
+    try {
+      await _timerChannel.invokeMethod('showTimer', {
+        'title': title,
+        'body': body,
+        'targetTimeMs': targetTime.millisecondsSinceEpoch,
+        'isStopwatch': isStopwatch,
+        'isPaused': isPaused,
+        'color': notificationColor.toARGB32(),
+      });
+    } catch (e) {
+      debugPrint('Failed to show custom timer notification: $e');
+    }
   }
 
   // Removes the pinned notification when stopped
   Future<void> cancelFocusTimerNotification() async {
     if (kIsWeb) return;
-    await _notificationsPlugin.cancel(id: focusTimerId);
+    
+    try {
+      await _timerChannel.invokeMethod('cancelTimer');
+    } catch (e) {
+      debugPrint('Failed to cancel custom timer notification: $e');
+    }
   }
 }

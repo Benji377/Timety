@@ -790,7 +790,7 @@
       }
     }
   },
-  "nTaskReminderPrefixDays": "Tra {count, plural, =1{Domani} other{{count} giorni}}",
+  "nTaskReminderPrefixDays": "{count, plural, =1{Domani} other{Tra {count} giorni}}",
   "@nTaskReminderPrefixDays": {
     "placeholders": {
       "count": {
