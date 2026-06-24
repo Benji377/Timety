@@ -352,7 +352,7 @@ class _FocusScreenState extends State<FocusScreen> {
                         ? 1.0
                         : 0.0,
                     child: IconButton(
-                      icon: const Icon(Icons.refresh),
+                      icon: const Icon(Icons.restart_alt),
                       iconSize: 32,
                       color: Colors.grey.shade600,
                       onPressed:
@@ -531,7 +531,8 @@ class _FocusScreenState extends State<FocusScreen> {
     FocusProvider focusProvider,
   ) async {
     final bool wasRunning = focusProvider.isRunning;
-    if (!wasRunning && !focusProvider.awaitingPhaseContinue) return;
+    final bool isPaused = focusProvider.isPaused;
+    if (!wasRunning && !focusProvider.awaitingPhaseContinue && !isPaused) return;
 
     var pausedByThisCall = false;
     if (wasRunning) {

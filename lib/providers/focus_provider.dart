@@ -267,7 +267,7 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     String titleText;
     if (asPaused) {
-      if (_secondsRemainingInPhase <= 0) {
+      if (_awaitingPhaseContinue) {
         titleText = l10n.focusStateReady;
       } else {
         titleText = l10n.focusStatePaused;
