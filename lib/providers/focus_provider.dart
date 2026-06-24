@@ -266,10 +266,23 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     final currentPhase = _activeMode!.phases[_currentPhaseIndex];
     final isStopwatch = _activeMode!.type == FocusModeType.stopwatch;
 
-    final String titleText = asPaused
-        ? l10n.focusStatePaused
-        : _activeMode!.getLocalizedName(l10n);
+    String titleText;
+    if (asPaused) {
+      if (_secondsRemainingInPhase <= 0) {
+        titleText = l10n.focusStateReady;
+      } else {
+        titleText = l10n.focusStatePaused;
+      }
+    } else {
+      if (currentPhase.type == PhaseType.focus) {
+        titleText = l10n.focusStateActive;
+      } else {
+        titleText = l10n.focusStateResting;
+      }
+    }
+
     final List<String> bodyParts = [];
+    bodyParts.add(_activeMode!.getLocalizedName(l10n));
 
     if (selectedTargetLabel != null && selectedTargetLabel!.isNotEmpty) {
       bodyParts.add('${l10n.focusTargetLabel}: $selectedTargetLabel');
@@ -278,15 +291,6 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     DateTime targetTime;
 
     if (asPaused) {
-      final safeRemaining = _secondsRemainingInPhase > 0
-          ? _secondsRemainingInPhase
-          : 0;
-      final mins = safeRemaining ~/ 60;
-      final secs = (safeRemaining % 60).toString().padLeft(2, '0');
-
-      if (!isStopwatch) {
-        bodyParts.add(l10n.notificationTimeRemaining(mins.toString(), secs));
-      }
       targetTime = DateTime.now();
     } else {
       final int remainingForNotification =
@@ -301,33 +305,23 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
         targetTime = DateTime.now().subtract(
           Duration(seconds: _currentSecondsFocussed),
         );
-        if (_settingsProvider?.maxStopwatchMins != null) {
-          bodyParts.add(
-            l10n.focusLimitMax(_settingsProvider!.maxStopwatchMins),
-          );
-        }
       } else {
         targetTime = DateTime.now().add(Duration(seconds: targetSeconds));
-        final timeString = _settingsProvider != null
-            ? _settingsProvider!.getFormattedTime(targetTime)
-            : "${targetTime.hour.toString().padLeft(2, '0')}:${targetTime.minute.toString().padLeft(2, '0')}";
-
-        bodyParts.add('${l10n.focusEndsAt} $timeString');
       }
     }
 
-    final String bodyText = bodyParts.isEmpty && !asPaused
-        ? l10n.focusStateActive
-        : bodyParts.join('  |  ');
+    final String bodyText = bodyParts.join('  |  ');
 
     NotificationService.instance.showFocusTimerNotification(
       title: titleText,
       body: bodyText,
       targetTime: targetTime,
       isStopwatch: isStopwatch,
-      notificationColor: currentPhase.type == PhaseType.rest
-          ? AppTheme.warningColor
-          : AppTheme.focusColor,
+      notificationColor: asPaused 
+          ? Colors.red
+          : currentPhase.type == PhaseType.rest
+              ? AppTheme.warningColor
+              : AppTheme.focusColor,
       isPaused: asPaused,
       l10n: l10n,
     );
@@ -416,6 +410,17 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> _playDing() async {
     try {
       final player = AudioPlayer();
+      await player.setAudioContext(AudioContext(
+        android: const AudioContextAndroid(
+          stayAwake: true,
+          contentType: AndroidContentType.sonification,
+          usageType: AndroidUsageType.notificationEvent,
+          audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+        ),
+        iOS: AudioContextIOS(
+          options: const {AVAudioSessionOptions.mixWithOthers},
+        ),
+      ));
       await player.play(AssetSource('ding.mp3'));
       await player.onPlayerComplete.first;
       await player.dispose();
