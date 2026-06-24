@@ -157,7 +157,9 @@
   "focusPhasesTitleAdd": "Njunté fasa",
   "focusPhasesTitleEdit": "Mudé fasa",
   "focusSnackbarHabitLocked": "Fina prima l'abitudin dant te la rënga!",
-  "focusStateActive": "Sescion focus ativa",
+  "focusStateActive": "Focus",
+  "focusStateResting": "Pausa",
+  "focusStateReady": "Pronto",
   "focusStatePaused": "Pausà",
   "focusStatsEmpty": "Fina n valguna sescions per udëi i dac!",
   "focusStatsSectionClockSessions": "{count} sescions",
@@ -790,7 +792,7 @@
       }
     }
   },
-  "nTaskReminderPrefixDays": "{count, plural, =1{Tomorrow} other{In {count} days}}",
+  "nTaskReminderPrefixDays": "{count, plural, =1{Duman} other{Te {count} dis}}",
   "@nTaskReminderPrefixDays": {
     "placeholders": {
       "count": {
