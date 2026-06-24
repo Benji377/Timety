@@ -132,9 +132,66 @@ class MainActivity : FlutterActivity() {
         } catch (e: SecurityException) {
             // Permission not granted
         }
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        val soundIntent = Intent(this, TimerSoundReceiver::class.java)
+        val soundPendingIntent = PendingIntent.getBroadcast(
+            this, 9998, soundIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        if (!isStopwatch && !isPaused && targetTimeMs > System.currentTimeMillis()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, targetTimeMs, soundPendingIntent)
+            } else {
+                alarmManager.setExact(android.app.AlarmManager.RTC_WAKEUP, targetTimeMs, soundPendingIntent)
+            }
+        } else {
+            alarmManager.cancel(soundPendingIntent)
+        }
     }
 
     private fun cancelCustomNotification() {
         NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        val soundIntent = Intent(this, TimerSoundReceiver::class.java)
+        val soundPendingIntent = PendingIntent.getBroadcast(
+            this, 9998, soundIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(soundPendingIntent)
+    }
+}
+
+class TimerSoundReceiver : android.content.BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val pendingResult = goAsync()
+        val resId = context.resources.getIdentifier("ding", "raw", context.packageName)
+        if (resId != 0) {
+            try {
+                val uri = android.net.Uri.parse("android.resource://" + context.packageName + "/" + resId)
+                val mediaPlayer = android.media.MediaPlayer()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    mediaPlayer.setAudioAttributes(
+                        android.media.AudioAttributes.Builder()
+                            .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build()
+                    )
+                }
+                mediaPlayer.setDataSource(context, uri)
+                mediaPlayer.setOnCompletionListener { 
+                    it.release()
+                    pendingResult.finish()
+                }
+                mediaPlayer.prepare()
+                mediaPlayer.start()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                pendingResult.finish()
+            }
+        } else {
+            pendingResult.finish()
+        }
     }
 }

@@ -19,6 +19,8 @@
             android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
 
+        <receiver android:name=".TimerSoundReceiver" android:exported="false" />
+
         <!-- Receiver so alarms survive phone reboots -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>

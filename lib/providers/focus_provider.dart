@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../theme/app_theme.dart';
 import '../data/focus/focus_models.dart';
 import '../data/focus/focus_repository.dart';
@@ -406,29 +405,6 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
     _awaitingPhaseContinue = false;
   }
 
-  // Plays a "ding" sound to notify the user of phase transitions.
-  Future<void> _playDing() async {
-    try {
-      final player = AudioPlayer();
-      await player.setAudioContext(AudioContext(
-        android: const AudioContextAndroid(
-          stayAwake: true,
-          contentType: AndroidContentType.sonification,
-          usageType: AndroidUsageType.notificationEvent,
-          audioFocus: AndroidAudioFocus.gainTransientMayDuck,
-        ),
-        iOS: AudioContextIOS(
-          options: const {AVAudioSessionOptions.mixWithOthers},
-        ),
-      ));
-      await player.play(AssetSource('ding.mp3'));
-      await player.onPlayerComplete.first;
-      await player.dispose();
-    } catch (e) {
-      debugPrint('Error playing sound: $e');
-    }
-  }
-
   /// Moves to the next phase in the current mode. If there are no more phases, it completes the session.
   Future<void> continueToNextPhase() async {
     if (!_awaitingPhaseContinue) return;
@@ -498,7 +474,6 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
                   _currentPhaseTotalSeconds;
             }
 
-            _playDing();
             _updateNotification(asPaused: true);
           } else {
             if (_currentPhaseType == PhaseType.focus) {
@@ -506,7 +481,6 @@ class FocusProvider extends ChangeNotifier with WidgetsBindingObserver {
                   _accumulatedFocusSecondsBeforePhase +
                   _currentPhaseTotalSeconds;
             }
-            _playDing();
             stopSession(completed: true, userProvider: _userProvider);
             return;
           }
