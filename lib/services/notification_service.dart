@@ -45,17 +45,19 @@ class NotificationService {
 
     await _notificationsPlugin.initialize(settings: initSettings);
 
-    if (Platform.isAndroid) {
-      final androidImplementation = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
-
-      await androidImplementation?.requestNotificationsPermission();
-      await androidImplementation?.requestExactAlarmsPermission();
-    }
-
     _isInitialized = true;
+  }
+
+  Future<void> requestPermissions() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    
+    final androidImplementation = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
+    await androidImplementation?.requestNotificationsPermission();
+    await androidImplementation?.requestExactAlarmsPermission();
   }
 
   // --- HELPER: GENERATE PREDICTABLE IDs ---

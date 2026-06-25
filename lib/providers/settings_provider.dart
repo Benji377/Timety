@@ -39,12 +39,19 @@ class SettingsProvider extends ChangeNotifier {
   String get dateFormatCode => _dateFormatCode ?? 'system';
 
   String get _resolvedLocale {
-    final locale =
-        _appLocaleCode ?? ui.PlatformDispatcher.instance.locale.languageCode;
+    final systemLocale = ui.PlatformDispatcher.instance.locale.languageCode;
+    final locale = _appLocaleCode ?? systemLocale;
 
     // The intl package crashes on Ladin, so we fall back to Italian for date formatting
     if (locale.startsWith('lld')) {
       return 'it';
+    }
+
+    // Ensure we only return a supported locale for intl formatting, otherwise it crashes
+    const supportedLocales = ['en', 'de', 'it'];
+    final baseLocale = locale.split('_').first;
+    if (!supportedLocales.contains(baseLocale)) {
+      return 'en';
     }
 
     return locale;

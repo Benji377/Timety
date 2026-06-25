@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
+import '../services/notification_service.dart';
 import 'habit/habit_list_screen.dart';
 import 'home_screen.dart';
 import 'focus/focus_screen.dart';
@@ -17,6 +18,15 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Request permissions after the first frame so we have an Activity context attached
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.instance.requestPermissions();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
