@@ -1,6 +1,6 @@
 {
   "@@locale": "zh-CN",
-  "appTitle": "Timety",
+  "appTitle": "时简",
   "globalLabelHabit": "习惯",
   "globalLabelHabits": "习惯",
   "globalLabelTags": "标签",
@@ -8,13 +8,13 @@
   "globalLabelTasks": "任务",
   "commonButtonGotIt": "明白了",
   "commonDaytimeAfternoon": "下午",
-  "commonDaytimeAfternoonRange": "12 PM - 5 PM",
+  "commonDaytimeAfternoonRange": "中午12点 - 下午5点",
   "commonDaytimeEvening": "傍晚",
   "commonDaytimeEveningRange": "5 PM - 9 PM",
   "commonDaytimeMorning": "早上",
-  "commonDaytimeMorningRange": "5 AM - 12 PM",
+  "commonDaytimeMorningRange": "凌晨5点 - 中午12点",
   "commonDaytimeNight": "晚上",
-  "commonDaytimeNightRange": "9 PM - 5 AM",
+  "commonDaytimeNightRange": "晚上9点 - 凌晨5点",
   "commonLabelAdd": "添加",
   "commonLabelCancel": "取消",
   "commonLabelConfirm": "确认",
@@ -24,23 +24,23 @@
   "commonTimeDone": "完成",
   "commonTimeDueToday": "今日截止",
   "commonTimeUpcoming": "Upcoming",
-  "commonTooltipCalendar": "Calendar View",
+  "commonTooltipCalendar": "日历视图",
   "commonTooltipDistractions": "Distractions",
-  "commonTooltipStats": "Statistics",
+  "commonTooltipStats": "统计数据",
   "commonTooltipTimeMachine": "Log Past Session",
-  "commonWeekdayFri": "Fri",
-  "commonWeekdayMon": "Mon",
-  "commonWeekdaySat": "Sat",
-  "commonWeekdaySun": "Sun",
-  "commonWeekdayThu": "Thu",
-  "commonWeekdayTue": "Tue",
-  "commonWeekdayWed": "Wed",
-  "navigationFocus": "Focus",
-  "navigationHabits": "Habits",
-  "navigationHome": "Home",
-  "navigationProfile": "Profile",
-  "navigationTasks": "Tasks",
-  "greetingAfternoon": "Good afternoon {user}!",
+  "commonWeekdayFri": "周五",
+  "commonWeekdayMon": "周一",
+  "commonWeekdaySat": "周六",
+  "commonWeekdaySun": "周天",
+  "commonWeekdayThu": "周四",
+  "commonWeekdayTue": "周二",
+  "commonWeekdayWed": "周三",
+  "navigationFocus": "专注",
+  "navigationHabits": "习惯",
+  "navigationHome": "主页",
+  "navigationProfile": "资料",
+  "navigationTasks": "任务",
+  "greetingAfternoon": "午安 {user}！",
   "@greetingAfternoon": {
     "placeholders": {
       "user": {
@@ -48,8 +48,8 @@
       }
     }
   },
-  "greetingAfternoonMotivation": "Keep up the great work! You've got this",
-  "greetingDeepNight": "Still awake {user}?",
+  "greetingAfternoonMotivation": "为者常成！行者常至",
+  "greetingDeepNight": "何故夜作不寐 {user}？",
   "@greetingDeepNight": {
     "placeholders": {
       "user": {
@@ -57,8 +57,8 @@
       }
     }
   },
-  "greetingDeepNightMotivation": "Take it easy and get some well-deserved rest",
-  "greetingEvening": "Good evening {user}!",
+  "greetingDeepNightMotivation": "苟有恒，何必三更眠五更起；最无益，莫过一日曝十日寒",
+  "greetingEvening": "暮安 {user}！",
   "@greetingEvening": {
     "placeholders": {
       "user": {
@@ -66,8 +66,8 @@
       }
     }
   },
-  "greetingEveningMotivation": "Take a deep breath and enjoy your evening",
-  "greetingMorning": "Good morning {user}!",
+  "greetingEveningMotivation": "晚来天欲雪，能饮一杯无",
+  "greetingMorning": "早安 {user}！",
   "@greetingMorning": {
     "placeholders": {
       "user": {
