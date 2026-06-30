@@ -23,11 +23,11 @@
   "commonLabelSave": "保存",
   "commonTimeDone": "完成",
   "commonTimeDueToday": "今日截止",
-  "commonTimeUpcoming": "Upcoming",
+  "commonTimeUpcoming": "预期",
   "commonTooltipCalendar": "日历视图",
-  "commonTooltipDistractions": "Distractions",
+  "commonTooltipDistractions": "分心",
   "commonTooltipStats": "统计数据",
-  "commonTooltipTimeMachine": "Log Past Session",
+  "commonTooltipTimeMachine": "上传已有记录",
   "commonWeekdayFri": "周五",
   "commonWeekdayMon": "周一",
   "commonWeekdaySat": "周六",
@@ -75,8 +75,8 @@
       }
     }
   },
-  "greetingMorningMotivation": "Rise and shine! Let's make today productive.",
-  "greetingNight": "Good night {user}!",
+  "greetingMorningMotivation": "雄关漫道真如铁，而今迈步从头越。",
+  "greetingNight": "晚安 {user}！",
   "@greetingNight": {
     "placeholders": {
       "user": {
@@ -84,10 +84,10 @@
       }
     }
   },
-  "greetingNightMotivation": "It's getting late! Consider wrapping up soon.",
-  "homeDailyGoal": "Daily Goal",
-  "homeDailyGoalDone": "You're all caught up for today!",
-  "homeSectionHabitsDue": "Habits Today ({count})",
+  "greetingNightMotivation": "春宵一刻值千金，花有清香月有阴。",
+  "homeDailyGoal": "今日目标",
+  "homeDailyGoalDone": "今日尽善矣！",
+  "homeSectionHabitsDue": "今日习惯 ({count})",
   "@homeSectionHabitsDue": {
     "placeholders": {
       "count": {
@@ -95,7 +95,7 @@
       }
     }
   },
-  "homeSectionTasksDue": "Tasks Due ({count})",
+  "homeSectionTasksDue": "临期任务({count})",
   "@homeSectionTasksDue": {
     "placeholders": {
       "count": {
@@ -103,7 +103,7 @@
       }
     }
   },
-  "homeSectionTasksUpcoming": "Upcoming Tasks ({count})",
+  "homeSectionTasksUpcoming": "预期任务 ({count})",
   "@homeSectionTasksUpcoming": {
     "placeholders": {
       "count": {
@@ -111,16 +111,16 @@
       }
     }
   },
-  "focusDialogSessionResetContent": "The timer is paused while you decide. Confirm to reset the session, or cancel to continue.",
-  "focusDialogSessionResetTitle": "Reset Focus Session?",
-  "focusDialogSessionStopContent": "The timer is paused while you decide. Confirm to stop and save the session, or cancel to continue.",
-  "focusDialogSessionStopTitle": "Stop Focus Session?",
-  "focusEndsAt": "Ends at",
-  "focusLabelDefault": "Focus",
-  "focusLabelRest": "Rest",
-  "focusLabelSetTime": "Set Time",
-  "focusLabelStopwatch": "Stopwatch",
-  "focusLimitMax": "Max {minutes} mins",
+  "focusDialogSessionResetContent": "计时器已暂停。确认以重置计时，或者取消以继续计时。",
+  "focusDialogSessionResetTitle": "重置专注计时吗？",
+  "focusDialogSessionStopContent": "计时器已暂停。确认以保存当前记录，或者取消以继续计时。",
+  "focusDialogSessionStopTitle": "结束专注计时吗？",
+  "focusEndsAt": "终止于",
+  "focusLabelDefault": "专注计时",
+  "focusLabelRest": "休息",
+  "focusLabelSetTime": "设置时间",
+  "focusLabelStopwatch": "正计时",
+  "focusLimitMax": "最多 {minutes} 分钟",
   "@focusLimitMax": {
     "placeholders": {
       "minutes": {
@@ -128,7 +128,7 @@
       }
     }
   },
-  "focusMinutes": "{count}m focus",
+  "focusMinutes": "{count}分钟 专注计时",
   "@focusMinutes": {
     "placeholders": {
       "count": {
@@ -136,8 +136,8 @@
       }
     }
   },
-  "focusModeDialogDeleteContent": "Are you sure you want to delete this custom mode?",
-  "focusModeDialogDeleteTitle": "Delete Focus Mode?",
+  "focusModeDialogDeleteContent": "你确定要删除该自定义计时模型？",
+  "focusModeDialogDeleteTitle": "删除专注计时模型？",
   "focusModeFlex": "Flex",
   "focusModeFlexible": "Flexible",
   "focusModeLabelEdit": "Edit Mode",
