@@ -220,23 +220,23 @@
   },
   "habitDetailLabelIcon": "选择一个图标",
   "habitDetailLabelName": "习惯名称",
-  "habitDetailLabelNameHint": "e.g., Read 10 pages, Workout...",
-  "habitDetailLabelNameRequest": "Please enter a name",
-  "habitDetailLabelNotes": "Notes (Optional)",
-  "habitDetailLabelNotesHint": "Why are you building this habit?",
-  "habitDetailLabelReminder": "Reminder time (Optional)",
-  "habitDetailLabelReminderNoTime": "No specific time",
-  "habitDetailLabelColor": "Color",
-  "habitDetailLabelColorPicker": "Choose a Color",
-  "habitDetailLabelStack": "Habit Stack (Optional)",
-  "habitDetailLabelStackHint": "e.g., Morning Routine",
-  "habitDetailLabelStackOrder": "Stack Order",
-  "habitDetailSnackbarSaveNoDay": "Please select at least one day",
-  "habitDetailTitleEdit": "Edit Habit",
-  "habitDetailTitleView": "Habit Details",
-  "habitDetailTitleNew": "New Habit",
-  "habitFreqDaily": "Daily",
-  "habitFreqFlexible": "{progress} / {target} this week",
+  "habitDetailLabelNameHint": "例如，读书10页，锻炼几分钟……",
+  "habitDetailLabelNameRequest": "请输入名称",
+  "habitDetailLabelNotes": "备注（选填）",
+  "habitDetailLabelNotesHint": "建立这个习惯的原因？",
+  "habitDetailLabelReminder": "提醒时间(选填)",
+  "habitDetailLabelReminderNoTime": "未指定时间",
+  "habitDetailLabelColor": "颜色",
+  "habitDetailLabelColorPicker": "选择一种颜色",
+  "habitDetailLabelStack": "习惯堆叠(可选)",
+  "habitDetailLabelStackHint": "例如, 晨间例程",
+  "habitDetailLabelStackOrder": "堆叠顺序",
+  "habitDetailSnackbarSaveNoDay": "请至少选择一天",
+  "habitDetailTitleEdit": "编辑习惯",
+  "habitDetailTitleView": "习惯详情",
+  "habitDetailTitleNew": "新习惯",
+  "habitFreqDaily": "每日",
+  "habitFreqFlexible": "{progress} / {target} 本周",
   "@habitFreqFlexible": {
     "placeholders": {
       "progress": {
@@ -247,7 +247,7 @@
       }
     }
   },
-  "habitFreqWeekly": "Weekly on {days}",
+  "habitFreqWeekly": "每周的 {days}",
   "@habitFreqWeekly": {
     "placeholders": {
       "days": {
@@ -255,7 +255,7 @@
       }
     }
   },
-  "habitHistoryCompletedAt": "Completed at {time}",
+  "habitHistoryCompletedAt": "完成于 {time}",
   "@habitHistoryCompletedAt": {
     "placeholders": {
       "time": {
@@ -263,8 +263,8 @@
       }
     }
   },
-  "habitHistoryEmpty": "No history yet.",
-  "habitHistoryRemoveCompletion": "Remove completion for {date}?",
+  "habitHistoryEmpty": "暂无历史记录。",
+  "habitHistoryRemoveCompletion": "移除 {date} 的完成记录？",
   "@habitHistoryRemoveCompletion": {
     "placeholders": {
       "date": {
@@ -272,19 +272,19 @@
       }
     }
   },
-  "habitHistoryRemoveTitle": "Remove completion?",
-  "habitHistoryRemoveTooltip": "Remove this record",
-  "habitHistoryStatLast30": "Last 30d",
-  "habitHistoryStatLast90": "Last 90d",
-  "habitHistoryStatTotal": "Total",
-  "habitHistoryTimePrompt": "At what time did you complete this habit?",
-  "habitHistoryTitle": "Habit History",
-  "habitLabelFreqDaily": "Daily Habit",
-  "habitLabelFreqWeekly": "Weekly Habit",
-  "habitMarkPastCompletionTooltip": "Mark past completion",
-  "habitScreenEmpty": "No habits yet! Tap + to build a routine",
-  "habitStatsLabelActive": "Active Habits",
-  "habitStatsLabelBest": "Best: {streak}",
+  "habitHistoryRemoveTitle": "移除完成记录？",
+  "habitHistoryRemoveTooltip": "删除此记录",
+  "habitHistoryStatLast30": "过去 30 日",
+  "habitHistoryStatLast90": "过去 90 日",
+  "habitHistoryStatTotal": "总计",
+  "habitHistoryTimePrompt": "您在何时完成了这个习惯？",
+  "habitHistoryTitle": "习惯历史记录",
+  "habitLabelFreqDaily": "每日习惯",
+  "habitLabelFreqWeekly": "每周习惯",
+  "habitMarkPastCompletionTooltip": "标记过去完成记录",
+  "habitScreenEmpty": "目前还没有习惯！点击 + 来建立你的例程",
+  "habitStatsLabelActive": "活跃习惯",
+  "habitStatsLabelBest": "最佳: {streak}",
   "@habitStatsLabelBest": {
     "placeholders": {
       "streak": {
@@ -292,11 +292,11 @@
       }
     }
   },
-  "habitStatsLabelBestStreak": "Best Streak",
-  "habitStatsLabelCompletionsDaily": "Total habit completions per day",
-  "habitStatsLabelCompletionsDistribution": "Completion distribution by time of day",
-  "habitStatsLabelCompletionsTime": "When do you build habits?",
-  "habitStatsLabelCurrentStreak": "Current Streak",
+  "habitStatsLabelBestStreak": "最佳连续记录",
+  "habitStatsLabelCompletionsDaily": "每日完成的习惯总计",
+  "habitStatsLabelCompletionsDistribution": "每日完成时间分布",
+  "habitStatsLabelCompletionsTime": "您在何时打造习惯？",
+  "habitStatsLabelCurrentStreak": "当前连续完成次数",
   "habitStatsLabelEmpty": "Create and complete habits to unlock insights!",
   "habitStatsLabelTotal": "Total Logged",
   "habitStatsLabelVelocity": "Weekly Velocity",
