@@ -18,33 +18,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          channel: 'stable'
-          cache: true
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate Hive Adapters
-        # Crucial: We must generate the Hive files before linting, or it will throw errors
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Analyze code
-        run: flutter analyze --machine > flutter_analyze.log || true
-
-      - name: Convert to SARIF
-        uses: advanced-security/dart-analyzer-sarif@main
-        with:
-          input: flutter_analyze.log
-          output: flutter.sarif
-
-      # 3. Upload to GitHub Code Scanning UI
-      - name: Upload analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: flutter.sarif
-          wait-for-processing: true
+      - name: Run Android Lint
+        run: ./gradlew lintDebug

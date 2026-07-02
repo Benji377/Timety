@@ -19,17 +19,20 @@ Because Timety is carefully designed around an offline, privacy-first, Neo-bruta
 
 ## Local Development Setup
 
-To get the project running locally:
+### Setting up the Environment
 
-1. Ensure you have the **Flutter SDK** (stable channel) installed.
-2. Fork the repository and clone it to your local machine.
-3. Run `flutter pub get` to install all dependencies.
-4. **CRITICAL STEP:** Timety uses Hive for local storage. You *must* generate the database adapters before the app will run. Run this command in your terminal:
-   ```bash
-   dart run build_runner build --delete-conflicting-outputs
-    ```
+1. Ensure you have the **Android Studio** and **Java 17** installed.
+2. Clone the repository.
+3. Open the project in Android Studio to sync dependencies.
+4. If modifying Room database entities, ensure schemas are updated correctly.
+5. Run the app via Android Studio or `./gradlew installDebug`.
 
-5. Run the app via `flutter run` or your IDE.
+### Style Guide & Best Practices
+
+* **Code Formatting**: We follow standard Kotlin style guidelines. 
+  * Format your code using Android Studio's built-in formatter.
+  * Check for lint errors: `./gradlew lintDebug`
+  * Run the tests: `./gradlew testDebugUnitTest`
 
 ## Pull Request Process
 
@@ -38,9 +41,7 @@ When you are ready to submit your code, please follow these steps:
 1. **Create a branch** for your feature or bugfix (e.g., `feature/awesome-new-widget` or `bugfix/fix-calendar-crash`).
 2. **Write clean, readable code.**
 3. **Run the Linter & Tests:** Ensure your code passes our CI requirements locally before pushing.
-  * Format your code: `dart format .`
-  * Check for lint errors: `flutter analyze`
-  * Run the tests: `flutter test`
+
 
 3. **Update the UI (if applicable):** If you changed how the app looks, please include a screenshot or screen recording in your Pull Request description.
 4. **Open a Pull Request** against the `main` branch.

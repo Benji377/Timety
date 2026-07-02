@@ -21,6 +21,6 @@
 ## Checklist
 - [ ] I have read the [Contributing Guidelines](../CONTRIBUTING.md) and [Code of Conduct](../CODE_OF_CONDUCT.md).
 - [ ] My code follows the existing style and architecture of the project.
-- [ ] I have run `dart run build_runner build --delete-conflicting-outputs` (if Hive models were changed).
-- [ ] I have run `flutter analyze` and fixed all linting warnings.
+- [ ] I have run `./gradlew testDebugUnitTest` and all tests pass.
+- [ ] I have run `./gradlew lintDebug` and fixed all linting warnings.
 - [ ] I have tested my changes thoroughly on my local machine.

@@ -10,19 +10,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          channel: 'stable'
-          cache: true
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run Build Runner
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Run Flutter tests
-        run: flutter test
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest
