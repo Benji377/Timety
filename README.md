@@ -19,6 +19,9 @@
     <a href="https://crowdin.com/project/timety">
       <img src="https://img.shields.io/badge/Translate-Crowdin-2E3340?style=for-the-badge&logo=crowdin&logoColor=white&labelColor=555555" alt="translate">
     </a>
+    <a href="mailto:apptimety@gmail.com">
+      <img src="https://img.shields.io/badge/Email-Contact-EA4335?style=for-the-badge&logo=gmail&logoColor=white&labelColor=555555" alt="email">
+    </a>
   </p>
 </p>
 
