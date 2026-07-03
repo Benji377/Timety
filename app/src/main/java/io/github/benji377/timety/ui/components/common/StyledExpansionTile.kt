@@ -53,3 +53,39 @@ fun StyledExpansionTile(
         }
     }
 }
+
+/**
+ * Slot-based variant matching Flutter's StyledExpansionTile whose `title` is an
+ * arbitrary widget (e.g. a [ListSectionHeader] with icon + label).
+ */
+@Composable
+fun StyledExpansionTile(
+    title: @Composable () -> Unit,
+    iconColor: Color,
+    initiallyExpanded: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    var isExpanded by remember { mutableStateOf(initiallyExpanded) }
+
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { isExpanded = !isExpanded }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f)) { title() }
+            Icon(
+                imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = "Expand/Collapse",
+                tint = iconColor
+            )
+        }
+        AnimatedVisibility(visible = isExpanded) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                content()
+            }
+        }
+    }
+}

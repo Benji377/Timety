@@ -11,9 +11,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.benji377.timety.ui.navigation.BottomNavItems
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
 fun MainScreen() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { _ -> }
+        LaunchedEffect(Unit) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -21,7 +34,7 @@ fun MainScreen() {
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = MaterialTheme.colorScheme.background,
                 tonalElevation = NavigationBarDefaults.Elevation
             ) {
                 BottomNavItems.forEach { item ->
@@ -68,9 +81,9 @@ fun MainScreen() {
             startDestination = BottomNavItems[0].route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(BottomNavItems[0].route) {
+            composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Home.route) {
                 io.github.benji377.timety.ui.screens.home.HomeScreen(
-                    onNavigateToFocus = { navController.navigate(BottomNavItems[1].route) },
+                    onNavigateToFocus = { navController.navigate(io.github.benji377.timety.ui.navigation.BottomNavItem.Focus.route) },
                     onNavigateToTaskDetail = { taskId -> 
                         if (taskId == null) navController.navigate("task_detail")
                         else navController.navigate("task_detail/$taskId")
@@ -78,10 +91,12 @@ fun MainScreen() {
                     onNavigateToHabitDetail = { habitId -> 
                         if (habitId == null) navController.navigate("habit_detail")
                         else navController.navigate("habit_detail/$habitId")
-                    }
+                    },
+                    onNavigateToCalendar = { navController.navigate(io.github.benji377.timety.ui.navigation.BottomNavItem.Calendar.route) },
+                    onNavigateToStatistics = { navController.navigate(io.github.benji377.timety.ui.navigation.BottomNavItem.Statistics.route) }
                 )
             }
-            composable(BottomNavItems[1].route) {
+            composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Focus.route) {
                 io.github.benji377.timety.ui.screens.focus.FocusScreen(
                     onNavigateToModes = { navController.navigate("focus_modes") }
                 )
@@ -91,7 +106,7 @@ fun MainScreen() {
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-            composable(BottomNavItems[2].route) {
+            composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Tasks.route) {
                 io.github.benji377.timety.ui.screens.tasks.TaskListScreen(
                     onNavigateToTaskDetail = { taskId -> 
                         if (taskId == null) navController.navigate("task_detail")
@@ -99,7 +114,7 @@ fun MainScreen() {
                     }
                 )
             }
-            composable(BottomNavItems[3].route) {
+            composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Habits.route) {
                 io.github.benji377.timety.ui.screens.habits.HabitListScreen(
                     onNavigateToHabitDetail = { habitId -> 
                         if (habitId == null) navController.navigate("habit_detail")
@@ -107,9 +122,19 @@ fun MainScreen() {
                     }
                 )
             }
-            composable(BottomNavItems[4].route) {
+            composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Profile.route) {
                 io.github.benji377.timety.ui.screens.profile.ProfileScreen(
                     onNavigateToSettings = { navController.navigate("settings") }
+                )
+            }
+            composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Calendar.route) {
+                io.github.benji377.timety.ui.screens.calendar.CalendarScreen(
+                    onNavigateToTask = { taskId -> navController.navigate("task_detail/$taskId") }
+                )
+            }
+            composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Statistics.route) {
+                io.github.benji377.timety.ui.screens.statistics.StatisticsScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable("settings") {

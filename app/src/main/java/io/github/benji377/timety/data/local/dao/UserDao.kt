@@ -13,9 +13,12 @@ interface UserDao {
     @Query("SELECT * FROM user_profile WHERE id = 1 LIMIT 1")
     fun getUserProfile(): Flow<UserProfileEntity?>
 
+    @Query("SELECT * FROM user_profile WHERE id = 1 LIMIT 1")
+    fun getUserProfileSynchronous(): UserProfileEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertUserProfile(userProfile: UserProfileEntity)
+    fun insertUserProfile(userProfile: UserProfileEntity)
 
     @Update
-    suspend fun updateUserProfile(userProfile: UserProfileEntity)
+    fun updateUserProfile(userProfile: UserProfileEntity)
 }

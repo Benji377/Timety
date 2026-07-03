@@ -7,12 +7,14 @@ import io.github.benji377.timety.data.repository.FocusRepository
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.data.repository.UserRepository
+import io.github.benji377.timety.data.repository.dataStore
 
 interface AppContainer {
     val taskRepository: TaskRepository
     val habitRepository: HabitRepository
     val focusRepository: FocusRepository
     val userRepository: UserRepository
+    val settingsRepository: io.github.benji377.timety.data.repository.SettingsRepository
 }
 
 class DefaultAppContainer(private val context: Context) : AppContainer {
@@ -38,5 +40,9 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val userRepository: UserRepository by lazy {
         UserRepository(database.userDao())
+    }
+
+    override val settingsRepository: io.github.benji377.timety.data.repository.SettingsRepository by lazy {
+        io.github.benji377.timety.data.repository.SettingsRepository(context.dataStore)
     }
 }

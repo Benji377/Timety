@@ -1,244 +1,124 @@
 package io.github.benji377.timety.ui.screens.focus
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
+import io.github.benji377.timety.data.model.focus.PhaseType
+import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.ui.components.focus.FocusModeEditCard
 import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import java.util.UUID
 
-data class MockFocusMode(
-    val id: String,
-    val name: String,
-    val type: FocusModeType,
-    val phases: List<MockSessionPhase>
-)
-
-data class MockSessionPhase(
-    val isFocus: Boolean,
-    val durationMinutes: Int
-)
-
+/**
+ * "Manage Modes" screen: lists all focus modes (system + custom) as [FocusModeEditCard]s and
+ * lets the user create a new custom mode. Mirrors `screens/focus/focus_modes_screen.dart`.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusModesScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    var modes by remember {
-        mutableStateOf(
-            listOf(
-                MockFocusMode(
-                    id = "1",
-                    name = "Pomodoro",
-                    type = FocusModeType.POMODORO,
-                    phases = listOf(MockSessionPhase(true, 25), MockSessionPhase(false, 5))
-                ),
-                MockFocusMode(
-                    id = "2",
-                    name = "52/17 Rule",
-                    type = FocusModeType.CUSTOM,
-                    phases = listOf(MockSessionPhase(true, 52), MockSessionPhase(false, 17))
-                )
-            )
-        )
-    }
-
-    var pendingMode by remember { mutableStateOf<MockFocusMode?>(null) }
+    val modes by focusViewModel.allModes.collectAsState()
+    var pendingMode by remember { mutableStateOf<FocusModeEntity?>(null) }
+    val newModeLabel = stringResource(R.string.focusModeLabelNew)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Focus Modes", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.focusModesTitle), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
-                }
+                },
             )
         },
         floatingActionButton = {
             if (pendingMode == null) {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        pendingMode = MockFocusMode(
-                            id = "new",
-                            name = "New Mode",
-                            type = FocusModeType.CUSTOM,
-                            phases = listOf(MockSessionPhase(true, 25), MockSessionPhase(false, 5))
-                        )
+                        val newId = UUID.randomUUID().toString()
+                        pendingMode = FocusModeEntity(id = newId, name = newModeLabel, type = FocusModeType.CUSTOM)
                     },
-                    icon = { Icon(Icons.Filled.Add, null) },
-                    text = { Text("New Mode") },
-                    containerColor = FocusColor,
-                    contentColor = Color.White
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text(newModeLabel) },
+                    containerColor = io.github.benji377.timety.ui.theme.TaskColor,
+                    contentColor = Color.White,
                 )
             }
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(paddingValues),
         ) {
-            if (pendingMode != null) {
-                item {
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+
+            pendingMode?.let { mode ->
+                item(key = mode.id) {
                     FocusModeEditCard(
-                        mode = pendingMode!!,
+                        mode = mode,
+                        phases = listOf(
+                            SessionPhaseEntity(modeId = mode.id, type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 0),
+                            SessionPhaseEntity(modeId = mode.id, type = PhaseType.REST, durationMinutes = 5, orderIndex = 1),
+                        ),
                         isNewMode = true,
-                        onCancel = { pendingMode = null },
-                        onSave = { 
-                            modes = modes + it
-                            pendingMode = null 
-                        }
+                        onCancelNew = { pendingMode = null },
+                        onSaveNew = { pendingMode = null },
+                        onSave = { updatedMode, updatedPhases -> focusViewModel.saveMode(updatedMode, updatedPhases) },
+                        onDelete = { },
                     )
                 }
             }
 
-            items(modes) { mode ->
+            items(modes, key = { it.id }) { mode ->
+                var phases by remember(mode.id) { mutableStateOf<List<SessionPhaseEntity>>(emptyList()) }
+                LaunchedEffect(mode.id) {
+                    focusViewModel.getPhasesForMode(mode.id).collect { phases = it }
+                }
                 FocusModeEditCard(
                     mode = mode,
+                    phases = phases,
                     isNewMode = false,
-                    onCancel = { },
-                    onSave = { updatedMode ->
-                        modes = modes.map { if (it.id == updatedMode.id) updatedMode else it }
-                    }
+                    onSave = { updatedMode, updatedPhases -> focusViewModel.saveMode(updatedMode, updatedPhases) },
+                    onDelete = { focusViewModel.deleteMode(it) },
                 )
             }
-            item { Spacer(modifier = Modifier.height(80.dp)) }
-        }
-    }
-}
 
-@Composable
-fun FocusModeEditCard(
-    mode: MockFocusMode,
-    isNewMode: Boolean,
-    onCancel: () -> Unit,
-    onSave: (MockFocusMode) -> Unit
-) {
-    var isEditing by remember { mutableStateOf(isNewMode) }
-    var name by remember(mode) { mutableStateOf(mode.name) }
-    var phases by remember(mode) { mutableStateOf(mode.phases) }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            if (isEditing) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Mode Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                phases.forEachIndexed { index, phase ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = if (phase.isFocus) Icons.Filled.Whatshot else Icons.Filled.Coffee,
-                            contentDescription = null,
-                            tint = if (phase.isFocus) FocusColor else Color.Gray,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            if (phase.isFocus) "Focus Phase" else "Rest Phase",
-                            modifier = Modifier.weight(1f),
-                            fontWeight = FontWeight.Medium
-                        )
-                        OutlinedTextField(
-                            value = phase.durationMinutes.toString(),
-                            onValueChange = { 
-                                val newVal = it.toIntOrNull() ?: 0
-                                phases = phases.toMutableList().apply { set(index, phase.copy(durationMinutes = newVal)) }
-                            },
-                            modifier = Modifier.width(80.dp),
-                            singleLine = true
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("m", color = Color.Gray)
-                    }
-                }
-                
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = {
-                        if (isNewMode) onCancel() else isEditing = false
-                    }) {
-                        Text("Cancel")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            onSave(mode.copy(name = name, phases = phases))
-                            isEditing = false
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = FocusColor)
-                    ) {
-                        Text("Save")
-                    }
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(mode.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    IconButton(onClick = { isEditing = true }) {
-                        Icon(Icons.Filled.Edit, "Edit")
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    phases.forEachIndexed { index, phase ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = if (phase.isFocus) Icons.Filled.Whatshot else Icons.Filled.Coffee,
-                                contentDescription = null,
-                                tint = if (phase.isFocus) FocusColor else Color.Gray,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("${phase.durationMinutes}m", fontWeight = FontWeight.Bold)
-                            
-                            if (index < phases.size - 1) {
-                                Icon(
-                                    Icons.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    modifier = Modifier.padding(horizontal = 8.dp).size(16.dp),
-                                    tint = Color.Gray
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            item { Spacer(modifier = Modifier.height(100.dp)) }
         }
     }
 }

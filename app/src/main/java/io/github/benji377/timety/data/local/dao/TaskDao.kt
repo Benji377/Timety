@@ -13,34 +13,35 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
+    @Transaction
     @Query("SELECT * FROM tasks ORDER BY createdAt DESC")
-    fun getAllTasks(): Flow<List<TaskEntity>>
+    fun getAllTasks(): Flow<List<io.github.benji377.timety.data.model.task.TaskWithSubtasks>>
 
     @Query("SELECT * FROM tasks WHERE id = :id")
-    suspend fun getTaskById(id: String): TaskEntity?
+    fun getTaskById(id: String): TaskEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(task: TaskEntity)
+    fun insertTask(task: TaskEntity)
 
     @Update
-    suspend fun updateTask(task: TaskEntity)
+    fun updateTask(task: TaskEntity)
 
     @Delete
-    suspend fun deleteTask(task: TaskEntity)
+    fun deleteTask(task: TaskEntity)
 
     @Query("DELETE FROM tasks")
-    suspend fun clearAll()
+    fun clearAll(): Int
 
     // Subtasks
     @Query("SELECT * FROM subtasks WHERE taskId = :taskId")
     fun getSubtasksForTask(taskId: String): Flow<List<SubtaskEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSubtask(subtask: SubtaskEntity)
+    fun insertSubtask(subtask: SubtaskEntity)
 
     @Update
-    suspend fun updateSubtask(subtask: SubtaskEntity)
+    fun updateSubtask(subtask: SubtaskEntity)
 
     @Delete
-    suspend fun deleteSubtask(subtask: SubtaskEntity)
+    fun deleteSubtask(subtask: SubtaskEntity)
 }

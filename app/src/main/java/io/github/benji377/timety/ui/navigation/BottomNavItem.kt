@@ -53,6 +53,22 @@ sealed class BottomNavItem(
         Icons.Filled.Person,
         UserColor
     )
+
+    object Calendar : BottomNavItem(
+        "calendar",
+        "Calendar",
+        Icons.Outlined.CalendarToday,
+        Icons.Filled.CalendarToday,
+        TaskColor
+    )
+
+    object Statistics : BottomNavItem(
+        "statistics",
+        "Stats",
+        Icons.Outlined.BarChart,
+        Icons.Filled.BarChart,
+        WarningColor
+    )
 }
 
 val BottomNavItems = listOf(

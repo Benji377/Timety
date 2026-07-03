@@ -1,32 +1,70 @@
 package io.github.benji377.timety.ui.components.habit
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.WifiOffColor
+import io.github.benji377.timety.util.habit.HabitIcons
 
+/**
+ * Mirrors `HabitListTile` in `widgets/list_tiles/habit_list_tile.dart`.
+ *
+ * NOTE: Flutter shows a brief [ScaffoldMessenger] snackbar (`focusSnackbarHabitLocked`)
+ * when the locked leading circle is tapped. This leaf component has no [Scaffold]/
+ * `SnackbarHostState` reference to post into, so it surfaces the same message via a
+ * short [Toast] instead - functionally equivalent, visually a native Android toast.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListTile(
@@ -40,168 +78,229 @@ fun HabitListTile(
     onTap: () -> Unit,
     onDelete: (() -> Unit)? = null,
     onMarkPastCompletion: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    enableDismissible: Boolean = true,
+    modifier: Modifier = Modifier,
+    // Mirrors AppTheme.listTileScreenMargin (spaceLarge horizontal, spaceXSmall vertical).
+    margin: PaddingValues = PaddingValues(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceXSmall),
 ) {
     val color = Color(habit.colorValue)
+    val context = LocalContext.current
+    val lockedMessage = stringResource(R.string.focusSnackbarHabitLocked)
 
-    val content = @Composable {
-        val listTileContent = @Composable {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Circular check button
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (isCompleted) color else MaterialTheme.colorScheme.surfaceVariant
-                        )
-                        .clickable(enabled = !isLocked) {
-                            onToggleCompleted()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isCompleted) {
-                        Icon(Icons.Filled.Check, contentDescription = "Completed", tint = Color.White, modifier = Modifier.size(22.dp))
-                    } else if (isLocked) {
-                        Icon(Icons.Filled.Lock, contentDescription = "Locked", tint = Color.Gray, modifier = Modifier.size(18.dp))
-                    }
-                    // Border handled by Box decoration in Flutter, doing it via Surface below:
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        // TODO: Map iconCodePoint to actual Icons
-                        Icon(
-                            imageVector = Icons.Filled.Star, // Placeholder for habit.iconData
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else (if (isLocked) Color.Gray else color)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = habit.name,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
-                                color = if (isCompleted || isLocked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    if (!habit.notes.isNullOrEmpty()) {
-                        Text(
-                            text = habit.notes,
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    Text(
-                        text = subtitleText,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    if (progressValue != null && !isCompleted) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        LinearProgressIndicator(
-                            progress = { progressValue.coerceIn(0f, 1f) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(4.dp)
-                                .clip(RoundedCornerShape(2.dp)),
-                            color = color,
-                            trackColor = color.copy(alpha = 0.15f)
-                        )
-                    }
-                }
-
-                if (onMarkPastCompletion != null) {
-                    IconButton(onClick = onMarkPastCompletion) {
-                        Icon(Icons.Filled.Schedule, contentDescription = "History")
-                    }
-                }
-            }
-        }
-
+    val tile: @Composable () -> Unit = {
         if (isStacked) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 2.dp)
-                    .clickable { onTap() }
-            ) {
-                // Left border for stack
+            val barColor = if (isCompleted) color.copy(alpha = AppTheme.opacityLight) else color
+            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(4.dp)
-                        .background(if (isCompleted) color.copy(alpha = 0.5f) else color)
+                        .background(barColor)
                 )
-                listTileContent()
+                Box(modifier = Modifier.weight(1f)) {
+                    HabitTileContent(
+                        habit = habit,
+                        color = color,
+                        isCompleted = isCompleted,
+                        isLocked = isLocked,
+                        subtitleText = subtitleText,
+                        progressValue = progressValue,
+                        onToggleCompleted = onToggleCompleted,
+                        onTap = onTap,
+                        onMarkPastCompletion = onMarkPastCompletion,
+                        onLockedTap = { Toast.makeText(context, lockedMessage, Toast.LENGTH_SHORT).show() },
+                    )
+                }
             }
         } else {
+            val borderColor = if (isCompleted) color.copy(alpha = AppTheme.opacityLight) else color
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clickable { onTap() },
-                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth().padding(margin),
+                shape = AppTheme.brMedium,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(2.dp, if (isCompleted) color.copy(alpha = 0.5f) else color)
+                border = BorderStroke(AppTheme.listTileBorderWidth, borderColor),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
-                listTileContent()
+                HabitTileContent(
+                    habit = habit,
+                    color = color,
+                    isCompleted = isCompleted,
+                    isLocked = isLocked,
+                    subtitleText = subtitleText,
+                    progressValue = progressValue,
+                    onToggleCompleted = onToggleCompleted,
+                    onTap = onTap,
+                    onMarkPastCompletion = onMarkPastCompletion,
+                    onLockedTap = { Toast.makeText(context, lockedMessage, Toast.LENGTH_SHORT).show() },
+                )
             }
         }
     }
 
-    if (onDelete != null) {
-        val dismissState = rememberSwipeToDismissBoxState(
-            confirmValueChange = {
-                if (it == SwipeToDismissBoxValue.EndToStart) {
-                    onDelete()
-                    true
-                } else false
-            }
-        )
+    if (!enableDismissible || onDelete == null) {
+        Box(modifier = modifier) { tile() }
+        return
+    }
 
-        SwipeToDismissBox(
-            state = dismissState,
-            enableDismissFromStartToEnd = false,
-            backgroundContent = {
-                Box(
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart) {
+                showDeleteDialog = true
+            }
+            false
+        },
+    )
+
+    ConfirmationDialog(
+        visible = showDeleteDialog,
+        title = stringResource(R.string.habitDeleteTitle),
+        content = stringResource(R.string.habitDeleteContent),
+        confirmLabel = stringResource(R.string.commonLabelRemove),
+        confirmColor = ErrorColor,
+        onConfirm = {
+            showDeleteDialog = false
+            onDelete()
+        },
+        onDismiss = { showDeleteDialog = false },
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        modifier = modifier,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(margin)
+                    .background(ErrorColor),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.commonLabelDelete),
+                    tint = Color.White,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(ErrorColor)
-                        .padding(horizontal = 20.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color.White
-                    )
-                }
-            },
-            modifier = modifier
+                        .padding(end = AppTheme.spaceLarge)
+                        .size(AppTheme.listTileSwipeIconSize),
+                )
+            }
+        },
+    ) {
+        tile()
+    }
+}
+
+@Composable
+private fun HabitTileContent(
+    habit: HabitEntity,
+    color: Color,
+    isCompleted: Boolean,
+    isLocked: Boolean,
+    subtitleText: String,
+    progressValue: Float?,
+    onToggleCompleted: () -> Unit,
+    onTap: () -> Unit,
+    onMarkPastCompletion: (() -> Unit)?,
+    onLockedTap: () -> Unit,
+) {
+    val habitIcon = HabitIcons.iconAt(habit.iconCodePoint)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onTap() }
+            .padding(AppTheme.spaceMedium),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Leading circular completion toggle.
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(
+                    color = if (isCompleted) color else MaterialTheme.colorScheme.surfaceContainerHighest,
+                    shape = CircleShape,
+                )
+                .border(
+                    width = 2.dp,
+                    color = if (isCompleted) color else (if (isLocked) Color.Gray else HabitColor),
+                    shape = CircleShape,
+                )
+                .clickable { if (isLocked) onLockedTap() else onToggleCompleted() },
+            contentAlignment = Alignment.Center,
         ) {
-            content()
+            if (isCompleted) {
+                Icon(
+                    imageVector = Icons.Rounded.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                )
+            } else if (isLocked) {
+                Icon(
+                    imageVector = Icons.Rounded.Lock,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = Color.Gray,
+                )
+            }
         }
-    } else {
-        Box(modifier = modifier) {
-            content()
+
+        Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = habitIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(AppTheme.iconSizeSmall),
+                    tint = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else (if (isLocked) WifiOffColor else color),
+                )
+                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                Text(
+                    text = habit.name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = AppTheme.fwBold,
+                    textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
+                    color = if (isCompleted || isLocked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+
+            if (!habit.notes.isNullOrEmpty()) {
+                Text(
+                    text = habit.notes,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = AppTheme.fsLabel,
+                )
+            }
+
+            Text(
+                text = subtitleText,
+                fontSize = AppTheme.fsLabel,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            if (progressValue != null && !isCompleted) {
+                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                LinearProgressIndicator(
+                    progress = { progressValue.coerceIn(0f, 1f) },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = color,
+                    trackColor = color.copy(alpha = AppTheme.opacityVeryLight),
+                )
+            }
+        }
+
+        if (onMarkPastCompletion != null) {
+            IconButton(onClick = onMarkPastCompletion) {
+                Icon(
+                    imageVector = Icons.Filled.Schedule,
+                    contentDescription = stringResource(R.string.habitMarkPastCompletionTooltip),
+                )
+            }
         }
     }
 }

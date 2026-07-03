@@ -6,6 +6,14 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.Instant
 
+enum class DistractionType {
+    DISTRACTED,
+    HYDRATED,
+    STRETCHED,
+    SNACK,
+    RESTROOM
+}
+
 enum class FocusModeType(val value: Int) {
     STOPWATCH(0),
     POMODORO(1),
@@ -105,5 +113,6 @@ data class DistractionEntity(
     val id: Long = 0,
     val sessionId: String,
     val time: Instant,
+    val type: DistractionType = DistractionType.DISTRACTED,
     val note: String = ""
 )

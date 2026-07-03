@@ -18,16 +18,29 @@ object AppViewModelProvider {
 
             return when {
                 modelClass.isAssignableFrom(TaskViewModel::class.java) -> {
-                    TaskViewModel(container.taskRepository) as T
+                    TaskViewModel(application, container.taskRepository, container.userRepository) as T
                 }
                 modelClass.isAssignableFrom(HabitViewModel::class.java) -> {
-                    HabitViewModel(container.habitRepository) as T
+                    HabitViewModel(application, container.habitRepository, container.userRepository) as T
                 }
                 modelClass.isAssignableFrom(FocusViewModel::class.java) -> {
-                    FocusViewModel(container.focusRepository) as T
+                    FocusViewModel(
+                        container.focusRepository,
+                        container.userRepository,
+                        container.habitRepository,
+                        container.settingsRepository
+                    ) as T
                 }
                 modelClass.isAssignableFrom(UserViewModel::class.java) -> {
                     UserViewModel(container.userRepository) as T
+                }
+                modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
+                    SettingsViewModel(
+                        application,
+                        container.settingsRepository,
+                        container.taskRepository,
+                        container.habitRepository
+                    ) as T
                 }
                 else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
             }

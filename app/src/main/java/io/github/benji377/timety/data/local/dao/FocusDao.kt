@@ -16,48 +16,57 @@ interface FocusDao {
     fun getAllModes(): Flow<List<FocusModeEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMode(mode: FocusModeEntity)
+    fun insertMode(mode: FocusModeEntity)
 
     @Delete
-    suspend fun deleteMode(mode: FocusModeEntity)
+    fun deleteMode(mode: FocusModeEntity)
 
     // Phases
     @Query("SELECT * FROM session_phases WHERE modeId = :modeId ORDER BY orderIndex ASC")
     fun getPhasesForMode(modeId: String): Flow<List<SessionPhaseEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPhases(phases: List<SessionPhaseEntity>)
+    fun insertPhases(phases: List<SessionPhaseEntity>)
 
     @Query("DELETE FROM session_phases WHERE modeId = :modeId")
-    suspend fun deletePhasesForMode(modeId: String)
+    fun deletePhasesForMode(modeId: String): Int
 
     // Sessions
     @Query("SELECT * FROM focus_sessions ORDER BY startTime DESC")
     fun getAllSessions(): Flow<List<FocusSessionEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSession(session: FocusSessionEntity)
+    fun insertSession(session: FocusSessionEntity)
 
     @Update
-    suspend fun updateSession(session: FocusSessionEntity)
+    fun updateSession(session: FocusSessionEntity)
 
     @Delete
-    suspend fun deleteSession(session: FocusSessionEntity)
+    fun deleteSession(session: FocusSessionEntity)
 
     // Distractions
     @Query("SELECT * FROM distractions WHERE sessionId = :sessionId")
     fun getDistractionsForSession(sessionId: String): Flow<List<DistractionEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDistraction(distraction: DistractionEntity)
+    fun insertDistraction(distraction: DistractionEntity)
 
     // Tags
     @Query("SELECT * FROM focus_tags")
     fun getAllTags(): Flow<List<FocusTagEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTag(tag: FocusTagEntity)
+    fun insertTag(tag: FocusTagEntity)
 
     @Delete
-    suspend fun deleteTag(tag: FocusTagEntity)
+    fun deleteTag(tag: FocusTagEntity)
+
+    @Query("DELETE FROM focus_sessions")
+    fun clearAllSessions()
+
+    @Query("DELETE FROM focus_modes")
+    fun clearAllModes()
+
+    @Query("DELETE FROM focus_tags")
+    fun clearAllTags()
 }

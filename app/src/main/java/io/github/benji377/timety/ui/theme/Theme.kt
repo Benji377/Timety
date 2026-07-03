@@ -1,57 +1,71 @@
 package io.github.benji377.timety.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+// Neobrutalist color schemes ported 1:1 from AppTheme.buildTheme() in app_theme.dart.
+// No Material You / dynamic color — the palette is fixed.
+
 private val DarkColorScheme = darkColorScheme(
-    primary = FocusColor,
-    secondary = TaskColor,
-    tertiary = HabitColor
+    primary = TaskColor,
+    onPrimary = Color.White,
+    secondary = FocusColor,
+    onSecondary = Color.White,
+    tertiary = HabitColor,
+    onTertiary = Color.White,
+    error = UserColor,
+    onError = Color.White,
+    background = PaperDark,
+    onBackground = InkDark,
+    surface = PaperAltDark,          // _surfaceColor(dark) = paperAltDark
+    onSurface = InkDark,             // _foregroundColor(dark)
+    surfaceVariant = SurfaceAltDark, // _surfaceAltColor(dark) = 0xFF2A2A2A
+    onSurfaceVariant = Color(0xFFCACACA),
+    surfaceContainerHighest = SurfaceAltDark,
+    surfaceContainerHigh = SurfaceAltDark,
+    surfaceContainer = PaperAltDark,
+    outline = BorderDark,
+    outlineVariant = Color(0xFF4A4A4A),
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = FocusColor,
-    secondary = TaskColor,
-    tertiary = HabitColor
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = TaskColor,
     onPrimary = Color.White,
+    secondary = FocusColor,
     onSecondary = Color.White,
+    tertiary = HabitColor,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    error = UserColor,
+    onError = Color.White,
+    background = PaperLight,
+    onBackground = InkLight,
+    surface = Color.White,           // _surfaceColor(light) = white
+    onSurface = InkLight,            // _foregroundColor(light)
+    surfaceVariant = PaperAltLight,  // _surfaceAltColor(light) = paperAltLight
+    onSurfaceVariant = Color(0xFF4A4A4A),
+    surfaceContainerHighest = PaperAltLight,
+    surfaceContainerHigh = PaperAltLight,
+    surfaceContainer = Color.White,
+    outline = BorderLight,
+    outlineVariant = Color(0xFFE5DED1),
 )
 
 @Composable
 fun TimetyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -63,7 +77,8 @@ fun TimetyTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        // typography = Typography, // To be implemented
+        typography = TimetyTypography,
+        shapes = TimetyShapes,
         content = content
     )
 }

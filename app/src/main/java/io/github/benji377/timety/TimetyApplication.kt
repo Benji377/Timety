@@ -10,5 +10,6 @@ class TimetyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = DefaultAppContainer(this)
+        io.github.benji377.timety.services.NotificationService(this).ensureChannels()
     }
 }

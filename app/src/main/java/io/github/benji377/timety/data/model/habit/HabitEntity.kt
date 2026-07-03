@@ -26,3 +26,8 @@ data class HabitEntity(
     val stackName: String? = null,
     val stackOrder: Int? = null
 )
+
+data class HabitWithCompletions(
+    val habit: HabitEntity,
+    val completions: List<HabitCompletionEntity>
+)

@@ -18,6 +18,22 @@ enum class TaskSize(val value: Int) {
     VERY_LARGE(3)
 }
 
+enum class TaskSortOption {
+    DUE_DATE,
+    PRIORITY,
+    SIZE,
+    ALPHABETICAL,
+    CATEGORY
+}
+
+enum class ReminderOption {
+    ON_TIME,
+    MINUTES_30_BEFORE,
+    HOUR_1_BEFORE,
+    DAY_1_BEFORE,
+    CUSTOM
+}
+
 @Entity(tableName = "tasks")
 data class TaskEntity(
     @PrimaryKey
@@ -32,12 +48,14 @@ data class TaskEntity(
     val isCompleted: Boolean = false,
     val completedAt: Instant? = null,
     val createdAt: Instant,
-    val reminders: List<Instant> = emptyList(), // Needs TypeConverter
-    val subtasks: List<Subtask> = emptyList() // Needs TypeConverter
+    val reminders: List<Instant> = emptyList() // Needs TypeConverter
 )
 
-data class Subtask(
-    val id: String,
-    val title: String,
-    val isCompleted: Boolean = false
+data class TaskWithSubtasks(
+    @androidx.room.Embedded val task: TaskEntity,
+    @androidx.room.Relation(
+        parentColumn = "id",
+        entityColumn = "taskId"
+    )
+    val subtasks: List<SubtaskEntity>
 )

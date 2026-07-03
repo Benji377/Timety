@@ -1,36 +1,347 @@
 package io.github.benji377.timety.ui.viewmodel
 
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.benji377.timety.data.model.focus.DistractionEntity
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
+import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
+import io.github.benji377.timety.data.model.focus.FocusTagEntity
+import io.github.benji377.timety.data.model.focus.FocusTargetSelection
+import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.focus.PhaseType
+import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.data.repository.FocusRepository
+import io.github.benji377.timety.data.repository.UserRepository
+import io.github.benji377.timety.services.FocusTimerManager
+import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.util.stats.ExperienceEngine
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.UUID
+
+/**
+ * A logged distraction paired with the session it happened in - lets the stats screen show the
+ * session's target name next to each distraction (mirrors Flutter's `DistractionEntry`, but built
+ * here by joining the normalized `distractions`/`focus_sessions` tables instead of Flutter's
+ * denormalized `FocusSession.distractions` list).
+ */
+data class DistractionWithSession(val distraction: DistractionEntity, val session: FocusSessionEntity)
 
 class FocusViewModel(
-    private val focusRepository: FocusRepository
+    private val focusRepository: FocusRepository,
+    private val userRepository: UserRepository,
+    private val habitRepository: io.github.benji377.timety.data.repository.HabitRepository,
+    private val settingsRepository: io.github.benji377.timety.data.repository.SettingsRepository
 ) : ViewModel() {
 
+    // --- MODES / SESSIONS / TAGS (existing) ---
     val allModes: StateFlow<List<FocusModeEntity>> = focusRepository.allModes
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val allSessions: StateFlow<List<FocusSessionEntity>> = focusRepository.allSessions
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val allTags: StateFlow<List<FocusTagEntity>> = focusRepository.allTags
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    /**
+     * All logged distractions across all sessions, newest first, each paired with its session.
+     * NOTE (viewmodel addition - see report): built here (not in the DAO/repository) by combining
+     * the existing `getDistractionsForSession` flow per session, so the Focus Stats screen can
+     * show a day-by-day distraction feed the way Flutter's `FocusProvider.history` (which embeds
+     * distractions directly on each session) does.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allDistractions: StateFlow<List<DistractionWithSession>> = allSessions
+        .flatMapLatest { sessions ->
+            if (sessions.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    sessions.map { session ->
+                        focusRepository.getDistractionsForSession(session.id)
+                            .map { list -> list.map { DistractionWithSession(it, session) } }
+                    }
+                ) { arrays -> arrays.toList().flatten().sortedByDescending { it.distraction.time } }
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // --- ACTIVE MODE / PHASE NAVIGATION ---
+    private val _currentModeIndex = MutableStateFlow(0)
+    val currentModeIndex = _currentModeIndex.asStateFlow()
+    fun setCurrentModeIndex(index: Int) { _currentModeIndex.value = index }
+
+    /** Index of the phase currently active within the active mode's phase list. */
+    private val _currentPhaseIndex = MutableStateFlow(0)
+    val currentPhaseIndex = _currentPhaseIndex.asStateFlow()
+    fun setCurrentPhaseIndex(index: Int) { _currentPhaseIndex.value = index }
+    fun resetPhaseIndex() { _currentPhaseIndex.value = 0 }
+
+    /** True once a phase has finished and the user must tap "continue" to start the next one. */
+    private val _awaitingContinue = MutableStateFlow(false)
+    val awaitingContinue: StateFlow<Boolean> = _awaitingContinue.asStateFlow()
+    fun setAwaitingContinue(awaiting: Boolean) { _awaitingContinue.value = awaiting }
+
+    private val _autoCompleteTaskEvent = MutableSharedFlow<String>()
+    val autoCompleteTaskEvent = _autoCompleteTaskEvent.asSharedFlow()
+
+    // --- SESSION TARGET (tag / task / habit) ---
+    private val _selectedTarget = MutableStateFlow<FocusTargetSelection?>(null)
+    val selectedTarget: StateFlow<FocusTargetSelection?> = _selectedTarget.asStateFlow()
+
+    fun setSelectedTag(tag: FocusTagEntity) {
+        _selectedTarget.value = FocusTargetSelection.tag(tag)
+    }
+
+    fun setSelectedTask(id: String, label: String, colorValue: Int) {
+        _selectedTarget.value = FocusTargetSelection.task(id, label, colorValue)
+    }
+
+    fun setSelectedHabit(id: String, label: String, colorValue: Int) {
+        _selectedTarget.value = FocusTargetSelection.habit(id, label, colorValue)
+    }
+
+    fun clearSelectedTarget() {
+        val defaultTag = allTags.value.firstOrNull()
+        _selectedTarget.value = defaultTag?.let { FocusTargetSelection.tag(it) }
+    }
+
+    private var currentSessionId: String = UUID.randomUUID().toString()
+    fun resetCurrentSession() { currentSessionId = UUID.randomUUID().toString() }
+
+    init {
+        // Seed the default tag + the three built-in system modes on first run, and default the
+        // selected target to the first tag. Mirrors `FocusProvider.loadFocusData`.
+        // NOTE (viewmodel addition - see report): nothing seeded these before; without this the
+        // app launched with zero focus modes and no usable target. This collects the *raw*
+        // repository flows (not the `stateIn`-wrapped `allTags`/`allModes` above) so the check
+        // only sees genuine Room emissions - `stateIn`'s synthetic `emptyList()` initial value
+        // would otherwise look like "no tags yet" on every launch and stomp a user-renamed
+        // default tag.
+        viewModelScope.launch {
+            focusRepository.allTags.collect { tags ->
+                if (tags.isEmpty()) {
+                    focusRepository.insertTag(
+                        FocusTagEntity(id = "default_tag", name = "None", colorValue = FocusColor.toArgb())
+                    )
+                } else if (_selectedTarget.value == null) {
+                    _selectedTarget.value = FocusTargetSelection.tag(tags.first())
+                }
+            }
+        }
+        viewModelScope.launch {
+            focusRepository.allModes.collect { modes -> ensureSystemModes(modes) }
+        }
+
+        viewModelScope.launch {
+            FocusTimerManager.phaseCompleteEvent.collect { (isRestPhase, durationSeconds) ->
+                val target = selectedTarget.value
+
+                if (!isRestPhase) {
+                    val durationMinutes = durationSeconds / 60
+                    if (durationMinutes > 0) {
+                        userRepository.addXp(durationMinutes * ExperienceEngine.xpPerFocusMin)
+                    }
+                    sessionAccumulatedFocusSeconds += durationSeconds
+
+                    // --- Auto-completion logic ---
+                    val autoCompleteEnabled = settingsRepository.autoCompleteFocusFlow.first()
+                    if (autoCompleteEnabled && target != null) {
+                        when (target.type) {
+                            FocusTargetType.TASK -> {
+                                _autoCompleteTaskEvent.emit(target.id)
+                            }
+                            FocusTargetType.HABIT -> {
+                                val today = LocalDate.now()
+                                val hcEntity = habitRepository.getHabitById(target.id)
+                                if (hcEntity != null) {
+                                    val completions = habitRepository.getCompletionsForHabit(target.id).first()
+                                    val hwc = io.github.benji377.timety.data.model.habit.HabitWithCompletions(hcEntity, completions)
+                                    if (!io.github.benji377.timety.util.habit.HabitUtils.isCompletedOn(hwc, today)) {
+                                        habitRepository.insertCompletion(
+                                            io.github.benji377.timety.data.model.habit.HabitCompletionEntity(
+                                                habitId = hcEntity.id,
+                                                completionDate = Instant.now()
+                                            )
+                                        )
+                                        userRepository.addXp(ExperienceEngine.xpPerHabit)
+                                    }
+                                }
+                            }
+                            else -> {}
+                        }
+                    }
+                }
+
+                if (sessionStartTime == null) {
+                    sessionStartTime = Instant.now().minusSeconds(durationSeconds.toLong())
+                }
+
+                setAwaitingContinue(true)
+            }
+        }
+    }
+
+    private var sessionAccumulatedFocusSeconds: Int = 0
+    private var sessionStartTime: Instant? = null
+
+    fun completeSessionAndLog() {
+        if (sessionAccumulatedFocusSeconds > 0) {
+            val target = selectedTarget.value
+            val activeMode = allModes.value.getOrNull(currentModeIndex.value)
+            logSession(
+                FocusSessionEntity(
+                    id = currentSessionId,
+                    modeId = activeMode?.id ?: "unknown",
+                    startTime = sessionStartTime ?: Instant.now().minusSeconds(sessionAccumulatedFocusSeconds.toLong()),
+                    endTime = Instant.now(),
+                    totalSecondsFocused = sessionAccumulatedFocusSeconds,
+                    isCompleted = true,
+                    tagId = if (target?.type == FocusTargetType.TAG) target.id else null,
+                    targetType = target?.type ?: FocusTargetType.TAG,
+                    targetId = target?.id,
+                    targetLabel = target?.label,
+                )
+            )
+        }
+        sessionAccumulatedFocusSeconds = 0
+        sessionStartTime = null
+        resetCurrentSession()
+    }
+
+    private suspend fun ensureSystemModes(modes: List<FocusModeEntity>) {
+        if (modes.none { it.id == "system_stopwatch" }) {
+            focusRepository.insertModeWithPhases(
+                FocusModeEntity(id = "system_stopwatch", name = "Stopwatch", type = FocusModeType.STOPWATCH, isSystem = true),
+                listOf(SessionPhaseEntity(modeId = "system_stopwatch", type = PhaseType.FOCUS, durationMinutes = 0, orderIndex = 0)),
+            )
+        }
+        if (modes.none { it.id == "system_flexible" }) {
+            focusRepository.insertModeWithPhases(
+                FocusModeEntity(id = "system_flexible", name = "Flexible", type = FocusModeType.FLEXIBLE, isSystem = true),
+                listOf(SessionPhaseEntity(modeId = "system_flexible", type = PhaseType.FOCUS, durationMinutes = -1, orderIndex = 0)),
+            )
+        }
+        if (modes.none { it.id == "system_pomodoro" }) {
+            focusRepository.insertModeWithPhases(
+                FocusModeEntity(id = "system_pomodoro", name = "Pomodoro Classic", type = FocusModeType.POMODORO, isSystem = true),
+                listOf(
+                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 0),
+                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.REST, durationMinutes = 5, orderIndex = 1),
+                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 2),
+                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.REST, durationMinutes = 5, orderIndex = 3),
+                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 4),
+                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.REST, durationMinutes = 5, orderIndex = 5),
+                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 6),
+                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.REST, durationMinutes = 15, orderIndex = 7),
+                ),
+            )
+        }
+    }
 
     fun logSession(session: FocusSessionEntity) {
+        viewModelScope.launch { focusRepository.insertSession(session) }
+    }
+
+    fun logDistraction(note: String) {
         viewModelScope.launch {
-            focusRepository.insertSession(session)
+            focusRepository.insertDistraction(
+                DistractionEntity(sessionId = currentSessionId, time = Instant.now(), note = note)
+            )
+        }
+    }
+
+    suspend fun getPhasesForMode(modeId: String) = focusRepository.getPhasesForMode(modeId)
+
+    fun saveMode(mode: FocusModeEntity, phases: List<SessionPhaseEntity>) {
+        viewModelScope.launch { focusRepository.insertModeWithPhases(mode, phases) }
+    }
+
+    fun deleteMode(mode: FocusModeEntity) {
+        if (mode.isSystem) return
+        viewModelScope.launch { focusRepository.deleteMode(mode) }
+    }
+
+    // --- TAGS ---
+    fun createTag(name: String, colorValue: Int) {
+        viewModelScope.launch {
+            val tag = FocusTagEntity(id = UUID.randomUUID().toString(), name = name, colorValue = colorValue)
+            focusRepository.insertTag(tag)
+            _selectedTarget.value = FocusTargetSelection.tag(tag)
+        }
+    }
+
+    fun updateTag(id: String, name: String, colorValue: Int) {
+        viewModelScope.launch {
+            focusRepository.insertTag(FocusTagEntity(id = id, name = name, colorValue = colorValue))
+        }
+    }
+
+    fun deleteTag(tag: FocusTagEntity) {
+        viewModelScope.launch {
+            focusRepository.deleteTag(tag)
+            if (_selectedTarget.value?.type == FocusTargetType.TAG && _selectedTarget.value?.id == tag.id) {
+                clearSelectedTarget()
+            }
+        }
+    }
+
+    // --- STATS HELPERS ---
+
+    /** Total focused minutes on [day], summing completed sessions that started that day. Mirrors `FocusProvider.getMinutesFocusedOnDay`. */
+    fun getMinutesFocusedOnDay(day: LocalDate, zone: ZoneId = ZoneId.systemDefault()): Int {
+        val totalSeconds = allSessions.value
+            .filter { it.startTime.atZone(zone).toLocalDate() == day }
+            .sumOf { it.totalSecondsFocused }
+        return totalSeconds / 60
+    }
+
+    fun getMinutesFocusedToday(zone: ZoneId = ZoneId.systemDefault()): Int = getMinutesFocusedOnDay(LocalDate.now(), zone)
+
+    /** Manually logs a completed session in the past. Mirrors `FocusProvider.logPastSession` (the "Time Machine" dialog). */
+    fun logPastSession(mode: FocusModeEntity, startTime: Instant, endTime: Instant, tag: FocusTagEntity?) {
+        val totalSeconds = endTime.epochSecond - startTime.epochSecond
+        if (totalSeconds <= 0) return
+
+        viewModelScope.launch {
+            focusRepository.insertSession(
+                FocusSessionEntity(
+                    id = UUID.randomUUID().toString(),
+                    modeId = mode.id,
+                    startTime = startTime,
+                    endTime = endTime,
+                    totalSecondsFocused = totalSeconds.toInt(),
+                    isCompleted = true,
+                    tagId = tag?.id,
+                    targetType = FocusTargetType.TAG,
+                    targetId = tag?.id,
+                    targetLabel = tag?.name,
+                )
+            )
+            val focusMinutes = (totalSeconds / 60).toInt()
+            if (focusMinutes > 0) {
+                userRepository.addXp(focusMinutes * ExperienceEngine.xpPerFocusMin)
+            }
         }
     }
 }
