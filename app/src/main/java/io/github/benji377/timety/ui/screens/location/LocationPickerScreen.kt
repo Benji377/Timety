@@ -99,6 +99,7 @@ fun LocationPickerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
                 title = { Text("Pick Location") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

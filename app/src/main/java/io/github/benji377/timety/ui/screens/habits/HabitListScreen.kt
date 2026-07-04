@@ -61,7 +61,8 @@ fun HabitListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.habitsListTitle)) })
+            TopAppBar(
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),title = { Text(stringResource(R.string.habitsListTitle)) })
         },
         floatingActionButton = {
             FloatingActionButton(

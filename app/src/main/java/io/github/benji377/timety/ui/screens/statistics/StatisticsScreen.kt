@@ -112,6 +112,7 @@ fun StatisticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
                 title = { Text(stringResource(R.string.statsTitle), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     androidx.compose.material3.IconButton(onClick = onNavigateBack) {

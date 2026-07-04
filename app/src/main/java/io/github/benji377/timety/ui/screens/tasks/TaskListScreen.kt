@@ -72,7 +72,7 @@ fun TaskListScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.taskListTitle), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },

@@ -112,6 +112,7 @@ fun CalendarScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
                 title = { Text(stringResource(R.string.calendarTitle)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -423,7 +424,7 @@ private fun HabitsAccordion(
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                     shape = AppTheme.brMedium,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     border = androidx.compose.foundation.BorderStroke(
                         1.dp,
                         if (isCompleted) HabitColor.copy(alpha = 0.3f) else HabitColor
@@ -484,7 +485,7 @@ private fun TasksAccordion(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                         .clickable { onTaskClick(taskWithSubtasks) },
                     shape = AppTheme.brMedium,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     border = androidx.compose.foundation.BorderStroke(
                         1.dp,
                         if (task.isCompleted) SuccessColor else TaskColor
@@ -560,7 +561,7 @@ private fun FocusSessionsAccordion(
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                     shape = AppTheme.brMedium,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Grey300),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {

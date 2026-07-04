@@ -296,7 +296,7 @@ fun FocusScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.focusTitle), fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 actions = {
                     IconButton(onClick = onNavigateToModes) {
                         Icon(Icons.Filled.DashboardCustomize, contentDescription = null)

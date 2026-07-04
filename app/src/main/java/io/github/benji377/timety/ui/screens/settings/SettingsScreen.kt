@@ -277,6 +277,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
                 title = { Text(stringResource(R.string.settingsTitle), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -295,7 +296,7 @@ fun SettingsScreen(
             // --- APPEARANCE ---
             item { SettingsHeader(stringResource(R.string.settingsSectionAppearance)) }
             item {
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTheme)) },
                     leadingContent = { Icon(Icons.Outlined.DarkMode, null) },
                     trailingContent = { Text(currentThemeLabel, color = Color.Gray) },
@@ -308,13 +309,13 @@ fun SettingsScreen(
             // --- LOCALIZATION & FORMATTING ---
             item { SettingsHeader(stringResource(R.string.settingsSectionLocaleFormat)) }
             item {
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelLanguage)) },
                     leadingContent = { Icon(Icons.Filled.Language, null, tint = TaskColor) },
                     trailingContent = { Text(currentLanguageLabel, color = Color.Gray) },
                     modifier = Modifier.clickable { showLanguageDialog = true }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTimeFormat)) },
                     leadingContent = { Icon(Icons.Filled.AccessTime, null, tint = FocusColor) },
                     trailingContent = {
@@ -328,7 +329,7 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelDateFormat)) },
                     leadingContent = { Icon(Icons.Filled.CalendarToday, null, tint = HabitColor) },
                     trailingContent = { Text(currentDateFormatLabel, color = Color.Gray) },
@@ -341,7 +342,7 @@ fun SettingsScreen(
             // --- FOCUS & PRODUCTIVITY ---
             item { SettingsHeader(stringResource(R.string.settingsSectionFocusProductivity)) }
             item {
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusGoal)) },
                     supportingContent = {
                         Text(quantityString(R.plurals.nMinutesCount, dailyGoalMins, R.string.nMinutesCountZero, dailyGoalMins))
@@ -356,7 +357,7 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusAutocomplete)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusAutocompleteSubtitle)) },
                     leadingContent = { Icon(Icons.Filled.TaskAlt, null, tint = TaskColor) },
@@ -371,7 +372,7 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusStopwatch)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusStopwatchSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Timer, null, tint = WarningAccent) },
@@ -384,7 +385,7 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusNodeTime)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusNodeTimeSubtitle)) },
                     leadingContent = { Icon(Icons.Filled.LinearScale, null, tint = TaskColor) },
@@ -397,7 +398,7 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelUpcomingTask)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelUpcomingTaskSubtitle, upcomingTasksHorizon)) },
                     leadingContent = { Icon(Icons.Outlined.Schedule, null, tint = TaskColor) },
@@ -417,14 +418,14 @@ fun SettingsScreen(
             // --- ORGANIZATION ---
             item { SettingsHeader(stringResource(R.string.settingsSectionOrganization)) }
             item {
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTags)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelTagsSubtitle, focusTags.size)) },
                     leadingContent = { Icon(Icons.Outlined.LocalOffer, null, tint = FocusColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable { onNavigateToTags() }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelCategories)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelCategoriesSubtitle, categoryCount)) },
                     leadingContent = { Icon(Icons.Outlined.Label, null, tint = TaskColor) },
@@ -438,7 +439,7 @@ fun SettingsScreen(
             // --- API & SERVICES ---
             item { SettingsHeader(stringResource(R.string.settingsSectionApi)) }
             item {
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelLocationApi)) },
                     supportingContent = {
                         Text(
@@ -461,7 +462,7 @@ fun SettingsScreen(
             // --- NOTIFICATIONS ---
             item { SettingsHeader(stringResource(R.string.settingsSectionNotifications)) }
             item {
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelDailyMotivation)) },
                     supportingContent = { Text(formatTimeOfDay(dailyMotivationTime, use24HourFormat)) },
                     leadingContent = { Icon(Icons.Filled.Schedule, null, tint = WarningAccent) },
@@ -474,7 +475,7 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelEodCheckup)) },
                     supportingContent = { Text(formatTimeOfDay(endOfDayCheckupTime, use24HourFormat)) },
                     leadingContent = { Icon(Icons.Filled.NightlightRound, null, tint = HabitColor) },
@@ -494,7 +495,7 @@ fun SettingsScreen(
             // --- DATA & BACKUP ---
             item { SettingsHeader(stringResource(R.string.settingsSectionDataBackup)) }
             item {
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelExportData)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelExportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.UploadFile, null, tint = TaskColor) },
@@ -502,7 +503,7 @@ fun SettingsScreen(
                         exportLauncher.launch(backupService.suggestedFileName())
                     }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelImportData)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelImportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Download, null, tint = FocusColor) },
@@ -517,7 +518,7 @@ fun SettingsScreen(
             // --- SUPPORT & FEEDBACK ---
             item { SettingsHeader(stringResource(R.string.settingsSectionSupport)) }
             item {
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelCommunity)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelCommunitySubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Forum, null, tint = FocusColor) },
@@ -526,7 +527,7 @@ fun SettingsScreen(
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Benji377/Timety/discussions")))
                     }
                 )
-                ListItem(
+                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFeedback)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFeedbackSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.BugReport, null, tint = HabitColor) },
@@ -545,7 +546,7 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
