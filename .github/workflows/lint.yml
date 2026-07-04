@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    name: Flutter Analyze
+    name: Android Lint
     runs-on: ubuntu-latest
 
     permissions:
