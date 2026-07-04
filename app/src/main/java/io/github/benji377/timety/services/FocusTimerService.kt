@@ -56,11 +56,11 @@ class FocusTimerService : Service() {
         FocusTimerManager.timerState
             .distinctUntilChanged { old, new ->
                 old.isRunning == new.isRunning &&
-                    old.isPaused == new.isPaused &&
-                    old.isAwaitingContinue == new.isAwaitingContinue &&
-                    old.isRestPhase == new.isRestPhase &&
-                    old.modeName == new.modeName &&
-                    old.totalPhaseSeconds == new.totalPhaseSeconds
+                        old.isPaused == new.isPaused &&
+                        old.isAwaitingContinue == new.isAwaitingContinue &&
+                        old.isRestPhase == new.isRestPhase &&
+                        old.modeName == new.modeName &&
+                        old.totalPhaseSeconds == new.totalPhaseSeconds
             }
             .onEach { state ->
                 if (state.isRunning || state.isPaused || state.isAwaitingContinue) {
@@ -81,6 +81,7 @@ class FocusTimerService : Service() {
                 startForeground(NOTIFICATION_ID, buildNotification(state))
                 FocusTimerManager.startTimer()
             }
+
             ACTION_PAUSE -> FocusTimerManager.pauseTimer()
             ACTION_STOP -> {
                 FocusTimerManager.stopTimer()
@@ -124,7 +125,11 @@ class FocusTimerService : Service() {
         val targetTimeMs = System.currentTimeMillis() + (secondsRemaining * 1000L)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetTimeMs, soundPendingIntent)
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                targetTimeMs,
+                soundPendingIntent
+            )
         } else {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, targetTimeMs, soundPendingIntent)
         }
@@ -211,7 +216,10 @@ class FocusTimerService : Service() {
                 action = if (state.isRunning) ACTION_PAUSE else ACTION_START
             }
             val pendingPauseResumeIntent = PendingIntent.getService(
-                this, 1, pauseResumeIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                this,
+                1,
+                pauseResumeIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
             builder.addAction(
                 if (state.isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play,

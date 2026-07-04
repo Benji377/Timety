@@ -2,13 +2,29 @@ package io.github.benji377.timety.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,9 +85,14 @@ fun HomeScreen(
 
     val todayLocalDate = LocalDate.now()
     val focusMinsToday = sessions.filter {
-        LocalDateTime.ofInstant(it.startTime, ZoneId.systemDefault()).toLocalDate() == todayLocalDate
+        LocalDateTime.ofInstant(it.startTime, ZoneId.systemDefault())
+            .toLocalDate() == todayLocalDate
     }.sumOf { it.totalSecondsFocused.toInt() } / 60
-    val focusProgress = if (dailyTarget > 0) (focusMinsToday.toFloat() / dailyTarget.toFloat()).coerceIn(0f, 1f) else 0f
+    val focusProgress =
+        if (dailyTarget > 0) (focusMinsToday.toFloat() / dailyTarget.toFloat()).coerceIn(
+            0f,
+            1f
+        ) else 0f
 
     val currentHour = LocalTime.now().hour
     val greeting = when (currentHour) {
@@ -99,7 +120,9 @@ fun HomeScreen(
     val upcomingEndDate = todayLocalDate.plusDays(upcomingWindowDays.toLong())
     val upcomingTasks = tasks.filter { t ->
         val dueDay = t.task.dueDate?.atZone(ZoneId.systemDefault())?.toLocalDate()
-        !t.task.isCompleted && dueDay != null && dueDay.isAfter(todayLocalDate) && !dueDay.isAfter(upcomingEndDate)
+        !t.task.isCompleted && dueDay != null && dueDay.isAfter(todayLocalDate) && !dueDay.isAfter(
+            upcomingEndDate
+        )
     }.sortedBy { it.task.dueDate }
 
     // Today's habits: scheduled for today and not yet at their weekly target (excluding today's own completion).
@@ -111,10 +134,16 @@ fun HomeScreen(
                 title = { Text(stringResource(R.string.appTitle), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onNavigateToStatistics) {
-                        Icon(Icons.Filled.BarChart, contentDescription = stringResource(R.string.commonTooltipStats))
+                        Icon(
+                            Icons.Filled.BarChart,
+                            contentDescription = stringResource(R.string.commonTooltipStats)
+                        )
                     }
                     IconButton(onClick = onNavigateToCalendar) {
-                        Icon(Icons.Filled.CalendarToday, contentDescription = stringResource(R.string.commonTooltipCalendar))
+                        Icon(
+                            Icons.Filled.CalendarToday,
+                            contentDescription = stringResource(R.string.commonTooltipCalendar)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -201,7 +230,10 @@ fun HomeScreen(
                         if (urgentTasks.isNotEmpty()) {
                             item {
                                 StyledExpansionTile(
-                                    title = stringResource(R.string.homeSectionTasksDue, urgentTasks.size),
+                                    title = stringResource(
+                                        R.string.homeSectionTasksDue,
+                                        urgentTasks.size
+                                    ),
                                     titleColor = WarningColor,
                                     initiallyExpanded = true
                                 ) {
@@ -209,12 +241,17 @@ fun HomeScreen(
                                         TaskListTile(
                                             task = task.task,
                                             isOverdue = task.task.dueDate != null &&
-                                                task.task.dueDate.atZone(ZoneId.systemDefault()).toLocalDate().isBefore(todayLocalDate),
+                                                    task.task.dueDate.atZone(ZoneId.systemDefault())
+                                                        .toLocalDate().isBefore(todayLocalDate),
                                             enableDismissible = false,
                                             showDescription = false,
                                             subtasksCompleted = task.subtasks.count { it.isCompleted },
                                             subtasksTotal = task.subtasks.size,
-                                            onToggleCompleted = { taskViewModel.toggleTaskCompletion(task.task) },
+                                            onToggleCompleted = {
+                                                taskViewModel.toggleTaskCompletion(
+                                                    task.task
+                                                )
+                                            },
                                             onTap = { onNavigateToTaskDetail(task.task.id) }
                                         )
                                     }
@@ -227,7 +264,10 @@ fun HomeScreen(
                         if (todaysHabits.isNotEmpty()) {
                             item {
                                 StyledExpansionTile(
-                                    title = stringResource(R.string.homeSectionHabitsDue, todaysHabits.size),
+                                    title = stringResource(
+                                        R.string.homeSectionHabitsDue,
+                                        todaysHabits.size
+                                    ),
                                     titleColor = HabitColor,
                                     initiallyExpanded = false
                                 ) {
@@ -236,15 +276,23 @@ fun HomeScreen(
                                         allHabitsForStacks = habitsWithCompletions,
                                         targetDate = todayLocalDate,
                                         habitBuilder = { hc, isDone, isStacked, isLocked ->
-                                            val completionsThisWeek = HabitUtils.getCompletionsThisWeek(hc)
+                                            val completionsThisWeek =
+                                                HabitUtils.getCompletionsThisWeek(hc)
                                             HabitListTile(
                                                 habit = hc.habit,
                                                 isCompleted = isDone,
                                                 isStacked = isStacked,
                                                 isLocked = isLocked,
-                                                subtitleText = HabitUtils.buildHabitSubtitle(hc.habit, completionsThisWeek),
+                                                subtitleText = HabitUtils.buildHabitSubtitle(
+                                                    hc.habit,
+                                                    completionsThisWeek
+                                                ),
                                                 enableDismissible = false,
-                                                onToggleCompleted = { habitViewModel.toggleCompletionToday(hc.habit.id) },
+                                                onToggleCompleted = {
+                                                    habitViewModel.toggleCompletionToday(
+                                                        hc.habit.id
+                                                    )
+                                                },
                                                 onTap = { onNavigateToHabitDetail(hc.habit.id) }
                                             )
                                         }
@@ -258,7 +306,10 @@ fun HomeScreen(
                         if (upcomingTasks.isNotEmpty()) {
                             item {
                                 StyledExpansionTile(
-                                    title = stringResource(R.string.homeSectionTasksUpcoming, upcomingTasks.size),
+                                    title = stringResource(
+                                        R.string.homeSectionTasksUpcoming,
+                                        upcomingTasks.size
+                                    ),
                                     titleColor = TaskColor,
                                     initiallyExpanded = false
                                 ) {
@@ -269,7 +320,11 @@ fun HomeScreen(
                                             showDescription = false,
                                             subtasksCompleted = task.subtasks.count { it.isCompleted },
                                             subtasksTotal = task.subtasks.size,
-                                            onToggleCompleted = { taskViewModel.toggleTaskCompletion(task.task) },
+                                            onToggleCompleted = {
+                                                taskViewModel.toggleTaskCompletion(
+                                                    task.task
+                                                )
+                                            },
                                             onTap = { onNavigateToTaskDetail(task.task.id) }
                                         )
                                     }

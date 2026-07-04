@@ -22,7 +22,7 @@ class Converters {
     @TypeConverter
     fun toInstantList(data: String?): List<Instant> {
         if (data.isNullOrBlank()) return emptyList()
-        return data.split(",").mapNotNull { 
+        return data.split(",").mapNotNull {
             try {
                 Instant.ofEpochMilli(it.toLong())
             } catch (e: Exception) {

@@ -5,7 +5,18 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,8 +43,40 @@ import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,7 +85,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -70,8 +112,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
@@ -83,7 +123,10 @@ import java.util.UUID
  * yet, so this screen uses `DateTimeFormatter` with the device locale (see [formatDate]/
  * [formatTime]). The parent should centralize this later.
  */
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
 @Composable
 fun TaskDetailScreen(
     taskId: String? = null,
@@ -102,12 +145,24 @@ fun TaskDetailScreen(
     var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
     var description by remember(existingTask) { mutableStateOf(existingTask?.description ?: "") }
     var location by remember(existingTask) { mutableStateOf(existingTask?.location ?: "") }
-    var priority by remember(existingTask) { mutableStateOf(existingTask?.priority ?: Priority.MEDIUM) }
+    var priority by remember(existingTask) {
+        mutableStateOf(
+            existingTask?.priority ?: Priority.MEDIUM
+        )
+    }
     var size by remember(existingTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
     var dueDate by remember(existingTask) { mutableStateOf(existingTask?.dueDate) }
     var category by remember(existingTask) { mutableStateOf(existingTask?.category ?: "") }
-    var reminders by remember(existingTask) { mutableStateOf(existingTask?.reminders ?: emptyList()) }
-    var subtasks by remember(existingTaskWithSubtasks) { mutableStateOf(existingTaskWithSubtasks?.subtasks ?: emptyList()) }
+    var reminders by remember(existingTask) {
+        mutableStateOf(
+            existingTask?.reminders ?: emptyList()
+        )
+    }
+    var subtasks by remember(existingTaskWithSubtasks) {
+        mutableStateOf(
+            existingTaskWithSubtasks?.subtasks ?: emptyList()
+        )
+    }
 
     var showLocationPicker by remember { mutableStateOf(false) }
     var isAddingNewCategory by remember { mutableStateOf(false) }
@@ -147,6 +202,7 @@ fun TaskDetailScreen(
                 pickerTarget = PickerTarget.CUSTOM_REMINDER
                 pickerStep = 1
             }
+
             else -> {
                 val due = dueDate
                 if (due == null) {
@@ -185,7 +241,11 @@ fun TaskDetailScreen(
                 actions = {
                     if (!isEditing && !isNewTask) {
                         IconButton(onClick = { showDeleteConfirm = true }) {
-                            Icon(Icons.Filled.DeleteOutline, contentDescription = stringResource(R.string.commonLabelDelete), tint = ErrorColor)
+                            Icon(
+                                Icons.Filled.DeleteOutline,
+                                contentDescription = stringResource(R.string.commonLabelDelete),
+                                tint = ErrorColor
+                            )
                         }
                         IconButton(onClick = { isEditing = true }) {
                             Icon(Icons.Filled.Edit, contentDescription = null)
@@ -212,7 +272,8 @@ fun TaskDetailScreen(
                                 createdAt = existingTask?.createdAt ?: Instant.now()
                             )
                             if (isNewTask) {
-                                val subtasksToSave = subtasks.map { it.copy(taskId = taskToSave.id) }
+                                val subtasksToSave =
+                                    subtasks.map { it.copy(taskId = taskToSave.id) }
                                 taskViewModel.addTask(taskToSave, subtasksToSave)
                                 onNavigateBack()
                             } else {
@@ -220,7 +281,10 @@ fun TaskDetailScreen(
                                 isEditing = false
                             }
                         }) {
-                            Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.commonLabelSave))
+                            Icon(
+                                Icons.Filled.Check,
+                                contentDescription = stringResource(R.string.commonLabelSave)
+                            )
                         }
                     }
                 }
@@ -234,7 +298,12 @@ fun TaskDetailScreen(
                 .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall)
         ) {
             // --- SECTION: THE BASICS ---
-            item { SectionHeader(stringResource(R.string.taskDetailsSectionInfo), Icons.Outlined.Info) }
+            item {
+                SectionHeader(
+                    stringResource(R.string.taskDetailsSectionInfo),
+                    Icons.Outlined.Info
+                )
+            }
             item {
                 OutlinedTextField(
                     value = title,
@@ -272,9 +341,17 @@ fun TaskDetailScreen(
             }
 
             // --- SECTION: PRIORITY & SIZE ---
-            item { SectionHeader(stringResource(R.string.taskDetailsSectionPriorityAndEffort), Icons.Filled.BarChart) }
             item {
-                Text(stringResource(R.string.taskDetailsLabelPriority), fontWeight = FontWeight.Bold)
+                SectionHeader(
+                    stringResource(R.string.taskDetailsSectionPriorityAndEffort),
+                    Icons.Filled.BarChart
+                )
+            }
+            item {
+                Text(
+                    stringResource(R.string.taskDetailsLabelPriority),
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(Modifier.height(AppTheme.spaceSmall))
                 AccordionSelector(
                     values = Priority.entries,
@@ -309,7 +386,12 @@ fun TaskDetailScreen(
             }
 
             // --- SECTION: TIME ---
-            item { SectionHeader(stringResource(R.string.taskDetailsSectionScheduling), Icons.Filled.CalendarToday) }
+            item {
+                SectionHeader(
+                    stringResource(R.string.taskDetailsSectionScheduling),
+                    Icons.Filled.CalendarToday
+                )
+            }
             item {
                 Box(
                     modifier = Modifier
@@ -320,7 +402,13 @@ fun TaskDetailScreen(
                         }
                 ) {
                     OutlinedTextField(
-                        value = dueDate?.let { stringResource(R.string.taskDetailsLabelDueDate, formatDate(it, dateFmt.dateFormatCode), formatTime(it, dateFmt.use24HourFormat)) } ?: "",
+                        value = dueDate?.let {
+                            stringResource(
+                                R.string.taskDetailsLabelDueDate,
+                                formatDate(it, dateFmt.dateFormatCode),
+                                formatTime(it, dateFmt.use24HourFormat)
+                            )
+                        } ?: "",
                         onValueChange = {},
                         enabled = false,
                         modifier = Modifier.fillMaxWidth(),
@@ -348,9 +436,25 @@ fun TaskDetailScreen(
                             InputChip(
                                 selected = false,
                                 onClick = { if (isEditing) reminders = reminders - reminder },
-                                label = { Text("${formatDate(reminder, dateFmt.dateFormatCode)} - ${formatTime(reminder, dateFmt.use24HourFormat)}", fontSize = AppTheme.fsBodySmall) },
+                                label = {
+                                    Text(
+                                        "${
+                                            formatDate(
+                                                reminder,
+                                                dateFmt.dateFormatCode
+                                            )
+                                        } - ${formatTime(reminder, dateFmt.use24HourFormat)}",
+                                        fontSize = AppTheme.fsBodySmall
+                                    )
+                                },
                                 trailingIcon = if (isEditing) {
-                                    { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.commonLabelRemove), modifier = Modifier.size(16.dp)) }
+                                    {
+                                        Icon(
+                                            Icons.Filled.Close,
+                                            contentDescription = stringResource(R.string.commonLabelRemove),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
                                 } else null
                             )
                         }
@@ -359,7 +463,12 @@ fun TaskDetailScreen(
             }
 
             // --- SECTION: LOCATION ---
-            item { SectionHeader(stringResource(R.string.taskDetailsSectionLocation), Icons.Outlined.LocationOn) }
+            item {
+                SectionHeader(
+                    stringResource(R.string.taskDetailsSectionLocation),
+                    Icons.Outlined.LocationOn
+                )
+            }
             item {
                 OutlinedTextField(
                     value = location,
@@ -376,11 +485,13 @@ fun TaskDetailScreen(
                         }
                     }
                 )
-                
+
                 if (showLocationPicker) {
                     androidx.compose.ui.window.Dialog(
                         onDismissRequest = { showLocationPicker = false },
-                        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+                        properties = androidx.compose.ui.window.DialogProperties(
+                            usePlatformDefaultWidth = false
+                        )
                     ) {
                         io.github.benji377.timety.ui.screens.location.LocationPickerScreen(
                             onLocationSelected = { selectedLocation ->
@@ -394,7 +505,12 @@ fun TaskDetailScreen(
             }
 
             // --- SUBTASKS ---
-            item { SectionHeader(stringResource(R.string.taskDetailsSectionChecklist), Icons.Filled.Checklist) }
+            item {
+                SectionHeader(
+                    stringResource(R.string.taskDetailsSectionChecklist),
+                    Icons.Filled.Checklist
+                )
+            }
             items(subtasks, key = { it.id }) { subtask ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -428,7 +544,12 @@ fun TaskDetailScreen(
                                 taskViewModel.deleteSubtask(subtask)
                             }
                         }) {
-                            Icon(Icons.Filled.Close, contentDescription = null, tint = ErrorColor, modifier = Modifier.size(20.dp))
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = null,
+                                tint = ErrorColor,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }
@@ -441,7 +562,11 @@ fun TaskDetailScreen(
                             .fillMaxWidth()
                             .padding(top = AppTheme.spaceSmall)
                     ) {
-                        Icon(Icons.Filled.SubdirectoryArrowRight, contentDescription = null, tint = Color.Gray)
+                        Icon(
+                            Icons.Filled.SubdirectoryArrowRight,
+                            contentDescription = null,
+                            tint = Color.Gray
+                        )
                         Spacer(Modifier.width(AppTheme.spaceMedium))
                         OutlinedTextField(
                             value = newSubtaskTitle,
@@ -452,7 +577,11 @@ fun TaskDetailScreen(
                             keyboardActions = KeyboardActions(onDone = {
                                 val trimmed = newSubtaskTitle.trim()
                                 if (trimmed.isNotEmpty()) {
-                                    val newSubtask = SubtaskEntity(id = UUID.randomUUID().toString(), taskId = taskId ?: "", title = trimmed)
+                                    val newSubtask = SubtaskEntity(
+                                        id = UUID.randomUUID().toString(),
+                                        taskId = taskId ?: "",
+                                        title = trimmed
+                                    )
                                     subtasks = subtasks + newSubtask
                                     if (taskId != null) taskViewModel.addSubtask(newSubtask)
                                     newSubtaskTitle = ""
@@ -462,13 +591,21 @@ fun TaskDetailScreen(
                                 IconButton(onClick = {
                                     val trimmed = newSubtaskTitle.trim()
                                     if (trimmed.isNotEmpty()) {
-                                        val newSubtask = SubtaskEntity(id = UUID.randomUUID().toString(), taskId = taskId ?: "", title = trimmed)
+                                        val newSubtask = SubtaskEntity(
+                                            id = UUID.randomUUID().toString(),
+                                            taskId = taskId ?: "",
+                                            title = trimmed
+                                        )
                                         subtasks = subtasks + newSubtask
                                         if (taskId != null) taskViewModel.addSubtask(newSubtask)
                                         newSubtaskTitle = ""
                                     }
                                 }) {
-                                    Icon(Icons.Filled.AddCircle, contentDescription = stringResource(R.string.commonLabelAdd), tint = InfoColor)
+                                    Icon(
+                                        Icons.Filled.AddCircle,
+                                        contentDescription = stringResource(R.string.commonLabelAdd),
+                                        tint = InfoColor
+                                    )
                                 }
                             }
                         )
@@ -499,7 +636,8 @@ fun TaskDetailScreen(
         // Mirror AppDatePickers.pickDateTime constraints: due dates can't be before today; a custom
         // reminder can't be after the task's due date.
         val zone = ZoneId.systemDefault()
-        val todayUtcMillis = java.time.LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val todayUtcMillis =
+            java.time.LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         val dueUtcMillis = dueDate?.atZone(zone)?.toLocalDate()
             ?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
         val selectableDates = remember(pickerTarget, dueUtcMillis, todayUtcMillis) {
@@ -522,7 +660,8 @@ fun TaskDetailScreen(
                 TextButton(onClick = {
                     val millis = datePickerState.selectedDateMillis
                     if (millis != null) {
-                        pickedLocalDate = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+                        pickedLocalDate =
+                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
                         pickerStep = 2
                     } else {
                         closePicker()
@@ -538,7 +677,11 @@ fun TaskDetailScreen(
     }
 
     if (pickerStep == 2 && pickedLocalDate != null) {
-        val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0, is24Hour = dateFmt.use24HourFormat)
+        val timePickerState = rememberTimePickerState(
+            initialHour = 12,
+            initialMinute = 0,
+            is24Hour = dateFmt.use24HourFormat
+        )
         AlertDialog(
             onDismissRequest = { closePicker() },
             title = { Text(stringResource(R.string.taskDetailsLabelDueDateSet)) },
@@ -562,6 +705,7 @@ fun TaskDetailScreen(
                                 addComputedReminder(instant)
                             }
                         }
+
                         null -> {}
                     }
                     closePicker()
@@ -580,7 +724,9 @@ private enum class PickerTarget { DUE_DATE, CUSTOM_REMINDER }
 @Composable
 private fun disabledFieldColors(isEditing: Boolean) = OutlinedTextFieldDefaults.colors(
     disabledTextColor = if (isEditing) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-    disabledBorderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+    disabledBorderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(
+        alpha = 0.6f
+    ),
     disabledLeadingIconColor = if (isEditing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
     disabledTrailingIconColor = if (isEditing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant,
     disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -599,7 +745,12 @@ private fun SectionHeader(title: String, icon: ImageVector) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(top = AppTheme.spaceXLarge, bottom = AppTheme.spaceMedium)
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(AppTheme.iconSizeSmall))
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(AppTheme.iconSizeSmall)
+        )
         Spacer(Modifier.width(AppTheme.spaceSmall))
         Text(
             text = title.uppercase(),
@@ -628,7 +779,10 @@ private fun <T> AccordionSelector(
     activeBgColor: Color = TaskColor.copy(alpha = 0.15f),
     activeTextColor: Color = TaskColor,
 ) {
-    val borderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+    val borderColor =
+        if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(
+            alpha = 0.3f
+        )
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -639,7 +793,10 @@ private fun <T> AccordionSelector(
     ) {
         values.forEachIndexed { index, value ->
             val isSelected = value == selectedValue
-            val weight by animateFloatAsState(targetValue = if (isSelected) 3f else 1f, label = "accordionSegment")
+            val weight by animateFloatAsState(
+                targetValue = if (isSelected) 3f else 1f,
+                label = "accordionSegment"
+            )
             val isLast = index == values.lastIndex
             Row(
                 modifier = Modifier
@@ -659,7 +816,9 @@ private fun <T> AccordionSelector(
                     }
                     .background(
                         if (isSelected) {
-                            if (isEditing) activeBgColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                            if (isEditing) activeBgColor else MaterialTheme.colorScheme.outline.copy(
+                                alpha = 0.2f
+                            )
                         } else Color.Transparent
                     )
                     .clickable(enabled = isEditing) { onSelected(value) },
@@ -672,7 +831,9 @@ private fun <T> AccordionSelector(
                         text = labelBuilder(value),
                         modifier = Modifier.padding(start = 8.dp),
                         fontWeight = FontWeight.Bold,
-                        color = if (isEditing) activeTextColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        color = if (isEditing) activeTextColor else MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = 0.38f
+                        ),
                         fontSize = 11.sp,
                         letterSpacing = 0.5.sp
                     )
@@ -702,7 +863,9 @@ private fun ReminderInput(
                 readOnly = true,
                 label = { Text(stringResource(R.string.taskDetailsLabelReminderSet)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor().fillMaxWidth()
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
             )
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 ReminderOption.entries.forEach { option ->
@@ -767,7 +930,9 @@ private fun CategoryPicker(
                     label = { Text(stringResource(R.string.taskDetailsLabelCategory)) },
                     leadingIcon = { Icon(Icons.Filled.Label, null) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
                 )
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DropdownMenuItem(
@@ -789,9 +954,17 @@ private fun CategoryPicker(
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Filled.Add, contentDescription = null, tint = InfoColor, modifier = Modifier.size(AppTheme.iconSizeSmall))
+                                Icon(
+                                    Icons.Filled.Add,
+                                    contentDescription = null,
+                                    tint = InfoColor,
+                                    modifier = Modifier.size(AppTheme.iconSizeSmall)
+                                )
                                 Spacer(Modifier.width(AppTheme.spaceSmall))
-                                Text(stringResource(R.string.taskDetailsLabelCategoryAddNew), color = InfoColor)
+                                Text(
+                                    stringResource(R.string.taskDetailsLabelCategoryAddNew),
+                                    color = InfoColor
+                                )
                             }
                         },
                         onClick = {
@@ -818,10 +991,18 @@ private fun CategoryPicker(
                                 onNewCategoryTextChange("")
                             }
                         }) {
-                            Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.commonLabelConfirm), tint = SuccessColor)
+                            Icon(
+                                Icons.Filled.Check,
+                                contentDescription = stringResource(R.string.commonLabelConfirm),
+                                tint = SuccessColor
+                            )
                         }
                         IconButton(onClick = { onIsAddingNewCategoryChange(false) }) {
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.commonLabelCancel), tint = ErrorColor)
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.commonLabelCancel),
+                                tint = ErrorColor
+                            )
                         }
                     }
                 }

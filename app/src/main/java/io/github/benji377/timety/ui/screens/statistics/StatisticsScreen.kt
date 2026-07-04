@@ -3,6 +3,7 @@ package io.github.benji377.timety.ui.screens.statistics
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +19,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TrackChanges
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -80,9 +79,9 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
+import java.time.format.TextStyle as JavaTextStyle
 
 /**
  * Tabbed statistics container: Overview / Tasks / Focus / Habits. Mirrors
@@ -217,7 +216,8 @@ private fun OverviewStatsScreen(
     val tasksCompletedToday = tasksPerDay[now] ?: 0
     val focusMinsToday = remember(sessions) { focusViewModel.getMinutesFocusedOnDay(now, zone) }
     val focusTarget = if (dailyGoalMins > 0) dailyGoalMins else 1
-    val goalPercent = ((focusMinsToday.toDouble() / focusTarget.toDouble()).coerceIn(0.0, 1.0) * 100).toInt()
+    val goalPercent =
+        ((focusMinsToday.toDouble() / focusTarget.toDouble()).coerceIn(0.0, 1.0) * 100).toInt()
 
     val last7Days = remember(now) { (0..6).map { now.minusDays((6 - it).toLong()) } }
     val dailyFocus = remember(last7Days, sessions) {
@@ -324,7 +324,9 @@ private fun LegendDot(color: Color) {
         imageVector = Icons.Filled.Circle,
         contentDescription = null,
         tint = color,
-        modifier = Modifier.height(12.dp).width(12.dp)
+        modifier = Modifier
+            .height(12.dp)
+            .width(12.dp)
     )
 }
 
@@ -346,8 +348,10 @@ private fun SynergyChart(
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
 
-    val maxFocus = remember(dailyFocus) { (dailyFocus.maxOrNull() ?: 0).toDouble().coerceAtLeast(1.0) }
-    val maxTasks = remember(dailyTasks) { (dailyTasks.maxOrNull() ?: 0).toDouble().coerceAtLeast(1.0) }
+    val maxFocus =
+        remember(dailyFocus) { (dailyFocus.maxOrNull() ?: 0).toDouble().coerceAtLeast(1.0) }
+    val maxTasks =
+        remember(dailyTasks) { (dailyTasks.maxOrNull() ?: 0).toDouble().coerceAtLeast(1.0) }
     val focusValues = remember(dailyFocus, maxFocus) { dailyFocus.map { (it / maxFocus) * 10.0 } }
     val taskValues = remember(dailyTasks, maxTasks) { dailyTasks.map { (it / maxTasks) * 10.0 } }
 
@@ -402,11 +406,19 @@ private fun SynergyChart(
                 val y = plotHeight - (v / 11f) * plotHeight
                 val layout = textMeasurer.measure(
                     text = "$v",
-                    style = TextStyle(fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Bold, textAlign = TextAlign.Right)
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Right
+                    )
                 )
                 drawText(
                     textLayoutResult = layout,
-                    topLeft = Offset(leftReservedPx - 8.dp.toPx() - layout.size.width, y - layout.size.height / 2f)
+                    topLeft = Offset(
+                        leftReservedPx - 8.dp.toPx() - layout.size.width,
+                        y - layout.size.height / 2f
+                    )
                 )
             }
 
@@ -448,7 +460,11 @@ private fun SynergyChart(
                     close()
                 }
                 drawPath(areaPath, color = color.copy(alpha = 0.1f))
-                drawPath(linePath, color = color, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round))
+                drawPath(
+                    linePath,
+                    color = color,
+                    style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+                )
             }
 
             drawSeries(focusValues, FocusColor)
@@ -456,8 +472,16 @@ private fun SynergyChart(
 
             // Touched-day indicator dots.
             selectedIndex?.let { idx ->
-                drawCircle(color = FocusColor, radius = 4.dp.toPx(), center = pointFor(focusValues, idx))
-                drawCircle(color = TaskColor, radius = 4.dp.toPx(), center = pointFor(taskValues, idx))
+                drawCircle(
+                    color = FocusColor,
+                    radius = 4.dp.toPx(),
+                    center = pointFor(focusValues, idx)
+                )
+                drawCircle(
+                    color = TaskColor,
+                    radius = 4.dp.toPx(),
+                    center = pointFor(taskValues, idx)
+                )
             }
         }
 
@@ -473,7 +497,8 @@ private fun SynergyChart(
                 val tooltipHeightPx = with(density) { 56.dp.toPx() }
                 val offsetX = (x - tooltipWidthPx / 2f)
                     .coerceIn(0f, (canvasSize.width - tooltipWidthPx).coerceAtLeast(0f))
-                val offsetY = (topY - tooltipHeightPx - with(density) { 8.dp.toPx() }).coerceAtLeast(0f)
+                val offsetY =
+                    (topY - tooltipHeightPx - with(density) { 8.dp.toPx() }).coerceAtLeast(0f)
 
                 Column(
                     modifier = Modifier
@@ -484,13 +509,23 @@ private fun SynergyChart(
                         .padding(8.dp)
                 ) {
                     Text(
-                        text = quantityString(R.plurals.nMinutesCount, dailyFocus[idx], zeroRes = R.string.nMinutesCountZero, dailyFocus[idx]),
+                        text = quantityString(
+                            R.plurals.nMinutesCount,
+                            dailyFocus[idx],
+                            zeroRes = R.string.nMinutesCountZero,
+                            dailyFocus[idx]
+                        ),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = FocusColor
                     )
                     Text(
-                        text = quantityString(R.plurals.nTasksCount, dailyTasks[idx], zeroRes = R.string.nTasksCountZero, dailyTasks[idx]),
+                        text = quantityString(
+                            R.plurals.nTasksCount,
+                            dailyTasks[idx],
+                            zeroRes = R.string.nTasksCountZero,
+                            dailyTasks[idx]
+                        ),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = TaskColor

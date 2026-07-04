@@ -1,6 +1,16 @@
 package io.github.benji377.timety.ui.screens.tasks
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -10,8 +20,25 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -57,20 +84,26 @@ fun TaskListScreen(
         tasks.map { it.task.category.trim() }.filter { it.isNotEmpty() }.distinct().sorted()
     }
 
-    val processedTasks = remember(tasks, searchQuery, selectedCategoryFilter, sortOption, isAscending) {
-        val engine = TaskFilterEngine(
-            searchQuery = searchQuery,
-            categoryFilter = selectedCategoryFilter,
-            sortOption = sortOption,
-            isAscending = isAscending
-        )
-        engine.process(tasks) { it.task }
-    }
+    val processedTasks =
+        remember(tasks, searchQuery, selectedCategoryFilter, sortOption, isAscending) {
+            val engine = TaskFilterEngine(
+                searchQuery = searchQuery,
+                categoryFilter = selectedCategoryFilter,
+                sortOption = sortOption,
+                isAscending = isAscending
+            )
+            engine.process(tasks) { it.task }
+        }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.taskListTitle), fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.taskListTitle),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -112,7 +145,10 @@ fun TaskListScreen(
                 // Sort Dropdown
                 Box {
                     IconButton(onClick = { sortMenuExpanded = true }) {
-                        Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.taskListTooltipSort))
+                        Icon(
+                            Icons.Filled.Sort,
+                            contentDescription = stringResource(R.string.taskListTooltipSort)
+                        )
                     }
                     DropdownMenu(
                         expanded = sortMenuExpanded,
@@ -161,7 +197,9 @@ fun TaskListScreen(
                         val isSelected = selectedCategoryFilter == category
                         FilterChip(
                             selected = isSelected,
-                            onClick = { selectedCategoryFilter = if (isSelected) null else category },
+                            onClick = {
+                                selectedCategoryFilter = if (isSelected) null else category
+                            },
                             label = { Text(category) }
                         )
                     }
@@ -169,14 +207,22 @@ fun TaskListScreen(
             }
 
             // --- TASKS SCROLLABLE LIST ---
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            Box(modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()) {
                 if (tasks.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.taskListEmpty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(R.string.taskListEmpty),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 } else if (processedTasks.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.taskListFilterNoMatch), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(R.string.taskListFilterNoMatch),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 } else {
                     // Grouping Logic (mirrors Flutter: completed -> overdue -> due today -> todo)
@@ -194,7 +240,9 @@ fun TaskListScreen(
                         when {
                             task.isCompleted -> done.add(item)
                             task.dueDate != null && task.dueDate.isBefore(now) -> overdue.add(item)
-                            task.dueDate != null && task.dueDate.atZone(zone).toLocalDate() == today -> dueToday.add(item)
+                            task.dueDate != null && task.dueDate.atZone(zone)
+                                .toLocalDate() == today -> dueToday.add(item)
+
                             else -> todo.add(item)
                         }
                     }
@@ -213,7 +261,12 @@ fun TaskListScreen(
                                     color = ErrorColor,
                                     initiallyExpanded = true
                                 ) {
-                                    TaskSectionContent(overdue, isOverdue = true, viewModel = viewModel, onNavigateToTaskDetail = onNavigateToTaskDetail)
+                                    TaskSectionContent(
+                                        overdue,
+                                        isOverdue = true,
+                                        viewModel = viewModel,
+                                        onNavigateToTaskDetail = onNavigateToTaskDetail
+                                    )
                                 }
                             }
                         }
@@ -224,7 +277,12 @@ fun TaskListScreen(
                                     color = WarningColor,
                                     initiallyExpanded = true
                                 ) {
-                                    TaskSectionContent(dueToday, isOverdue = false, viewModel = viewModel, onNavigateToTaskDetail = onNavigateToTaskDetail)
+                                    TaskSectionContent(
+                                        dueToday,
+                                        isOverdue = false,
+                                        viewModel = viewModel,
+                                        onNavigateToTaskDetail = onNavigateToTaskDetail
+                                    )
                                 }
                             }
                         }
@@ -235,7 +293,12 @@ fun TaskListScreen(
                                     color = TaskColor,
                                     initiallyExpanded = true
                                 ) {
-                                    TaskSectionContent(todo, isOverdue = false, viewModel = viewModel, onNavigateToTaskDetail = onNavigateToTaskDetail)
+                                    TaskSectionContent(
+                                        todo,
+                                        isOverdue = false,
+                                        viewModel = viewModel,
+                                        onNavigateToTaskDetail = onNavigateToTaskDetail
+                                    )
                                 }
                             }
                         }
@@ -246,7 +309,12 @@ fun TaskListScreen(
                                     color = SuccessColor,
                                     initiallyExpanded = false
                                 ) {
-                                    TaskSectionContent(done, isOverdue = false, viewModel = viewModel, onNavigateToTaskDetail = onNavigateToTaskDetail)
+                                    TaskSectionContent(
+                                        done,
+                                        isOverdue = false,
+                                        viewModel = viewModel,
+                                        onNavigateToTaskDetail = onNavigateToTaskDetail
+                                    )
                                 }
                             }
                         }

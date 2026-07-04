@@ -51,7 +51,8 @@ fun WeekNavigator(
 
     val shortFormatter = DateTimeFormatter.ofPattern("MMM d", locale)
     val fullFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-    val weekRangeLabel = "${startOfWeek.format(shortFormatter)} - ${endOfWeek.format(fullFormatter)}"
+    val weekRangeLabel =
+        "${startOfWeek.format(shortFormatter)} - ${endOfWeek.format(fullFormatter)}"
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -63,7 +64,9 @@ fun WeekNavigator(
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = if (isCurrentWeek) stringResource(R.string.weekNavThisWeek) else stringResource(R.string.weekNavPastWeek),
+                text = if (isCurrentWeek) stringResource(R.string.weekNavThisWeek) else stringResource(
+                    R.string.weekNavPastWeek
+                ),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )

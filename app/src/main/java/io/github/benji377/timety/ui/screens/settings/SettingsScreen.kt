@@ -5,15 +5,39 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LinearScale
+import androidx.compose.material.icons.filled.NightlightRound
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Download
@@ -23,14 +47,39 @@ import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.UploadFile
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,19 +87,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
-import kotlinx.coroutines.launch
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
-import io.github.benji377.timety.ui.components.common.TextInputDialog
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -96,7 +144,10 @@ fun SettingsScreen(
             val msg = if (result.isSuccess) {
                 context.getString(R.string.backupExportSuccess)
             } else {
-                context.getString(R.string.backupExportFailure, result.exceptionOrNull()?.message ?: "")
+                context.getString(
+                    R.string.backupExportFailure,
+                    result.exceptionOrNull()?.message ?: ""
+                )
             }
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
         }
@@ -206,19 +257,29 @@ fun SettingsScreen(
                 Column {
                     OutlinedTextField(
                         value = pendingLocationUrl,
-                        onValueChange = { 
+                        onValueChange = {
                             pendingLocationUrl = it
                             locationError = null
                         },
                         label = { Text(stringResource(R.string.settingsLabelLocationApi)) },
                         singleLine = true,
                         isError = locationError != null,
-                        supportingText = locationError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
+                        supportingText = locationError?.let {
+                            {
+                                Text(
+                                    it,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
                     )
                     if (isCheckingLocation) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Validating...", style = MaterialTheme.typography.bodySmall)
                         }
@@ -278,7 +339,12 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(
                 colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
-                title = { Text(stringResource(R.string.settingsTitle), fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.settingsTitle),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = null)
@@ -296,10 +362,17 @@ fun SettingsScreen(
             // --- APPEARANCE ---
             item { SettingsHeader(stringResource(R.string.settingsSectionAppearance)) }
             item {
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTheme)) },
                     leadingContent = { Icon(Icons.Outlined.DarkMode, null) },
-                    trailingContent = { Text(currentThemeLabel, color = Color.Gray, fontSize = 14.sp) },
+                    trailingContent = {
+                        Text(
+                            currentThemeLabel,
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    },
                     modifier = Modifier.clickable { showThemeDialog = true }
                 )
             }
@@ -309,13 +382,21 @@ fun SettingsScreen(
             // --- LOCALIZATION & FORMATTING ---
             item { SettingsHeader(stringResource(R.string.settingsSectionLocaleFormat)) }
             item {
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelLanguage)) },
                     leadingContent = { Icon(Icons.Filled.Language, null, tint = TaskColor) },
-                    trailingContent = { Text(currentLanguageLabel, color = Color.Gray, fontSize = 14.sp) },
+                    trailingContent = {
+                        Text(
+                            currentLanguageLabel,
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    },
                     modifier = Modifier.clickable { showLanguageDialog = true }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTimeFormat)) },
                     leadingContent = { Icon(Icons.Filled.AccessTime, null, tint = FocusColor) },
                     trailingContent = {
@@ -329,10 +410,17 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelDateFormat)) },
                     leadingContent = { Icon(Icons.Filled.CalendarToday, null, tint = HabitColor) },
-                    trailingContent = { Text(currentDateFormatLabel, color = Color.Gray, fontSize = 14.sp) },
+                    trailingContent = {
+                        Text(
+                            currentDateFormatLabel,
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    },
                     modifier = Modifier.clickable { showDateFormatDialog = true }
                 )
             }
@@ -342,10 +430,18 @@ fun SettingsScreen(
             // --- FOCUS & PRODUCTIVITY ---
             item { SettingsHeader(stringResource(R.string.settingsSectionFocusProductivity)) }
             item {
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusGoal)) },
                     supportingContent = {
-                        Text(quantityString(R.plurals.nMinutesCount, dailyGoalMins, R.string.nMinutesCountZero, dailyGoalMins))
+                        Text(
+                            quantityString(
+                                R.plurals.nMinutesCount,
+                                dailyGoalMins,
+                                R.string.nMinutesCountZero,
+                                dailyGoalMins
+                            )
+                        )
                     },
                     leadingContent = { Icon(Icons.Filled.TrackChanges, null, tint = FocusColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
@@ -357,7 +453,8 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusAutocomplete)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusAutocompleteSubtitle)) },
                     leadingContent = { Icon(Icons.Filled.TaskAlt, null, tint = TaskColor) },
@@ -372,7 +469,8 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusStopwatch)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusStopwatchSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Timer, null, tint = WarningAccent) },
@@ -385,7 +483,8 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusNodeTime)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusNodeTimeSubtitle)) },
                     leadingContent = { Icon(Icons.Filled.LinearScale, null, tint = TaskColor) },
@@ -398,9 +497,17 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelUpcomingTask)) },
-                    supportingContent = { Text(stringResource(R.string.settingsLabelUpcomingTaskSubtitle, upcomingTasksHorizon)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(
+                                R.string.settingsLabelUpcomingTaskSubtitle,
+                                upcomingTasksHorizon
+                            )
+                        )
+                    },
                     leadingContent = { Icon(Icons.Outlined.Schedule, null, tint = TaskColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
@@ -418,16 +525,32 @@ fun SettingsScreen(
             // --- ORGANIZATION ---
             item { SettingsHeader(stringResource(R.string.settingsSectionOrganization)) }
             item {
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTags)) },
-                    supportingContent = { Text(stringResource(R.string.settingsLabelTagsSubtitle, focusTags.size)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(
+                                R.string.settingsLabelTagsSubtitle,
+                                focusTags.size
+                            )
+                        )
+                    },
                     leadingContent = { Icon(Icons.Outlined.LocalOffer, null, tint = FocusColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable { onNavigateToTags() }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelCategories)) },
-                    supportingContent = { Text(stringResource(R.string.settingsLabelCategoriesSubtitle, categoryCount)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(
+                                R.string.settingsLabelCategoriesSubtitle,
+                                categoryCount
+                            )
+                        )
+                    },
                     leadingContent = { Icon(Icons.Outlined.Label, null, tint = TaskColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable { onNavigateToCategories() }
@@ -439,7 +562,8 @@ fun SettingsScreen(
             // --- API & SERVICES ---
             item { SettingsHeader(stringResource(R.string.settingsSectionApi)) }
             item {
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelLocationApi)) },
                     supportingContent = {
                         Text(
@@ -449,10 +573,10 @@ fun SettingsScreen(
                     },
                     leadingContent = { Icon(Icons.Filled.Cloud, null, tint = TaskColor) },
                     trailingContent = { Icon(Icons.Filled.Edit, null) },
-                    modifier = Modifier.clickable { 
+                    modifier = Modifier.clickable {
                         pendingLocationUrl = locationApiEndpoint
                         locationError = null
-                        showLocationDialog = true 
+                        showLocationDialog = true
                     }
                 )
             }
@@ -462,9 +586,17 @@ fun SettingsScreen(
             // --- NOTIFICATIONS ---
             item { SettingsHeader(stringResource(R.string.settingsSectionNotifications)) }
             item {
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelDailyMotivation)) },
-                    supportingContent = { Text(formatTimeOfDay(dailyMotivationTime, use24HourFormat)) },
+                    supportingContent = {
+                        Text(
+                            formatTimeOfDay(
+                                dailyMotivationTime,
+                                use24HourFormat
+                            )
+                        )
+                    },
                     leadingContent = { Icon(Icons.Filled.Schedule, null, tint = WarningAccent) },
                     trailingContent = { Icon(Icons.Filled.Edit, null) },
                     modifier = Modifier.clickable {
@@ -475,10 +607,24 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelEodCheckup)) },
-                    supportingContent = { Text(formatTimeOfDay(endOfDayCheckupTime, use24HourFormat)) },
-                    leadingContent = { Icon(Icons.Filled.NightlightRound, null, tint = HabitColor) },
+                    supportingContent = {
+                        Text(
+                            formatTimeOfDay(
+                                endOfDayCheckupTime,
+                                use24HourFormat
+                            )
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            Icons.Filled.NightlightRound,
+                            null,
+                            tint = HabitColor
+                        )
+                    },
                     trailingContent = { Icon(Icons.Filled.Edit, null) },
                     modifier = Modifier.clickable {
                         timeDialogSpec = TimeDialogSpec(
@@ -495,7 +641,8 @@ fun SettingsScreen(
             // --- DATA & BACKUP ---
             item { SettingsHeader(stringResource(R.string.settingsSectionDataBackup)) }
             item {
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelExportData)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelExportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.UploadFile, null, tint = TaskColor) },
@@ -503,7 +650,8 @@ fun SettingsScreen(
                         exportLauncher.launch(backupService.suggestedFileName())
                     }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelImportData)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelImportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Download, null, tint = FocusColor) },
@@ -518,22 +666,48 @@ fun SettingsScreen(
             // --- SUPPORT & FEEDBACK ---
             item { SettingsHeader(stringResource(R.string.settingsSectionSupport)) }
             item {
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelCommunity)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelCommunitySubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Forum, null, tint = FocusColor) },
-                    trailingContent = { Icon(Icons.Filled.OpenInNew, null, modifier = Modifier.size(16.dp), tint = Color.Gray) },
+                    trailingContent = {
+                        Icon(
+                            Icons.Filled.OpenInNew,
+                            null,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.Gray
+                        )
+                    },
                     modifier = Modifier.clickable {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Benji377/Timety/discussions")))
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/Benji377/Timety/discussions")
+                            )
+                        )
                     }
                 )
-                ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                ListItem(
+                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFeedback)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFeedbackSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.BugReport, null, tint = HabitColor) },
-                    trailingContent = { Icon(Icons.Filled.OpenInNew, null, modifier = Modifier.size(16.dp), tint = Color.Gray) },
+                    trailingContent = {
+                        Icon(
+                            Icons.Filled.OpenInNew,
+                            null,
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.Gray
+                        )
+                    },
                     modifier = Modifier.clickable {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://tally.so/r/ODbEoA")))
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://tally.so/r/ODbEoA")
+                            )
+                        )
                     }
                 )
             }
@@ -552,7 +726,9 @@ fun SettingsScreen(
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
                     ) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Box(
@@ -569,7 +745,11 @@ fun SettingsScreen(
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.appTitle), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                        Text(
+                            stringResource(R.string.appTitle),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
                         Text(
                             stringResource(R.string.settingsLabelVersion, versionName ?: "1.0.0"),
                             color = Color.Gray,
@@ -579,27 +759,63 @@ fun SettingsScreen(
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.settingsLabelBuiltBy)) },
                             supportingContent = { Text(stringResource(R.string.settingsLabelMaintainer)) },
-                            leadingContent = { Icon(Icons.Filled.Person, null, tint = Color(0xFFFF5722)) },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Person,
+                                    null,
+                                    tint = Color(0xFFFF5722)
+                                )
+                            },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                         )
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.settingsLabelDonate)) },
                             supportingContent = { Text(stringResource(R.string.settingsLabelDonateSubtitle)) },
-                            leadingContent = { Icon(Icons.Filled.Favorite, null, tint = Color.Red) },
-                            trailingContent = { Icon(Icons.Filled.OpenInNew, null, modifier = Modifier.size(16.dp), tint = Color.Gray) },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Filled.Favorite,
+                                    null,
+                                    tint = Color.Red
+                                )
+                            },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Filled.OpenInNew,
+                                    null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.Gray
+                                )
+                            },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             modifier = Modifier.clickable {
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/sponsors/Benji377")))
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://github.com/sponsors/Benji377")
+                                    )
+                                )
                             }
                         )
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.settingsLabelSourceCode)) },
                             supportingContent = { Text(stringResource(R.string.settingsLabelSourceCodeSubtitle)) },
                             leadingContent = { Icon(Icons.Filled.Code, null, tint = Color.Blue) },
-                            trailingContent = { Icon(Icons.Filled.OpenInNew, null, modifier = Modifier.size(16.dp), tint = Color.Gray) },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Filled.OpenInNew,
+                                    null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.Gray
+                                )
+                            },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             modifier = Modifier.clickable {
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Benji377/Timety")))
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://github.com/Benji377/Timety")
+                                    )
+                                )
                             }
                         )
                     }
@@ -622,7 +838,11 @@ fun SettingsScreen(
                     if (result.isSuccess) {
                         showRestartDialog = true
                     } else {
-                        Toast.makeText(context, context.getString(R.string.backupImportFailure), Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.backupImportFailure),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }
@@ -713,7 +933,11 @@ private fun NumberPickerDialog(spec: NumberDialogSpec, onDismiss: () -> Unit) {
         title = { Text(spec.title) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("${value.toInt()} ${spec.unit}", fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                Text(
+                    "${value.toInt()} ${spec.unit}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
                 Slider(
                     value = value,
                     onValueChange = { value = it },
@@ -745,7 +969,11 @@ private data class TimeDialogSpec(
 private fun TimePickerDialogRow(spec: TimeDialogSpec, onDismiss: () -> Unit) {
     val (initialHour, initialMinute) = parseHHmm(spec.current)
     val is24Hour = LocalDateFormatSettings.current.use24HourFormat
-    val timePickerState = rememberTimePickerState(initialHour = initialHour, initialMinute = initialMinute, is24Hour = is24Hour)
+    val timePickerState = rememberTimePickerState(
+        initialHour = initialHour,
+        initialMinute = initialMinute,
+        is24Hour = is24Hour
+    )
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(spec.title) },

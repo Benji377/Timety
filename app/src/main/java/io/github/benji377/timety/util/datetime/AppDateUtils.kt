@@ -20,7 +20,11 @@ object AppDateUtils {
     }
 
     /** Checks if a date falls within an inclusive range. */
-    fun isWithinInclusive(value: LocalDate, startInclusive: LocalDate, endInclusive: LocalDate): Boolean {
+    fun isWithinInclusive(
+        value: LocalDate,
+        startInclusive: LocalDate,
+        endInclusive: LocalDate
+    ): Boolean {
         return !value.isBefore(startInclusive) && !value.isAfter(endInclusive)
     }
 

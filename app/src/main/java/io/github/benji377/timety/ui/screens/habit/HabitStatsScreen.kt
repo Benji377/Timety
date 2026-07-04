@@ -50,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -95,7 +94,9 @@ fun HabitStatsScreen(
     Scaffold { paddingValues ->
         if (habits.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(stringResource(R.string.habitStatsLabelEmpty))
@@ -124,7 +125,10 @@ fun HabitStatsScreen(
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium, Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            AppTheme.spaceMedium,
+                            Alignment.CenterHorizontally
+                        ),
                     ) {
                         StatCard(
                             title = stringResource(R.string.habitStatsLabelTotal),
@@ -271,7 +275,9 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
     )
 
     Row(
-        modifier = Modifier.fillMaxWidth().height(200.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.Bottom,
     ) {
@@ -281,7 +287,9 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
             ) {
                 Box(
                     modifier = Modifier
@@ -389,7 +397,12 @@ private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
             }
             Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
             Text(
-                text = quantityString(R.plurals.nHabitsCount, total, zeroRes = R.string.nHabitsCountZero, total),
+                text = quantityString(
+                    R.plurals.nHabitsCount,
+                    total,
+                    zeroRes = R.string.nHabitsCountZero,
+                    total
+                ),
                 fontSize = 15.sp,
                 fontWeight = AppTheme.fwExtraBold,
             )
@@ -401,7 +414,10 @@ private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest, RoundedCornerShape(999.dp)),
+                .background(
+                    MaterialTheme.colorScheme.surfaceContainerHighest,
+                    RoundedCornerShape(999.dp)
+                ),
         ) {
             if (total == 0) {
                 Box(
@@ -429,7 +445,8 @@ private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             buckets.forEach { bucket ->
-                val percent = if (total == 0) 0 else Math.round((bucket.count.toFloat() / total) * 100)
+                val percent =
+                    if (total == 0) 0 else Math.round((bucket.count.toFloat() / total) * 100)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.47f)
@@ -444,7 +461,12 @@ private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
                             .background(bucket.color.copy(alpha = 0.14f), CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(bucket.icon, contentDescription = null, tint = bucket.color, modifier = Modifier.size(20.dp))
+                        Icon(
+                            bucket.icon,
+                            contentDescription = null,
+                            tint = bucket.color,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
@@ -457,8 +479,16 @@ private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
                         )
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(text = bucket.count.toString(), fontSize = 16.sp, fontWeight = AppTheme.fwExtraBold)
-                        Text(text = "$percent%", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            text = bucket.count.toString(),
+                            fontSize = 16.sp,
+                            fontWeight = AppTheme.fwExtraBold
+                        )
+                        Text(
+                            text = "$percent%",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }

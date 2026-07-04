@@ -3,18 +3,18 @@ package io.github.benji377.timety.ui.components.common
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import io.github.benji377.timety.R
 
 /**
@@ -43,7 +43,10 @@ fun ConfirmationDialog(
             Button(
                 onClick = onConfirm,
                 colors = if (confirmColor == null) ButtonDefaults.buttonColors()
-                else ButtonDefaults.buttonColors(containerColor = confirmColor, contentColor = Color.White),
+                else ButtonDefaults.buttonColors(
+                    containerColor = confirmColor,
+                    contentColor = Color.White
+                ),
             ) {
                 Text(confirmLabel ?: stringResource(R.string.commonLabelConfirm))
             }

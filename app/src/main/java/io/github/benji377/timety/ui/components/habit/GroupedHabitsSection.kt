@@ -2,7 +2,6 @@ package io.github.benji377.timety.ui.components.habit
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -78,7 +77,10 @@ fun GroupedHabitsSection(
                         alpha = if (isExpanded) 0.1f else 0.4f,
                     ),
                 ),
-                border = BorderStroke(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                border = BorderStroke(
+                    AppTheme.listTileBorderWidth,
+                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             ) {
                 Column {

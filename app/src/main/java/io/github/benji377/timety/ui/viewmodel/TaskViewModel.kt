@@ -1,6 +1,6 @@
 package io.github.benji377.timety.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
-import androidx.glance.appwidget.updateAll
 
 class TaskViewModel(
     private val application: android.app.Application,
@@ -92,34 +91,45 @@ class TaskViewModel(
     }
 
     private fun scheduleTaskReminders(task: TaskEntity) {
-        val notificationService = io.github.benji377.timety.services.NotificationService(application)
+        val notificationService =
+            io.github.benji377.timety.services.NotificationService(application)
         val baseId = task.id.hashCode()
         for (i in 0..10) notificationService.cancelNotification(baseId + i)
-        
+
         if (task.isCompleted) return
-        
+
         val now = Instant.now()
         var scheduledCount = 0
-        
+
         task.reminders.forEach { reminder ->
             if (reminder.isAfter(now)) {
-                val diffMinutes = java.time.Duration.between(reminder, task.dueDate ?: reminder).toMinutes()
-                val bodyText = if (diffMinutes > 0) application.getString(io.github.benji377.timety.R.string.homeSectionTasksDue, diffMinutes) else task.category.ifBlank { application.getString(io.github.benji377.timety.R.string.globalLabelTask) }
-                
+                val diffMinutes =
+                    java.time.Duration.between(reminder, task.dueDate ?: reminder).toMinutes()
+                val bodyText = if (diffMinutes > 0) application.getString(
+                    io.github.benji377.timety.R.string.homeSectionTasksDue,
+                    diffMinutes
+                ) else task.category.ifBlank { application.getString(io.github.benji377.timety.R.string.globalLabelTask) }
+
                 notificationService.scheduleTaskReminder(
                     notificationId = baseId + scheduledCount,
-                    title = application.getString(io.github.benji377.timety.R.string.reminderTaskTitle, task.title),
+                    title = application.getString(
+                        io.github.benji377.timety.R.string.reminderTaskTitle,
+                        task.title
+                    ),
                     body = bodyText,
                     scheduledTime = reminder
                 )
                 scheduledCount++
             }
         }
-        
+
         if (task.reminders.isEmpty() && task.dueDate != null && task.dueDate.isAfter(now)) {
             notificationService.scheduleTaskReminder(
                 notificationId = baseId + scheduledCount,
-                title = application.getString(io.github.benji377.timety.R.string.reminderTaskTitle, task.title),
+                title = application.getString(
+                    io.github.benji377.timety.R.string.reminderTaskTitle,
+                    task.title
+                ),
                 body = task.category.ifBlank { application.getString(io.github.benji377.timety.R.string.globalLabelTask) },
                 scheduledTime = task.dueDate
             )
@@ -127,13 +137,15 @@ class TaskViewModel(
     }
 
     private fun cancelTaskReminders(taskId: String) {
-        val notificationService = io.github.benji377.timety.services.NotificationService(application)
+        val notificationService =
+            io.github.benji377.timety.services.NotificationService(application)
         val baseId = taskId.hashCode()
         for (i in 0..10) notificationService.cancelNotification(baseId + i)
     }
 
     fun getAllCategories(): List<String> {
-        return allTasks.value.map { it.task.category }.filter { it.isNotBlank() }.distinct().sorted()
+        return allTasks.value.map { it.task.category }.filter { it.isNotBlank() }.distinct()
+            .sorted()
     }
 
     fun renameCategory(oldName: String, newName: String) {

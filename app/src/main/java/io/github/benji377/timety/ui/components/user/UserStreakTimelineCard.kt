@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,8 +49,8 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
-import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
+import java.time.format.TextStyle as JavaTextStyle
 
 /**
  * 7-day streak timeline: current-streak status message, a horizontally scrollable
@@ -143,7 +143,11 @@ fun UserStreakTimelineCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = quantityString(R.plurals.streakTimelineDays, currentStreak, formatArgs = arrayOf(currentStreak)),
+                        text = quantityString(
+                            R.plurals.streakTimelineDays,
+                            currentStreak,
+                            formatArgs = arrayOf(currentStreak)
+                        ),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                     )
@@ -160,7 +164,9 @@ fun UserStreakTimelineCard(
             LazyRow(
                 state = listState,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().height(84.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(84.dp),
             ) {
                 itemsIndexed(days) { _, info ->
                     DayTile(info, modifier = Modifier.width(56.dp))

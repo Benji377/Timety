@@ -7,14 +7,13 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
-
-import android.os.Vibrator
 import android.os.VibrationEffect
+import android.os.Vibrator
 
 class TimerSoundReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
-        
+
         // Haptic Feedback
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -37,7 +36,7 @@ class TimerSoundReceiver : BroadcastReceiver() {
                     )
                 }
                 mediaPlayer.setDataSource(context, uri)
-                mediaPlayer.setOnCompletionListener { 
+                mediaPlayer.setOnCompletionListener {
                     it.release()
                     pendingResult.finish()
                 }

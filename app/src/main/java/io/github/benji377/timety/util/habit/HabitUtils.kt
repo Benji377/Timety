@@ -7,6 +7,8 @@ import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.habit.HabitUtils.parseWeekdays
+import io.github.benji377.timety.util.habit.HabitUtils.serializeWeekdays
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
@@ -37,7 +39,9 @@ object HabitUtils {
 
     /** Checks whether [hwc] has a completion on [date]. Mirrors `HabitProvider.isCompletedOn`. */
     fun isCompletedOn(hwc: HabitWithCompletions, date: LocalDate): Boolean =
-        hwc.completions.any { it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date }
+        hwc.completions.any {
+            it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date
+        }
 
     /**
      * Counts completions within the current real calendar week (Monday..Sunday), optionally
@@ -61,7 +65,10 @@ object HabitUtils {
         return when (habit.frequency) {
             HabitFrequency.DAILY -> true
             HabitFrequency.WEEKLY_EXACT -> parseWeekdays(habit.targetWeekdays).contains(LocalDate.now().dayOfWeek.value)
-            HabitFrequency.WEEKLY_FLEXIBLE -> getCompletionsThisWeek(hwc, includeToday = false) < (habit.targetDaysPerWeek ?: 1)
+            HabitFrequency.WEEKLY_FLEXIBLE -> getCompletionsThisWeek(
+                hwc,
+                includeToday = false
+            ) < (habit.targetDaysPerWeek ?: 1)
         }
     }
 
@@ -86,6 +93,7 @@ object HabitUtils {
                     .joinToString(", ") { AppDateUtils.weekdayToStringShort(locale, it) }
                 stringResource(R.string.habitFreqWeekly, days)
             }
+
             HabitFrequency.WEEKLY_FLEXIBLE -> {
                 val target = habit.targetDaysPerWeek ?: 0
                 stringResource(R.string.habitFreqFlexible, completionsThisWeek, target)
@@ -97,7 +105,11 @@ object HabitUtils {
      * Determines if a habit in a stack is locked based on previous habit completion.
      * Mirrors `HabitUtils.isHabitLocked`.
      */
-    fun isHabitLocked(index: Int, isCurrentHabitDone: Boolean, isPreviousHabitDone: Boolean): Boolean =
+    fun isHabitLocked(
+        index: Int,
+        isCurrentHabitDone: Boolean,
+        isPreviousHabitDone: Boolean
+    ): Boolean =
         index > 0 && !isCurrentHabitDone && !isPreviousHabitDone
 
     /** Checks if all habits in a stack are completed for a given date. Mirrors `HabitUtils.isStackFullyCompleted`. */

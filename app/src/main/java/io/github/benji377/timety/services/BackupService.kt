@@ -96,7 +96,10 @@ class BackupService(
             put("buildNumber", buildNumber)
             put("exportedAt", Instant.now().toString())
             put("preferences", preferencesToJson(settingsRepository.exportAll()))
-            put("userProfile", userProfileToJson(userDao.getUserProfileSynchronous()) ?: JSONObject.NULL)
+            put(
+                "userProfile",
+                userProfileToJson(userDao.getUserProfileSynchronous()) ?: JSONObject.NULL
+            )
             put("tasks", tasksToJson())
             put("habits", habitsToJson())
             put("focus", focusToJson())
@@ -339,22 +342,42 @@ class BackupService(
                 HabitEntity(
                     id = habitId,
                     name = readString(habitJson, "name") ?: "",
-                    frequency = enumOrDefault(readString(habitJson, "frequency"), HabitFrequency.DAILY),
-                    targetDaysPerWeek = if (habitJson.has("targetDaysPerWeek") && !habitJson.isNull("targetDaysPerWeek")) habitJson.optInt("targetDaysPerWeek") else null,
+                    frequency = enumOrDefault(
+                        readString(habitJson, "frequency"),
+                        HabitFrequency.DAILY
+                    ),
+                    targetDaysPerWeek = if (habitJson.has("targetDaysPerWeek") && !habitJson.isNull(
+                            "targetDaysPerWeek"
+                        )
+                    ) habitJson.optInt("targetDaysPerWeek") else null,
                     targetWeekdays = readString(habitJson, "targetWeekdays"),
-                    targetTimeMinutes = if (habitJson.has("targetTimeMinutes") && !habitJson.isNull("targetTimeMinutes")) habitJson.optInt("targetTimeMinutes") else null,
+                    targetTimeMinutes = if (habitJson.has("targetTimeMinutes") && !habitJson.isNull(
+                            "targetTimeMinutes"
+                        )
+                    ) habitJson.optInt("targetTimeMinutes") else null,
                     createdAt = readInstant(habitJson, "createdAt") ?: Instant.now(),
                     colorValue = habitJson.optInt("colorValue", 0),
                     notes = readString(habitJson, "notes"),
-                    iconCodePoint = if (habitJson.has("iconCodePoint") && !habitJson.isNull("iconCodePoint")) habitJson.optInt("iconCodePoint") else null,
+                    iconCodePoint = if (habitJson.has("iconCodePoint") && !habitJson.isNull("iconCodePoint")) habitJson.optInt(
+                        "iconCodePoint"
+                    ) else null,
                     stackName = readString(habitJson, "stackName"),
-                    stackOrder = if (habitJson.has("stackOrder") && !habitJson.isNull("stackOrder")) habitJson.optInt("stackOrder") else null,
+                    stackOrder = if (habitJson.has("stackOrder") && !habitJson.isNull("stackOrder")) habitJson.optInt(
+                        "stackOrder"
+                    ) else null,
                 )
             )
             val completionsJson = habitJson.optJSONArray("completions") ?: JSONArray()
             for (j in 0 until completionsJson.length()) {
-                val instant = runCatching { Instant.parse(completionsJson.getString(j)) }.getOrNull() ?: continue
-                habitDao.insertCompletion(HabitCompletionEntity(habitId = habitId, completionDate = instant))
+                val instant =
+                    runCatching { Instant.parse(completionsJson.getString(j)) }.getOrNull()
+                        ?: continue
+                habitDao.insertCompletion(
+                    HabitCompletionEntity(
+                        habitId = habitId,
+                        completionDate = instant
+                    )
+                )
             }
         }
     }
@@ -416,7 +439,10 @@ class BackupService(
                     totalSecondsFocused = sessionJson.optInt("totalSecondsFocused", 0),
                     isCompleted = sessionJson.optBoolean("isCompleted", false),
                     tagId = readString(sessionJson, "tagId"),
-                    targetType = enumOrDefault(readString(sessionJson, "targetType"), FocusTargetType.TAG),
+                    targetType = enumOrDefault(
+                        readString(sessionJson, "targetType"),
+                        FocusTargetType.TAG
+                    ),
                     targetId = readString(sessionJson, "targetId"),
                     targetLabel = readString(sessionJson, "targetLabel"),
                 )

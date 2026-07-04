@@ -6,10 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,7 +65,6 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
 
 /**
@@ -131,7 +130,9 @@ private fun UnifiedCalendarSheetContent(
     var dateForRemoval by remember { mutableStateOf<LocalDate?>(null) }
     var dateForAdd by remember { mutableStateOf<LocalDate?>(null) }
 
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight()) {
         Text(
             text = stringResource(R.string.habitHistoryTitle),
             style = MaterialTheme.typography.titleLarge,
@@ -224,7 +225,9 @@ private fun UnifiedCalendarSheetContent(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
                 ) {
                     rowCells.forEach { date ->
-                        Box(modifier = Modifier.weight(1f).aspectRatio(1.1f)) {
+                        Box(modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1.1f)) {
                             if (date == null) {
                                 // empty slot
                             } else {
@@ -238,22 +241,31 @@ private fun UnifiedCalendarSheetContent(
                                         .fillMaxHeight()
                                         .background(
                                             color = if (isFuture) Color.Transparent
-                                            else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
+                                            else MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                                                alpha = 0.5f
+                                            ),
                                             shape = RoundedCornerShape(12.dp),
                                         )
                                         .then(
-                                            if (isToday) Modifier.border(2.dp, HabitColor, RoundedCornerShape(12.dp))
+                                            if (isToday) Modifier.border(
+                                                2.dp,
+                                                HabitColor,
+                                                RoundedCornerShape(12.dp)
+                                            )
                                             else Modifier
                                         )
                                         .clickable(enabled = !isFuture) {
-                                            if (isCompleted) dateForRemoval = date else dateForAdd = date
+                                            if (isCompleted) dateForRemoval = date else dateForAdd =
+                                                date
                                         },
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
                                         text = date.dayOfMonth.toString(),
                                         fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isFuture) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                        color = if (isFuture) MaterialTheme.colorScheme.onSurface.copy(
+                                            alpha = 0.3f
+                                        )
                                         else MaterialTheme.colorScheme.onSurface,
                                     )
                                     if (isCompleted) {
@@ -291,7 +303,10 @@ private fun UnifiedCalendarSheetContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                contentPadding = PaddingValues(top = AppTheme.spaceLarge, bottom = AppTheme.space2XLarge),
+                contentPadding = PaddingValues(
+                    top = AppTheme.spaceLarge,
+                    bottom = AppTheme.space2XLarge
+                ),
             ) {
                 items(completions, key = { it.id }) { completion ->
                     val isLast = completion == completions.last()

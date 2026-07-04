@@ -18,15 +18,13 @@ import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -44,7 +42,10 @@ import java.util.UUID
  * here by joining the normalized `distractions`/`focus_sessions` tables instead of Flutter's
  * denormalized `FocusSession.distractions` list).
  */
-data class DistractionWithSession(val distraction: DistractionEntity, val session: FocusSessionEntity)
+data class DistractionWithSession(
+    val distraction: DistractionEntity,
+    val session: FocusSessionEntity
+)
 
 class FocusViewModel(
     private val focusRepository: FocusRepository,
@@ -89,18 +90,27 @@ class FocusViewModel(
     // --- ACTIVE MODE / PHASE NAVIGATION ---
     private val _currentModeIndex = MutableStateFlow(0)
     val currentModeIndex = _currentModeIndex.asStateFlow()
-    fun setCurrentModeIndex(index: Int) { _currentModeIndex.value = index }
+    fun setCurrentModeIndex(index: Int) {
+        _currentModeIndex.value = index
+    }
 
     /** Index of the phase currently active within the active mode's phase list. */
     private val _currentPhaseIndex = MutableStateFlow(0)
     val currentPhaseIndex = _currentPhaseIndex.asStateFlow()
-    fun setCurrentPhaseIndex(index: Int) { _currentPhaseIndex.value = index }
-    fun resetPhaseIndex() { _currentPhaseIndex.value = 0 }
+    fun setCurrentPhaseIndex(index: Int) {
+        _currentPhaseIndex.value = index
+    }
+
+    fun resetPhaseIndex() {
+        _currentPhaseIndex.value = 0
+    }
 
     /** True once a phase has finished and the user must tap "continue" to start the next one. */
     private val _awaitingContinue = MutableStateFlow(false)
     val awaitingContinue: StateFlow<Boolean> = _awaitingContinue.asStateFlow()
-    fun setAwaitingContinue(awaiting: Boolean) { _awaitingContinue.value = awaiting }
+    fun setAwaitingContinue(awaiting: Boolean) {
+        _awaitingContinue.value = awaiting
+    }
 
     private val _autoCompleteTaskEvent = MutableSharedFlow<String>()
     val autoCompleteTaskEvent = _autoCompleteTaskEvent.asSharedFlow()
@@ -127,7 +137,9 @@ class FocusViewModel(
     }
 
     private var currentSessionId: String = UUID.randomUUID().toString()
-    fun resetCurrentSession() { currentSessionId = UUID.randomUUID().toString() }
+    fun resetCurrentSession() {
+        currentSessionId = UUID.randomUUID().toString()
+    }
 
     init {
         // Seed the default tag + the three built-in system modes on first run, and default the
@@ -142,7 +154,11 @@ class FocusViewModel(
             focusRepository.allTags.collect { tags ->
                 if (tags.isEmpty()) {
                     focusRepository.insertTag(
-                        FocusTagEntity(id = "default_tag", name = "None", colorValue = FocusColor.toArgb())
+                        FocusTagEntity(
+                            id = "default_tag",
+                            name = "None",
+                            colorValue = FocusColor.toArgb()
+                        )
                     )
                 } else if (_selectedTarget.value == null) {
                     _selectedTarget.value = FocusTargetSelection.tag(tags.first())
@@ -171,13 +187,23 @@ class FocusViewModel(
                             FocusTargetType.TASK -> {
                                 _autoCompleteTaskEvent.emit(target.id)
                             }
+
                             FocusTargetType.HABIT -> {
                                 val today = LocalDate.now()
                                 val hcEntity = habitRepository.getHabitById(target.id)
                                 if (hcEntity != null) {
-                                    val completions = habitRepository.getCompletionsForHabit(target.id).first()
-                                    val hwc = io.github.benji377.timety.data.model.habit.HabitWithCompletions(hcEntity, completions)
-                                    if (!io.github.benji377.timety.util.habit.HabitUtils.isCompletedOn(hwc, today)) {
+                                    val completions =
+                                        habitRepository.getCompletionsForHabit(target.id).first()
+                                    val hwc =
+                                        io.github.benji377.timety.data.model.habit.HabitWithCompletions(
+                                            hcEntity,
+                                            completions
+                                        )
+                                    if (!io.github.benji377.timety.util.habit.HabitUtils.isCompletedOn(
+                                            hwc,
+                                            today
+                                        )
+                                    ) {
                                         habitRepository.insertCompletion(
                                             io.github.benji377.timety.data.model.habit.HabitCompletionEntity(
                                                 habitId = hcEntity.id,
@@ -188,6 +214,7 @@ class FocusViewModel(
                                     }
                                 }
                             }
+
                             else -> {}
                         }
                     }
@@ -222,7 +249,8 @@ class FocusViewModel(
                 FocusSessionEntity(
                     id = currentSessionId,
                     modeId = activeMode?.id ?: "unknown",
-                    startTime = sessionStartTime ?: Instant.now().minusSeconds(sessionAccumulatedFocusSeconds.toLong()),
+                    startTime = sessionStartTime ?: Instant.now()
+                        .minusSeconds(sessionAccumulatedFocusSeconds.toLong()),
                     endTime = Instant.now(),
                     totalSecondsFocused = sessionAccumulatedFocusSeconds,
                     isCompleted = true,
@@ -241,28 +269,97 @@ class FocusViewModel(
     private suspend fun ensureSystemModes(modes: List<FocusModeEntity>) {
         if (modes.none { it.id == "system_stopwatch" }) {
             focusRepository.insertModeWithPhases(
-                FocusModeEntity(id = "system_stopwatch", name = "Stopwatch", type = FocusModeType.STOPWATCH, isSystem = true),
-                listOf(SessionPhaseEntity(modeId = "system_stopwatch", type = PhaseType.FOCUS, durationMinutes = 0, orderIndex = 0)),
+                FocusModeEntity(
+                    id = "system_stopwatch",
+                    name = "Stopwatch",
+                    type = FocusModeType.STOPWATCH,
+                    isSystem = true
+                ),
+                listOf(
+                    SessionPhaseEntity(
+                        modeId = "system_stopwatch",
+                        type = PhaseType.FOCUS,
+                        durationMinutes = 0,
+                        orderIndex = 0
+                    )
+                ),
             )
         }
         if (modes.none { it.id == "system_flexible" }) {
             focusRepository.insertModeWithPhases(
-                FocusModeEntity(id = "system_flexible", name = "Flexible", type = FocusModeType.FLEXIBLE, isSystem = true),
-                listOf(SessionPhaseEntity(modeId = "system_flexible", type = PhaseType.FOCUS, durationMinutes = -1, orderIndex = 0)),
+                FocusModeEntity(
+                    id = "system_flexible",
+                    name = "Flexible",
+                    type = FocusModeType.FLEXIBLE,
+                    isSystem = true
+                ),
+                listOf(
+                    SessionPhaseEntity(
+                        modeId = "system_flexible",
+                        type = PhaseType.FOCUS,
+                        durationMinutes = -1,
+                        orderIndex = 0
+                    )
+                ),
             )
         }
         if (modes.none { it.id == "system_pomodoro" }) {
             focusRepository.insertModeWithPhases(
-                FocusModeEntity(id = "system_pomodoro", name = "Pomodoro Classic", type = FocusModeType.POMODORO, isSystem = true),
+                FocusModeEntity(
+                    id = "system_pomodoro",
+                    name = "Pomodoro Classic",
+                    type = FocusModeType.POMODORO,
+                    isSystem = true
+                ),
                 listOf(
-                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 0),
-                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.REST, durationMinutes = 5, orderIndex = 1),
-                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 2),
-                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.REST, durationMinutes = 5, orderIndex = 3),
-                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 4),
-                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.REST, durationMinutes = 5, orderIndex = 5),
-                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 6),
-                    SessionPhaseEntity(modeId = "system_pomodoro", type = PhaseType.REST, durationMinutes = 15, orderIndex = 7),
+                    SessionPhaseEntity(
+                        modeId = "system_pomodoro",
+                        type = PhaseType.FOCUS,
+                        durationMinutes = 25,
+                        orderIndex = 0
+                    ),
+                    SessionPhaseEntity(
+                        modeId = "system_pomodoro",
+                        type = PhaseType.REST,
+                        durationMinutes = 5,
+                        orderIndex = 1
+                    ),
+                    SessionPhaseEntity(
+                        modeId = "system_pomodoro",
+                        type = PhaseType.FOCUS,
+                        durationMinutes = 25,
+                        orderIndex = 2
+                    ),
+                    SessionPhaseEntity(
+                        modeId = "system_pomodoro",
+                        type = PhaseType.REST,
+                        durationMinutes = 5,
+                        orderIndex = 3
+                    ),
+                    SessionPhaseEntity(
+                        modeId = "system_pomodoro",
+                        type = PhaseType.FOCUS,
+                        durationMinutes = 25,
+                        orderIndex = 4
+                    ),
+                    SessionPhaseEntity(
+                        modeId = "system_pomodoro",
+                        type = PhaseType.REST,
+                        durationMinutes = 5,
+                        orderIndex = 5
+                    ),
+                    SessionPhaseEntity(
+                        modeId = "system_pomodoro",
+                        type = PhaseType.FOCUS,
+                        durationMinutes = 25,
+                        orderIndex = 6
+                    ),
+                    SessionPhaseEntity(
+                        modeId = "system_pomodoro",
+                        type = PhaseType.REST,
+                        durationMinutes = 15,
+                        orderIndex = 7
+                    ),
                 ),
             )
         }
@@ -272,10 +369,18 @@ class FocusViewModel(
         viewModelScope.launch { focusRepository.insertSession(session) }
     }
 
-    fun logDistraction(type: io.github.benji377.timety.data.model.focus.DistractionType, note: String = "") {
+    fun logDistraction(
+        type: io.github.benji377.timety.data.model.focus.DistractionType,
+        note: String = ""
+    ) {
         viewModelScope.launch {
             focusRepository.insertDistraction(
-                DistractionEntity(sessionId = currentSessionId, time = Instant.now(), type = type, note = note)
+                DistractionEntity(
+                    sessionId = currentSessionId,
+                    time = Instant.now(),
+                    type = type,
+                    note = note
+                )
             )
         }
     }
@@ -294,7 +399,11 @@ class FocusViewModel(
     // --- TAGS ---
     fun createTag(name: String, colorValue: Int) {
         viewModelScope.launch {
-            val tag = FocusTagEntity(id = UUID.randomUUID().toString(), name = name, colorValue = colorValue)
+            val tag = FocusTagEntity(
+                id = UUID.randomUUID().toString(),
+                name = name,
+                colorValue = colorValue
+            )
             focusRepository.insertTag(tag)
             _selectedTarget.value = FocusTargetSelection.tag(tag)
         }
@@ -325,10 +434,16 @@ class FocusViewModel(
         return totalSeconds / 60
     }
 
-    fun getMinutesFocusedToday(zone: ZoneId = ZoneId.systemDefault()): Int = getMinutesFocusedOnDay(LocalDate.now(), zone)
+    fun getMinutesFocusedToday(zone: ZoneId = ZoneId.systemDefault()): Int =
+        getMinutesFocusedOnDay(LocalDate.now(), zone)
 
     /** Manually logs a completed session in the past. Mirrors `FocusProvider.logPastSession` (the "Time Machine" dialog). */
-    fun logPastSession(mode: FocusModeEntity, startTime: Instant, endTime: Instant, tag: FocusTagEntity?) {
+    fun logPastSession(
+        mode: FocusModeEntity,
+        startTime: Instant,
+        endTime: Instant,
+        tag: FocusTagEntity?
+    ) {
         val totalSeconds = endTime.epochSecond - startTime.epochSecond
         if (totalSeconds <= 0) return
 

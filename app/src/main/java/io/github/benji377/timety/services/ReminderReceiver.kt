@@ -29,24 +29,34 @@ class ReminderReceiver : BroadcastReceiver() {
             val pendingResult = goAsync()
             kotlinx.coroutines.GlobalScope.launch {
                 try {
-                    val container = (context.applicationContext as io.github.benji377.timety.TimetyApplication).container
+                    val container =
+                        (context.applicationContext as io.github.benji377.timety.TimetyApplication).container
                     val habits = container.habitRepository.allHabits.first()
                     val completions = container.habitRepository.allCompletions.first()
-                    
+
                     var finalBody = body
                     if (habits.isNotEmpty()) {
                         val habitWithLowestCompletion = habits.minByOrNull { habit ->
                             val comps = completions.filter { it.habitId == habit.id }
                             io.github.benji377.timety.util.habit.HabitUtils.getCompletionsThisWeek(
-                                io.github.benji377.timety.data.model.habit.HabitWithCompletions(habit, comps)
+                                io.github.benji377.timety.data.model.habit.HabitWithCompletions(
+                                    habit,
+                                    comps
+                                )
                             )
                         }
                         if (habitWithLowestCompletion != null) {
-                            finalBody = "Don't forget to work on '${habitWithLowestCompletion.name}' today!"
+                            finalBody =
+                                "Don't forget to work on '${habitWithLowestCompletion.name}' today!"
                         }
                     }
-                    
-                    notificationService.showNotification(notificationId, channelId, title, finalBody)
+
+                    notificationService.showNotification(
+                        notificationId,
+                        channelId,
+                        title,
+                        finalBody
+                    )
                     notificationService.rescheduleIfRepeating(intent)
                 } finally {
                     pendingResult.finish()

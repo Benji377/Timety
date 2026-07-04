@@ -6,7 +6,11 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import io.github.benji377.timety.data.model.focus.*
+import io.github.benji377.timety.data.model.focus.DistractionEntity
+import io.github.benji377.timety.data.model.focus.FocusModeEntity
+import io.github.benji377.timety.data.model.focus.FocusSessionEntity
+import io.github.benji377.timety.data.model.focus.FocusTagEntity
+import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

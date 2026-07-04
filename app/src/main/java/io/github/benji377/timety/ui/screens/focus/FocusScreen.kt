@@ -1,21 +1,66 @@
 package io.github.benji377.timety.ui.screens.focus
 
-import io.github.benji377.timety.data.model.focus.DistractionType
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.DashboardCustomize
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlayCircleFilled
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Task
+import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,9 +86,9 @@ import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
-import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
@@ -51,14 +96,16 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
-import androidx.compose.ui.graphics.toArgb
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
 /** Roughly a day; used as a stand-in "infinite" duration so Stopwatch mode can count up under
  * the current [FocusTimerManager], which only knows how to count down from a fixed total. */
-private fun secondsForPhase(phase: io.github.benji377.timety.data.model.focus.SessionPhaseEntity, flexibleMinutes: Int): Int = when {
+private fun secondsForPhase(
+    phase: io.github.benji377.timety.data.model.focus.SessionPhaseEntity,
+    flexibleMinutes: Int
+): Int = when {
     phase.durationMinutes == 0 -> 0 // Stopwatch
     phase.durationMinutes == -1 -> flexibleMinutes * 60
     else -> phase.durationMinutes * 60
@@ -229,21 +276,25 @@ fun FocusScreen(
                 gaugeLabel = focusLabelSetTime
                 centerText = AppDateFormatUtils.formatDuration(flexibleMinutes * 60)
             }
+
             !isStopwatchPhaseType -> {
                 if (isRunning || isPaused) {
-                    val total = if (timerState.totalPhaseSeconds > 0) timerState.totalPhaseSeconds else 1
+                    val total =
+                        if (timerState.totalPhaseSeconds > 0) timerState.totalPhaseSeconds else 1
                     gaugeProgress = (timerState.secondsRemaining.toFloat() / total).coerceIn(0f, 1f)
                     centerText = timerState.centerText
                     isResting = timerState.isRestPhase
                     gaugeLabel = if (timerState.isRestPhase) focusLabelRest else focusLabelDefault
                 } else {
-                    val totalPhaseSeconds = if (currentPhase.durationMinutes > 0) currentPhase.durationMinutes * 60 else 25 * 60
+                    val totalPhaseSeconds =
+                        if (currentPhase.durationMinutes > 0) currentPhase.durationMinutes * 60 else 25 * 60
                     gaugeProgress = 1f
                     centerText = AppDateFormatUtils.formatDuration(totalPhaseSeconds)
                     isResting = currentPhase.type == PhaseType.REST
                     gaugeLabel = if (isResting) focusLabelRest else focusLabelDefault
                 }
             }
+
             else -> {
                 isStopwatchAnim = isRunning
                 gaugeProgress = 0f
@@ -266,12 +317,14 @@ fun FocusScreen(
 
     val focusMinsToday = remember(allSessions) { focusViewModel.getMinutesFocusedToday() }
 
-    val activeModeName = if (activeMode != null) localizedFocusModeName(activeMode) else stringResource(R.string.focusModeSelect)
+    val activeModeName =
+        if (activeMode != null) localizedFocusModeName(activeMode) else stringResource(R.string.focusModeSelect)
     val habitLockedMsg = stringResource(R.string.focusSnackbarHabitLocked)
 
     fun cycleMode(direction: Int) {
         if (isRunning || isPaused || allModes.isEmpty()) return
-        val currentIndex = allModes.indexOfFirst { it.id == activeMode?.id }.let { if (it < 0) 0 else it }
+        val currentIndex =
+            allModes.indexOfFirst { it.id == activeMode?.id }.let { if (it < 0) 0 else it }
         var nextIndex = (currentIndex + direction) % allModes.size
         if (nextIndex < 0) nextIndex += allModes.size
         focusViewModel.setCurrentModeIndex(nextIndex)
@@ -315,9 +368,17 @@ fun FocusScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             // --- FOCUS MODE SELECTOR ---
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 IconButton(onClick = { cycleMode(-1) }, enabled = !isRunning && !isPaused) {
-                    Icon(Icons.Filled.ArrowBackIosNew, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.Gray)
+                    Icon(
+                        Icons.Filled.ArrowBackIosNew,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.Gray
+                    )
                 }
                 Box(
                     modifier = Modifier
@@ -337,7 +398,12 @@ fun FocusScreen(
                     )
                 }
                 IconButton(onClick = { cycleMode(1) }, enabled = !isRunning && !isPaused) {
-                    Icon(Icons.Filled.ArrowForwardIos, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.Gray)
+                    Icon(
+                        Icons.Filled.ArrowForwardIos,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.Gray
+                    )
                 }
             }
 
@@ -354,7 +420,12 @@ fun FocusScreen(
                     .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.TrackChanges, contentDescription = null, tint = FocusColor, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Filled.TrackChanges,
+                        contentDescription = null,
+                        tint = FocusColor,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                     Text(
                         text = "$focusMinsToday / $dailyGoalMins m",
@@ -366,7 +437,12 @@ fun FocusScreen(
             }
 
             // --- INTERACTIVE TIMER GAUGE ---
-            Box(modifier = Modifier.fillMaxWidth().height(320.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 InteractiveGauge(
                     progress = gaugeProgress,
                     isStopwatch = isStopwatchAnim,
@@ -377,7 +453,9 @@ fun FocusScreen(
                     bottomText = selectedTarget?.label ?: stringResource(R.string.focusTargetEmpty),
                     bottomTextColor = selectedTarget?.color ?: FocusColor,
                     bottomTextIcon = bottomTextIcon,
-                    onBottomTextTapped = if (isRunning || isPaused) null else { { showTargetSelection = true } },
+                    onBottomTextTapped = if (isRunning || isPaused) null else {
+                        { showTargetSelection = true }
+                    },
                     isInteractive = canDrag,
                     label = gaugeLabel,
                     onChanged = { newProgress ->
@@ -392,17 +470,29 @@ fun FocusScreen(
                 FilledTonalIconButton(
                     onClick = { showTimeMachine = true },
                     enabled = !isRunning && !isPaused,
-                    modifier = Modifier.padding(16.dp).align(Alignment.TopStart),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.TopStart),
                 ) {
-                    Icon(Icons.Filled.History, contentDescription = stringResource(R.string.commonTooltipTimeMachine), modifier = Modifier.size(28.dp))
+                    Icon(
+                        Icons.Filled.History,
+                        contentDescription = stringResource(R.string.commonTooltipTimeMachine),
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
 
                 FilledTonalIconButton(
                     onClick = { showDistraction = true },
                     enabled = isRunning || isPaused,
-                    modifier = Modifier.padding(16.dp).align(Alignment.TopEnd),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.TopEnd),
                 ) {
-                    Icon(Icons.Filled.WarningAmber, contentDescription = stringResource(R.string.commonTooltipDistractions), modifier = Modifier.size(28.dp))
+                    Icon(
+                        Icons.Filled.WarningAmber,
+                        contentDescription = stringResource(R.string.commonTooltipDistractions),
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
             }
 
@@ -417,9 +507,16 @@ fun FocusScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // --- PLAY/PAUSE CONTROLS ---
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 val secondaryEnabled = isRunning || isPaused || awaitingContinue
-                IconButton(onClick = { requestReset() }, modifier = Modifier.size(64.dp), enabled = secondaryEnabled) {
+                IconButton(
+                    onClick = { requestReset() },
+                    modifier = Modifier.size(64.dp),
+                    enabled = secondaryEnabled
+                ) {
                     Icon(
                         Icons.Filled.RestartAlt,
                         contentDescription = null,
@@ -435,13 +532,21 @@ fun FocusScreen(
                         when {
                             isRunning -> requestStop()
                             awaitingContinue -> continueToNextPhase()
-                            targetLocked -> scope.launch { snackbarHostState.showSnackbar(habitLockedMsg) }
+                            targetLocked -> scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    habitLockedMsg
+                                )
+                            }
+
                             else -> startFromScratch()
                         }
                     },
                     modifier = Modifier.size(80.dp),
                     shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = if (isRunning) ErrorColor else FocusColor, contentColor = Color.White),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isRunning) ErrorColor else FocusColor,
+                        contentColor = Color.White
+                    ),
                     contentPadding = PaddingValues(0.dp),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
                 ) {
@@ -492,8 +597,20 @@ fun FocusScreen(
             selectedType = selectedTarget?.type ?: FocusTargetType.TAG,
             selectedId = selectedTarget?.id,
             onTagSelected = { focusViewModel.setSelectedTag(it) },
-            onTaskSelected = { focusViewModel.setSelectedTask(it.id, it.title, TaskColor.toArgb()) },
-            onHabitSelected = { focusViewModel.setSelectedHabit(it.id, it.name, HabitColor.toArgb()) },
+            onTaskSelected = {
+                focusViewModel.setSelectedTask(
+                    it.id,
+                    it.title,
+                    TaskColor.toArgb()
+                )
+            },
+            onHabitSelected = {
+                focusViewModel.setSelectedHabit(
+                    it.id,
+                    it.name,
+                    HabitColor.toArgb()
+                )
+            },
             onCreateNewTag = { showCreateTagDialog = true },
         )
     }
@@ -512,7 +629,11 @@ fun FocusScreen(
             initialSelectedTagId = selectedTarget?.takeIf { it.type == FocusTargetType.TAG }?.id,
             onDismiss = { showTimeMachine = false },
             onLog = { mode, start, end, tagId ->
-                focusViewModel.logPastSession(mode, start, end, allTags.firstOrNull { it.id == tagId })
+                focusViewModel.logPastSession(
+                    mode,
+                    start,
+                    end,
+                    allTags.firstOrNull { it.id == tagId })
                 showTimeMachine = false
             },
         )
@@ -541,7 +662,8 @@ fun FocusScreen(
             text = { Text(stringResource(R.string.focusDialogSessionStopContent)) },
             confirmButton = {
                 Button(onClick = {
-                    val elapsed = if (timerState.isStopwatch) timerState.elapsedSeconds else timerState.totalPhaseSeconds - timerState.secondsRemaining
+                    val elapsed =
+                        if (timerState.isStopwatch) timerState.elapsedSeconds else timerState.totalPhaseSeconds - timerState.secondsRemaining
                     focusViewModel.addPartialPhaseTime(elapsed, timerState.isRestPhase)
                     sendAction(io.github.benji377.timety.services.FocusTimerService.ACTION_STOP)
                     focusViewModel.setAwaitingContinue(false)

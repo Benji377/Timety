@@ -16,9 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,6 +62,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import androidx.compose.foundation.lazy.grid.items as gridItems
 
 /**
  * Focus tag management screen: create, rename/recolor, and delete tags. Mirrors
@@ -87,7 +87,12 @@ fun FocusTagsWidget(
         topBar = {
             TopAppBar(
                 colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
-                title = { Text(stringResource(R.string.focusTagsTitle), fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.focusTagsTitle),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -131,7 +136,10 @@ fun FocusTagsWidget(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = AppTheme.spaceSmall, vertical = AppTheme.spaceXSmall),
+                            .padding(
+                                horizontal = AppTheme.spaceSmall,
+                                vertical = AppTheme.spaceXSmall
+                            ),
                     ) {
                         Row(
                             modifier = Modifier
@@ -148,11 +156,18 @@ fun FocusTagsWidget(
                             Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
                             Text(tag.name, modifier = Modifier.weight(1f))
                             IconButton(onClick = { tagDialogTarget = tag }) {
-                                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.focusTagsLabelEdit))
+                                Icon(
+                                    Icons.Filled.Edit,
+                                    contentDescription = stringResource(R.string.focusTagsLabelEdit)
+                                )
                             }
                             if (!tag.id.startsWith("default_tag")) {
                                 IconButton(onClick = { tagPendingDelete = tag }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.commonLabelDelete), tint = ErrorColor)
+                                    Icon(
+                                        Icons.Filled.Delete,
+                                        contentDescription = stringResource(R.string.commonLabelDelete),
+                                        tint = ErrorColor
+                                    )
                                 }
                             }
                         }
@@ -187,7 +202,12 @@ fun FocusTagsWidget(
     ConfirmationDialog(
         visible = deleteTarget != null,
         title = stringResource(R.string.focusTagsDialogTitleDelete),
-        content = deleteTarget?.let { stringResource(R.string.focusTagsDialogContentDelete, it.name) } ?: "",
+        content = deleteTarget?.let {
+            stringResource(
+                R.string.focusTagsDialogContentDelete,
+                it.name
+            )
+        } ?: "",
         confirmLabel = stringResource(R.string.commonLabelDelete),
         confirmColor = ErrorColor,
         onConfirm = {
@@ -206,11 +226,19 @@ private fun TagEditDialog(
 ) {
     val isEditing = initialTag != null
     var name by remember { mutableStateOf(initialTag?.name ?: "") }
-    var selectedColor by remember { mutableStateOf(initialTag?.let { Color(it.colorValue) } ?: FocusColor) }
+    var selectedColor by remember {
+        mutableStateOf(initialTag?.let { Color(it.colorValue) } ?: FocusColor)
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (isEditing) stringResource(R.string.focusTagsLabelEdit) else stringResource(R.string.focusTagsLabelAdd)) },
+        title = {
+            Text(
+                if (isEditing) stringResource(R.string.focusTagsLabelEdit) else stringResource(
+                    R.string.focusTagsLabelAdd
+                )
+            )
+        },
         text = {
             Column {
                 OutlinedTextField(
@@ -238,7 +266,11 @@ private fun TagEditDialog(
                                 .clip(CircleShape)
                                 .background(optionColor)
                                 .then(
-                                    if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                    if (isSelected) Modifier.border(
+                                        3.dp,
+                                        MaterialTheme.colorScheme.onSurface,
+                                        CircleShape
+                                    )
                                     else Modifier,
                                 )
                                 .clickable { selectedColor = optionColor },

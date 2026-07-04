@@ -1,6 +1,7 @@
 package io.github.benji377.timety.ui.components.focus
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,8 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.PhaseType
@@ -51,7 +50,7 @@ fun ModeTimeline(
     val completionFill = if (isDark) PaperLight else PaperAltLight
     val isRunningOrAwaiting = isRunning || awaitingContinue
     val outline = MaterialTheme.colorScheme.outline
-    val shadowColor = androidx.compose.ui.graphics.Color(0xFF111111).copy(alpha = 0.12f)
+    val shadowColor = Color(0xFF111111).copy(alpha = 0.12f)
     val lineColor = if (isDark) BorderDark else BorderLight
 
     Row(
@@ -84,7 +83,11 @@ fun ModeTimeline(
         }
 
         // End node
-        ConnectorLine(isPast = isCompleted, isRunningOrAwaiting = isRunningOrAwaiting, lineColor = lineColor)
+        ConnectorLine(
+            isPast = isCompleted,
+            isRunningOrAwaiting = isRunningOrAwaiting,
+            lineColor = lineColor
+        )
         CompletionNode(
             active = isRunningOrAwaiting && isCompleted,
             fillColor = completionFill,
@@ -109,11 +112,21 @@ private fun PhaseDot(color: Color, active: Boolean) {
 }
 
 @Composable
-private fun CompletionNode(active: Boolean, fillColor: Color, borderColor: Color, shadowColor: Color) {
+private fun CompletionNode(
+    active: Boolean,
+    fillColor: Color,
+    borderColor: Color,
+    shadowColor: Color
+) {
     val size = if (active) 22.dp else 16.dp
     Box(
         modifier = Modifier
-            .shadow(elevation = 6.dp, shape = CircleShape, ambientColor = shadowColor, spotColor = shadowColor)
+            .shadow(
+                elevation = 6.dp,
+                shape = CircleShape,
+                ambientColor = shadowColor,
+                spotColor = shadowColor
+            )
             .size(size)
             .background(fillColor, CircleShape)
             .border(if (active) 3.dp else 2.dp, borderColor, CircleShape)

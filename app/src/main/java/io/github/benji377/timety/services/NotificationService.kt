@@ -38,7 +38,8 @@ class NotificationService(private val context: Context) {
     /** Creates all notification channels used by the app. Safe to call repeatedly (idempotent). */
     fun ensureChannels() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-        val systemManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val systemManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channels = listOf(
             NotificationChannel(
                 CHANNEL_TASKS,
@@ -75,7 +76,12 @@ class NotificationService(private val context: Context) {
     // --- TASKS ---
 
     /** One-shot reminder for a specific task. Mirrors `scheduleTaskReminder`. */
-    fun scheduleTaskReminder(notificationId: Int, title: String, body: String, scheduledTime: Instant) {
+    fun scheduleTaskReminder(
+        notificationId: Int,
+        title: String,
+        body: String,
+        scheduledTime: Instant
+    ) {
         if (scheduledTime.isBefore(Instant.now())) return
         val intent = reminderIntent(
             notificationId = notificationId,
@@ -177,10 +183,14 @@ class NotificationService(private val context: Context) {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pendingContentIntent = PendingIntent.getActivity(
-            context, id, contentIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            context,
+            id,
+            contentIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(context.applicationInfo.icon.takeIf { it != 0 } ?: android.R.drawable.ic_dialog_info)
+            .setSmallIcon(context.applicationInfo.icon.takeIf { it != 0 }
+                ?: android.R.drawable.ic_dialog_info)
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
@@ -214,7 +224,11 @@ class NotificationService(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                pendingIntent
+            )
         } else {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
         }
@@ -259,7 +273,12 @@ class NotificationService(private val context: Context) {
      * is always advanced past "now" by a full cycle, matching the alarm having just fired at
      * (approximately) that exact instant.
      */
-    private fun nextReminderMillis(hour: Int, minute: Int, weekday: Int?, forceRollover: Boolean = false): Long {
+    private fun nextReminderMillis(
+        hour: Int,
+        minute: Int,
+        weekday: Int?,
+        forceRollover: Boolean = false
+    ): Long {
         val zone = ZoneId.systemDefault()
         val now = ZonedDateTime.now(zone)
         var scheduled = if (weekday == null) {
@@ -267,7 +286,8 @@ class NotificationService(private val context: Context) {
         } else {
             val target = DayOfWeek.of(weekday)
             val daysUntil = ((target.value - now.dayOfWeek.value) + 7) % 7
-            now.plusDays(daysUntil.toLong()).withHour(hour).withMinute(minute).withSecond(0).withNano(0)
+            now.plusDays(daysUntil.toLong()).withHour(hour).withMinute(minute).withSecond(0)
+                .withNano(0)
         }
         if (forceRollover || scheduled.isBefore(now) || !scheduled.isAfter(now)) {
             scheduled = if (weekday == null) scheduled.plusDays(1) else scheduled.plusDays(7)

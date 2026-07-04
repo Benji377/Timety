@@ -3,8 +3,8 @@ package io.github.benji377.timety.data.repository
 import io.github.benji377.timety.data.local.dao.HabitDao
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class HabitRepository(
@@ -30,7 +30,8 @@ class HabitRepository(
     }
 
     // Completions
-    fun getCompletionsForHabit(habitId: String): Flow<List<HabitCompletionEntity>> = habitDao.getCompletionsForHabit(habitId)
+    fun getCompletionsForHabit(habitId: String): Flow<List<HabitCompletionEntity>> =
+        habitDao.getCompletionsForHabit(habitId)
 
     suspend fun insertCompletion(completion: HabitCompletionEntity) = withContext(Dispatchers.IO) {
         habitDao.insertCompletion(completion)
@@ -39,7 +40,7 @@ class HabitRepository(
     suspend fun deleteCompletion(completion: HabitCompletionEntity) = withContext(Dispatchers.IO) {
         habitDao.deleteCompletion(completion)
     }
-    
+
     suspend fun deleteCompletionByDate(habitId: String, date: Long) = withContext(Dispatchers.IO) {
         habitDao.deleteCompletionByDate(habitId, date)
     }

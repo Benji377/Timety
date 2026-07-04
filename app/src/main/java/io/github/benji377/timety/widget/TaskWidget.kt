@@ -17,9 +17,9 @@ import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.text.FontWeight
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.TimetyApplication
 import kotlinx.coroutines.flow.first
@@ -31,14 +31,14 @@ class TaskWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appContainer = (context.applicationContext as TimetyApplication).container
         val taskRepository = appContainer.taskRepository
-        
+
         val allTasksWithSubtasks = taskRepository.allTasks.first()
         val now = Instant.now()
         val endOfToday = now.atZone(ZoneId.systemDefault())
             .truncatedTo(ChronoUnit.DAYS)
             .plusDays(1)
             .toInstant()
-            
+
         val urgentTasks = allTasksWithSubtasks.map { it.task }.filter { task ->
             !task.isCompleted && task.dueDate != null && task.dueDate.isBefore(endOfToday)
         }.sortedBy { it.dueDate }

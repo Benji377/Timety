@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notification_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="0dp"
-    android:paddingVertical="8dp"
-    android:gravity="center_vertical"
-    android:id="@+id/notification_container">
+    android:paddingVertical="8dp">
 
     <!-- Left side: Title, and Body -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/notification_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Focus"
-            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="20sp"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/notification_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:text="Pomodoro"
-            android:textSize="14sp"
-            android:textStyle="bold"
             android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginTop="2dp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- Right side: Chronometer or Paused text -->
@@ -41,20 +41,20 @@
         android:id="@+id/notification_chronometer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="40sp"
-        android:textColor="?android:attr/textColorPrimary"
         android:fontFamily="sans-serif-medium"
-        android:includeFontPadding="false" />
-        
+        android:includeFontPadding="false"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="40sp" />
+
     <TextView
         android:id="@+id/notification_paused_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="--:--"
-        android:textSize="28sp"
-        android:textColor="?android:attr/textColorPrimary"
         android:fontFamily="sans-serif-medium"
         android:includeFontPadding="false"
+        android:text="--:--"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="28sp"
         android:visibility="gone" />
 
 </LinearLayout>

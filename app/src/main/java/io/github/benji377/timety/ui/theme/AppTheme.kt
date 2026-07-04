@@ -53,7 +53,8 @@ object AppTheme {
     val space3XLarge = 40.dp
 
     // Common padding configurations
-    val paddingScreenHorizontal = androidx.compose.foundation.layout.PaddingValues(horizontal = spaceLarge)
+    val paddingScreenHorizontal =
+        androidx.compose.foundation.layout.PaddingValues(horizontal = spaceLarge)
     val paddingScreenVertical = androidx.compose.foundation.layout.PaddingValues(all = spaceLarge)
     val paddingCard = androidx.compose.foundation.layout.PaddingValues(all = spaceLarge)
     val paddingSection = androidx.compose.foundation.layout.PaddingValues(

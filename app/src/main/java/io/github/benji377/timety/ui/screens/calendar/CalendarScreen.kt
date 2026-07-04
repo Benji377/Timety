@@ -3,16 +3,43 @@ package io.github.benji377.timety.ui.screens.calendar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Today
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,8 +74,6 @@ import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 private val GreyDefault = Color(0xFF9E9E9E)
 private val Grey300 = Color(0xFFE0E0E0)
@@ -127,7 +152,10 @@ fun CalendarScreen(
                         focusedMonth = LocalDate.now().withDayOfMonth(1)
                         selectedDate = LocalDate.now()
                     }) {
-                        Icon(Icons.Filled.Today, contentDescription = stringResource(R.string.calendarTooltipToday))
+                        Icon(
+                            Icons.Filled.Today,
+                            contentDescription = stringResource(R.string.calendarTooltipToday)
+                        )
                     }
                 }
             )
@@ -194,7 +222,10 @@ fun CalendarScreen(
                                     } else {
                                         val now = java.time.LocalTime.now()
                                         val retroInstant = d.atTime(now).atZone(zone).toInstant()
-                                        habitViewModel.markCompletionOnDate(habit.habit.id, retroInstant)
+                                        habitViewModel.markCompletionOnDate(
+                                            habit.habit.id,
+                                            retroInstant
+                                        )
                                     }
                                 }
                             )
@@ -224,7 +255,8 @@ private fun isHabitScheduledOn(hwc: HabitWithCompletions, date: LocalDate): Bool
     return when (hwc.habit.frequency) {
         HabitFrequency.DAILY -> true
         HabitFrequency.WEEKLY_FLEXIBLE -> true
-        HabitFrequency.WEEKLY_EXACT -> HabitUtils.parseWeekdays(hwc.habit.targetWeekdays).contains(date.dayOfWeek.value)
+        HabitFrequency.WEEKLY_EXACT -> HabitUtils.parseWeekdays(hwc.habit.targetWeekdays)
+            .contains(date.dayOfWeek.value)
     }
 }
 
@@ -239,7 +271,9 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
             Icon(Icons.Filled.ChevronLeft, contentDescription = null)
         }
         Text(
-            text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatMonthYear(focusedMonth),
+            text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatMonthYear(
+                focusedMonth
+            ),
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
@@ -264,7 +298,8 @@ private fun CalendarGrid(
 
     // Pre-compute sets of dates with activity for O(1) lookup during grid generation.
     val taskDateKeys = remember(tasks) {
-        tasks.mapNotNull { it.task.dueDate }.map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }.toSet()
+        tasks.mapNotNull { it.task.dueDate }
+            .map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }.toSet()
     }
     val sessionDateKeys = remember(sessions) {
         sessions.map { AppDateUtils.dayKey(it.startTime.atZone(zone).toLocalDate()) }.toSet()
@@ -289,17 +324,26 @@ private fun CalendarGrid(
             )
             headers.forEach { header ->
                 Box(
-                    modifier = Modifier.weight(1f).padding(bottom = 8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(bottom = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(header, fontWeight = FontWeight.Bold, color = GreyDefault)
                 }
             }
             Box(
-                modifier = Modifier.weight(1.5f).padding(bottom = 8.dp),
+                modifier = Modifier
+                    .weight(1.5f)
+                    .padding(bottom = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.calendarHeaderWeekly), fontWeight = FontWeight.Bold, color = TaskColor, maxLines = 1)
+                Text(
+                    stringResource(R.string.calendarHeaderWeekly),
+                    fontWeight = FontWeight.Bold,
+                    color = TaskColor,
+                    maxLines = 1
+                )
             }
         }
 
@@ -358,27 +402,52 @@ private fun CalendarGrid(
                             Spacer(modifier = Modifier.height(2.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (hasTasks) Dot(TaskColor)
-                                if (hasTasks && (hasFocus || hasHabits)) Spacer(modifier = Modifier.width(2.dp))
+                                if (hasTasks && (hasFocus || hasHabits)) Spacer(
+                                    modifier = Modifier.width(
+                                        2.dp
+                                    )
+                                )
                                 if (hasFocus) Dot(SuccessColor)
                                 if (hasFocus && hasHabits) Spacer(modifier = Modifier.width(2.dp))
                                 if (hasHabits) Dot(HabitColor)
-                                if (!hasTasks && !hasFocus && !hasHabits) Spacer(modifier = Modifier.height(5.dp))
+                                if (!hasTasks && !hasFocus && !hasHabits) Spacer(
+                                    modifier = Modifier.height(
+                                        5.dp
+                                    )
+                                )
                             }
                         }
                     }
                 }
 
                 Box(
-                    modifier = Modifier.weight(1.5f).height(45.dp),
+                    modifier = Modifier
+                        .weight(1.5f)
+                        .height(45.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(SpanStyle(color = TaskColor, fontWeight = FontWeight.Bold)) { append("$weeklyTaskCount") }
+                            withStyle(
+                                SpanStyle(
+                                    color = TaskColor,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) { append("$weeklyTaskCount") }
                             withStyle(SpanStyle(color = Grey600)) { append(" | ") }
-                            withStyle(SpanStyle(color = HabitColor, fontWeight = FontWeight.Bold)) { append("$weeklyHabitCount") }
+                            withStyle(
+                                SpanStyle(
+                                    color = HabitColor,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) { append("$weeklyHabitCount") }
                             withStyle(SpanStyle(color = Grey600)) { append(" | ") }
-                            withStyle(SpanStyle(color = SuccessColor, fontWeight = FontWeight.Bold)) { append("$weeklyFocusCount") }
+                            withStyle(
+                                SpanStyle(
+                                    color = SuccessColor,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) { append("$weeklyFocusCount") }
                         },
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
@@ -422,7 +491,9 @@ private fun HabitsAccordion(
             habits.forEach { hwc ->
                 val isCompleted = HabitUtils.isCompletedOn(hwc, selectedDate)
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     shape = AppTheme.brMedium,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     border = androidx.compose.foundation.BorderStroke(
@@ -529,7 +600,8 @@ private fun FocusSessionsAccordion(
     val modes by focusViewModel.allModes.collectAsState()
     val tags by focusViewModel.allTags.collectAsState()
     val zone = ZoneId.systemDefault()
-    val use24Hour = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
+    val use24Hour =
+        io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
     val ongoingLabel = stringResource(R.string.calendarLabelFocusOngoing)
     val untaggedLabel = stringResource(R.string.focusTargetUntagged)
 
@@ -549,9 +621,20 @@ private fun FocusSessionsAccordion(
                 val mode = modes.firstOrNull { it.id == session.modeId } ?: modes.firstOrNull()
                 val tag = session.tagId?.let { tagId -> tags.firstOrNull { it.id == tagId } }
 
-                var timeString = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(session.startTime, use24Hour, zone)
+                var timeString =
+                    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+                        session.startTime,
+                        use24Hour,
+                        zone
+                    )
                 timeString += if (session.endTime != null) {
-                    " - ${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(session.endTime, use24Hour, zone)}"
+                    " - ${
+                        io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+                            session.endTime,
+                            use24Hour,
+                            zone
+                        )
+                    }"
                 } else {
                     " - $ongoingLabel"
                 }
@@ -559,7 +642,9 @@ private fun FocusSessionsAccordion(
                 val focusMins = session.totalSecondsFocused / 60
 
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     shape = AppTheme.brMedium,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Grey300),
@@ -584,7 +669,12 @@ private fun FocusSessionsAccordion(
                                 Text(text = localizedFocusModeName(mode), fontSize = 13.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
                             }
-                            Text(text = timeString, color = Grey600, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                            Text(
+                                text = timeString,
+                                color = Grey600,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                         Text(
                             text = stringResource(R.string.focusMinutes, focusMins),

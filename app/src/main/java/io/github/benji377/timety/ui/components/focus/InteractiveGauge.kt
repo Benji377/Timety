@@ -11,7 +11,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -145,7 +144,11 @@ fun InteractiveGauge(
             )
 
             // Inner disc.
-            drawCircle(color = if (isDark) GaugeBgDark else GaugeWhite, radius = innerRadius, center = center)
+            drawCircle(
+                color = if (isDark) GaugeBgDark else GaugeWhite,
+                radius = innerRadius,
+                center = center
+            )
             drawCircle(
                 color = if (isDark) GaugeBorderDark else GaugeBorderLight,
                 radius = innerRadius,
@@ -169,7 +172,10 @@ fun InteractiveGauge(
                 useCenter = false,
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
                 size = Size((radius - strokeWidth / 2f) * 2, (radius - strokeWidth / 2f) * 2),
-                topLeft = Offset(center.x - (radius - strokeWidth / 2f), center.y - (radius - strokeWidth / 2f)),
+                topLeft = Offset(
+                    center.x - (radius - strokeWidth / 2f),
+                    center.y - (radius - strokeWidth / 2f)
+                ),
             )
 
             // Draggable thumb.
@@ -179,9 +185,18 @@ fun InteractiveGauge(
                     (center.x + (radius - strokeWidth / 2f) * cos(thumbAngle)).toFloat(),
                     (center.y + (radius - strokeWidth / 2f) * sin(thumbAngle)).toFloat(),
                 )
-                drawCircle(color = gaugeColor.copy(alpha = AppTheme.opacityLight), radius = 20.dp.toPx(), center = thumbCenter)
+                drawCircle(
+                    color = gaugeColor.copy(alpha = AppTheme.opacityLight),
+                    radius = 20.dp.toPx(),
+                    center = thumbCenter
+                )
                 drawCircle(color = GaugeWhite, radius = 14.dp.toPx(), center = thumbCenter)
-                drawCircle(color = gaugeColor, radius = 14.dp.toPx(), center = thumbCenter, style = Stroke(width = 4.dp.toPx()))
+                drawCircle(
+                    color = gaugeColor,
+                    radius = 14.dp.toPx(),
+                    center = thumbCenter,
+                    style = Stroke(width = 4.dp.toPx())
+                )
             }
         }
 
@@ -223,7 +238,12 @@ fun InteractiveGauge(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (bottomTextIcon != null) {
-                        Icon(bottomTextIcon, contentDescription = null, tint = bottomTextColor, modifier = Modifier.size(16.dp))
+                        Icon(
+                            bottomTextIcon,
+                            contentDescription = null,
+                            tint = bottomTextColor,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(modifier = Modifier.width(6.dp))
                     }
                     Text(

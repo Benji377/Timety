@@ -79,11 +79,18 @@ private fun KpiContent(title: String, value: String, icon: ImageVector, color: C
 @Composable
 private fun CompactVerticalContent(title: String, value: String, icon: ImageVector, color: Color) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(AppTheme.spaceSmall),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(AppTheme.spaceSmall),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(AppTheme.iconSizeSmall))
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(AppTheme.iconSizeSmall)
+        )
         Spacer(Modifier.height(4.dp))
         Text(
             value,
@@ -109,11 +116,18 @@ private fun CompactVerticalContent(title: String, value: String, icon: ImageVect
 @Composable
 private fun CompactHeaderContent(title: String, value: String, icon: ImageVector, color: Color) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(AppTheme.spaceMedium),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(AppTheme.spaceMedium),
         verticalArrangement = Arrangement.Center,
     ) {
         Row(verticalAlignment = Alignment.Top) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(AppTheme.iconSizeSmall))
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(AppTheme.iconSizeSmall)
+            )
             Spacer(Modifier.width(AppTheme.spaceXSmall))
             Text(
                 title,

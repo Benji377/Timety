@@ -95,7 +95,7 @@ object AppDateFormatUtils {
     ): String {
         val ldt: LocalDateTime = instant.atZone(zone).toLocalDateTime()
         return "${ldt.toLocalDate().format(dateFormatter(dateFormatCode, locale))} " +
-            ldt.toLocalTime().format(timeFormatter(use24Hour, locale))
+                ldt.toLocalTime().format(timeFormatter(use24Hour, locale))
     }
 
     /** Mirrors getFormattedMonthYear (e.g. "July 2026"). */

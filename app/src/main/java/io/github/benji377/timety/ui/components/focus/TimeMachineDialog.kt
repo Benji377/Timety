@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
@@ -92,7 +91,8 @@ fun TimeMachineDialog(
     val zone = ZoneId.systemDefault()
     val locale = Locale.getDefault()
     val dateTimeFormatter = remember(locale) {
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(locale).withZone(zone)
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+            .withLocale(locale).withZone(zone)
     }
 
     AlertDialog(
@@ -106,16 +106,22 @@ fun TimeMachineDialog(
         },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                ExposedDropdownMenuBox(expanded = modeExpanded, onExpandedChange = { modeExpanded = it }) {
+                ExposedDropdownMenuBox(
+                    expanded = modeExpanded,
+                    onExpandedChange = { modeExpanded = it }) {
                     OutlinedTextField(
                         value = selectedMode?.let { localizedFocusModeName(it) } ?: "",
                         onValueChange = {},
                         readOnly = true,
                         label = { Text(stringResource(R.string.dialogTimeMachineMode)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modeExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth(),
                     )
-                    ExposedDropdownMenu(expanded = modeExpanded, onDismissRequest = { modeExpanded = false }) {
+                    ExposedDropdownMenu(
+                        expanded = modeExpanded,
+                        onDismissRequest = { modeExpanded = false }) {
                         modes.forEach { mode ->
                             DropdownMenuItem(
                                 text = { Text(localizedFocusModeName(mode)) },
@@ -127,19 +133,29 @@ fun TimeMachineDialog(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
                 val noTagLabel = stringResource(R.string.dialogTimeMachineNoTag)
-                ExposedDropdownMenuBox(expanded = tagExpanded, onExpandedChange = { tagExpanded = it }) {
+                ExposedDropdownMenuBox(
+                    expanded = tagExpanded,
+                    onExpandedChange = { tagExpanded = it }) {
                     OutlinedTextField(
                         value = tags.firstOrNull { it.id == selectedTagId }?.name ?: noTagLabel,
                         onValueChange = {},
                         readOnly = true,
                         label = { Text(stringResource(R.string.dialogTimeMachineTag)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = tagExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth(),
                     )
-                    ExposedDropdownMenu(expanded = tagExpanded, onDismissRequest = { tagExpanded = false }) {
-                        DropdownMenuItem(text = { Text(noTagLabel) }, onClick = { selectedTagId = null; tagExpanded = false })
+                    ExposedDropdownMenu(
+                        expanded = tagExpanded,
+                        onDismissRequest = { tagExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(noTagLabel) },
+                            onClick = { selectedTagId = null; tagExpanded = false })
                         tags.forEach { tag ->
-                            DropdownMenuItem(text = { Text(tag.name) }, onClick = { selectedTagId = tag.id; tagExpanded = false })
+                            DropdownMenuItem(
+                                text = { Text(tag.name) },
+                                onClick = { selectedTagId = tag.id; tagExpanded = false })
                         }
                     }
                 }
@@ -190,14 +206,16 @@ fun TimeMachineDialog(
     if (pickerStep == 1) {
         val target = pickerTarget
         val initialInstant = if (target == TimeMachineTarget.START) startDateTime else endDateTime
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialInstant.toEpochMilli())
+        val datePickerState =
+            rememberDatePickerState(initialSelectedDateMillis = initialInstant.toEpochMilli())
         DatePickerDialog(
             onDismissRequest = { pickerStep = 0; pickerTarget = null },
             confirmButton = {
                 TextButton(onClick = {
                     val millis = datePickerState.selectedDateMillis
                     if (millis != null) {
-                        pickedLocalDate = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
+                        pickedLocalDate =
+                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
                         pickerStep = 2
                     } else {
                         pickerStep = 0
@@ -206,7 +224,13 @@ fun TimeMachineDialog(
                 }) { Text(stringResource(R.string.commonLabelConfirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { pickerStep = 0; pickerTarget = null }) { Text(stringResource(R.string.commonLabelCancel)) }
+                TextButton(onClick = { pickerStep = 0; pickerTarget = null }) {
+                    Text(
+                        stringResource(
+                            R.string.commonLabelCancel
+                        )
+                    )
+                }
             },
         ) {
             DatePicker(state = datePickerState)
@@ -216,7 +240,8 @@ fun TimeMachineDialog(
     if (pickerStep == 2 && pickedLocalDate != null) {
         val context = LocalContext.current
         val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
-        val referenceInstant = if (pickerTarget == TimeMachineTarget.START) startDateTime else endDateTime
+        val referenceInstant =
+            if (pickerTarget == TimeMachineTarget.START) startDateTime else endDateTime
         val referenceTime = referenceInstant.atZone(zone)
         val timePickerState = rememberTimePickerState(
             initialHour = referenceTime.hour,
@@ -229,15 +254,24 @@ fun TimeMachineDialog(
             confirmButton = {
                 TextButton(onClick = {
                     val date = pickedLocalDate!!
-                    val instant = date.atTime(timePickerState.hour, timePickerState.minute).atZone(zone).toInstant()
-                    if (pickerTarget == TimeMachineTarget.START) startDateTime = instant else endDateTime = instant
+                    val instant =
+                        date.atTime(timePickerState.hour, timePickerState.minute).atZone(zone)
+                            .toInstant()
+                    if (pickerTarget == TimeMachineTarget.START) startDateTime =
+                        instant else endDateTime = instant
                     errorText = null
                     pickerStep = 0
                     pickerTarget = null
                 }) { Text(stringResource(R.string.commonLabelConfirm)) }
             },
             dismissButton = {
-                TextButton(onClick = { pickerStep = 0; pickerTarget = null }) { Text(stringResource(R.string.commonLabelCancel)) }
+                TextButton(onClick = { pickerStep = 0; pickerTarget = null }) {
+                    Text(
+                        stringResource(
+                            R.string.commonLabelCancel
+                        )
+                    )
+                }
             },
         )
     }
@@ -255,7 +289,11 @@ private fun TimeRow(label: String, value: String, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(label, fontSize = AppTheme.fsLabel, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    label,
+                    fontSize = AppTheme.fsLabel,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Text(value, fontWeight = FontWeight.Bold)
             }
             Icon(Icons.Filled.EditCalendar, contentDescription = null)

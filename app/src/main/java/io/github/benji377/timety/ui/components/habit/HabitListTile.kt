@@ -81,7 +81,10 @@ fun HabitListTile(
     enableDismissible: Boolean = true,
     modifier: Modifier = Modifier,
     // Mirrors AppTheme.listTileScreenMargin (spaceLarge horizontal, spaceXSmall vertical).
-    margin: PaddingValues = PaddingValues(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceXSmall),
+    margin: PaddingValues = PaddingValues(
+        horizontal = AppTheme.spaceLarge,
+        vertical = AppTheme.spaceXSmall
+    ),
 ) {
     val color = Color(habit.colorValue)
     val context = LocalContext.current
@@ -90,7 +93,9 @@ fun HabitListTile(
     val tile: @Composable () -> Unit = {
         if (isStacked) {
             val barColor = if (isCompleted) color.copy(alpha = AppTheme.opacityLight) else color
-            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -108,14 +113,18 @@ fun HabitListTile(
                         onToggleCompleted = onToggleCompleted,
                         onTap = onTap,
                         onMarkPastCompletion = onMarkPastCompletion,
-                        onLockedTap = { Toast.makeText(context, lockedMessage, Toast.LENGTH_SHORT).show() },
+                        onLockedTap = {
+                            Toast.makeText(context, lockedMessage, Toast.LENGTH_SHORT).show()
+                        },
                     )
                 }
             }
         } else {
             val borderColor = if (isCompleted) color.copy(alpha = AppTheme.opacityLight) else color
             Card(
-                modifier = Modifier.fillMaxWidth().padding(margin),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(margin),
                 shape = AppTheme.brMedium,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 border = BorderStroke(AppTheme.listTileBorderWidth, borderColor),
@@ -131,7 +140,9 @@ fun HabitListTile(
                     onToggleCompleted = onToggleCompleted,
                     onTap = onTap,
                     onMarkPastCompletion = onMarkPastCompletion,
-                    onLockedTap = { Toast.makeText(context, lockedMessage, Toast.LENGTH_SHORT).show() },
+                    onLockedTap = {
+                        Toast.makeText(context, lockedMessage, Toast.LENGTH_SHORT).show()
+                    },
                 )
             }
         }

@@ -57,7 +57,8 @@ fun TaskStatsScreen(
     val startOfWeekInstant = startOfWeek.atStartOfDay(zone).toInstant()
     val endOfWeekInstant = endOfWeekLocal.atTime(23, 59, 59).atZone(zone).toInstant()
 
-    val isCurrentRealWeek = AppDateUtils.isWithinInclusive(LocalDate.now(), startOfWeek, endOfWeekLocal)
+    val isCurrentRealWeek =
+        AppDateUtils.isWithinInclusive(LocalDate.now(), startOfWeek, endOfWeekLocal)
 
     if (tasks.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -79,32 +80,68 @@ fun TaskStatsScreen(
 
             // TASK VELOCITY CHART
             item {
-                Text(stringResource(R.string.taskStatsVelocity), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.taskStatsVelocity),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(12.dp).background(WarningColor, CircleShape))
+                    Box(modifier = Modifier
+                        .size(12.dp)
+                        .background(WarningColor, CircleShape))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(stringResource(R.string.taskStatsCreated), fontSize = 12.sp, color = Color.Gray)
+                    Text(
+                        stringResource(R.string.taskStatsCreated),
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Box(modifier = Modifier.size(12.dp).background(SuccessColor, CircleShape))
+                    Box(modifier = Modifier
+                        .size(12.dp)
+                        .background(SuccessColor, CircleShape))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(stringResource(R.string.taskStatsCompleted), fontSize = 12.sp, color = Color.Gray)
+                    Text(
+                        stringResource(R.string.taskStatsCompleted),
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(modifier = Modifier.height(200.dp)) {
-                    VelocityChart(tasks, startOfWeekInstant, endOfWeekInstant, isCurrentRealWeek, zone)
+                    VelocityChart(
+                        tasks,
+                        startOfWeekInstant,
+                        endOfWeekInstant,
+                        isCurrentRealWeek,
+                        zone
+                    )
                 }
             }
             item { Spacer(modifier = Modifier.height(40.dp)) }
 
             // PRODUCTIVITY BAR CHART
             item {
-                Text(stringResource(R.string.taskStatsProductivity), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    stringResource(R.string.taskStatsProductivity),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(stringResource(R.string.taskStatsCompletedDaily), fontSize = 12.sp, color = Color.Gray)
+                Text(
+                    stringResource(R.string.taskStatsCompletedDaily),
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(modifier = Modifier.height(200.dp)) {
-                    ProductivityChart(tasks, startOfWeekInstant, endOfWeekInstant, isCurrentRealWeek, zone)
+                    ProductivityChart(
+                        tasks,
+                        startOfWeekInstant,
+                        endOfWeekInstant,
+                        isCurrentRealWeek,
+                        zone
+                    )
                 }
             }
             item { Spacer(modifier = Modifier.height(40.dp)) }
@@ -117,7 +154,13 @@ fun TaskStatsScreen(
 }
 
 @Composable
-private fun VelocityChart(tasks: List<TaskWithSubtasks>, startOfWeek: Instant, endOfWeek: Instant, isCurrentRealWeek: Boolean, zone: ZoneId) {
+private fun VelocityChart(
+    tasks: List<TaskWithSubtasks>,
+    startOfWeek: Instant,
+    endOfWeek: Instant,
+    isCurrentRealWeek: Boolean,
+    zone: ZoneId
+) {
     val dailyCreated = IntArray(7)
     val dailyCompleted = IntArray(7)
 
@@ -128,7 +171,10 @@ private fun VelocityChart(tasks: List<TaskWithSubtasks>, startOfWeek: Instant, e
         }
         if (it.task.isCompleted) {
             val completedAt = it.task.completedAt
-            if (completedAt != null && !completedAt.isBefore(startOfWeek) && completedAt.isBefore(endOfWeek)) {
+            if (completedAt != null && !completedAt.isBefore(startOfWeek) && completedAt.isBefore(
+                    endOfWeek
+                )
+            ) {
                 dailyCompleted[completedAt.atZone(zone).dayOfWeek.value - 1]++
             }
         }
@@ -148,13 +194,22 @@ private fun VelocityChart(tasks: List<TaskWithSubtasks>, startOfWeek: Instant, e
 }
 
 @Composable
-private fun ProductivityChart(tasks: List<TaskWithSubtasks>, startOfWeek: Instant, endOfWeek: Instant, isCurrentRealWeek: Boolean, zone: ZoneId) {
+private fun ProductivityChart(
+    tasks: List<TaskWithSubtasks>,
+    startOfWeek: Instant,
+    endOfWeek: Instant,
+    isCurrentRealWeek: Boolean,
+    zone: ZoneId
+) {
     val dailyCompleted = IntArray(7)
 
     tasks.forEach {
         if (it.task.isCompleted) {
             val completedAt = it.task.completedAt
-            if (completedAt != null && !completedAt.isBefore(startOfWeek) && completedAt.isBefore(endOfWeek)) {
+            if (completedAt != null && !completedAt.isBefore(startOfWeek) && completedAt.isBefore(
+                    endOfWeek
+                )
+            ) {
                 dailyCompleted[completedAt.atZone(zone).dayOfWeek.value - 1]++
             }
         }
@@ -174,7 +229,15 @@ private fun ProductivityChart(tasks: List<TaskWithSubtasks>, startOfWeek: Instan
 }
 
 @Composable
-private fun SimpleBarChart(data1: IntArray, color1: Color, data2: IntArray?, color2: Color, maxVal: Double, isCurrentRealWeek: Boolean, zone: ZoneId) {
+private fun SimpleBarChart(
+    data1: IntArray,
+    color1: Color,
+    data2: IntArray?,
+    color2: Color,
+    maxVal: Double,
+    isCurrentRealWeek: Boolean,
+    zone: ZoneId
+) {
     val days = listOf(
         stringResource(R.string.commonWeekdayMon),
         stringResource(R.string.commonWeekdayTue),
@@ -189,7 +252,9 @@ private fun SimpleBarChart(data1: IntArray, color1: Color, data2: IntArray?, col
     val denom = (maxVal + 1).toFloat()
 
     Row(
-        modifier = Modifier.fillMaxWidth().height(200.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.Bottom
     ) {
@@ -197,7 +262,9 @@ private fun SimpleBarChart(data1: IntArray, color1: Color, data2: IntArray?, col
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier.weight(1f).fillMaxHeight()
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
             ) {
                 Row(
                     modifier = Modifier.weight(1f),
@@ -205,12 +272,24 @@ private fun SimpleBarChart(data1: IntArray, color1: Color, data2: IntArray?, col
                     verticalAlignment = Alignment.Bottom
                 ) {
                     val h1 = (data1[i].toFloat() / denom).coerceIn(0f, 1f)
-                    Box(modifier = Modifier.fillMaxHeight(h1).width(12.dp).clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)).background(color1))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight(h1)
+                            .width(12.dp)
+                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                            .background(color1)
+                    )
 
                     if (data2 != null) {
                         Spacer(modifier = Modifier.width(2.dp))
                         val h2 = (data2[i].toFloat() / denom).coerceIn(0f, 1f)
-                        Box(modifier = Modifier.fillMaxHeight(h2).width(12.dp).clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)).background(color2))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight(h2)
+                                .width(12.dp)
+                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                .background(color2)
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -238,7 +317,12 @@ private fun CategoryBreakdownCard(tasks: List<TaskWithSubtasks>) {
     }
 
     if (categoryCounts.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
             Text(stringResource(R.string.taskStatsCategoryUnused))
         }
         return
@@ -246,10 +330,23 @@ private fun CategoryBreakdownCard(tasks: List<TaskWithSubtasks>) {
 
     val totalTasks = categoryCounts.values.sum()
     val entries = categoryCounts.entries.sortedByDescending { it.value }
-    val colors = listOf(TaskColor, ErrorColor, SuccessColor, WarningColor, HabitColor, MaterialTheme.colorScheme.primary, Color(0xFF009688), Color(0xFFFF5722))
+    val colors = listOf(
+        TaskColor,
+        ErrorColor,
+        SuccessColor,
+        WarningColor,
+        HabitColor,
+        MaterialTheme.colorScheme.primary,
+        Color(0xFF009688),
+        Color(0xFFFF5722)
+    )
 
     Column {
-        Text(stringResource(R.string.taskStatsDistribution), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(
+            stringResource(R.string.taskStatsDistribution),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             stringResource(R.string.taskStatsDistributionSubtitle),
@@ -281,10 +378,14 @@ private fun CategoryBreakdownCard(tasks: List<TaskWithSubtasks>) {
             val color = colors[index % colors.size]
             val percent = ((entry.value.toFloat() / totalTasks) * 100).let { Math.round(it) }
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier.size(14.dp).background(color, CircleShape))
+                Box(modifier = Modifier
+                    .size(14.dp)
+                    .background(color, CircleShape))
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     entry.key,
@@ -295,12 +396,21 @@ private fun CategoryBreakdownCard(tasks: List<TaskWithSubtasks>) {
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    quantityString(R.plurals.nTasksCount, entry.value, zeroRes = R.string.nTasksCountZero, entry.value),
+                    quantityString(
+                        R.plurals.nTasksCount,
+                        entry.value,
+                        zeroRes = R.string.nTasksCountZero,
+                        entry.value
+                    ),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text("$percent%", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "$percent%",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

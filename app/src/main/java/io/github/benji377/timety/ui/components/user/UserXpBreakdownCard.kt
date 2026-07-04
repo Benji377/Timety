@@ -1,11 +1,11 @@
 package io.github.benji377.timety.ui.components.user
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -22,8 +22,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -164,7 +164,10 @@ fun UserXpBreakdownCard(
 
             Spacer(Modifier.height(18.dp))
 
-            val rotation by animateFloatAsState(if (showXpSources) 180f else 0f, label = "xpSourcesChevron")
+            val rotation by animateFloatAsState(
+                if (showXpSources) 180f else 0f,
+                label = "xpSourcesChevron"
+            )
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
@@ -185,7 +188,9 @@ fun UserXpBreakdownCard(
                 Icon(
                     imageVector = Icons.Filled.KeyboardArrowDown,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp).rotate(rotation),
+                    modifier = Modifier
+                        .size(18.dp)
+                        .rotate(rotation),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

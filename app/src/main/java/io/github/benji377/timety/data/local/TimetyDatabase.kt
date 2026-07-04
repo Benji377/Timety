@@ -3,11 +3,20 @@ package io.github.benji377.timety.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import io.github.benji377.timety.data.local.dao.*
-import io.github.benji377.timety.data.model.focus.*
-import io.github.benji377.timety.data.model.habit.*
-import io.github.benji377.timety.data.model.task.*
-import io.github.benji377.timety.data.model.user.*
+import io.github.benji377.timety.data.local.dao.FocusDao
+import io.github.benji377.timety.data.local.dao.HabitDao
+import io.github.benji377.timety.data.local.dao.TaskDao
+import io.github.benji377.timety.data.local.dao.UserDao
+import io.github.benji377.timety.data.model.focus.DistractionEntity
+import io.github.benji377.timety.data.model.focus.FocusModeEntity
+import io.github.benji377.timety.data.model.focus.FocusSessionEntity
+import io.github.benji377.timety.data.model.focus.FocusTagEntity
+import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
+import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.task.TaskEntity
+import io.github.benji377.timety.data.model.user.UserProfileEntity
 
 @Database(
     entities = [

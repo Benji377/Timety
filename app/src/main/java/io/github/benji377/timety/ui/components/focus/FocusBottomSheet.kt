@@ -19,8 +19,8 @@ import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -46,7 +46,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
-import io.github.benji377.timety.data.model.focus.DistractionType
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.habit.HabitEntity
@@ -87,8 +86,19 @@ fun DistractionBottomSheet(
 
             io.github.benji377.timety.data.model.focus.DistractionUIType.entries.forEach { type ->
                 ListItem(
-                    headlineContent = { Text(type.getLocalizedName(), fontWeight = FontWeight.Medium) },
-                    leadingContent = { Icon(type.icon, contentDescription = null, tint = type.color) },
+                    headlineContent = {
+                        Text(
+                            type.getLocalizedName(),
+                            fontWeight = FontWeight.Medium
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            type.icon,
+                            contentDescription = null,
+                            tint = type.color
+                        )
+                    },
                     modifier = Modifier.clickable { onEventSelected(type) },
                 )
             }
@@ -128,18 +138,52 @@ fun TargetSelectorBottomSheet(
                     text = stringResource(R.string.targetSheetTitle),
                     fontSize = AppTheme.fsHeadingSmall,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = AppTheme.spaceLarge, end = AppTheme.spaceLarge, bottom = AppTheme.spaceMedium),
+                    modifier = Modifier.padding(
+                        start = AppTheme.spaceLarge,
+                        end = AppTheme.spaceLarge,
+                        bottom = AppTheme.spaceMedium
+                    ),
                 )
                 TabRow(selectedTabIndex = tabIndex) {
-                    Tab(selected = tabIndex == 0, onClick = { tabIndex = 0 }, text = { Text(stringResource(R.string.globalLabelTags)) })
-                    Tab(selected = tabIndex == 1, onClick = { tabIndex = 1 }, text = { Text(stringResource(R.string.globalLabelTasks)) })
-                    Tab(selected = tabIndex == 2, onClick = { tabIndex = 2 }, text = { Text(stringResource(R.string.globalLabelHabits)) })
+                    Tab(
+                        selected = tabIndex == 0,
+                        onClick = { tabIndex = 0 },
+                        text = { Text(stringResource(R.string.globalLabelTags)) })
+                    Tab(
+                        selected = tabIndex == 1,
+                        onClick = { tabIndex = 1 },
+                        text = { Text(stringResource(R.string.globalLabelTasks)) })
+                    Tab(
+                        selected = tabIndex == 2,
+                        onClick = { tabIndex = 2 },
+                        text = { Text(stringResource(R.string.globalLabelHabits)) })
                 }
                 Box(modifier = Modifier.fillMaxSize()) {
                     when (tabIndex) {
-                        0 -> TagTab(tags, selectedType, selectedId, onTagSelected, onCreateNewTag, onDismissRequest)
-                        1 -> TaskTab(tasks, selectedType, selectedId, onTaskSelected, onDismissRequest)
-                        else -> HabitTab(habitsWithCompletions, selectedType, selectedId, onHabitSelected, onDismissRequest)
+                        0 -> TagTab(
+                            tags,
+                            selectedType,
+                            selectedId,
+                            onTagSelected,
+                            onCreateNewTag,
+                            onDismissRequest
+                        )
+
+                        1 -> TaskTab(
+                            tasks,
+                            selectedType,
+                            selectedId,
+                            onTaskSelected,
+                            onDismissRequest
+                        )
+
+                        else -> HabitTab(
+                            habitsWithCompletions,
+                            selectedType,
+                            selectedId,
+                            onHabitSelected,
+                            onDismissRequest
+                        )
                     }
                 }
             }
@@ -173,10 +217,17 @@ private fun TagTab(
                             )
                         },
                         headlineContent = {
-                            Text(tag.name, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
+                            Text(
+                                tag.name,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
                         },
                         trailingContent = {
-                            if (isSelected) Icon(Icons.Filled.Check, contentDescription = null, tint = SuccessColor)
+                            if (isSelected) Icon(
+                                Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = SuccessColor
+                            )
                         },
                         modifier = Modifier.clickable {
                             onTagSelected(tag)
@@ -233,12 +284,18 @@ private fun TaskTab(
                 supportingContent = {
                     Text(
                         task.category.ifBlank {
-                            if (task.isCompleted) stringResource(R.string.taskLabelCompleted) else stringResource(R.string.globalLabelTask)
+                            if (task.isCompleted) stringResource(R.string.taskLabelCompleted) else stringResource(
+                                R.string.globalLabelTask
+                            )
                         },
                     )
                 },
                 trailingContent = {
-                    if (isSelected) Icon(Icons.Filled.Check, contentDescription = null, tint = SuccessColor)
+                    if (isSelected) Icon(
+                        Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = SuccessColor
+                    )
                 },
                 modifier = Modifier.clickable {
                     onTaskSelected(task)
@@ -295,14 +352,22 @@ private fun HabitTab(
             }
             itemsIndexed(sorted) { index, hwc ->
                 val isDone = HabitUtils.isCompletedOn(hwc, today)
-                val isPrevDone = if (index > 0) HabitUtils.isCompletedOn(sorted[index - 1], today) else true
+                val isPrevDone =
+                    if (index > 0) HabitUtils.isCompletedOn(sorted[index - 1], today) else true
                 val isLocked = HabitUtils.isHabitLocked(index, isDone, isPrevDone)
                 HabitRow(hwc, isLocked, selectedType, selectedId, onHabitSelected, onDismissRequest)
             }
             item { HorizontalDivider() }
         }
         items(standalone, key = { it.habit.id }) { hwc ->
-            HabitRow(hwc, isLocked = false, selectedType = selectedType, selectedId = selectedId, onHabitSelected = onHabitSelected, onDismissRequest = onDismissRequest)
+            HabitRow(
+                hwc,
+                isLocked = false,
+                selectedType = selectedType,
+                selectedId = selectedId,
+                onHabitSelected = onHabitSelected,
+                onDismissRequest = onDismissRequest
+            )
         }
     }
 }
@@ -340,12 +405,19 @@ private fun HabitRow(
             )
         },
         supportingContent = {
-            Text(statusText, color = if (isLocked) Color.Gray else MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                statusText,
+                color = if (isLocked) Color.Gray else MaterialTheme.colorScheme.onSurfaceVariant
+            )
         },
         trailingContent = {
             when {
                 isLocked -> Icon(Icons.Filled.Lock, contentDescription = null, tint = Color.Gray)
-                isSelected -> Icon(Icons.Filled.Check, contentDescription = null, tint = SuccessColor)
+                isSelected -> Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = SuccessColor
+                )
             }
         },
         modifier = if (isLocked) {

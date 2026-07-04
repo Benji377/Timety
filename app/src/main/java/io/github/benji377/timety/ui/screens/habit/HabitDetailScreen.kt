@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,8 +26,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -86,8 +85,6 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import java.util.UUID
 
 /**
@@ -115,11 +112,20 @@ fun HabitDetailScreen(
     var stackName by remember(existingHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
     var stackOrder by remember(existingHabit) { mutableStateOf(existingHabit?.stackOrder) }
 
-    var frequency by remember(existingHabit) { mutableStateOf(existingHabit?.frequency ?: HabitFrequency.DAILY) }
-    var targetDaysPerWeek by remember(existingHabit) { mutableStateOf(existingHabit?.targetDaysPerWeek ?: 3) }
+    var frequency by remember(existingHabit) {
+        mutableStateOf(
+            existingHabit?.frequency ?: HabitFrequency.DAILY
+        )
+    }
+    var targetDaysPerWeek by remember(existingHabit) {
+        mutableStateOf(
+            existingHabit?.targetDaysPerWeek ?: 3
+        )
+    }
     var selectedWeekdays by remember(existingHabit) {
         mutableStateOf(
-            existingHabit?.targetWeekdays?.let { HabitUtils.parseWeekdays(it) }?.takeIf { it.isNotEmpty() }
+            existingHabit?.targetWeekdays?.let { HabitUtils.parseWeekdays(it) }
+                ?.takeIf { it.isNotEmpty() }
                 ?: setOf(1, 3, 5)
         )
     }
@@ -175,7 +181,9 @@ fun HabitDetailScreen(
             name = trimmedName,
             frequency = frequency,
             targetDaysPerWeek = if (frequency == HabitFrequency.WEEKLY_FLEXIBLE) targetDaysPerWeek else null,
-            targetWeekdays = if (frequency == HabitFrequency.WEEKLY_EXACT) HabitUtils.serializeWeekdays(selectedWeekdays) else null,
+            targetWeekdays = if (frequency == HabitFrequency.WEEKLY_EXACT) HabitUtils.serializeWeekdays(
+                selectedWeekdays
+            ) else null,
             targetTimeMinutes = targetTimeMinutes,
             createdAt = existingHabit?.createdAt ?: Instant.now(),
             colorValue = selectedColor.toArgb(),
@@ -213,7 +221,11 @@ fun HabitDetailScreen(
                 actions = {
                     if (!isEditing && !isNewHabit) {
                         IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(Icons.Filled.DeleteOutline, stringResource(R.string.commonLabelDelete), tint = ErrorColor)
+                            Icon(
+                                Icons.Filled.DeleteOutline,
+                                stringResource(R.string.commonLabelDelete),
+                                tint = ErrorColor
+                            )
                         }
                         IconButton(onClick = { isEditing = true }) {
                             Icon(Icons.Filled.Edit, "Edit")
@@ -258,7 +270,10 @@ fun HabitDetailScreen(
                     leadingIcon = { Icon(Icons.Filled.Stars, null, tint = selectedColor) },
                     isError = nameError,
                     supportingText = {
-                        if (nameError) Text(stringResource(R.string.habitDetailLabelNameRequest), color = ErrorColor)
+                        if (nameError) Text(
+                            stringResource(R.string.habitDetailLabelNameRequest),
+                            color = ErrorColor
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -284,7 +299,9 @@ fun HabitDetailScreen(
                             label = { Text(stringResource(R.string.habitDetailLabelStack)) },
                             placeholder = { Text(stringResource(R.string.habitDetailLabelStackHint)) },
                             leadingIcon = { Icon(Icons.Filled.Layers, null) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
                         )
                         if (filteredStacks.isNotEmpty()) {
                             ExposedDropdownMenu(
@@ -315,7 +332,9 @@ fun HabitDetailScreen(
                             readOnly = true,
                             enabled = isEditing,
                             label = { Text(stringResource(R.string.habitDetailLabelStackOrder)) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
                         )
                         ExposedDropdownMenu(
                             expanded = stackOrderExpanded && isEditing,
@@ -362,7 +381,9 @@ fun HabitDetailScreen(
                             modifier = Modifier
                                 .size(24.dp)
                                 .background(
-                                    color = if (isEditing) selectedColor else selectedColor.copy(alpha = 0.5f),
+                                    color = if (isEditing) selectedColor else selectedColor.copy(
+                                        alpha = 0.5f
+                                    ),
                                     shape = CircleShape,
                                 )
                         )
@@ -389,7 +410,10 @@ fun HabitDetailScreen(
 
             // --- FREQUENCY ---
             item {
-                Text(stringResource(R.string.habitDetailLabelFrequency), fontWeight = AppTheme.fwBold)
+                Text(
+                    stringResource(R.string.habitDetailLabelFrequency),
+                    fontWeight = AppTheme.fwBold
+                )
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     SegmentedButton(
@@ -413,11 +437,16 @@ fun HabitDetailScreen(
                 if (frequency == HabitFrequency.WEEKLY_FLEXIBLE) {
                     Card(
                         shape = AppTheme.brNeo,
-                        border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
+                        border = BorderStroke(
+                            AppTheme.neoBorderWidth,
+                            MaterialTheme.colorScheme.outline
+                        ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxWidth().padding(AppTheme.spaceLarge),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(AppTheme.spaceLarge),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(
@@ -445,7 +474,10 @@ fun HabitDetailScreen(
                 } else if (frequency == HabitFrequency.WEEKLY_EXACT) {
                     Card(
                         shape = AppTheme.brNeo,
-                        border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
+                        border = BorderStroke(
+                            AppTheme.neoBorderWidth,
+                            MaterialTheme.colorScheme.outline
+                        ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     ) {
                         val dayLabels = listOf(
@@ -458,7 +490,9 @@ fun HabitDetailScreen(
                             7 to stringResource(R.string.calendarHeaderSun),
                         )
                         FlowRow(
-                            modifier = Modifier.fillMaxWidth().padding(AppTheme.spaceLarge),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(AppTheme.spaceLarge),
                             horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
                             verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
                         ) {
@@ -468,7 +502,8 @@ fun HabitDetailScreen(
                                     selected = isSelected,
                                     enabled = isEditing,
                                     onClick = {
-                                        selectedWeekdays = if (isSelected) selectedWeekdays - day else selectedWeekdays + day
+                                        selectedWeekdays =
+                                            if (isSelected) selectedWeekdays - day else selectedWeekdays + day
                                     },
                                     label = { Text(label) },
                                     colors = FilterChipDefaults.filterChipColors(
@@ -484,7 +519,10 @@ fun HabitDetailScreen(
 
             // --- TIME REMINDER ---
             item {
-                Text(stringResource(R.string.habitDetailLabelReminder), fontWeight = AppTheme.fwBold)
+                Text(
+                    stringResource(R.string.habitDetailLabelReminder),
+                    fontWeight = AppTheme.fwBold
+                )
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
                 val timeLabel = targetTimeMinutes?.let {
                     val time = LocalTime.of(it / 60, it % 60)
@@ -551,7 +589,9 @@ fun HabitDetailScreen(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showIconPicker = false }) { Text(stringResource(R.string.commonLabelCancel)) }
+                    TextButton(onClick = {
+                        showIconPicker = false
+                    }) { Text(stringResource(R.string.commonLabelCancel)) }
                 },
             )
         }
@@ -576,7 +616,11 @@ fun HabitDetailScreen(
                                     .size(40.dp)
                                     .background(optionColor, CircleShape)
                                     .then(
-                                        if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                        if (isSelected) Modifier.border(
+                                            3.dp,
+                                            MaterialTheme.colorScheme.onSurface,
+                                            CircleShape
+                                        )
                                         else Modifier
                                     )
                                     .clickable {
@@ -588,7 +632,9 @@ fun HabitDetailScreen(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showColorPicker = false }) { Text(stringResource(R.string.commonLabelCancel)) }
+                    TextButton(onClick = {
+                        showColorPicker = false
+                    }) { Text(stringResource(R.string.commonLabelCancel)) }
                 },
             )
         }
@@ -612,7 +658,9 @@ fun HabitDetailScreen(
                     }) { Text(stringResource(R.string.commonLabelConfirm)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showTimePicker = false }) { Text(stringResource(R.string.commonLabelCancel)) }
+                    TextButton(onClick = {
+                        showTimePicker = false
+                    }) { Text(stringResource(R.string.commonLabelCancel)) }
                 },
             )
         }

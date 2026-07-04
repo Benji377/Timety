@@ -16,8 +16,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.LocalDining
 import androidx.compose.material.icons.filled.LunchDining
@@ -40,8 +40,11 @@ import androidx.compose.material.icons.filled.SportsGymnastics
 import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material.icons.outlined.Brush as BrushOutlined
 import androidx.compose.ui.graphics.vector.ImageVector
+import io.github.benji377.timety.util.habit.HabitIcons.availableIcons
+import io.github.benji377.timety.util.habit.HabitIcons.defaultIcon
+import io.github.benji377.timety.util.habit.HabitIcons.iconAt
+import androidx.compose.material.icons.outlined.Brush as BrushOutlined
 
 /**
  * Curated list of icons suitable for habits. Mirrors `utils/habit/habit_icons.dart`

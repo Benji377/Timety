@@ -35,7 +35,6 @@ import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.focus.FocusModeEditCard
-import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import java.util.UUID
@@ -58,7 +57,12 @@ fun FocusModesScreen(
         topBar = {
             TopAppBar(
                 colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
-                title = { Text(stringResource(R.string.focusModesTitle), fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.focusModesTitle),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -71,7 +75,11 @@ fun FocusModesScreen(
                 ExtendedFloatingActionButton(
                     onClick = {
                         val newId = UUID.randomUUID().toString()
-                        pendingMode = FocusModeEntity(id = newId, name = newModeLabel, type = FocusModeType.CUSTOM)
+                        pendingMode = FocusModeEntity(
+                            id = newId,
+                            name = newModeLabel,
+                            type = FocusModeType.CUSTOM
+                        )
                     },
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(newModeLabel) },
@@ -93,13 +101,28 @@ fun FocusModesScreen(
                     FocusModeEditCard(
                         mode = mode,
                         phases = listOf(
-                            SessionPhaseEntity(modeId = mode.id, type = PhaseType.FOCUS, durationMinutes = 25, orderIndex = 0),
-                            SessionPhaseEntity(modeId = mode.id, type = PhaseType.REST, durationMinutes = 5, orderIndex = 1),
+                            SessionPhaseEntity(
+                                modeId = mode.id,
+                                type = PhaseType.FOCUS,
+                                durationMinutes = 25,
+                                orderIndex = 0
+                            ),
+                            SessionPhaseEntity(
+                                modeId = mode.id,
+                                type = PhaseType.REST,
+                                durationMinutes = 5,
+                                orderIndex = 1
+                            ),
                         ),
                         isNewMode = true,
                         onCancelNew = { pendingMode = null },
                         onSaveNew = { pendingMode = null },
-                        onSave = { updatedMode, updatedPhases -> focusViewModel.saveMode(updatedMode, updatedPhases) },
+                        onSave = { updatedMode, updatedPhases ->
+                            focusViewModel.saveMode(
+                                updatedMode,
+                                updatedPhases
+                            )
+                        },
                         onDelete = { },
                     )
                 }
@@ -114,7 +137,12 @@ fun FocusModesScreen(
                     mode = mode,
                     phases = phases,
                     isNewMode = false,
-                    onSave = { updatedMode, updatedPhases -> focusViewModel.saveMode(updatedMode, updatedPhases) },
+                    onSave = { updatedMode, updatedPhases ->
+                        focusViewModel.saveMode(
+                            updatedMode,
+                            updatedPhases
+                        )
+                    },
                     onDelete = { focusViewModel.deleteMode(it) },
                 )
             }

@@ -21,8 +21,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
@@ -191,10 +191,16 @@ private fun OverviewView(
 ) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(localizedFocusModeName(mode), fontWeight = FontWeight.Bold, fontSize = AppTheme.fsHeadingSmall)
+            Text(
+                localizedFocusModeName(mode),
+                fontWeight = FontWeight.Bold,
+                fontSize = AppTheme.fsHeadingSmall
+            )
             Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
             Text(
-                text = if (mode.isSystem) stringResource(R.string.focusModeLabelTypeSystem) else stringResource(R.string.focusModeLabelTypeCustom),
+                text = if (mode.isSystem) stringResource(R.string.focusModeLabelTypeSystem) else stringResource(
+                    R.string.focusModeLabelTypeCustom
+                ),
                 color = if (mode.isSystem) MaterialTheme.colorScheme.onSurfaceVariant else TaskColor,
                 fontSize = AppTheme.fsBodySmall,
                 fontWeight = FontWeight.Medium,
@@ -207,10 +213,18 @@ private fun OverviewView(
         } else {
             Row {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.focusModeLabelEdit), tint = TaskColor)
+                    Icon(
+                        Icons.Filled.Edit,
+                        contentDescription = stringResource(R.string.focusModeLabelEdit),
+                        tint = TaskColor
+                    )
                 }
                 IconButton(onClick = onDeleteRequested) {
-                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.commonLabelDelete), tint = ErrorColor)
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.commonLabelDelete),
+                        tint = ErrorColor
+                    )
                 }
             }
         }
@@ -230,7 +244,11 @@ private fun EditorView(
     onCancel: () -> Unit,
     onSave: () -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             stringResource(R.string.focusModeLabelEditing),
             fontWeight = FontWeight.Bold,
@@ -238,7 +256,10 @@ private fun EditorView(
             color = TaskColor,
         )
         IconButton(onClick = onCancel) {
-            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.commonLabelCancel))
+            Icon(
+                Icons.Filled.Close,
+                contentDescription = stringResource(R.string.commonLabelCancel)
+            )
         }
     }
     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
@@ -253,7 +274,11 @@ private fun EditorView(
 
     Text(stringResource(R.string.focusModeLabelTimeline), fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-    Text(stringResource(R.string.focusModeLabelTimelineDesc), fontSize = AppTheme.fsBodySmall, color = Color.Gray)
+    Text(
+        stringResource(R.string.focusModeLabelTimelineDesc),
+        fontSize = AppTheme.fsBodySmall,
+        color = Color.Gray
+    )
     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
     val flexLabel = stringResource(R.string.focusModeFlex)
@@ -261,7 +286,10 @@ private fun EditorView(
         tempPhases.forEachIndexed { index, phase ->
             Row {
                 PhaseChip(phase = phase, flexLabel = flexLabel, onClick = { onPhaseTapped(index) })
-                Box(modifier = Modifier.width(24.dp).height(2.dp).background(Color.LightGray))
+                Box(modifier = Modifier
+                    .width(24.dp)
+                    .height(2.dp)
+                    .background(Color.LightGray))
             }
         }
         Box(
@@ -283,7 +311,11 @@ private fun EditorView(
         TextButton(onClick = onCancel) { Text(stringResource(R.string.commonLabelCancel)) }
         Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
         ElevatedButton(onClick = onSave) {
-            Icon(Icons.Filled.Save, contentDescription = null, modifier = Modifier.size(AppTheme.iconSizeSmall))
+            Icon(
+                Icons.Filled.Save,
+                contentDescription = null,
+                modifier = Modifier.size(AppTheme.iconSizeSmall)
+            )
             Spacer(modifier = Modifier.width(AppTheme.spaceXSmall))
             Text(stringResource(R.string.commonLabelSave))
         }

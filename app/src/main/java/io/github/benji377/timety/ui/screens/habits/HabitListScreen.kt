@@ -62,7 +62,8 @@ fun HabitListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),title = { Text(stringResource(R.string.habitsListTitle)) })
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
+                title = { Text(stringResource(R.string.habitsListTitle)) })
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -76,10 +77,15 @@ fun HabitListScreen(
     ) { paddingValues ->
         if (habitsWithCompletions.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.habitScreenEmpty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(R.string.habitScreenEmpty),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             val today = LocalDate.now()
@@ -89,7 +95,11 @@ fun HabitListScreen(
 
             habitsWithCompletions.forEach { hwc ->
                 when {
-                    HabitUtils.isCompletedOn(hwc, today) || HabitUtils.isWeeklyGoalMet(hwc) -> done.add(hwc)
+                    HabitUtils.isCompletedOn(
+                        hwc,
+                        today
+                    ) || HabitUtils.isWeeklyGoalMet(hwc) -> done.add(hwc)
+
                     HabitUtils.isHabitDueToday(hwc) -> dueToday.add(hwc)
                     else -> upcoming.add(hwc)
                 }

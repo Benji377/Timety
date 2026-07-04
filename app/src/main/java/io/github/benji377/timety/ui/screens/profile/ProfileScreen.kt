@@ -1,31 +1,53 @@
 package io.github.benji377.timety.ui.screens.profile
 
 import android.content.Intent
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,14 +61,11 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import io.github.benji377.timety.R
-import io.github.benji377.timety.ui.components.stats.CompactVerticalStatCard
-import io.github.benji377.timety.ui.components.user.StreakStatusBadge
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.ui.theme.WarningColor
-import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import kotlinx.coroutines.Dispatchers
@@ -77,19 +96,36 @@ fun ProfileScreen(
     val level = levelThresholds.indexOfLast { totalXp >= it }.coerceAtLeast(0) + 1
     val currentLevelXp = levelThresholds.getOrElse(level - 1) { 0 }
     val nextLevelXp = levelThresholds.getOrElse(level) { currentLevelXp + 1000 }
-    val progress = if (nextLevelXp > currentLevelXp) (totalXp - currentLevelXp).toFloat() / (nextLevelXp - currentLevelXp) else 1f
+    val progress =
+        if (nextLevelXp > currentLevelXp) (totalXp - currentLevelXp).toFloat() / (nextLevelXp - currentLevelXp) else 1f
 
     val totalTasksDone = tasks.count { it.task.isCompleted }
     val totalHabitsMet = habitsWithCompletions.sumOf { it.completions.size }
     val totalFocusMins = sessions.sumOf { it.totalSecondsFocused.toInt() } / 60
     val totalSessions = sessions.size
-    val taskDates = tasks.mapNotNull { if (it.task.isCompleted) it.task.completedAt?.atZone(java.time.ZoneId.systemDefault())?.toLocalDate() else null }
-    val habitDates = habitsWithCompletions.flatMap { it.completions.map { c -> c.completionDate.atZone(java.time.ZoneId.systemDefault()).toLocalDate() } }
-    val focusDates = sessions.map { java.time.LocalDateTime.ofInstant(it.startTime, java.time.ZoneId.systemDefault()).toLocalDate() }
+    val taskDates = tasks.mapNotNull {
+        if (it.task.isCompleted) it.task.completedAt?.atZone(java.time.ZoneId.systemDefault())
+            ?.toLocalDate() else null
+    }
+    val habitDates = habitsWithCompletions.flatMap {
+        it.completions.map { c ->
+            c.completionDate.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        }
+    }
+    val focusDates = sessions.map {
+        java.time.LocalDateTime.ofInstant(
+            it.startTime,
+            java.time.ZoneId.systemDefault()
+        ).toLocalDate()
+    }
     val allActivityDates = (taskDates + habitDates + focusDates).distinct().sorted()
 
-    val currentStreak = io.github.benji377.timety.util.stats.StreakCalculator.calculateCurrentStreak(allActivityDates)
-    val highestStreak = io.github.benji377.timety.util.stats.StreakCalculator.calculateBestStreak(allActivityDates)
+    val currentStreak =
+        io.github.benji377.timety.util.stats.StreakCalculator.calculateCurrentStreak(
+            allActivityDates
+        )
+    val highestStreak =
+        io.github.benji377.timety.util.stats.StreakCalculator.calculateBestStreak(allActivityDates)
 
     val context = LocalContext.current
     var showEditNameDialog by remember { mutableStateOf(false) }
@@ -123,15 +159,27 @@ fun ProfileScreen(
                 TextButton(onClick = {
                     showShareWrapupDialog = false
                     coroutineScope.launch(Dispatchers.IO) {
-                        val bytes = io.github.benji377.timety.ui.utils.WrapUpImageGenerator.generate(
-                            context, userName, level, levelTitle, highestStreak, totalTasksDone, totalFocusMins, totalHabitsMet
-                        )
+                        val bytes =
+                            io.github.benji377.timety.ui.utils.WrapUpImageGenerator.generate(
+                                context,
+                                userName,
+                                level,
+                                levelTitle,
+                                highestStreak,
+                                totalTasksDone,
+                                totalFocusMins,
+                                totalHabitsMet
+                            )
                         val cachePath = File(context.cacheDir, "images")
                         cachePath.mkdirs()
                         val file = File(cachePath, "wrapup.png")
                         file.writeBytes(bytes)
-                        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-                        
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            file
+                        )
+
                         withContext(Dispatchers.Main) {
                             val intent = Intent(Intent.ACTION_SEND).apply {
                                 type = "image/png"
@@ -183,13 +231,21 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.userProfileTitle), fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        stringResource(R.string.userProfileTitle),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 actions = {
                     IconButton(onClick = { showShareWrapupDialog = true }) {
                         Icon(Icons.Filled.Share, contentDescription = "Share Wrap-up")
                     }
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settingsTitle))
+                        Icon(
+                            Icons.Filled.Settings,
+                            contentDescription = stringResource(R.string.settingsTitle)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -239,7 +295,13 @@ fun ProfileScreen(
                             .clip(CircleShape)
                             .background(UserColor)
                             .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                            .clickable { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                            .clickable {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -268,11 +330,15 @@ fun ProfileScreen(
                         tempName = userName
                         showEditNameDialog = true
                     }) {
-                        Icon(Icons.Filled.Edit, stringResource(R.string.userEditNameTitle), tint = Color.Gray)
+                        Icon(
+                            Icons.Filled.Edit,
+                            stringResource(R.string.userEditNameTitle),
+                            tint = Color.Gray
+                        )
                     }
                 }
             }
-            
+
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
             // Streak Badge
@@ -284,7 +350,11 @@ fun ProfileScreen(
                 ) {
                     io.github.benji377.timety.ui.components.user.StreakStatusBadge(isActive = currentStreak > 0)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "$highestStreak Day Streak!", color = WarningColor, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "$highestStreak Day Streak!",
+                        color = WarningColor,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
@@ -301,7 +371,7 @@ fun ProfileScreen(
             }
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
-            
+
             // Streak Timeline Card Placeholder
             item {
                 io.github.benji377.timety.ui.components.user.UserStreakTimelineCard(
@@ -313,7 +383,7 @@ fun ProfileScreen(
                     highestStreak = highestStreak
                 )
             }
-            
+
             item { Spacer(modifier = Modifier.height(24.dp)) }
 
             // All-Time Statistics Section
@@ -324,19 +394,22 @@ fun ProfileScreen(
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         io.github.benji377.timety.ui.components.stats.StatCard(
-                            title = stringResource(R.string.userStatTasksDone), 
-                            value = totalTasksDone.toString(), 
+                            title = stringResource(R.string.userStatTasksDone),
+                            value = totalTasksDone.toString(),
                             icon = androidx.compose.material.icons.Icons.Filled.CheckCircle,
                             color = TaskColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
                         )
                         io.github.benji377.timety.ui.components.stats.StatCard(
-                            title = stringResource(R.string.userStatHabitsMet), 
-                            value = totalHabitsMet.toString(), 
+                            title = stringResource(R.string.userStatHabitsMet),
+                            value = totalHabitsMet.toString(),
                             icon = androidx.compose.material.icons.Icons.Filled.Repeat,
                             color = HabitColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
@@ -344,18 +417,21 @@ fun ProfileScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         io.github.benji377.timety.ui.components.stats.StatCard(
-                            title = stringResource(R.string.userStatFocusMins), 
-                            value = totalFocusMins.toString(), 
+                            title = stringResource(R.string.userStatFocusMins),
+                            value = totalFocusMins.toString(),
                             icon = androidx.compose.material.icons.Icons.Filled.Timer,
                             color = FocusColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
                         )
                         io.github.benji377.timety.ui.components.stats.StatCard(
-                            title = stringResource(R.string.userStatSessions), 
-                            value = totalSessions.toString(), 
+                            title = stringResource(R.string.userStatSessions),
+                            value = totalSessions.toString(),
                             icon = androidx.compose.material.icons.Icons.Filled.Timer,
                             color = FocusColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
@@ -363,10 +439,13 @@ fun ProfileScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         io.github.benji377.timety.ui.components.stats.StatCard(
-                            title = stringResource(R.string.streakLegendStreakDay), 
-                            value = highestStreak.toString(), 
+                            title = stringResource(R.string.streakLegendStreakDay),
+                            value = highestStreak.toString(),
                             icon = androidx.compose.material.icons.Icons.Filled.LocalFireDepartment,
                             color = WarningColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
@@ -376,7 +455,7 @@ fun ProfileScreen(
                     }
                 }
             }
-            
+
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
     }

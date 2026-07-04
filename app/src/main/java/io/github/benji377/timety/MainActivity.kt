@@ -60,7 +60,10 @@ class MainActivity : ComponentActivity() {
 
             TimetyTheme(darkTheme = darkTheme) {
                 CompositionLocalProvider(
-                    LocalDateFormatSettings provides DateFormatSettings(use24HourFormat, dateFormatCode)
+                    LocalDateFormatSettings provides DateFormatSettings(
+                        use24HourFormat,
+                        dateFormatCode
+                    )
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),

@@ -25,10 +25,10 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
 import androidx.glance.text.FontWeight
+import androidx.glance.text.Text
 import androidx.glance.text.TextDecoration
+import androidx.glance.text.TextStyle
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
@@ -44,10 +44,10 @@ class HabitWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appContainer = (context.applicationContext as TimetyApplication).container
         val habitRepository = appContainer.habitRepository
-        
+
         val habitsFlow = habitRepository.allHabits
         val completionsFlow = habitRepository.allCompletions
-        
+
         val habitsWithCompletions = combine(habitsFlow, completionsFlow) { habits, completions ->
             habits.map { habit ->
                 io.github.benji377.timety.data.model.habit.HabitWithCompletions(
@@ -56,15 +56,18 @@ class HabitWidget : GlanceAppWidget() {
                 )
             }
         }.first()
-        
+
         val today = LocalDate.now()
         val todayHabits = habitsWithCompletions.filter { HabitUtils.isHabitDueToday(it) }
-        
-        val completionStatus = todayHabits.associate { it.habit.id to HabitUtils.isCompletedOn(it, today) }
-        
-        val grouped = mutableMapOf<String, MutableList<io.github.benji377.timety.data.model.habit.HabitWithCompletions>>()
-        val standalone = mutableListOf<io.github.benji377.timety.data.model.habit.HabitWithCompletions>()
-        
+
+        val completionStatus =
+            todayHabits.associate { it.habit.id to HabitUtils.isCompletedOn(it, today) }
+
+        val grouped =
+            mutableMapOf<String, MutableList<io.github.benji377.timety.data.model.habit.HabitWithCompletions>>()
+        val standalone =
+            mutableListOf<io.github.benji377.timety.data.model.habit.HabitWithCompletions>()
+
         for (hwc in todayHabits) {
             val stackName = hwc.habit.stackName?.trim()
             if (!stackName.isNullOrEmpty()) {
@@ -73,7 +76,7 @@ class HabitWidget : GlanceAppWidget() {
                 standalone.add(hwc)
             }
         }
-        
+
         provideContent {
             val localContext = LocalContext.current
             GlanceTheme {
@@ -82,7 +85,14 @@ class HabitWidget : GlanceAppWidget() {
                         .fillMaxSize()
                         .padding(16.dp)
                         .background(GlanceTheme.colors.surface)
-                        .clickable(actionStartActivity(Intent(localContext, MainActivity::class.java))),
+                        .clickable(
+                            actionStartActivity(
+                                Intent(
+                                    localContext,
+                                    MainActivity::class.java
+                                )
+                            )
+                        ),
                     horizontalAlignment = Alignment.Start,
                     verticalAlignment = Alignment.Top
                 ) {
@@ -110,7 +120,7 @@ class HabitWidget : GlanceAppWidget() {
                             )
                         )
                     }
-                    
+
                     if (todayHabits.isEmpty()) {
                         Text(
                             text = localContext.getString(R.string.habitScreenEmpty),
@@ -125,12 +135,15 @@ class HabitWidget : GlanceAppWidget() {
                                 if (aDone != bDone) if (aDone) 1 else -1
                                 else (a.habit.stackOrder ?: 99).compareTo(b.habit.stackOrder ?: 99)
                             })
-                            
-                            val completedInStack = stackHabits.count { completionStatus[it.habit.id] == true }
+
+                            val completedInStack =
+                                stackHabits.count { completionStatus[it.habit.id] == true }
                             val totalInStack = stackHabits.size
                             val allDone = completedInStack == totalInStack
-                            
-                            Column(modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)) {
+
+                            Column(
+                                modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
+                            ) {
                                 // Stack Header
                                 Row(
                                     modifier = GlanceModifier.fillMaxWidth()
@@ -142,7 +155,11 @@ class HabitWidget : GlanceAppWidget() {
                                         text = stackName.uppercase(Locale.getDefault()),
                                         maxLines = 1,
                                         style = TextStyle(
-                                            color = androidx.glance.unit.ColorProvider(Color(0xFF7C3AED)),
+                                            color = androidx.glance.unit.ColorProvider(
+                                                Color(
+                                                    0xFF7C3AED
+                                                )
+                                            ),
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 10.sp
                                         ),
@@ -152,33 +169,51 @@ class HabitWidget : GlanceAppWidget() {
                                     Text(
                                         text = "$completedInStack / $totalInStack",
                                         style = TextStyle(
-                                            color = androidx.glance.unit.ColorProvider(if (allDone) Color(0xFF16A34A) else Color(0xFF7C3AED)),
+                                            color = androidx.glance.unit.ColorProvider(
+                                                if (allDone) Color(
+                                                    0xFF16A34A
+                                                ) else Color(0xFF7C3AED)
+                                            ),
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 10.sp
                                         )
                                     )
                                 }
-                                
+
                                 // Stack Items
                                 stackHabits.forEachIndexed { i, hwc ->
                                     val isDone = completionStatus[hwc.habit.id] ?: false
-                                    val prevDone = if (i == 0) true else completionStatus[stackHabits[i-1].habit.id] ?: false
+                                    val prevDone =
+                                        if (i == 0) true else completionStatus[stackHabits[i - 1].habit.id]
+                                            ?: false
                                     val isLocked = HabitUtils.isHabitLocked(i, isDone, prevDone)
                                     val completionsThisWeek = HabitUtils.getCompletionsThisWeek(hwc)
-                                    
+
                                     val subtitle = when (hwc.habit.frequency) {
                                         HabitFrequency.DAILY -> localContext.getString(R.string.habitFreqDaily)
                                         HabitFrequency.WEEKLY_EXACT -> {
-                                            val days = HabitUtils.parseWeekdays(hwc.habit.targetWeekdays).sorted()
-                                                .joinToString(", ") { AppDateUtils.weekdayToStringShort(Locale.getDefault(), it) }
+                                            val days =
+                                                HabitUtils.parseWeekdays(hwc.habit.targetWeekdays)
+                                                    .sorted()
+                                                    .joinToString(", ") {
+                                                        AppDateUtils.weekdayToStringShort(
+                                                            Locale.getDefault(),
+                                                            it
+                                                        )
+                                                    }
                                             localContext.getString(R.string.habitFreqWeekly, days)
                                         }
+
                                         HabitFrequency.WEEKLY_FLEXIBLE -> {
                                             val target = hwc.habit.targetDaysPerWeek ?: 0
-                                            localContext.getString(R.string.habitFreqFlexible, completionsThisWeek, target)
+                                            localContext.getString(
+                                                R.string.habitFreqFlexible,
+                                                completionsThisWeek,
+                                                target
+                                            )
                                         }
                                     }
-                                    
+
                                     Row(
                                         modifier = GlanceModifier.fillMaxWidth()
                                             .background(ImageProvider(R.drawable.widget_habit_stack_item_bg))
@@ -198,11 +233,14 @@ class HabitWidget : GlanceAppWidget() {
                                         Spacer(modifier = GlanceModifier.width(4.dp))
                                         Text(
                                             text = subtitle,
-                                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp)
+                                            style = TextStyle(
+                                                color = GlanceTheme.colors.onSurfaceVariant,
+                                                fontSize = 12.sp
+                                            )
                                         )
                                     }
                                 }
-                                
+
                                 // Stack Footer
                                 Box(
                                     modifier = GlanceModifier.fillMaxWidth().height(2.dp)
@@ -210,25 +248,36 @@ class HabitWidget : GlanceAppWidget() {
                                 ) {}
                             }
                         }
-                        
+
                         // Standalone Habits
                         standalone.forEach { hwc ->
                             val isDone = completionStatus[hwc.habit.id] ?: false
                             val completionsThisWeek = HabitUtils.getCompletionsThisWeek(hwc)
-                            
+
                             val subtitle = when (hwc.habit.frequency) {
                                 HabitFrequency.DAILY -> localContext.getString(R.string.habitFreqDaily)
                                 HabitFrequency.WEEKLY_EXACT -> {
-                                    val days = HabitUtils.parseWeekdays(hwc.habit.targetWeekdays).sorted()
-                                        .joinToString(", ") { AppDateUtils.weekdayToStringShort(Locale.getDefault(), it) }
+                                    val days =
+                                        HabitUtils.parseWeekdays(hwc.habit.targetWeekdays).sorted()
+                                            .joinToString(", ") {
+                                                AppDateUtils.weekdayToStringShort(
+                                                    Locale.getDefault(),
+                                                    it
+                                                )
+                                            }
                                     localContext.getString(R.string.habitFreqWeekly, days)
                                 }
+
                                 HabitFrequency.WEEKLY_FLEXIBLE -> {
                                     val target = hwc.habit.targetDaysPerWeek ?: 0
-                                    localContext.getString(R.string.habitFreqFlexible, completionsThisWeek, target)
+                                    localContext.getString(
+                                        R.string.habitFreqFlexible,
+                                        completionsThisWeek,
+                                        target
+                                    )
                                 }
                             }
-                            
+
                             Box(modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)) {
                                 Row(
                                     modifier = GlanceModifier.fillMaxWidth()
@@ -249,7 +298,10 @@ class HabitWidget : GlanceAppWidget() {
                                     Spacer(modifier = GlanceModifier.width(4.dp))
                                     Text(
                                         text = subtitle,
-                                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp)
+                                        style = TextStyle(
+                                            color = GlanceTheme.colors.onSurfaceVariant,
+                                            fontSize = 12.sp
+                                        )
                                     )
                                 }
                             }

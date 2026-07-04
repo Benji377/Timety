@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -32,7 +32,9 @@
             android:name=".services.FocusTimerService"
             android:exported="false"
             android:foregroundServiceType="specialUse">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Timer for productivity tracking" />
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Timer for productivity tracking" />
         </service>
 
         <receiver
@@ -43,7 +45,9 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".services.TimerSoundReceiver" android:exported="false" />
+        <receiver
+            android:name=".services.TimerSoundReceiver"
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

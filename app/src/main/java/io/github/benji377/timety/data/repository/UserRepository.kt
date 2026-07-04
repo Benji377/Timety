@@ -2,8 +2,8 @@ package io.github.benji377.timety.data.repository
 
 import io.github.benji377.timety.data.local.dao.UserDao
 import io.github.benji377.timety.data.model.user.UserProfileEntity
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.time.Instant
 

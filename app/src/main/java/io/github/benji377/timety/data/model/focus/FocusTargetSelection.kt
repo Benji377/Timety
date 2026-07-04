@@ -61,7 +61,11 @@ data class FocusTargetSelection(
  * NOTE (viewmodel addition - see report): this enum did not exist in the Kotlin port yet. Added
  * here in `data/model/focus` per the porting instructions.
  */
-enum class DistractionUIType(val entityType: DistractionType, val icon: ImageVector, val color: Color) {
+enum class DistractionUIType(
+    val entityType: DistractionType,
+    val icon: ImageVector,
+    val color: Color
+) {
     DISTRACTED(DistractionType.DISTRACTED, Icons.Filled.WarningAmber, ErrorColor),
     HYDRATED(DistractionType.HYDRATED, Icons.Filled.WaterDrop, TaskColor),
     STRETCHED(DistractionType.STRETCHED, Icons.Filled.AccessibilityNew, WarningColor),
@@ -78,7 +82,8 @@ enum class DistractionUIType(val entityType: DistractionType, val icon: ImageVec
     }
 
     companion object {
-        fun fromEntityType(type: DistractionType): DistractionUIType = entries.firstOrNull { it.entityType == type } ?: DISTRACTED
+        fun fromEntityType(type: DistractionType): DistractionUIType =
+            entries.firstOrNull { it.entityType == type } ?: DISTRACTED
     }
 }
 

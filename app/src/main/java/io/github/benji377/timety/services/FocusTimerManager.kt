@@ -1,10 +1,16 @@
 package io.github.benji377.timety.services
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.time.Instant
 
 /**
@@ -33,7 +39,10 @@ data class TimerState(
     val elapsedSeconds: Int = 0,
 ) {
     val progress: Float
-        get() = if (isStopwatch) 0f else if (totalPhaseSeconds > 0) (secondsRemaining.toFloat() / totalPhaseSeconds).coerceIn(0f, 1f) else 1f
+        get() = if (isStopwatch) 0f else if (totalPhaseSeconds > 0) (secondsRemaining.toFloat() / totalPhaseSeconds).coerceIn(
+            0f,
+            1f
+        ) else 1f
 
     val centerText: String
         get() {
@@ -53,7 +62,8 @@ object FocusTimerManager {
     private val _timerState = MutableStateFlow(TimerState())
     val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
 
-    val phaseCompleteEvent = kotlinx.coroutines.flow.MutableSharedFlow<Pair<Boolean, Int>>(extraBufferCapacity = 1)
+    val phaseCompleteEvent =
+        kotlinx.coroutines.flow.MutableSharedFlow<Pair<Boolean, Int>>(extraBufferCapacity = 1)
 
     private var job: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -70,7 +80,12 @@ object FocusTimerManager {
      * being re-run for every phase (fresh anchor) while `startSession`'s resume path leaves
      * `_secondsRemainingInPhase` untouched.
      */
-    fun setMode(name: String, totalPhaseSeconds: Int, isRestPhase: Boolean, isStopwatch: Boolean = false) {
+    fun setMode(
+        name: String,
+        totalPhaseSeconds: Int,
+        isRestPhase: Boolean,
+        isStopwatch: Boolean = false
+    ) {
         if (_timerState.value.isRunning) return
         val resuming = _timerState.value.isPaused
         _timerState.update {
@@ -93,7 +108,13 @@ object FocusTimerManager {
     fun startTimer() {
         if (_timerState.value.isRunning) return
 
-        _timerState.update { it.copy(isRunning = true, isPaused = false, isAwaitingContinue = false) }
+        _timerState.update {
+            it.copy(
+                isRunning = true,
+                isPaused = false,
+                isAwaitingContinue = false
+            )
+        }
 
         if (phaseBaseTime == null) {
             phaseBaseTime = Instant.now()
@@ -138,7 +159,7 @@ object FocusTimerManager {
         val now = Instant.now()
         val currentChunkElapsed = (now.epochSecond - baseTime.epochSecond).toInt()
         val totalElapsed = accumulatedElapsed + currentChunkElapsed
-        
+
         if (_timerState.value.isStopwatch) {
             _timerState.update { it.copy(elapsedSeconds = totalElapsed) }
         } else {
@@ -147,7 +168,7 @@ object FocusTimerManager {
                 job?.cancel()
                 val isRestPhase = _timerState.value.isRestPhase
                 val duration = _timerState.value.totalPhaseSeconds
-    
+
                 _timerState.update {
                     it.copy(
                         isRunning = false,
@@ -158,7 +179,12 @@ object FocusTimerManager {
                 }
                 phaseCompleteEvent.tryEmit(Pair(isRestPhase, duration))
             } else {
-                _timerState.update { it.copy(secondsRemaining = remaining, elapsedSeconds = totalElapsed) }
+                _timerState.update {
+                    it.copy(
+                        secondsRemaining = remaining,
+                        elapsedSeconds = totalElapsed
+                    )
+                }
             }
         }
     }

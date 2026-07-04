@@ -39,7 +39,7 @@ class HabitStatsScreenTest {
     @Test
     fun testCalculateCurrentStreak() {
         val today = LocalDate.now()
-        
+
         // No completions
         assertEquals(0, calculateCurrentStreak(createHabitWithCompletions(emptyList())))
 
@@ -47,13 +47,22 @@ class HabitStatsScreenTest {
         assertEquals(1, calculateCurrentStreak(createHabitWithCompletions(listOf(today))))
 
         // Completed yesterday and today
-        assertEquals(2, calculateCurrentStreak(createHabitWithCompletions(listOf(today, today.minusDays(1)))))
+        assertEquals(
+            2,
+            calculateCurrentStreak(createHabitWithCompletions(listOf(today, today.minusDays(1))))
+        )
 
         // Completed yesterday but not today (streak is maintained)
-        assertEquals(1, calculateCurrentStreak(createHabitWithCompletions(listOf(today.minusDays(1)))))
-        
+        assertEquals(
+            1,
+            calculateCurrentStreak(createHabitWithCompletions(listOf(today.minusDays(1))))
+        )
+
         // Completed 2 days ago (streak broken)
-        assertEquals(0, calculateCurrentStreak(createHabitWithCompletions(listOf(today.minusDays(2)))))
+        assertEquals(
+            0,
+            calculateCurrentStreak(createHabitWithCompletions(listOf(today.minusDays(2))))
+        )
     }
 
     @Test
@@ -67,16 +76,28 @@ class HabitStatsScreenTest {
         assertEquals(1, calculateBestStreak(createHabitWithCompletions(listOf(today))))
 
         // Contiguous
-        assertEquals(3, calculateBestStreak(createHabitWithCompletions(listOf(
-            today,
-            today.minusDays(1),
-            today.minusDays(2)
-        ))))
+        assertEquals(
+            3, calculateBestStreak(
+                createHabitWithCompletions(
+                    listOf(
+                        today,
+                        today.minusDays(1),
+                        today.minusDays(2)
+                    )
+                )
+            )
+        )
 
         // Broken streak, should return max
-        assertEquals(3, calculateBestStreak(createHabitWithCompletions(listOf(
-            today, // 1
-            today.minusDays(2), today.minusDays(3), today.minusDays(4) // 3
-        ))))
+        assertEquals(
+            3, calculateBestStreak(
+                createHabitWithCompletions(
+                    listOf(
+                        today, // 1
+                        today.minusDays(2), today.minusDays(3), today.minusDays(4) // 3
+                    )
+                )
+            )
+        )
     }
 }

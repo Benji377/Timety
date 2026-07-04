@@ -1,30 +1,29 @@
 package io.github.benji377.timety.ui.screens.focus
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.ui.text.drawText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -48,13 +47,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
-import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
@@ -65,16 +64,12 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
-import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.StatsUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Locale
 
 /**
  * Focus statistics content: week navigator, tag filter, 24h "clock" of the selected day's
@@ -118,7 +113,12 @@ fun FocusStatsScreen(
     val isCurrentRealWeek = AppDateUtils.isWithinInclusive(LocalDate.now(), startOfWeek, endOfWeek)
 
     val clockSessions = remember(filteredSessions, selectedDay) {
-        filteredSessions.filter { AppDateUtils.isSameDay(it.startTime.atZone(zone).toLocalDate(), selectedDay) }
+        filteredSessions.filter {
+            AppDateUtils.isSameDay(
+                it.startTime.atZone(zone).toLocalDate(),
+                selectedDay
+            )
+        }
     }
     val clockTotalMins = clockSessions.sumOf { it.totalSecondsFocused / 60 }
 
@@ -129,6 +129,7 @@ fun FocusStatsScreen(
     fun resolveTargetName(session: FocusSessionEntity): String = when (session.targetType) {
         FocusTargetType.TASK, FocusTargetType.HABIT ->
             session.targetLabel?.trim()?.takeIf { it.isNotEmpty() } ?: defaultTargetEmpty
+
         FocusTargetType.TAG ->
             if (session.tagId != null) {
                 tagById[session.tagId]?.name ?: session.targetLabel ?: defaultTargetUntagged
@@ -140,11 +141,16 @@ fun FocusStatsScreen(
     val selectedDayDistractions = remember(distractions, selectedTagFilterId, selectedDay) {
         distractions.filter { entry ->
             (selectedTagFilterId == null || entry.session.tagId == selectedTagFilterId) &&
-                AppDateUtils.isSameDay(entry.distraction.time.atZone(zone).toLocalDate(), selectedDay)
+                    AppDateUtils.isSameDay(
+                        entry.distraction.time.atZone(zone).toLocalDate(),
+                        selectedDay
+                    )
         }
     }
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(AppTheme.spaceLarge)) {
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .padding(AppTheme.spaceLarge)) {
         item {
             WeekNavigator(
                 focusedDate = focusedWeek,
@@ -174,11 +180,22 @@ fun FocusStatsScreen(
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Box(modifier = Modifier.size(250.dp), contentAlignment = Alignment.Center) {
-                    FocusClockChart(sessions = clockSessions, color = FocusColor, modifier = Modifier.fillMaxSize())
+                    FocusClockChart(
+                        sessions = clockSessions,
+                        color = FocusColor,
+                        modifier = Modifier.fillMaxSize()
+                    )
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("${clockTotalMins / 60}h ${clockTotalMins % 60}m", fontSize = 28.sp, fontWeight = FontWeight.Black)
                         Text(
-                            stringResource(R.string.focusStatsSectionClockSessions, clockSessions.size),
+                            "${clockTotalMins / 60}h ${clockTotalMins % 60}m",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            stringResource(
+                                R.string.focusStatsSectionClockSessions,
+                                clockSessions.size
+                            ),
                             color = Color.Gray,
                         )
                     }
@@ -194,8 +211,19 @@ fun FocusStatsScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 val sortedSessions = filteredSessions.sortedByDescending { it.startTime }
                 sortedSessions.forEachIndexed { index, session ->
-                    SessionRow(session, resolveTargetName(session), session.modeId.let { id -> modeById[id]?.let { localizedFocusModeName(it) } ?: defaultModeLabel }, tagById)
-                    if (index != sortedSessions.lastIndex) Divider(modifier = Modifier.padding(vertical = AppTheme.spaceMedium))
+                    SessionRow(
+                        session,
+                        resolveTargetName(session),
+                        session.modeId.let { id ->
+                            modeById[id]?.let { localizedFocusModeName(it) } ?: defaultModeLabel
+                        },
+                        tagById
+                    )
+                    if (index != sortedSessions.lastIndex) Divider(
+                        modifier = Modifier.padding(
+                            vertical = AppTheme.spaceMedium
+                        )
+                    )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
             }
@@ -206,7 +234,12 @@ fun FocusStatsScreen(
             )
             Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             if (selectedDayDistractions.isEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().padding(vertical = AppTheme.spaceXLarge), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = AppTheme.spaceXLarge),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(stringResource(R.string.focusStatsSectionDistractionsEmpty))
                 }
             } else {
@@ -222,7 +255,9 @@ fun FocusStatsScreen(
                 stringResource(R.string.focusStatsSectionVolumeSubtitle),
             )
             Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-            Box(modifier = Modifier.height(200.dp).fillMaxWidth()) {
+            Box(modifier = Modifier
+                .height(200.dp)
+                .fillMaxWidth()) {
                 VolumeBarChart(filteredSessions, startOfWeek, isCurrentRealWeek, zone)
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
@@ -233,14 +268,21 @@ fun FocusStatsScreen(
     }
 }
 
-private fun filteredSessionsForCounts(sessions: List<FocusSessionEntity>, tags: List<FocusTagEntity>): List<FocusSessionEntity> = sessions
+private fun filteredSessionsForCounts(
+    sessions: List<FocusSessionEntity>,
+    tags: List<FocusTagEntity>
+): List<FocusSessionEntity> = sessions
 
 @Composable
 private fun SectionHeader(title: String, subtitle: String) {
     Column {
         Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-        Text(subtitle, fontSize = AppTheme.fsBodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            subtitle,
+            fontSize = AppTheme.fsBodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -254,7 +296,10 @@ private fun TagFilterRow(
     val tagById = remember(tags) { tags.associateBy { it.id } }
     val counts = remember(sessions, tags) {
         val map = LinkedHashMap<String, Int>()
-        sessions.forEach { s -> val id = s.tagId; if (id != null && tagById.containsKey(id)) map[id] = (map[id] ?: 0) + 1 }
+        sessions.forEach { s ->
+            val id = s.tagId; if (id != null && tagById.containsKey(id)) map[id] =
+            (map[id] ?: 0) + 1
+        }
         map
     }
     if (counts.isEmpty()) return
@@ -263,19 +308,32 @@ private fun TagFilterRow(
         counts.keys.mapNotNull { tagById[it] }.sortedBy { it.name }
     }
 
-    Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
+    ) {
         FilterChip(
             selected = selectedTagId == null,
             onClick = { onSelect(null) },
             label = { Text(stringResource(R.string.focusTagsLabelAll)) },
-            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = FocusColor, selectedLabelColor = Color.White),
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = FocusColor,
+                selectedLabelColor = Color.White
+            ),
         )
         usedTags.forEach { tag ->
             FilterChip(
                 selected = selectedTagId == tag.id,
                 onClick = { onSelect(if (selectedTagId == tag.id) null else tag.id) },
                 label = { Text("${tag.name} (${counts[tag.id] ?: 0})") },
-                leadingIcon = { Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(Color(tag.colorValue))) },
+                leadingIcon = {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(Color(tag.colorValue))
+                    )
+                },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = Color(tag.colorValue).copy(alpha = 0.25f),
                 ),
@@ -285,8 +343,15 @@ private fun TagFilterRow(
 }
 
 @Composable
-private fun DayPillSelector(startOfWeek: LocalDate, selectedDay: LocalDate, onSelect: (LocalDate) -> Unit) {
-    Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
+private fun DayPillSelector(
+    startOfWeek: LocalDate,
+    selectedDay: LocalDate,
+    onSelect: (LocalDate) -> Unit
+) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
+    ) {
         for (i in 0 until 7) {
             val day = startOfWeek.plusDays(i.toLong())
             val isSelected = day == selectedDay
@@ -306,11 +371,18 @@ private fun DayPillSelector(startOfWeek: LocalDate, selectedDay: LocalDate, onSe
                     .then(
                         androidx.compose.ui.Modifier.background(if (isSelected) FocusColor else Color.Transparent)
                     )
-                    .then(androidx.compose.ui.Modifier.clickable(onClick = { onSelect(day) }, indication = null, interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() })),
+                    .then(
+                        androidx.compose.ui.Modifier.clickable(
+                            onClick = { onSelect(day) },
+                            indication = null,
+                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() })
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatWeekdayDay(day),
+                    text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatWeekdayDay(
+                        day
+                    ),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                     color = if (isSelected) Color.White else Color.Gray,
@@ -321,7 +393,11 @@ private fun DayPillSelector(startOfWeek: LocalDate, selectedDay: LocalDate, onSe
 }
 
 @Composable
-private fun FocusClockChart(sessions: List<FocusSessionEntity>, color: Color, modifier: Modifier = Modifier) {
+private fun FocusClockChart(
+    sessions: List<FocusSessionEntity>,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
     val zone = remember { ZoneId.systemDefault() }
     val textMeasurer = rememberTextMeasurer()
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -331,7 +407,12 @@ private fun FocusClockChart(sessions: List<FocusSessionEntity>, color: Color, mo
         val radius = minOf(size.width, size.height) / 2f
         val strokeWidth = 24.dp.toPx()
 
-        drawCircle(color = trackColor, radius = radius - strokeWidth / 2f, center = center, style = Stroke(width = strokeWidth))
+        drawCircle(
+            color = trackColor,
+            radius = radius - strokeWidth / 2f,
+            center = center,
+            style = Stroke(width = strokeWidth)
+        )
 
         val markers = listOf("0" to -90.0, "6" to 0.0, "12" to 90.0, "18" to 180.0)
         markers.forEach { (label, deg) ->
@@ -339,8 +420,12 @@ private fun FocusClockChart(sessions: List<FocusSessionEntity>, color: Color, mo
             val r = radius - strokeWidth - 10.dp.toPx()
             val x = center.x + (r * kotlin.math.cos(rad)).toFloat()
             val y = center.y + (r * kotlin.math.sin(rad)).toFloat()
-            val layout = textMeasurer.measure(label, style = TextStyle(color = Color.Gray, fontSize = 10.sp))
-            drawText(layout, topLeft = Offset(x - layout.size.width / 2f, y - layout.size.height / 2f))
+            val layout =
+                textMeasurer.measure(label, style = TextStyle(color = Color.Gray, fontSize = 10.sp))
+            drawText(
+                layout,
+                topLeft = Offset(x - layout.size.width / 2f, y - layout.size.height / 2f)
+            )
         }
 
         sessions.forEach { session ->
@@ -364,7 +449,10 @@ private fun FocusClockChart(sessions: List<FocusSessionEntity>, color: Color, mo
                 useCenter = false,
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
                 size = Size((radius - strokeWidth / 2f) * 2, (radius - strokeWidth / 2f) * 2),
-                topLeft = Offset(center.x - (radius - strokeWidth / 2f), center.y - (radius - strokeWidth / 2f)),
+                topLeft = Offset(
+                    center.x - (radius - strokeWidth / 2f),
+                    center.y - (radius - strokeWidth / 2f)
+                ),
             )
         }
     }
@@ -380,15 +468,33 @@ private fun SessionRow(
     val (icon: ImageVector, color: Color) = when (session.targetType) {
         FocusTargetType.TASK -> Icons.Filled.TaskAlt to TaskColor
         FocusTargetType.HABIT -> Icons.Filled.Alarm to HabitColor
-        FocusTargetType.TAG -> Icons.Outlined.LocalOffer to (session.tagId?.let { tagById[it]?.let { tag -> Color(tag.colorValue) } } ?: FocusColor)
+        FocusTargetType.TAG -> Icons.Outlined.LocalOffer to (session.tagId?.let {
+            tagById[it]?.let { tag ->
+                Color(
+                    tag.colorValue
+                )
+            }
+        } ?: FocusColor)
     }
     val dfs = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
-    val dateStr = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(session.startTime, dfs.dateFormatCode)
-    val timeStr = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(session.startTime, dfs.use24HourFormat)
+    val dateStr = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(
+        session.startTime,
+        dfs.dateFormatCode
+    )
+    val timeStr = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+        session.startTime,
+        dfs.use24HourFormat
+    )
     val mins = session.totalSecondsFocused / 60
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(color.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
             Icon(icon, contentDescription = null, tint = color)
         }
         Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
@@ -404,14 +510,25 @@ private fun SessionRow(
 }
 
 @Composable
-private fun DistractionRow(entry: io.github.benji377.timety.ui.viewmodel.DistractionWithSession, targetName: String) {
-    val type = io.github.benji377.timety.data.model.focus.DistractionUIType.fromEntityType(entry.distraction.type)
-    val use24Hour = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
+private fun DistractionRow(
+    entry: io.github.benji377.timety.ui.viewmodel.DistractionWithSession,
+    targetName: String
+) {
+    val type =
+        io.github.benji377.timety.data.model.focus.DistractionUIType.fromEntityType(entry.distraction.type)
+    val use24Hour =
+        io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
     val zone = remember { ZoneId.systemDefault() }
 
-    Row(modifier = Modifier.padding(vertical = AppTheme.spaceSmall), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier.padding(vertical = AppTheme.spaceSmall),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box(
-            modifier = Modifier.size(40.dp).clip(CircleShape).background(io.github.benji377.timety.ui.theme.WarningAccent.copy(alpha = 0.12f)),
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(io.github.benji377.timety.ui.theme.WarningAccent.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(type.icon, contentDescription = null, tint = type.color)
@@ -420,7 +537,13 @@ private fun DistractionRow(entry: io.github.benji377.timety.ui.viewmodel.Distrac
         Column {
             Text(type.getLocalizedName(), fontWeight = FontWeight.SemiBold)
             Text(
-                "${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTimeWithSeconds(entry.distraction.time, use24Hour, zone)} | $targetName",
+                "${
+                    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTimeWithSeconds(
+                        entry.distraction.time,
+                        use24Hour,
+                        zone
+                    )
+                } | $targetName",
                 fontSize = AppTheme.fsBodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -429,7 +552,12 @@ private fun DistractionRow(entry: io.github.benji377.timety.ui.viewmodel.Distrac
 }
 
 @Composable
-private fun VolumeBarChart(sessions: List<FocusSessionEntity>, startOfWeek: LocalDate, isCurrentRealWeek: Boolean, zone: ZoneId) {
+private fun VolumeBarChart(
+    sessions: List<FocusSessionEntity>,
+    startOfWeek: LocalDate,
+    isCurrentRealWeek: Boolean,
+    zone: ZoneId
+) {
     val dailyMins = IntArray(7)
     sessions.forEach { session ->
         val day = session.startTime.atZone(zone).toLocalDate()
@@ -441,16 +569,35 @@ private fun VolumeBarChart(sessions: List<FocusSessionEntity>, startOfWeek: Loca
     val todayIndex = if (isCurrentRealWeek) LocalDate.now().dayOfWeek.value - 1 else -1
 
     val days = listOf(
-        stringResource(R.string.commonWeekdayMon), stringResource(R.string.commonWeekdayTue), stringResource(R.string.commonWeekdayWed),
-        stringResource(R.string.commonWeekdayThu), stringResource(R.string.commonWeekdayFri), stringResource(R.string.commonWeekdaySat),
+        stringResource(R.string.commonWeekdayMon),
+        stringResource(R.string.commonWeekdayTue),
+        stringResource(R.string.commonWeekdayWed),
+        stringResource(R.string.commonWeekdayThu),
+        stringResource(R.string.commonWeekdayFri),
+        stringResource(R.string.commonWeekdaySat),
         stringResource(R.string.commonWeekdaySun),
     )
 
-    Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.Bottom) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.Bottom
+    ) {
         for (i in 0 until 7) {
             val isToday = i == todayIndex
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).fillMaxSize(), verticalArrangement = Arrangement.Bottom) {
-                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
                     val h = (dailyMins[i] / denom).coerceIn(0f, 1f)
                     Box(
                         modifier = Modifier
@@ -472,7 +619,12 @@ private fun VolumeBarChart(sessions: List<FocusSessionEntity>, startOfWeek: Loca
     }
 }
 
-private data class TargetTypeStat(val label: String, val color: Color, val icon: ImageVector, val minutes: Int)
+private data class TargetTypeStat(
+    val label: String,
+    val color: Color,
+    val icon: ImageVector,
+    val minutes: Int
+)
 
 @Composable
 private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
@@ -481,15 +633,36 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
     val habitsLabel = stringResource(R.string.globalLabelHabits)
 
     val totals = remember(sessions) {
-        val map = mutableMapOf(FocusTargetType.TAG to 0, FocusTargetType.TASK to 0, FocusTargetType.HABIT to 0)
-        sessions.forEach { s -> map[s.targetType] = (map[s.targetType] ?: 0) + s.totalSecondsFocused / 60 }
+        val map = mutableMapOf(
+            FocusTargetType.TAG to 0,
+            FocusTargetType.TASK to 0,
+            FocusTargetType.HABIT to 0
+        )
+        sessions.forEach { s ->
+            map[s.targetType] = (map[s.targetType] ?: 0) + s.totalSecondsFocused / 60
+        }
         map
     }
 
     val stats = listOf(
-        TargetTypeStat(tagsLabel, FocusColor, Icons.Outlined.LocalOffer, totals[FocusTargetType.TAG] ?: 0),
-        TargetTypeStat(tasksLabel, TaskColor, Icons.Filled.TaskAlt, totals[FocusTargetType.TASK] ?: 0),
-        TargetTypeStat(habitsLabel, HabitColor, Icons.Filled.Alarm, totals[FocusTargetType.HABIT] ?: 0),
+        TargetTypeStat(
+            tagsLabel,
+            FocusColor,
+            Icons.Outlined.LocalOffer,
+            totals[FocusTargetType.TAG] ?: 0
+        ),
+        TargetTypeStat(
+            tasksLabel,
+            TaskColor,
+            Icons.Filled.TaskAlt,
+            totals[FocusTargetType.TASK] ?: 0
+        ),
+        TargetTypeStat(
+            habitsLabel,
+            HabitColor,
+            Icons.Filled.Alarm,
+            totals[FocusTargetType.HABIT] ?: 0
+        ),
     )
     val totalMinutes = stats.sumOf { it.minutes }
 
@@ -513,23 +686,52 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             if (totalMinutes == 0) {
-                Box(modifier = Modifier.fillMaxSize().background(Color.Gray.copy(alpha = 0.15f)))
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Gray.copy(alpha = 0.15f)))
             } else {
                 stats.filter { it.minutes > 0 }.forEach { stat ->
-                    Box(modifier = Modifier.weight(stat.minutes.toFloat()).fillMaxHeight().background(stat.color))
+                    Box(
+                        modifier = Modifier
+                            .weight(stat.minutes.toFloat())
+                            .fillMaxHeight()
+                            .background(stat.color)
+                    )
                 }
             }
         }
         Spacer(modifier = Modifier.height(18.dp))
         stats.forEach { stat ->
-            Row(modifier = Modifier.fillMaxWidth().padding(bottom = AppTheme.spaceMedium), verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.size(14.dp).clip(CircleShape).background(stat.color))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = AppTheme.spaceMedium),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier
+                    .size(14.dp)
+                    .clip(CircleShape)
+                    .background(stat.color))
                 Spacer(modifier = Modifier.width(10.dp))
-                Text(stat.label, modifier = Modifier.weight(1f), fontSize = AppTheme.fsBodyMedium, fontWeight = FontWeight.SemiBold)
-                Text(formatFocusMinutes(stat.minutes), fontSize = AppTheme.fsBodyMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    stat.label,
+                    modifier = Modifier.weight(1f),
+                    fontSize = AppTheme.fsBodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    formatFocusMinutes(stat.minutes),
+                    fontSize = AppTheme.fsBodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
-                val pct = if (totalMinutes == 0) 0 else Math.round((stat.minutes.toFloat() / totalMinutes) * 100)
-                Text("$pct%", fontSize = AppTheme.fsBodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                val pct =
+                    if (totalMinutes == 0) 0 else Math.round((stat.minutes.toFloat() / totalMinutes) * 100)
+                Text(
+                    "$pct%",
+                    fontSize = AppTheme.fsBodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

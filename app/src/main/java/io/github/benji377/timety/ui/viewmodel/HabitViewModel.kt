@@ -1,10 +1,9 @@
 package io.github.benji377.timety.ui.viewmodel
 
 import androidx.glance.appwidget.updateAll
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
+import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.UserRepository
@@ -40,21 +39,22 @@ class HabitViewModel(
             initialValue = emptyList()
         )
 
-    val habitsWithCompletions: StateFlow<List<HabitWithCompletions>> = kotlinx.coroutines.flow.combine(
-        habitRepository.allHabits,
-        habitRepository.allCompletions
-    ) { habits, completions ->
-        habits.map { habit ->
-            HabitWithCompletions(
-                habit = habit,
-                completions = completions.filter { it.habitId == habit.id }
-            )
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    val habitsWithCompletions: StateFlow<List<HabitWithCompletions>> =
+        kotlinx.coroutines.flow.combine(
+            habitRepository.allHabits,
+            habitRepository.allCompletions
+        ) { habits, completions ->
+            habits.map { habit ->
+                HabitWithCompletions(
+                    habit = habit,
+                    completions = completions.filter { it.habitId == habit.id }
+                )
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     private fun updateWidgets() {
         viewModelScope.launch {
@@ -87,7 +87,8 @@ class HabitViewModel(
     }
 
     private fun scheduleHabitReminder(habit: HabitEntity) {
-        val notificationService = io.github.benji377.timety.services.NotificationService(application)
+        val notificationService =
+            io.github.benji377.timety.services.NotificationService(application)
         notificationService.cancelHabitReminder(habit.id)
 
         val mins = habit.targetTimeMinutes ?: return
@@ -95,12 +96,17 @@ class HabitViewModel(
         try {
             val hour = mins / 60
             val minute = mins % 60
-            
-            val targetWeekdaysList = habit.targetWeekdays?.removePrefix("[")?.removeSuffix("]")?.split(",")?.mapNotNull { it.trim().toIntOrNull() }
-            
+
+            val targetWeekdaysList =
+                habit.targetWeekdays?.removePrefix("[")?.removeSuffix("]")?.split(",")
+                    ?.mapNotNull { it.trim().toIntOrNull() }
+
             notificationService.scheduleHabitReminder(
                 habitId = habit.id,
-                title = application.getString(io.github.benji377.timety.R.string.reminderHabitTitle, habit.name),
+                title = application.getString(
+                    io.github.benji377.timety.R.string.reminderHabitTitle,
+                    habit.name
+                ),
                 body = application.getString(io.github.benji377.timety.R.string.globalLabelHabit),
                 hour = hour,
                 minute = minute,
@@ -112,7 +118,8 @@ class HabitViewModel(
     }
 
     private fun cancelHabitReminder(habitId: String) {
-        val notificationService = io.github.benji377.timety.services.NotificationService(application)
+        val notificationService =
+            io.github.benji377.timety.services.NotificationService(application)
         notificationService.cancelHabitReminder(habitId)
     }
 
@@ -128,10 +135,12 @@ class HabitViewModel(
     /** Toggles today's completion for [habitId] and awards/revokes XP. Mirrors `HabitProvider.toggleCompletionToday`. */
     fun toggleCompletionToday(habitId: String) {
         viewModelScope.launch {
-            val habitWithCompletions = habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
+            val habitWithCompletions =
+                habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
             val today = LocalDate.now()
             val todayCompletion = habitWithCompletions.completions.find {
-                LocalDateTime.ofInstant(it.completionDate, ZoneId.systemDefault()).toLocalDate() == today
+                LocalDateTime.ofInstant(it.completionDate, ZoneId.systemDefault())
+                    .toLocalDate() == today
             }
             if (todayCompletion != null) {
                 habitRepository.deleteCompletion(todayCompletion)
@@ -149,7 +158,8 @@ class HabitViewModel(
     /** Marks [habitId] completed on [date] (a specific point in time), awarding XP. Mirrors `HabitProvider.markCompletionOnDate`. */
     fun markCompletionOnDate(habitId: String, date: Instant) {
         viewModelScope.launch {
-            val habitWithCompletions = habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
+            val habitWithCompletions =
+                habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
             val targetDay = date.atZone(ZoneId.systemDefault()).toLocalDate()
             val alreadyCompleted = habitWithCompletions.completions.any {
                 it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == targetDay
@@ -167,7 +177,8 @@ class HabitViewModel(
     /** Unmarks [habitId]'s completion on [date], revoking XP. Mirrors `HabitProvider.unmarkCompletionOnDate`. */
     fun unmarkCompletionOnDate(habitId: String, date: LocalDate) {
         viewModelScope.launch {
-            val habitWithCompletions = habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
+            val habitWithCompletions =
+                habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
             val completion = habitWithCompletions.completions.find {
                 it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date
             }

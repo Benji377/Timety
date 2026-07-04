@@ -1,21 +1,30 @@
 package io.github.benji377.timety.ui.screens.main
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.ui.navigation.BottomNavItems
-import android.Manifest
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
 fun MainScreen() {
@@ -85,11 +94,11 @@ fun MainScreen() {
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Home.route) {
                 io.github.benji377.timety.ui.screens.home.HomeScreen(
                     onNavigateToFocus = { navController.navigate(io.github.benji377.timety.ui.navigation.BottomNavItem.Focus.route) },
-                    onNavigateToTaskDetail = { taskId -> 
+                    onNavigateToTaskDetail = { taskId ->
                         if (taskId == null) navController.navigate("task_detail")
                         else navController.navigate("task_detail/$taskId")
                     },
-                    onNavigateToHabitDetail = { habitId -> 
+                    onNavigateToHabitDetail = { habitId ->
                         if (habitId == null) navController.navigate("habit_detail")
                         else navController.navigate("habit_detail/$habitId")
                     },
@@ -109,7 +118,7 @@ fun MainScreen() {
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Tasks.route) {
                 io.github.benji377.timety.ui.screens.tasks.TaskListScreen(
-                    onNavigateToTaskDetail = { taskId -> 
+                    onNavigateToTaskDetail = { taskId ->
                         if (taskId == null) navController.navigate("task_detail")
                         else navController.navigate("task_detail/$taskId")
                     }
@@ -117,7 +126,7 @@ fun MainScreen() {
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Habits.route) {
                 io.github.benji377.timety.ui.screens.habits.HabitListScreen(
-                    onNavigateToHabitDetail = { habitId -> 
+                    onNavigateToHabitDetail = { habitId ->
                         if (habitId == null) navController.navigate("habit_detail")
                         else navController.navigate("habit_detail/$habitId")
                     }
@@ -169,7 +178,9 @@ fun MainScreen() {
             }
             composable(
                 route = "task_detail/{taskId}",
-                arguments = listOf(androidx.navigation.navArgument("taskId") { type = androidx.navigation.NavType.StringType })
+                arguments = listOf(androidx.navigation.navArgument("taskId") {
+                    type = androidx.navigation.NavType.StringType
+                })
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId")
                 io.github.benji377.timety.ui.screens.task.TaskDetailScreen(
@@ -185,7 +196,9 @@ fun MainScreen() {
             }
             composable(
                 route = "habit_detail/{habitId}",
-                arguments = listOf(androidx.navigation.navArgument("habitId") { type = androidx.navigation.NavType.StringType })
+                arguments = listOf(androidx.navigation.navArgument("habitId") {
+                    type = androidx.navigation.NavType.StringType
+                })
             ) { backStackEntry ->
                 val habitId = backStackEntry.arguments?.getString("habitId")
                 io.github.benji377.timety.ui.screens.habit.HabitDetailScreen(

@@ -3,7 +3,6 @@ package io.github.benji377.timety.ui.components.task
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -88,7 +87,10 @@ fun TaskListTile(
     dateFormatCode: String = LocalDateFormatSettings.current.dateFormatCode,
     modifier: Modifier = Modifier,
     // Screen margin, mirrors AppTheme.listTileScreenMargin (spaceLarge horizontal, spaceXSmall vertical).
-    margin: PaddingValues = PaddingValues(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceXSmall),
+    margin: PaddingValues = PaddingValues(
+        horizontal = AppTheme.spaceLarge,
+        vertical = AppTheme.spaceXSmall
+    ),
 ) {
     val borderColor = getBorderColor(task, isOverdue)
     val hasSubtasks = subtasksTotal > 0
@@ -184,7 +186,11 @@ fun TaskListTile(
                                 // aware). No centralized Kotlin equivalent exists yet, so this falls
                                 // back to a locale-aware medium date/time formatter.
                                 Text(
-                                    text = formatDueDateTime(task.dueDate, use24HourFormat, dateFormatCode),
+                                    text = formatDueDateTime(
+                                        task.dueDate,
+                                        use24HourFormat,
+                                        dateFormatCode
+                                    ),
                                     fontSize = AppTheme.fsLabel,
                                     color = borderColor,
                                     fontWeight = AppTheme.fwMedium,
@@ -273,5 +279,9 @@ private fun getBorderColor(task: TaskEntity, isOverdue: Boolean): Color {
     return TaskColor
 }
 
-private fun formatDueDateTime(dueDate: Instant, use24HourFormat: Boolean, dateFormatCode: String): String =
+private fun formatDueDateTime(
+    dueDate: Instant,
+    use24HourFormat: Boolean,
+    dateFormatCode: String
+): String =
     AppDateFormatUtils.formatDateTime(dueDate, dateFormatCode, use24HourFormat)
