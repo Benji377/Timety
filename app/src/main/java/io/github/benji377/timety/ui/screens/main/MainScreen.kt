@@ -32,47 +32,47 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val showBottomNav = currentRoute in BottomNavItems.map { it.route }
+
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.background,
-                tonalElevation = NavigationBarDefaults.Elevation
-            ) {
-                BottomNavItems.forEach { item ->
-                    val isSelected = currentRoute == item.route
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                // Pop up to the start destination of the graph to
-                                // avoid building up a large stack of destinations
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (showBottomNav) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    tonalElevation = NavigationBarDefaults.Elevation
+                ) {
+                    BottomNavItems.forEach { item ->
+                        val isSelected = currentRoute == item.route
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                // Avoid multiple copies of the same destination
-                                launchSingleTop = true
-                                // Restore state when reselecting a previously selected item
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = if (isSelected) item.iconFilled else item.iconOutlined,
-                                contentDescription = stringResource(item.titleRes),
-                                tint = if (isSelected) item.activeColor else MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (isSelected) item.iconFilled else item.iconOutlined,
+                                    contentDescription = stringResource(item.titleRes),
+                                    tint = if (isSelected) item.activeColor else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = stringResource(item.titleRes),
+                                    color = if (isSelected) item.activeColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = item.activeColor.copy(alpha = 0.15f)
                             )
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(item.titleRes),
-                                color = if (isSelected) item.activeColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = item.activeColor.copy(alpha = 0.15f)
                         )
-                    )
+                    }
                 }
             }
         }
