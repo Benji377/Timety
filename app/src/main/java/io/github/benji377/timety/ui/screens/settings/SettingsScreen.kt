@@ -299,7 +299,7 @@ fun SettingsScreen(
                 ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTheme)) },
                     leadingContent = { Icon(Icons.Outlined.DarkMode, null) },
-                    trailingContent = { Text(currentThemeLabel, color = Color.Gray) },
+                    trailingContent = { Text(currentThemeLabel, color = Color.Gray, fontSize = 14.sp) },
                     modifier = Modifier.clickable { showThemeDialog = true }
                 )
             }
@@ -312,7 +312,7 @@ fun SettingsScreen(
                 ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelLanguage)) },
                     leadingContent = { Icon(Icons.Filled.Language, null, tint = TaskColor) },
-                    trailingContent = { Text(currentLanguageLabel, color = Color.Gray) },
+                    trailingContent = { Text(currentLanguageLabel, color = Color.Gray, fontSize = 14.sp) },
                     modifier = Modifier.clickable { showLanguageDialog = true }
                 )
                 ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
@@ -332,7 +332,7 @@ fun SettingsScreen(
                 ListItem(colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelDateFormat)) },
                     leadingContent = { Icon(Icons.Filled.CalendarToday, null, tint = HabitColor) },
-                    trailingContent = { Text(currentDateFormatLabel, color = Color.Gray) },
+                    trailingContent = { Text(currentDateFormatLabel, color = Color.Gray, fontSize = 14.sp) },
                     modifier = Modifier.clickable { showDateFormatDialog = true }
                 )
             }
