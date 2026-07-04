@@ -70,7 +70,8 @@ fun GroupedHabitsSection(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall),
+                    .padding(AppTheme.paddingScreenHorizontal)
+                    .padding(vertical = AppTheme.spaceSmall),
                 shape = AppTheme.brMedium,
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(

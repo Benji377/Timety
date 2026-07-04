@@ -58,7 +58,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -129,6 +129,7 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
     val backupService = remember {
         (context.applicationContext as TimetyApplication).container.backupService
     }
@@ -149,7 +150,7 @@ fun SettingsScreen(
                     result.exceptionOrNull()?.message ?: ""
                 )
             }
-            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+            snackbarHostState.showSnackbar(msg)
         }
     }
     val importLauncher = rememberLauncherForActivityResult(
@@ -838,11 +839,7 @@ fun SettingsScreen(
                     if (result.isSuccess) {
                         showRestartDialog = true
                     } else {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.backupImportFailure),
-                            Toast.LENGTH_LONG
-                        ).show()
+                        snackbarHostState.showSnackbar(context.getString(R.string.backupImportFailure))
                     }
                 }
             }

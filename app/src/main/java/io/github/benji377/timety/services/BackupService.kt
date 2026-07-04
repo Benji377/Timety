@@ -485,10 +485,16 @@ class BackupService(
 
     private inline fun <reified T : Enum<T>> enumOrDefault(name: String?, default: T): T {
         if (name == null) return default
+        // To support importing from older Flutter versions, try converting camelCase to UPPER_SNAKE_CASE
+        val normalizedName = name.replace(Regex("([a-z])([A-Z]+)"), "$1_$2").uppercase()
         return try {
-            enumValueOf<T>(name)
+            enumValueOf<T>(normalizedName)
         } catch (e: IllegalArgumentException) {
-            default
+            try {
+                enumValueOf<T>(name)
+            } catch (e2: IllegalArgumentException) {
+                default
+            }
         }
     }
 

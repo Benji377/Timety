@@ -123,8 +123,6 @@ fun TaskListTile(
                 headlineContent = {
                     Text(
                         text = task.title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleMedium.copy(
                             textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
                             color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,

@@ -43,7 +43,9 @@ fun MainScreen() {
 
     val showBottomNav = currentRoute in BottomNavItems.map { it.route }
 
+    val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
     Scaffold(
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (showBottomNav) {
                 NavigationBar(
@@ -140,6 +142,7 @@ fun MainScreen() {
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Calendar.route) {
                 io.github.benji377.timety.ui.screens.calendar.CalendarScreen(
                     onNavigateToTask = { taskId -> navController.navigate("task_detail/$taskId") },
+                    onNavigateToHabit = { habitId -> navController.navigate("habit_detail/$habitId") },
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

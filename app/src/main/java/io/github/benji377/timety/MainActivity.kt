@@ -59,11 +59,13 @@ class MainActivity : ComponentActivity() {
             val dateFormatCode by settings.dateFormatFlow.collectAsState(initial = "System")
 
             TimetyTheme(darkTheme = darkTheme) {
+                val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
                 CompositionLocalProvider(
                     LocalDateFormatSettings provides DateFormatSettings(
                         use24HourFormat,
                         dateFormatCode
-                    )
+                    ),
+                    io.github.benji377.timety.ui.theme.LocalSnackbarHostState provides snackbarHostState
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),

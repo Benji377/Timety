@@ -8,9 +8,9 @@ class AppUtilsTest {
 
     @Test
     fun testGetSizeEmoji() {
-        assertEquals("🌱", AppUtils.getSizeEmoji(TaskSize.SMALL))
-        assertEquals("🌿", AppUtils.getSizeEmoji(TaskSize.MEDIUM))
-        assertEquals("🌳", AppUtils.getSizeEmoji(TaskSize.LARGE))
-        assertEquals("🏔️", AppUtils.getSizeEmoji(TaskSize.VERY_LARGE))
+        assertEquals("S", AppUtils.getSizeEmoji(TaskSize.SMALL))
+        assertEquals("M", AppUtils.getSizeEmoji(TaskSize.MEDIUM))
+        assertEquals("L", AppUtils.getSizeEmoji(TaskSize.LARGE))
+        assertEquals("XL", AppUtils.getSizeEmoji(TaskSize.VERY_LARGE))
     }
 }

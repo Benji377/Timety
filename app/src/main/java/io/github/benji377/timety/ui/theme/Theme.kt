@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.compose.material3.SnackbarHostState
 
 // Neobrutalist color schemes ported 1:1 from AppTheme.buildTheme() in app_theme.dart.
 // No Material You / dynamic color — the palette is fixed.
@@ -60,6 +61,9 @@ private val LightColorScheme = lightColorScheme(
 )
 
 val LocalIsDarkTheme = androidx.compose.runtime.staticCompositionLocalOf<Boolean> { false }
+val LocalSnackbarHostState = androidx.compose.runtime.staticCompositionLocalOf<SnackbarHostState> {
+    error("No SnackbarHostState provided")
+}
 
 @Composable
 fun TimetyTheme(

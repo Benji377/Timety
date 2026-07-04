@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.border
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -154,6 +155,13 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onNavigateToTaskDetail(null) },
+                modifier = Modifier.border(
+                    io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
+                    androidx.compose.material3.MaterialTheme.colorScheme.outline,
+                    io.github.benji377.timety.ui.theme.AppTheme.brNeo
+                ),
+                shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
+                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                 containerColor = io.github.benji377.timety.ui.theme.TaskColor,
                 contentColor = androidx.compose.ui.graphics.Color.White
             ) {

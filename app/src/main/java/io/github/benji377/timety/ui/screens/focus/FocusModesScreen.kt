@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.border
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,9 +82,16 @@ fun FocusModesScreen(
                             type = FocusModeType.CUSTOM
                         )
                     },
+                    modifier = Modifier.border(
+                        io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
+                        androidx.compose.material3.MaterialTheme.colorScheme.outline,
+                        io.github.benji377.timety.ui.theme.AppTheme.brNeo
+                    ),
+                    shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
+                    elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(newModeLabel) },
-
+                    containerColor = io.github.benji377.timety.ui.theme.FocusColor,
                     contentColor = Color.White,
                 )
             }

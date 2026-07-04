@@ -24,11 +24,12 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.foundation.border
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -112,6 +113,13 @@ fun TaskListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onNavigateToTaskDetail(null) },
+                modifier = Modifier.border(
+                    io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
+                    androidx.compose.material3.MaterialTheme.colorScheme.outline,
+                    io.github.benji377.timety.ui.theme.AppTheme.brNeo
+                ),
+                shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
+                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                 containerColor = io.github.benji377.timety.ui.theme.TaskColor,
                 contentColor = androidx.compose.ui.graphics.Color.White
             ) {

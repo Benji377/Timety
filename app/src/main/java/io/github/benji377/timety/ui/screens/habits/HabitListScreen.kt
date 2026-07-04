@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.border
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +69,13 @@ fun HabitListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onNavigateToHabitDetail(null) },
+                modifier = Modifier.border(
+                    io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
+                    androidx.compose.material3.MaterialTheme.colorScheme.outline,
+                    io.github.benji377.timety.ui.theme.AppTheme.brNeo
+                ),
+                shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
+                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                 containerColor = io.github.benji377.timety.ui.theme.HabitColor,
                 contentColor = androidx.compose.ui.graphics.Color.White
             ) {

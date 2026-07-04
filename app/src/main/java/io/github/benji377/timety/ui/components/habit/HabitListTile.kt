@@ -56,6 +56,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.util.habit.HabitIcons
+import kotlinx.coroutines.launch
 
 /**
  * Mirrors `HabitListTile` in `widgets/list_tiles/habit_list_tile.dart`.
@@ -63,7 +64,7 @@ import io.github.benji377.timety.util.habit.HabitIcons
  * NOTE: Flutter shows a brief [ScaffoldMessenger] snackbar (`focusSnackbarHabitLocked`)
  * when the locked leading circle is tapped. This leaf component has no [Scaffold]/
  * `SnackbarHostState` reference to post into, so it surfaces the same message via a
- * short [Toast] instead - functionally equivalent, visually a native Android toast.
+ * Snackbar by accessing LocalSnackbarHostState.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,15 +81,14 @@ fun HabitListTile(
     onMarkPastCompletion: (() -> Unit)? = null,
     enableDismissible: Boolean = true,
     modifier: Modifier = Modifier,
-    // Mirrors AppTheme.listTileScreenMargin (spaceLarge horizontal, spaceXSmall vertical).
-    margin: PaddingValues = PaddingValues(
-        horizontal = AppTheme.spaceLarge,
-        vertical = AppTheme.spaceXSmall
-    ),
+    // Mirrors AppTheme.paddingScreenHorizontal.
+    margin: PaddingValues = AppTheme.paddingScreenHorizontal,
 ) {
     val color = Color(habit.colorValue)
     val context = LocalContext.current
     val lockedMessage = stringResource(R.string.focusSnackbarHabitLocked)
+    val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     val tile: @Composable () -> Unit = {
         if (isStacked) {
@@ -114,7 +114,9 @@ fun HabitListTile(
                         onTap = onTap,
                         onMarkPastCompletion = onMarkPastCompletion,
                         onLockedTap = {
-                            Toast.makeText(context, lockedMessage, Toast.LENGTH_SHORT).show()
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar(lockedMessage)
+                            }
                         },
                     )
                 }
@@ -141,7 +143,9 @@ fun HabitListTile(
                     onTap = onTap,
                     onMarkPastCompletion = onMarkPastCompletion,
                     onLockedTap = {
-                        Toast.makeText(context, lockedMessage, Toast.LENGTH_SHORT).show()
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(lockedMessage)
+                        }
                     },
                 )
             }

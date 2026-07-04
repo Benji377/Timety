@@ -28,13 +28,6 @@ import java.util.Locale
 /**
  * Week navigation header. Mirrors `widgets/common/week_navigator.dart`: shows the
  * current week range and lets the caller shift by [onShiftWeek] days (-7/+7).
- *
- * Date formatting note: the Flutter version delegates to
- * `SettingsProvider.getFormattedShortDate`/`getFormattedDate`, which honor the
- * user's date-format preference + locale. No centralized Kotlin equivalent
- * exists yet, so this uses `DateTimeFormatter` with the device locale as a
- * reasonable stand-in (short pattern for the start date, medium localized date
- * for the end date). The parent should centralize this later.
  */
 @Composable
 fun WeekNavigator(
@@ -49,10 +42,8 @@ fun WeekNavigator(
     val today = LocalDate.now()
     val isCurrentWeek = AppDateUtils.isWithinInclusive(today, startOfWeek, endOfWeek)
 
-    val shortFormatter = DateTimeFormatter.ofPattern("MMM d", locale)
-    val fullFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-    val weekRangeLabel =
-        "${startOfWeek.format(shortFormatter)} - ${endOfWeek.format(fullFormatter)}"
+    val dfs = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
+    val weekRangeLabel = "${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatShortDate(startOfWeek)} - ${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(endOfWeek, dfs.dateFormatCode)}"
 
     Row(
         modifier = modifier.fillMaxWidth(),

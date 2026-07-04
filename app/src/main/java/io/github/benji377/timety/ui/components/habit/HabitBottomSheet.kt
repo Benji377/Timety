@@ -72,11 +72,6 @@ import java.util.Locale
  * `HabitBottomSheetBuilders.showUnifiedHistorySheet` / `_UnifiedCalendarSheet` in
  * `widgets/habit/habit_bottom_sheet.dart`: stats row, an interactive monthly calendar
  * (tap a day to mark/unmark a completion), and a reverse-chronological timeline.
- *
- * Date/time formatting note: Flutter delegates to `SettingsProvider` (24h flag + date-format
- * code + locale). No centralized Kotlin equivalent exists yet, so this uses
- * `DateTimeFormatter` with the device locale as a reasonable stand-in - the parent should
- * centralize this later.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -165,8 +160,7 @@ private fun UnifiedCalendarSheetContent(
                 Icon(Icons.Filled.ChevronLeft, contentDescription = null)
             }
             Text(
-                text = displayedMonth.atDay(1)
-                    .format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())),
+                text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatMonthYear(displayedMonth.atDay(1)),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
             )

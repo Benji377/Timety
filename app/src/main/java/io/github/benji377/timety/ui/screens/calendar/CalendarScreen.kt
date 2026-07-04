@@ -84,10 +84,6 @@ private val Grey600 = Color(0xFF757575)
  * Calendar view: a month grid with per-day activity dots plus an accordion breakdown
  * (habits/tasks/focus sessions) for the selected day. Mirrors `screens/calendar_screen.dart`.
  *
- * NOTE (date formatting): as in [io.github.benji377.timety.ui.components.common.WeekNavigator],
- * `SettingsProvider.getFormattedMonthYear`/`getFormattedTime` have no centralized Kotlin
- * equivalent yet, so this uses `DateTimeFormatter` with the device locale as a stand-in.
- *
  * NOTE (navigation): Flutter's task/habit rows here navigate to their detail screens on tap.
  * This composable's signature is fixed to zero-arg `CalendarScreen()` (per porting contract), so
  * there is no navigation callback available; row taps only toggle completion, matching everything
@@ -100,6 +96,7 @@ fun CalendarScreen(
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onNavigateToTask: (String) -> Unit = {},
+    onNavigateToHabit: (String) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
@@ -227,7 +224,8 @@ fun CalendarScreen(
                                             retroInstant
                                         )
                                     }
-                                }
+                                },
+                                onHabitClick = { habit -> onNavigateToHabit(habit.habit.id) }
                             )
                         }
                         item {
@@ -474,7 +472,8 @@ private fun Dot(color: Color) {
 private fun HabitsAccordion(
     habits: List<HabitWithCompletions>,
     selectedDate: LocalDate,
-    onToggle: (HabitWithCompletions, Boolean) -> Unit
+    onToggle: (HabitWithCompletions, Boolean) -> Unit,
+    onHabitClick: (HabitWithCompletions) -> Unit
 ) {
     StyledExpansionTile(
         title = stringResource(R.string.calendarSectionHabits, habits.size),
@@ -493,7 +492,8 @@ private fun HabitsAccordion(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .clickable { onHabitClick(hwc) },
                     shape = AppTheme.brMedium,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
                     border = androidx.compose.foundation.BorderStroke(
