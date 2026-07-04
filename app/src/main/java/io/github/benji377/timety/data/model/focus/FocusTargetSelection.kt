@@ -61,12 +61,12 @@ data class FocusTargetSelection(
  * NOTE (viewmodel addition - see report): this enum did not exist in the Kotlin port yet. Added
  * here in `data/model/focus` per the porting instructions.
  */
-enum class DistractionUIType(val dbId: String, val icon: ImageVector, val color: Color) {
-    DISTRACTED("Distracted", Icons.Filled.WarningAmber, ErrorColor),
-    HYDRATED("Hydrated / Drink", Icons.Filled.WaterDrop, TaskColor),
-    STRETCHED("Stretched", Icons.Filled.AccessibilityNew, WarningColor),
-    SNACK("Snack", Icons.Filled.Restaurant, SuccessColor),
-    RESTROOM("Restroom", Icons.Filled.Wc, Color.Gray);
+enum class DistractionUIType(val entityType: DistractionType, val icon: ImageVector, val color: Color) {
+    DISTRACTED(DistractionType.DISTRACTED, Icons.Filled.WarningAmber, ErrorColor),
+    HYDRATED(DistractionType.HYDRATED, Icons.Filled.WaterDrop, TaskColor),
+    STRETCHED(DistractionType.STRETCHED, Icons.Filled.AccessibilityNew, WarningColor),
+    SNACK(DistractionType.SNACK, Icons.Filled.Restaurant, SuccessColor),
+    RESTROOM(DistractionType.RESTROOM, Icons.Filled.Wc, Color.Gray);
 
     @Composable
     fun getLocalizedName(): String = when (this) {
@@ -78,7 +78,7 @@ enum class DistractionUIType(val dbId: String, val icon: ImageVector, val color:
     }
 
     companion object {
-        fun fromDbId(id: String): DistractionUIType = entries.firstOrNull { it.dbId == id } ?: DISTRACTED
+        fun fromEntityType(type: DistractionType): DistractionUIType = entries.firstOrNull { it.entityType == type } ?: DISTRACTED
     }
 }
 

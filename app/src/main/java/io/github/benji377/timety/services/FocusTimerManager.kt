@@ -29,14 +29,17 @@ data class TimerState(
     val totalPhaseSeconds: Int = 25 * 60,
     val modeName: String = "Pomodoro",
     val isRestPhase: Boolean = false,
+    val isStopwatch: Boolean = false,
+    val elapsedSeconds: Int = 0,
 ) {
     val progress: Float
-        get() = if (totalPhaseSeconds > 0) (secondsRemaining.toFloat() / totalPhaseSeconds).coerceIn(0f, 1f) else 1f
+        get() = if (isStopwatch) 0f else if (totalPhaseSeconds > 0) (secondsRemaining.toFloat() / totalPhaseSeconds).coerceIn(0f, 1f) else 1f
 
     val centerText: String
         get() {
-            val mins = secondsRemaining / 60
-            val secs = secondsRemaining % 60
+            val displaySecs = if (isStopwatch) elapsedSeconds else secondsRemaining
+            val mins = displaySecs / 60
+            val secs = displaySecs % 60
             return String.format("%02d:%02d", mins, secs)
         }
 }
@@ -57,6 +60,7 @@ object FocusTimerManager {
 
     private var phaseBaseTime: Instant? = null
     private var currentPhaseTotalSeconds: Int = 0
+    private var accumulatedElapsed: Int = 0
 
     /**
      * Loads a phase's configuration. Safe to call again for the *same* phase while paused (e.g.
@@ -66,7 +70,7 @@ object FocusTimerManager {
      * being re-run for every phase (fresh anchor) while `startSession`'s resume path leaves
      * `_secondsRemainingInPhase` untouched.
      */
-    fun setMode(name: String, totalPhaseSeconds: Int, isRestPhase: Boolean) {
+    fun setMode(name: String, totalPhaseSeconds: Int, isRestPhase: Boolean, isStopwatch: Boolean = false) {
         if (_timerState.value.isRunning) return
         val resuming = _timerState.value.isPaused
         _timerState.update {
@@ -76,13 +80,13 @@ object FocusTimerManager {
                 secondsRemaining = if (resuming) it.secondsRemaining else totalPhaseSeconds,
                 isRestPhase = isRestPhase,
                 isAwaitingContinue = false,
+                isStopwatch = isStopwatch,
+                elapsedSeconds = if (resuming) it.elapsedSeconds else 0
             )
         }
         if (!resuming) {
-            // Fresh phase (first start, or advancing after a natural completion): drop the old
-            // anchor so `startTimer` re-derives it from `totalPhaseSeconds` instead of reusing a
-            // stale one left over from whichever phase ran before this one.
             phaseBaseTime = null
+            accumulatedElapsed = 0
         }
     }
 
@@ -95,9 +99,9 @@ object FocusTimerManager {
             phaseBaseTime = Instant.now()
             currentPhaseTotalSeconds = _timerState.value.totalPhaseSeconds
         } else if (_timerState.value.isPaused) {
-            // Adjust base time after resume
-            val elapsedSoFar = currentPhaseTotalSeconds - _timerState.value.secondsRemaining
-            phaseBaseTime = Instant.now().minusSeconds(elapsedSoFar.toLong())
+            // Store elapsed time before pausing and reset base time to now
+            accumulatedElapsed = _timerState.value.elapsedSeconds
+            phaseBaseTime = Instant.now()
         }
 
         job?.cancel()
@@ -117,12 +121,14 @@ object FocusTimerManager {
     fun stopTimer() {
         job?.cancel()
         phaseBaseTime = null
+        accumulatedElapsed = 0
         _timerState.update {
             it.copy(
                 isRunning = false,
                 isPaused = false,
                 isAwaitingContinue = false,
                 secondsRemaining = it.totalPhaseSeconds,
+                elapsedSeconds = 0,
             )
         }
     }
@@ -130,27 +136,30 @@ object FocusTimerManager {
     private fun tick() {
         val baseTime = phaseBaseTime ?: return
         val now = Instant.now()
-        val elapsed = now.epochSecond - baseTime.epochSecond
-        val remaining = (currentPhaseTotalSeconds - elapsed).toInt()
-
-        if (remaining <= 0) {
-            // Phase complete - freeze at zero and wait for the caller to either advance to the
-            // next phase (setMode + startTimer) or stop the session (stopTimer).
-            job?.cancel()
-            val isRestPhase = _timerState.value.isRestPhase
-            val duration = _timerState.value.totalPhaseSeconds
-
-            _timerState.update {
-                it.copy(
-                    isRunning = false,
-                    isPaused = false,
-                    isAwaitingContinue = true,
-                    secondsRemaining = 0,
-                )
-            }
-            phaseCompleteEvent.tryEmit(Pair(isRestPhase, duration))
+        val currentChunkElapsed = (now.epochSecond - baseTime.epochSecond).toInt()
+        val totalElapsed = accumulatedElapsed + currentChunkElapsed
+        
+        if (_timerState.value.isStopwatch) {
+            _timerState.update { it.copy(elapsedSeconds = totalElapsed) }
         } else {
-            _timerState.update { it.copy(secondsRemaining = remaining) }
+            val remaining = (currentPhaseTotalSeconds - totalElapsed).coerceAtLeast(0)
+            if (remaining <= 0) {
+                job?.cancel()
+                val isRestPhase = _timerState.value.isRestPhase
+                val duration = _timerState.value.totalPhaseSeconds
+    
+                _timerState.update {
+                    it.copy(
+                        isRunning = false,
+                        isPaused = false,
+                        isAwaitingContinue = true,
+                        secondsRemaining = 0,
+                    )
+                }
+                phaseCompleteEvent.tryEmit(Pair(isRestPhase, duration))
+            } else {
+                _timerState.update { it.copy(secondsRemaining = remaining, elapsedSeconds = totalElapsed) }
+            }
         }
     }
 }

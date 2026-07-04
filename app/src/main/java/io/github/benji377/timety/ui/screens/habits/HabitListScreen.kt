@@ -66,7 +66,7 @@ fun HabitListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onNavigateToHabitDetail(null) },
-                containerColor = io.github.benji377.timety.ui.theme.TaskColor,
+                containerColor = io.github.benji377.timety.ui.theme.HabitColor,
                 contentColor = androidx.compose.ui.graphics.Color.White
             ) {
                 Icon(Icons.Filled.Add, stringResource(R.string.commonLabelAdd))

@@ -84,10 +84,6 @@ import java.util.Locale
  * Not wired into `MainScreen`'s nav graph (signature is flexible per porting instructions) - it
  * owns no Scaffold/TopAppBar of its own, matching Flutter's screen (a bare `Scaffold(body: ...)`
  * with no app bar), so the parent can embed it wherever it decides to surface focus stats.
- *
- * Date/time formatting note: Flutter delegates day-pill/time labels to `SettingsProvider`. No
- * centralized Kotlin equivalent exists yet, so this uses `DateTimeFormatter` with the device
- * locale - the parent should centralize this later.
  */
 @Composable
 fun FocusStatsScreen(
@@ -290,7 +286,6 @@ private fun TagFilterRow(
 
 @Composable
 private fun DayPillSelector(startOfWeek: LocalDate, selectedDay: LocalDate, onSelect: (LocalDate) -> Unit) {
-    val formatter = remember { DateTimeFormatter.ofPattern("EEE d", Locale.getDefault()) }
     Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
         for (i in 0 until 7) {
             val day = startOfWeek.plusDays(i.toLong())
@@ -315,7 +310,7 @@ private fun DayPillSelector(startOfWeek: LocalDate, selectedDay: LocalDate, onSe
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = formatter.format(day),
+                    text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatWeekdayDay(day),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                     color = if (isSelected) Color.White else Color.Gray,
@@ -387,9 +382,9 @@ private fun SessionRow(
         FocusTargetType.HABIT -> Icons.Filled.Alarm to HabitColor
         FocusTargetType.TAG -> Icons.Outlined.LocalOffer to (session.tagId?.let { tagById[it]?.let { tag -> Color(tag.colorValue) } } ?: FocusColor)
     }
-    val zone = remember { ZoneId.systemDefault() }
-    val dateFormatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault()).withZone(zone) }
-    val timeFormatter = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault()).withZone(zone) }
+    val dfs = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
+    val dateStr = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(session.startTime, dfs.dateFormatCode)
+    val timeStr = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(session.startTime, dfs.use24HourFormat)
     val mins = session.totalSecondsFocused / 60
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -400,7 +395,7 @@ private fun SessionRow(
         Column {
             Text(targetName, fontWeight = FontWeight.SemiBold, color = color)
             Text(
-                "${dateFormatter.format(session.startTime)} | ${timeFormatter.format(session.startTime)} | ${formatFocusMinutes(mins)} | $modeName",
+                "$dateStr | $timeStr | ${formatFocusMinutes(mins)} | $modeName",
                 fontSize = AppTheme.fsBodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -409,10 +404,10 @@ private fun SessionRow(
 }
 
 @Composable
-private fun DistractionRow(entry: DistractionWithSession, targetName: String) {
-    val type = io.github.benji377.timety.data.model.focus.DistractionUIType.fromDbId(entry.distraction.note)
+private fun DistractionRow(entry: io.github.benji377.timety.ui.viewmodel.DistractionWithSession, targetName: String) {
+    val type = io.github.benji377.timety.data.model.focus.DistractionUIType.fromEntityType(entry.distraction.type)
+    val use24Hour = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
     val zone = remember { ZoneId.systemDefault() }
-    val timeFormatter = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).withLocale(Locale.getDefault()).withZone(zone) }
 
     Row(modifier = Modifier.padding(vertical = AppTheme.spaceSmall), verticalAlignment = Alignment.CenterVertically) {
         Box(
@@ -425,7 +420,7 @@ private fun DistractionRow(entry: DistractionWithSession, targetName: String) {
         Column {
             Text(type.getLocalizedName(), fontWeight = FontWeight.SemiBold)
             Text(
-                "${timeFormatter.format(entry.distraction.time)} | $targetName",
+                "${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTimeWithSeconds(entry.distraction.time, use24Hour, zone)} | $targetName",
                 fontSize = AppTheme.fsBodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

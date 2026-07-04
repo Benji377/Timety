@@ -1,22 +1,24 @@
 package io.github.benji377.timety.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.*
 
 sealed class BottomNavItem(
     val route: String,
-    val title: String,
+    @StringRes val titleRes: Int,
     val iconOutlined: ImageVector,
     val iconFilled: ImageVector,
     val activeColor: Color
 ) {
     object Home : BottomNavItem(
         "home",
-        "Home",
+        R.string.navigationHome,
         Icons.Outlined.Home,
         Icons.Filled.Home,
         WarningColor
@@ -24,7 +26,7 @@ sealed class BottomNavItem(
 
     object Focus : BottomNavItem(
         "focus",
-        "Focus",
+        R.string.navigationFocus,
         Icons.Outlined.Coffee,
         Icons.Filled.Coffee,
         FocusColor
@@ -32,7 +34,7 @@ sealed class BottomNavItem(
 
     object Tasks : BottomNavItem(
         "tasks",
-        "Tasks",
+        R.string.navigationTasks,
         Icons.Outlined.Task,
         Icons.Filled.Task,
         TaskColor
@@ -40,7 +42,7 @@ sealed class BottomNavItem(
 
     object Habits : BottomNavItem(
         "habits",
-        "Habits",
+        R.string.navigationHabits,
         Icons.Outlined.Alarm,
         Icons.Filled.Alarm,
         HabitColor
@@ -48,7 +50,7 @@ sealed class BottomNavItem(
 
     object Profile : BottomNavItem(
         "profile",
-        "Profile",
+        R.string.navigationProfile,
         Icons.Outlined.Person,
         Icons.Filled.Person,
         UserColor
@@ -56,7 +58,7 @@ sealed class BottomNavItem(
 
     object Calendar : BottomNavItem(
         "calendar",
-        "Calendar",
+        R.string.calendarTitle,
         Icons.Outlined.CalendarToday,
         Icons.Filled.CalendarToday,
         TaskColor
@@ -64,7 +66,7 @@ sealed class BottomNavItem(
 
     object Statistics : BottomNavItem(
         "statistics",
-        "Stats",
+        R.string.statsTitle,
         Icons.Outlined.BarChart,
         Icons.Filled.BarChart,
         WarningColor

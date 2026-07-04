@@ -1,7 +1,9 @@
 package io.github.benji377.timety.data.model.habit
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 import java.time.Instant
 
 enum class HabitFrequency(val value: Int) {
@@ -27,7 +29,13 @@ data class HabitEntity(
     val stackOrder: Int? = null
 )
 
+
 data class HabitWithCompletions(
+    @Embedded
     val habit: HabitEntity,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "habitId"
+    )
     val completions: List<HabitCompletionEntity>
 )

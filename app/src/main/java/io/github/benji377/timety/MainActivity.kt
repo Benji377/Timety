@@ -8,6 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -15,6 +16,8 @@ import androidx.lifecycle.lifecycleScope
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.dataStore
 import io.github.benji377.timety.ui.theme.TimetyTheme
+import io.github.benji377.timety.ui.utils.DateFormatSettings
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.LocaleHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -52,12 +55,19 @@ class MainActivity : ComponentActivity() {
                 else -> isSystemInDarkTheme()
             }
 
+            val use24HourFormat by settings.use24HourFormatFlow.collectAsState(initial = true)
+            val dateFormatCode by settings.dateFormatFlow.collectAsState(initial = "System")
+
             TimetyTheme(darkTheme = darkTheme) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                CompositionLocalProvider(
+                    LocalDateFormatSettings provides DateFormatSettings(use24HourFormat, dateFormatCode)
                 ) {
-                    io.github.benji377.timety.ui.screens.main.MainScreen()
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        io.github.benji377.timety.ui.screens.main.MainScreen()
+                    }
                 }
             }
         }

@@ -235,11 +235,13 @@ fun HomeScreen(
                                         habits = todaysHabits,
                                         allHabitsForStacks = habitsWithCompletions,
                                         targetDate = todayLocalDate,
-                                        habitBuilder = { hc, isDone, _, _ ->
+                                        habitBuilder = { hc, isDone, isStacked, isLocked ->
                                             val completionsThisWeek = HabitUtils.getCompletionsThisWeek(hc)
                                             HabitListTile(
                                                 habit = hc.habit,
                                                 isCompleted = isDone,
+                                                isStacked = isStacked,
+                                                isLocked = isLocked,
                                                 subtitleText = HabitUtils.buildHabitSubtitle(hc.habit, completionsThisWeek),
                                                 enableDismissible = false,
                                                 onToggleCompleted = { habitViewModel.toggleCompletionToday(hc.habit.id) },

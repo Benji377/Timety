@@ -82,10 +82,6 @@ import java.util.UUID
  * honors a 24h flag + date-format code + locale. No centralized Kotlin equivalent exists
  * yet, so this screen uses `DateTimeFormatter` with the device locale (see [formatDate]/
  * [formatTime]). The parent should centralize this later.
- *
- * LOCATION PICKER NOTE: Flutter's location field has a search button that opens a
- * `LocationPicker` screen (map-based). No such screen has been ported to Kotlin yet, so
- * the search affordance is rendered for visual parity but is currently a no-op.
  */
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
@@ -95,6 +91,7 @@ fun TaskDetailScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val allTasks by taskViewModel.allTasks.collectAsState()
+    val dateFmt = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
     val isNewTask = taskId == null
     val existingTaskWithSubtasks = taskId?.let { id -> allTasks.find { it.task.id == id } }
     val existingTask = existingTaskWithSubtasks?.task
@@ -322,7 +319,7 @@ fun TaskDetailScreen(
                         }
                 ) {
                     OutlinedTextField(
-                        value = dueDate?.let { stringResource(R.string.taskDetailsLabelDueDate, formatDate(it), formatTime(it)) } ?: "",
+                        value = dueDate?.let { stringResource(R.string.taskDetailsLabelDueDate, formatDate(it, dateFmt.dateFormatCode), formatTime(it, dateFmt.use24HourFormat)) } ?: "",
                         onValueChange = {},
                         enabled = false,
                         modifier = Modifier.fillMaxWidth(),
@@ -350,7 +347,7 @@ fun TaskDetailScreen(
                             InputChip(
                                 selected = false,
                                 onClick = { if (isEditing) reminders = reminders - reminder },
-                                label = { Text("${formatDate(reminder)} - ${formatTime(reminder)}", fontSize = AppTheme.fsBodySmall) },
+                                label = { Text("${formatDate(reminder, dateFmt.dateFormatCode)} - ${formatTime(reminder, dateFmt.use24HourFormat)}", fontSize = AppTheme.fsBodySmall) },
                                 trailingIcon = if (isEditing) {
                                     { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.commonLabelRemove), modifier = Modifier.size(16.dp)) }
                                 } else null
@@ -498,9 +495,25 @@ fun TaskDetailScreen(
 
     // --- Date + time picker dialogs (mirrors AppDatePickers.pickDateTime) ---
     if (pickerStep == 1) {
+        // Mirror AppDatePickers.pickDateTime constraints: due dates can't be before today; a custom
+        // reminder can't be after the task's due date.
+        val zone = ZoneId.systemDefault()
+        val todayUtcMillis = java.time.LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val dueUtcMillis = dueDate?.atZone(zone)?.toLocalDate()
+            ?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+        val selectableDates = remember(pickerTarget, dueUtcMillis, todayUtcMillis) {
+            object : androidx.compose.material3.SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean = when (pickerTarget) {
+                    PickerTarget.DUE_DATE -> utcTimeMillis >= todayUtcMillis
+                    PickerTarget.CUSTOM_REMINDER -> dueUtcMillis == null || utcTimeMillis <= dueUtcMillis
+                    else -> true
+                }
+            }
+        }
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = (if (pickerTarget == PickerTarget.DUE_DATE) dueDate else null)
-                ?.toEpochMilli() ?: System.currentTimeMillis()
+                ?.toEpochMilli() ?: System.currentTimeMillis(),
+            selectableDates = selectableDates
         )
         DatePickerDialog(
             onDismissRequest = { closePicker() },
@@ -524,9 +537,7 @@ fun TaskDetailScreen(
     }
 
     if (pickerStep == 2 && pickedLocalDate != null) {
-        val context = LocalContext.current
-        val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
-        val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0, is24Hour = is24Hour)
+        val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0, is24Hour = dateFmt.use24HourFormat)
         AlertDialog(
             onDismissRequest = { closePicker() },
             title = { Text(stringResource(R.string.taskDetailsLabelDueDateSet)) },
@@ -575,11 +586,11 @@ private fun disabledFieldColors(isEditing: Boolean) = OutlinedTextFieldDefaults.
 )
 
 /** Date/time formatting stand-in; see the file-level KDoc note on date formatting. */
-private fun formatDate(instant: Instant): String =
-    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault()).format(instant)
+private fun formatDate(instant: Instant, dateFormatCode: String): String =
+    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(instant, dateFormatCode)
 
-private fun formatTime(instant: Instant): String =
-    DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault()).format(instant)
+private fun formatTime(instant: Instant, use24Hour: Boolean): String =
+    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(instant, use24Hour)
 
 @Composable
 private fun SectionHeader(title: String, icon: ImageVector) {

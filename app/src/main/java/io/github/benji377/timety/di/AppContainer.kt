@@ -15,6 +15,7 @@ interface AppContainer {
     val focusRepository: FocusRepository
     val userRepository: UserRepository
     val settingsRepository: io.github.benji377.timety.data.repository.SettingsRepository
+    val backupService: io.github.benji377.timety.services.BackupService
 }
 
 class DefaultAppContainer(private val context: Context) : AppContainer {
@@ -44,5 +45,9 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val settingsRepository: io.github.benji377.timety.data.repository.SettingsRepository by lazy {
         io.github.benji377.timety.data.repository.SettingsRepository(context.dataStore)
+    }
+
+    override val backupService: io.github.benji377.timety.services.BackupService by lazy {
+        io.github.benji377.timety.services.BackupService(context, database, settingsRepository)
     }
 }

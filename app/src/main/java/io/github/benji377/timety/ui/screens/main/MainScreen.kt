@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.ui.navigation.BottomNavItems
 import android.Manifest
 import android.os.Build
@@ -57,13 +58,13 @@ fun MainScreen() {
                         icon = {
                             Icon(
                                 imageVector = if (isSelected) item.iconFilled else item.iconOutlined,
-                                contentDescription = item.title,
+                                contentDescription = stringResource(item.titleRes),
                                 tint = if (isSelected) item.activeColor else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
                         label = {
                             Text(
-                                text = item.title,
+                                text = stringResource(item.titleRes),
                                 color = if (isSelected) item.activeColor else MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )
@@ -129,7 +130,8 @@ fun MainScreen() {
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Calendar.route) {
                 io.github.benji377.timety.ui.screens.calendar.CalendarScreen(
-                    onNavigateToTask = { taskId -> navController.navigate("task_detail/$taskId") }
+                    onNavigateToTask = { taskId -> navController.navigate("task_detail/$taskId") },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Statistics.route) {
@@ -137,8 +139,25 @@ fun MainScreen() {
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
+            composable("focus_history") {
+                io.github.benji377.timety.ui.screens.focus.FocusHistoryScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
             composable("settings") {
                 io.github.benji377.timety.ui.screens.settings.SettingsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToTags = { navController.navigate("focus_tags") },
+                    onNavigateToCategories = { navController.navigate("task_categories") }
+                )
+            }
+            composable("focus_tags") {
+                io.github.benji377.timety.ui.components.focus.FocusTagsWidget(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable("task_categories") {
+                io.github.benji377.timety.ui.screens.task.TaskCategoriesScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

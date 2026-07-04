@@ -58,10 +58,8 @@ import kotlin.math.roundToInt
 
 /** Roughly a day; used as a stand-in "infinite" duration so Stopwatch mode can count up under
  * the current [FocusTimerManager], which only knows how to count down from a fixed total. */
-private const val STOPWATCH_MAX_SECONDS = 24 * 60 * 60
-
-private fun secondsForPhase(phase: SessionPhaseEntity, flexibleMinutes: Int): Int = when {
-    phase.durationMinutes == 0 -> STOPWATCH_MAX_SECONDS
+private fun secondsForPhase(phase: io.github.benji377.timety.data.model.focus.SessionPhaseEntity, flexibleMinutes: Int): Int = when {
+    phase.durationMinutes == 0 -> 0 // Stopwatch
     phase.durationMinutes == -1 -> flexibleMinutes * 60
     else -> phase.durationMinutes * 60
 }
@@ -251,10 +249,9 @@ fun FocusScreen(
                 gaugeProgress = 0f
                 gaugeLabel = focusLabelStopwatch
                 centerText = if (isRunning || isPaused) {
-                    val elapsed = (timerState.totalPhaseSeconds - timerState.secondsRemaining).coerceAtLeast(0)
-                    AppDateFormatUtils.formatDuration(elapsed)
+                    timerState.centerText
                 } else {
-                    "0:00"
+                    "00:00"
                 }
             }
         }
@@ -504,7 +501,7 @@ fun FocusScreen(
     if (showDistraction) {
         DistractionBottomSheet(
             onDismissRequest = { showDistraction = false },
-            onEventSelected = { type -> focusViewModel.logDistraction(type.dbId) },
+            onEventSelected = { type -> focusViewModel.logDistraction(type.entityType) },
         )
     }
 
@@ -544,7 +541,9 @@ fun FocusScreen(
             text = { Text(stringResource(R.string.focusDialogSessionStopContent)) },
             confirmButton = {
                 Button(onClick = {
-                    sendAction(FocusTimerService.ACTION_STOP)
+                    val elapsed = if (timerState.isStopwatch) timerState.elapsedSeconds else timerState.totalPhaseSeconds - timerState.secondsRemaining
+                    focusViewModel.addPartialPhaseTime(elapsed, timerState.isRestPhase)
+                    sendAction(io.github.benji377.timety.services.FocusTimerService.ACTION_STOP)
                     focusViewModel.setAwaitingContinue(false)
                     focusViewModel.resetPhaseIndex()
                     focusViewModel.completeSessionAndLog()

@@ -310,9 +310,10 @@ private fun UnifiedCalendarSheetContent(
     // Remove-completion confirmation dialog
     val removalDate = dateForRemoval
     if (removalDate != null) {
-        val formattedDate = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-            .withLocale(Locale.getDefault())
-            .format(removalDate)
+        val formattedDate = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(
+            removalDate,
+            io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.dateFormatCode
+        )
         ConfirmationDialog(
             visible = true,
             title = stringResource(R.string.habitHistoryRemoveTitle),
@@ -334,7 +335,7 @@ private fun UnifiedCalendarSheetContent(
         val timePickerState = rememberTimePickerState(
             initialHour = now.hour,
             initialMinute = now.minute,
-            is24Hour = true,
+            is24Hour = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat,
         )
         AlertDialog(
             onDismissRequest = { dateForAdd = null },
@@ -380,14 +381,13 @@ private fun TimelineItem(
     isLast: Boolean,
     onDelete: () -> Unit,
 ) {
-    val zone = ZoneId.systemDefault()
-    val dateTime = completion.completionDate.atZone(zone)
-    val dateLabel = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-        .withLocale(Locale.getDefault())
-        .format(dateTime)
-    val timeLabel = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
-        .withLocale(Locale.getDefault())
-        .format(dateTime)
+    val dfs = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
+    val dateLabel = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(
+        completion.completionDate, dfs.dateFormatCode
+    )
+    val timeLabel = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+        completion.completionDate, dfs.use24HourFormat
+    )
 
     Row(
         modifier = Modifier

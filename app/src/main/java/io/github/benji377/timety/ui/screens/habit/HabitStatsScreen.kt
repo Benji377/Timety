@@ -429,7 +429,7 @@ private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             buckets.forEach { bucket ->
-                val percent = if (total == 0) 0 else ((bucket.count.toFloat() / total) * 100).toInt()
+                val percent = if (total == 0) 0 else Math.round((bucket.count.toFloat() / total) * 100)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.47f)

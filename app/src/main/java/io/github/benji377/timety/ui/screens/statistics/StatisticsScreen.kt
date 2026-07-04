@@ -19,9 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -110,7 +112,15 @@ fun StatisticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.statsTitle), fontWeight = FontWeight.Bold) }
+                title = { Text(stringResource(R.string.statsTitle), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    androidx.compose.material3.IconButton(onClick = onNavigateBack) {
+                        androidx.compose.material3.Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
             )
         }
     ) { padding ->

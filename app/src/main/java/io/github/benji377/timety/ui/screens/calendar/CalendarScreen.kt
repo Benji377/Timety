@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,7 +74,8 @@ fun CalendarScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onNavigateToTask: (String) -> Unit = {}
+    onNavigateToTask: (String) -> Unit = {},
+    onNavigateBack: () -> Unit = {}
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
@@ -111,6 +113,14 @@ fun CalendarScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.calendarTitle)) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
                 actions = {
                     IconButton(onClick = {
                         focusedMonth = LocalDate.now().withDayOfMonth(1)
@@ -130,7 +140,6 @@ fun CalendarScreen(
             // --- TOP HALF: THE CALENDAR ---
             Box(
                 modifier = Modifier
-                    .weight(1f)
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(16.dp)
@@ -142,16 +151,14 @@ fun CalendarScreen(
                         onNext = { focusedMonth = focusedMonth.plusMonths(1) }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Box(modifier = Modifier.weight(1f)) {
-                        CalendarGrid(
-                            focusedMonth = focusedMonth,
-                            selectedDate = selectedDate,
-                            tasks = tasks,
-                            sessions = sessions,
-                            habitsWithCompletions = habitsWithCompletions,
-                            onDaySelected = { selectedDate = it }
-                        )
-                    }
+                    CalendarGrid(
+                        focusedMonth = focusedMonth,
+                        selectedDate = selectedDate,
+                        tasks = tasks,
+                        sessions = sessions,
+                        habitsWithCompletions = habitsWithCompletions,
+                        onDaySelected = { selectedDate = it }
+                    )
                 }
             }
 
@@ -222,8 +229,6 @@ private fun isHabitScheduledOn(hwc: HabitWithCompletions, date: LocalDate): Bool
 
 @Composable
 private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNext: () -> Unit) {
-    val locale = Locale.getDefault()
-    val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", locale)
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -233,7 +238,7 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
             Icon(Icons.Filled.ChevronLeft, contentDescription = null)
         }
         Text(
-            text = focusedMonth.format(formatter),
+            text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatMonthYear(focusedMonth),
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
@@ -290,10 +295,10 @@ private fun CalendarGrid(
                 }
             }
             Box(
-                modifier = Modifier.weight(1f).padding(bottom = 8.dp),
+                modifier = Modifier.weight(1.5f).padding(bottom = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.calendarHeaderWeekly), fontWeight = FontWeight.Bold, color = TaskColor)
+                Text(stringResource(R.string.calendarHeaderWeekly), fontWeight = FontWeight.Bold, color = TaskColor, maxLines = 1)
             }
         }
 
@@ -363,7 +368,7 @@ private fun CalendarGrid(
                 }
 
                 Box(
-                    modifier = Modifier.weight(1f).height(45.dp),
+                    modifier = Modifier.weight(1.5f).height(45.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -523,8 +528,7 @@ private fun FocusSessionsAccordion(
     val modes by focusViewModel.allModes.collectAsState()
     val tags by focusViewModel.allTags.collectAsState()
     val zone = ZoneId.systemDefault()
-    val locale = Locale.getDefault()
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", locale)
+    val use24Hour = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
     val ongoingLabel = stringResource(R.string.calendarLabelFocusOngoing)
     val untaggedLabel = stringResource(R.string.focusTargetUntagged)
 
@@ -544,9 +548,9 @@ private fun FocusSessionsAccordion(
                 val mode = modes.firstOrNull { it.id == session.modeId } ?: modes.firstOrNull()
                 val tag = session.tagId?.let { tagId -> tags.firstOrNull { it.id == tagId } }
 
-                var timeString = session.startTime.atZone(zone).toLocalTime().format(timeFormatter)
+                var timeString = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(session.startTime, use24Hour, zone)
                 timeString += if (session.endTime != null) {
-                    " - ${session.endTime.atZone(zone).toLocalTime().format(timeFormatter)}"
+                    " - ${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(session.endTime, use24Hour, zone)}"
                 } else {
                     " - $ongoingLabel"
                 }

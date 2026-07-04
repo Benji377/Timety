@@ -487,10 +487,10 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
                 val timeLabel = targetTimeMinutes?.let {
                     val time = LocalTime.of(it / 60, it % 60)
-                    // NOTE: Flutter formats via SettingsProvider.getFormattedTime (24h flag + locale).
-                    // No centralized Kotlin equivalent exists yet, so this uses a locale-aware short
-                    // time formatter as a stand-in.
-                    DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()).format(time)
+                    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+                        time,
+                        io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
+                    )
                 } ?: stringResource(R.string.habitDetailLabelReminderNoTime)
 
                 Box(modifier = Modifier.clickable(enabled = isEditing) { showTimePicker = true }) {
@@ -598,7 +598,7 @@ fun HabitDetailScreen(
             val timePickerState = rememberTimePickerState(
                 initialHour = initial?.let { it / 60 } ?: 8,
                 initialMinute = initial?.let { it % 60 } ?: 0,
-                is24Hour = true,
+                is24Hour = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat,
             )
             AlertDialog(
                 onDismissRequest = { showTimePicker = false },

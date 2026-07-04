@@ -57,11 +57,11 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.AppUtils
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.time.temporal.ChronoUnit
 
 /**
  * Mirrors `TaskListTile` in `task_list_tile.dart`.
@@ -84,6 +84,8 @@ fun TaskListTile(
     showTrailing: Boolean = true,
     subtasksCompleted: Int = 0,
     subtasksTotal: Int = 0,
+    use24HourFormat: Boolean = LocalDateFormatSettings.current.use24HourFormat,
+    dateFormatCode: String = LocalDateFormatSettings.current.dateFormatCode,
     modifier: Modifier = Modifier,
     // Screen margin, mirrors AppTheme.listTileScreenMargin (spaceLarge horizontal, spaceXSmall vertical).
     margin: PaddingValues = PaddingValues(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceXSmall),
@@ -182,7 +184,7 @@ fun TaskListTile(
                                 // aware). No centralized Kotlin equivalent exists yet, so this falls
                                 // back to a locale-aware medium date/time formatter.
                                 Text(
-                                    text = formatDueDateTime(task.dueDate),
+                                    text = formatDueDateTime(task.dueDate, use24HourFormat, dateFormatCode),
                                     fontSize = AppTheme.fsLabel,
                                     color = borderColor,
                                     fontWeight = AppTheme.fwMedium,
@@ -264,14 +266,12 @@ private fun getBorderColor(task: TaskEntity, isOverdue: Boolean): Color {
     if (isOverdue) return ErrorColor
     val dueDate = task.dueDate
     if (dueDate != null) {
-        val today = Instant.now().truncatedTo(ChronoUnit.DAYS)
-        if (dueDate.truncatedTo(ChronoUnit.DAYS) == today) return WarningColor
+        val zone = ZoneId.systemDefault()
+        val today = LocalDate.now(zone)
+        if (dueDate.atZone(zone).toLocalDate() == today) return WarningColor
     }
     return TaskColor
 }
 
-private fun formatDueDateTime(dueDate: Instant): String {
-    val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-        .withZone(ZoneId.systemDefault())
-    return formatter.format(dueDate)
-}
+private fun formatDueDateTime(dueDate: Instant, use24HourFormat: Boolean, dateFormatCode: String): String =
+    AppDateFormatUtils.formatDateTime(dueDate, dateFormatCode, use24HourFormat)

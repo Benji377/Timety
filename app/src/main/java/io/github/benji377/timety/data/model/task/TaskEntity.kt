@@ -48,7 +48,7 @@ data class TaskEntity(
     val isCompleted: Boolean = false,
     val completedAt: Instant? = null,
     val createdAt: Instant,
-    val reminders: List<Instant> = emptyList() // Needs TypeConverter
+    val reminders: List<Instant> = emptyList()
 )
 
 data class TaskWithSubtasks(

@@ -1,5 +1,10 @@
 package io.github.benji377.timety.ui.screens.profile
 
+import android.content.Intent
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,29 +14,45 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import android.widget.Toast
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.stats.CompactVerticalStatCard
+import io.github.benji377.timety.ui.components.user.StreakStatusBadge
+import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +96,15 @@ fun ProfileScreen(
     var tempName by remember { mutableStateOf("") }
     var showShareWrapupDialog by remember { mutableStateOf(false) }
 
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let {
+            userViewModel.updateProfileImage(it.toString())
+        }
+    }
+    val coroutineScope = rememberCoroutineScope()
+
     if (showShareWrapupDialog) {
         AlertDialog(
             onDismissRequest = { showShareWrapupDialog = false },
@@ -87,11 +117,35 @@ fun ProfileScreen(
                     Text("${stringResource(R.string.userStatHabitsMet)}: $totalHabitsMet")
                     Text("${stringResource(R.string.userStatFocusMins)}: $totalFocusMins")
                     Text("Highest Streak: $highestStreak")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Image generation and sharing intent coming soon!")
                 }
             },
             confirmButton = {
+                TextButton(onClick = {
+                    showShareWrapupDialog = false
+                    coroutineScope.launch(Dispatchers.IO) {
+                        val bytes = io.github.benji377.timety.ui.utils.WrapUpImageGenerator.generate(
+                            context, userName, level, levelTitle, highestStreak, totalTasksDone, totalFocusMins, totalHabitsMet
+                        )
+                        val cachePath = File(context.cacheDir, "images")
+                        cachePath.mkdirs()
+                        val file = File(cachePath, "wrapup.png")
+                        file.writeBytes(bytes)
+                        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                        
+                        withContext(Dispatchers.Main) {
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "image/png"
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(Intent.createChooser(intent, "Share Wrap-Up"))
+                        }
+                    }
+                }) {
+                    Text("Share")
+                }
+            },
+            dismissButton = {
                 TextButton(onClick = { showShareWrapupDialog = false }) {
                     Text("Close")
                 }
@@ -163,12 +217,21 @@ fun ProfileScreen(
                             .background(UserColor.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = "Avatar",
-                            modifier = Modifier.size(60.dp),
-                            tint = UserColor
-                        )
+                        if (userProfile?.profileImagePath != null) {
+                            AsyncImage(
+                                model = userProfile?.profileImagePath,
+                                contentDescription = "Avatar",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = "Avatar",
+                                modifier = Modifier.size(60.dp),
+                                tint = UserColor
+                            )
+                        }
                     }
                     Box(
                         modifier = Modifier
@@ -176,7 +239,7 @@ fun ProfileScreen(
                             .clip(CircleShape)
                             .background(UserColor)
                             .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                            .clickable { Toast.makeText(context, "Image Picker coming soon", Toast.LENGTH_SHORT).show() },
+                            .clickable { photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -214,18 +277,14 @@ fun ProfileScreen(
 
             // Streak Badge
             item {
-                Surface(
-                    color = WarningColor.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(16.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Filled.LocalFireDepartment, contentDescription = "Streak", tint = WarningColor)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "$highestStreak Day Streak!", color = WarningColor, fontWeight = FontWeight.Bold)
-                    }
+                    io.github.benji377.timety.ui.components.user.StreakStatusBadge(isActive = currentStreak > 0)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "$highestStreak Day Streak!", color = WarningColor, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -267,49 +326,58 @@ fun ProfileScreen(
                     )
                     
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        StatCard(title = stringResource(R.string.userStatTasksDone), value = totalTasksDone.toString(), modifier = Modifier.weight(1f))
-                        StatCard(title = stringResource(R.string.userStatHabitsMet), value = totalHabitsMet.toString(), modifier = Modifier.weight(1f))
+                        io.github.benji377.timety.ui.components.stats.StatCard(
+                            title = stringResource(R.string.userStatTasksDone), 
+                            value = totalTasksDone.toString(), 
+                            icon = androidx.compose.material.icons.Icons.Filled.CheckCircle,
+                            color = TaskColor,
+                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            modifier = Modifier.weight(1f)
+                        )
+                        io.github.benji377.timety.ui.components.stats.StatCard(
+                            title = stringResource(R.string.userStatHabitsMet), 
+                            value = totalHabitsMet.toString(), 
+                            icon = androidx.compose.material.icons.Icons.Filled.Repeat,
+                            color = HabitColor,
+                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        StatCard(title = stringResource(R.string.userStatFocusMins), value = totalFocusMins.toString(), modifier = Modifier.weight(1f))
-                        StatCard(title = stringResource(R.string.userStatSessions), value = totalSessions.toString(), modifier = Modifier.weight(1f))
+                        io.github.benji377.timety.ui.components.stats.StatCard(
+                            title = stringResource(R.string.userStatFocusMins), 
+                            value = totalFocusMins.toString(), 
+                            icon = androidx.compose.material.icons.Icons.Filled.Timer,
+                            color = FocusColor,
+                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            modifier = Modifier.weight(1f)
+                        )
+                        io.github.benji377.timety.ui.components.stats.StatCard(
+                            title = stringResource(R.string.userStatSessions), 
+                            value = totalSessions.toString(), 
+                            icon = androidx.compose.material.icons.Icons.Filled.Timer,
+                            color = FocusColor,
+                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        StatCard(title = stringResource(R.string.streakLegendStreakDay), value = highestStreak.toString(), modifier = Modifier.weight(1f))
+                        io.github.benji377.timety.ui.components.stats.StatCard(
+                            title = stringResource(R.string.streakLegendStreakDay), 
+                            value = highestStreak.toString(), 
+                            icon = androidx.compose.material.icons.Icons.Filled.LocalFireDepartment,
+                            color = WarningColor,
+                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            modifier = Modifier.weight(1f)
+                        )
                         Spacer(modifier = Modifier.weight(1f))
                     }
                 }
             }
             
             item { Spacer(modifier = Modifier.height(40.dp)) }
-        }
-    }
-}
-
-@Composable
-fun StatCard(title: String, value: String, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

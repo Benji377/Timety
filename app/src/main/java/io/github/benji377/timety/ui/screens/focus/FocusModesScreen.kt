@@ -74,7 +74,7 @@ fun FocusModesScreen(
                     },
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(newModeLabel) },
-                    containerColor = io.github.benji377.timety.ui.theme.TaskColor,
+
                     contentColor = Color.White,
                 )
             }

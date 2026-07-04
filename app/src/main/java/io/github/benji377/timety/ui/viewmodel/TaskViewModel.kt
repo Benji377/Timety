@@ -65,11 +65,13 @@ class TaskViewModel(
         )
         viewModelScope.launch {
             taskRepository.updateTask(updatedTask)
+            scheduleTaskReminders(updatedTask)
             updateWidgets()
+            val xpAmount = io.github.benji377.timety.util.stats.ExperienceEngine.xpPerTask
             if (updatedTask.isCompleted) {
-                userRepository.addXp(15) // XP per task
+                userRepository.addXp(xpAmount) // XP per task
             } else {
-                userRepository.addXp(-15) // Revert XP
+                userRepository.addXp(-xpAmount) // Revert XP
             }
         }
     }
@@ -83,7 +85,8 @@ class TaskViewModel(
         )
         viewModelScope.launch {
             taskRepository.updateTask(updatedTask)
-            userRepository.addXp(15)
+            scheduleTaskReminders(updatedTask)
+            userRepository.addXp(io.github.benji377.timety.util.stats.ExperienceEngine.xpPerTask)
             updateWidgets()
         }
     }
@@ -100,10 +103,13 @@ class TaskViewModel(
         
         task.reminders.forEach { reminder ->
             if (reminder.isAfter(now)) {
+                val diffMinutes = java.time.Duration.between(reminder, task.dueDate ?: reminder).toMinutes()
+                val bodyText = if (diffMinutes > 0) application.getString(io.github.benji377.timety.R.string.homeSectionTasksDue, diffMinutes) else task.category.ifBlank { application.getString(io.github.benji377.timety.R.string.globalLabelTask) }
+                
                 notificationService.scheduleTaskReminder(
                     notificationId = baseId + scheduledCount,
                     title = application.getString(io.github.benji377.timety.R.string.reminderTaskTitle, task.title),
-                    body = task.category.ifBlank { application.getString(io.github.benji377.timety.R.string.globalLabelTask) },
+                    body = bodyText,
                     scheduledTime = reminder
                 )
                 scheduledCount++

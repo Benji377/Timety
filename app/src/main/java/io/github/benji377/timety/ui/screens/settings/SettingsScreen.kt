@@ -3,6 +3,8 @@ package io.github.benji377.timety.ui.screens.settings
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,7 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.TimetyApplication
+import kotlinx.coroutines.launch
+import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.TextInputDialog
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -67,11 +73,39 @@ import java.util.Locale
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToTags: () -> Unit = {},
+    onNavigateToCategories: () -> Unit = {},
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val backupService = remember {
+        (context.applicationContext as TimetyApplication).container.backupService
+    }
+    // Import runs in two steps to mirror Flutter: pick file -> confirm overwrite -> restore -> restart dialog.
+    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
+    var showRestartDialog by remember { mutableStateOf(false) }
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val result = backupService.exportToUri(uri)
+            val msg = if (result.isSuccess) {
+                context.getString(R.string.backupExportSuccess)
+            } else {
+                context.getString(R.string.backupExportFailure, result.exceptionOrNull()?.message ?: "")
+            }
+            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+        }
+    }
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) pendingImportUri = uri
+    }
 
     val themePref by settingsViewModel.themePref.collectAsState()
     val appLocaleCode by settingsViewModel.appLocaleCode.collectAsState()
@@ -100,6 +134,9 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showDateFormatDialog by remember { mutableStateOf(false) }
     var showLocationDialog by remember { mutableStateOf(false) }
+    var pendingLocationUrl by remember { mutableStateOf(locationApiEndpoint) }
+    var locationError by remember { mutableStateOf<String?>(null) }
+    var isCheckingLocation by remember { mutableStateOf(false) }
     var numberDialogSpec by remember { mutableStateOf<NumberDialogSpec?>(null) }
     var timeDialogSpec by remember { mutableStateOf<TimeDialogSpec?>(null) }
 
@@ -157,14 +194,73 @@ fun SettingsScreen(
         onSelect = { settingsViewModel.setDateFormat(it) },
         onDismiss = { showDateFormatDialog = false }
     )
-    TextInputDialog(
-        visible = showLocationDialog,
-        title = stringResource(R.string.settingsLabelLocationApi),
-        labelText = stringResource(R.string.settingsLabelLocationApi),
-        initialValue = locationApiEndpoint,
-        onConfirm = { settingsViewModel.setLocationApiEndpoint(it) },
-        onDismiss = { showLocationDialog = false }
-    )
+    if (showLocationDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showLocationDialog = false
+                locationError = null
+                pendingLocationUrl = locationApiEndpoint
+            },
+            title = { Text(stringResource(R.string.settingsLabelLocationApi)) },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = pendingLocationUrl,
+                        onValueChange = { 
+                            pendingLocationUrl = it
+                            locationError = null
+                        },
+                        label = { Text(stringResource(R.string.settingsLabelLocationApi)) },
+                        singleLine = true,
+                        isError = locationError != null,
+                        supportingText = locationError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
+                    )
+                    if (isCheckingLocation) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Validating...", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showLocationDialog = false
+                        locationError = null
+                        pendingLocationUrl = locationApiEndpoint
+                    },
+                    enabled = !isCheckingLocation
+                ) { Text(stringResource(R.string.commonLabelCancel)) }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val trimmed = pendingLocationUrl.trim()
+                        if (trimmed.isEmpty()) {
+                            settingsViewModel.setLocationApiEndpoint(trimmed)
+                            showLocationDialog = false
+                        } else {
+                            scope.launch {
+                                isCheckingLocation = true
+                                val isValid = settingsViewModel.validateLocationApiEndpoint(trimmed)
+                                isCheckingLocation = false
+                                if (isValid) {
+                                    settingsViewModel.setLocationApiEndpoint(trimmed)
+                                    showLocationDialog = false
+                                } else {
+                                    locationError = "Invalid endpoint or not reachable"
+                                }
+                            }
+                        }
+                    },
+                    enabled = !isCheckingLocation
+                ) { Text(stringResource(R.string.commonLabelSave)) }
+            }
+        )
+    }
     numberDialogSpec?.let { spec ->
         NumberPickerDialog(
             spec = spec,
@@ -326,18 +422,14 @@ fun SettingsScreen(
                     supportingContent = { Text(stringResource(R.string.settingsLabelTagsSubtitle, focusTags.size)) },
                     leadingContent = { Icon(Icons.Outlined.LocalOffer, null, tint = FocusColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
-                    modifier = Modifier.clickable {
-                        Toast.makeText(context, "Focus tag management coming soon", Toast.LENGTH_SHORT).show()
-                    }
+                    modifier = Modifier.clickable { onNavigateToTags() }
                 )
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settingsLabelCategories)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelCategoriesSubtitle, categoryCount)) },
                     leadingContent = { Icon(Icons.Outlined.Label, null, tint = TaskColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
-                    modifier = Modifier.clickable {
-                        Toast.makeText(context, "Category management coming soon", Toast.LENGTH_SHORT).show()
-                    }
+                    modifier = Modifier.clickable { onNavigateToCategories() }
                 )
             }
 
@@ -356,7 +448,11 @@ fun SettingsScreen(
                     },
                     leadingContent = { Icon(Icons.Filled.Cloud, null, tint = TaskColor) },
                     trailingContent = { Icon(Icons.Filled.Edit, null) },
-                    modifier = Modifier.clickable { showLocationDialog = true }
+                    modifier = Modifier.clickable { 
+                        pendingLocationUrl = locationApiEndpoint
+                        locationError = null
+                        showLocationDialog = true 
+                    }
                 )
             }
 
@@ -403,7 +499,7 @@ fun SettingsScreen(
                     supportingContent = { Text(stringResource(R.string.settingsLabelExportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.UploadFile, null, tint = TaskColor) },
                     modifier = Modifier.clickable {
-                        Toast.makeText(context, "Data export coming soon", Toast.LENGTH_SHORT).show()
+                        exportLauncher.launch(backupService.suggestedFileName())
                     }
                 )
                 ListItem(
@@ -411,7 +507,7 @@ fun SettingsScreen(
                     supportingContent = { Text(stringResource(R.string.settingsLabelImportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Download, null, tint = FocusColor) },
                     modifier = Modifier.clickable {
-                        Toast.makeText(context, "Data import coming soon", Toast.LENGTH_SHORT).show()
+                        importLauncher.launch(arrayOf("application/json"))
                     }
                 )
             }
@@ -509,6 +605,42 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+
+    // Import confirmation (overwrite warning), mirrors Flutter's showConfirmation before restore.
+    ConfirmationDialog(
+        visible = pendingImportUri != null,
+        title = stringResource(R.string.backupImportConfirmTitle),
+        content = stringResource(R.string.backupImportConfirmBody),
+        onConfirm = {
+            val uri = pendingImportUri
+            pendingImportUri = null
+            if (uri != null) {
+                scope.launch {
+                    val result = backupService.importFromUri(uri)
+                    if (result.isSuccess) {
+                        showRestartDialog = true
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.backupImportFailure), Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        },
+        onDismiss = { pendingImportUri = null }
+    )
+
+    // Restore-success dialog telling the user to restart the app, mirrors Flutter's success dialog.
+    if (showRestartDialog) {
+        AlertDialog(
+            onDismissRequest = { showRestartDialog = false },
+            title = { Text(stringResource(R.string.backupRestoreSuccessTitle)) },
+            text = { Text(stringResource(R.string.backupRestoreSuccessBody)) },
+            confirmButton = {
+                TextButton(onClick = { showRestartDialog = false }) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            }
+        )
     }
 }
 
@@ -610,9 +742,8 @@ private data class TimeDialogSpec(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerDialogRow(spec: TimeDialogSpec, onDismiss: () -> Unit) {
-    val context = LocalContext.current
     val (initialHour, initialMinute) = parseHHmm(spec.current)
-    val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
+    val is24Hour = LocalDateFormatSettings.current.use24HourFormat
     val timePickerState = rememberTimePickerState(initialHour = initialHour, initialMinute = initialMinute, is24Hour = is24Hour)
     AlertDialog(
         onDismissRequest = onDismiss,

@@ -108,7 +108,7 @@ class FocusTimerService : Service() {
 
         // A single exact alarm per phase, targeting the phase's absolute end time - mirrors
         // `showCustomNotification`'s `targetTimeMs`-based scheduling (not re-armed every tick).
-        if (state.isRunning && !state.isPaused && state.secondsRemaining > 0) {
+        if (state.isRunning && !state.isPaused && !state.isStopwatch && state.secondsRemaining > 0) {
             scheduleAlarm(state.secondsRemaining)
         } else {
             cancelAlarm()
@@ -170,11 +170,18 @@ class FocusTimerService : Service() {
             customView.setViewVisibility(R.id.notification_paused_text, android.view.View.GONE)
 
             val elapsedRealtime = SystemClock.elapsedRealtime()
-            val baseTime = elapsedRealtime + (state.secondsRemaining * 1000L)
-
-            customView.setChronometer(R.id.notification_chronometer, baseTime, null, true)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                customView.setChronometerCountDown(R.id.notification_chronometer, true)
+            if (state.isStopwatch) {
+                val baseTime = elapsedRealtime - (state.elapsedSeconds * 1000L)
+                customView.setChronometer(R.id.notification_chronometer, baseTime, null, true)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    customView.setChronometerCountDown(R.id.notification_chronometer, false)
+                }
+            } else {
+                val baseTime = elapsedRealtime + (state.secondsRemaining * 1000L)
+                customView.setChronometer(R.id.notification_chronometer, baseTime, null, true)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    customView.setChronometerCountDown(R.id.notification_chronometer, true)
+                }
             }
         }
 

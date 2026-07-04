@@ -205,6 +205,15 @@ class FocusViewModel(
     private var sessionAccumulatedFocusSeconds: Int = 0
     private var sessionStartTime: Instant? = null
 
+    fun addPartialPhaseTime(seconds: Int, isRestPhase: Boolean) {
+        if (!isRestPhase && seconds > 0) {
+            sessionAccumulatedFocusSeconds += seconds
+            if (sessionStartTime == null) {
+                sessionStartTime = Instant.now().minusSeconds(seconds.toLong())
+            }
+        }
+    }
+
     fun completeSessionAndLog() {
         if (sessionAccumulatedFocusSeconds > 0) {
             val target = selectedTarget.value
@@ -263,10 +272,10 @@ class FocusViewModel(
         viewModelScope.launch { focusRepository.insertSession(session) }
     }
 
-    fun logDistraction(note: String) {
+    fun logDistraction(type: io.github.benji377.timety.data.model.focus.DistractionType, note: String = "") {
         viewModelScope.launch {
             focusRepository.insertDistraction(
-                DistractionEntity(sessionId = currentSessionId, time = Instant.now(), note = note)
+                DistractionEntity(sessionId = currentSessionId, time = Instant.now(), type = type, note = note)
             )
         }
     }
