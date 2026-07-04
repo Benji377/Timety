@@ -562,8 +562,8 @@ fun SettingsScreen(
                                 .background(Color.White),
                             contentAlignment = Alignment.Center
                         ) {
-                            Image(
-                                painter = painterResource(id = R.mipmap.ic_launcher),
+                            coil.compose.AsyncImage(
+                                model = R.mipmap.ic_launcher,
                                 contentDescription = null,
                                 modifier = Modifier.size(48.dp)
                             )
