@@ -46,7 +46,7 @@ fun ModeTimeline(
 ) {
     if (phases.isEmpty()) return
 
-    val isDark = isSystemInDarkTheme()
+    val isDark = io.github.benji377.timety.ui.theme.LocalIsDarkTheme.current
     val isCompleted = currentPhaseIndex >= phases.size
     val completionFill = if (isDark) PaperLight else PaperAltLight
     val isRunningOrAwaiting = isRunning || awaitingContinue

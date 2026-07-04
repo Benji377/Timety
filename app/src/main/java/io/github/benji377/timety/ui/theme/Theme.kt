@@ -59,6 +59,8 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = Color(0xFFE5DED1),
 )
 
+val LocalIsDarkTheme = androidx.compose.runtime.staticCompositionLocalOf<Boolean> { false }
+
 @Composable
 fun TimetyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -75,10 +77,12 @@ fun TimetyTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = TimetyTypography,
-        shapes = TimetyShapes,
-        content = content
-    )
+    androidx.compose.runtime.CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = TimetyTypography,
+            shapes = TimetyShapes,
+            content = content
+        )
+    }
 }

@@ -87,7 +87,7 @@ fun InteractiveGauge(
     var currentProgress by remember { mutableStateOf(progress) }
     LaunchedEffect(progress, isInteractive) { currentProgress = progress }
 
-    val isDark = isSystemInDarkTheme()
+    val isDark = io.github.benji377.timety.ui.theme.LocalIsDarkTheme.current
     val gaugeColor = color ?: MaterialTheme.colorScheme.primary
 
     val infiniteTransition = rememberInfiniteTransition(label = "gaugePulse")
