@@ -58,6 +58,7 @@ fun ModeTimeline(
         modifier = modifier
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = AppTheme.spaceXLarge, vertical = AppTheme.spaceMedium),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
     ) {
         // Start node
         CompletionNode(
