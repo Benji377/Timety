@@ -61,3 +61,6 @@ captures/
 
 # Mac OS
 .DS_Store
+
+# Kotlin tooling
+.kotlin/

@@ -50,7 +50,7 @@ fun StyledExpansionTile(
             )
             Icon(
                 imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                contentDescription = "Expand/Collapse",
+                contentDescription = null,
                 tint = titleColor
             )
         }
@@ -88,7 +88,7 @@ fun StyledExpansionTile(
             Box(modifier = Modifier.weight(1f)) { title() }
             Icon(
                 imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                contentDescription = "Expand/Collapse",
+                contentDescription = null,
                 tint = iconColor
             )
         }

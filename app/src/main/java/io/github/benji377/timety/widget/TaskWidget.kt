@@ -55,7 +55,7 @@ class TaskWidget : GlanceAppWidget() {
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = "Tasks Due: ${urgentTasks.size}",
+                        text = context.getString(R.string.widgetTasksDue, urgentTasks.size),
                         style = TextStyle(
                             color = GlanceTheme.colors.onSurface,
                             fontWeight = FontWeight.Bold

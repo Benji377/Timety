@@ -21,7 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.History
@@ -399,7 +399,7 @@ fun FocusScreen(
                 }
                 IconButton(onClick = { cycleMode(1) }, enabled = !isRunning && !isPaused) {
                     Icon(
-                        Icons.Filled.ArrowForwardIos,
+                        Icons.AutoMirrored.Filled.ArrowForwardIos,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = Color.Gray
@@ -618,7 +618,14 @@ fun FocusScreen(
     if (showDistraction) {
         DistractionBottomSheet(
             onDismissRequest = { showDistraction = false },
-            onEventSelected = { type -> focusViewModel.logDistraction(type.entityType) },
+            onEventSelected = { type ->
+                focusViewModel.logDistraction(type.entityType)
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.distractionLogged, context.getString(type.labelRes))
+                    )
+                }
+            },
         )
     }
 
@@ -635,6 +642,9 @@ fun FocusScreen(
                     end,
                     allTags.firstOrNull { it.id == tagId })
                 showTimeMachine = false
+                scope.launch {
+                    snackbarHostState.showSnackbar(context.getString(R.string.dialogTimeMachineSuccess))
+                }
             },
         )
     }

@@ -40,9 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.R
 import io.github.benji377.timety.data.repository.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -58,17 +60,17 @@ fun LocationApiDialog(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val endpointFlow =
-        settingsRepository.locationApiEndpointFlow.collectAsState(initial = "https://photon.komoot.io/api/")
+        settingsRepository.locationApiEndpointFlow.collectAsState(initial = SettingsRepository.DEFAULT_LOCATION_API_ENDPOINT)
     var endpointText by remember(endpointFlow.value) { mutableStateOf(endpointFlow.value) }
 
     var isTestingConnection by remember { mutableStateOf(false) }
     var hasValidatedConnection by remember { mutableStateOf(false) }
-    var testError by remember { mutableStateOf<String?>(null) }
+    var hasTestFailed by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Location API Endpoint") },
+        title = { Text(stringResource(R.string.locationApiDialogTitle)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -79,17 +81,17 @@ fun LocationApiDialog(
                     onValueChange = {
                         endpointText = it
                         hasValidatedConnection = false
-                        testError = null
+                        hasTestFailed = false
                     },
-                    label = { Text("API Endpoint URL") },
-                    placeholder = { Text("https://photon.komoot.io/api/") },
+                    label = { Text(stringResource(R.string.locationApiDialogLabel)) },
+                    placeholder = { Text(SettingsRepository.DEFAULT_LOCATION_API_ENDPOINT) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 InfoItem(
                     icon = Icons.Default.CheckCircle,
-                    title = "Supported APIs",
-                    subtitle = "This app uses the Photon geocoder API format."
+                    title = stringResource(R.string.locationApiDialogSupported),
+                    subtitle = stringResource(R.string.locationApiDialogSupportedDesc)
                 )
 
                 Row(
@@ -106,7 +108,7 @@ fun LocationApiDialog(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        "Learn more about Photon",
+                        stringResource(R.string.locationApiDialogLearnMore),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
@@ -115,11 +117,11 @@ fun LocationApiDialog(
 
                 InfoItem(
                     icon = Icons.Default.Storage,
-                    title = "Best Practice",
-                    subtitle = "Consider self-hosting the API to improve privacy and avoid rate limits."
+                    title = stringResource(R.string.locationApiDialogBestPractice),
+                    subtitle = stringResource(R.string.locationApiDialogBestPracticeDesc)
                 )
 
-                if (hasValidatedConnection && testError == null) {
+                if (hasValidatedConnection && !hasTestFailed) {
                     Surface(
                         color = Color(0xFF4CAF50).copy(alpha = 0.1f),
                         shape = RoundedCornerShape(8.dp),
@@ -141,7 +143,7 @@ fun LocationApiDialog(
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                "Connection successful!",
+                                stringResource(R.string.locationApiDialogSuccess),
                                 color = Color(0xFF4CAF50),
                                 fontSize = 12.sp
                             )
@@ -149,7 +151,7 @@ fun LocationApiDialog(
                     }
                 }
 
-                if (testError != null) {
+                if (hasTestFailed) {
                     Surface(
                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(8.dp),
@@ -171,7 +173,7 @@ fun LocationApiDialog(
                             )
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                "Error: $testError",
+                                stringResource(R.string.locationApiDialogError),
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 12.sp
                             )
@@ -190,32 +192,29 @@ fun LocationApiDialog(
                 },
                 enabled = hasValidatedConnection || endpointText.trim().isEmpty()
             ) {
-                Text("Save")
+                Text(stringResource(R.string.commonLabelSave))
             }
         },
         dismissButton = {
             Row {
-                if (endpointText != "https://photon.komoot.io/api/") {
+                if (endpointText != SettingsRepository.DEFAULT_LOCATION_API_ENDPOINT) {
                     TextButton(onClick = {
-                        endpointText = "https://photon.komoot.io/api/"
+                        endpointText = SettingsRepository.DEFAULT_LOCATION_API_ENDPOINT
                         hasValidatedConnection = false
-                        testError = null
+                        hasTestFailed = false
                     }) {
-                        Text("Reset")
+                        Text(stringResource(R.string.locationApiDialogReset))
                     }
                 }
                 TextButton(
                     onClick = {
                         isTestingConnection = true
-                        testError = null
+                        hasTestFailed = false
                         coroutineScope.launch {
                             val success = validateLocationApiEndpoint(endpointText.trim())
                             isTestingConnection = false
-                            if (success) {
-                                hasValidatedConnection = true
-                            } else {
-                                testError = "Failed to connect"
-                            }
+                            hasValidatedConnection = success
+                            hasTestFailed = !success
                         }
                     },
                     enabled = !isTestingConnection
@@ -226,11 +225,11 @@ fun LocationApiDialog(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Test")
+                        Text(stringResource(R.string.locationApiDialogTest))
                     }
                 }
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.commonLabelCancel))
                 }
             }
         }

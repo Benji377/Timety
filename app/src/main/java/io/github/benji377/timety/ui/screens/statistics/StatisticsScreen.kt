@@ -64,7 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
-import io.github.benji377.timety.ui.components.stats.KpiStatCard
+import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.screens.focus.FocusStatsScreen
 import io.github.benji377.timety.ui.screens.habit.HabitStatsScreen
 import io.github.benji377.timety.ui.screens.task.TaskStatsScreen
@@ -117,7 +117,7 @@ fun StatisticsScreen(
                     androidx.compose.material3.IconButton(onClick = onNavigateBack) {
                         androidx.compose.material3.Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.commonBack)
                         )
                     }
                 }
@@ -240,14 +240,14 @@ private fun OverviewStatsScreen(
             Spacer(Modifier.height(16.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                KpiStatCard(
+                StatCard(
                     title = stringResource(R.string.statsLabelTasksDone),
                     value = "$tasksCompletedToday",
                     icon = Icons.Filled.TaskAlt,
                     color = TaskColor,
                     modifier = Modifier.weight(1f)
                 )
-                KpiStatCard(
+                StatCard(
                     title = stringResource(R.string.statsLabelFocus),
                     value = "${focusMinsToday}m",
                     icon = Icons.Filled.Timer,
@@ -257,7 +257,7 @@ private fun OverviewStatsScreen(
             }
             Spacer(Modifier.height(16.dp))
 
-            KpiStatCard(
+            StatCard(
                 title = stringResource(R.string.statsLabelFocusGoal),
                 value = "$goalPercent%",
                 icon = Icons.Filled.TrackChanges,

@@ -3,6 +3,7 @@ package io.github.benji377.timety.ui.viewmodel
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.repository.SettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -94,26 +95,14 @@ class SettingsViewModel(
 
     fun setDailyMotivationTime(time: String) = viewModelScope.launch {
         repository.saveDailyMotivationTime(time)
-        val parts = time.split(":")
-        val hour = parts.getOrNull(0)?.toIntOrNull() ?: 8
-        val min = parts.getOrNull(1)?.toIntOrNull() ?: 0
-        io.github.benji377.timety.services.NotificationService(application).scheduleDailyMotivation(
-            hour, min,
-            application.getString(io.github.benji377.timety.R.string.notificationMotivationTitle),
-            application.getString(io.github.benji377.timety.R.string.notificationMotivationBody)
-        )
+        io.github.benji377.timety.services.ReminderScheduler.create(application)
+            .scheduleDailyMotivation(time)
     }
 
     fun setEndOfDayCheckupTime(time: String) = viewModelScope.launch {
         repository.saveEndOfDayCheckupTime(time)
-        val parts = time.split(":")
-        val hour = parts.getOrNull(0)?.toIntOrNull() ?: 20
-        val min = parts.getOrNull(1)?.toIntOrNull() ?: 0
-        io.github.benji377.timety.services.NotificationService(application).scheduleEndOfDayCheckup(
-            hour, min,
-            application.getString(io.github.benji377.timety.R.string.notificationEveningTitle),
-            application.getString(io.github.benji377.timety.R.string.notificationEveningBody)
-        )
+        io.github.benji377.timety.services.ReminderScheduler.create(application)
+            .scheduleEndOfDayCheckup(time)
     }
 
     fun setLocationApiEndpoint(endpoint: String) =
@@ -124,75 +113,18 @@ class SettingsViewModel(
         resyncNotifications()
     }
 
+    /** Re-schedules everything so pending notification text picks up the new language. */
     private suspend fun resyncNotifications() {
-        val notificationService =
-            io.github.benji377.timety.services.NotificationService(application)
+        val scheduler = io.github.benji377.timety.services.ReminderScheduler.create(application)
+
         val tasks = taskRepository.allTasks.firstOrNull() ?: emptyList()
+        tasks.forEach { scheduler.scheduleTaskReminders(it.task) }
+
         val habits = habitRepository.allHabits.firstOrNull() ?: emptyList()
+        habits.forEach { scheduler.scheduleHabitReminder(it) }
 
-        tasks.forEach { taskWithSubtasks ->
-            val task = taskWithSubtasks.task
-            if (!task.isCompleted) {
-                val baseId = task.id.hashCode()
-                for (i in 0..10) notificationService.cancelNotification(baseId + i)
-
-                var scheduledCount = 0
-                val now = java.time.Instant.now()
-
-                task.reminders.forEach { reminder ->
-                    if (reminder.isAfter(now)) {
-                        notificationService.scheduleTaskReminder(
-                            notificationId = baseId + scheduledCount,
-                            title = application.getString(
-                                io.github.benji377.timety.R.string.reminderTaskTitle,
-                                task.title
-                            ),
-                            body = task.category.ifBlank { application.getString(io.github.benji377.timety.R.string.globalLabelTask) },
-                            scheduledTime = reminder
-                        )
-                        scheduledCount++
-                    }
-                }
-
-                if (task.reminders.isEmpty() && task.dueDate != null && task.dueDate.isAfter(now)) {
-                    notificationService.scheduleTaskReminder(
-                        notificationId = baseId + scheduledCount,
-                        title = application.getString(
-                            io.github.benji377.timety.R.string.reminderTaskTitle,
-                            task.title
-                        ),
-                        body = task.category.ifBlank { application.getString(io.github.benji377.timety.R.string.globalLabelTask) },
-                        scheduledTime = task.dueDate
-                    )
-                }
-            }
-        }
-
-        habits.forEach { habit ->
-            notificationService.cancelHabitReminder(habit.id)
-            val mins = habit.targetTimeMinutes ?: return@forEach
-            try {
-                val hour = mins / 60
-                val minute = mins % 60
-                val targetWeekdaysList =
-                    habit.targetWeekdays?.removePrefix("[")?.removeSuffix("]")?.split(",")
-                        ?.mapNotNull { it.trim().toIntOrNull() }
-
-                notificationService.scheduleHabitReminder(
-                    habitId = habit.id,
-                    title = application.getString(
-                        io.github.benji377.timety.R.string.reminderHabitTitle,
-                        habit.name
-                    ),
-                    body = application.getString(io.github.benji377.timety.R.string.globalLabelHabit),
-                    hour = hour,
-                    minute = minute,
-                    targetWeekdays = targetWeekdaysList
-                )
-            } catch (e: Exception) {
-                // Ignore parse errors
-            }
-        }
+        scheduler.scheduleDailyMotivation(repository.dailyMotivationTimeFlow.first())
+        scheduler.scheduleEndOfDayCheckup(repository.endOfDayCheckupTimeFlow.first())
     }
 
     suspend fun validateLocationApiEndpoint(url: String): Boolean {

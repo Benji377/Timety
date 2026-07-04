@@ -1,7 +1,6 @@
 package io.github.benji377.timety.util
 
 import android.content.Context
-import android.os.Build
 import java.util.Locale
 
 /** Applies a per-app locale by wrapping a Context with an overridden Configuration. */
@@ -21,12 +20,6 @@ object LocaleHelper {
         config.setLocale(locale)
         config.setLayoutDirection(locale)
 
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            context.createConfigurationContext(config)
-        } else {
-            @Suppress("DEPRECATION")
-            context.resources.updateConfiguration(config, context.resources.displayMetrics)
-            context
-        }
+        return context.createConfigurationContext(config)
     }
 }

@@ -34,15 +34,16 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Label
-import androidx.compose.material.icons.filled.LabelImportant
-import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.filled.LabelImportant
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.AlertDialog
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.Checkbox
@@ -334,7 +335,7 @@ fun TaskDetailScreen(
                     enabled = isEditing,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
-                    leadingIcon = { Icon(Icons.Filled.Notes, null) },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
                     minLines = 3,
                     maxLines = 6
                 )
@@ -864,7 +865,7 @@ private fun ReminderInput(
                 label = { Text(stringResource(R.string.taskDetailsLabelReminderSet)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
-                    .menuAnchor()
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                     .fillMaxWidth()
             )
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -912,7 +913,7 @@ private fun CategoryPicker(
             enabled = false,
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.taskDetailsLabelCategory)) },
-            leadingIcon = { Icon(Icons.Filled.Label, null) },
+            leadingIcon = { Icon(Icons.AutoMirrored.Filled.Label, null) },
             colors = disabledFieldColors(isEditing = false)
         )
         return
@@ -928,10 +929,10 @@ private fun CategoryPicker(
                     readOnly = true,
                     placeholder = { Text(if (category.isEmpty()) stringResource(R.string.taskDetailsLabelCategorySelect) else category) },
                     label = { Text(stringResource(R.string.taskDetailsLabelCategory)) },
-                    leadingIcon = { Icon(Icons.Filled.Label, null) },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Label, null) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     modifier = Modifier
-                        .menuAnchor()
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                         .fillMaxWidth()
                 )
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -980,7 +981,7 @@ private fun CategoryPicker(
                 onValueChange = onNewCategoryTextChange,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(stringResource(R.string.taskDetailsLabelCategoryNewName)) },
-                leadingIcon = { Icon(Icons.Filled.LabelImportant, null) },
+                leadingIcon = { Icon(Icons.AutoMirrored.Filled.LabelImportant, null) },
                 trailingIcon = {
                     Row {
                         IconButton(onClick = {

@@ -17,7 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +48,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import io.github.benji377.timety.R
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -60,6 +62,7 @@ fun LocationPickerScreen(
     onLocationSelected: (String) -> Unit,
     onBack: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     var query by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
@@ -106,12 +109,15 @@ fun LocationPickerScreen(
                             }
                             list
                         } else {
-                            throw Exception("API Error: ${connection.responseCode}")
+                            throw ServerException(connection.responseCode)
                         }
                     }
                     searchResults = results
+                } catch (e: ServerException) {
+                    errorMessage = context.getString(R.string.locationPickerServerError, e.code)
+                    searchResults = emptyList()
                 } catch (e: Exception) {
-                    errorMessage = "Network error or server unavailable"
+                    errorMessage = context.getString(R.string.locationPickerNetworkError)
                     searchResults = emptyList()
                 } finally {
                     isLoading = false
@@ -128,10 +134,10 @@ fun LocationPickerScreen(
         topBar = {
             TopAppBar(
                 colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
-                title = { Text("Pick Location") },
+                title = { Text(stringResource(R.string.locationPickerTitle)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.Clear, contentDescription = "Back")
+                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.commonBack))
                     }
                 }
             )
@@ -151,7 +157,7 @@ fun LocationPickerScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                placeholder = { Text("Search location...") },
+                placeholder = { Text(stringResource(R.string.locationPickerHint)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
@@ -159,7 +165,7 @@ fun LocationPickerScreen(
                             query = ""
                             performSearch("")
                         }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear")
+                            Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.commonClear))
                         }
                     }
                 },
@@ -192,14 +198,14 @@ fun LocationPickerScreen(
                             tint = Color.Gray
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Start typing to search", fontSize = 16.sp, color = Color.Gray)
+                        Text(stringResource(R.string.locationPickerStartTyping), fontSize = 16.sp, color = Color.Gray)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("At least 3 characters", fontSize = 12.sp, color = Color.Gray)
+                        Text(stringResource(R.string.locationPickerMinChars), fontSize = 12.sp, color = Color.Gray)
                     }
                 } else if (!isLoading && searchResults.isEmpty() && errorMessage == null) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            "No results for \"${query.trim()}\"",
+                            stringResource(R.string.locationPickerNoResults, query.trim()),
                             fontSize = 16.sp,
                             color = Color.Gray
                         )
@@ -209,6 +215,7 @@ fun LocationPickerScreen(
                         items(searchResults) { feature ->
                             val properties = feature.optJSONObject("properties") ?: JSONObject()
                             val title = getPrimaryName(properties)
+                                .ifEmpty { stringResource(R.string.locationPickerUnknown) }
                             val subtitle = buildDetailsString(properties)
 
                             ListItem(
@@ -233,7 +240,7 @@ fun LocationPickerScreen(
                                     onLocationSelected(title)
                                 }
                             )
-                            Divider()
+                            HorizontalDivider()
                         }
                     }
                 }
@@ -257,7 +264,7 @@ private fun getPrimaryName(p: JSONObject): String {
     if (city.isNotEmpty()) return city
     if (state.isNotEmpty()) return state
 
-    return "Unknown Location"
+    return ""
 }
 
 private fun buildDetailsString(p: JSONObject): String {
@@ -293,3 +300,5 @@ private fun buildDetailsString(p: JSONObject): String {
 
     return parts.joinToString(" • ")
 }
+
+private class ServerException(val code: Int) : Exception("Server error: $code")

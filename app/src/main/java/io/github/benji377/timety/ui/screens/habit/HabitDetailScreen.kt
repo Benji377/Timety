@@ -26,9 +26,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Stars
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -300,7 +301,7 @@ fun HabitDetailScreen(
                             placeholder = { Text(stringResource(R.string.habitDetailLabelStackHint)) },
                             leadingIcon = { Icon(Icons.Filled.Layers, null) },
                             modifier = Modifier
-                                .menuAnchor()
+                                .menuAnchor(MenuAnchorType.PrimaryEditable)
                                 .fillMaxWidth(),
                         )
                         if (filteredStacks.isNotEmpty()) {
@@ -333,7 +334,7 @@ fun HabitDetailScreen(
                             enabled = isEditing,
                             label = { Text(stringResource(R.string.habitDetailLabelStackOrder)) },
                             modifier = Modifier
-                                .menuAnchor()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                                 .fillMaxWidth(),
                         )
                         ExposedDropdownMenu(
@@ -400,7 +401,7 @@ fun HabitDetailScreen(
                     enabled = isEditing,
                     label = { Text(stringResource(R.string.habitDetailLabelNotes)) },
                     placeholder = { Text(stringResource(R.string.habitDetailLabelNotesHint)) },
-                    leadingIcon = { Icon(Icons.Filled.Notes, null) },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
                     minLines = 3,
                     maxLines = 6,
                     modifier = Modifier.fillMaxWidth(),

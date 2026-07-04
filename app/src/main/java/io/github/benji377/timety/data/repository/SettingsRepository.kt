@@ -17,6 +17,8 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     companion object {
+        const val DEFAULT_LOCATION_API_ENDPOINT = "https://photon.komoot.io/api/"
+
         val THEME_PREF = stringPreferencesKey("theme")
         val USE_24_HOUR_FORMAT = booleanPreferencesKey("use24HourFormat")
         val DATE_FORMAT = stringPreferencesKey("dateFormat")
@@ -45,7 +47,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val endOfDayCheckupTimeFlow: Flow<String> =
         dataStore.data.map { it[END_OF_DAY_CHECKUP_TIME] ?: "20:00" }
     val locationApiEndpointFlow: Flow<String> =
-        dataStore.data.map { it[LOCATION_API_ENDPOINT] ?: "https://photon.komoot.io/api/" }
+        dataStore.data.map { it[LOCATION_API_ENDPOINT] ?: DEFAULT_LOCATION_API_ENDPOINT }
 
     // Per-app locale: "system" (follow OS) or one of "en"/"de"/"it"/"lld".
     val appLocaleCodeFlow: Flow<String> = dataStore.data.map { it[APP_LOCALE_CODE] ?: "system" }

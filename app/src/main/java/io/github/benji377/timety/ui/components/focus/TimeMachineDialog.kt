@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.AlertDialog
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.DatePicker
@@ -116,7 +117,7 @@ fun TimeMachineDialog(
                         label = { Text(stringResource(R.string.dialogTimeMachineMode)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modeExpanded) },
                         modifier = Modifier
-                            .menuAnchor()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                             .fillMaxWidth(),
                     )
                     ExposedDropdownMenu(
@@ -143,7 +144,7 @@ fun TimeMachineDialog(
                         label = { Text(stringResource(R.string.dialogTimeMachineTag)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = tagExpanded) },
                         modifier = Modifier
-                            .menuAnchor()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                             .fillMaxWidth(),
                     )
                     ExposedDropdownMenu(

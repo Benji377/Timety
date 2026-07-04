@@ -37,6 +37,6 @@ object AppUtils {
             Priority.HIGH -> Icons.Filled.KeyboardArrowUp to ErrorColor
             Priority.VERY_HIGH -> Icons.Filled.KeyboardDoubleArrowUp to ErrorColor
         }
-        Icon(imageVector = icon, contentDescription = "Priority", tint = color)
+        Icon(imageVector = icon, contentDescription = null, tint = color)
     }
 }

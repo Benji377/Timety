@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
 import android.widget.RemoteViews
@@ -124,15 +123,11 @@ class FocusTimerService : Service() {
         )
         val targetTimeMs = System.currentTimeMillis() + (secondsRemaining * 1000L)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                targetTimeMs,
-                soundPendingIntent
-            )
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, targetTimeMs, soundPendingIntent)
-        }
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            targetTimeMs,
+            soundPendingIntent
+        )
     }
 
     private fun cancelAlarm() {
@@ -178,15 +173,11 @@ class FocusTimerService : Service() {
             if (state.isStopwatch) {
                 val baseTime = elapsedRealtime - (state.elapsedSeconds * 1000L)
                 customView.setChronometer(R.id.notification_chronometer, baseTime, null, true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    customView.setChronometerCountDown(R.id.notification_chronometer, false)
-                }
+                customView.setChronometerCountDown(R.id.notification_chronometer, false)
             } else {
                 val baseTime = elapsedRealtime + (state.secondsRemaining * 1000L)
                 customView.setChronometer(R.id.notification_chronometer, baseTime, null, true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    customView.setChronometerCountDown(R.id.notification_chronometer, true)
-                }
+                customView.setChronometerCountDown(R.id.notification_chronometer, true)
             }
         }
 
@@ -198,7 +189,7 @@ class FocusTimerService : Service() {
         )
 
         val builder = NotificationCompat.Builder(this, NotificationService.CHANNEL_FOCUS)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // Fallback icon
+            .setSmallIcon(R.drawable.ic_notification)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setCustomContentView(customView)
             .setCustomBigContentView(customView)
@@ -223,10 +214,7 @@ class FocusTimerService : Service() {
             )
             builder.addAction(
                 if (state.isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play,
-                // No Flutter equivalent exists for these action labels (Flutter's notification has
-                // no interactive actions at all - see class doc); kept as English literals per
-                // CONVENTIONS.md guidance for strings with no source text to mirror.
-                if (state.isRunning) "Pause" else "Resume",
+                getString(if (state.isRunning) R.string.focusActionPause else R.string.focusActionResume),
                 pendingPauseResumeIntent
             )
         }
@@ -237,7 +225,7 @@ class FocusTimerService : Service() {
         val pendingStopIntent = PendingIntent.getService(
             this, 2, stopIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        builder.addAction(android.R.drawable.ic_delete, "Stop", pendingStopIntent)
+        builder.addAction(android.R.drawable.ic_delete, getString(R.string.focusActionStop), pendingStopIntent)
 
         return builder.build()
     }

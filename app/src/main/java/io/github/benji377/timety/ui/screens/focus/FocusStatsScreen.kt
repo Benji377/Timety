@@ -24,7 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.outlined.LocalOffer
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -219,7 +219,7 @@ fun FocusStatsScreen(
                         },
                         tagById
                     )
-                    if (index != sortedSessions.lastIndex) Divider(
+                    if (index != sortedSessions.lastIndex) HorizontalDivider(
                         modifier = Modifier.padding(
                             vertical = AppTheme.spaceMedium
                         )
@@ -245,7 +245,7 @@ fun FocusStatsScreen(
             } else {
                 selectedDayDistractions.forEachIndexed { index, entry ->
                     DistractionRow(entry, resolveTargetName(entry.session))
-                    if (index != selectedDayDistractions.lastIndex) Divider()
+                    if (index != selectedDayDistractions.lastIndex) HorizontalDivider()
                 }
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))

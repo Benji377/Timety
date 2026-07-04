@@ -267,7 +267,7 @@ private fun EditorView(
     OutlinedTextField(
         value = name,
         onValueChange = onNameChange,
-        label = { Text("Mode Name") },
+        label = { Text(stringResource(R.string.focusModeLabelName)) },
         modifier = Modifier.fillMaxWidth(),
     )
     Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))

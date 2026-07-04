@@ -64,22 +64,17 @@ data class FocusTargetSelection(
 enum class DistractionUIType(
     val entityType: DistractionType,
     val icon: ImageVector,
-    val color: Color
+    val color: Color,
+    val labelRes: Int,
 ) {
-    DISTRACTED(DistractionType.DISTRACTED, Icons.Filled.WarningAmber, ErrorColor),
-    HYDRATED(DistractionType.HYDRATED, Icons.Filled.WaterDrop, TaskColor),
-    STRETCHED(DistractionType.STRETCHED, Icons.Filled.AccessibilityNew, WarningColor),
-    SNACK(DistractionType.SNACK, Icons.Filled.Restaurant, SuccessColor),
-    RESTROOM(DistractionType.RESTROOM, Icons.Filled.Wc, Color.Gray);
+    DISTRACTED(DistractionType.DISTRACTED, Icons.Filled.WarningAmber, ErrorColor, R.string.distractionDistracted),
+    HYDRATED(DistractionType.HYDRATED, Icons.Filled.WaterDrop, TaskColor, R.string.distractionHydrated),
+    STRETCHED(DistractionType.STRETCHED, Icons.Filled.AccessibilityNew, WarningColor, R.string.distractionStretched),
+    SNACK(DistractionType.SNACK, Icons.Filled.Restaurant, SuccessColor, R.string.distractionSnack),
+    RESTROOM(DistractionType.RESTROOM, Icons.Filled.Wc, Color.Gray, R.string.distractionRestroom);
 
     @Composable
-    fun getLocalizedName(): String = when (this) {
-        DISTRACTED -> stringResource(R.string.distractionDistracted)
-        HYDRATED -> stringResource(R.string.distractionHydrated)
-        STRETCHED -> stringResource(R.string.distractionStretched)
-        SNACK -> stringResource(R.string.distractionSnack)
-        RESTROOM -> stringResource(R.string.distractionRestroom)
-    }
+    fun getLocalizedName(): String = stringResource(labelRes)
 
     companion object {
         fun fromEntityType(type: DistractionType): DistractionUIType =

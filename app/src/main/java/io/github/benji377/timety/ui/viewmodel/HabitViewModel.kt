@@ -86,41 +86,14 @@ class HabitViewModel(
         }
     }
 
-    private fun scheduleHabitReminder(habit: HabitEntity) {
-        val notificationService =
-            io.github.benji377.timety.services.NotificationService(application)
-        notificationService.cancelHabitReminder(habit.id)
-
-        val mins = habit.targetTimeMinutes ?: return
-
-        try {
-            val hour = mins / 60
-            val minute = mins % 60
-
-            val targetWeekdaysList =
-                habit.targetWeekdays?.removePrefix("[")?.removeSuffix("]")?.split(",")
-                    ?.mapNotNull { it.trim().toIntOrNull() }
-
-            notificationService.scheduleHabitReminder(
-                habitId = habit.id,
-                title = application.getString(
-                    io.github.benji377.timety.R.string.reminderHabitTitle,
-                    habit.name
-                ),
-                body = application.getString(io.github.benji377.timety.R.string.globalLabelHabit),
-                hour = hour,
-                minute = minute,
-                targetWeekdays = targetWeekdaysList
-            )
-        } catch (e: Exception) {
-            // Ignore parse errors
-        }
+    private suspend fun scheduleHabitReminder(habit: HabitEntity) {
+        io.github.benji377.timety.services.ReminderScheduler.create(application)
+            .scheduleHabitReminder(habit)
     }
 
-    private fun cancelHabitReminder(habitId: String) {
-        val notificationService =
-            io.github.benji377.timety.services.NotificationService(application)
-        notificationService.cancelHabitReminder(habitId)
+    private suspend fun cancelHabitReminder(habitId: String) {
+        io.github.benji377.timety.services.ReminderScheduler.create(application)
+            .cancelHabitReminder(habitId)
     }
 
     fun logCompletion(habitId: String, date: Instant = Instant.now()) {

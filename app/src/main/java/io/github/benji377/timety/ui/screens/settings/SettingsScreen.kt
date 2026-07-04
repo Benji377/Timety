@@ -23,7 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cloud
@@ -33,7 +33,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LinearScale
 import androidx.compose.material.icons.filled.NightlightRound
-import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TaskAlt
@@ -42,7 +42,7 @@ import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Forum
-import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Timer
@@ -136,6 +136,7 @@ fun SettingsScreen(
     // Import runs in two steps to mirror Flutter: pick file -> confirm overwrite -> restore -> restart dialog.
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
     var showRestartDialog by remember { mutableStateOf(false) }
+    var showExportOptions by remember { mutableStateOf(false) }
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
@@ -282,7 +283,7 @@ fun SettingsScreen(
                                 strokeWidth = 2.dp
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Validating...", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.settingsLabelValidating), style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
@@ -348,7 +349,7 @@ fun SettingsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 }
             )
@@ -552,7 +553,7 @@ fun SettingsScreen(
                             )
                         )
                     },
-                    leadingContent = { Icon(Icons.Outlined.Label, null, tint = TaskColor) },
+                    leadingContent = { Icon(Icons.AutoMirrored.Outlined.Label, null, tint = TaskColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable { onNavigateToCategories() }
                 )
@@ -647,9 +648,7 @@ fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.settingsLabelExportData)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelExportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.UploadFile, null, tint = TaskColor) },
-                    modifier = Modifier.clickable {
-                        exportLauncher.launch(backupService.suggestedFileName())
-                    }
+                    modifier = Modifier.clickable { showExportOptions = true }
                 )
                 ListItem(
                     colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
@@ -674,7 +673,7 @@ fun SettingsScreen(
                     leadingContent = { Icon(Icons.Outlined.Forum, null, tint = FocusColor) },
                     trailingContent = {
                         Icon(
-                            Icons.Filled.OpenInNew,
+                            Icons.AutoMirrored.Filled.OpenInNew,
                             null,
                             modifier = Modifier.size(16.dp),
                             tint = Color.Gray
@@ -696,7 +695,7 @@ fun SettingsScreen(
                     leadingContent = { Icon(Icons.Outlined.BugReport, null, tint = HabitColor) },
                     trailingContent = {
                         Icon(
-                            Icons.Filled.OpenInNew,
+                            Icons.AutoMirrored.Filled.OpenInNew,
                             null,
                             modifier = Modifier.size(16.dp),
                             tint = Color.Gray
@@ -781,7 +780,7 @@ fun SettingsScreen(
                             },
                             trailingContent = {
                                 Icon(
-                                    Icons.Filled.OpenInNew,
+                                    Icons.AutoMirrored.Filled.OpenInNew,
                                     null,
                                     modifier = Modifier.size(16.dp),
                                     tint = Color.Gray
@@ -803,7 +802,7 @@ fun SettingsScreen(
                             leadingContent = { Icon(Icons.Filled.Code, null, tint = Color.Blue) },
                             trailingContent = {
                                 Icon(
-                                    Icons.Filled.OpenInNew,
+                                    Icons.AutoMirrored.Filled.OpenInNew,
                                     null,
                                     modifier = Modifier.size(16.dp),
                                     tint = Color.Gray
@@ -848,6 +847,68 @@ fun SettingsScreen(
     )
 
     // Restore-success dialog telling the user to restart the app, mirrors Flutter's success dialog.
+    if (showExportOptions) {
+        AlertDialog(
+            onDismissRequest = { showExportOptions = false },
+            title = { Text(stringResource(R.string.backupExportTitle)) },
+            text = {
+                Column {
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                        headlineContent = { Text(stringResource(R.string.backupActionSaveDevice)) },
+                        supportingContent = { Text(stringResource(R.string.backupActionSaveDeviceSubtitle)) },
+                        leadingContent = { Icon(Icons.Outlined.Download, null, tint = TaskColor) },
+                        modifier = Modifier.clickable {
+                            showExportOptions = false
+                            exportLauncher.launch(backupService.suggestedFileName())
+                        }
+                    )
+                    ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                        headlineContent = { Text(stringResource(R.string.backupActionShareCloud)) },
+                        supportingContent = { Text(stringResource(R.string.backupActionShareCloudSubtitle)) },
+                        leadingContent = { Icon(Icons.Outlined.UploadFile, null, tint = FocusColor) },
+                        modifier = Modifier.clickable {
+                            showExportOptions = false
+                            scope.launch {
+                                backupService.exportToShareUri().fold(
+                                    onSuccess = { uri ->
+                                        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                            type = "application/json"
+                                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                                            putExtra(
+                                                android.content.Intent.EXTRA_SUBJECT,
+                                                context.getString(R.string.backupExportSubject)
+                                            )
+                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(
+                                            android.content.Intent.createChooser(
+                                                intent,
+                                                context.getString(R.string.backupExportSubject)
+                                            )
+                                        )
+                                    },
+                                    onFailure = { e ->
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(R.string.backupShareFailure, e.message ?: "")
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showExportOptions = false }) {
+                    Text(stringResource(R.string.commonLabelCancel))
+                }
+            }
+        )
+    }
+
     if (showRestartDialog) {
         AlertDialog(
             onDismissRequest = { showRestartDialog = false },
@@ -855,7 +916,7 @@ fun SettingsScreen(
             text = { Text(stringResource(R.string.backupRestoreSuccessBody)) },
             confirmButton = {
                 TextButton(onClick = { showRestartDialog = false }) {
-                    Text(stringResource(android.R.string.ok))
+                    Text(stringResource(R.string.commonButtonGotIt))
                 }
             }
         )

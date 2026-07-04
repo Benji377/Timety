@@ -97,7 +97,7 @@ fun TimetyOutlinedTextField(
                 colors = colors,
                 contentPadding = PaddingValues(AppTheme.spaceMedium),
                 container = {
-                    OutlinedTextFieldDefaults.ContainerBox(
+                    OutlinedTextFieldDefaults.Container(
                         enabled = enabled,
                         isError = isError,
                         interactionSource = interactionSource,

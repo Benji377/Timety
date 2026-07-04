@@ -3,6 +3,13 @@ package io.github.benji377.timety.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import io.github.benji377.timety.R
+import io.github.benji377.timety.TimetyApplication
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.util.habit.HabitUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -23,40 +30,15 @@ class ReminderReceiver : BroadcastReceiver() {
         val channelId = intent.getStringExtra(NotificationService.EXTRA_CHANNEL_ID)
             ?: NotificationService.CHANNEL_TASKS
 
-        val notificationService = NotificationService(context.applicationContext)
+        val appContext = context.applicationContext
+        val notificationService = NotificationService(appContext)
 
         if (channelId == NotificationService.CHANNEL_MOTIVATION) {
             val pendingResult = goAsync()
-            kotlinx.coroutines.GlobalScope.launch {
+            CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
                 try {
-                    val container =
-                        (context.applicationContext as io.github.benji377.timety.TimetyApplication).container
-                    val habits = container.habitRepository.allHabits.first()
-                    val completions = container.habitRepository.allCompletions.first()
-
-                    var finalBody = body
-                    if (habits.isNotEmpty()) {
-                        val habitWithLowestCompletion = habits.minByOrNull { habit ->
-                            val comps = completions.filter { it.habitId == habit.id }
-                            io.github.benji377.timety.util.habit.HabitUtils.getCompletionsThisWeek(
-                                io.github.benji377.timety.data.model.habit.HabitWithCompletions(
-                                    habit,
-                                    comps
-                                )
-                            )
-                        }
-                        if (habitWithLowestCompletion != null) {
-                            finalBody =
-                                "Don't forget to work on '${habitWithLowestCompletion.name}' today!"
-                        }
-                    }
-
-                    notificationService.showNotification(
-                        notificationId,
-                        channelId,
-                        title,
-                        finalBody
-                    )
+                    val finalBody = body + todaysHabitsSuffix(appContext)
+                    notificationService.showNotification(notificationId, channelId, title, finalBody)
                     notificationService.rescheduleIfRepeating(intent)
                 } finally {
                     pendingResult.finish()
@@ -67,5 +49,30 @@ class ReminderReceiver : BroadcastReceiver() {
 
         notificationService.showNotification(notificationId, channelId, title, body)
         notificationService.rescheduleIfRepeating(intent)
+    }
+
+    /**
+     * "\nDon't forget to do X, Y and more today!" - appends the habits still due today to the
+     * motivation quote, mirroring `NotificationService.scheduleDailyMotivation`'s
+     * `includeHabits` path in the Flutter reference. Empty when nothing is due.
+     */
+    private suspend fun todaysHabitsSuffix(context: Context): String {
+        val app = context as? TimetyApplication ?: return ""
+        val habits = app.container.habitRepository.allHabits.first()
+        if (habits.isEmpty()) return ""
+        val completions = app.container.habitRepository.allCompletions.first()
+        val completionsByHabit = completions.groupBy { it.habitId }
+
+        val todaysHabits = habits
+            .map { HabitWithCompletions(it, completionsByHabit[it.id].orEmpty()) }
+            .filter { HabitUtils.isHabitDueToday(it) }
+            .map { it.habit.name }
+        if (todaysHabits.isEmpty()) return ""
+
+        var habitList = todaysHabits.take(2).joinToString(", ")
+        if (todaysHabits.size > 2) {
+            habitList += context.getString(R.string.notificationHabitListSuffix)
+        }
+        return context.getString(R.string.notificationHabitReminder, habitList)
     }
 }

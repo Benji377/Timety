@@ -49,7 +49,7 @@ data class TimerState(
             val displaySecs = if (isStopwatch) elapsedSeconds else secondsRemaining
             val mins = displaySecs / 60
             val secs = displaySecs % 60
-            return String.format("%02d:%02d", mins, secs)
+            return String.format(java.util.Locale.ROOT, "%02d:%02d", mins, secs)
         }
 }
 

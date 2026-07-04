@@ -5,25 +5,25 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.LocalDining
 import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PendingActions
 import androidx.compose.material.icons.filled.People
@@ -61,7 +61,7 @@ object HabitIcons {
         // Health & Fitness
         Icons.Filled.FitnessCenter,
         Icons.Filled.SportsGymnastics,
-        Icons.Filled.DirectionsRun,
+        Icons.AutoMirrored.Filled.DirectionsRun,
         Icons.Filled.SportsSoccer,
         Icons.Filled.SportsBasketball,
         Icons.Filled.WaterDrop,
@@ -77,9 +77,9 @@ object HabitIcons {
 
         // Learning & Knowledge
         Icons.Filled.School,
-        Icons.Filled.LibraryBooks,
+        Icons.AutoMirrored.Filled.LibraryBooks,
         Icons.Filled.AutoStories,
-        Icons.Filled.Notes,
+        Icons.AutoMirrored.Filled.Notes,
         Icons.Filled.Edit,
         Icons.Filled.Lightbulb,
         Icons.Filled.Code,
@@ -103,7 +103,7 @@ object HabitIcons {
         Icons.Filled.People,
         Icons.Filled.Group,
         Icons.Filled.Call,
-        Icons.Filled.Chat,
+        Icons.AutoMirrored.Filled.Chat,
 
         // Food & Nutrition
         Icons.Filled.Restaurant,

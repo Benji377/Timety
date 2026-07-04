@@ -21,6 +21,10 @@
     <string name="commonLabelDelete">Delete</string>
     <string name="commonLabelRemove">Remove</string>
     <string name="commonLabelSave">Save</string>
+    <string name="commonLabelShare">Share</string>
+    <string name="commonLabelClose">Close</string>
+    <string name="commonBack">Back</string>
+    <string name="commonClear">Clear</string>
     <string name="commonTimeDone">Done</string>
     <string name="commonTimeDueToday">Due Today</string>
     <string name="commonTimeUpcoming">Upcoming</string>
@@ -55,10 +59,19 @@
     <string name="homeSectionHabitsDue">Habits Today (%1$d)</string>
     <string name="homeSectionTasksDue">Tasks Due (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Upcoming Tasks (%1$d)</string>
+    <string name="focusActionPause">Pause</string>
+    <string name="focusActionResume">Resume</string>
+    <string name="focusActionStop">Stop</string>
     <string name="focusDialogSessionResetContent">The timer is paused while you decide. Confirm to reset the session, or cancel to continue.</string>
     <string name="focusDialogSessionResetTitle">Reset Focus Session?</string>
     <string name="focusDialogSessionStopContent">The timer is paused while you decide. Confirm to stop and save the session, or cancel to continue.</string>
     <string name="focusDialogSessionStopTitle">Stop Focus Session?</string>
+    <string name="focusHistoryTitle">Focus History</string>
+    <string name="focusHistoryEmpty">No focus history yet.</string>
+    <string name="focusHistorySessionCompleted">Completed Session</string>
+    <string name="focusHistorySessionIncomplete">Incomplete Session</string>
+    <string name="focusHistoryDuration">Duration: %1$dm %2$ds</string>
+    <string name="focusHistoryStarted">Started: %1$s</string>
     <string name="focusEndsAt">Ends at</string>
     <string name="focusLabelDefault">Focus</string>
     <string name="focusLabelRest">Rest</string>
@@ -72,6 +85,7 @@
     <string name="focusModeFlexible">Flexible</string>
     <string name="focusModeLabelEdit">Edit Mode</string>
     <string name="focusModeLabelEditing">Editing Mode</string>
+    <string name="focusModeLabelName">Mode Name</string>
     <string name="focusModeLabelNew">New Mode</string>
     <string name="focusModeLabelTimeline">Timeline Phases</string>
     <string name="focusModeLabelTimelineDesc">Tap a phase to edit or delete it</string>
@@ -307,6 +321,7 @@
     <string name="settingsLabelLanguage">Language</string>
     <string name="settingsLabelLanguageSystem">System Default</string>
     <string name="settingsLabelLocationApi">Location Search API</string>
+    <string name="settingsLabelValidating">Validating…</string>
     <string name="settingsLabelMaintainer">Maintainer</string>
     <string name="settingsLabelSourceCode">Source Code</string>
     <string name="settingsLabelSourceCodeSubtitle">GitHub Repository</string>
@@ -334,6 +349,7 @@
     <string name="userErrorGenerateImage">Failed to generate wrap-up image.</string>
     <string name="userProfileTitle">Profile</string>
     <string name="userShareSubject">My Timety Wrap-Up</string>
+    <string name="userShareSummary">Here\'s a summary of your achievements:</string>
     <string name="userShareText">Master your time with Timety!</string>
     <string name="userStatBestStreak">Best Streak</string>
     <string name="userStatFocusMins">Focus Mins</string>
@@ -342,6 +358,7 @@
     <string name="userStatTasksDone">Tasks Done</string>
     <string name="userStatsAllTimeSubtitle">Lifetime progress at a glance</string>
     <string name="userStatsAllTimeTitle">All-Time Stats</string>
+    <string name="userTooltipEditAvatar">Edit Avatar</string>
     <string name="userTooltipShareWrapUp">Share Weekly Wrap-up</string>
     <string name="userTooltipStatistics">Statistics</string>
     <string name="backupActionSaveDevice">Save to Device</string>

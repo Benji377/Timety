@@ -27,7 +27,7 @@ import io.github.benji377.timety.ui.theme.WarningColor
 
 sealed class BottomNavItem(
     val route: String,
-    @StringRes val titleRes: Int,
+    @param:StringRes val titleRes: Int,
     val iconOutlined: ImageVector,
     val iconFilled: ImageVector,
     val activeColor: Color

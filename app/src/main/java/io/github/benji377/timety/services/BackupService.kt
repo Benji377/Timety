@@ -65,6 +65,25 @@ class BackupService(
         }
     }
 
+    /**
+     * Builds the export payload, writes it into the FileProvider-exposed cache directory and
+     * returns a shareable content Uri. Backs the "Share / Upload to Cloud" export option
+     * (mirrors `backup_service.dart`'s share path).
+     */
+    suspend fun exportToShareUri(): Result<Uri> = withContext(Dispatchers.IO) {
+        runCatching {
+            val json = buildPayload().toString(2)
+            val dir = java.io.File(context.cacheDir, "shared").apply { mkdirs() }
+            val file = java.io.File(dir, suggestedFileName())
+            file.writeText(json, Charsets.UTF_8)
+            androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+        }
+    }
+
     /** Reads [uri] and OVERWRITES all current user data and settings with its contents, atomically. */
     suspend fun importFromUri(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {

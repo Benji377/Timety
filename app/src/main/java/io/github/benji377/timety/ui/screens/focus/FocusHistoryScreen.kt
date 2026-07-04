@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.screens.focus
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,15 +24,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import java.time.ZoneId
@@ -52,11 +58,19 @@ fun FocusHistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
-                title = { Text("Focus History", fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+                title = {
+                    Text(
+                        stringResource(R.string.focusHistoryTitle),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.commonBack)
+                        )
                     }
                 }
             )
@@ -69,7 +83,10 @@ fun FocusHistoryScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No focus history yet.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(R.string.focusHistoryEmpty),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             LazyColumn(
@@ -77,12 +94,18 @@ fun FocusHistoryScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                items(sessions.sortedByDescending { it.startTime }) { session ->
+                // Sessions already arrive newest-first from the DAO (ORDER BY startTime DESC).
+                items(sessions, key = { it.id }) { session ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        shape = AppTheme.brNeo,
+                        border = BorderStroke(AppTheme.neoBorderWidth, FocusColor),
+                        colors = CardDefaults.cardColors(
+                            containerColor = FocusColor.copy(alpha = 0.08f)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
                         Row(
                             modifier = Modifier
@@ -93,22 +116,32 @@ fun FocusHistoryScreen(
                             Icon(
                                 Icons.Filled.Timer,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = FocusColor
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = if (session.isCompleted) "Completed Session" else "Incomplete Session",
+                                    text = stringResource(
+                                        if (session.isCompleted) R.string.focusHistorySessionCompleted
+                                        else R.string.focusHistorySessionIncomplete
+                                    ),
                                     fontWeight = FontWeight.Bold,
                                     color = if (session.isCompleted) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    "Duration: ${session.totalSecondsFocused / 60}m ${session.totalSecondsFocused % 60}s",
+                                    stringResource(
+                                        R.string.focusHistoryDuration,
+                                        session.totalSecondsFocused / 60,
+                                        session.totalSecondsFocused % 60
+                                    ),
                                     style = MaterialTheme.typography.bodySmall
                                 )
                                 Text(
-                                    "Started: ${formatter.format(session.startTime)}",
+                                    stringResource(
+                                        R.string.focusHistoryStarted,
+                                        formatter.format(session.startTime)
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

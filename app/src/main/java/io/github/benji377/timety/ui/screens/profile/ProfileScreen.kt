@@ -144,21 +144,22 @@ fun ProfileScreen(
     if (showShareWrapupDialog) {
         AlertDialog(
             onDismissRequest = { showShareWrapupDialog = false },
-            title = { Text("Share Wrap-Up") },
+            title = { Text(stringResource(R.string.userTooltipShareWrapUp)) },
             text = {
                 Column {
-                    Text("Here's a summary of your achievements:", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.userShareSummary), fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("${stringResource(R.string.userStatTasksDone)}: $totalTasksDone")
                     Text("${stringResource(R.string.userStatHabitsMet)}: $totalHabitsMet")
                     Text("${stringResource(R.string.userStatFocusMins)}: $totalFocusMins")
-                    Text("Highest Streak: $highestStreak")
+                    Text("${stringResource(R.string.userStatBestStreak)}: $highestStreak")
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
                     showShareWrapupDialog = false
                     coroutineScope.launch(Dispatchers.IO) {
+                        try {
                         val bytes =
                             io.github.benji377.timety.ui.utils.WrapUpImageGenerator.generate(
                                 context,
@@ -170,7 +171,7 @@ fun ProfileScreen(
                                 totalFocusMins,
                                 totalHabitsMet
                             )
-                        val cachePath = File(context.cacheDir, "images")
+                        val cachePath = File(context.cacheDir, "shared")
                         cachePath.mkdirs()
                         val file = File(cachePath, "wrapup.png")
                         file.writeBytes(bytes)
@@ -184,18 +185,29 @@ fun ProfileScreen(
                             val intent = Intent(Intent.ACTION_SEND).apply {
                                 type = "image/png"
                                 putExtra(Intent.EXTRA_STREAM, uri)
+                                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.userShareSubject))
+                                putExtra(Intent.EXTRA_TEXT, context.getString(R.string.userShareText))
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
-                            context.startActivity(Intent.createChooser(intent, "Share Wrap-Up"))
+                            context.startActivity(Intent.createChooser(intent, context.getString(R.string.userTooltipShareWrapUp)))
+                        }
+                        } catch (e: Exception) {
+                            withContext(Dispatchers.Main) {
+                                android.widget.Toast.makeText(
+                                    context,
+                                    context.getString(R.string.userErrorGenerateImage),
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     }
                 }) {
-                    Text("Share")
+                    Text(stringResource(R.string.commonLabelShare))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showShareWrapupDialog = false }) {
-                    Text("Close")
+                    Text(stringResource(R.string.commonLabelClose))
                 }
             }
         )
@@ -209,6 +221,7 @@ fun ProfileScreen(
                 OutlinedTextField(
                     value = tempName,
                     onValueChange = { tempName = it },
+                    placeholder = { Text(stringResource(R.string.userEditNameHint)) },
                     singleLine = true
                 )
             },
@@ -239,7 +252,7 @@ fun ProfileScreen(
                 },
                 actions = {
                     IconButton(onClick = { showShareWrapupDialog = true }) {
-                        Icon(Icons.Filled.Share, contentDescription = "Share Wrap-up")
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.userTooltipShareWrapUp))
                     }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
@@ -276,14 +289,14 @@ fun ProfileScreen(
                         if (userProfile?.profileImagePath != null) {
                             AsyncImage(
                                 model = userProfile?.profileImagePath,
-                                contentDescription = "Avatar",
+                                contentDescription = null,
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
                         } else {
                             Icon(
                                 imageVector = Icons.Filled.Person,
-                                contentDescription = "Avatar",
+                                contentDescription = null,
                                 modifier = Modifier.size(60.dp),
                                 tint = UserColor
                             )
@@ -306,7 +319,7 @@ fun ProfileScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.CameraAlt,
-                            contentDescription = "Edit Avatar",
+                            contentDescription = stringResource(R.string.userTooltipEditAvatar),
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )
@@ -390,7 +403,7 @@ fun ProfileScreen(
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "All-Time Statistics",
+                        text = stringResource(R.string.userStatsAllTimeTitle),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )

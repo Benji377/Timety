@@ -12,7 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -98,7 +98,7 @@ fun TaskCategoriesScreen(
                     .padding(paddingValues),
                 contentPadding = PaddingValues(bottom = 40.dp)
             ) {
-                items(categories) { category ->
+                items(categories, key = { it }) { category ->
                     val taskCount = tasks.count { it.task.category == category }
                     Card(
                         modifier = Modifier
@@ -114,7 +114,7 @@ fun TaskCategoriesScreen(
                             ListItem(
                                 modifier = Modifier.weight(1f),
                                 leadingContent = {
-                                    Icon(Icons.Filled.Label, contentDescription = null)
+                                    Icon(Icons.AutoMirrored.Filled.Label, contentDescription = null)
                                 },
                                 headlineContent = { Text(category) },
                                 supportingContent = {

@@ -21,6 +21,10 @@
     <string name="commonLabelDelete">Elimina</string>
     <string name="commonLabelRemove">Rimuovi</string>
     <string name="commonLabelSave">Salva</string>
+    <string name="commonLabelShare">Condividi</string>
+    <string name="commonLabelClose">Chiudi</string>
+    <string name="commonBack">Indietro</string>
+    <string name="commonClear">Cancella</string>
     <string name="commonTimeDone">Completato</string>
     <string name="commonTimeDueToday">Scadono oggi</string>
     <string name="commonTimeUpcoming">In arrivo</string>
@@ -55,10 +59,19 @@
     <string name="homeSectionHabitsDue">Abitudini di oggi (%1$d)</string>
     <string name="homeSectionTasksDue">Attività in scadenza (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Prossime attività (%1$d)</string>
+    <string name="focusActionPause">Pausa</string>
+    <string name="focusActionResume">Riprendi</string>
+    <string name="focusActionStop">Interrompi</string>
     <string name="focusDialogSessionResetContent">Il timer è in pausa mentre decidi. Conferma per resettare la sessione o annulla per continuare.</string>
     <string name="focusDialogSessionResetTitle">Resettare la sessione di focus?</string>
     <string name="focusDialogSessionStopContent">Il timer è in pausa mentre decidi. Conferma per interrompere e salvare la sessione o annulla per continuare.</string>
     <string name="focusDialogSessionStopTitle">Interrompere la sessione di focus?</string>
+    <string name="focusHistoryTitle">Cronologia focus</string>
+    <string name="focusHistoryEmpty">Ancora nessuna cronologia focus.</string>
+    <string name="focusHistorySessionCompleted">Sessione completata</string>
+    <string name="focusHistorySessionIncomplete">Sessione incompleta</string>
+    <string name="focusHistoryDuration">Durata: %1$dm %2$ds</string>
+    <string name="focusHistoryStarted">Iniziato: %1$s</string>
     <string name="focusEndsAt">Finisce alle</string>
     <string name="focusLabelDefault">Focus</string>
     <string name="focusLabelRest">Pausa</string>
@@ -72,6 +85,7 @@
     <string name="focusModeFlexible">Flessibile</string>
     <string name="focusModeLabelEdit">Modifica modalità</string>
     <string name="focusModeLabelEditing">Modifica modalità</string>
+    <string name="focusModeLabelName">Nome modalità</string>
     <string name="focusModeLabelNew">Nuova modalità</string>
     <string name="focusModeLabelTimeline">Fasi temporali</string>
     <string name="focusModeLabelTimelineDesc">Tocca una fase per modificarla o eliminarla</string>
@@ -307,6 +321,7 @@
     <string name="settingsLabelLanguage">Lingua</string>
     <string name="settingsLabelLanguageSystem">Predefinita di sistema</string>
     <string name="settingsLabelLocationApi">API di ricerca luoghi</string>
+    <string name="settingsLabelValidating">Verifica…</string>
     <string name="settingsLabelMaintainer">Manutentore</string>
     <string name="settingsLabelSourceCode">Codice sorgente</string>
     <string name="settingsLabelSourceCodeSubtitle">Repository GitHub</string>
@@ -334,6 +349,7 @@
     <string name="userErrorGenerateImage">Errore durante la generazione dell\'immagine di riepilogo.</string>
     <string name="userProfileTitle">Profilo</string>
     <string name="userShareSubject">Il mio riepilogo Timety</string>
+    <string name="userShareSummary">Ecco un riepilogo dei tuoi traguardi:</string>
     <string name="userShareText">Domina il tuo tempo con Timety!</string>
     <string name="userStatBestStreak">Miglior serie</string>
     <string name="userStatFocusMins">Min focus</string>
@@ -342,6 +358,7 @@
     <string name="userStatTasksDone">Attività completate</string>
     <string name="userStatsAllTimeSubtitle">I tuoi progressi a colpo d\'occhio</string>
     <string name="userStatsAllTimeTitle">Statistiche di sempre</string>
+    <string name="userTooltipEditAvatar">Modifica avatar</string>
     <string name="userTooltipShareWrapUp">Condividi riepilogo settimanale</string>
     <string name="userTooltipStatistics">Statistiche</string>
     <string name="backupActionSaveDevice">Salva sul dispositivo</string>

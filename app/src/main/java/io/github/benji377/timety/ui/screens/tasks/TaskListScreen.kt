@@ -19,7 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -154,7 +154,7 @@ fun TaskListScreen(
                 Box {
                     IconButton(onClick = { sortMenuExpanded = true }) {
                         Icon(
-                            Icons.Filled.Sort,
+                            Icons.AutoMirrored.Filled.Sort,
                             contentDescription = stringResource(R.string.taskListTooltipSort)
                         )
                     }
@@ -201,7 +201,7 @@ fun TaskListScreen(
                             label = { Text(stringResource(R.string.taskListFilterAll)) }
                         )
                     }
-                    items(allCategories) { category ->
+                    items(allCategories, key = { it }) { category ->
                         val isSelected = selectedCategoryFilter == category
                         FilterChip(
                             selected = isSelected,
