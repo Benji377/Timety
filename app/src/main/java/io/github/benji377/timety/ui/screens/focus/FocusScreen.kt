@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.screens.focus
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -112,6 +113,7 @@ private fun secondsForPhase(
 }
 
 
+@SuppressLint("LocalContextResourcesRead")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusScreen(
