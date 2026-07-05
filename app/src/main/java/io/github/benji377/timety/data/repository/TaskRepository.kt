@@ -17,6 +17,11 @@ class TaskRepository(
         taskDao.getTaskById(id)
     }
 
+    suspend fun getOpenTasksDueBefore(deadline: java.time.Instant): List<TaskEntity> =
+        withContext(Dispatchers.IO) {
+            taskDao.getOpenTasksDueBefore(deadline)
+        }
+
     suspend fun insertTask(task: TaskEntity) = withContext(Dispatchers.IO) {
         taskDao.insertTask(task)
     }

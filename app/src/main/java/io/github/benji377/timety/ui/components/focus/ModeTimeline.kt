@@ -153,9 +153,9 @@ private fun ConnectorLine(isPast: Boolean, isRunningOrAwaiting: Boolean, lineCol
 fun localizedFocusModeName(mode: FocusModeEntity): String {
     if (!mode.isSystem) return mode.name
     return when (mode.id) {
-        "system_stopwatch" -> stringResource(R.string.focusModeStopwatch)
-        "system_flexible" -> stringResource(R.string.focusModeFlexible)
-        "system_pomodoro" -> stringResource(R.string.focusModePomodoro)
+        FocusModeEntity.SYSTEM_STOPWATCH_ID -> stringResource(R.string.focusModeStopwatch)
+        FocusModeEntity.SYSTEM_FLEXIBLE_ID -> stringResource(R.string.focusModeFlexible)
+        FocusModeEntity.SYSTEM_POMODORO_ID -> stringResource(R.string.focusModePomodoro)
         else -> mode.name
     }
 }

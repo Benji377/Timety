@@ -17,7 +17,7 @@ class SettingsViewModel(
     val themePref = repository.themePrefFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        "System Default"
+        io.github.benji377.timety.data.repository.ThemeMode.SYSTEM
     )
     val use24HourFormat = repository.use24HourFormatFlow.stateIn(
         viewModelScope,
@@ -75,7 +75,8 @@ class SettingsViewModel(
         "system"
     )
 
-    fun setThemePref(theme: String) = viewModelScope.launch { repository.saveThemePref(theme) }
+    fun setThemePref(theme: io.github.benji377.timety.data.repository.ThemeMode) =
+        viewModelScope.launch { repository.saveThemePref(theme) }
     fun setUse24HourFormat(use24Hour: Boolean) = viewModelScope.launch {
         repository.saveUse24HourFormat(use24Hour)
         resyncNotifications()

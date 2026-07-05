@@ -10,6 +10,7 @@ import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -44,13 +45,14 @@ class HabitViewModel(
             habitRepository.allHabits,
             habitRepository.allCompletions
         ) { habits, completions ->
+            val completionsByHabit = completions.groupBy { it.habitId }
             habits.map { habit ->
                 HabitWithCompletions(
                     habit = habit,
-                    completions = completions.filter { it.habitId == habit.id }
+                    completions = completionsByHabit[habit.id].orEmpty()
                 )
             }
-        }.stateIn(
+        }.flowOn(kotlinx.coroutines.Dispatchers.Default).stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()

@@ -21,6 +21,10 @@ interface HabitDao {
     @Query("SELECT * FROM habits WHERE id = :id")
     fun getHabitById(id: String): HabitEntity?
 
+    /** Completions on/after [cutoff]. Lets the widget avoid loading the full completion history. */
+    @Query("SELECT * FROM habit_completions WHERE completionDate >= :cutoff")
+    fun getCompletionsSince(cutoff: java.time.Instant): List<HabitCompletionEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertHabit(habit: HabitEntity)
 

@@ -14,6 +14,21 @@ import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
+/**
+ * App theme preference. [storageValue] is what gets persisted in DataStore (and what older
+ * installs already have on disk), so it must not change even if the enum is renamed.
+ */
+enum class ThemeMode(val storageValue: String) {
+    LIGHT("Light"),
+    DARK("Dark"),
+    SYSTEM("System Default");
+
+    companion object {
+        fun fromStorage(value: String?): ThemeMode =
+            entries.firstOrNull { it.storageValue == value } ?: SYSTEM
+    }
+}
+
 class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     companion object {
@@ -33,7 +48,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val APP_LOCALE_CODE = stringPreferencesKey("appLocaleCode")
     }
 
-    val themePrefFlow: Flow<String> = dataStore.data.map { it[THEME_PREF] ?: "System Default" }
+    val themePrefFlow: Flow<ThemeMode> =
+        dataStore.data.map { ThemeMode.fromStorage(it[THEME_PREF]) }
     val use24HourFormatFlow: Flow<Boolean> = dataStore.data.map { it[USE_24_HOUR_FORMAT] ?: true }
     val dateFormatFlow: Flow<String> = dataStore.data.map { it[DATE_FORMAT] ?: "System" }
     val autoCompleteFocusFlow: Flow<Boolean> =
@@ -52,8 +68,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     // Per-app locale: "system" (follow OS) or one of "en"/"de"/"it"/"lld".
     val appLocaleCodeFlow: Flow<String> = dataStore.data.map { it[APP_LOCALE_CODE] ?: "system" }
 
-    suspend fun saveThemePref(theme: String) {
-        dataStore.edit { it[THEME_PREF] = theme }
+    suspend fun saveThemePref(theme: ThemeMode) {
+        dataStore.edit { it[THEME_PREF] = theme.storageValue }
     }
 
     suspend fun saveUse24HourFormat(use24Hour: Boolean) {

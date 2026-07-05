@@ -352,7 +352,10 @@ fun FocusScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 actions = {
                     IconButton(onClick = onNavigateToModes) {
-                        Icon(Icons.Filled.DashboardCustomize, contentDescription = null)
+                        Icon(
+                            Icons.Filled.DashboardCustomize,
+                            contentDescription = stringResource(R.string.focusModesTitle)
+                        )
                     }
                     Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                 },

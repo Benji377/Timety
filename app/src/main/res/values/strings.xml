@@ -2,4 +2,6 @@
     <!-- The app name is a brand and is intentionally not translated. All translatable UI
          strings live in strings_l10n.xml (managed via Crowdin). -->
     <string name="app_name" translatable="false">Timety</string>
+    <!-- Locale-neutral "time hidden while paused" placeholder in the focus timer notification. -->
+    <string name="notificationTimerPaused" translatable="false">--:--</string>
 </resources>

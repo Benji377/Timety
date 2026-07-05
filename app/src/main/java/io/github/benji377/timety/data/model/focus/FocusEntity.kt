@@ -33,7 +33,15 @@ data class FocusModeEntity(
     val name: String,
     val type: FocusModeType,
     val isSystem: Boolean = false
-)
+) {
+    companion object {
+        // Fixed ids of the built-in modes seeded on first launch (FocusViewModel) and given
+        // localized display names (ModeTimeline). Persisted in the DB - do not change.
+        const val SYSTEM_STOPWATCH_ID = "system_stopwatch"
+        const val SYSTEM_FLEXIBLE_ID = "system_flexible"
+        const val SYSTEM_POMODORO_ID = "system_pomodoro"
+    }
+}
 
 @Entity(
     tableName = "session_phases",

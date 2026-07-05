@@ -405,6 +405,12 @@ fun ProfileScreen(
                     Text(
                         text = stringResource(R.string.userStatsAllTimeTitle),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.userStatsAllTimeSubtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 

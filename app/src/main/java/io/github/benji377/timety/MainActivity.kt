@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.github.benji377.timety.data.repository.SettingsRepository
+import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.data.repository.dataStore
 import io.github.benji377.timety.ui.theme.TimetyTheme
 import io.github.benji377.timety.ui.utils.DateFormatSettings
@@ -52,11 +53,11 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val themePref by settings.themePrefFlow.collectAsState(initial = "System Default")
+            val themePref by settings.themePrefFlow.collectAsState(initial = ThemeMode.SYSTEM)
             val darkTheme = when (themePref) {
-                "Light" -> false
-                "Dark" -> true
-                else -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
             val use24HourFormat by settings.use24HourFormatFlow.collectAsState(initial = true)

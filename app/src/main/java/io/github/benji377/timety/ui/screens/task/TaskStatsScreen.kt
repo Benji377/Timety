@@ -87,9 +87,11 @@ fun TaskStatsScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier
-                        .size(12.dp)
-                        .background(WarningColor, CircleShape))
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(WarningColor, CircleShape)
+                    )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         stringResource(R.string.taskStatsCreated),
@@ -97,9 +99,11 @@ fun TaskStatsScreen(
                         color = Color.Gray
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Box(modifier = Modifier
-                        .size(12.dp)
-                        .background(SuccessColor, CircleShape))
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(SuccessColor, CircleShape)
+                    )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         stringResource(R.string.taskStatsCompleted),
@@ -383,9 +387,11 @@ private fun CategoryBreakdownCard(tasks: List<TaskWithSubtasks>) {
                     .padding(bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier
-                    .size(14.dp)
-                    .background(color, CircleShape))
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .background(color, CircleShape)
+                )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     entry.key,

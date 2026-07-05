@@ -66,6 +66,8 @@ android {
         // Translations are managed on Crowdin and land asynchronously; a key missing from one
         // locale falls back to English at runtime and must not fail the build.
         warning += "MissingTranslation"
+        // SARIF is uploaded to GitHub code scanning by the lint workflow.
+        sarifReport = true
     }
 }
 
@@ -113,6 +115,7 @@ dependencies {
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:rules:1.6.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(composeBom)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")

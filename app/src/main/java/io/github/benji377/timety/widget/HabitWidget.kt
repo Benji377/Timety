@@ -35,7 +35,6 @@ import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
@@ -45,19 +44,23 @@ class HabitWidget : GlanceAppWidget() {
         val appContainer = (context.applicationContext as TimetyApplication).container
         val habitRepository = appContainer.habitRepository
 
-        val habitsFlow = habitRepository.allHabits
-        val completionsFlow = habitRepository.allCompletions
-
-        val habitsWithCompletions = combine(habitsFlow, completionsFlow) { habits, completions ->
-            habits.map { habit ->
-                io.github.benji377.timety.data.model.habit.HabitWithCompletions(
-                    habit = habit,
-                    completions = completions.filter { it.habitId == habit.id }
-                )
-            }
-        }.first()
-
         val today = LocalDate.now()
+        // Due-today/completed-today checks only look at the current Monday-based week, so a
+        // week-bounded query is enough (padded a day for zone-edge completions).
+        val weekCutoff = AppDateUtils.startOfWeekMonday(today)
+            .minusDays(1)
+            .atStartOfDay(java.time.ZoneId.systemDefault())
+            .toInstant()
+        val habits = habitRepository.allHabits.first()
+        val completionsByHabit = habitRepository.getCompletionsSince(weekCutoff)
+            .groupBy { it.habitId }
+        val habitsWithCompletions = habits.map { habit ->
+            io.github.benji377.timety.data.model.habit.HabitWithCompletions(
+                habit = habit,
+                completions = completionsByHabit[habit.id].orEmpty()
+            )
+        }
+
         val todayHabits = habitsWithCompletions.filter { HabitUtils.isHabitDueToday(it) }
 
         val completionStatus =

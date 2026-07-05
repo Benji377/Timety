@@ -17,6 +17,11 @@ class HabitRepository(
         habitDao.getHabitById(id)
     }
 
+    suspend fun getCompletionsSince(cutoff: java.time.Instant): List<HabitCompletionEntity> =
+        withContext(Dispatchers.IO) {
+            habitDao.getCompletionsSince(cutoff)
+        }
+
     suspend fun insertHabit(habit: HabitEntity) = withContext(Dispatchers.IO) {
         habitDao.insertHabit(habit)
     }
@@ -27,6 +32,10 @@ class HabitRepository(
 
     suspend fun deleteHabit(habit: HabitEntity) = withContext(Dispatchers.IO) {
         habitDao.deleteHabit(habit)
+    }
+
+    suspend fun clearAll() = withContext(Dispatchers.IO) {
+        habitDao.clearAll()
     }
 
     // Completions

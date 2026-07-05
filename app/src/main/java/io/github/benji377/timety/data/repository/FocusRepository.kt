@@ -54,6 +54,13 @@ class FocusRepository(
         focusDao.insertTag(tag)
     }
 
+    /** Wipes all focus data. Sessions must go first: their modeId foreign key is RESTRICT. */
+    suspend fun clearAll() = withContext(Dispatchers.IO) {
+        focusDao.clearAllSessions()
+        focusDao.clearAllModes()
+        focusDao.clearAllTags()
+    }
+
     suspend fun deleteTag(tag: FocusTagEntity) = withContext(Dispatchers.IO) {
         focusDao.deleteTag(tag)
     }

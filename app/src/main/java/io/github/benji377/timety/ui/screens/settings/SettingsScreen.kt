@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.screens.settings
 
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -87,6 +88,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
+import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -195,11 +197,11 @@ fun SettingsScreen(
 
     // --- OPTION LABEL MAPS (value -> display, mirrors the Flutter dropdown item lists exactly) ---
     val themeOptions = listOf(
-        stringResource(R.string.settingsLabelThemeLight) to "Light",
-        stringResource(R.string.settingsLabelThemeDark) to "Dark",
-        stringResource(R.string.settingsLabelThemeSystem) to "System Default"
+        stringResource(R.string.settingsLabelThemeLight) to ThemeMode.LIGHT.storageValue,
+        stringResource(R.string.settingsLabelThemeDark) to ThemeMode.DARK.storageValue,
+        stringResource(R.string.settingsLabelThemeSystem) to ThemeMode.SYSTEM.storageValue
     )
-    val currentThemeLabel = themeOptions.firstOrNull { it.second == themePref }?.first
+    val currentThemeLabel = themeOptions.firstOrNull { it.second == themePref.storageValue }?.first
         ?: stringResource(R.string.settingsLabelThemeSystem)
 
     val languageOptions = listOf(
@@ -230,7 +232,7 @@ fun SettingsScreen(
         visible = showThemeDialog,
         title = stringResource(R.string.settingsLabelTheme),
         options = themeOptions,
-        onSelect = { settingsViewModel.setThemePref(it) },
+        onSelect = { settingsViewModel.setThemePref(ThemeMode.fromStorage(it)) },
         onDismiss = { showThemeDialog = false }
     )
     OptionsDialog(
@@ -683,7 +685,7 @@ fun SettingsScreen(
                         context.startActivity(
                             Intent(
                                 Intent.ACTION_VIEW,
-                                Uri.parse("https://github.com/Benji377/Timety/discussions")
+                                "https://github.com/Benji377/Timety/discussions".toUri()
                             )
                         )
                     }
@@ -705,7 +707,7 @@ fun SettingsScreen(
                         context.startActivity(
                             Intent(
                                 Intent.ACTION_VIEW,
-                                Uri.parse("https://tally.so/r/ODbEoA")
+                                "https://tally.so/r/ODbEoA".toUri()
                             )
                         )
                     }
@@ -791,7 +793,7 @@ fun SettingsScreen(
                                 context.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://github.com/sponsors/Benji377")
+                                        "https://github.com/sponsors/Benji377".toUri()
                                     )
                                 )
                             }
@@ -813,7 +815,7 @@ fun SettingsScreen(
                                 context.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://github.com/Benji377/Timety")
+                                        "https://github.com/Benji377/Timety".toUri()
                                     )
                                 )
                             }

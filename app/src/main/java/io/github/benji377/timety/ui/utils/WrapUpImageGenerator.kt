@@ -10,6 +10,8 @@ import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.toColorInt
 import io.github.benji377.timety.R
 import java.io.ByteArrayOutputStream
 
@@ -22,13 +24,13 @@ object WrapUpImageGenerator {
     private const val STAT_ROW_GAP = 52f
 
     // Colors matching AppTheme
-    private val PAPER_DARK = Color.parseColor("#151515")
-    private val GRADIENT_MID = Color.parseColor("#2A2418")
-    private val TASK_COLOR = Color.parseColor("#2563EB")
-    private val TASK_COLOR_90 = Color.parseColor("#E62563EB")
-    private val WARNING_COLOR = Color.parseColor("#F59E0B")
-    private val SUCCESS_COLOR = Color.parseColor("#16A34A")
-    private val HABIT_COLOR = Color.parseColor("#7C3AED")
+    private val PAPER_DARK = "#151515".toColorInt()
+    private val GRADIENT_MID = "#2A2418".toColorInt()
+    private val TASK_COLOR = "#2563EB".toColorInt()
+    private val TASK_COLOR_90 = "#E62563EB".toColorInt()
+    private val WARNING_COLOR = "#F59E0B".toColorInt()
+    private val SUCCESS_COLOR = "#16A34A".toColorInt()
+    private val HABIT_COLOR = "#7C3AED".toColorInt()
 
     fun generate(
         context: Context,
@@ -40,7 +42,7 @@ object WrapUpImageGenerator {
         focusMins: Int,
         habitsMet: Int
     ): ByteArray {
-        val bitmap = Bitmap.createBitmap(W.toInt(), H.toInt(), Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(W.toInt(), H.toInt())
         val canvas = Canvas(bitmap)
 
         canvas.scale(1.2f, 1.2f)
@@ -181,7 +183,7 @@ object WrapUpImageGenerator {
         paintTextTopLeft(canvas, row.value, textX, y + 2f, valuePaint)
 
         val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#B3FFFFFF")
+            color = "#B3FFFFFF".toColorInt()
             textSize = 30f
         }
         paintTextTopLeft(canvas, row.label, textX, y + 58f, labelPaint)
@@ -189,7 +191,7 @@ object WrapUpImageGenerator {
 
     private fun drawFooter(context: Context, canvas: Canvas) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#8CFFFFFF")
+            color = "#8CFFFFFF".toColorInt()
             textSize = 30f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER

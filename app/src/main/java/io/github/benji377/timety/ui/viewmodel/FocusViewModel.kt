@@ -267,17 +267,17 @@ class FocusViewModel(
     }
 
     private suspend fun ensureSystemModes(modes: List<FocusModeEntity>) {
-        if (modes.none { it.id == "system_stopwatch" }) {
+        if (modes.none { it.id == FocusModeEntity.SYSTEM_STOPWATCH_ID }) {
             focusRepository.insertModeWithPhases(
                 FocusModeEntity(
-                    id = "system_stopwatch",
+                    id = FocusModeEntity.SYSTEM_STOPWATCH_ID,
                     name = "Stopwatch",
                     type = FocusModeType.STOPWATCH,
                     isSystem = true
                 ),
                 listOf(
                     SessionPhaseEntity(
-                        modeId = "system_stopwatch",
+                        modeId = FocusModeEntity.SYSTEM_STOPWATCH_ID,
                         type = PhaseType.FOCUS,
                         durationMinutes = 0,
                         orderIndex = 0
@@ -285,17 +285,17 @@ class FocusViewModel(
                 ),
             )
         }
-        if (modes.none { it.id == "system_flexible" }) {
+        if (modes.none { it.id == FocusModeEntity.SYSTEM_FLEXIBLE_ID }) {
             focusRepository.insertModeWithPhases(
                 FocusModeEntity(
-                    id = "system_flexible",
+                    id = FocusModeEntity.SYSTEM_FLEXIBLE_ID,
                     name = "Flexible",
                     type = FocusModeType.FLEXIBLE,
                     isSystem = true
                 ),
                 listOf(
                     SessionPhaseEntity(
-                        modeId = "system_flexible",
+                        modeId = FocusModeEntity.SYSTEM_FLEXIBLE_ID,
                         type = PhaseType.FOCUS,
                         durationMinutes = -1,
                         orderIndex = 0
@@ -303,59 +303,59 @@ class FocusViewModel(
                 ),
             )
         }
-        if (modes.none { it.id == "system_pomodoro" }) {
+        if (modes.none { it.id == FocusModeEntity.SYSTEM_POMODORO_ID }) {
             focusRepository.insertModeWithPhases(
                 FocusModeEntity(
-                    id = "system_pomodoro",
+                    id = FocusModeEntity.SYSTEM_POMODORO_ID,
                     name = "Pomodoro Classic",
                     type = FocusModeType.POMODORO,
                     isSystem = true
                 ),
                 listOf(
                     SessionPhaseEntity(
-                        modeId = "system_pomodoro",
+                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
                         type = PhaseType.FOCUS,
                         durationMinutes = 25,
                         orderIndex = 0
                     ),
                     SessionPhaseEntity(
-                        modeId = "system_pomodoro",
+                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
                         type = PhaseType.REST,
                         durationMinutes = 5,
                         orderIndex = 1
                     ),
                     SessionPhaseEntity(
-                        modeId = "system_pomodoro",
+                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
                         type = PhaseType.FOCUS,
                         durationMinutes = 25,
                         orderIndex = 2
                     ),
                     SessionPhaseEntity(
-                        modeId = "system_pomodoro",
+                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
                         type = PhaseType.REST,
                         durationMinutes = 5,
                         orderIndex = 3
                     ),
                     SessionPhaseEntity(
-                        modeId = "system_pomodoro",
+                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
                         type = PhaseType.FOCUS,
                         durationMinutes = 25,
                         orderIndex = 4
                     ),
                     SessionPhaseEntity(
-                        modeId = "system_pomodoro",
+                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
                         type = PhaseType.REST,
                         durationMinutes = 5,
                         orderIndex = 5
                     ),
                     SessionPhaseEntity(
-                        modeId = "system_pomodoro",
+                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
                         type = PhaseType.FOCUS,
                         durationMinutes = 25,
                         orderIndex = 6
                     ),
                     SessionPhaseEntity(
-                        modeId = "system_pomodoro",
+                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
                         type = PhaseType.REST,
                         durationMinutes = 15,
                         orderIndex = 7

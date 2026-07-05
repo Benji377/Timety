@@ -36,11 +36,12 @@ import java.time.Instant
  * `buildNumber`/`exportedAt` envelope wrapping `preferences`/`userProfile`/`tasks`/`habits`/
  * `focus`) as closely as the Room schema allows.
  *
- * Two shape differences from the Dart export, both inherent to the platform/schema swap rather
- * than a missed detail (see report): enum fields serialize using this app's own Kotlin enum names
- * (`"VERY_HIGH"`, not Dart's `"veryHigh"`), and `preferences` reflects this app's own DataStore
- * key set, not Flutter's SharedPreferences keys - so a file exported here only round-trips with
- * this app, and a Flutter-exported file is not importable here (and vice versa).
+ * Exports use this app's own conventions (Kotlin enum names like `"VERY_HIGH"`, DataStore
+ * preference keys, ISO instants). Imports additionally accept Flutter-era exports: enum names in
+ * Dart camelCase are normalized (see [enumOrDefault]) and zone-less `DateTime.toIso8601String()`
+ * timestamps are parsed in the device zone (see [parseInstantFlexible]). Flutter's
+ * SharedPreferences keys are NOT mapped, so imported Flutter backups restore data but reset
+ * app settings to defaults.
  */
 class BackupService(
     private val context: Context,
@@ -388,9 +389,7 @@ class BackupService(
             )
             val completionsJson = habitJson.optJSONArray("completions") ?: JSONArray()
             for (j in 0 until completionsJson.length()) {
-                val instant =
-                    runCatching { Instant.parse(completionsJson.getString(j)) }.getOrNull()
-                        ?: continue
+                val instant = parseInstantFlexible(completionsJson.getString(j)) ?: continue
                 habitDao.insertCompletion(
                     HabitCompletionEntity(
                         habitId = habitId,
@@ -487,15 +486,29 @@ class BackupService(
 
     private fun readInstant(json: JSONObject, key: String): Instant? {
         val raw = readString(json, key) ?: return null
-        return runCatching { Instant.parse(raw) }.getOrNull()
+        return parseInstantFlexible(raw)
     }
 
     private fun readInstantList(json: JSONObject, key: String): List<Instant> {
         val array = json.optJSONArray(key) ?: return emptyList()
         return (0 until array.length()).mapNotNull { i ->
-            runCatching { Instant.parse(array.getString(i)) }.getOrNull()
+            parseInstantFlexible(array.getString(i))
         }
     }
+
+    /**
+     * Parses both this app's own exports (ISO instants ending in `Z`) and Flutter exports, whose
+     * `DateTime.toIso8601String()` emits local wall-clock time with no zone suffix
+     * (e.g. `2024-05-01T12:30:00.000`); those are interpreted in the device's current zone.
+     */
+    private fun parseInstantFlexible(raw: String): Instant? =
+        runCatching { Instant.parse(raw) }.getOrNull()
+            ?: runCatching { java.time.OffsetDateTime.parse(raw).toInstant() }.getOrNull()
+            ?: runCatching {
+                java.time.LocalDateTime.parse(raw)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toInstant()
+            }.getOrNull()
 
     private fun readStringList(json: JSONObject, key: String): List<String> {
         val array = json.optJSONArray(key) ?: return emptyList()

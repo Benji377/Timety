@@ -21,8 +21,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import io.github.benji377.timety.MainActivity
+import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
-import kotlinx.coroutines.flow.first
 import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
@@ -32,16 +32,12 @@ class TaskWidget : GlanceAppWidget() {
         val appContainer = (context.applicationContext as TimetyApplication).container
         val taskRepository = appContainer.taskRepository
 
-        val allTasksWithSubtasks = taskRepository.allTasks.first()
-        val now = Instant.now()
-        val endOfToday = now.atZone(ZoneId.systemDefault())
+        val endOfToday = Instant.now().atZone(ZoneId.systemDefault())
             .truncatedTo(ChronoUnit.DAYS)
             .plusDays(1)
             .toInstant()
 
-        val urgentTasks = allTasksWithSubtasks.map { it.task }.filter { task ->
-            !task.isCompleted && task.dueDate != null && task.dueDate.isBefore(endOfToday)
-        }.sortedBy { it.dueDate }
+        val urgentTasks = taskRepository.getOpenTasksDueBefore(endOfToday)
 
         provideContent {
             GlanceTheme {
@@ -64,7 +60,7 @@ class TaskWidget : GlanceAppWidget() {
                     Spacer(modifier = GlanceModifier.height(8.dp))
                     if (urgentTasks.isEmpty()) {
                         Text(
-                            text = "No urgent tasks",
+                            text = context.getString(R.string.widgetNoUrgentTasks),
                             style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
                         )
                     } else {
@@ -77,7 +73,7 @@ class TaskWidget : GlanceAppWidget() {
                         }
                         if (urgentTasks.size > 3) {
                             Text(
-                                text = "+${urgentTasks.size - 3} more",
+                                text = context.getString(R.string.widgetMoreTasks, urgentTasks.size - 3),
                                 style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
                             )
                         }

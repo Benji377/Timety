@@ -59,12 +59,10 @@
     <string name="focusDialogSessionResetTitle">Taché da nuev la sescion?</string>
     <string name="focusDialogSessionStopContent">L cronometer ie pausà. Cunfermea per stlù ju y salvé, o anulea per jì inant.</string>
     <string name="focusDialogSessionStopTitle">Fermé la sescion?</string>
-    <string name="focusEndsAt">Fina dala</string>
     <string name="focusLabelDefault">Focus</string>
     <string name="focusLabelRest">Pausa</string>
     <string name="focusLabelSetTime">Mët l tëmp</string>
     <string name="focusLabelStopwatch">Cronometer</string>
-    <string name="focusLimitMax">Masc. %1$d min</string>
     <string name="focusMinutes">%1$d min focus</string>
     <string name="focusModeDialogDeleteContent">T\'es segur de ulëi scancelé chësta modalità persunalisheda?</string>
     <string name="focusModeDialogDeleteTitle">Scancelé modalità focus?</string>
@@ -117,7 +115,6 @@
     <string name="focusTagsLabelName">Inuem eticheta</string>
     <string name="focusTagsTitle">Etichetes de focus</string>
     <string name="focusTargetEmpty">Degun travert</string>
-    <string name="focusTargetLabel">Travert</string>
     <string name="focusTargetUntagged">Zënza eticheta</string>
     <string name="focusTitle">Focus</string>
     <string name="habitDeleteContent">T\'es segur de ulëi scancelé chësta abitudin?</string>
@@ -186,14 +183,12 @@
     <string name="taskDetailsLabelCategorySelect">Cëria categoria</string>
     <string name="taskDetailsLabelDescription">Descrizion</string>
     <string name="taskDetailsLabelDueDate">Scadënza: %1$s dala %2$s</string>
-    <string name="taskDetailsLabelDueDateNone">Deguna data de scadënza metuda</string>
     <string name="taskDetailsLabelDueDateSet">Met data de scadenza</string>
     <string name="taskDetailsLabelEffort">Sforz</string>
     <string name="taskDetailsLabelLocation">Luelg</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
     <string name="taskDetailsLabelReminderSet">Mët lezit</string>
     <string name="taskDetailsLabelReminderTooEarly">L lezit persunalisà muessa vester dant ala data de scadënza</string>
-    <string name="taskDetailsLabelSaveEdit">Salvé l mudé</string>
     <string name="taskDetailsLabelSubtaskHint">Njunté sot-ncëries...</string>
     <string name="taskDetailsLabelTitle">Titul dla ncëria</string>
     <string name="taskDetailsReminderOptionCustom">Persunalisà</string>
@@ -343,7 +338,6 @@
     <string name="userStatsAllTimeSubtitle">I ti progreji a n colp d\'uedl</string>
     <string name="userStatsAllTimeTitle">Statistiches de dut l tëmp</string>
     <string name="userTooltipShareWrapUp">Përti l result dl\'ena</string>
-    <string name="userTooltipStatistics">Statistiches</string>
     <string name="backupActionSaveDevice">Salvé sun l\'aparat</string>
     <string name="backupActionSaveDeviceSubtitle">Cëria ora na cartela</string>
     <string name="backupActionShareCloud">Përti / Ciarié sun l Cloud</string>
@@ -352,13 +346,11 @@
     <string name="backupExportSubject">Esportazion Timety</string>
     <string name="backupExportSuccess">Esportazion saveda te</string>
     <string name="backupExportTitle">Salvé esportazion</string>
-    <string name="backupFilePickerTitle">Cëria ulache salvé l file</string>
     <string name="backupImportConfirmBody">Chësc SRÌA SËURA dut i dac atuëi. Chësc ne pònia nia unì anulà. T\'es segur?</string>
     <string name="backupImportConfirmTitle">Mpurter dac JSON?</string>
     <string name="backupImportFailure">Mpurtazion faleda: Cuntrulea l format dl file</string>
     <string name="backupRestoreSuccessBody">I ti dac ie unic turnei de reviers. Stlù ju nfin al fin y deuj a Timety da nuev per i ciarié.</string>
     <string name="backupRestoreSuccessTitle">Tornà de reviers cun suzes!</string>
-    <string name="backupSaveFailure">Salvatage falà: %1$s</string>
     <string name="backupShareFailure">Scipartida faleda: %1$s</string>
     <string name="notificationChannelEveningDesc">Lezic de fin di per registré la abitudins</string>
     <string name="notificationChannelEveningName">Cuntrol dla Sëira</string>
@@ -380,7 +372,6 @@
     <string name="notificationQuote1">Dumineia ti di!</string>
     <string name="notificationQuote2">Pici vares porta a grandi resultac. Tira inant!</string>
     <string name="notificationQuote3">Cie ies\'l in dro ncuei? Lajons taché.</string>
-    <string name="notificationTimeRemaining">L mancia %1$s:%2$s</string>
     <string name="wrapUpFooter">Dumineia ti tëmp cun Timety</string>
     <string name="wrapUpHeaderEyebrow">SOMA DE TIMETY</string>
     <string name="wrapUpHeaderLevel">Livèl %1$d | %2$s</string>

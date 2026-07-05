@@ -243,21 +243,26 @@ fun TaskListTile(
         enableDismissFromStartToEnd = false,
         modifier = modifier,
         backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(margin)
-                    .background(ErrorColor),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.commonLabelDelete),
-                    tint = Color.White,
+            // Only visible mid-swipe: at rest the red would bleed through the card's
+            // rounded corners.
+            if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                Box(
                     modifier = Modifier
-                        .padding(end = AppTheme.spaceLarge)
-                        .size(AppTheme.listTileSwipeIconSize),
-                )
+                        .fillMaxSize()
+                        .padding(margin)
+                        .clip(AppTheme.brMedium)
+                        .background(ErrorColor),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.commonLabelDelete),
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(end = AppTheme.spaceLarge)
+                            .size(AppTheme.listTileSwipeIconSize),
+                    )
+                }
             }
         },
     ) {

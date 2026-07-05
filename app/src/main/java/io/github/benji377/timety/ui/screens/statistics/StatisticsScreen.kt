@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
@@ -145,6 +146,9 @@ fun StatisticsScreen(
                             modifier = Modifier
                                 .tabIndicatorOffset(tabPositions[selectedTabIndex])
                                 .fillMaxSize()
+                                // TabRow places the indicator above the tabs; without this the
+                                // opaque pill covers the selected tab's label.
+                                .zIndex(-1f)
                                 .padding(4.dp)
                                 .shadow(4.dp, RoundedCornerShape(25.dp))
                                 .clip(RoundedCornerShape(25.dp))

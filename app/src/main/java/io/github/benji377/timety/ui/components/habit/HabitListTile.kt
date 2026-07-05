@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -185,21 +186,26 @@ fun HabitListTile(
         enableDismissFromStartToEnd = false,
         modifier = modifier,
         backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(margin)
-                    .background(ErrorColor),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(R.string.commonLabelDelete),
-                    tint = Color.White,
+            // Only visible mid-swipe: at rest the red would bleed through rounded corners
+            // and through tiles without an opaque background (e.g. inside stack cards).
+            if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                Box(
                     modifier = Modifier
-                        .padding(end = AppTheme.spaceLarge)
-                        .size(AppTheme.listTileSwipeIconSize),
-                )
+                        .fillMaxSize()
+                        .padding(margin)
+                        .clip(AppTheme.brMedium)
+                        .background(ErrorColor),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.commonLabelDelete),
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(end = AppTheme.spaceLarge)
+                            .size(AppTheme.listTileSwipeIconSize),
+                    )
+                }
             }
         },
     ) {
