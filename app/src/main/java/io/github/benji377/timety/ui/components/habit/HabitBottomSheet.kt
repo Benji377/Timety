@@ -201,6 +201,7 @@ private fun UnifiedCalendarSheetContent(
         val cells: List<LocalDate?> = buildList {
             repeat(emptySlotsPrefix) { add(null) }
             for (day in 1..daysInMonth) add(displayedMonth.atDay(day))
+            while (size % 7 != 0) add(null)
         }
         val rows = cells.chunked(7)
 
@@ -347,7 +348,7 @@ private fun UnifiedCalendarSheetContent(
         )
         AlertDialog(
             onDismissRequest = { dateForAdd = null },
-            title = { Text(stringResource(R.string.habitHistoryTimePrompt).uppercase()) },
+            title = { Text(stringResource(R.string.habitHistoryTimePrompt), fontWeight = FontWeight.Normal, style = MaterialTheme.typography.bodyLarge) },
             text = { TimePicker(state = timePickerState) },
             confirmButton = {
                 TextButton(onClick = {

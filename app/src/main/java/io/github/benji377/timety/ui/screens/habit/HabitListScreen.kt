@@ -43,7 +43,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -203,7 +202,9 @@ fun HabitListScreen(
         }
     }
 
-    val sheetHabit = historySheetFor
+    val sheetHabit = historySheetFor?.let { hwc ->
+        habitsWithCompletions.find { it.habit.id == hwc.habit.id } ?: hwc
+    }
     if (sheetHabit != null) {
         HabitBottomSheet(
             habitWithCompletions = sheetHabit,
@@ -236,8 +237,9 @@ private fun HabitTileWrapper(
     if (habit.targetTimeMinutes != null) {
         val time = LocalTime.of(habit.targetTimeMinutes / 60, habit.targetTimeMinutes % 60)
         val pattern = if (use24HourFormat) "HH:mm" else "hh:mm a"
+        val locale = androidx.compose.ui.platform.LocalLocale.current.platformLocale
         val formatted = time.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
-            .format(DateTimeFormatter.ofPattern(pattern, Locale.getDefault()))
+            .format(DateTimeFormatter.ofPattern(pattern, locale))
         subtitleText += " | $formatted"
     }
 

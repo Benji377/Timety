@@ -83,11 +83,16 @@ fun FocusModeEditCard(
         if (!isEditing) tempPhases = phases
     }
 
-    Card(
+    androidx.compose.material3.Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 4.dp else 1.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = androidx.compose.foundation.BorderStroke(
+            AppTheme.neoBorderWidth,
+            if (io.github.benji377.timety.ui.theme.LocalIsDarkTheme.current) Color.White else Color.Black
+        )
     ) {
         Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
             if (isEditing) {
@@ -278,9 +283,12 @@ private fun EditorView(
     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
     val flexLabel = stringResource(R.string.focusModeFlex)
-    Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         tempPhases.forEachIndexed { index, phase ->
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 PhaseChip(phase = phase, flexLabel = flexLabel, onClick = { onPhaseTapped(index) })
                 Box(
                     modifier = Modifier
@@ -332,11 +340,13 @@ private fun PhaseChip(phase: SessionPhaseEntity, flexLabel: String, onClick: () 
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = "${if (phase.durationMinutes == -1) flexLabel else phase.durationMinutes.toString()}\nm",
+            text = "${if (phase.durationMinutes == -1) flexLabel else phase.durationMinutes.toString()}m",
             textAlign = TextAlign.Center,
             color = Color.White,
             fontWeight = FontWeight.Bold,
-            fontSize = AppTheme.fsCaption,
+            fontSize = AppTheme.fsBodyLarge,
+            maxLines = 1,
+            softWrap = false,
         )
     }
 }

@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ChevronRight
@@ -60,6 +63,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
+import io.github.benji377.timety.ui.theme.AppTheme
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -173,9 +177,7 @@ fun SettingsScreen(
     }
 
     // --- DIALOG STATE ---
-    var showThemeDialog by remember { mutableStateOf(false) }
-    var showLanguageDialog by remember { mutableStateOf(false) }
-    var showDateFormatDialog by remember { mutableStateOf(false) }
+
     var showLocationDialog by remember { mutableStateOf(false) }
     var pendingLocationUrl by remember { mutableStateOf(locationApiEndpoint) }
     var locationError by remember { mutableStateOf<String?>(null) }
@@ -216,27 +218,7 @@ fun SettingsScreen(
     val daysUnit = stringResource(R.string.settingsDialogUnitDays)
 
     // --- DIALOGS ---
-    OptionsDialog(
-        visible = showThemeDialog,
-        title = stringResource(R.string.settingsLabelTheme),
-        options = themeOptions,
-        onSelect = { settingsViewModel.setThemePref(ThemeMode.fromStorage(it)) },
-        onDismiss = { showThemeDialog = false }
-    )
-    OptionsDialog(
-        visible = showLanguageDialog,
-        title = stringResource(R.string.settingsLabelLanguage),
-        options = languageOptions,
-        onSelect = { settingsViewModel.setAppLocaleCode(it) },
-        onDismiss = { showLanguageDialog = false }
-    )
-    OptionsDialog(
-        visible = showDateFormatDialog,
-        title = stringResource(R.string.settingsLabelDateFormat),
-        options = dateFormatOptions,
-        onSelect = { settingsViewModel.setDateFormat(it) },
-        onDismiss = { showDateFormatDialog = false }
-    )
+
     if (showLocationDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -357,18 +339,12 @@ fun SettingsScreen(
             // --- APPEARANCE ---
             item { SettingsHeader(stringResource(R.string.settingsSectionAppearance)) }
             item {
-                ListItem(
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    headlineContent = { Text(stringResource(R.string.settingsLabelTheme)) },
-                    leadingContent = { Icon(Icons.Outlined.DarkMode, null) },
-                    trailingContent = {
-                        Text(
-                            currentThemeLabel,
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
-                    },
-                    modifier = Modifier.clickable { showThemeDialog = true }
+                DropdownSettingsItem(
+                    headlineText = stringResource(R.string.settingsLabelTheme),
+                    leadingIcon = { Icon(Icons.Outlined.DarkMode, null) },
+                    currentLabel = currentThemeLabel,
+                    options = themeOptions,
+                    onSelect = { settingsViewModel.setThemePref(ThemeMode.fromStorage(it)) }
                 )
             }
 
@@ -377,18 +353,37 @@ fun SettingsScreen(
             // --- LOCALIZATION & FORMATTING ---
             item { SettingsHeader(stringResource(R.string.settingsSectionLocaleFormat)) }
             item {
-                ListItem(
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    headlineContent = { Text(stringResource(R.string.settingsLabelLanguage)) },
-                    leadingContent = { Icon(Icons.Filled.Language, null, tint = TaskColor) },
-                    trailingContent = {
-                        Text(
-                            currentLanguageLabel,
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
-                    },
-                    modifier = Modifier.clickable { showLanguageDialog = true }
+                DropdownSettingsItem(
+                    headlineText = stringResource(R.string.settingsLabelLanguage),
+                    leadingIcon = { Icon(Icons.Filled.Language, null, tint = TaskColor) },
+                    currentLabel = currentLanguageLabel,
+                    options = languageOptions,
+                    onSelect = { settingsViewModel.setAppLocaleCode(it) },
+                    optionIcon = { value ->
+                        val flagName = when (value) {
+                            "en" -> "gb"
+                            "de" -> "de"
+                            "it" -> "it"
+                            "lld" -> "lld"
+                            else -> null
+                        }
+                        if (flagName != null) {
+                            coil.compose.AsyncImage(
+                                model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
+                                    .data("file:///android_asset/flags/$flagName.svg")
+                                    .decoderFactory(coil.decode.SvgDecoder.Factory())
+                                    .build(),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Icon(
+                                Icons.Filled.Language,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
                 )
                 ListItem(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -405,18 +400,12 @@ fun SettingsScreen(
                         )
                     }
                 )
-                ListItem(
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    headlineContent = { Text(stringResource(R.string.settingsLabelDateFormat)) },
-                    leadingContent = { Icon(Icons.Filled.CalendarToday, null, tint = HabitColor) },
-                    trailingContent = {
-                        Text(
-                            currentDateFormatLabel,
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
-                    },
-                    modifier = Modifier.clickable { showDateFormatDialog = true }
+                DropdownSettingsItem(
+                    headlineText = stringResource(R.string.settingsLabelDateFormat),
+                    leadingIcon = { Icon(Icons.Filled.CalendarToday, null, tint = HabitColor) },
+                    currentLabel = currentDateFormatLabel,
+                    options = dateFormatOptions,
+                    onSelect = { settingsViewModel.setDateFormat(it) }
                 )
             }
 
@@ -951,38 +940,59 @@ private fun SettingsHeader(title: String) {
 
 
 @Composable
-private fun OptionsDialog(
-    visible: Boolean,
-    title: String,
+private fun DropdownSettingsItem(
+    headlineText: String,
+    leadingIcon: @Composable () -> Unit,
+    currentLabel: String,
     options: List<Pair<String, String>>,
     onSelect: (String) -> Unit,
-    onDismiss: () -> Unit
+    optionIcon: (@Composable (String) -> Unit)? = null
 ) {
-    if (!visible) return
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            Column {
-                options.forEach { (label, value) ->
+    var expanded by remember { mutableStateOf(false) }
+
+    ListItem(
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        headlineContent = { Text(headlineText) },
+        leadingContent = leadingIcon,
+        trailingContent = {
+            Box {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = label,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onSelect(value)
-                                onDismiss()
-                            }
-                            .padding(vertical = 12.dp),
-                        style = MaterialTheme.typography.bodyLarge
+                        currentLabel,
+                        color = Color.Gray,
+                        fontSize = 14.sp
                     )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                        contentDescription = null
+                    )
+                }
+                androidx.compose.material3.DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline,
+                            AppTheme.brNeo
+                        )
+                ) {
+                    options.forEach { (label, value) ->
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { Text(label) },
+                            leadingIcon = optionIcon?.let { { it(value) } },
+                            onClick = {
+                                onSelect(value)
+                                expanded = false
+                            }
+                        )
+                    }
                 }
             }
         },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-        }
+        modifier = Modifier.clickable { expanded = !expanded }
     )
 }
 

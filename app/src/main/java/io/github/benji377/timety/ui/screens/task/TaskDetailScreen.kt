@@ -716,18 +716,23 @@ private enum class PickerTarget { DUE_DATE, CUSTOM_REMINDER }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun disabledFieldColors(isEditing: Boolean) = OutlinedTextFieldDefaults.colors(
-    // While editing these click-through fields should look like regular enabled inputs;
-    // in view mode they blend into the screen background like other disabled fields.
-    disabledContainerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
-    disabledTextColor = if (isEditing) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-    disabledBorderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(
-        alpha = 0.6f
-    ),
-    disabledLeadingIconColor = if (isEditing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-    disabledTrailingIconColor = if (isEditing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant,
-    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-)
+private fun disabledFieldColors(isEditing: Boolean) = if (isEditing) {
+    OutlinedTextFieldDefaults.colors(
+        disabledContainerColor = MaterialTheme.colorScheme.surface,
+        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+        disabledBorderColor = MaterialTheme.colorScheme.outline,
+        disabledLeadingIconColor = MaterialTheme.colorScheme.primary,
+        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+} else {
+    OutlinedTextFieldDefaults.colors(
+        focusedContainerColor = MaterialTheme.colorScheme.surface,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+        disabledContainerColor = Color.Transparent,
+        errorContainerColor = MaterialTheme.colorScheme.surface
+    )
+}
 
 
 private fun formatDate(instant: Instant, dateFormatCode: String): String =

@@ -365,7 +365,7 @@ fun HabitDetailScreen(
                         Icon(
                             imageVector = HabitIcons.iconAt(selectedIconIndex),
                             contentDescription = null,
-                            tint = if (isEditing) selectedColor else selectedColor.copy(alpha = 0.5f),
+                            tint = selectedColor,
                         )
                     }
                     Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
@@ -379,9 +379,7 @@ fun HabitDetailScreen(
                             modifier = Modifier
                                 .size(24.dp)
                                 .background(
-                                    color = if (isEditing) selectedColor else selectedColor.copy(
-                                        alpha = 0.5f
-                                    ),
+                                    color = selectedColor,
                                     shape = CircleShape,
                                 )
                         )
@@ -413,21 +411,35 @@ fun HabitDetailScreen(
                     fontWeight = AppTheme.fwBold
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
+                val segmentedColors = SegmentedButtonDefaults.colors(
+                    disabledActiveContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    disabledActiveContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    disabledInactiveContainerColor = Color.Transparent,
+                    disabledInactiveContentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledActiveBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                    disabledInactiveBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                )
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     SegmentedButton(
                         selected = frequency == HabitFrequency.DAILY,
                         onClick = { if (isEditing) frequency = HabitFrequency.DAILY },
                         shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                        enabled = isEditing,
+                        colors = segmentedColors
                     ) { Text(stringResource(R.string.habitDetailLabelFrequencyDaily)) }
                     SegmentedButton(
                         selected = frequency == HabitFrequency.WEEKLY_FLEXIBLE,
                         onClick = { if (isEditing) frequency = HabitFrequency.WEEKLY_FLEXIBLE },
                         shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+                        enabled = isEditing,
+                        colors = segmentedColors
                     ) { Text(stringResource(R.string.habitDetailLabelFrequencyFlexible)) }
                     SegmentedButton(
                         selected = frequency == HabitFrequency.WEEKLY_EXACT,
                         onClick = { if (isEditing) frequency = HabitFrequency.WEEKLY_EXACT },
                         shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+                        enabled = isEditing,
+                        colors = segmentedColors
                     ) { Text(stringResource(R.string.habitDetailLabelFrequencyExact)) }
                 }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
@@ -437,9 +449,10 @@ fun HabitDetailScreen(
                         shape = AppTheme.brNeo,
                         border = BorderStroke(
                             AppTheme.neoBorderWidth,
-                            MaterialTheme.colorScheme.outline
+                            if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                         ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 6.dp else 0.dp),
+                        colors = CardDefaults.cardColors(containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent)
                     ) {
                         Column(
                             modifier = Modifier
@@ -474,9 +487,10 @@ fun HabitDetailScreen(
                         shape = AppTheme.brNeo,
                         border = BorderStroke(
                             AppTheme.neoBorderWidth,
-                            MaterialTheme.colorScheme.outline
+                            if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                         ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 6.dp else 0.dp),
+                        colors = CardDefaults.cardColors(containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent)
                     ) {
                         val dayLabels = listOf(
                             1 to stringResource(R.string.calendarHeaderMon),
@@ -705,10 +719,6 @@ private fun PickerField(
             label = { Text(label) },
             leadingIcon = { Box(contentAlignment = Alignment.Center) { content() } },
             modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(
-                disabledBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
         )
         Box(
             modifier = Modifier

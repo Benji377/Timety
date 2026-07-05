@@ -71,7 +71,7 @@ object HabitUtils {
         return when (habit.frequency) {
             HabitFrequency.DAILY -> stringResource(R.string.habitFreqDaily)
             HabitFrequency.WEEKLY_EXACT -> {
-                val locale = Locale.getDefault()
+                val locale = androidx.compose.ui.platform.LocalLocale.current.platformLocale
                 val days = parseWeekdays(habit.targetWeekdays).sorted()
                     .joinToString(", ") { AppDateUtils.weekdayToStringShort(locale, it) }
                 stringResource(R.string.habitFreqWeekly, days)
