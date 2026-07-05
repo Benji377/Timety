@@ -23,7 +23,10 @@ fun TimetyButton(
     shape: Shape = AppTheme.brNeo,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     elevation: ButtonElevation? = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-    border: BorderStroke? = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
+    border: BorderStroke? = BorderStroke(
+        AppTheme.neoBorderWidth,
+        MaterialTheme.colorScheme.outline
+    ),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit
 ) {
@@ -47,8 +50,17 @@ fun TimetyElevatedButton(
     enabled: Boolean = true,
     shape: Shape = AppTheme.brNeo,
     colors: ButtonColors = ButtonDefaults.elevatedButtonColors(),
-    elevation: ButtonElevation? = ButtonDefaults.elevatedButtonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-    border: BorderStroke? = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
+    elevation: ButtonElevation? = ButtonDefaults.elevatedButtonElevation(
+        0.dp,
+        0.dp,
+        0.dp,
+        0.dp,
+        0.dp
+    ),
+    border: BorderStroke? = BorderStroke(
+        AppTheme.neoBorderWidth,
+        MaterialTheme.colorScheme.outline
+    ),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit
 ) {

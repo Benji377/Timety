@@ -144,7 +144,13 @@ fun MainScreen() {
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Calendar.route) {
                 io.github.benji377.timety.ui.screens.calendar.CalendarScreen(
                     onNavigateToTask = { taskId -> navController.navigate(AppRoute.taskDetail(taskId)) },
-                    onNavigateToHabit = { habitId -> navController.navigate(AppRoute.habitDetail(habitId)) },
+                    onNavigateToHabit = { habitId ->
+                        navController.navigate(
+                            AppRoute.habitDetail(
+                                habitId
+                            )
+                        )
+                    },
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

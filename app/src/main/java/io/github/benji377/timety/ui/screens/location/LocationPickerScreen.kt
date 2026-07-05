@@ -17,14 +17,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -38,20 +37,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import io.github.benji377.timety.R
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,11 +133,14 @@ fun LocationPickerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = { Text(stringResource(R.string.locationPickerTitle)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.commonBack))
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.commonBack)
+                        )
                     }
                 }
             )
@@ -165,7 +168,10 @@ fun LocationPickerScreen(
                             query = ""
                             performSearch("")
                         }) {
-                            Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.commonClear))
+                            Icon(
+                                Icons.Default.Clear,
+                                contentDescription = stringResource(R.string.commonClear)
+                            )
                         }
                     }
                 },
@@ -198,9 +204,17 @@ fun LocationPickerScreen(
                             tint = Color.Gray
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(stringResource(R.string.locationPickerStartTyping), fontSize = 16.sp, color = Color.Gray)
+                        Text(
+                            stringResource(R.string.locationPickerStartTyping),
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.locationPickerMinChars), fontSize = 12.sp, color = Color.Gray)
+                        Text(
+                            stringResource(R.string.locationPickerMinChars),
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
                     }
                 } else if (!isLoading && searchResults.isEmpty() && errorMessage == null) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

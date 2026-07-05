@@ -35,7 +35,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -72,6 +71,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -160,37 +160,48 @@ fun ProfileScreen(
                     showShareWrapupDialog = false
                     coroutineScope.launch(Dispatchers.IO) {
                         try {
-                        val bytes =
-                            io.github.benji377.timety.ui.utils.WrapUpImageGenerator.generate(
+                            val bytes =
+                                io.github.benji377.timety.ui.utils.WrapUpImageGenerator.generate(
+                                    context,
+                                    userName,
+                                    level,
+                                    levelTitle,
+                                    highestStreak,
+                                    totalTasksDone,
+                                    totalFocusMins,
+                                    totalHabitsMet
+                                )
+                            val cachePath = File(context.cacheDir, "shared")
+                            cachePath.mkdirs()
+                            val file = File(cachePath, "wrapup.png")
+                            file.writeBytes(bytes)
+                            val uri = FileProvider.getUriForFile(
                                 context,
-                                userName,
-                                level,
-                                levelTitle,
-                                highestStreak,
-                                totalTasksDone,
-                                totalFocusMins,
-                                totalHabitsMet
+                                "${context.packageName}.fileprovider",
+                                file
                             )
-                        val cachePath = File(context.cacheDir, "shared")
-                        cachePath.mkdirs()
-                        val file = File(cachePath, "wrapup.png")
-                        file.writeBytes(bytes)
-                        val uri = FileProvider.getUriForFile(
-                            context,
-                            "${context.packageName}.fileprovider",
-                            file
-                        )
 
-                        withContext(Dispatchers.Main) {
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                type = "image/png"
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.userShareSubject))
-                                putExtra(Intent.EXTRA_TEXT, context.getString(R.string.userShareText))
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            withContext(Dispatchers.Main) {
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "image/png"
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    putExtra(
+                                        Intent.EXTRA_SUBJECT,
+                                        context.getString(R.string.userShareSubject)
+                                    )
+                                    putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        context.getString(R.string.userShareText)
+                                    )
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        intent,
+                                        context.getString(R.string.userTooltipShareWrapUp)
+                                    )
+                                )
                             }
-                            context.startActivity(Intent.createChooser(intent, context.getString(R.string.userTooltipShareWrapUp)))
-                        }
                         } catch (e: Exception) {
                             withContext(Dispatchers.Main) {
                                 android.widget.Toast.makeText(
@@ -252,7 +263,10 @@ fun ProfileScreen(
                 },
                 actions = {
                     IconButton(onClick = { showShareWrapupDialog = true }) {
-                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.userTooltipShareWrapUp))
+                        Icon(
+                            Icons.Filled.Share,
+                            contentDescription = stringResource(R.string.userTooltipShareWrapUp)
+                        )
                     }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
@@ -404,7 +418,7 @@ fun ProfileScreen(
                         io.github.benji377.timety.ui.components.stats.StatCard(
                             title = stringResource(R.string.userStatTasksDone),
                             value = totalTasksDone.toString(),
-                            icon = androidx.compose.material.icons.Icons.Filled.CheckCircle,
+                            icon = Icons.Filled.CheckCircle,
                             color = TaskColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
@@ -412,7 +426,7 @@ fun ProfileScreen(
                         io.github.benji377.timety.ui.components.stats.StatCard(
                             title = stringResource(R.string.userStatHabitsMet),
                             value = totalHabitsMet.toString(),
-                            icon = androidx.compose.material.icons.Icons.Filled.Repeat,
+                            icon = Icons.Filled.Repeat,
                             color = HabitColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
@@ -426,7 +440,7 @@ fun ProfileScreen(
                         io.github.benji377.timety.ui.components.stats.StatCard(
                             title = stringResource(R.string.userStatFocusMins),
                             value = totalFocusMins.toString(),
-                            icon = androidx.compose.material.icons.Icons.Filled.Timer,
+                            icon = Icons.Filled.Timer,
                             color = FocusColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
@@ -434,7 +448,7 @@ fun ProfileScreen(
                         io.github.benji377.timety.ui.components.stats.StatCard(
                             title = stringResource(R.string.userStatSessions),
                             value = totalSessions.toString(),
-                            icon = androidx.compose.material.icons.Icons.Filled.Timer,
+                            icon = Icons.Filled.Timer,
                             color = FocusColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
@@ -448,7 +462,7 @@ fun ProfileScreen(
                         io.github.benji377.timety.ui.components.stats.StatCard(
                             title = stringResource(R.string.streakLegendStreakDay),
                             value = highestStreak.toString(),
-                            icon = androidx.compose.material.icons.Icons.Filled.LocalFireDepartment,
+                            icon = Icons.Filled.LocalFireDepartment,
                             color = WarningColor,
                             style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)

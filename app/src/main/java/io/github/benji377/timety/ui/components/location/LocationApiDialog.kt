@@ -20,12 +20,10 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.AlertDialog
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,6 +49,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
+import io.github.benji377.timety.ui.components.common.TimetyButton as Button
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

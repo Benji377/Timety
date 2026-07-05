@@ -114,14 +114,27 @@ object WrapUpImageGenerator {
             letterSpacing = 0f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         }
-        y = paintFittedText(canvas, context.getString(R.string.wrapUpHeaderTitle, name), PAD, y, paint, W - PAD * 2)
+        y = paintFittedText(
+            canvas,
+            context.getString(R.string.wrapUpHeaderTitle, name),
+            PAD,
+            y,
+            paint,
+            W - PAD * 2
+        )
         y += 14f
 
         paint.apply {
             color = WARNING_COLOR
             textSize = 38f
         }
-        y = paintTextTopLeft(canvas, context.getString(R.string.wrapUpHeaderLevel, level, levelTitle), PAD, y, paint)
+        y = paintTextTopLeft(
+            canvas,
+            context.getString(R.string.wrapUpHeaderLevel, level, levelTitle),
+            PAD,
+            y,
+            paint
+        )
         y += 58f
 
         return y
@@ -146,7 +159,12 @@ object WrapUpImageGenerator {
                 context.getString(R.string.wrapUpStatStreakLabel)
             ),
             StatRow("✅", TASK_COLOR, "$tasks", context.getString(R.string.wrapUpStatTasksLabel)),
-            StatRow("⏱️", SUCCESS_COLOR, "$focus", context.getString(R.string.wrapUpStatFocusLabel)),
+            StatRow(
+                "⏱️",
+                SUCCESS_COLOR,
+                "$focus",
+                context.getString(R.string.wrapUpStatFocusLabel)
+            ),
             StatRow("🔁", HABIT_COLOR, "$habits", context.getString(R.string.wrapUpStatHabitsLabel))
         )
 
