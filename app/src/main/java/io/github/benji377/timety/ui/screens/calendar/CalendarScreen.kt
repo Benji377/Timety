@@ -374,11 +374,13 @@ private fun CalendarGrid(
                     val hasFocus = sessionDateKeys.contains(dateKey)
                     val hasHabits = habitDateKeys.contains(dateKey)
 
+                    // Padding sits outside the fixed height (Flutter: margin around a
+                    // 45-tall container), so the selection outline keeps clear of the dots.
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(45.dp)
                             .padding(4.dp)
+                            .height(45.dp)
                             .background(
                                 color = if (isSelected) TaskColor.copy(alpha = 0.2f) else Color.Transparent,
                                 shape = AppTheme.brMedium
@@ -421,7 +423,7 @@ private fun CalendarGrid(
                 Box(
                     modifier = Modifier
                         .weight(1.5f)
-                        .height(45.dp),
+                        .height(53.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

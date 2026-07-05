@@ -140,13 +140,13 @@
     <string name="habitDetailLabelName">Habit Name</string>
     <string name="habitDetailLabelNameHint">e.g., Read 10 pages, Workout...</string>
     <string name="habitDetailLabelNameRequest">Please enter a name</string>
-    <string name="habitDetailLabelNotes">Notes (Optional)</string>
+    <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Why are you building this habit?</string>
-    <string name="habitDetailLabelReminder">Reminder time (Optional)</string>
+    <string name="habitDetailLabelReminder">Reminder time</string>
     <string name="habitDetailLabelReminderNoTime">No specific time</string>
     <string name="habitDetailLabelColor">Color</string>
     <string name="habitDetailLabelColorPicker">Choose a Color</string>
-    <string name="habitDetailLabelStack">Habit Stack (Optional)</string>
+    <string name="habitDetailLabelStack">Habit Stack</string>
     <string name="habitDetailLabelStackHint">e.g., Morning Routine</string>
     <string name="habitDetailLabelStackOrder">Stack Order</string>
     <string name="habitDetailSnackbarSaveNoDay">Please select at least one day</string>
@@ -409,7 +409,7 @@
     <string name="dialogTimeMachineNoTag">No Tag</string>
     <string name="dialogTimeMachineStartTime">Start Time</string>
     <string name="dialogTimeMachineSuccess">Session Logged!</string>
-    <string name="dialogTimeMachineTag">Tag (Optional)</string>
+    <string name="dialogTimeMachineTag">Tag</string>
     <string name="dialogTimeMachineTitle">Log Past Session</string>
     <string name="locationApiDialogBestPractice">Best Practice</string>
     <string name="locationApiDialogBestPracticeDesc">Self-host your own Photon instance for privacy</string>

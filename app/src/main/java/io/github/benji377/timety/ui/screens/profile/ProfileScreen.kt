@@ -329,9 +329,11 @@ fun ProfileScreen(
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
 
-            // Name Section
+            // Name Section (streak flame sits left of the name)
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    io.github.benji377.timety.ui.components.user.StreakStatusBadge(isActive = currentStreak > 0)
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = userName,
                         style = MaterialTheme.typography.headlineLarge.copy(
@@ -349,25 +351,6 @@ fun ProfileScreen(
                             tint = Color.Gray
                         )
                     }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            // Streak Badge
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    io.github.benji377.timety.ui.components.user.StreakStatusBadge(isActive = currentStreak > 0)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "$highestStreak Day Streak!",
-                        color = WarningColor,
-                        fontWeight = FontWeight.Bold
-                    )
                 }
             }
 

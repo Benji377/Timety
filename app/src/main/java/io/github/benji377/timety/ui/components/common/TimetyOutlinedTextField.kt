@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.common
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
@@ -16,6 +15,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
@@ -51,17 +51,21 @@ fun TimetyOutlinedTextField(
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         focusedContainerColor = MaterialTheme.colorScheme.surface,
         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+        // Disabled fields blend into the screen instead of looking like paper.
+        disabledContainerColor = Color.Transparent,
         errorContainerColor = MaterialTheme.colorScheme.surface
     )
 ) {
-    val backgroundColor = if (enabled) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
     val mergedTextStyle = textStyle.merge(TextStyle(color = MaterialTheme.colorScheme.onSurface))
 
+    // The container background comes from [colors] via the DecorationBox Container below,
+    // so callers can restyle the disabled state.
     BasicTextField(
         value = value,
         modifier = modifier
-            .background(backgroundColor, shape)
+            // Room for the floating label's top half, like M3's OutlinedTextFieldTopPadding;
+            // without it the label gets clipped at the top.
+            .then(if (label != null) Modifier.padding(top = 8.dp) else Modifier)
             .defaultMinSize(
                 minWidth = OutlinedTextFieldDefaults.MinWidth,
                 minHeight = OutlinedTextFieldDefaults.MinHeight
@@ -90,7 +94,9 @@ fun TimetyOutlinedTextField(
                 prefix = prefix,
                 suffix = suffix,
                 supportingText = supportingText,
-                singleLine = singleLine,
+                // Single-row fields (minLines == 1) center their text on the leading icon;
+                // real text areas (minLines > 1) keep the text top-aligned.
+                singleLine = singleLine || minLines == 1,
                 enabled = enabled,
                 isError = isError,
                 interactionSource = interactionSource,

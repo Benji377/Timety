@@ -140,13 +140,13 @@
     <string name="habitDetailLabelName">Name der Gewohnheit</string>
     <string name="habitDetailLabelNameHint">z.B. 10 Seiten lesen, Workout...</string>
     <string name="habitDetailLabelNameRequest">Bitte gib einen Namen ein</string>
-    <string name="habitDetailLabelNotes">Notizen (Optional)</string>
+    <string name="habitDetailLabelNotes">Notizen</string>
     <string name="habitDetailLabelNotesHint">Warum baust du diese Gewohnheit auf?</string>
-    <string name="habitDetailLabelReminder">Erinnerungszeit (Optional)</string>
+    <string name="habitDetailLabelReminder">Erinnerungszeit</string>
     <string name="habitDetailLabelReminderNoTime">Keine bestimmte Zeit</string>
     <string name="habitDetailLabelColor">Farbe</string>
     <string name="habitDetailLabelColorPicker">Wähle eine Farbe</string>
-    <string name="habitDetailLabelStack">Gewohnheits-Stapel (Optional)</string>
+    <string name="habitDetailLabelStack">Gewohnheits-Stapel</string>
     <string name="habitDetailLabelStackHint">z.B. Morgenroutine</string>
     <string name="habitDetailLabelStackOrder">Stapel-Reihenfolge</string>
     <string name="habitDetailSnackbarSaveNoDay">Bitte wähle mindestens einen Tag</string>
@@ -409,7 +409,7 @@
     <string name="dialogTimeMachineNoTag">Kein Tag</string>
     <string name="dialogTimeMachineStartTime">Startzeit</string>
     <string name="dialogTimeMachineSuccess">Sitzung protokolliert!</string>
-    <string name="dialogTimeMachineTag">Tag (Optional)</string>
+    <string name="dialogTimeMachineTag">Tag</string>
     <string name="dialogTimeMachineTitle">Vergangene Sitzung eintragen</string>
     <string name="locationApiDialogBestPractice">Beste Praktiken</string>
     <string name="locationApiDialogBestPracticeDesc">Hoste deine eigene Photon-Instanz für mehr Privatsphäre</string>

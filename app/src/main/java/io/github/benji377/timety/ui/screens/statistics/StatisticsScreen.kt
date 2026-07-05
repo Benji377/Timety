@@ -469,21 +469,25 @@ private fun SynergyChart(
                     color = color,
                     style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
                 )
+                // Per-point dots, matching fl_chart's default FlDotData in the Flutter app.
+                points.forEach { point ->
+                    drawCircle(color = color, radius = 4.dp.toPx(), center = point)
+                }
             }
 
             drawSeries(focusValues, FocusColor)
             drawSeries(taskValues, TaskColor)
 
-            // Touched-day indicator dots.
+            // Touched-day indicator dots, enlarged to stand out from the regular dots.
             selectedIndex?.let { idx ->
                 drawCircle(
                     color = FocusColor,
-                    radius = 4.dp.toPx(),
+                    radius = 6.dp.toPx(),
                     center = pointFor(focusValues, idx)
                 )
                 drawCircle(
                     color = TaskColor,
-                    radius = 4.dp.toPx(),
+                    radius = 6.dp.toPx(),
                     center = pointFor(taskValues, idx)
                 )
             }

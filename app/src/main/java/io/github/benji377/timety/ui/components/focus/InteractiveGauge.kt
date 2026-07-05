@@ -11,16 +11,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +43,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -200,9 +204,14 @@ fun InteractiveGauge(
             }
         }
 
+        // Label, time and tag pill spread evenly over the inner disc's full height,
+        // centered both ways (Flutter achieves this with a FittedBox inside the disc).
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(40.dp),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(40.dp),
         ) {
             val actualLabelColor = labelColor ?: (if (isDark) GaugeLabelDark else GaugeTrackLight)
             Text(
@@ -214,20 +223,30 @@ fun InteractiveGauge(
                 color = actualLabelColor,
                 lineHeight = if (label.length > 12) AppTheme.fsGaugeLabel * 1.1f else AppTheme.fsGaugeLabel,
             )
-            Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
             val bodyLargeColor = MaterialTheme.colorScheme.onSurface
             val actualCenterColor = if (centerTextColor != null) {
                 if (isDark) GaugeWhite else centerTextColor
             } else {
                 bodyLargeColor
             }
-            Text(
+            // Auto-shrinks for long stopwatch values (e.g. "120:00"), like Flutter's
+            // FittedBox(scaleDown).
+            BasicText(
                 text = centerText,
-                fontSize = 44.sp,
-                fontWeight = AppTheme.fwLight,
-                color = actualCenterColor,
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(
+                    minFontSize = 32.sp,
+                    maxFontSize = AppTheme.fsGaugeDisplay,
+                    stepSize = 2.sp,
+                ),
+                style = TextStyle(
+                    fontSize = AppTheme.fsGaugeDisplay,
+                    fontWeight = AppTheme.fwLight,
+                    color = actualCenterColor,
+                    textAlign = TextAlign.Center,
+                ),
+                modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
             Box(
                 modifier = Modifier
                     .clip(CircleShape)

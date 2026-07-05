@@ -96,7 +96,10 @@ fun HabitListTile(
             val barColor = if (isCompleted) color.copy(alpha = AppTheme.opacityLight) else color
             Row(modifier = Modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min)) {
+                .height(IntrinsicSize.Min)
+                // Unlocked stack members get the same surface background as standalone
+                // habits; only locked ones let the dim stack card shine through.
+                .background(if (isLocked) Color.Transparent else MaterialTheme.colorScheme.surface)) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()

@@ -132,13 +132,13 @@
     <string name="habitDetailLabelName">Inuem abitudin</string>
     <string name="habitDetailLabelNameHint">ej. Lejer 10 plates, Allenamënt...</string>
     <string name="habitDetailLabelNameRequest">Nserësc n inuem</string>
-    <string name="habitDetailLabelNotes">Notes (Zënza ubligh)</string>
+    <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Cie mutivazions es\'a per chësta abitudin?</string>
-    <string name="habitDetailLabelReminder">Ora dl lezit (Zënza ubligh)</string>
+    <string name="habitDetailLabelReminder">Ora dl lezit</string>
     <string name="habitDetailLabelReminderNoTime">Deguna ora zessa</string>
     <string name="habitDetailLabelColor">Culëur</string>
     <string name="habitDetailLabelColorPicker">Chir ora n culëur</string>
-    <string name="habitDetailLabelStack">Rënga de abitudins (Zënza ubligh)</string>
+    <string name="habitDetailLabelStack">Rënga de abitudins</string>
     <string name="habitDetailLabelStackHint">ej. Routine da duman</string>
     <string name="habitDetailLabelStackOrder">Orden te la rënga</string>
     <string name="habitDetailSnackbarSaveNoDay">Cëria ora almanco n di</string>
@@ -398,7 +398,7 @@
     <string name="dialogTimeMachineNoTag">Deguna eticheta</string>
     <string name="dialogTimeMachineStartTime">Ora de taché</string>
     <string name="dialogTimeMachineSuccess">Sescion registreda!</string>
-    <string name="dialogTimeMachineTag">Eticheta (Zënza ubligh)</string>
+    <string name="dialogTimeMachineTag">Eticheta</string>
     <string name="dialogTimeMachineTitle">Registré sescion passeda</string>
     <string name="locationApiDialogBestPractice">Pruzess Miëur</string>
     <string name="locationApiDialogBestPracticeDesc">Aministrea la tia istyanza Photon per ti privacy</string>

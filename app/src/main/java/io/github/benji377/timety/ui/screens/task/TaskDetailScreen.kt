@@ -311,7 +311,7 @@ fun TaskDetailScreen(
                     onValueChange = { title = it },
                     enabled = isEditing,
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.taskDetailsLabelTitle)) },
+                    label = { Text(stringResource(R.string.taskDetailsLabelTitle) + " *") },
                     leadingIcon = { Icon(Icons.Filled.Title, null) },
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
@@ -724,6 +724,9 @@ private enum class PickerTarget { DUE_DATE, CUSTOM_REMINDER }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun disabledFieldColors(isEditing: Boolean) = OutlinedTextFieldDefaults.colors(
+    // While editing these click-through fields should look like regular enabled inputs;
+    // in view mode they blend into the screen background like other disabled fields.
+    disabledContainerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
     disabledTextColor = if (isEditing) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
     disabledBorderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(
         alpha = 0.6f

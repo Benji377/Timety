@@ -140,13 +140,13 @@
     <string name="habitDetailLabelName">Nome dell\'abitudine</string>
     <string name="habitDetailLabelNameHint">es., Leggere 10 pagine, Allenamento...</string>
     <string name="habitDetailLabelNameRequest">Inserisci un nome</string>
-    <string name="habitDetailLabelNotes">Note (Opzionale)</string>
+    <string name="habitDetailLabelNotes">Note</string>
     <string name="habitDetailLabelNotesHint">Perché stai sviluppando questa abitudine?</string>
-    <string name="habitDetailLabelReminder">Orario promemoria (Opzionale)</string>
+    <string name="habitDetailLabelReminder">Orario promemoria</string>
     <string name="habitDetailLabelReminderNoTime">Nessun orario specifico</string>
     <string name="habitDetailLabelColor">Colore</string>
     <string name="habitDetailLabelColorPicker">Scegli un colore</string>
-    <string name="habitDetailLabelStack">Sequenza di abitudini (Opzionale)</string>
+    <string name="habitDetailLabelStack">Sequenza di abitudini</string>
     <string name="habitDetailLabelStackHint">es. Routine mattutina</string>
     <string name="habitDetailLabelStackOrder">Ordine sequenza</string>
     <string name="habitDetailSnackbarSaveNoDay">Seleziona almeno un giorno</string>
@@ -409,7 +409,7 @@
     <string name="dialogTimeMachineNoTag">Nessuna etichetta</string>
     <string name="dialogTimeMachineStartTime">Orario di inizio</string>
     <string name="dialogTimeMachineSuccess">Sessione registrata!</string>
-    <string name="dialogTimeMachineTag">Etichetta (Opzionale)</string>
+    <string name="dialogTimeMachineTag">Etichetta</string>
     <string name="dialogTimeMachineTitle">Registra sessione passata</string>
     <string name="locationApiDialogBestPractice">Miglior pratica</string>
     <string name="locationApiDialogBestPracticeDesc">Ospita la tua istanza Photon per una maggiore privacy</string>

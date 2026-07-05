@@ -266,7 +266,7 @@ fun HabitDetailScreen(
                     value = name,
                     onValueChange = { name = it; if (it.isNotBlank()) nameError = false },
                     enabled = isEditing,
-                    label = { Text(stringResource(R.string.habitDetailLabelName)) },
+                    label = { Text(stringResource(R.string.habitDetailLabelName) + " *") },
                     placeholder = { Text(stringResource(R.string.habitDetailLabelNameHint)) },
                     leadingIcon = { Icon(Icons.Filled.Stars, null, tint = selectedColor) },
                     isError = nameError,
@@ -543,6 +543,7 @@ fun HabitDetailScreen(
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
+                            disabledContainerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
                             disabledTextColor = if (isEditing) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                             disabledBorderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
                             disabledLeadingIconColor = if (isEditing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outlineVariant,
@@ -696,19 +697,26 @@ private fun PickerField(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    Box(modifier = modifier.clickable(enabled = enabled) { onClick() }) {
+    Box(modifier = modifier) {
+        // The field itself follows [enabled] so it picks up the normal enabled/disabled
+        // styling (surface vs. transparent background); the overlay box catches taps.
         OutlinedTextField(
             value = "",
             onValueChange = {},
             readOnly = true,
-            enabled = false,
+            enabled = enabled,
             label = { Text(label) },
             leadingIcon = { Box(contentAlignment = Alignment.Center) { content() } },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
                 disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable(enabled = enabled) { onClick() },
         )
     }
 }

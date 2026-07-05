@@ -104,6 +104,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * Application settings for theme, notifications, API, and backups. Mirrors `screens/settings_screen.dart`.
@@ -987,7 +988,6 @@ private data class NumberDialogSpec(
 @Composable
 private fun NumberPickerDialog(spec: NumberDialogSpec, onDismiss: () -> Unit) {
     var value by remember(spec) { mutableStateOf(spec.current.toFloat()) }
-    val steps = (((spec.max - spec.min) / 5) - 1).coerceAtLeast(0)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(spec.title) },
@@ -998,11 +998,12 @@ private fun NumberPickerDialog(spec: NumberDialogSpec, onDismiss: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp
                 )
+                // Continuous slider rounded to whole units: precise selection without
+                // the coarse 5-unit jumps (or dozens of tick marks) a stepped slider gives.
                 Slider(
                     value = value,
-                    onValueChange = { value = it },
-                    valueRange = spec.min.toFloat()..spec.max.toFloat(),
-                    steps = steps
+                    onValueChange = { value = it.roundToInt().toFloat() },
+                    valueRange = spec.min.toFloat()..spec.max.toFloat()
                 )
             }
         },

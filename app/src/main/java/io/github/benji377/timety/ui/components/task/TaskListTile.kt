@@ -26,8 +26,6 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -107,20 +105,26 @@ fun TaskListTile(
             border = BorderStroke(AppTheme.listTileBorderWidth, borderColor),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
-            ListItem(
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                leadingContent = {
-                    Checkbox(
-                        checked = task.isCompleted,
-                        onCheckedChange = { onToggleCompleted() },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = SuccessColor,
-                            uncheckedColor = TaskColor,
-                            checkmarkColor = Color.White,
-                        ),
-                    )
-                },
-                headlineContent = {
+            // Custom row instead of ListItem: M3 ListItem top-aligns leading/trailing
+            // content on three-line items, whereas Flutter's ListTile keeps them
+            // vertically centered.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(
+                    checked = task.isCompleted,
+                    onCheckedChange = { onToggleCompleted() },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = SuccessColor,
+                        uncheckedColor = TaskColor,
+                        checkmarkColor = Color.White,
+                    ),
+                )
+                Spacer(Modifier.width(AppTheme.spaceSmall))
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = task.title,
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -129,84 +133,77 @@ fun TaskListTile(
                             fontWeight = AppTheme.fwBold,
                         ),
                     )
-                },
-                supportingContent = {
-                    Column {
-                        if (showDescription && task.description.isNotEmpty()) {
+                    if (showDescription && task.description.isNotEmpty()) {
+                        Text(
+                            text = task.description,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontSize = AppTheme.fsLabel,
+                        )
+                    }
+
+                    if (hasSubtasks) {
+                        Spacer(Modifier.height(6.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Filled.Checklist,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Spacer(Modifier.width(4.dp))
                             Text(
-                                text = task.description,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
+                                text = "$subtasksCompleted/$subtasksTotal",
                                 fontSize = AppTheme.fsLabel,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = AppTheme.fwMedium,
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            LinearProgressIndicator(
+                                progress = { progress },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(4.dp)),
+                                color = if (task.isCompleted) SuccessColor else borderColor,
+                                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                             )
                         }
-
-                        if (hasSubtasks) {
-                            Spacer(Modifier.height(6.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Filled.Checklist,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    text = "$subtasksCompleted/$subtasksTotal",
-                                    fontSize = AppTheme.fsLabel,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontWeight = AppTheme.fwMedium,
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                LinearProgressIndicator(
-                                    progress = { progress },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(4.dp)
-                                        .clip(RoundedCornerShape(4.dp)),
-                                    color = if (task.isCompleted) SuccessColor else borderColor,
-                                    trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                )
-                            }
-                        }
-
-                        if (showDueDate && task.dueDate != null) {
-                            Spacer(Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Filled.AccessTime,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = borderColor,
-                                )
-                                Spacer(Modifier.width(4.dp))
-                                // NOTE: Flutter uses settings.getFormattedDateTime (24h flag + locale
-                                // aware). No centralized Kotlin equivalent exists yet, so this falls
-                                // back to a locale-aware medium date/time formatter.
-                                Text(
-                                    text = formatDueDateTime(
-                                        task.dueDate,
-                                        use24HourFormat,
-                                        dateFormatCode
-                                    ),
-                                    fontSize = AppTheme.fsLabel,
-                                    color = borderColor,
-                                    fontWeight = AppTheme.fwMedium,
-                                )
-                            }
-                        }
                     }
-                },
-                trailingContent = if (showTrailing) {
-                    {
+
+                    if (showDueDate && task.dueDate != null) {
+                        Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = AppUtils.getSizeEmoji(task.size), fontSize = 18.sp)
-                            Spacer(Modifier.width(8.dp))
-                            AppUtils.PriorityIcon(priority = task.priority)
+                            Icon(
+                                imageVector = Icons.Filled.AccessTime,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = borderColor,
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            // NOTE: Flutter uses settings.getFormattedDateTime (24h flag + locale
+                            // aware). No centralized Kotlin equivalent exists yet, so this falls
+                            // back to a locale-aware medium date/time formatter.
+                            Text(
+                                text = formatDueDateTime(
+                                    task.dueDate,
+                                    use24HourFormat,
+                                    dateFormatCode
+                                ),
+                                fontSize = AppTheme.fsLabel,
+                                color = borderColor,
+                                fontWeight = AppTheme.fwMedium,
+                            )
                         }
-                    }
-                } else null,
-            )
+                }
+                }
+                if (showTrailing) {
+                    Spacer(Modifier.width(AppTheme.spaceLarge))
+                    Text(text = AppUtils.getSizeEmoji(task.size), fontSize = 18.sp)
+                    Spacer(Modifier.width(AppTheme.listTileTrailingSpacing))
+                    AppUtils.PriorityIcon(priority = task.priority)
+                }
+            }
         }
     }
 
