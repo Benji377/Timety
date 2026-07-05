@@ -123,6 +123,8 @@ fun FocusScreen(
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val context = LocalContext.current
+    val distractionLoggedRaw = stringResource(R.string.distractionLogged)
+    val dialogTimeMachineSuccessStr = stringResource(R.string.dialogTimeMachineSuccess)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -607,10 +609,7 @@ fun FocusScreen(
                 focusViewModel.logDistraction(type.entityType)
                 scope.launch {
                     snackbarHostState.showSnackbar(
-                        context.getString(
-                            R.string.distractionLogged,
-                            context.getString(type.labelRes)
-                        )
+                        distractionLoggedRaw.format(context.resources.getString(type.labelRes))
                     )
                 }
             },
@@ -631,7 +630,7 @@ fun FocusScreen(
                     allTags.firstOrNull { it.id == tagId })
                 showTimeMachine = false
                 scope.launch {
-                    snackbarHostState.showSnackbar(context.getString(R.string.dialogTimeMachineSuccess))
+                    snackbarHostState.showSnackbar(dialogTimeMachineSuccessStr)
                 }
             },
         )

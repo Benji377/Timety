@@ -72,13 +72,12 @@ fun HabitListTile(
     onTap: () -> Unit,
     onDelete: (() -> Unit)? = null,
     onMarkPastCompletion: (() -> Unit)? = null,
-    enableDismissible: Boolean = true,
     modifier: Modifier = Modifier,
+    enableDismissible: Boolean = true,
     // Mirrors AppTheme.paddingScreenHorizontal.
     margin: PaddingValues = AppTheme.paddingScreenHorizontal,
 ) {
     val color = Color(habit.colorValue)
-    val context = LocalContext.current
     val lockedMessage = stringResource(R.string.focusSnackbarHabitLocked)
     val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()

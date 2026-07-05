@@ -62,11 +62,10 @@ fun LocationPickerScreen(
     onLocationSelected: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
     var query by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorState by remember { mutableStateOf<LocationError?>(null) }
 
     val coroutineScope = rememberCoroutineScope()
     var searchJob by remember { mutableStateOf<Job?>(null) }
@@ -78,7 +77,7 @@ fun LocationPickerScreen(
             searchJob = coroutineScope.launch {
                 delay(600) // Debounce
                 isLoading = true
-                errorMessage = null
+                errorState = null
 
                 try {
                     val endpoint = locationApiEndpoint
@@ -114,10 +113,10 @@ fun LocationPickerScreen(
                     }
                     searchResults = results
                 } catch (e: ServerException) {
-                    errorMessage = context.getString(R.string.locationPickerServerError, e.code)
+                    errorState = LocationError.Server(e.code)
                     searchResults = emptyList()
                 } catch (e: Exception) {
-                    errorMessage = context.getString(R.string.locationPickerNetworkError)
+                    errorState = LocationError.Network
                     searchResults = emptyList()
                 } finally {
                     isLoading = false
@@ -126,7 +125,7 @@ fun LocationPickerScreen(
         } else {
             searchResults = emptyList()
             isLoading = false
-            errorMessage = null
+            errorState = null
         }
     }
 
@@ -182,9 +181,14 @@ fun LocationPickerScreen(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
-            if (errorMessage != null) {
+            val currentError = errorState
+            if (currentError != null) {
+                val errorMsg = when (currentError) {
+                    is LocationError.Server -> stringResource(R.string.locationPickerServerError, currentError.code)
+                    is LocationError.Network -> stringResource(R.string.locationPickerNetworkError)
+                }
                 Text(
-                    text = errorMessage!!,
+                    text = errorMsg,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(16.dp)
                 )
@@ -216,7 +220,7 @@ fun LocationPickerScreen(
                             color = Color.Gray
                         )
                     }
-                } else if (!isLoading && searchResults.isEmpty() && errorMessage == null) {
+                } else if (!isLoading && searchResults.isEmpty() && errorState == null) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             stringResource(R.string.locationPickerNoResults, query.trim()),
@@ -316,3 +320,8 @@ private fun buildDetailsString(p: JSONObject): String {
 }
 
 private class ServerException(val code: Int) : Exception("Server error: $code")
+
+private sealed class LocationError {
+    class Server(val code: Int) : LocationError()
+    object Network : LocationError()
+}

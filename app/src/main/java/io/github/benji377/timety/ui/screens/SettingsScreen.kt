@@ -122,6 +122,17 @@ fun SettingsScreen(
     focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val context = LocalContext.current
+    val backupExportSuccessStr = stringResource(R.string.backupExportSuccess)
+    val backupExportFailureRaw = stringResource(R.string.backupExportFailure)
+    val focusGoalTitle = stringResource(R.string.settingsLabelFocusGoal)
+    val focusStopwatchTitle = stringResource(R.string.settingsLabelFocusStopwatch)
+    val focusNodeTimeTitle = stringResource(R.string.settingsLabelFocusNodeTime)
+    val upcomingTaskTitle = stringResource(R.string.settingsLabelUpcomingTask)
+    val dailyMotivationTitle = stringResource(R.string.settingsLabelDailyMotivation)
+    val eodCheckupTitle = stringResource(R.string.settingsLabelEodCheckup)
+    val backupImportFailureStr = stringResource(R.string.backupImportFailure)
+    val backupExportSubjectStr = stringResource(R.string.backupExportSubject)
+    val backupShareFailureRaw = stringResource(R.string.backupShareFailure)
     val scope = rememberCoroutineScope()
     val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
     val backupService = remember {
@@ -138,12 +149,9 @@ fun SettingsScreen(
         scope.launch {
             val result = backupService.exportToUri(uri)
             val msg = if (result.isSuccess) {
-                context.getString(R.string.backupExportSuccess)
+                backupExportSuccessStr
             } else {
-                context.getString(
-                    R.string.backupExportFailure,
-                    result.exceptionOrNull()?.message ?: ""
-                )
+                backupExportFailureRaw.format(result.exceptionOrNull()?.message ?: "")
             }
             snackbarHostState.showSnackbar(msg)
         }
@@ -431,7 +439,7 @@ fun SettingsScreen(
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
                         numberDialogSpec = NumberDialogSpec(
-                            title = context.getString(R.string.settingsLabelFocusGoal),
+                            title = focusGoalTitle,
                             current = dailyGoalMins, min = 10, max = 480, unit = minutesUnit,
                             onSave = { settingsViewModel.setDailyGoalMins(it) }
                         )
@@ -461,7 +469,7 @@ fun SettingsScreen(
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
                         numberDialogSpec = NumberDialogSpec(
-                            title = context.getString(R.string.settingsLabelFocusStopwatch),
+                            title = focusStopwatchTitle,
                             current = maxStopwatchMins, min = 30, max = 480, unit = minutesUnit,
                             onSave = { settingsViewModel.setMaxStopwatchMins(it) }
                         )
@@ -475,7 +483,7 @@ fun SettingsScreen(
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
                         numberDialogSpec = NumberDialogSpec(
-                            title = context.getString(R.string.settingsLabelFocusNodeTime),
+                            title = focusNodeTimeTitle,
                             current = maxNodeMins, min = 10, max = 480, unit = minutesUnit,
                             onSave = { settingsViewModel.setMaxNodeMins(it) }
                         )
@@ -496,7 +504,7 @@ fun SettingsScreen(
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
                         numberDialogSpec = NumberDialogSpec(
-                            title = context.getString(R.string.settingsLabelUpcomingTask),
+                            title = upcomingTaskTitle,
                             current = upcomingTasksHorizon, min = 1, max = 60, unit = daysUnit,
                             onSave = { settingsViewModel.setUpcomingTasksHorizon(it) }
                         )
@@ -591,7 +599,7 @@ fun SettingsScreen(
                     trailingContent = { Icon(Icons.Filled.Edit, null) },
                     modifier = Modifier.clickable {
                         timeDialogSpec = TimeDialogSpec(
-                            title = context.getString(R.string.settingsLabelDailyMotivation),
+                            title = dailyMotivationTitle,
                             current = dailyMotivationTime,
                             onSave = { settingsViewModel.setDailyMotivationTime(it) }
                         )
@@ -618,7 +626,7 @@ fun SettingsScreen(
                     trailingContent = { Icon(Icons.Filled.Edit, null) },
                     modifier = Modifier.clickable {
                         timeDialogSpec = TimeDialogSpec(
-                            title = context.getString(R.string.settingsLabelEodCheckup),
+                            title = eodCheckupTitle,
                             current = endOfDayCheckupTime,
                             onSave = { settingsViewModel.setEndOfDayCheckupTime(it) }
                         )
@@ -826,7 +834,7 @@ fun SettingsScreen(
                     if (result.isSuccess) {
                         showRestartDialog = true
                     } else {
-                        snackbarHostState.showSnackbar(context.getString(R.string.backupImportFailure))
+                        snackbarHostState.showSnackbar(backupImportFailureStr)
                     }
                 }
             }
@@ -877,23 +885,20 @@ fun SettingsScreen(
                                                     )
                                                     putExtra(
                                                         Intent.EXTRA_SUBJECT,
-                                                        context.getString(R.string.backupExportSubject)
+                                                        backupExportSubjectStr
                                                     )
                                                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                                 }
                                         context.startActivity(
                                             Intent.createChooser(
                                                 intent,
-                                                context.getString(R.string.backupExportSubject)
+                                                backupExportSubjectStr
                                             )
                                         )
                                     },
                                     onFailure = { e ->
                                         snackbarHostState.showSnackbar(
-                                            context.getString(
-                                                R.string.backupShareFailure,
-                                                e.message ?: ""
-                                            )
+                                            backupShareFailureRaw.format(e.message ?: "")
                                         )
                                     }
                                 )

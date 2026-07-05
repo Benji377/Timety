@@ -30,7 +30,7 @@ fun WeekNavigator(
     onShiftWeek: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.text.intl.Locale.current.platformLocale
     val startOfWeek = AppDateUtils.startOfWeekMonday(focusedDate)
     val endOfWeek = startOfWeek.plusDays(6)
 

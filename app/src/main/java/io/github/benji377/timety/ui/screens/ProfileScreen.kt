@@ -101,7 +101,7 @@ fun ProfileScreen(
 
     val totalTasksDone = tasks.count { it.task.isCompleted }
     val totalHabitsMet = habitsWithCompletions.sumOf { it.completions.size }
-    val totalFocusMins = sessions.sumOf { it.totalSecondsFocused.toInt() } / 60
+    val totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60
     val totalSessions = sessions.size
     val taskDates = tasks.mapNotNull {
         if (it.task.isCompleted) it.task.completedAt?.atZone(java.time.ZoneId.systemDefault())
@@ -128,6 +128,10 @@ fun ProfileScreen(
         io.github.benji377.timety.util.stats.StreakCalculator.calculateBestStreak(allActivityDates)
 
     val context = LocalContext.current
+    val shareSubjectStr = stringResource(R.string.userShareSubject)
+    val shareTextStr = stringResource(R.string.userShareText)
+    val shareWrapUpTooltipStr = stringResource(R.string.userTooltipShareWrapUp)
+    val errorGenerateImageStr = stringResource(R.string.userErrorGenerateImage)
     var showEditNameDialog by remember { mutableStateOf(false) }
     var tempName by remember { mutableStateOf("") }
     var showShareWrapupDialog by remember { mutableStateOf(false) }
@@ -187,18 +191,18 @@ fun ProfileScreen(
                                     putExtra(Intent.EXTRA_STREAM, uri)
                                     putExtra(
                                         Intent.EXTRA_SUBJECT,
-                                        context.getString(R.string.userShareSubject)
+                                        shareSubjectStr
                                     )
                                     putExtra(
                                         Intent.EXTRA_TEXT,
-                                        context.getString(R.string.userShareText)
+                                        shareTextStr
                                     )
                                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                 }
                                 context.startActivity(
                                     Intent.createChooser(
                                         intent,
-                                        context.getString(R.string.userTooltipShareWrapUp)
+                                        shareWrapUpTooltipStr
                                     )
                                 )
                             }
@@ -206,7 +210,7 @@ fun ProfileScreen(
                             withContext(Dispatchers.Main) {
                                 android.widget.Toast.makeText(
                                     context,
-                                    context.getString(R.string.userErrorGenerateImage),
+                                    errorGenerateImageStr,
                                     android.widget.Toast.LENGTH_SHORT
                                 ).show()
                             }

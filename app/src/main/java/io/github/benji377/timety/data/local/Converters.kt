@@ -25,7 +25,7 @@ class Converters {
         return data.split(",").mapNotNull {
             try {
                 Instant.ofEpochMilli(it.toLong())
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }

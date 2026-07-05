@@ -81,7 +81,7 @@ fun TimeMachineDialog(
 
     val endBeforeStartError = stringResource(R.string.dialogTimeMachineErrorEndBeforeStart)
     val zone = ZoneId.systemDefault()
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.text.intl.Locale.current.platformLocale
     val dateTimeFormatter = remember(locale) {
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
             .withLocale(locale).withZone(zone)

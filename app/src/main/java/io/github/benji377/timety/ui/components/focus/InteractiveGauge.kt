@@ -65,19 +65,19 @@ import kotlin.math.sin
 @Composable
 fun InteractiveGauge(
     progress: Float,
+    label: String,
+    centerText: String,
+    bottomText: String,
+    modifier: Modifier = Modifier,
     isInteractive: Boolean = true,
     isStopwatch: Boolean = false,
     onChanged: ((Float) -> Unit)? = null,
-    label: String,
-    centerText: String,
     centerTextColor: Color? = null,
     labelColor: Color? = null,
-    bottomText: String,
     bottomTextColor: Color = Color.Unspecified,
     bottomTextIcon: ImageVector? = null,
     onBottomTextTapped: (() -> Unit)? = null,
     color: Color? = null,
-    modifier: Modifier = Modifier,
 ) {
     var currentProgress by remember { mutableFloatStateOf(progress) }
     LaunchedEffect(progress, isInteractive) { currentProgress = progress }

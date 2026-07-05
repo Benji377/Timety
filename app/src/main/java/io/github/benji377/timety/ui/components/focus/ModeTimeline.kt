@@ -35,10 +35,10 @@ import io.github.benji377.timety.ui.theme.WarningColor
 @Composable
 fun ModeTimeline(
     phases: List<SessionPhaseEntity>,
+    modifier: Modifier = Modifier,
     currentPhaseIndex: Int = 0,
     isRunning: Boolean = false,
     awaitingContinue: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     if (phases.isEmpty()) return
 

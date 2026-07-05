@@ -67,6 +67,7 @@ fun TaskListTile(
     task: TaskEntity,
     onToggleCompleted: () -> Unit,
     onTap: () -> Unit,
+    modifier: Modifier = Modifier,
     onDelete: (() -> Unit)? = null,
     isOverdue: Boolean = false,
     enableDismissible: Boolean = true,
@@ -77,7 +78,6 @@ fun TaskListTile(
     subtasksTotal: Int = 0,
     use24HourFormat: Boolean = LocalDateFormatSettings.current.use24HourFormat,
     dateFormatCode: String = LocalDateFormatSettings.current.dateFormatCode,
-    modifier: Modifier = Modifier,
     // Screen margin, mirrors AppTheme.listTileScreenMargin (spaceLarge horizontal, spaceXSmall vertical).
     margin: PaddingValues = PaddingValues(
         horizontal = AppTheme.spaceLarge,

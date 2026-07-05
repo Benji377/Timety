@@ -85,7 +85,7 @@ fun HomeScreen(
     val focusMinsToday = sessions.filter {
         LocalDateTime.ofInstant(it.startTime, ZoneId.systemDefault())
             .toLocalDate() == todayLocalDate
-    }.sumOf { it.totalSecondsFocused.toInt() } / 60
+    }.sumOf { it.totalSecondsFocused } / 60
     val focusProgress =
         if (dailyTarget > 0) (focusMinsToday.toFloat() / dailyTarget.toFloat()).coerceIn(
             0f,

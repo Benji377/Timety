@@ -182,6 +182,7 @@ class HabitWidget : GlanceAppWidget() {
     }
 
     @androidx.compose.runtime.Composable
+    @android.annotation.SuppressLint("NonObservableLocale")
     private fun RenderRow(row: HabitWidgetRow, openApp: androidx.glance.action.Action) {
         when (row) {
             is HabitWidgetRow.StackHeader -> Row(
