@@ -14,10 +14,7 @@ import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-/**
- * App theme preference. [storageValue] is what gets persisted in DataStore (and what older
- * installs already have on disk), so it must not change even if the enum is renamed.
- */
+
 enum class ThemeMode(val storageValue: String) {
     LIGHT("Light"),
     DARK("Dark"),

@@ -24,6 +24,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.filled.LabelImportant
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.BarChart
@@ -34,18 +37,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material.icons.automirrored.filled.LabelImportant
-import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.AlertDialog
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DatePicker
@@ -59,7 +57,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -115,15 +113,10 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+import io.github.benji377.timety.ui.components.common.TimetyButton as Button
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * View / create / edit a task. Mirrors `screens/task/task_detail_screen.dart`.
- *
- * DATE FORMATTING NOTE: Flutter formats dates/times through `SettingsProvider`, which
- * honors a 24h flag + date-format code + locale. No centralized Kotlin equivalent exists
- * yet, so this screen uses `DateTimeFormatter` with the device locale (see [formatDate]/
- * [formatTime]). The parent should centralize this later.
- */
+
 @OptIn(
     ExperimentalMaterial3Api::class,
     androidx.compose.foundation.layout.ExperimentalLayoutApi::class
@@ -232,7 +225,7 @@ fun TaskDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = { Text(appBarTitle, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -638,7 +631,7 @@ fun TaskDetailScreen(
         // reminder can't be after the task's due date.
         val zone = ZoneId.systemDefault()
         val todayUtcMillis =
-            java.time.LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+            LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         val dueUtcMillis = dueDate?.atZone(zone)?.toLocalDate()
             ?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
         val selectableDates = remember(pickerTarget, dueUtcMillis, todayUtcMillis) {
@@ -736,7 +729,7 @@ private fun disabledFieldColors(isEditing: Boolean) = OutlinedTextFieldDefaults.
     disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
 )
 
-/** Date/time formatting stand-in; see the file-level KDoc note on date formatting. */
+
 private fun formatDate(instant: Instant, dateFormatCode: String): String =
     io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(instant, dateFormatCode)
 
@@ -768,10 +761,7 @@ private fun SectionHeader(title: String, icon: ImageVector) {
     }
 }
 
-/**
- * Pill-style selector where the selected segment expands to show its label. Mirrors
- * `_buildAccordionSelector` in task_detail_screen.dart.
- */
+
 @Composable
 private fun <T> AccordionSelector(
     values: List<T>,

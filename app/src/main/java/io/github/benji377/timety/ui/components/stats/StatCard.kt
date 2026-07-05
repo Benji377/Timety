@@ -26,12 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.ui.theme.AppTheme
 
-/** Layout styles for [StatCard]. Mirrors StatCardStyle in stat_card.dart. */
+
 enum class StatCardStyle { KPI, COMPACT_VERTICAL, COMPACT_HEADER }
 
-/**
- * Unified stat card supporting multiple layout styles. Mirrors StatCard in stat_card.dart.
- */
+
 @Composable
 fun StatCard(
     title: String,

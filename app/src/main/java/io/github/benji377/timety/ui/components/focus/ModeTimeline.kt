@@ -31,10 +31,7 @@ import io.github.benji377.timety.ui.theme.PaperAltLight
 import io.github.benji377.timety.ui.theme.PaperLight
 import io.github.benji377.timety.ui.theme.WarningColor
 
-/**
- * Horizontal dot/line timeline showing the sequence of phases in a focus mode, highlighting the
- * current one while a session runs. Mirrors `widgets/focus/focus_mode_timeline.dart`.
- */
+
 @Composable
 fun ModeTimeline(
     phases: List<SessionPhaseEntity>,
@@ -144,11 +141,7 @@ private fun ConnectorLine(isPast: Boolean, isRunningOrAwaiting: Boolean, lineCol
     )
 }
 
-/**
- * Resolves the display name of a focus mode, localizing the three built-in system modes.
- * Mirrors `getLocalizedFocusModeName` in `utils/ui/l10n_utils.dart` /
- * `FocusMode.getLocalizedName`.
- */
+
 @Composable
 fun localizedFocusModeName(mode: FocusModeEntity): String {
     if (!mode.isSystem) return mode.name

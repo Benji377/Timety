@@ -34,16 +34,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-/**
- * Task statistics content. Mirrors `screens/task/task_stats_screen.dart`.
- *
- * NOTE: the Flutter screen has no AppBar of its own — it is embedded as one tab of a
- * `TabBarView` inside `statistics_screen.dart`. This composable mirrors that: it renders
- * only the body content (week navigator + charts), no Scaffold/TopAppBar/back button.
- * It currently isn't wired into any navigation graph (MainScreen doesn't reference it);
- * the parent should either embed it as tab content in `StatisticsScreen` (mirroring
- * Flutter) or wrap it in a Scaffold if it needs to be a standalone destination.
- */
+
 @Composable
 fun TaskStatsScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)

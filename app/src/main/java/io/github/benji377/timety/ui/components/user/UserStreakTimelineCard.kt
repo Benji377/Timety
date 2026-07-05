@@ -52,11 +52,7 @@ import java.time.LocalDate
 import java.util.Locale
 import java.time.format.TextStyle as JavaTextStyle
 
-/**
- * 7-day streak timeline: current-streak status message, a horizontally scrollable
- * strip of day tiles (task/habit/focus dots, highlighted when part of the ongoing
- * streak), and a legend. Mirrors `widgets/user_profile/user_streak_timeline_card.dart`.
- */
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun UserStreakTimelineCard(
@@ -197,7 +193,7 @@ private data class StreakDayInfo(
     val hasHabit: Boolean,
 )
 
-/** Mirrors `_UserStreakTimelineCardState._buildCurrentStreakDayKeys`. */
+
 private fun buildCurrentStreakDayKeys(dates: List<LocalDate>): Set<String> {
     val dayKeys = dates.map { AppDateUtils.dayKey(it) }.toSet()
     if (dayKeys.isEmpty()) return emptySet()
@@ -217,7 +213,7 @@ private fun buildCurrentStreakDayKeys(dates: List<LocalDate>): Set<String> {
     return streakKeys
 }
 
-/** Mirrors `_UserStreakTimelineCardState._streakStatusText`. */
+
 @Composable
 private fun streakStatusText(activityDates: List<LocalDate>, currentStreak: Int): String {
     if (activityDates.isEmpty()) return stringResource(R.string.streakStatusNone)

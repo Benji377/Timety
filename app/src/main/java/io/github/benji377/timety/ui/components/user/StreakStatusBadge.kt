@@ -28,15 +28,7 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import kotlin.math.PI
 import kotlin.math.sin
 
-/**
- * Animated flame badge shown next to the user's name to indicate whether today's
- * streak is active. Mirrors `widgets/user_profile/streak_status_badge.dart`.
- *
- * The Flutter version drives the animation with an [AnimationController] repeating
- * (reverse: true) over 2s and reads `_controller.value` as `t` inside `sin(t * pi * 2)` /
- * `sin(t * pi * 4)` formulas - since those are already periodic, a plain looping 0..1
- * ramp (rather than a ping-pong) produces the same continuous flicker/rise motion.
- */
+
 @Composable
 fun StreakStatusBadge(
     isActive: Boolean,

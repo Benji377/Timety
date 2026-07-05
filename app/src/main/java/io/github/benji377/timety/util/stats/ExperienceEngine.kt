@@ -15,24 +15,24 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import kotlin.math.floor
 import kotlin.math.sqrt
 
-/** Engine for calculating user experience points (XP), levels, and titles. Mirrors xp_calculator.dart. */
+
 object ExperienceEngine {
     const val xpPerTask = 15
     const val xpPerHabit = 10
     const val xpPerFocusMin = 1
 
-    /** Calculates the user level based on total XP. */
+
     fun calculateLevel(totalXp: Int): Int {
         return floor(sqrt(totalXp / 100.0)).toInt() + 1
     }
 
-    /** Calculates the required XP to reach a specific level. */
+
     fun getXpForLevel(level: Int): Int {
         val base = (level - 1)
         return 100 * base * base
     }
 
-    /** Generates a descriptive title based on the user level. */
+
     fun getTitle(level: Int): String {
         return when {
             level < 5 -> "Novice Planner"
@@ -45,7 +45,7 @@ object ExperienceEngine {
         }
     }
 
-    /** Returns the corresponding icon for the user level. */
+
     fun getTitleIcon(level: Int): ImageVector {
         return when {
             level < 5 -> Icons.Outlined.EmojiEvents
@@ -58,7 +58,7 @@ object ExperienceEngine {
         }
     }
 
-    /** Returns the corresponding color theme for the user level. */
+
     fun getTitleColor(level: Int): Color {
         return when {
             level < 5 -> WarningColor
@@ -71,7 +71,7 @@ object ExperienceEngine {
         }
     }
 
-    /** Returns progress to the NEXT level as a fraction (0.0 to 1.0). */
+
     fun getLevelProgress(totalXp: Int): Double {
         val currentLevel = calculateLevel(totalXp)
         val currentTierXp = getXpForLevel(currentLevel)

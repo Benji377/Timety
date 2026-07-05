@@ -9,10 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
-/**
- * A collapsible titled section. Mirrors ExpansionSection in expansion_section.dart.
- * Callers should guard emptiness (Flutter hides the section when it has no children).
- */
+
 @Composable
 fun ExpansionSection(
     title: String,

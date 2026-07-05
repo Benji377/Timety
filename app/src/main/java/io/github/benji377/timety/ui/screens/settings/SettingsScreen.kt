@@ -2,8 +2,6 @@ package io.github.benji377.timety.ui.screens.settings
 
 import android.content.Intent
 import android.net.Uri
-import androidx.core.net.toUri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -23,8 +21,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cloud
@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LinearScale
 import androidx.compose.material.icons.filled.NightlightRound
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TaskAlt
@@ -43,7 +42,6 @@ import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Forum
-import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Timer
@@ -59,7 +57,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -86,6 +83,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
@@ -106,21 +104,9 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * Application settings for theme, notifications, API, and backups. Mirrors `screens/settings_screen.dart`.
- *
- * Deviations from Flutter, noted per section below where relevant:
- * - Flutter renders Theme/Language/Date-Format as an inline [DropdownButton] embedded in the row's
- *   trailing slot. Material3 `ListItem` has no equivalent inline dropdown affordance, so (matching
- *   this codebase's existing convention for such rows) the row shows the current selection as
- *   trailing text and opens a simple option-list dialog on tap. Behavior/labels/values match Flutter.
- * - Focus Tags / Task Categories / Export / Import have no wired destination yet in the Kotlin nav
- *   graph (no route registered in `MainScreen`, no `BackupService` port); these show a short
- *   "coming soon" toast on tap, same placeholder approach as before this port.
- * - Location API editing uses the shared [io.github.benji377.timety.ui.components.common.TextInputDialog]
- *   without Flutter's live endpoint validation (no validator exists yet on `SettingsRepository`).
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -287,7 +273,10 @@ fun SettingsScreen(
                                 strokeWidth = 2.dp
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.settingsLabelValidating), style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                stringResource(R.string.settingsLabelValidating),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
@@ -344,7 +333,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = {
                     Text(
                         stringResource(R.string.settingsTitle),
@@ -369,7 +358,7 @@ fun SettingsScreen(
             item { SettingsHeader(stringResource(R.string.settingsSectionAppearance)) }
             item {
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTheme)) },
                     leadingContent = { Icon(Icons.Outlined.DarkMode, null) },
                     trailingContent = {
@@ -389,7 +378,7 @@ fun SettingsScreen(
             item { SettingsHeader(stringResource(R.string.settingsSectionLocaleFormat)) }
             item {
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelLanguage)) },
                     leadingContent = { Icon(Icons.Filled.Language, null, tint = TaskColor) },
                     trailingContent = {
@@ -402,7 +391,7 @@ fun SettingsScreen(
                     modifier = Modifier.clickable { showLanguageDialog = true }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTimeFormat)) },
                     leadingContent = { Icon(Icons.Filled.AccessTime, null, tint = FocusColor) },
                     trailingContent = {
@@ -417,7 +406,7 @@ fun SettingsScreen(
                     }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelDateFormat)) },
                     leadingContent = { Icon(Icons.Filled.CalendarToday, null, tint = HabitColor) },
                     trailingContent = {
@@ -437,7 +426,7 @@ fun SettingsScreen(
             item { SettingsHeader(stringResource(R.string.settingsSectionFocusProductivity)) }
             item {
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusGoal)) },
                     supportingContent = {
                         Text(
@@ -460,7 +449,7 @@ fun SettingsScreen(
                     }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusAutocomplete)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusAutocompleteSubtitle)) },
                     leadingContent = { Icon(Icons.Filled.TaskAlt, null, tint = TaskColor) },
@@ -476,7 +465,7 @@ fun SettingsScreen(
                     }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusStopwatch)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusStopwatchSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Timer, null, tint = WarningAccent) },
@@ -490,7 +479,7 @@ fun SettingsScreen(
                     }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusNodeTime)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFocusNodeTimeSubtitle)) },
                     leadingContent = { Icon(Icons.Filled.LinearScale, null, tint = TaskColor) },
@@ -504,7 +493,7 @@ fun SettingsScreen(
                     }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelUpcomingTask)) },
                     supportingContent = {
                         Text(
@@ -532,7 +521,7 @@ fun SettingsScreen(
             item { SettingsHeader(stringResource(R.string.settingsSectionOrganization)) }
             item {
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelTags)) },
                     supportingContent = {
                         Text(
@@ -547,7 +536,7 @@ fun SettingsScreen(
                     modifier = Modifier.clickable { onNavigateToTags() }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelCategories)) },
                     supportingContent = {
                         Text(
@@ -557,7 +546,13 @@ fun SettingsScreen(
                             )
                         )
                     },
-                    leadingContent = { Icon(Icons.AutoMirrored.Outlined.Label, null, tint = TaskColor) },
+                    leadingContent = {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.Label,
+                            null,
+                            tint = TaskColor
+                        )
+                    },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable { onNavigateToCategories() }
                 )
@@ -569,7 +564,7 @@ fun SettingsScreen(
             item { SettingsHeader(stringResource(R.string.settingsSectionApi)) }
             item {
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelLocationApi)) },
                     supportingContent = {
                         Text(
@@ -593,7 +588,7 @@ fun SettingsScreen(
             item { SettingsHeader(stringResource(R.string.settingsSectionNotifications)) }
             item {
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelDailyMotivation)) },
                     supportingContent = {
                         Text(
@@ -614,7 +609,7 @@ fun SettingsScreen(
                     }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelEodCheckup)) },
                     supportingContent = {
                         Text(
@@ -648,14 +643,14 @@ fun SettingsScreen(
             item { SettingsHeader(stringResource(R.string.settingsSectionDataBackup)) }
             item {
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelExportData)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelExportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.UploadFile, null, tint = TaskColor) },
                     modifier = Modifier.clickable { showExportOptions = true }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelImportData)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelImportDataSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Download, null, tint = FocusColor) },
@@ -671,7 +666,7 @@ fun SettingsScreen(
             item { SettingsHeader(stringResource(R.string.settingsSectionSupport)) }
             item {
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelCommunity)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelCommunitySubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.Forum, null, tint = FocusColor) },
@@ -693,7 +688,7 @@ fun SettingsScreen(
                     }
                 )
                 ListItem(
-                    colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFeedback)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelFeedbackSubtitle)) },
                     leadingContent = { Icon(Icons.Outlined.BugReport, null, tint = HabitColor) },
@@ -724,7 +719,7 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -858,7 +853,7 @@ fun SettingsScreen(
             text = {
                 Column {
                     ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         headlineContent = { Text(stringResource(R.string.backupActionSaveDevice)) },
                         supportingContent = { Text(stringResource(R.string.backupActionSaveDeviceSubtitle)) },
                         leadingContent = { Icon(Icons.Outlined.Download, null, tint = TaskColor) },
@@ -868,26 +863,37 @@ fun SettingsScreen(
                         }
                     )
                     ListItem(
-                        colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         headlineContent = { Text(stringResource(R.string.backupActionShareCloud)) },
                         supportingContent = { Text(stringResource(R.string.backupActionShareCloudSubtitle)) },
-                        leadingContent = { Icon(Icons.Outlined.UploadFile, null, tint = FocusColor) },
+                        leadingContent = {
+                            Icon(
+                                Icons.Outlined.UploadFile,
+                                null,
+                                tint = FocusColor
+                            )
+                        },
                         modifier = Modifier.clickable {
                             showExportOptions = false
                             scope.launch {
                                 backupService.exportToShareUri().fold(
                                     onSuccess = { uri ->
-                                        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                            type = "application/json"
-                                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
-                                            putExtra(
-                                                android.content.Intent.EXTRA_SUBJECT,
-                                                context.getString(R.string.backupExportSubject)
-                                            )
-                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
+                                        val intent =
+                                            Intent(Intent.ACTION_SEND)
+                                                .apply {
+                                                    type = "application/json"
+                                                    putExtra(
+                                                        Intent.EXTRA_STREAM,
+                                                        uri
+                                                    )
+                                                    putExtra(
+                                                        Intent.EXTRA_SUBJECT,
+                                                        context.getString(R.string.backupExportSubject)
+                                                    )
+                                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                }
                                         context.startActivity(
-                                            android.content.Intent.createChooser(
+                                            Intent.createChooser(
                                                 intent,
                                                 context.getString(R.string.backupExportSubject)
                                             )
@@ -895,7 +901,10 @@ fun SettingsScreen(
                                     },
                                     onFailure = { e ->
                                         snackbarHostState.showSnackbar(
-                                            context.getString(R.string.backupShareFailure, e.message ?: "")
+                                            context.getString(
+                                                R.string.backupShareFailure,
+                                                e.message ?: ""
+                                            )
                                         )
                                     }
                                 )
@@ -940,7 +949,7 @@ private fun SettingsHeader(title: String) {
     )
 }
 
-/** Simple option-list picker used in place of Flutter's inline [DropdownButton]s (see file header note). */
+
 @Composable
 private fun OptionsDialog(
     visible: Boolean,
@@ -1065,11 +1074,7 @@ private fun parseHHmm(value: String): Pair<Int, Int> {
     }
 }
 
-/**
- * NOTE (date formatting): mirrors `SettingsProvider.getFormattedTimeOfDay`, which honors the
- * 24h flag + device locale. No centralized Kotlin equivalent exists yet, so this formats the
- * stored "HH:mm" string directly via [DateTimeFormatter] with the device locale.
- */
+
 private fun formatTimeOfDay(hhmm: String, use24Hour: Boolean): String {
     val (h, m) = parseHHmm(hhmm)
     val time = LocalTime.of(h, m)

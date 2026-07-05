@@ -18,15 +18,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-/**
- * NOTE (viewmodel logic added for the Habits port): [toggleCompletionToday],
- * [markCompletionOnDate] and [unmarkCompletionOnDate] now also award/revert
- * [ExperienceEngine.xpPerHabit] XP via [userRepository], mirroring
- * `HabitProvider.toggleCompletionToday`/`markCompletionOnDate`/`unmarkCompletionOnDate`
- * (which take an optional `UserProvider` to add/subtract XP). The constructor gained a
- * [UserRepository] dependency for this - `AppViewModelProvider` was updated accordingly
- * (same pattern already used by `TaskViewModel`).
- */
+
 class HabitViewModel(
     private val application: android.app.Application,
     private val habitRepository: HabitRepository,
@@ -107,7 +99,7 @@ class HabitViewModel(
         }
     }
 
-    /** Toggles today's completion for [habitId] and awards/revokes XP. Mirrors `HabitProvider.toggleCompletionToday`. */
+
     fun toggleCompletionToday(habitId: String) {
         viewModelScope.launch {
             val habitWithCompletions =
@@ -130,7 +122,7 @@ class HabitViewModel(
         }
     }
 
-    /** Marks [habitId] completed on [date] (a specific point in time), awarding XP. Mirrors `HabitProvider.markCompletionOnDate`. */
+
     fun markCompletionOnDate(habitId: String, date: Instant) {
         viewModelScope.launch {
             val habitWithCompletions =
@@ -149,7 +141,7 @@ class HabitViewModel(
         }
     }
 
-    /** Unmarks [habitId]'s completion on [date], revoking XP. Mirrors `HabitProvider.unmarkCompletionOnDate`. */
+
     fun unmarkCompletionOnDate(habitId: String, date: LocalDate) {
         viewModelScope.launch {
             val habitWithCompletions =

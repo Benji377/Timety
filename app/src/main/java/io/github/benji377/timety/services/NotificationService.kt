@@ -20,26 +20,13 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-/**
- * Schedules and shows the app's non-focus-timer notifications (task/habit reminders, daily
- * motivation, end-of-day checkup). Mirrors `services/notification_service.dart`, swapping
- * `flutter_local_notifications`' `zonedSchedule` for a plain `AlarmManager` exact alarm +
- * [ReminderReceiver] that renders the notification when the alarm fires (and re-arms itself for
- * repeating reminders, since `AlarmManager` - unlike the Dart plugin's OS-level scheduler on
- * Android - does not support `matchDateTimeComponents`-style implicit recurrence).
- *
- * The focus-timer's own persistent notification is intentionally NOT handled here: it has a
- * completely different lifecycle (bound to the [FocusTimerService] foreground service, updated
- * from live [FocusTimerManager] state rather than a one-shot alarm) and is built directly by
- * [FocusTimerService] instead - see that class's doc. [ensureChannels] still creates its channel
- * so channel setup has one call site.
- */
+
 class NotificationService(private val context: Context) {
 
     private val notificationManager = NotificationManagerCompat.from(context)
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    /** Creates all notification channels used by the app. Safe to call repeatedly (idempotent). */
+
     fun ensureChannels() {
         val systemManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -78,7 +65,7 @@ class NotificationService(private val context: Context) {
 
     // --- TASKS ---
 
-    /** One-shot reminder for a specific task. Mirrors `scheduleTaskReminder`. */
+
     fun scheduleTaskReminder(
         notificationId: Int,
         title: String,
@@ -98,11 +85,7 @@ class NotificationService(private val context: Context) {
 
     // --- HABITS ---
 
-    /**
-     * Schedules a habit reminder at [hour]:[minute]. If [targetWeekdays] is null/empty, fires
-     * daily; otherwise fires once per listed ISO weekday (1=Mon..7=Sun). Mirrors
-     * `scheduleHabitReminder`.
-     */
+
     fun scheduleHabitReminder(
         habitId: String,
         title: String,
@@ -133,7 +116,7 @@ class NotificationService(private val context: Context) {
         }
     }
 
-    /** Cancels every reminder (daily + all 7 weekday variants) for [habitId]. Mirrors `cancelHabitReminder`. */
+
     fun cancelHabitReminder(habitId: String) {
         cancelAlarmAndNotification(habitReminderId(habitId, null))
         for (weekday in 1..7) cancelAlarmAndNotification(habitReminderId(habitId, weekday))
@@ -141,8 +124,7 @@ class NotificationService(private val context: Context) {
 
     // --- DAILY MOTIVATION ---
 
-    /** Mirrors `scheduleDailyMotivation` (quote selection is the caller's responsibility here,
-     * since it lives behind localized strings the caller already resolved). */
+
     fun scheduleDailyMotivation(hour: Int, minute: Int, title: String, body: String) {
         val triggerAt = nextReminderMillis(hour, minute, null)
         val intent = reminderIntent(
@@ -159,7 +141,7 @@ class NotificationService(private val context: Context) {
 
     // --- END OF DAY CHECKUP ---
 
-    /** Mirrors `scheduleEndOfDayCheckup`. */
+
     fun scheduleEndOfDayCheckup(hour: Int, minute: Int, title: String, body: String) {
         val triggerAt = nextReminderMillis(hour, minute, null)
         val intent = reminderIntent(
@@ -176,7 +158,7 @@ class NotificationService(private val context: Context) {
 
     // --- CANCEL ---
 
-    /** Mirrors `cancelNotification`. */
+
     fun cancelNotification(notificationId: Int) = cancelAlarmAndNotification(notificationId)
 
     // --- Called by ReminderReceiver when an alarm fires ---
@@ -209,7 +191,7 @@ class NotificationService(private val context: Context) {
         }
     }
 
-    /** Brand accent per channel so reminders are visually attributable at a glance. */
+
     private fun channelAccentColor(channelId: String): Int = when (channelId) {
         CHANNEL_TASKS -> TaskColor
         CHANNEL_HABITS -> HabitColor
@@ -274,13 +256,7 @@ class NotificationService(private val context: Context) {
         putExtra(EXTRA_MINUTE, minute)
     }
 
-    /**
-     * Next epoch-millis occurrence of [hour]:[minute], either daily ([weekday] null) or on the
-     * given ISO [weekday] (1=Mon..7=Sun). Mirrors `NotificationService._nextReminderDate`. When
-     * [forceRollover] is true (used to re-arm a just-fired repeating reminder) the computed time
-     * is always advanced past "now" by a full cycle, matching the alarm having just fired at
-     * (approximately) that exact instant.
-     */
+
     private fun nextReminderMillis(
         hour: Int,
         minute: Int,
@@ -333,7 +309,7 @@ class NotificationService(private val context: Context) {
         internal const val EXTRA_MINUTE = "minute"
         internal const val EXTRA_REPEAT = "repeat"
 
-        /** Predictable per-habit alarm/notification id. Mirrors `_habitReminderId`. */
+
         fun habitReminderId(habitId: String, weekday: Int?): Int {
             val suffix = if (weekday == null) "daily" else "weekday_$weekday"
             return "habit_time_${habitId}_$suffix".hashCode()

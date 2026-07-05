@@ -61,8 +61,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.stats.StatCard
@@ -84,10 +84,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 import java.time.format.TextStyle as JavaTextStyle
 
-/**
- * Tabbed statistics container: Overview / Tasks / Focus / Habits. Mirrors
- * `screens/statistics_screen.dart`.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
@@ -112,11 +109,11 @@ fun StatisticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = { Text(stringResource(R.string.statsTitle), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     androidx.compose.material3.IconButton(onClick = onNavigateBack) {
-                        androidx.compose.material3.Icon(
+                        Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.commonBack)
                         )
@@ -186,11 +183,7 @@ fun StatisticsScreen(
     }
 }
 
-/**
- * Overview tab: today's KPIs (tasks done, focus time, focus goal %) plus a 7-day
- * "productivity synergy" line chart comparing daily focus minutes vs. tasks
- * completed. Mirrors `screens/overview_stats_screen.dart`.
- */
+
 @Composable
 private fun OverviewStatsScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -334,12 +327,7 @@ private fun LegendDot(color: Color) {
     )
 }
 
-/**
- * 7-day dual-line chart: focus minutes vs. tasks completed, both normalized to a
- * relative 0-10 scale so they're comparable on one axis (mirrors fl_chart's
- * `LineChart` in `_buildSynergyChart`). Supports press/drag to reveal a tooltip
- * with the real (denormalized) values for the touched day.
- */
+
 @Composable
 private fun SynergyChart(
     last7Days: List<LocalDate>,

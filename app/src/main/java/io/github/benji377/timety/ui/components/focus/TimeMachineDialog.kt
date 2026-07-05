@@ -12,9 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.AlertDialog
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -23,8 +21,8 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedCard
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -54,17 +52,10 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import io.github.benji377.timety.ui.components.common.TimetyButton as Button
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * "Log a past session" dialog: pick a mode, an optional tag, and a start/end time, mirroring
- * `AppDialogs.showTimeMachineDialog` in `widgets/common/app_dialogs.dart`. This is focus-specific
- * (unlike the shared `ConfirmationDialog`/`TextInputDialog`), so it lives in this feature's
- * component package rather than the shared `AppDialogs`.
- *
- * Date/time formatting note: Flutter delegates to `SettingsProvider.getFormattedDateTime`. No
- * centralized Kotlin equivalent exists yet, so this uses `DateTimeFormatter` with the device
- * locale as a reasonable stand-in - the parent should centralize this later.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimeMachineDialog(

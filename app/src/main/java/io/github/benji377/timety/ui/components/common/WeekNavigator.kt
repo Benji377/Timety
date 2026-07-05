@@ -21,14 +21,9 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
 
-/**
- * Week navigation header. Mirrors `widgets/common/week_navigator.dart`: shows the
- * current week range and lets the caller shift by [onShiftWeek] days (-7/+7).
- */
+
 @Composable
 fun WeekNavigator(
     focusedDate: LocalDate,
@@ -43,7 +38,13 @@ fun WeekNavigator(
     val isCurrentWeek = AppDateUtils.isWithinInclusive(today, startOfWeek, endOfWeek)
 
     val dfs = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
-    val weekRangeLabel = "${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatShortDate(startOfWeek)} - ${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(endOfWeek, dfs.dateFormatCode)}"
+    val weekRangeLabel =
+        "${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatShortDate(startOfWeek)} - ${
+            io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(
+                endOfWeek,
+                dfs.dateFormatCode
+            )
+        }"
 
     Row(
         modifier = modifier.fillMaxWidth(),

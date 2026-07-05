@@ -24,9 +24,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.outlined.LocalOffer
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -71,15 +71,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-/**
- * Focus statistics content: week navigator, tag filter, 24h "clock" of the selected day's
- * sessions, session list, distraction feed, weekly volume bar chart, and target-type breakdown.
- * Mirrors `screens/focus/focus_stats_screen.dart`.
- *
- * Not wired into `MainScreen`'s nav graph (signature is flexible per porting instructions) - it
- * owns no Scaffold/TopAppBar of its own, matching Flutter's screen (a bare `Scaffold(body: ...)`
- * with no app bar), so the parent can embed it wherever it decides to surface focus stats.
- */
+
 @Composable
 fun FocusStatsScreen(
     focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -148,9 +140,11 @@ fun FocusStatsScreen(
         }
     }
 
-    LazyColumn(modifier = Modifier
-        .fillMaxSize()
-        .padding(AppTheme.spaceLarge)) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(AppTheme.spaceLarge)
+    ) {
         item {
             WeekNavigator(
                 focusedDate = focusedWeek,
@@ -255,9 +249,11 @@ fun FocusStatsScreen(
                 stringResource(R.string.focusStatsSectionVolumeSubtitle),
             )
             Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-            Box(modifier = Modifier
-                .height(200.dp)
-                .fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .height(200.dp)
+                    .fillMaxWidth()
+            ) {
                 VolumeBarChart(filteredSessions, startOfWeek, isCurrentRealWeek, zone)
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
@@ -362,17 +358,17 @@ private fun DayPillSelector(
                     .background(if (isSelected) FocusColor else Color.Transparent)
                     .then(
                         Modifier.background(
-                            color = androidx.compose.ui.graphics.Color.Transparent,
+                            color = Color.Transparent,
                         ),
                     )
                     .padding(horizontal = AppTheme.spaceMedium, vertical = AppTheme.spaceSmall)
                     .then(Modifier)
                     .clip(RoundedCornerShape(16.dp))
                     .then(
-                        androidx.compose.ui.Modifier.background(if (isSelected) FocusColor else Color.Transparent)
+                        Modifier.background(if (isSelected) FocusColor else Color.Transparent)
                     )
                     .then(
-                        androidx.compose.ui.Modifier.clickable(
+                        Modifier.clickable(
                             onClick = { onSelect(day) },
                             indication = null,
                             interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() })
@@ -686,9 +682,11 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             if (totalMinutes == 0) {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Gray.copy(alpha = 0.15f)))
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Gray.copy(alpha = 0.15f))
+                )
             } else {
                 stats.filter { it.minutes > 0 }.forEach { stat ->
                     Box(
@@ -708,10 +706,12 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                     .padding(bottom = AppTheme.spaceMedium),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier
-                    .size(14.dp)
-                    .clip(CircleShape)
-                    .background(stat.color))
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .clip(CircleShape)
+                        .background(stat.color)
+                )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     stat.label,

@@ -77,6 +77,7 @@ class SettingsViewModel(
 
     fun setThemePref(theme: io.github.benji377.timety.data.repository.ThemeMode) =
         viewModelScope.launch { repository.saveThemePref(theme) }
+
     fun setUse24HourFormat(use24Hour: Boolean) = viewModelScope.launch {
         repository.saveUse24HourFormat(use24Hour)
         resyncNotifications()
@@ -114,7 +115,7 @@ class SettingsViewModel(
         resyncNotifications()
     }
 
-    /** Re-schedules everything so pending notification text picks up the new language. */
+
     private suspend fun resyncNotifications() {
         val scheduler = io.github.benji377.timety.services.ReminderScheduler.create(application)
 

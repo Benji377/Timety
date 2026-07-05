@@ -2,9 +2,7 @@ package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.ButtonDefaults
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -16,11 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.common.TimetyButton as Button
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * Standard confirmation dialog (Cancel / Confirm). Mirrors AppDialogs.showConfirmation.
- * Rendered when [visible] is true; caller controls visibility.
- */
+
 @Composable
 fun ConfirmationDialog(
     visible: Boolean,
@@ -54,9 +51,7 @@ fun ConfirmationDialog(
     )
 }
 
-/**
- * Dialog with a single text field (Cancel / Save). Mirrors AppDialogs.showTextInputDialog.
- */
+
 @Composable
 fun TextInputDialog(
     visible: Boolean,

@@ -73,15 +73,7 @@ import io.github.benji377.timety.util.stats.StreakCalculator
 import java.time.LocalDate
 import java.time.ZoneId
 
-/**
- * Mirrors `HabitStatsScreen` in `screens/habit/habit_stats_screen.dart`: weekly KPIs,
- * a per-weekday completion bar chart, a time-of-day breakdown, and a per-habit streak
- * leaderboard.
- *
- * NOTE: this screen is not currently wired into `MainScreen`'s navigation graph (same as
- * before this port) - the parent should add a route/entry point if/when needed. The
- * `onBack` parameter is preserved from the previous signature for that future wiring.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitStatsScreen(

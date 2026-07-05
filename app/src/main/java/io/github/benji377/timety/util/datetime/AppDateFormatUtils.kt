@@ -9,20 +9,10 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 
-/**
- * Utility functions for consistent date and time formatting. Mirrors date_format_utils.dart and the
- * old Flutter `SettingsProvider.getFormatted*` helpers so the user-configurable date-format code and
- * 24-hour toggle are honored everywhere (not just in Settings).
- *
- * [dateFormatCode] matches the values offered in Settings: "System" (locale default) or a concrete
- * pattern such as "dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy".
- */
+
 object AppDateFormatUtils {
 
-    /**
-     * Formats a duration in MM:SS format. Useful for timer values.
-     * Example: 125 seconds -> "02:05".
-     */
+
     fun formatDuration(totalSeconds: Int): String {
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
@@ -39,7 +29,7 @@ object AppDateFormatUtils {
     private fun timeFormatter(use24Hour: Boolean, locale: Locale): DateTimeFormatter =
         DateTimeFormatter.ofPattern(if (use24Hour) "HH:mm" else "h:mm a", locale)
 
-    /** Mirrors getFormattedDate: honors the user's date-format code. */
+
     fun formatDate(
         date: LocalDate,
         dateFormatCode: String,
@@ -53,7 +43,7 @@ object AppDateFormatUtils {
         locale: Locale = Locale.getDefault()
     ): String = formatDate(instant.atZone(zone).toLocalDate(), dateFormatCode, locale)
 
-    /** Mirrors getFormattedTime: honors the user's 24-hour toggle. */
+
     fun formatTime(
         time: LocalTime,
         use24Hour: Boolean,
@@ -67,7 +57,7 @@ object AppDateFormatUtils {
         locale: Locale = Locale.getDefault()
     ): String = formatTime(instant.atZone(zone).toLocalTime(), use24Hour, locale)
 
-    /** Mirrors getFormattedTimeWithSeconds: honors the 24-hour toggle, keeps seconds precision. */
+
     fun formatTimeWithSeconds(
         instant: Instant,
         use24Hour: Boolean,
@@ -77,7 +67,7 @@ object AppDateFormatUtils {
         DateTimeFormatter.ofPattern(if (use24Hour) "HH:mm:ss" else "h:mm:ss a", locale)
     )
 
-    /** Mirrors getFormattedTimeOfDay for an hour/minute pair. */
+
     fun formatTimeOfDay(
         hour: Int,
         minute: Int,
@@ -85,7 +75,7 @@ object AppDateFormatUtils {
         locale: Locale = Locale.getDefault()
     ): String = formatTime(LocalTime.of(hour, minute), use24Hour, locale)
 
-    /** Mirrors getFormattedDateTime: "<date> <time>". */
+
     fun formatDateTime(
         instant: Instant,
         dateFormatCode: String,
@@ -98,19 +88,19 @@ object AppDateFormatUtils {
                 ldt.toLocalTime().format(timeFormatter(use24Hour, locale))
     }
 
-    /** Mirrors getFormattedMonthYear (e.g. "July 2026"). */
+
     fun formatMonthYear(
         date: LocalDate,
         locale: Locale = Locale.getDefault()
     ): String = date.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale))
 
-    /** Mirrors getFormattedShortDate (e.g. "Jul 4"). */
+
     fun formatShortDate(
         date: LocalDate,
         locale: Locale = Locale.getDefault()
     ): String = date.format(DateTimeFormatter.ofPattern("MMM d", locale))
 
-    /** Mirrors getFormattedWeekdayDay (e.g. "Sat 4"). */
+
     fun formatWeekdayDay(
         date: LocalDate,
         locale: Locale = Locale.getDefault()

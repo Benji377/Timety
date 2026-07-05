@@ -29,20 +29,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
 
-/**
- * Full user-data export/import as a single JSON file, written/read through a caller-supplied SAF
- * [Uri] (picking/sharing the file is a UI concern, out of scope here). Mirrors
- * `services/backup_service.dart`'s payload shape (`payloadType`/`schemaVersion`/`appVersion`/
- * `buildNumber`/`exportedAt` envelope wrapping `preferences`/`userProfile`/`tasks`/`habits`/
- * `focus`) as closely as the Room schema allows.
- *
- * Exports use this app's own conventions (Kotlin enum names like `"VERY_HIGH"`, DataStore
- * preference keys, ISO instants). Imports additionally accept Flutter-era exports: enum names in
- * Dart camelCase are normalized (see [enumOrDefault]) and zone-less `DateTime.toIso8601String()`
- * timestamps are parsed in the device zone (see [parseInstantFlexible]). Flutter's
- * SharedPreferences keys are NOT mapped, so imported Flutter backups restore data but reset
- * app settings to defaults.
- */
+
 class BackupService(
     private val context: Context,
     private val database: TimetyDatabase,
@@ -53,10 +40,10 @@ class BackupService(
     private val focusDao get() = database.focusDao()
     private val userDao get() = database.userDao()
 
-    /** A timestamped default export file name, mirroring `_buildTimestampedFileName`. */
+
     fun suggestedFileName(): String = "Timety_Export_${System.currentTimeMillis()}.json"
 
-    /** Builds the export payload and writes it to [uri] (expects a writable SAF document Uri). */
+
     suspend fun exportToUri(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val json = buildPayload().toString(2)
@@ -66,11 +53,7 @@ class BackupService(
         }
     }
 
-    /**
-     * Builds the export payload, writes it into the FileProvider-exposed cache directory and
-     * returns a shareable content Uri. Backs the "Share / Upload to Cloud" export option
-     * (mirrors `backup_service.dart`'s share path).
-     */
+
     suspend fun exportToShareUri(): Result<Uri> = withContext(Dispatchers.IO) {
         runCatching {
             val json = buildPayload().toString(2)
@@ -85,7 +68,7 @@ class BackupService(
         }
     }
 
-    /** Reads [uri] and OVERWRITES all current user data and settings with its contents, atomically. */
+
     suspend fun importFromUri(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val text = context.contentResolver.openInputStream(uri)?.use { input ->
@@ -400,8 +383,7 @@ class BackupService(
         }
     }
 
-    /** Order matters: [FocusSessionEntity.modeId] is a RESTRICT foreign key, so sessions must be
-     * cleared before modes, and modes must be (re)inserted before sessions. */
+
     private fun restoreFocus(focusJson: JSONObject) {
         focusDao.clearAllSessions()
         focusDao.clearAllModes()
@@ -496,11 +478,7 @@ class BackupService(
         }
     }
 
-    /**
-     * Parses both this app's own exports (ISO instants ending in `Z`) and Flutter exports, whose
-     * `DateTime.toIso8601String()` emits local wall-clock time with no zone suffix
-     * (e.g. `2024-05-01T12:30:00.000`); those are interpreted in the device's current zone.
-     */
+
     private fun parseInstantFlexible(raw: String): Instant? =
         runCatching { Instant.parse(raw) }.getOrNull()
             ?: runCatching { java.time.OffsetDateTime.parse(raw).toInstant() }.getOrNull()

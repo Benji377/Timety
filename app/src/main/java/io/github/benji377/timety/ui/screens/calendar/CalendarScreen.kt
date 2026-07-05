@@ -80,15 +80,7 @@ private val Grey300 = Color(0xFFE0E0E0)
 private val Grey400 = Color(0xFFBDBDBD)
 private val Grey600 = Color(0xFF757575)
 
-/**
- * Calendar view: a month grid with per-day activity dots plus an accordion breakdown
- * (habits/tasks/focus sessions) for the selected day. Mirrors `screens/calendar_screen.dart`.
- *
- * NOTE (navigation): Flutter's task/habit rows here navigate to their detail screens on tap.
- * This composable's signature is fixed to zero-arg `CalendarScreen()` (per porting contract), so
- * there is no navigation callback available; row taps only toggle completion, matching everything
- * except that final navigation hop.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
@@ -134,7 +126,7 @@ fun CalendarScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = { Text(stringResource(R.string.calendarTitle)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -248,7 +240,7 @@ fun CalendarScreen(
     }
 }
 
-/** True if [hwc]'s habit is scheduled to appear on [date] (ignoring completion state). Mirrors `HabitProvider.getHabitsForDay`. */
+
 private fun isHabitScheduledOn(hwc: HabitWithCompletions, date: LocalDate): Boolean {
     return when (hwc.habit.frequency) {
         HabitFrequency.DAILY -> true

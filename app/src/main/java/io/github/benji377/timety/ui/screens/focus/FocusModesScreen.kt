@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.screens.focus
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -10,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.foundation.border
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,10 +41,7 @@ import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-/**
- * "Manage Modes" screen: lists all focus modes (system + custom) as [FocusModeEditCard]s and
- * lets the user create a new custom mode. Mirrors `screens/focus/focus_modes_screen.dart`.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusModesScreen(
@@ -92,7 +89,12 @@ fun FocusModesScreen(
                         io.github.benji377.timety.ui.theme.AppTheme.brNeo
                     ),
                     shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
-                    elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                    elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
+                        0.dp,
+                        0.dp,
+                        0.dp,
+                        0.dp
+                    ),
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(newModeLabel) },
                     containerColor = io.github.benji377.timety.ui.theme.FocusColor,

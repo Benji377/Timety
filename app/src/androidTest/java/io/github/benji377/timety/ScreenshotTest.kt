@@ -43,19 +43,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-/**
- * Generates the store/README screenshots. Port of the Flutter driver test
- * (`timety_old_reference/screenshots/screenshot_test.dart`): seeds the same mock data
- * (same names, dates, priorities and focus history) and captures the same ten screens
- * under the same file names.
- *
- * How to execute:
- * 1. Start an emulator
- * 2. ./gradlew :app:connectedDebugAndroidTest \
- *      -Pandroid.testInstrumentationRunnerArguments.class=io.github.benji377.timety.ScreenshotTest
- * 3. Gradle pulls the PNGs into
- *    app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/<device>/
- */
+
 @RunWith(AndroidJUnit4::class)
 class ScreenshotTest {
 
@@ -157,7 +145,7 @@ class ScreenshotTest {
         container.focusRepository.clearAll()
     }
 
-    /** Mirrors `_seedMockData` from the Flutter screenshot test, value for value. */
+    
     private suspend fun seedMockData(container: AppContainer) {
         val zone = ZoneId.systemDefault()
         val dayStart = LocalDate.now().atStartOfDay(zone)

@@ -13,12 +13,9 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
-/**
- * General utility functions for the application. Mirrors `utils/common/app_utils.dart`.
- */
+
 object AppUtils {
-    /** Returns a short letter abbreviation for a given task [size]. Mirrors `getSizeEmoji` (despite
-     * its name, the Flutter implementation returns "S"/"M"/"L"/"XL" letters, not emoji). */
+
     fun getSizeEmoji(size: TaskSize): String {
         return when (size) {
             TaskSize.SMALL -> "S"
@@ -28,7 +25,7 @@ object AppUtils {
         }
     }
 
-    /** Returns the corresponding Icon for a given [priority]. Mirrors `getPriorityIcon`. */
+
     @Composable
     fun PriorityIcon(priority: Priority) {
         val (icon, color) = when (priority) {

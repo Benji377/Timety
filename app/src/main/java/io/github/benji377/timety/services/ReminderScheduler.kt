@@ -14,27 +14,14 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 
-/**
- * Central home for composing and (re)scheduling the app's task/habit/motivation reminders with
- * properly localized text. Mirrors the scheduling helpers of Flutter's `task_provider` /
- * `habit_provider` / `notification_service` (`_buildReminderBody`, `_syncTaskReminders`, ...),
- * which were previously re-implemented - inconsistently - in `TaskViewModel`, `HabitViewModel`,
- * `SettingsViewModel` and `AlarmReceiver`.
- *
- * Obtain instances via [create]: it wraps the context in the user's chosen in-app language so
- * notification text scheduled now still matches the app language (like Flutter's
- * `getL10n(settings: _settings)`).
- */
+
 class ReminderScheduler private constructor(private val context: Context) {
 
     private val notificationService = NotificationService(context)
 
     // --- TASKS ---
 
-    /**
-     * Cancels and re-arms every reminder for [task]. Mirrors `_syncTaskReminders`: one alarm per
-     * future explicit reminder, or a single due-date alarm when no explicit reminders exist.
-     */
+
     fun scheduleTaskReminders(task: TaskEntity) {
         cancelTaskReminders(task.id)
         if (task.isCompleted) return
@@ -70,9 +57,7 @@ class ReminderScheduler private constructor(private val context: Context) {
         for (i in 0 until TASK_ID_SLOTS) notificationService.cancelNotification(baseId + i)
     }
 
-    /**
-     * "In 2 hours remember to do X!" / "It is time to do X!" - port of `_buildReminderBody`.
-     */
+
     private fun buildReminderBody(
         task: TaskEntity,
         reminderTime: Instant,
@@ -106,11 +91,7 @@ class ReminderScheduler private constructor(private val context: Context) {
 
     // --- HABITS ---
 
-    /**
-     * Cancels and re-arms the daily/weekly reminder for [habit] at its target time (if any).
-     * Mirrors `habit_provider`'s scheduling: weekday restriction only applies to
-     * [HabitFrequency.WEEKLY_EXACT] habits.
-     */
+
     fun scheduleHabitReminder(habit: HabitEntity) {
         notificationService.cancelHabitReminder(habit.id)
         val totalMinutes = habit.targetTimeMinutes ?: return
@@ -133,7 +114,7 @@ class ReminderScheduler private constructor(private val context: Context) {
 
     // --- DAILY MOTIVATION / EVENING CHECKUP ---
 
-    /** [time] is the stored "HH:mm" preference string. */
+
     fun scheduleDailyMotivation(time: String) {
         val (hour, minute) = parseTime(time)
         val quotes = listOf(
@@ -149,7 +130,7 @@ class ReminderScheduler private constructor(private val context: Context) {
         )
     }
 
-    /** [time] is the stored "HH:mm" preference string. */
+
     fun scheduleEndOfDayCheckup(time: String) {
         val (hour, minute) = parseTime(time)
         notificationService.scheduleEndOfDayCheckup(
@@ -160,7 +141,7 @@ class ReminderScheduler private constructor(private val context: Context) {
         )
     }
 
-    /** Parses a stored "HH:mm" preference string; falls back to 00:00 if malformed. */
+
     private fun parseTime(raw: String): Pair<Int, Int> {
         val parts = raw.split(":")
         val hour = parts.getOrNull(0)?.toIntOrNull()?.coerceIn(0, 23) ?: 0
@@ -169,10 +150,10 @@ class ReminderScheduler private constructor(private val context: Context) {
     }
 
     companion object {
-        /** Notification-id slots reserved (and always cancelled) per task. */
+
         private const val TASK_ID_SLOTS = 11
 
-        /** Builds a scheduler whose strings resolve in the user's chosen in-app language. */
+
         suspend fun create(context: Context): ReminderScheduler {
             val appContext = context.applicationContext
             val code = SettingsRepository(appContext.dataStore).appLocaleCodeFlow.first()

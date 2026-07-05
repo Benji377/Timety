@@ -31,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -62,15 +61,7 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
-/**
- * A circular, draggable progress gauge used for the focus timer. Mirrors
- * `widgets/focus/interactive_gauge.dart` (drawing logic from `utils/painters/gauge_painter.dart`).
- *
- * NOTE: Flutter's `GaugePainter` casts a soft drop-shadow behind the inner disc via
- * `canvas.drawShadow`. Compose's `DrawScope` has no direct equivalent (no blur without a
- * `RenderEffect`, API 31+), so this approximates it with a translucent circle drawn slightly
- * larger than the disc - visually close but not pixel-identical.
- */
+
 @Composable
 fun InteractiveGauge(
     progress: Float,

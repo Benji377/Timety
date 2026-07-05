@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.screens.habits
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.foundation.border
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,10 +45,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/**
- * Displays a categorized list of all habits (Due Today, Upcoming, Done). Mirrors
- * `HabitListScreen` in `screens/habit/habit_list_screen.dart`.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListScreen(
@@ -63,7 +60,7 @@ fun HabitListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = { Text(stringResource(R.string.habitsListTitle)) })
         },
         floatingActionButton = {
@@ -71,11 +68,16 @@ fun HabitListScreen(
                 onClick = { onNavigateToHabitDetail(null) },
                 modifier = Modifier.border(
                     io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
-                    androidx.compose.material3.MaterialTheme.colorScheme.outline,
+                    MaterialTheme.colorScheme.outline,
                     io.github.benji377.timety.ui.theme.AppTheme.brNeo
                 ),
                 shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
-                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
+                    0.dp,
+                    0.dp,
+                    0.dp,
+                    0.dp
+                ),
                 containerColor = io.github.benji377.timety.ui.theme.HabitColor,
                 contentColor = androidx.compose.ui.graphics.Color.White
             ) {

@@ -25,24 +25,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-/**
- * Foreground service driving the persistent focus-timer notification. Mirrors the native Android
- * bridge in the Flutter reference (`android/.../MainActivity.kt`'s `showCustomNotification`/
- * `cancelCustomNotification`, invoked from `FocusProvider._updateNotification`): a
- * `DecoratedCustomViewStyle` notification with a live `Chronometer` while running, a static
- * "paused" readout otherwise, an accent color that flags paused/rest/active state, and a single
- * exact alarm (via [TimerSoundReceiver]) that fires the "ding" sound when the current phase's
- * absolute target time is reached.
- *
- * Two enhancements beyond the Flutter reference (intentionally kept, see report): the notification
- * exposes Pause/Resume + Stop actions (Flutter's is purely informational), and [TimerSoundReceiver]
- * also vibrates.
- */
+
 class FocusTimerService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val notificationManager by lazy { NotificationManagerCompat.from(this) }
-    private val alarmManager by lazy { getSystemService(Context.ALARM_SERVICE) as AlarmManager }
+    private val alarmManager by lazy { getSystemService(ALARM_SERVICE) as AlarmManager }
 
     override fun onCreate() {
         super.onCreate()
@@ -73,8 +61,7 @@ class FocusTimerService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val action = intent?.action
-        when (action) {
+        when (val action = intent?.action) {
             ACTION_START -> {
                 val state = FocusTimerManager.timerState.value
                 startForeground(NOTIFICATION_ID, buildNotification(state))
@@ -232,7 +219,11 @@ class FocusTimerService : Service() {
         val pendingStopIntent = PendingIntent.getService(
             this, 2, stopIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        builder.addAction(R.drawable.ic_action_stop, getString(R.string.focusActionStop), pendingStopIntent)
+        builder.addAction(
+            R.drawable.ic_action_stop,
+            getString(R.string.focusActionStop),
+            pendingStopIntent
+        )
 
         return builder.build()
     }
@@ -245,7 +236,7 @@ class FocusTimerService : Service() {
         const val ACTION_PAUSE = "ACTION_PAUSE"
         const val ACTION_STOP = "ACTION_STOP"
 
-        /** Stops the timer WITHOUT logging the session (the in-app "Reset" flow). */
+
         const val ACTION_DISCARD = "ACTION_DISCARD"
     }
 }

@@ -13,20 +13,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Instant
 
-/**
- * Snapshot of the running focus/rest phase. Mirrors the countdown-relevant subset of Flutter's
- * `FocusProvider` state (`_isRunning`, `_isPaused`, `_secondsRemainingInPhase`,
- * `_currentPhaseTotalSeconds`, `_activeMode!.name`, phase `type`).
- *
- * [isAwaitingContinue] mirrors `FocusProvider._awaitingPhaseContinue`: true once a phase counts
- * down to zero on its own (as opposed to an explicit stop), until the caller either starts the
- * next phase (via [FocusTimerManager.setMode] + [FocusTimerManager.startTimer]) or stops the
- * session (via [FocusTimerManager.stopTimer]). [FocusTimerService] uses it to keep the foreground
- * notification/service alive across the "ready to continue" gap instead of tearing down as soon
- * as the phase's countdown reaches zero - the actual advance-vs-stop decision still lives in
- * `FocusScreen`/`FocusViewModel` (phase count/index are UI-owned), this flag only prevents the
- * service from disappearing prematurely while that decision is pending.
- */
+
 data class TimerState(
     val isRunning: Boolean = false,
     val isPaused: Boolean = false,
@@ -53,11 +40,7 @@ data class TimerState(
         }
 }
 
-/**
- * Singleton countdown engine backing [FocusTimerService]. Mirrors the anchor-based (absolute
- * `DateTime` difference, not tick-accumulation) drift-proof timing technique used by both
- * `FocusProvider._tick` and the unused `focus_timer_service.dart` reference.
- */
+
 object FocusTimerManager {
     private val _timerState = MutableStateFlow(TimerState())
     val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
@@ -65,15 +48,7 @@ object FocusTimerManager {
     val phaseCompleteEvent =
         kotlinx.coroutines.flow.MutableSharedFlow<Pair<Boolean, Int>>(extraBufferCapacity = 1)
 
-    /**
-     * Emitted once per [stopTimer] call on an active session, so session bookkeeping (logging the
-     * partial phase, resetting the UI's phase cursor) happens identically whether the stop came
-     * from the in-app dialog or the notification's Stop action while the app is backgrounded.
-     *
-     * [elapsedFocusSeconds] is 0 when the stop happened at an awaiting-continue boundary: that
-     * phase's full duration was already banked via [phaseCompleteEvent], counting it again here
-     * would double it.
-     */
+
     data class StopInfo(
         val elapsedFocusSeconds: Int,
         val wasRestPhase: Boolean,
@@ -89,14 +64,7 @@ object FocusTimerManager {
     private var currentPhaseTotalSeconds: Int = 0
     private var accumulatedElapsed: Int = 0
 
-    /**
-     * Loads a phase's configuration. Safe to call again for the *same* phase while paused (e.g.
-     * resuming) - progress is only reset when not currently paused, so a fresh call (new phase,
-     * or first start) starts at [totalPhaseSeconds] while a resume-from-pause call preserves
-     * whatever [TimerState.secondsRemaining] currently holds. Mirrors `FocusProvider._setupPhase`
-     * being re-run for every phase (fresh anchor) while `startSession`'s resume path leaves
-     * `_secondsRemainingInPhase` untouched.
-     */
+
     fun setMode(
         name: String,
         totalPhaseSeconds: Int,

@@ -25,11 +25,9 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import io.github.benji377.timety.ui.components.common.TimetyElevatedButton as ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -57,12 +55,10 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
+import io.github.benji377.timety.ui.components.common.TimetyElevatedButton as ElevatedButton
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * A card showing a focus mode: read-only overview (name, timeline) with edit/delete actions for
- * custom modes, or an inline editor (name field + phase chip timeline) when editing/creating.
- * Mirrors `widgets/focus/focus_mode_edit_card.dart` (`ModeEditCard`).
- */
+
 @Composable
 fun FocusModeEditCard(
     mode: FocusModeEntity,
@@ -286,10 +282,12 @@ private fun EditorView(
         tempPhases.forEachIndexed { index, phase ->
             Row {
                 PhaseChip(phase = phase, flexLabel = flexLabel, onClick = { onPhaseTapped(index) })
-                Box(modifier = Modifier
-                    .width(24.dp)
-                    .height(2.dp)
-                    .background(Color.LightGray))
+                Box(
+                    modifier = Modifier
+                        .width(24.dp)
+                        .height(2.dp)
+                        .background(Color.LightGray)
+                )
             }
         }
         Box(

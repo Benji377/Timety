@@ -57,10 +57,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 
-/**
- * The main dashboard screen showing today's overview, goals, and upcoming tasks.
- * Mirrors `screens/home_screen.dart`.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -156,18 +153,18 @@ fun HomeScreen(
             FloatingActionButton(
                 onClick = { onNavigateToTaskDetail(null) },
                 modifier = Modifier.border(
-                    io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
-                    androidx.compose.material3.MaterialTheme.colorScheme.outline,
-                    io.github.benji377.timety.ui.theme.AppTheme.brNeo
+                    AppTheme.neoBorderWidth,
+                    MaterialTheme.colorScheme.outline,
+                    AppTheme.brNeo
                 ),
-                shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
+                shape = AppTheme.brNeo,
                 elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
                     0.dp,
                     0.dp,
                     0.dp,
                     0.dp
                 ),
-                containerColor = io.github.benji377.timety.ui.theme.TaskColor,
+                containerColor = TaskColor,
                 contentColor = androidx.compose.ui.graphics.Color.White
             ) {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.commonLabelAdd))

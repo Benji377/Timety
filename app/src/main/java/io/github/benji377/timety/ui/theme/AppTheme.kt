@@ -6,13 +6,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Design tokens mirroring `lib/theme/app_theme.dart`.
- *
- * Colors live in [Color.kt]; this object holds the numeric design system
- * (typography sizes, spacing, radii, dimensions, durations) and the
- * phase/status color helpers so screens can reference them 1:1 with Flutter.
- */
+
 object AppTheme {
     // ===== TYPOGRAPHY =====
     val fsHeadingLarge = 24.sp

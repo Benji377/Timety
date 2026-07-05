@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.habit
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,8 +40,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -59,14 +58,7 @@ import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.util.habit.HabitIcons
 import kotlinx.coroutines.launch
 
-/**
- * Mirrors `HabitListTile` in `widgets/list_tiles/habit_list_tile.dart`.
- *
- * NOTE: Flutter shows a brief [ScaffoldMessenger] snackbar (`focusSnackbarHabitLocked`)
- * when the locked leading circle is tapped. This leaf component has no [Scaffold]/
- * `SnackbarHostState` reference to post into, so it surfaces the same message via a
- * Snackbar by accessing LocalSnackbarHostState.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListTile(
@@ -94,12 +86,14 @@ fun HabitListTile(
     val tile: @Composable () -> Unit = {
         if (isStacked) {
             val barColor = if (isCompleted) color.copy(alpha = AppTheme.opacityLight) else color
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                // Unlocked stack members get the same surface background as standalone
-                // habits; only locked ones let the dim stack card shine through.
-                .background(if (isLocked) Color.Transparent else MaterialTheme.colorScheme.surface)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+                    // Unlocked stack members get the same surface background as standalone
+                    // habits; only locked ones let the dim stack card shine through.
+                    .background(if (isLocked) Color.Transparent else MaterialTheme.colorScheme.surface)
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()

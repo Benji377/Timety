@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import io.github.benji377.timety.ui.theme.AppTheme
 
-/** A stylized header row for list sections. Mirrors ListSectionHeader in list_section_header.dart. */
+
 @Composable
 fun ListSectionHeader(
     title: String,

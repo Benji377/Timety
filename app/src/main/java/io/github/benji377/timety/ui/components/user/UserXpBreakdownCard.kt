@@ -55,11 +55,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.util.stats.ExperienceEngine
 
-/**
- * XP breakdown card: current level/title, progress bar to the next level, and an
- * expandable "How XP is earned" section. Mirrors
- * `widgets/user_profile/user_xp_breakdown_card.dart`.
- */
+
 @Composable
 fun UserXpBreakdownCard(
     currentLevel: Int,

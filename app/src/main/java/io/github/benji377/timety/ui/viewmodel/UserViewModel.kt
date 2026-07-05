@@ -23,7 +23,7 @@ class UserViewModel(
             initialValue = null
         )
 
-    /** Current level derived from total XP. Mirrors UserProvider.currentLevel. */
+
     val currentLevel: StateFlow<Int> = userProfile
         .map { ExperienceEngine.calculateLevel(it?.totalXp ?: 0) }
         .stateIn(
@@ -32,7 +32,7 @@ class UserViewModel(
             initialValue = ExperienceEngine.calculateLevel(0)
         )
 
-    /** Descriptive title for the current level. Mirrors UserProvider.levelTitle. */
+
     val levelTitle: StateFlow<String> = currentLevel
         .map { ExperienceEngine.getTitle(it) }
         .stateIn(
@@ -41,7 +41,7 @@ class UserViewModel(
             initialValue = ExperienceEngine.getTitle(ExperienceEngine.calculateLevel(0))
         )
 
-    /** Progress fraction (0.0-1.0) towards the next level. Mirrors UserProvider.levelProgress. */
+
     val levelProgress: StateFlow<Double> = userProfile
         .map { ExperienceEngine.getLevelProgress(it?.totalXp ?: 0) }
         .stateIn(

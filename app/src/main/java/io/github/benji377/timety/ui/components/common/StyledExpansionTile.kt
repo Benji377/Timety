@@ -62,10 +62,7 @@ fun StyledExpansionTile(
     }
 }
 
-/**
- * Slot-based variant matching Flutter's StyledExpansionTile whose `title` is an
- * arbitrary widget (e.g. a [ListSectionHeader] with icon + label).
- */
+
 @Composable
 fun StyledExpansionTile(
     title: @Composable () -> Unit,
@@ -75,9 +72,11 @@ fun StyledExpansionTile(
 ) {
     var isExpanded by remember { mutableStateOf(initiallyExpanded) }
 
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(bottom = 12.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

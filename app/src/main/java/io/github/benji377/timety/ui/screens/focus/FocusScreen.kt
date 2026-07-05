@@ -19,9 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.History
@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.Task
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
@@ -100,9 +99,9 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.roundToInt
+import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 
-/** Roughly a day; used as a stand-in "infinite" duration so Stopwatch mode can count up under
- * the current [FocusTimerManager], which only knows how to count down from a fixed total. */
+
 private fun secondsForPhase(
     phase: SessionPhaseEntity,
     flexibleMinutes: Int
@@ -112,21 +111,7 @@ private fun secondsForPhase(
     else -> phase.durationMinutes * 60
 }
 
-/**
- * The main focus timer screen: mode selector, interactive gauge, phase timeline, and transport
- * controls. Mirrors `screens/focus/focus_screen.dart`.
- *
- * NOTE (timer-engine scope boundary - see report): [FocusTimerManager]/[FocusTimerService] are
- * out of scope for this port (a separate phase) and only support a single countdown phase at a
- * time. This screen works within that: it drives `setMode`/start/pause/stop using the engine's
- * existing public API to approximate Flutter's stopwatch (counts up, here via a 24h countdown +
- * elapsed-time display), flexible (drag-to-set duration before starting), and multi-phase
- * (focus/rest sequence with a "continue" prompt) modes, and detects phase completion generically
- * by observing `FocusTimerManager.timerState` (not just the focus-only `sessionCompleteEvent`) so
- * rest-phase boundaries also prompt "continue". True parity (one logged session per whole
- * multi-phase run, dynamic target auto-complete, habit/task XP wiring on finish) needs engine
- * changes and should land with the timer-service phase.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusScreen(
@@ -622,7 +607,10 @@ fun FocusScreen(
                 focusViewModel.logDistraction(type.entityType)
                 scope.launch {
                     snackbarHostState.showSnackbar(
-                        context.getString(R.string.distractionLogged, context.getString(type.labelRes))
+                        context.getString(
+                            R.string.distractionLogged,
+                            context.getString(type.labelRes)
+                        )
                     )
                 }
             },

@@ -20,10 +20,10 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :id")
     fun getTaskById(id: String): TaskEntity?
 
-    /** Open tasks due before [deadline], soonest first. Lets the widget avoid loading the full table. */
+
     @Query(
         "SELECT * FROM tasks WHERE isCompleted = 0 AND dueDate IS NOT NULL AND dueDate < :deadline " +
-            "ORDER BY dueDate ASC"
+                "ORDER BY dueDate ASC"
     )
     fun getOpenTasksDueBefore(deadline: java.time.Instant): List<TaskEntity>
 

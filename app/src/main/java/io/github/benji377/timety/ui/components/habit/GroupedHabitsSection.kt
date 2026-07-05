@@ -35,15 +35,7 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 
-/**
- * Displays a grouped view of habits organized by stacks. Mirrors `GroupedHabitsSection`
- * in `widgets/habit/grouped_habits_section.dart`.
- *
- * [allHabitsForStacks] mirrors the Flutter widget's separate `habitProvider` reference:
- * stack totals/completion counts are computed against the FULL habit list (every member of
- * a stack, regardless of which section - due/upcoming/done - [habits] itself was filtered to),
- * not just the [habits] passed in for rendering.
- */
+
 @Composable
 fun GroupedHabitsSection(
     habits: List<HabitWithCompletions>,

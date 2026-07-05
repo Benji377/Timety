@@ -64,15 +64,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-/**
- * Unified calendar + history bottom sheet for a habit. Mirrors
- * `HabitBottomSheetBuilders.showUnifiedHistorySheet` / `_UnifiedCalendarSheet` in
- * `widgets/habit/habit_bottom_sheet.dart`: stats row, an interactive monthly calendar
- * (tap a day to mark/unmark a completion), and a reverse-chronological timeline.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitBottomSheet(
@@ -125,9 +118,11 @@ private fun UnifiedCalendarSheetContent(
     var dateForRemoval by remember { mutableStateOf<LocalDate?>(null) }
     var dateForAdd by remember { mutableStateOf<LocalDate?>(null) }
 
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+    ) {
         Text(
             text = stringResource(R.string.habitHistoryTitle),
             style = MaterialTheme.typography.titleLarge,
@@ -160,7 +155,9 @@ private fun UnifiedCalendarSheetContent(
                 Icon(Icons.Filled.ChevronLeft, contentDescription = null)
             }
             Text(
-                text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatMonthYear(displayedMonth.atDay(1)),
+                text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatMonthYear(
+                    displayedMonth.atDay(1)
+                ),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -219,9 +216,11 @@ private fun UnifiedCalendarSheetContent(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
                 ) {
                     rowCells.forEach { date ->
-                        Box(modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1.1f)) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1.1f)
+                        ) {
                             if (date == null) {
                                 // empty slot
                             } else {

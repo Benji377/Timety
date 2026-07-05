@@ -10,16 +10,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-/**
- * Re-arms the app's repeating notifications after a device reboot or app update. `AlarmManager`
- * exact alarms (unlike Flutter's `flutter_local_notifications`, which re-registers its own alarms
- * via its own boot receiver internally) do not survive a reboot, so without this receiver the
- * daily motivation / end-of-day checkup / habit-time reminders would silently stop firing until
- * the next time something happened to reschedule them.
- *
- * One-shot task reminders are intentionally NOT re-armed here: they are re-scheduled by
- * `TaskViewModel` whenever their owning task is created/edited.
- */
+
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action !in REARM_ACTIONS) return

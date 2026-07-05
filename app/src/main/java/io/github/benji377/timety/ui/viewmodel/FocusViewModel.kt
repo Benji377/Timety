@@ -36,12 +36,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
 
-/**
- * A logged distraction paired with the session it happened in - lets the stats screen show the
- * session's target name next to each distraction (mirrors Flutter's `DistractionEntry`, but built
- * here by joining the normalized `distractions`/`focus_sessions` tables instead of Flutter's
- * denormalized `FocusSession.distractions` list).
- */
+
 data class DistractionWithSession(
     val distraction: DistractionEntity,
     val session: FocusSessionEntity
@@ -65,13 +60,7 @@ class FocusViewModel(
     val allTags: StateFlow<List<FocusTagEntity>> = focusRepository.allTags
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * All logged distractions across all sessions, newest first, each paired with its session.
-     * NOTE (viewmodel addition - see report): built here (not in the DAO/repository) by combining
-     * the existing `getDistractionsForSession` flow per session, so the Focus Stats screen can
-     * show a day-by-day distraction feed the way Flutter's `FocusProvider.history` (which embeds
-     * distractions directly on each session) does.
-     */
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val allDistractions: StateFlow<List<DistractionWithSession>> = allSessions
         .flatMapLatest { sessions ->
@@ -95,7 +84,7 @@ class FocusViewModel(
         _currentModeIndex.value = index
     }
 
-    /** Index of the phase currently active within the active mode's phase list. */
+
     private val _currentPhaseIndex = MutableStateFlow(0)
     val currentPhaseIndex = _currentPhaseIndex.asStateFlow()
     fun setCurrentPhaseIndex(index: Int) {
@@ -106,7 +95,7 @@ class FocusViewModel(
         _currentPhaseIndex.value = 0
     }
 
-    /** True once a phase has finished and the user must tap "continue" to start the next one. */
+
     private val _awaitingContinue = MutableStateFlow(false)
     val awaitingContinue: StateFlow<Boolean> = _awaitingContinue.asStateFlow()
     fun setAwaitingContinue(awaiting: Boolean) {
@@ -287,7 +276,7 @@ class FocusViewModel(
         resetCurrentSession()
     }
 
-    /** Throws away the in-flight session without logging anything (the "Reset" flow). */
+
     fun discardSession() {
         sessionAccumulatedFocusSeconds = 0
         sessionStartTime = null
@@ -454,7 +443,7 @@ class FocusViewModel(
 
     // --- STATS HELPERS ---
 
-    /** Total focused minutes on [day], summing completed sessions that started that day. Mirrors `FocusProvider.getMinutesFocusedOnDay`. */
+
     fun getMinutesFocusedOnDay(day: LocalDate, zone: ZoneId = ZoneId.systemDefault()): Int {
         val totalSeconds = allSessions.value
             .filter { it.startTime.atZone(zone).toLocalDate() == day }
@@ -465,7 +454,7 @@ class FocusViewModel(
     fun getMinutesFocusedToday(zone: ZoneId = ZoneId.systemDefault()): Int =
         getMinutesFocusedOnDay(LocalDate.now(), zone)
 
-    /** Manually logs a completed session in the past. Mirrors `FocusProvider.logPastSession` (the "Time Machine" dialog). */
+
     fun logPastSession(
         mode: FocusModeEntity,
         startTime: Instant,

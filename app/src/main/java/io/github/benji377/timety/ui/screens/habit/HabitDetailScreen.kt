@@ -22,14 +22,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Stars
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,7 +40,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -88,12 +87,9 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * Mirrors `HabitDetailScreen` in `screens/habit/habit_detail_screen.dart`: a combined
- * create/view/edit screen for a single habit, gated by an `isEditing` flag (always true
- * for brand-new habits).
- */
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HabitDetailScreen(
@@ -670,7 +666,7 @@ fun HabitDetailScreen(
     }
 }
 
-/** Standard 15-color palette offered by the Flutter color picker dialog (habit_detail_screen.dart). */
+
 private val HABIT_DETAIL_COLORS = listOf(
     HabitColor,
     Color(0xFFF44336), // Colors.red
@@ -689,7 +685,7 @@ private val HABIT_DETAIL_COLORS = listOf(
     Color(0xFF607D8B), // Colors.blueGrey
 )
 
-/** A clickable outlined field mimicking Flutter's `InputDecorator` wrapping an arbitrary [content] (icon/color swatch). */
+
 @Composable
 private fun PickerField(
     label: String,

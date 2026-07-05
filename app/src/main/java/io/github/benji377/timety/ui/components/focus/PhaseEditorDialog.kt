@@ -9,10 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material3.AlertDialog
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -31,14 +29,10 @@ import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.components.common.TimetyButton as Button
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * Dialog to add/edit a single phase node in a focus mode's timeline. Mirrors
- * `widgets/focus/phase_editor_dialog.dart`.
- *
- * [initialPhase] null means "add new". [onDelete] is only invoked (and only offered in the UI)
- * when editing an existing phase (mirrors Flutter only showing the Delete action when `!isNew`).
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhaseEditorDialog(

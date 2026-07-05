@@ -60,10 +60,7 @@ import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 
-/**
- * Bottom sheet listing distraction events to log during a session. Mirrors
- * `FocusBottomSheetBuilders.showDistractionSheet` in `widgets/focus/focus_bottom_sheet.dart`.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DistractionBottomSheet(
@@ -106,10 +103,7 @@ fun DistractionBottomSheet(
     }
 }
 
-/**
- * Bottom sheet for selecting the target a focus session should be linked to: a tag, a task, or a
- * habit. Mirrors `FocusBottomSheetBuilders.showTargetSelector`.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TargetSelectorBottomSheet(

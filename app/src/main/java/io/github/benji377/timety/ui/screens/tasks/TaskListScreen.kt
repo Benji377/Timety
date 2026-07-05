@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.screens.tasks
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,21 +16,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.foundation.border
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -61,11 +60,9 @@ import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.task.TaskFilterEngine
 import java.time.Instant
 import java.time.ZoneId
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * Displays a searchable, filterable, and sortable list of all tasks.
- * Mirrors `screens/task/task_list_screen.dart`.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
@@ -114,13 +111,18 @@ fun TaskListScreen(
             FloatingActionButton(
                 onClick = { onNavigateToTaskDetail(null) },
                 modifier = Modifier.border(
-                    io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
-                    androidx.compose.material3.MaterialTheme.colorScheme.outline,
-                    io.github.benji377.timety.ui.theme.AppTheme.brNeo
+                    AppTheme.neoBorderWidth,
+                    MaterialTheme.colorScheme.outline,
+                    AppTheme.brNeo
                 ),
-                shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
-                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                containerColor = io.github.benji377.timety.ui.theme.TaskColor,
+                shape = AppTheme.brNeo,
+                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
+                    0.dp,
+                    0.dp,
+                    0.dp,
+                    0.dp
+                ),
+                containerColor = TaskColor,
                 contentColor = androidx.compose.ui.graphics.Color.White
             ) {
                 Icon(Icons.Filled.Add, stringResource(R.string.commonLabelAdd))
@@ -215,9 +217,11 @@ fun TaskListScreen(
             }
 
             // --- TASKS SCROLLABLE LIST ---
-            Box(modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
                 if (tasks.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(

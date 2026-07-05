@@ -13,13 +13,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-/**
- * Fires when a [NotificationService]-scheduled `AlarmManager` alarm goes off: shows the
- * notification carried in the intent's extras, then - if the reminder is daily/weekly repeating -
- * re-arms the next occurrence. This replaces the implicit recurrence Flutter gets for free from
- * `flutter_local_notifications`' `matchDateTimeComponents` (there is no native `AlarmManager`
- * equivalent, so the receiver re-schedules itself on every fire instead).
- */
+
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val notificationId = intent.getIntExtra(NotificationService.EXTRA_NOTIFICATION_ID, -1)
@@ -38,7 +32,12 @@ class ReminderReceiver : BroadcastReceiver() {
             CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
                 try {
                     val finalBody = body + todaysHabitsSuffix(appContext)
-                    notificationService.showNotification(notificationId, channelId, title, finalBody)
+                    notificationService.showNotification(
+                        notificationId,
+                        channelId,
+                        title,
+                        finalBody
+                    )
                     notificationService.rescheduleIfRepeating(intent)
                 } finally {
                     pendingResult.finish()
@@ -51,11 +50,7 @@ class ReminderReceiver : BroadcastReceiver() {
         notificationService.rescheduleIfRepeating(intent)
     }
 
-    /**
-     * "\nDon't forget to do X, Y and more today!" - appends the habits still due today to the
-     * motivation quote, mirroring `NotificationService.scheduleDailyMotivation`'s
-     * `includeHabits` path in the Flutter reference. Empty when nothing is due.
-     */
+
     private suspend fun todaysHabitsSuffix(context: Context): String {
         val app = context as? TimetyApplication ?: return ""
         val habits = app.container.habitRepository.allHabits.first()

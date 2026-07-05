@@ -12,8 +12,8 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.lazy.LazyColumn
-import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.lazy.itemsIndexed
+import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
 
-/** One renderable line of the habit widget; flattened so the whole widget can scroll as one list. */
+
 private sealed interface HabitWidgetRow {
     data class StackHeader(val name: String, val completed: Int, val total: Int) : HabitWidgetRow
     data class Habit(
@@ -57,11 +57,7 @@ private sealed interface HabitWidgetRow {
     data object StackFooter : HabitWidgetRow
 }
 
-/**
- * Home-screen widget listing the habits due today, stacks first (in stack order, locked steps
- * dimmed), then standalone habits. Styled after the app's neobrutalist cards; scrollable when
- * the list outgrows the widget. Tapping anywhere opens the app.
- */
+
 class HabitWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appContainer = (context.applicationContext as TimetyApplication).container
@@ -78,7 +74,10 @@ class HabitWidget : GlanceAppWidget() {
         val completionsByHabit = habitRepository.getCompletionsSince(weekCutoff)
             .groupBy { it.habitId }
         val habitsWithCompletions = habits.map { habit ->
-            HabitWithCompletions(habit = habit, completions = completionsByHabit[habit.id].orEmpty())
+            HabitWithCompletions(
+                habit = habit,
+                completions = completionsByHabit[habit.id].orEmpty()
+            )
         }
 
         val todayHabits = habitsWithCompletions.filter { HabitUtils.isHabitDueToday(it) }
@@ -277,7 +276,7 @@ class HabitWidget : GlanceAppWidget() {
         )
     }
 
-    /** "Daily" / "Weekly: Mon, Wed" / "3 of 5 this week" line under each habit name. */
+
     private fun frequencySubtitle(context: Context, hwc: HabitWithCompletions): String =
         when (hwc.habit.frequency) {
             HabitFrequency.DAILY -> context.getString(R.string.habitFreqDaily)

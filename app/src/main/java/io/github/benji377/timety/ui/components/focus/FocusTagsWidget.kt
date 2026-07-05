@@ -27,13 +27,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -63,15 +61,10 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import io.github.benji377.timety.ui.components.common.TimetyButton as Button
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
-/**
- * Focus tag management screen: create, rename/recolor, and delete tags. Mirrors
- * `widgets/focus/focus_tags_widget.dart` (`TagsWidget`, reached from Settings in Flutter).
- *
- * NOTE (navigation - see report): this is not yet wired into `MainScreen`'s nav graph (no route
- * calls it). It is self-contained (owns its Scaffold/TopAppBar) so the parent can add a route +
- * an entry point from the Settings screen, mirroring `settings_screen.dart`'s "Focus Tags" tile.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusTagsWidget(
@@ -86,7 +79,7 @@ fun FocusTagsWidget(
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 title = {
                     Text(
                         stringResource(R.string.focusTagsTitle),

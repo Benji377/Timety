@@ -13,8 +13,8 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.lazy.LazyColumn
-import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.lazy.itemsIndexed
+import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -43,11 +43,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
-/**
- * Home-screen widget listing today's still-open tasks (due before end of day), most urgent
- * first. Styled after the app's neobrutalist cards (paper background + ink border, blue task
- * accent); scrollable when the list outgrows the widget. Tapping anywhere opens the app.
- */
+
 class TaskWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appContainer = (context.applicationContext as TimetyApplication).container
@@ -130,7 +126,10 @@ class TaskWidget : GlanceAppWidget() {
                                         if (due != null) {
                                             Spacer(modifier = GlanceModifier.width(8.dp))
                                             Text(
-                                                text = AppDateFormatUtils.formatTime(due, use24Hour),
+                                                text = AppDateFormatUtils.formatTime(
+                                                    due,
+                                                    use24Hour
+                                                ),
                                                 style = TextStyle(
                                                     color = GlanceTheme.colors.onSurfaceVariant,
                                                     fontSize = 12.sp
@@ -148,7 +147,7 @@ class TaskWidget : GlanceAppWidget() {
         }
     }
 
-    /** Same mapping as [io.github.benji377.timety.ui.utils.AppUtils.PriorityIcon]. */
+
     private fun priorityColor(priority: Priority) = when (priority) {
         Priority.LOW -> TaskColor
         Priority.MEDIUM -> WarningColor

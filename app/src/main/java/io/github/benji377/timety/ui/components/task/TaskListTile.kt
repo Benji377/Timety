@@ -60,13 +60,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-/**
- * Mirrors `TaskListTile` in `task_list_tile.dart`.
- *
- * The Flutter [Task] model embeds its subtasks, whereas the Kotlin [TaskEntity] does
- * not (subtasks live in a separate Room table), so [subtasksCompleted]/[subtasksTotal]
- * are passed in explicitly by the caller instead of being read off the entity.
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListTile(
@@ -195,7 +189,7 @@ fun TaskListTile(
                                 fontWeight = AppTheme.fwMedium,
                             )
                         }
-                }
+                    }
                 }
                 if (showTrailing) {
                     Spacer(Modifier.width(AppTheme.spaceLarge))
