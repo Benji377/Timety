@@ -1,4 +1,4 @@
-package io.github.benji377.timety.ui.screens.location
+package io.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

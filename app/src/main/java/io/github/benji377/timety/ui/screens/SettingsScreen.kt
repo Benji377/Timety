@@ -1,4 +1,4 @@
-package io.github.benji377.timety.ui.screens.settings
+package io.github.benji377.timety.ui.screens
 
 import android.content.Intent
 import android.net.Uri

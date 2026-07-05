@@ -1,4 +1,4 @@
-package io.github.benji377.timety.ui.screens.statistics
+package io.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background

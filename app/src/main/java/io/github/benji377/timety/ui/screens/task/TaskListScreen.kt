@@ -1,4 +1,4 @@
-package io.github.benji377.timety.ui.screens.tasks
+package io.github.benji377.timety.ui.screens.task
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement

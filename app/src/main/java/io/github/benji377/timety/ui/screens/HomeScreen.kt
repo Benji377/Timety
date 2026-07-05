@@ -1,4 +1,4 @@
-package io.github.benji377.timety.ui.screens.home
+package io.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

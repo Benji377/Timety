@@ -1,4 +1,4 @@
-package io.github.benji377.timety.ui.screens.profile
+package io.github.benji377.timety.ui.screens
 
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult

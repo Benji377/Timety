@@ -487,7 +487,7 @@ fun TaskDetailScreen(
                             usePlatformDefaultWidth = false
                         )
                     ) {
-                        io.github.benji377.timety.ui.screens.location.LocationPickerScreen(
+                        io.github.benji377.timety.ui.screens.LocationPickerScreen(
                             onLocationSelected = { selectedLocation ->
                                 location = selectedLocation
                                 showLocationPicker = false

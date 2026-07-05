@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        io.github.benji377.timety.ui.screens.main.MainScreen()
+                        io.github.benji377.timety.ui.screens.MainScreen()
                     }
                 }
             }

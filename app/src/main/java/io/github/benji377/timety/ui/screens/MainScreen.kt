@@ -1,4 +1,4 @@
-package io.github.benji377.timety.ui.screens.main
+package io.github.benji377.timety.ui.screens
 
 import android.Manifest
 import android.os.Build
@@ -100,7 +100,7 @@ fun MainScreen() {
                 .consumeWindowInsets(innerPadding)
         ) {
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Home.route) {
-                io.github.benji377.timety.ui.screens.home.HomeScreen(
+                io.github.benji377.timety.ui.screens.HomeScreen(
                     onNavigateToFocus = { navController.navigate(io.github.benji377.timety.ui.navigation.BottomNavItem.Focus.route) },
                     onNavigateToTaskDetail = { taskId ->
                         navController.navigate(AppRoute.taskDetail(taskId))
@@ -123,26 +123,26 @@ fun MainScreen() {
                 )
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Tasks.route) {
-                io.github.benji377.timety.ui.screens.tasks.TaskListScreen(
+                io.github.benji377.timety.ui.screens.task.TaskListScreen(
                     onNavigateToTaskDetail = { taskId ->
                         navController.navigate(AppRoute.taskDetail(taskId))
                     }
                 )
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Habits.route) {
-                io.github.benji377.timety.ui.screens.habits.HabitListScreen(
+                io.github.benji377.timety.ui.screens.habit.HabitListScreen(
                     onNavigateToHabitDetail = { habitId ->
                         navController.navigate(AppRoute.habitDetail(habitId))
                     }
                 )
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Profile.route) {
-                io.github.benji377.timety.ui.screens.profile.ProfileScreen(
+                io.github.benji377.timety.ui.screens.ProfileScreen(
                     onNavigateToSettings = { navController.navigate(AppRoute.SETTINGS.route) }
                 )
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Calendar.route) {
-                io.github.benji377.timety.ui.screens.calendar.CalendarScreen(
+                io.github.benji377.timety.ui.screens.CalendarScreen(
                     onNavigateToTask = { taskId -> navController.navigate(AppRoute.taskDetail(taskId)) },
                     onNavigateToHabit = { habitId ->
                         navController.navigate(
@@ -155,12 +155,12 @@ fun MainScreen() {
                 )
             }
             composable(io.github.benji377.timety.ui.navigation.BottomNavItem.Statistics.route) {
-                io.github.benji377.timety.ui.screens.statistics.StatisticsScreen(
+                io.github.benji377.timety.ui.screens.StatisticsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable(AppRoute.SETTINGS.route) {
-                io.github.benji377.timety.ui.screens.settings.SettingsScreen(
+                io.github.benji377.timety.ui.screens.SettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToTags = { navController.navigate(AppRoute.FOCUS_TAGS.route) },
                     onNavigateToCategories = { navController.navigate(AppRoute.TASK_CATEGORIES.route) }
