@@ -13,6 +13,10 @@ import androidx.core.net.toUri
 import io.github.benji377.timety.R
 
 class TimerSoundReceiver : BroadcastReceiver() {
+    companion object {
+        private val activePlayers = mutableSetOf<MediaPlayer>()
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
 
@@ -39,10 +43,27 @@ class TimerSoundReceiver : BroadcastReceiver() {
             mediaPlayer.setDataSource(context, uri)
             mediaPlayer.setOnCompletionListener {
                 it.release()
+                activePlayers.remove(it)
                 pendingResult.finish()
             }
-            mediaPlayer.prepare()
-            mediaPlayer.start()
+            mediaPlayer.setOnErrorListener { mp, _, _ ->
+                mp.release()
+                activePlayers.remove(mp)
+                pendingResult.finish()
+                true
+            }
+            mediaPlayer.setOnPreparedListener { mp ->
+                try {
+                    mp.start()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    mp.release()
+                    activePlayers.remove(mp)
+                    pendingResult.finish()
+                }
+            }
+            mediaPlayer.prepareAsync()
+            activePlayers.add(mediaPlayer)
         } catch (e: Exception) {
             e.printStackTrace()
             pendingResult.finish()
