@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     id("com.android.application")
     id("com.google.devtools.ksp")
@@ -67,12 +65,6 @@ android {
         warning += "MissingTranslation"
         // SARIF is uploaded to GitHub code scanning by the lint workflow.
         sarifReport = true
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
