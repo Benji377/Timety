@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="appTitle">Timety</string>
     <string name="globalLabelHabit">Abitudine</string>
     <string name="globalLabelHabits">Abitudini</string>
@@ -8,13 +8,13 @@
     <string name="globalLabelTasks">Attività</string>
     <string name="commonButtonGotIt">Capito</string>
     <string name="commonDaytimeAfternoon">Pomeriggio</string>
-    <string name="commonDaytimeAfternoonRange">12:00 - 17:00</string>
+    <string name="commonDaytimeAfternoonRange">12:00 – 17:00</string>
     <string name="commonDaytimeEvening">Sera</string>
-    <string name="commonDaytimeEveningRange">17:00 - 21:00</string>
+    <string name="commonDaytimeEveningRange">17:00 – 21:00</string>
     <string name="commonDaytimeMorning">Mattina</string>
-    <string name="commonDaytimeMorningRange">05:00 - 12:00</string>
+    <string name="commonDaytimeMorningRange">05:00 – 12:00</string>
     <string name="commonDaytimeNight">Notte</string>
-    <string name="commonDaytimeNightRange">21:00 - 05:00</string>
+    <string name="commonDaytimeNightRange">21:00 – 05:00</string>
     <string name="commonLabelAdd">Aggiungi</string>
     <string name="commonLabelCancel">Annulla</string>
     <string name="commonLabelConfirm">Conferma</string>
@@ -132,13 +132,13 @@
     <string name="habitDetailLabelFrequencyExact">Specifica</string>
     <string name="habitDetailLabelFrequencyFlexible">Flessibile</string>
     <string name="habitDetailLabelGoalZero">Obiettivo: Giornaliero</string>
-    <plurals name="habitDetailLabelGoal">
+    <plurals name="habitDetailLabelGoal" tools:ignore="MissingQuantity">
         <item quantity="one">Obiettivo: 1 giorno a settimana</item>
         <item quantity="other">Obiettivo: %d giorni a settimana</item>
     </plurals>
     <string name="habitDetailLabelIcon">Seleziona un\'icona</string>
     <string name="habitDetailLabelName">Nome dell\'abitudine</string>
-    <string name="habitDetailLabelNameHint">es., Leggere 10 pagine, Allenamento...</string>
+    <string name="habitDetailLabelNameHint">es., Leggere 10 pagine, Allenamento…</string>
     <string name="habitDetailLabelNameRequest">Inserisci un nome</string>
     <string name="habitDetailLabelNotes">Note</string>
     <string name="habitDetailLabelNotesHint">Perché stai sviluppando questa abitudine?</string>
@@ -197,7 +197,7 @@
     <string name="taskDetailsLabelPriority">Priorità</string>
     <string name="taskDetailsLabelReminderSet">Imposta promemoria</string>
     <string name="taskDetailsLabelReminderTooEarly">Il promemoria personalizzato deve essere precedente alla data di scadenza</string>
-    <string name="taskDetailsLabelSubtaskHint">Aggiungi sotto-attività...</string>
+    <string name="taskDetailsLabelSubtaskHint">Aggiungi sotto-attività…</string>
     <string name="taskDetailsLabelTitle">Titolo attività</string>
     <string name="taskDetailsReminderOptionCustom">Personalizzato</string>
     <string name="taskDetailsReminderOptionDay">1 giorno prima</string>
@@ -218,7 +218,7 @@
     <string name="taskListEmpty">Ancora nessuna attività! Tocca + per aggiungerne una</string>
     <string name="taskListFilterAll">Tutte</string>
     <string name="taskListFilterNoMatch">Nessuna attività corrisponde ai tuoi filtri</string>
-    <string name="taskListSearchHint">Cerca titolo o descrizione...</string>
+    <string name="taskListSearchHint">Cerca titolo o descrizione…</string>
     <string name="taskListSectionDone">Completate</string>
     <string name="taskListSectionOverdue">Scadute</string>
     <string name="taskListSectionToday">Scadono oggi</string>
@@ -352,7 +352,7 @@
     <string name="backupActionSaveDevice">Salva sul dispositivo</string>
     <string name="backupActionSaveDeviceSubtitle">Scegli una cartella locale</string>
     <string name="backupActionShareCloud">Condividi / Carica in cloud</string>
-    <string name="backupActionShareCloudSubtitle">Invia a Drive, Dropbox, WhatsApp...</string>
+    <string name="backupActionShareCloudSubtitle">Invia a Drive, Dropbox, WhatsApp…</string>
     <string name="backupExportFailure">Esportazione fallita: %1$s</string>
     <string name="backupExportSubject">Esportazione Timety</string>
     <string name="backupExportSuccess">Esportazione salvata in</string>
@@ -398,7 +398,7 @@
     <string name="categoryEmpty">Ancora nessuna categoria. Creane una aggiungendo un\'attività con una categoria.</string>
     <string name="categoryNameLabel">Nome della categoria</string>
     <string name="categoryTaskCountZero">Nessuna attività</string>
-    <plurals name="categoryTaskCount">
+    <plurals name="categoryTaskCount" tools:ignore="MissingQuantity">
         <item quantity="one">1 attività</item>
         <item quantity="other">%d attività</item>
     </plurals>
@@ -422,7 +422,7 @@
     <string name="locationApiDialogSupportedDesc">Endpoint compatibili con Photon</string>
     <string name="locationApiDialogTest">Testa connessione</string>
     <string name="locationApiDialogTitle">API di ricerca luoghi</string>
-    <string name="locationPickerHint">es. Pizza Hut, Roma...</string>
+    <string name="locationPickerHint">es. Pizza Hut, Roma…</string>
     <string name="locationPickerMinChars">Minimo 3 caratteri</string>
     <string name="locationPickerNetworkError">Errore di rete. Controlla la tua connessione e le impostazioni dell\'API dei luoghi.</string>
     <string name="locationPickerNoResults">Nessun luogo trovato per \"%1$s\"</string>
@@ -438,7 +438,7 @@
     <string name="streakStatusNone">Ancora nessuna serie. Completa qualcosa oggi per iniziarne una.</string>
     <string name="streakStatusStart">Inizia oggi per costruire una serie che prosegua nel futuro.</string>
     <string name="streakTimelineCurrent">Serie attuale</string>
-    <plurals name="streakTimelineDays">
+    <plurals name="streakTimelineDays" tools:ignore="MissingQuantity">
         <item quantity="one">1 giorno</item>
         <item quantity="other">%d giorni</item>
     </plurals>
@@ -455,30 +455,32 @@
     <string name="weekNavThisWeek">Questa settimana</string>
     <string name="widgetHabitsToday">Abitudini di oggi</string>
     <string name="widgetTasksDue">Attività in scadenza (%1$d)</string>
-    <plurals name="nTaskReminderPrefixDays">
+    <string name="widgetNoUrgentTasks">Nessuna attività urgente</string>
+    <string name="widgetMoreTasks">+%1$d di più</string>
+    <plurals name="nTaskReminderPrefixDays" tools:ignore="MissingQuantity">
         <item quantity="one">Domani</item>
         <item quantity="other">Tra %d giorni</item>
     </plurals>
-    <plurals name="nTaskReminderPrefixHours">
+    <plurals name="nTaskReminderPrefixHours" tools:ignore="MissingQuantity">
         <item quantity="one">Tra 1 ora</item>
         <item quantity="other">Tra %d ore</item>
     </plurals>
-    <plurals name="nTaskReminderPrefixMinutes">
+    <plurals name="nTaskReminderPrefixMinutes" tools:ignore="MissingQuantity">
         <item quantity="one">Tra 1 minuto</item>
         <item quantity="other">Tra %d minuti</item>
     </plurals>
     <string name="nTasksCountZero">Nessuna attività</string>
-    <plurals name="nTasksCount">
+    <plurals name="nTasksCount" tools:ignore="MissingQuantity">
         <item quantity="one">1 attività</item>
         <item quantity="other">%d attività</item>
     </plurals>
     <string name="nHabitsCountZero">Nessun completamento</string>
-    <plurals name="nHabitsCount">
+    <plurals name="nHabitsCount" tools:ignore="MissingQuantity">
         <item quantity="one">1 completamento</item>
         <item quantity="other">%d completamenti</item>
     </plurals>
     <string name="nMinutesCountZero">Nessun minuto</string>
-    <plurals name="nMinutesCount">
+    <plurals name="nMinutesCount" tools:ignore="MissingQuantity">
         <item quantity="one">1 minuto</item>
         <item quantity="other">%d minuti</item>
     </plurals>

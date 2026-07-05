@@ -8,13 +8,13 @@
     <string name="globalLabelTasks">Aufgaben</string>
     <string name="commonButtonGotIt">Verstanden</string>
     <string name="commonDaytimeAfternoon">Nachmittag</string>
-    <string name="commonDaytimeAfternoonRange">12:00 - 17:00</string>
+    <string name="commonDaytimeAfternoonRange">12:00 – 17:00</string>
     <string name="commonDaytimeEvening">Abend</string>
-    <string name="commonDaytimeEveningRange">17:00 - 21:00</string>
+    <string name="commonDaytimeEveningRange">17:00 – 21:00</string>
     <string name="commonDaytimeMorning">Morgen</string>
-    <string name="commonDaytimeMorningRange">05:00 - 12:00</string>
+    <string name="commonDaytimeMorningRange">05:00 – 12:00</string>
     <string name="commonDaytimeNight">Nacht</string>
-    <string name="commonDaytimeNightRange">21:00 - 05:00</string>
+    <string name="commonDaytimeNightRange">21:00 – 05:00</string>
     <string name="commonLabelAdd">Hinzufügen</string>
     <string name="commonLabelCancel">Abbrechen</string>
     <string name="commonLabelConfirm">Bestätigen</string>
@@ -138,7 +138,7 @@
     </plurals>
     <string name="habitDetailLabelIcon">Wähle ein Icon</string>
     <string name="habitDetailLabelName">Name der Gewohnheit</string>
-    <string name="habitDetailLabelNameHint">z.B. 10 Seiten lesen, Workout...</string>
+    <string name="habitDetailLabelNameHint">z.B. 10 Seiten lesen, Workout…</string>
     <string name="habitDetailLabelNameRequest">Bitte gib einen Namen ein</string>
     <string name="habitDetailLabelNotes">Notizen</string>
     <string name="habitDetailLabelNotesHint">Warum baust du diese Gewohnheit auf?</string>
@@ -197,7 +197,7 @@
     <string name="taskDetailsLabelPriority">Priorität</string>
     <string name="taskDetailsLabelReminderSet">Erinnerung einstellen</string>
     <string name="taskDetailsLabelReminderTooEarly">Die benutzerdefinierte Erinnerung muss vor dem Fälligkeitsdatum liegen</string>
-    <string name="taskDetailsLabelSubtaskHint">Teilaufgaben hinzufügen...</string>
+    <string name="taskDetailsLabelSubtaskHint">Teilaufgaben hinzufügen…</string>
     <string name="taskDetailsLabelTitle">Aufgabentitel</string>
     <string name="taskDetailsReminderOptionCustom">Benutzerdefiniert</string>
     <string name="taskDetailsReminderOptionDay">1 Tag vorher</string>
@@ -218,7 +218,7 @@
     <string name="taskListEmpty">Noch keine Aufgaben! Tippe auf +, um eine hinzuzufügen</string>
     <string name="taskListFilterAll">Alle</string>
     <string name="taskListFilterNoMatch">Keine Aufgaben entsprechen deinen Filtern</string>
-    <string name="taskListSearchHint">Titel oder Beschreibung suchen...</string>
+    <string name="taskListSearchHint">Titel oder Beschreibung suchen…</string>
     <string name="taskListSectionDone">Erledigt</string>
     <string name="taskListSectionOverdue">Überfällig</string>
     <string name="taskListSectionToday">Heute fällig</string>
@@ -422,7 +422,7 @@
     <string name="locationApiDialogSupportedDesc">Photon-kompatible Endpunkte</string>
     <string name="locationApiDialogTest">Verbindung testen</string>
     <string name="locationApiDialogTitle">Ortssuche-API</string>
-    <string name="locationPickerHint">z.B. Pizza Hut, London...</string>
+    <string name="locationPickerHint">z.B. Pizza Hut, London…</string>
     <string name="locationPickerMinChars">Mindestens 3 Zeichen</string>
     <string name="locationPickerNetworkError">Netzwerkfehler. Überprüfe deine Verbindung und die Standort-API-Einstellungen.</string>
     <string name="locationPickerNoResults">Keine Orte gefunden für \"%1$s\"</string>
@@ -455,6 +455,8 @@
     <string name="weekNavThisWeek">Diese Woche</string>
     <string name="widgetHabitsToday">Heutige Gewohnheiten</string>
     <string name="widgetTasksDue">Fällige Aufgaben (%1$d)</string>
+    <string name="widgetNoUrgentTasks">Keine dringende Aufgaben</string>
+    <string name="widgetMoreTasks">+%1$d mehr</string>
     <plurals name="nTaskReminderPrefixDays">
         <item quantity="one">Morgen</item>
         <item quantity="other">In %d Tagen</item>

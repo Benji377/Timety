@@ -8,19 +8,23 @@
     <string name="globalLabelTasks">Ncëries</string>
     <string name="commonButtonGotIt">Capì</string>
     <string name="commonDaytimeAfternoon">Domesdì</string>
-    <string name="commonDaytimeAfternoonRange">12:00 - 17:00</string>
+    <string name="commonDaytimeAfternoonRange">12:00 – 17:00</string>
     <string name="commonDaytimeEvening">Sëira</string>
-    <string name="commonDaytimeEveningRange">17:00 - 21:00</string>
+    <string name="commonDaytimeEveningRange">17:00 – 21:00</string>
     <string name="commonDaytimeMorning">Duman</string>
-    <string name="commonDaytimeMorningRange">05:00 - 12:00</string>
+    <string name="commonDaytimeMorningRange">05:00 – 12:00</string>
     <string name="commonDaytimeNight">Nuet</string>
-    <string name="commonDaytimeNightRange">21:00 - 05:00</string>
+    <string name="commonDaytimeNightRange">21:00 – 05:00</string>
     <string name="commonLabelAdd">Njunté</string>
     <string name="commonLabelCancel">Anulé</string>
     <string name="commonLabelConfirm">Cunfermé</string>
     <string name="commonLabelDelete">Scancelé</string>
     <string name="commonLabelRemove">Tò demez</string>
     <string name="commonLabelSave">Salvé</string>
+    <string name="commonLabelShare">Share</string>
+    <string name="commonLabelClose">Stlu</string>
+    <string name="commonBack">Zeruch</string>
+    <string name="commonClear">Clear</string>
     <string name="commonTimeDone">Fat</string>
     <string name="commonTimeDueToday">Scade ncuei</string>
     <string name="commonTimeUpcoming">Da unì</string>
@@ -55,6 +59,9 @@
     <string name="homeSectionHabitsDue">Abitudins de ncuei (%1$d)</string>
     <string name="homeSectionTasksDue">Ncëries da finé (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Proscima ncëries (%1$d)</string>
+    <string name="focusActionPause">Pause</string>
+    <string name="focusActionResume">Fe inant</string>
+    <string name="focusActionStop">Ferme</string>
     <string name="focusDialogSessionResetContent">L cronometer ie pausà. Cunfermea per taché da nuev, o anulea per jì inant.</string>
     <string name="focusDialogSessionResetTitle">Taché da nuev la sescion?</string>
     <string name="focusDialogSessionStopContent">L cronometer ie pausà. Cunfermea per stlù ju y salvé, o anulea per jì inant.</string>
@@ -70,6 +77,7 @@
     <string name="focusModeFlexible">Flessibl</string>
     <string name="focusModeLabelEdit">Mudé modalità</string>
     <string name="focusModeLabelEditing">Ntan a mudé modalità</string>
+    <string name="focusModeLabelName">Inuem mode</string>
     <string name="focusModeLabelNew">Nueva modalità</string>
     <string name="focusModeLabelTimeline">Fases dl tëmp</string>
     <string name="focusModeLabelTimelineDesc">Clica sun na fasa per la mudé o scancelé</string>
@@ -130,7 +138,7 @@
     </plurals>
     <string name="habitDetailLabelIcon">Cëria ora n\'icona</string>
     <string name="habitDetailLabelName">Inuem abitudin</string>
-    <string name="habitDetailLabelNameHint">ej. Lejer 10 plates, Allenamënt...</string>
+    <string name="habitDetailLabelNameHint">ej. Lejer 10 plates, Allenamënt…</string>
     <string name="habitDetailLabelNameRequest">Nserësc n inuem</string>
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Cie mutivazions es\'a per chësta abitudin?</string>
@@ -189,7 +197,7 @@
     <string name="taskDetailsLabelPriority">Priorità</string>
     <string name="taskDetailsLabelReminderSet">Mët lezit</string>
     <string name="taskDetailsLabelReminderTooEarly">L lezit persunalisà muessa vester dant ala data de scadënza</string>
-    <string name="taskDetailsLabelSubtaskHint">Njunté sot-ncëries...</string>
+    <string name="taskDetailsLabelSubtaskHint">Njunté sot-ncëries…</string>
     <string name="taskDetailsLabelTitle">Titul dla ncëria</string>
     <string name="taskDetailsReminderOptionCustom">Persunalisà</string>
     <string name="taskDetailsReminderOptionDay">1 di dant</string>
@@ -210,7 +218,7 @@
     <string name="taskListEmpty">Niamò deguna ncëries! Clica sun + per njunté</string>
     <string name="taskListFilterAll">Dutes</string>
     <string name="taskListFilterNoMatch">Deguna ncëries passenëia ai tò filtri</string>
-    <string name="taskListSearchHint">Cërca titul o descrizion...</string>
+    <string name="taskListSearchHint">Cërca titul o descrizion…</string>
     <string name="taskListSectionDone">Finedes</string>
     <string name="taskListSectionOverdue">Termin passà</string>
     <string name="taskListSectionToday">Scade ncuei</string>
@@ -302,6 +310,7 @@
     <string name="settingsLabelLanguage">Lingaz</string>
     <string name="settingsLabelLanguageSystem">Dl Sistem</string>
     <string name="settingsLabelLocationApi">API per crì luelg</string>
+    <string name="settingsLabelValidating">verifiché…</string>
     <string name="settingsLabelMaintainer">Manutenidëur</string>
     <string name="settingsLabelSourceCode">Còdesc Sursënt</string>
     <string name="settingsLabelSourceCodeSubtitle">GitHub Repository</string>
@@ -329,6 +338,7 @@
     <string name="userErrorGenerateImage">Feter de generé l cheder di resultac.</string>
     <string name="userProfileTitle">Profil</string>
     <string name="userShareSubject">Mi soma sun Timety</string>
+    <string name="userShareSummary">Tlo ie n resume de cie che es arjont:</string>
     <string name="userShareText">Dumineia ti tëmp cun Timety!</string>
     <string name="userStatBestStreak">Sëria miëura</string>
     <string name="userStatFocusMins">Min focus</string>
@@ -337,11 +347,12 @@
     <string name="userStatTasksDone">Ncëries finedes</string>
     <string name="userStatsAllTimeSubtitle">I ti progreji a n colp d\'uedl</string>
     <string name="userStatsAllTimeTitle">Statistiches de dut l tëmp</string>
+    <string name="userTooltipEditAvatar">Mude Avatar</string>
     <string name="userTooltipShareWrapUp">Përti l result dl\'ena</string>
     <string name="backupActionSaveDevice">Salvé sun l\'aparat</string>
     <string name="backupActionSaveDeviceSubtitle">Cëria ora na cartela</string>
     <string name="backupActionShareCloud">Përti / Ciarié sun l Cloud</string>
-    <string name="backupActionShareCloudSubtitle">Mëna a Drive, Dropbox, WhatsApp...</string>
+    <string name="backupActionShareCloudSubtitle">Mëna a Drive, Dropbox, WhatsApp…</string>
     <string name="backupExportFailure">Esportazion faleda: %1$s</string>
     <string name="backupExportSubject">Esportazion Timety</string>
     <string name="backupExportSuccess">Esportazion saveda te</string>
@@ -411,7 +422,7 @@
     <string name="locationApiDialogSupportedDesc">Endpoints che passa con Photon</string>
     <string name="locationApiDialogTest">Cuntrulea liant</string>
     <string name="locationApiDialogTitle">API per crì luelg</string>
-    <string name="locationPickerHint">ej. Pizza Hut, Roma...</string>
+    <string name="locationPickerHint">ej. Pizza Hut, Roma…</string>
     <string name="locationPickerMinChars">Mancimun 3 carateres</string>
     <string name="locationPickerNetworkError">Fal dla rë. Cuntrulea l liant y la mpustazions API di luesc.</string>
     <string name="locationPickerNoResults">Degun luesc abinei per \"%1$s\"</string>
@@ -444,6 +455,8 @@
     <string name="weekNavThisWeek">Chësta ena</string>
     <string name="widgetHabitsToday">Abitudins de ncuei</string>
     <string name="widgetTasksDue">Ncëries da finé (%1$d)</string>
+    <string name="widgetNoUrgentTasks">Net nia de urgente</string>
+    <string name="widgetMoreTasks">+%1$d de plu</string>
     <plurals name="nTaskReminderPrefixDays">
         <item quantity="one">Duman</item>
         <item quantity="other">Te %d dis</item>

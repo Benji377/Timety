@@ -8,13 +8,13 @@
     <string name="globalLabelTasks">Tasks</string>
     <string name="commonButtonGotIt">Got it</string>
     <string name="commonDaytimeAfternoon">Afternoon</string>
-    <string name="commonDaytimeAfternoonRange">12 PM - 5 PM</string>
+    <string name="commonDaytimeAfternoonRange">12 PM – 5 PM</string>
     <string name="commonDaytimeEvening">Evening</string>
-    <string name="commonDaytimeEveningRange">5 PM - 9 PM</string>
+    <string name="commonDaytimeEveningRange">5 PM – 9 PM</string>
     <string name="commonDaytimeMorning">Morning</string>
-    <string name="commonDaytimeMorningRange">5 AM - 12 PM</string>
+    <string name="commonDaytimeMorningRange">5 AM – 12 PM</string>
     <string name="commonDaytimeNight">Night</string>
-    <string name="commonDaytimeNightRange">9 PM - 5 AM</string>
+    <string name="commonDaytimeNightRange">9 PM – 5 AM</string>
     <string name="commonLabelAdd">Add</string>
     <string name="commonLabelCancel">Cancel</string>
     <string name="commonLabelConfirm">Confirm</string>
@@ -138,7 +138,7 @@
     </plurals>
     <string name="habitDetailLabelIcon">Select an Icon</string>
     <string name="habitDetailLabelName">Habit Name</string>
-    <string name="habitDetailLabelNameHint">e.g., Read 10 pages, Workout...</string>
+    <string name="habitDetailLabelNameHint">e.g., Read 10 pages, Workout…</string>
     <string name="habitDetailLabelNameRequest">Please enter a name</string>
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Why are you building this habit?</string>
@@ -197,7 +197,7 @@
     <string name="taskDetailsLabelPriority">Priority</string>
     <string name="taskDetailsLabelReminderSet">Set Reminder</string>
     <string name="taskDetailsLabelReminderTooEarly">Custom reminder must be before the Due Date</string>
-    <string name="taskDetailsLabelSubtaskHint">Add subtasks...</string>
+    <string name="taskDetailsLabelSubtaskHint">Add subtasks…</string>
     <string name="taskDetailsLabelTitle">Task Title</string>
     <string name="taskDetailsReminderOptionCustom">Custom</string>
     <string name="taskDetailsReminderOptionDay">1 day before</string>
@@ -218,7 +218,7 @@
     <string name="taskListEmpty">No tasks yet! Tap + to add one</string>
     <string name="taskListFilterAll">All</string>
     <string name="taskListFilterNoMatch">No tasks match your filters</string>
-    <string name="taskListSearchHint">Search title or description...</string>
+    <string name="taskListSearchHint">Search title or description…</string>
     <string name="taskListSectionDone">Done</string>
     <string name="taskListSectionOverdue">Overdue</string>
     <string name="taskListSectionToday">Due Today</string>
@@ -422,7 +422,7 @@
     <string name="locationApiDialogSupportedDesc">Photon-compatible endpoints</string>
     <string name="locationApiDialogTest">Test Connection</string>
     <string name="locationApiDialogTitle">Location Search API</string>
-    <string name="locationPickerHint">e.g., Pizza Hut, London...</string>
+    <string name="locationPickerHint">e.g., Pizza Hut, London…</string>
     <string name="locationPickerMinChars">Minimum 3 characters</string>
     <string name="locationPickerNetworkError">Network error. Check your connection and location API settings.</string>
     <string name="locationPickerNoResults">No places found for \"%1$s\"</string>
