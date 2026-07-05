@@ -9,9 +9,7 @@
         android:left="2dp"
         android:right="2dp">
         <shape android:shape="rectangle">
-            <!-- Opaque fill between the purple side rails; the old translucent overlay left
-                 the row solid purple and made the text unreadable -->
-            <solid android:color="#FBF8FF" />
+            <solid android:color="#1F1A2E" />
         </shape>
     </item>
 </layer-list>

@@ -6,10 +6,15 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.UserColor
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZoneId
@@ -193,6 +198,8 @@ class NotificationService(private val context: Context) {
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setAutoCancel(true)
             .setContentIntent(pendingContentIntent)
+            .setColor(channelAccentColor(channelId))
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
         try {
@@ -201,6 +208,14 @@ class NotificationService(private val context: Context) {
             // Notification permission not granted; the alarm still fired, just silently.
         }
     }
+
+    /** Brand accent per channel so reminders are visually attributable at a glance. */
+    private fun channelAccentColor(channelId: String): Int = when (channelId) {
+        CHANNEL_TASKS -> TaskColor
+        CHANNEL_HABITS -> HabitColor
+        CHANNEL_FOCUS, CHANNEL_MOTIVATION -> FocusColor
+        else -> UserColor
+    }.toArgb()
 
     internal fun rescheduleIfRepeating(intent: Intent) {
         val repeat = Repeat.fromExtra(intent.getStringExtra(EXTRA_REPEAT))

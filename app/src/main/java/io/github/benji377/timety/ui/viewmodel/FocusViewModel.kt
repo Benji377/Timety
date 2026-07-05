@@ -1,7 +1,7 @@
 package io.github.benji377.timety.ui.viewmodel
 
 import androidx.compose.ui.graphics.toArgb
-import androidx.lifecycle.ViewModel
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.focus.DistractionEntity
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
@@ -48,11 +48,12 @@ data class DistractionWithSession(
 )
 
 class FocusViewModel(
+    application: android.app.Application,
     private val focusRepository: FocusRepository,
     private val userRepository: UserRepository,
     private val habitRepository: io.github.benji377.timety.data.repository.HabitRepository,
     private val settingsRepository: io.github.benji377.timety.data.repository.SettingsRepository
-) : ViewModel() {
+) : androidx.lifecycle.AndroidViewModel(application) {
 
     // --- MODES / SESSIONS / TAGS (existing) ---
     val allModes: StateFlow<List<FocusModeEntity>> = focusRepository.allModes
@@ -211,6 +212,10 @@ class FocusViewModel(
                                             )
                                         )
                                         userRepository.addXp(ExperienceEngine.xpPerHabit)
+                                        // Auto-completion bypasses HabitViewModel, so refresh
+                                        // the habit widget here too.
+                                        io.github.benji377.timety.widget.HabitWidget()
+                                            .updateAll(getApplication())
                                     }
                                 }
                             }
@@ -225,6 +230,22 @@ class FocusViewModel(
                 }
 
                 setAwaitingContinue(true)
+            }
+        }
+
+        // Single bookkeeping path for every way the timer can stop (in-app stop dialog, in-app
+        // reset, or the notification's Stop action while the app is backgrounded): bank the
+        // partial phase, then either log the session or discard it, and reset the phase cursor.
+        viewModelScope.launch {
+            FocusTimerManager.stopEvent.collect { info ->
+                setAwaitingContinue(false)
+                resetPhaseIndex()
+                if (info.discard) {
+                    discardSession()
+                } else {
+                    addPartialPhaseTime(info.elapsedFocusSeconds, info.wasRestPhase)
+                    completeSessionAndLog()
+                }
             }
         }
     }
@@ -261,6 +282,13 @@ class FocusViewModel(
                 )
             )
         }
+        sessionAccumulatedFocusSeconds = 0
+        sessionStartTime = null
+        resetCurrentSession()
+    }
+
+    /** Throws away the in-flight session without logging anything (the "Reset" flow). */
+    fun discardSession() {
         sessionAccumulatedFocusSeconds = 0
         sessionStartTime = null
         resetCurrentSession()

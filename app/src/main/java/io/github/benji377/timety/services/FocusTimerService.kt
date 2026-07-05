@@ -82,8 +82,8 @@ class FocusTimerService : Service() {
             }
 
             ACTION_PAUSE -> FocusTimerManager.pauseTimer()
-            ACTION_STOP -> {
-                FocusTimerManager.stopTimer()
+            ACTION_STOP, ACTION_DISCARD -> {
+                FocusTimerManager.stopTimer(discard = action == ACTION_DISCARD)
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 cancelAlarm()
                 stopSelf()
@@ -161,6 +161,8 @@ class FocusTimerService : Service() {
         customView.setTextViewText(R.id.notification_title, title)
         customView.setTextViewText(R.id.notification_body, state.modeName)
         customView.setTextColor(R.id.notification_title, accentColor)
+        customView.setTextColor(R.id.notification_chronometer, accentColor)
+        customView.setTextColor(R.id.notification_paused_text, accentColor)
 
         if (isStatic) {
             customView.setViewVisibility(R.id.notification_chronometer, android.view.View.GONE)
@@ -197,11 +199,16 @@ class FocusTimerService : Service() {
             .setOnlyAlertOnce(true)
             .setContentIntent(pendingContentIntent)
             .setColor(accentColor)
+            .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setShowWhen(false)
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
         // Kotlin-only enhancement (no Flutter equivalent): interactive actions. The pause/resume
         // action is omitted while awaiting continue - resuming there needs the next phase's
         // config, which only `FocusScreen`/`FocusViewModel` know, so only "Stop" is offered.
+        // Session bookkeeping for Stop happens app-side via [FocusTimerManager.stopEvent], so the
+        // action stays correct while the app is backgrounded.
         if (!state.isAwaitingContinue) {
             val pauseResumeIntent = Intent(this, FocusTimerService::class.java).apply {
                 action = if (state.isRunning) ACTION_PAUSE else ACTION_START
@@ -213,7 +220,7 @@ class FocusTimerService : Service() {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
             builder.addAction(
-                if (state.isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play,
+                if (state.isRunning) R.drawable.ic_action_pause else R.drawable.ic_action_play,
                 getString(if (state.isRunning) R.string.focusActionPause else R.string.focusActionResume),
                 pendingPauseResumeIntent
             )
@@ -225,7 +232,7 @@ class FocusTimerService : Service() {
         val pendingStopIntent = PendingIntent.getService(
             this, 2, stopIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        builder.addAction(android.R.drawable.ic_delete, getString(R.string.focusActionStop), pendingStopIntent)
+        builder.addAction(R.drawable.ic_action_stop, getString(R.string.focusActionStop), pendingStopIntent)
 
         return builder.build()
     }
@@ -237,5 +244,8 @@ class FocusTimerService : Service() {
         const val ACTION_START = "ACTION_START"
         const val ACTION_PAUSE = "ACTION_PAUSE"
         const val ACTION_STOP = "ACTION_STOP"
+
+        /** Stops the timer WITHOUT logging the session (the in-app "Reset" flow). */
+        const val ACTION_DISCARD = "ACTION_DISCARD"
     }
 }

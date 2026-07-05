@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="20sp"
+            android:textSize="18sp"
             tools:text="Focus"
             android:textStyle="bold" />
 
@@ -42,20 +42,22 @@
         android:id="@+id/notification_chronometer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:fontFamily="sans-serif-medium"
         android:includeFontPadding="false"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="40sp" />
+        android:textSize="34sp" />
 
     <TextView
         android:id="@+id/notification_paused_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:fontFamily="sans-serif-medium"
         android:includeFontPadding="false"
         android:text="@string/notificationTimerPaused"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="28sp"
+        android:textSize="22sp"
         android:visibility="gone" />
 
 </LinearLayout>

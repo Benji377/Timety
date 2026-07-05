@@ -14,7 +14,8 @@
         android:right="2dp"
         android:top="2dp">
         <shape android:shape="rectangle">
-            <solid android:color="#1A7C3AED" />
+            <!-- Opaque light-purple fill so the purple header text stays readable -->
+            <solid android:color="#F1E9FC" />
             <corners
                 android:topLeftRadius="10dp"
                 android:topRightRadius="10dp" />

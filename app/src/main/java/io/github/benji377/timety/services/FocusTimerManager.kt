@@ -65,6 +65,23 @@ object FocusTimerManager {
     val phaseCompleteEvent =
         kotlinx.coroutines.flow.MutableSharedFlow<Pair<Boolean, Int>>(extraBufferCapacity = 1)
 
+    /**
+     * Emitted once per [stopTimer] call on an active session, so session bookkeeping (logging the
+     * partial phase, resetting the UI's phase cursor) happens identically whether the stop came
+     * from the in-app dialog or the notification's Stop action while the app is backgrounded.
+     *
+     * [elapsedFocusSeconds] is 0 when the stop happened at an awaiting-continue boundary: that
+     * phase's full duration was already banked via [phaseCompleteEvent], counting it again here
+     * would double it.
+     */
+    data class StopInfo(
+        val elapsedFocusSeconds: Int,
+        val wasRestPhase: Boolean,
+        val discard: Boolean,
+    )
+
+    val stopEvent = kotlinx.coroutines.flow.MutableSharedFlow<StopInfo>(extraBufferCapacity = 1)
+
     private var job: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -107,6 +124,9 @@ object FocusTimerManager {
 
     fun startTimer() {
         if (_timerState.value.isRunning) return
+        // Must be read before the state update below clears the paused flag, otherwise the
+        // resume branch is unreachable and the countdown silently swallows the pause duration.
+        val resuming = _timerState.value.isPaused
 
         _timerState.update {
             it.copy(
@@ -119,8 +139,8 @@ object FocusTimerManager {
         if (phaseBaseTime == null) {
             phaseBaseTime = Instant.now()
             currentPhaseTotalSeconds = _timerState.value.totalPhaseSeconds
-        } else if (_timerState.value.isPaused) {
-            // Store elapsed time before pausing and reset base time to now
+        } else if (resuming) {
+            // Bank the pre-pause elapsed time and re-anchor, so the paused wall time is excluded.
             accumulatedElapsed = _timerState.value.elapsedSeconds
             phaseBaseTime = Instant.now()
         }
@@ -139,8 +159,15 @@ object FocusTimerManager {
         _timerState.update { it.copy(isRunning = false, isPaused = true) }
     }
 
-    fun stopTimer() {
+    fun stopTimer(discard: Boolean = false) {
         job?.cancel()
+        val state = _timerState.value
+        val wasActive = state.isRunning || state.isPaused || state.isAwaitingContinue
+        val elapsed = when {
+            state.isAwaitingContinue -> 0 // already banked via phaseCompleteEvent
+            state.isStopwatch -> state.elapsedSeconds
+            else -> (state.totalPhaseSeconds - state.secondsRemaining).coerceAtLeast(0)
+        }
         phaseBaseTime = null
         accumulatedElapsed = 0
         _timerState.update {
@@ -151,6 +178,9 @@ object FocusTimerManager {
                 secondsRemaining = it.totalPhaseSeconds,
                 elapsedSeconds = 0,
             )
+        }
+        if (wasActive) {
+            stopEvent.tryEmit(StopInfo(elapsed, state.isRestPhase, discard))
         }
     }
 

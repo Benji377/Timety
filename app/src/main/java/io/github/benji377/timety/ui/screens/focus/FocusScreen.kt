@@ -197,10 +197,8 @@ fun FocusScreen(
         val nextIndex = phaseIndex + 1
         val mode = activeMode
         if (mode == null || nextIndex >= activePhases.size) {
+            // Bookkeeping (log + reset flags) happens via FocusTimerManager.stopEvent.
             sendAction(FocusTimerService.ACTION_STOP)
-            focusViewModel.setAwaitingContinue(false)
-            focusViewModel.resetPhaseIndex()
-            focusViewModel.completeSessionAndLog()
             return
         }
         val phase = activePhases[nextIndex]
@@ -675,13 +673,9 @@ fun FocusScreen(
             text = { Text(stringResource(R.string.focusDialogSessionStopContent)) },
             confirmButton = {
                 Button(onClick = {
-                    val elapsed =
-                        if (timerState.isStopwatch) timerState.elapsedSeconds else timerState.totalPhaseSeconds - timerState.secondsRemaining
-                    focusViewModel.addPartialPhaseTime(elapsed, timerState.isRestPhase)
-                    sendAction(io.github.benji377.timety.services.FocusTimerService.ACTION_STOP)
-                    focusViewModel.setAwaitingContinue(false)
-                    focusViewModel.resetPhaseIndex()
-                    focusViewModel.completeSessionAndLog()
+                    // Partial-phase banking + session logging happen via
+                    // FocusTimerManager.stopEvent, shared with the notification's Stop action.
+                    sendAction(FocusTimerService.ACTION_STOP)
                     showStopConfirmation = false
                 }) { Text(stringResource(R.string.commonLabelConfirm)) }
             },
@@ -702,9 +696,7 @@ fun FocusScreen(
             text = { Text(stringResource(R.string.focusDialogSessionResetContent)) },
             confirmButton = {
                 Button(onClick = {
-                    sendAction(FocusTimerService.ACTION_STOP)
-                    focusViewModel.setAwaitingContinue(false)
-                    focusViewModel.resetPhaseIndex()
+                    sendAction(FocusTimerService.ACTION_DISCARD)
                     showResetConfirmation = false
                 }) { Text(stringResource(R.string.commonLabelConfirm)) }
             },

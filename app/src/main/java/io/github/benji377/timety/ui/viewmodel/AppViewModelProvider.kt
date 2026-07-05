@@ -35,6 +35,7 @@ object AppViewModelProvider {
 
                 modelClass.isAssignableFrom(FocusViewModel::class.java) -> {
                     FocusViewModel(
+                        application,
                         container.focusRepository,
                         container.userRepository,
                         container.habitRepository,
