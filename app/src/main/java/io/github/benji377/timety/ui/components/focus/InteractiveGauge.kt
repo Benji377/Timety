@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -87,7 +88,7 @@ fun InteractiveGauge(
     color: Color? = null,
     modifier: Modifier = Modifier,
 ) {
-    var currentProgress by remember { mutableStateOf(progress) }
+    var currentProgress by remember { mutableFloatStateOf(progress) }
     LaunchedEffect(progress, isInteractive) { currentProgress = progress }
 
     val isDark = io.github.benji377.timety.ui.theme.LocalIsDarkTheme.current

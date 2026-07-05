@@ -72,6 +72,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -987,7 +988,7 @@ private data class NumberDialogSpec(
 
 @Composable
 private fun NumberPickerDialog(spec: NumberDialogSpec, onDismiss: () -> Unit) {
-    var value by remember(spec) { mutableStateOf(spec.current.toFloat()) }
+    var value by remember(spec) { mutableFloatStateOf(spec.current.toFloat()) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(spec.title) },

@@ -52,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -103,11 +104,11 @@ import kotlin.math.roundToInt
 /** Roughly a day; used as a stand-in "infinite" duration so Stopwatch mode can count up under
  * the current [FocusTimerManager], which only knows how to count down from a fixed total. */
 private fun secondsForPhase(
-    phase: io.github.benji377.timety.data.model.focus.SessionPhaseEntity,
+    phase: SessionPhaseEntity,
     flexibleMinutes: Int
-): Int = when {
-    phase.durationMinutes == 0 -> 0 // Stopwatch
-    phase.durationMinutes == -1 -> flexibleMinutes * 60
+): Int = when (phase.durationMinutes) {
+    0 -> 0 // Stopwatch
+    -1 -> flexibleMinutes * 60
     else -> phase.durationMinutes * 60
 }
 
@@ -164,7 +165,7 @@ fun FocusScreen(
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
 
-    var flexibleMinutes by remember { mutableStateOf(25) }
+    var flexibleMinutes by remember { mutableIntStateOf(25) }
 
     var showTargetSelection by remember { mutableStateOf(false) }
     var showTimeMachine by remember { mutableStateOf(false) }
@@ -183,9 +184,8 @@ fun FocusScreen(
     // Load the active mode's phases and reset the phase cursor whenever the mode changes.
     LaunchedEffect(activeMode?.id) {
         focusViewModel.resetPhaseIndex()
-        val mode = activeMode
-        if (mode != null) {
-            focusViewModel.getPhasesForMode(mode.id).collect { phases ->
+        if (activeMode != null) {
+            focusViewModel.getPhasesForMode(activeMode.id).collect { phases ->
                 activePhases = phases.sortedBy { it.orderIndex }
             }
         } else {
@@ -195,8 +195,7 @@ fun FocusScreen(
 
     fun continueToNextPhase() {
         val nextIndex = phaseIndex + 1
-        val mode = activeMode
-        if (mode == null || nextIndex >= activePhases.size) {
+        if (activeMode == null || nextIndex >= activePhases.size) {
             // Bookkeeping (log + reset flags) happens via FocusTimerManager.stopEvent.
             sendAction(FocusTimerService.ACTION_STOP)
             return
@@ -205,7 +204,7 @@ fun FocusScreen(
         focusViewModel.setCurrentPhaseIndex(nextIndex)
         focusViewModel.setAwaitingContinue(false)
         FocusTimerManager.setMode(
-            name = mode.name,
+            name = activeMode.name,
             totalPhaseSeconds = secondsForPhase(phase, flexibleMinutes),
             isRestPhase = phase.type == PhaseType.REST,
         )
