@@ -64,6 +64,7 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.StatsUtils
@@ -74,7 +75,7 @@ import java.time.ZoneId
 
 @Composable
 fun FocusStatsScreen(
-    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
 ) {
     val sessions by focusViewModel.allSessions.collectAsState()
     val tags by focusViewModel.allTags.collectAsState()

@@ -7,7 +7,6 @@ import io.github.benji377.timety.TimetyApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
@@ -31,16 +30,9 @@ class AlarmReceiver : BroadcastReceiver() {
 
     private suspend fun rescheduleRecurring(app: TimetyApplication) {
         NotificationService(app).ensureChannels()
-
-        val scheduler = ReminderScheduler.create(app)
-        val settings = app.container.settingsRepository
-
-        scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
-        scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
-
-        app.container.habitRepository.allHabits.first().forEach { habit ->
-            scheduler.scheduleHabitReminder(habit)
-        }
+        // Includes task reminders: one-shot exact alarms are wiped by a reboot or app
+        // update just like the repeating ones.
+        ReminderScheduler.resyncAll(app)
     }
 
     private companion object {

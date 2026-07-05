@@ -66,6 +66,7 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
@@ -86,7 +87,7 @@ private val Grey600 = Color(0xFF757575)
 fun CalendarScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
     onNavigateToTask: (String) -> Unit = {},
     onNavigateToHabit: (String) -> Unit = {},
     onNavigateBack: () -> Unit = {}

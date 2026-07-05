@@ -75,6 +75,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
@@ -187,7 +188,7 @@ fun StatisticsScreen(
 @Composable
 private fun OverviewStatsScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()

@@ -46,6 +46,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
@@ -64,7 +65,7 @@ fun HomeScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onNavigateToFocus: () -> Unit,
     onNavigateToTaskDetail: (String?) -> Unit,

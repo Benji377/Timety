@@ -37,6 +37,7 @@ import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.focus.FocusModeEditCard
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -46,7 +47,7 @@ import java.util.UUID
 @Composable
 fun FocusModesScreen(
     onNavigateBack: () -> Unit,
-    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
 ) {
     val modes by focusViewModel.allModes.collectAsState()
     var pendingMode by remember { mutableStateOf<FocusModeEntity?>(null) }
@@ -54,6 +55,7 @@ fun FocusModesScreen(
     val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
     val modeSavedScope = androidx.compose.runtime.rememberCoroutineScope()
     val modeSavedMessage = stringResource(R.string.focusModeSnackbarSaved)
+    val modeInUseMessage = stringResource(R.string.focusModeSnackbarInUse)
 
     Scaffold(
         topBar = {
@@ -159,7 +161,11 @@ fun FocusModesScreen(
                         )
                         modeSavedScope.launch { snackbarHostState.showSnackbar(modeSavedMessage) }
                     },
-                    onDelete = { focusViewModel.deleteMode(it) },
+                    onDelete = {
+                        focusViewModel.deleteMode(it) {
+                            modeSavedScope.launch { snackbarHostState.showSnackbar(modeInUseMessage) }
+                        }
+                    },
                 )
             }
 

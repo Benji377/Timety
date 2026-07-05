@@ -3,16 +3,12 @@ package io.github.benji377.timety.ui.viewmodel
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.repository.SettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val application: android.app.Application,
-    private val repository: SettingsRepository,
-    private val taskRepository: io.github.benji377.timety.data.repository.TaskRepository,
-    private val habitRepository: io.github.benji377.timety.data.repository.HabitRepository
+    private val repository: SettingsRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
     val themePref = repository.themePrefFlow.stateIn(
         viewModelScope,
@@ -117,16 +113,7 @@ class SettingsViewModel(
 
 
     private suspend fun resyncNotifications() {
-        val scheduler = io.github.benji377.timety.services.ReminderScheduler.create(application)
-
-        val tasks = taskRepository.allTasks.firstOrNull() ?: emptyList()
-        tasks.forEach { scheduler.scheduleTaskReminders(it.task) }
-
-        val habits = habitRepository.allHabits.firstOrNull() ?: emptyList()
-        habits.forEach { scheduler.scheduleHabitReminder(it) }
-
-        scheduler.scheduleDailyMotivation(repository.dailyMotivationTimeFlow.first())
-        scheduler.scheduleEndOfDayCheckup(repository.endOfDayCheckupTimeFlow.first())
+        io.github.benji377.timety.services.ReminderScheduler.resyncAll(application)
     }
 
     suspend fun validateLocationApiEndpoint(url: String): Boolean {

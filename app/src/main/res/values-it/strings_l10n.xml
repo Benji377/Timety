@@ -85,6 +85,7 @@
     <string name="focusModeLabelTypeSystem">Modalità di sistema</string>
     <string name="focusModePomodoro">Pomodoro Classico</string>
     <string name="focusModeSelect">Seleziona modalità</string>
+    <string name="focusModeSnackbarInUse">Questa modalità ha sessioni registrate e non può essere eliminata.</string>
     <string name="focusModeSnackbarSaved">Modalità salvata!</string>
     <string name="focusModeStopwatch">Cronometro</string>
     <string name="focusModesTitle">Gestisci modalità</string>

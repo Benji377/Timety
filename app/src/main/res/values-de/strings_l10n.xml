@@ -85,6 +85,7 @@
     <string name="focusModeLabelTypeSystem">System-Modus</string>
     <string name="focusModePomodoro">Pomodoro Klassik</string>
     <string name="focusModeSelect">Modus wählen</string>
+    <string name="focusModeSnackbarInUse">Dieser Modus hat protokollierte Sitzungen und kann nicht gelöscht werden.</string>
     <string name="focusModeSnackbarSaved">Modus gespeichert!</string>
     <string name="focusModeStopwatch">Stoppuhr</string>
     <string name="focusModesTitle">Modi verwalten</string>

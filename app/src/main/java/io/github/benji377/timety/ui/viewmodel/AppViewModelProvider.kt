@@ -1,10 +1,23 @@
 package io.github.benji377.timety.ui.viewmodel
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.TimetyApplication
+
+
+@Composable
+inline fun <reified VM : ViewModel> activityScopedViewModel(): VM {
+    val activity = checkNotNull(LocalActivity.current as? ComponentActivity) {
+        "activityScopedViewModel requires a ComponentActivity host"
+    }
+    return viewModel(viewModelStoreOwner = activity, factory = AppViewModelProvider.Factory)
+}
 
 object AppViewModelProvider {
     val Factory = object : ViewModelProvider.Factory {
@@ -50,9 +63,7 @@ object AppViewModelProvider {
                 modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
                     SettingsViewModel(
                         application,
-                        container.settingsRepository,
-                        container.taskRepository,
-                        container.habitRepository
+                        container.settingsRepository
                     ) as T
                 }
 

@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
 import android.widget.RemoteViews
@@ -110,11 +111,21 @@ class FocusTimerService : Service() {
         )
         val targetTimeMs = System.currentTimeMillis() + (secondsRemaining * 1000L)
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            targetTimeMs,
-            soundPendingIntent
-        )
+        // Same guard as NotificationService.scheduleExact: exact-alarm access can be revoked
+        // on Android 12+, and the phase-end chime is not worth a SecurityException crash.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                targetTimeMs,
+                soundPendingIntent
+            )
+        } else {
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                targetTimeMs,
+                soundPendingIntent
+            )
+        }
     }
 
     private fun cancelAlarm() {
@@ -152,6 +163,9 @@ class FocusTimerService : Service() {
         customView.setTextColor(R.id.notification_paused_text, accentColor)
 
         if (isStatic) {
+            // Show the frozen time (elapsed for stopwatch, remaining for countdown) instead of
+            // the layout's "--:--" placeholder.
+            customView.setTextViewText(R.id.notification_paused_text, state.centerText)
             customView.setViewVisibility(R.id.notification_chronometer, android.view.View.GONE)
             customView.setViewVisibility(R.id.notification_paused_text, android.view.View.VISIBLE)
         } else {

@@ -85,6 +85,7 @@
     <string name="focusModeLabelTypeSystem">Modalità dl sistem</string>
     <string name="focusModePomodoro">Pomodoro Classich</string>
     <string name="focusModeSelect">Cëria modalità</string>
+    <string name="focusModeSnackbarInUse">Chësta modalità à sescions registredes y ne possa nia unì scanceleda.</string>
     <string name="focusModeSnackbarSaved">Modalità saveda!</string>
     <string name="focusModeStopwatch">Cronometer</string>
     <string name="focusModesTitle">Aministré modaliteies</string>

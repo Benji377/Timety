@@ -100,6 +100,7 @@ import io.github.benji377.timety.ui.theme.WarningAccent
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
@@ -119,7 +120,7 @@ fun SettingsScreen(
     onNavigateToCategories: () -> Unit = {},
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    focusViewModel: FocusViewModel = activityScopedViewModel()
 ) {
     val context = LocalContext.current
     val backupExportSuccessStr = stringResource(R.string.backupExportSuccess)

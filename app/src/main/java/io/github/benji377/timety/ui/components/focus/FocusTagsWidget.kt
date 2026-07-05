@@ -59,6 +59,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
@@ -69,7 +70,7 @@ import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as
 @Composable
 fun FocusTagsWidget(
     onNavigateBack: () -> Unit,
-    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
 ) {
     val tags by focusViewModel.allTags.collectAsState()
     var tagDialogTarget by remember { mutableStateOf<FocusTagEntity?>(null) }

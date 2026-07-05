@@ -242,6 +242,16 @@ class FocusViewModel(
     private var sessionAccumulatedFocusSeconds: Int = 0
     private var sessionStartTime: Instant? = null
 
+    // Mode the running session was started with, captured at start time. Reading
+    // currentModeIndex/allModes at stop time is unreliable (the stop can arrive from the
+    // notification while the mode list flow is not being collected), and inserting a session
+    // with a made-up mode id violates the focus_sessions foreign key and crashes the app.
+    private var activeSessionModeId: String? = null
+
+    fun setActiveSessionMode(modeId: String) {
+        activeSessionModeId = modeId
+    }
+
     fun addPartialPhaseTime(seconds: Int, isRestPhase: Boolean) {
         if (!isRestPhase && seconds > 0) {
             sessionAccumulatedFocusSeconds += seconds
@@ -252,13 +262,13 @@ class FocusViewModel(
     }
 
     fun completeSessionAndLog() {
-        if (sessionAccumulatedFocusSeconds > 0) {
+        val modeId = activeSessionModeId ?: allModes.value.getOrNull(currentModeIndex.value)?.id
+        if (sessionAccumulatedFocusSeconds > 0 && modeId != null) {
             val target = selectedTarget.value
-            val activeMode = allModes.value.getOrNull(currentModeIndex.value)
             logSession(
                 FocusSessionEntity(
                     id = currentSessionId,
-                    modeId = activeMode?.id ?: "unknown",
+                    modeId = modeId,
                     startTime = sessionStartTime ?: Instant.now()
                         .minusSeconds(sessionAccumulatedFocusSeconds.toLong()),
                     endTime = Instant.now(),
@@ -273,6 +283,7 @@ class FocusViewModel(
         }
         sessionAccumulatedFocusSeconds = 0
         sessionStartTime = null
+        activeSessionModeId = null
         resetCurrentSession()
     }
 
@@ -280,6 +291,7 @@ class FocusViewModel(
     fun discardSession() {
         sessionAccumulatedFocusSeconds = 0
         sessionStartTime = null
+        activeSessionModeId = null
         resetCurrentSession()
     }
 
@@ -408,9 +420,17 @@ class FocusViewModel(
         viewModelScope.launch { focusRepository.insertModeWithPhases(mode, phases) }
     }
 
-    fun deleteMode(mode: FocusModeEntity) {
+    fun deleteMode(mode: FocusModeEntity, onBlocked: () -> Unit = {}) {
         if (mode.isSystem) return
-        viewModelScope.launch { focusRepository.deleteMode(mode) }
+        viewModelScope.launch {
+            // focus_sessions references modes with a RESTRICT foreign key, so deleting a mode
+            // that has logged sessions would throw. Keep the mode and tell the user instead.
+            if (focusRepository.modeHasSessions(mode.id)) {
+                onBlocked()
+            } else {
+                focusRepository.deleteMode(mode)
+            }
+        }
     }
 
     // --- TAGS ---

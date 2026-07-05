@@ -2,6 +2,7 @@ package io.github.benji377.timety.services
 
 import android.content.Context
 import io.github.benji377.timety.R
+import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -158,6 +159,20 @@ class ReminderScheduler private constructor(private val context: Context) {
             val appContext = context.applicationContext
             val code = SettingsRepository(appContext.dataStore).appLocaleCodeFlow.first()
             return ReminderScheduler(LocaleHelper.wrap(appContext, code))
+        }
+
+        
+        suspend fun resyncAll(context: Context) {
+            val app = context.applicationContext as? TimetyApplication ?: return
+            val scheduler = create(app)
+            val settings = app.container.settingsRepository
+
+            app.container.taskRepository.allTasks.first()
+                .forEach { scheduler.scheduleTaskReminders(it.task) }
+            app.container.habitRepository.allHabits.first()
+                .forEach { scheduler.scheduleHabitReminder(it) }
+            scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
+            scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
         }
     }
 }

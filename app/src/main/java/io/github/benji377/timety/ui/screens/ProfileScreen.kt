@@ -80,7 +80,7 @@ fun ProfileScreen(
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory),
     taskViewModel: io.github.benji377.timety.ui.viewmodel.TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: io.github.benji377.timety.ui.viewmodel.HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    focusViewModel: io.github.benji377.timety.ui.viewmodel.FocusViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    focusViewModel: io.github.benji377.timety.ui.viewmodel.FocusViewModel = io.github.benji377.timety.ui.viewmodel.activityScopedViewModel()
 ) {
     val userProfile by userViewModel.userProfile.collectAsState()
     val tasks by taskViewModel.allTasks.collectAsState()

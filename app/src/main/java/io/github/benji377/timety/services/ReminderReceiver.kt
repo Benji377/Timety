@@ -31,7 +31,7 @@ class ReminderReceiver : BroadcastReceiver() {
             val pendingResult = goAsync()
             CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
                 try {
-                    val finalBody = body + todaysHabitsSuffix(appContext)
+                    val finalBody = motivationBody(appContext, fallback = body)
                     notificationService.showNotification(
                         notificationId,
                         channelId,
@@ -51,8 +51,24 @@ class ReminderReceiver : BroadcastReceiver() {
     }
 
 
-    private suspend fun todaysHabitsSuffix(context: Context): String {
-        val app = context as? TimetyApplication ?: return ""
+    
+    private suspend fun motivationBody(context: Context, fallback: String): String {
+        val app = context.applicationContext as? TimetyApplication ?: return fallback
+        val localized = io.github.benji377.timety.util.LocaleHelper.wrap(
+            app,
+            app.container.settingsRepository.appLocaleCodeFlow.first()
+        )
+        val quotes = listOf(
+            localized.getString(R.string.notificationQuote1),
+            localized.getString(R.string.notificationQuote2),
+            localized.getString(R.string.notificationQuote3),
+        )
+        val quote = quotes[java.time.LocalDate.now().dayOfMonth % quotes.size]
+        return quote + todaysHabitsSuffix(app, localized)
+    }
+
+
+    private suspend fun todaysHabitsSuffix(app: TimetyApplication, context: Context): String {
         val habits = app.container.habitRepository.allHabits.first()
         if (habits.isEmpty()) return ""
         val completions = app.container.habitRepository.allCompletions.first()

@@ -28,6 +28,10 @@ class FocusRepository(
         focusDao.deleteMode(mode)
     }
 
+    suspend fun modeHasSessions(modeId: String): Boolean = withContext(Dispatchers.IO) {
+        focusDao.countSessionsForMode(modeId) > 0
+    }
+
     fun getPhasesForMode(modeId: String): Flow<List<SessionPhaseEntity>> =
         focusDao.getPhasesForMode(modeId)
 

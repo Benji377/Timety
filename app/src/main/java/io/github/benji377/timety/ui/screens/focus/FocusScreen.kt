@@ -91,6 +91,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
@@ -119,7 +120,7 @@ private fun secondsForPhase(
 fun FocusScreen(
     onNavigateToModes: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
-    focusViewModel: FocusViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -171,8 +172,13 @@ fun FocusScreen(
     }
 
     // Load the active mode's phases and reset the phase cursor whenever the mode changes.
+    // The reset must be skipped while a session is active: the ViewModel is shared
+    // activity-wide, so re-entering this screen mid-session would otherwise rewind the
+    // phase cursor of the running session.
     LaunchedEffect(activeMode?.id) {
-        focusViewModel.resetPhaseIndex()
+        if (!isRunning && !isPaused && !awaitingContinue) {
+            focusViewModel.resetPhaseIndex()
+        }
         if (activeMode != null) {
             focusViewModel.getPhasesForMode(activeMode.id).collect { phases ->
                 activePhases = phases.sortedBy { it.orderIndex }
@@ -192,10 +198,12 @@ fun FocusScreen(
         val phase = activePhases[nextIndex]
         focusViewModel.setCurrentPhaseIndex(nextIndex)
         focusViewModel.setAwaitingContinue(false)
+        focusViewModel.setActiveSessionMode(activeMode.id)
         FocusTimerManager.setMode(
             name = activeMode.name,
             totalPhaseSeconds = secondsForPhase(phase, flexibleMinutes),
             isRestPhase = phase.type == PhaseType.REST,
+            isStopwatch = activeMode.type == FocusModeType.STOPWATCH,
         )
         sendAction(FocusTimerService.ACTION_START)
     }
@@ -203,10 +211,12 @@ fun FocusScreen(
     fun startFromScratch() {
         val mode = activeMode ?: return
         val phase = activePhases.getOrNull(phaseIndex) ?: return
+        focusViewModel.setActiveSessionMode(mode.id)
         FocusTimerManager.setMode(
             name = mode.name,
             totalPhaseSeconds = secondsForPhase(phase, flexibleMinutes),
             isRestPhase = phase.type == PhaseType.REST,
+            isStopwatch = mode.type == FocusModeType.STOPWATCH,
         )
         sendAction(FocusTimerService.ACTION_START)
     }
@@ -307,8 +317,12 @@ fun FocusScreen(
         if (activeMode != null) localizedFocusModeName(activeMode) else stringResource(R.string.focusModeSelect)
     val habitLockedMsg = stringResource(R.string.focusSnackbarHabitLocked)
 
+    // Also locked while awaiting the next phase: the session's phase cursor refers to the
+    // current mode, and continuing into a freshly selected mode's phase list makes no sense.
+    val modeSelectionLocked = isRunning || isPaused || awaitingContinue
+
     fun cycleMode(direction: Int) {
-        if (isRunning || isPaused || allModes.isEmpty()) return
+        if (modeSelectionLocked || allModes.isEmpty()) return
         val currentIndex =
             allModes.indexOfFirst { it.id == activeMode?.id }.let { if (it < 0) 0 else it }
         var nextIndex = (currentIndex + direction) % allModes.size
@@ -361,7 +375,7 @@ fun FocusScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(onClick = { cycleMode(-1) }, enabled = !isRunning && !isPaused) {
+                IconButton(onClick = { cycleMode(-1) }, enabled = !modeSelectionLocked) {
                     Icon(
                         Icons.Filled.ArrowBackIosNew,
                         contentDescription = null,
@@ -373,7 +387,7 @@ fun FocusScreen(
                     modifier = Modifier
                         .width(180.dp)
                         .clip(AppTheme.brMedium)
-                        .clickable(enabled = !isRunning && !isPaused, onClick = onNavigateToModes),
+                        .clickable(enabled = !modeSelectionLocked, onClick = onNavigateToModes),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -386,7 +400,7 @@ fun FocusScreen(
                         modifier = Modifier.padding(vertical = 8.dp),
                     )
                 }
-                IconButton(onClick = { cycleMode(1) }, enabled = !isRunning && !isPaused) {
+                IconButton(onClick = { cycleMode(1) }, enabled = !modeSelectionLocked) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowForwardIos,
                         contentDescription = null,
