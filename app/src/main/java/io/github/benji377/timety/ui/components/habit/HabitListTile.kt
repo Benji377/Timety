@@ -62,6 +62,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListTile(
+    modifier: Modifier = Modifier,
     habit: HabitEntity,
     isCompleted: Boolean,
     subtitleText: String,
@@ -72,7 +73,6 @@ fun HabitListTile(
     onTap: () -> Unit,
     onDelete: (() -> Unit)? = null,
     onMarkPastCompletion: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
     enableDismissible: Boolean = true,
     // Mirrors AppTheme.paddingScreenHorizontal.
     margin: PaddingValues = AppTheme.paddingScreenHorizontal,
