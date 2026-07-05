@@ -218,7 +218,24 @@ class FocusViewModel(
                     sessionStartTime = Instant.now().minusSeconds(durationSeconds.toLong())
                 }
 
-                setAwaitingContinue(true)
+                val currentMode = allModes.value.getOrNull(currentModeIndex.value)
+                var isLastPhase = false
+                if (currentMode != null) {
+                    val phases = getPhasesForMode(currentMode.id).first()
+                    if (currentPhaseIndex.value + 1 >= phases.size) {
+                        isLastPhase = true
+                    }
+                }
+
+                // We rely on the AlarmManager to natively play the sound.
+                // The FocusTimerService will not cancel the alarm if the phase naturally completes,
+                // so the sound will correctly play without double dings.
+
+                if (isLastPhase) {
+                    FocusTimerManager.stopTimer(discard = false)
+                } else {
+                    setAwaitingContinue(true)
+                }
             }
         }
 
@@ -241,6 +258,7 @@ class FocusViewModel(
 
     private var sessionAccumulatedFocusSeconds: Int = 0
     private var sessionStartTime: Instant? = null
+    private val pendingDistractions = mutableListOf<DistractionEntity>()
 
     // Mode the running session was started with, captured at start time. Reading
     // currentModeIndex/allModes at stop time is unreliable (the stop can arrive from the
@@ -265,22 +283,27 @@ class FocusViewModel(
         val modeId = activeSessionModeId ?: allModes.value.getOrNull(currentModeIndex.value)?.id
         if (sessionAccumulatedFocusSeconds > 0 && modeId != null) {
             val target = selectedTarget.value
-            logSession(
-                FocusSessionEntity(
-                    id = currentSessionId,
-                    modeId = modeId,
-                    startTime = sessionStartTime ?: Instant.now()
-                        .minusSeconds(sessionAccumulatedFocusSeconds.toLong()),
-                    endTime = Instant.now(),
-                    totalSecondsFocused = sessionAccumulatedFocusSeconds,
-                    isCompleted = true,
-                    tagId = if (target?.type == FocusTargetType.TAG) target.id else null,
-                    targetType = target?.type ?: FocusTargetType.TAG,
-                    targetId = target?.id,
-                    targetLabel = target?.label,
-                )
+            val sessionToLog = FocusSessionEntity(
+                id = currentSessionId,
+                modeId = modeId,
+                startTime = sessionStartTime ?: Instant.now()
+                    .minusSeconds(sessionAccumulatedFocusSeconds.toLong()),
+                endTime = Instant.now(),
+                totalSecondsFocused = sessionAccumulatedFocusSeconds,
+                isCompleted = true,
+                tagId = if (target?.type == FocusTargetType.TAG) target.id else null,
+                targetType = target?.type ?: FocusTargetType.TAG,
+                targetId = target?.id,
+                targetLabel = target?.label,
             )
+            val distractionsToLog = pendingDistractions.toList()
+            
+            viewModelScope.launch {
+                focusRepository.insertSession(sessionToLog)
+                distractionsToLog.forEach { focusRepository.insertDistraction(it) }
+            }
         }
+        pendingDistractions.clear()
         sessionAccumulatedFocusSeconds = 0
         sessionStartTime = null
         activeSessionModeId = null
@@ -289,6 +312,7 @@ class FocusViewModel(
 
 
     fun discardSession() {
+        pendingDistractions.clear()
         sessionAccumulatedFocusSeconds = 0
         sessionStartTime = null
         activeSessionModeId = null
@@ -402,16 +426,14 @@ class FocusViewModel(
         type: io.github.benji377.timety.data.model.focus.DistractionType,
         note: String = ""
     ) {
-        viewModelScope.launch {
-            focusRepository.insertDistraction(
-                DistractionEntity(
-                    sessionId = currentSessionId,
-                    time = Instant.now(),
-                    type = type,
-                    note = note
-                )
+        pendingDistractions.add(
+            DistractionEntity(
+                sessionId = currentSessionId,
+                time = Instant.now(),
+                type = type,
+                note = note
             )
-        }
+        )
     }
 
     suspend fun getPhasesForMode(modeId: String) = focusRepository.getPhasesForMode(modeId)

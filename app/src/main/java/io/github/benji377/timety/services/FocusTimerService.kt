@@ -55,7 +55,6 @@ class FocusTimerService : Service() {
                     updateNotification(state)
                 } else {
                     stopForeground(STOP_FOREGROUND_REMOVE)
-                    cancelAlarm()
                     stopSelf()
                 }
             }.launchIn(serviceScope)
@@ -69,7 +68,10 @@ class FocusTimerService : Service() {
                 FocusTimerManager.startTimer()
             }
 
-            ACTION_PAUSE -> FocusTimerManager.pauseTimer()
+            ACTION_PAUSE -> {
+                FocusTimerManager.pauseTimer()
+                cancelAlarm()
+            }
             ACTION_STOP, ACTION_DISCARD -> {
                 FocusTimerManager.stopTimer(discard = action == ACTION_DISCARD)
                 stopForeground(STOP_FOREGROUND_REMOVE)
@@ -98,8 +100,6 @@ class FocusTimerService : Service() {
         // `showCustomNotification`'s `targetTimeMs`-based scheduling (not re-armed every tick).
         if (state.isRunning && !state.isPaused && !state.isStopwatch && state.secondsRemaining > 0) {
             scheduleAlarm(state.secondsRemaining)
-        } else {
-            cancelAlarm()
         }
     }
 

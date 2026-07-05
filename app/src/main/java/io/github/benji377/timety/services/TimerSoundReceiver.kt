@@ -15,10 +15,18 @@ import io.github.benji377.timety.R
 class TimerSoundReceiver : BroadcastReceiver() {
     companion object {
         private val activePlayers = mutableSetOf<MediaPlayer>()
+        private var lastPlayTimeMs: Long = 0
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         val pendingResult = goAsync()
+        
+        val now = System.currentTimeMillis()
+        if (now - lastPlayTimeMs < 2000) {
+            pendingResult.finish()
+            return
+        }
+        lastPlayTimeMs = now
 
         // Haptic feedback
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

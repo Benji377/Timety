@@ -168,7 +168,11 @@ fun FocusScreen(
 
     fun sendAction(action: String) {
         val intent = Intent(context, FocusTimerService::class.java).apply { this.action = action }
-        ContextCompat.startForegroundService(context, intent)
+        if (action == FocusTimerService.ACTION_START) {
+            ContextCompat.startForegroundService(context, intent)
+        } else {
+            context.startService(intent)
+        }
     }
 
     // Load the active mode's phases and reset the phase cursor whenever the mode changes.
@@ -622,6 +626,7 @@ fun FocusScreen(
         DistractionBottomSheet(
             onDismissRequest = { showDistraction = false },
             onEventSelected = { type ->
+                showDistraction = false
                 focusViewModel.logDistraction(type.entityType)
                 scope.launch {
                     snackbarHostState.showSnackbar(
