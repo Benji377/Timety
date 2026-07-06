@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.screens.focus
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -63,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -114,7 +114,6 @@ private fun secondsForPhase(
 }
 
 
-@SuppressLint("LocalContextResourcesRead")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusScreen(
@@ -126,6 +125,7 @@ fun FocusScreen(
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val distractionLoggedRaw = stringResource(R.string.distractionLogged)
     val dialogTimeMachineSuccessStr = stringResource(R.string.dialogTimeMachineSuccess)
     val scope = rememberCoroutineScope()
@@ -630,7 +630,7 @@ fun FocusScreen(
                 focusViewModel.logDistraction(type.entityType)
                 scope.launch {
                     snackbarHostState.showSnackbar(
-                        distractionLoggedRaw.format(context.resources.getString(type.labelRes))
+                        distractionLoggedRaw.format(resources.getString(type.labelRes))
                     )
                 }
             },

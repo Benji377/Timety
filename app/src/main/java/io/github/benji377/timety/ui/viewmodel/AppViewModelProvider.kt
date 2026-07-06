@@ -21,7 +21,6 @@ inline fun <reified VM : ViewModel> activityScopedViewModel(): VM {
 
 object AppViewModelProvider {
     val Factory = object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
             modelClass: Class<T>,
             extras: CreationExtras
@@ -29,13 +28,13 @@ object AppViewModelProvider {
             val application = checkNotNull(extras[APPLICATION_KEY]) as TimetyApplication
             val container = application.container
 
-            return when {
+            val viewModel = when {
                 modelClass.isAssignableFrom(TaskViewModel::class.java) -> {
                     TaskViewModel(
                         application,
                         container.taskRepository,
                         container.userRepository
-                    ) as T
+                    )
                 }
 
                 modelClass.isAssignableFrom(HabitViewModel::class.java) -> {
@@ -43,7 +42,7 @@ object AppViewModelProvider {
                         application,
                         container.habitRepository,
                         container.userRepository
-                    ) as T
+                    )
                 }
 
                 modelClass.isAssignableFrom(FocusViewModel::class.java) -> {
@@ -53,22 +52,23 @@ object AppViewModelProvider {
                         container.userRepository,
                         container.habitRepository,
                         container.settingsRepository
-                    ) as T
+                    )
                 }
 
                 modelClass.isAssignableFrom(UserViewModel::class.java) -> {
-                    UserViewModel(container.userRepository) as T
+                    UserViewModel(container.userRepository)
                 }
 
                 modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
                     SettingsViewModel(
                         application,
                         container.settingsRepository
-                    ) as T
+                    )
                 }
 
                 else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
             }
+            return modelClass.cast(viewModel)!!
         }
     }
 }
