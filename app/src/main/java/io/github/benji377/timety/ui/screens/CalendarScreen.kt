@@ -338,24 +338,33 @@ private fun CalendarGrid(
             }
         }
 
-        weeks.forEach { week ->
-            val weekStart = week.first()
-            val weekEnd = week.last()
-
-            val weeklyTaskCount = tasks.count { t ->
-                val d = t.task.dueDate?.atZone(zone)?.toLocalDate()
-                d != null && !d.isBefore(weekStart) && !d.isAfter(weekEnd)
-            }
-            val weeklyHabitCount = habitsWithCompletions.sumOf { h ->
-                h.completions.count { c ->
-                    val d = c.completionDate.atZone(zone).toLocalDate()
+        // Memoized: these scans touch every task/completion/session for all ~6 week rows and
+        // would otherwise re-run on every recomposition (e.g. each day tap).
+        val weeklyCounts = remember(weeks, tasks, sessions, habitsWithCompletions) {
+            weeks.associateWith { week ->
+                val weekStart = week.first()
+                val weekEnd = week.last()
+                val taskCount = tasks.count { t ->
+                    val d = t.task.dueDate?.atZone(zone)?.toLocalDate()
+                    d != null && !d.isBefore(weekStart) && !d.isAfter(weekEnd)
+                }
+                val habitCount = habitsWithCompletions.sumOf { h ->
+                    h.completions.count { c ->
+                        val d = c.completionDate.atZone(zone).toLocalDate()
+                        !d.isBefore(weekStart) && !d.isAfter(weekEnd)
+                    }
+                }
+                val focusCount = sessions.count { s ->
+                    val d = s.startTime.atZone(zone).toLocalDate()
                     !d.isBefore(weekStart) && !d.isAfter(weekEnd)
                 }
+                Triple(taskCount, habitCount, focusCount)
             }
-            val weeklyFocusCount = sessions.count { s ->
-                val d = s.startTime.atZone(zone).toLocalDate()
-                !d.isBefore(weekStart) && !d.isAfter(weekEnd)
-            }
+        }
+
+        weeks.forEach { week ->
+            val (weeklyTaskCount, weeklyHabitCount, weeklyFocusCount) =
+                weeklyCounts[week] ?: Triple(0, 0, 0)
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 week.forEach { day ->

@@ -58,6 +58,9 @@ interface FocusDao {
     @Query("SELECT * FROM distractions WHERE sessionId = :sessionId")
     fun getDistractionsForSession(sessionId: String): Flow<List<DistractionEntity>>
 
+    @Query("SELECT * FROM distractions ORDER BY time DESC")
+    fun getAllDistractions(): Flow<List<DistractionEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertDistraction(distraction: DistractionEntity)
 

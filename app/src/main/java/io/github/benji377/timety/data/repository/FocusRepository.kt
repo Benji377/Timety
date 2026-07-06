@@ -16,6 +16,7 @@ class FocusRepository(
     val allModes: Flow<List<FocusModeEntity>> = focusDao.getAllModes()
     val allSessions: Flow<List<FocusSessionEntity>> = focusDao.getAllSessions()
     val allTags: Flow<List<FocusTagEntity>> = focusDao.getAllTags()
+    val allDistractions: Flow<List<DistractionEntity>> = focusDao.getAllDistractions()
 
     suspend fun insertModeWithPhases(mode: FocusModeEntity, phases: List<SessionPhaseEntity>) =
         withContext(Dispatchers.IO) {

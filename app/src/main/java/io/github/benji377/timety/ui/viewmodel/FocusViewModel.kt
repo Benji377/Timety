@@ -17,7 +17,6 @@ import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.util.stats.ExperienceEngine
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,9 +25,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -61,20 +57,18 @@ class FocusViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val allDistractions: StateFlow<List<DistractionWithSession>> = allSessions
-        .flatMapLatest { sessions ->
-            if (sessions.isEmpty()) {
-                flowOf(emptyList())
-            } else {
-                combine(
-                    sessions.map { session ->
-                        focusRepository.getDistractionsForSession(session.id)
-                            .map { list -> list.map { DistractionWithSession(it, session) } }
-                    }
-                ) { arrays -> arrays.toList().flatten().sortedByDescending { it.distraction.time } }
-            }
+    // A single live query over the distractions table joined in memory with the sessions list.
+    // The previous flatMapLatest+combine version opened one Room flow PER session, which meant
+    // hundreds of concurrent live queries once real usage history accumulated.
+    val allDistractions: StateFlow<List<DistractionWithSession>> = combine(
+        focusRepository.allSessions,
+        focusRepository.allDistractions
+    ) { sessions, distractions ->
+        val sessionById = sessions.associateBy { it.id }
+        distractions.mapNotNull { d ->
+            sessionById[d.sessionId]?.let { DistractionWithSession(d, it) }
         }
+    }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // --- ACTIVE MODE / PHASE NAVIGATION ---

@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -204,21 +206,31 @@ fun FocusStatsScreen(
                     stringResource(R.string.focusStatsSectionSessionsSubtitle),
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                val sortedSessions = filteredSessions.sortedByDescending { it.startTime }
-                sortedSessions.forEachIndexed { index, session ->
-                    SessionRow(
-                        session,
-                        resolveTargetName(session),
-                        session.modeId.let { id ->
-                            modeById[id]?.let { localizedFocusModeName(it) } ?: defaultModeLabel
-                        },
-                        tagById
-                    )
-                    if (index != sortedSessions.lastIndex) HorizontalDivider(
-                        modifier = Modifier.padding(
-                            vertical = AppTheme.spaceMedium
+                val sortedSessions = remember(filteredSessions) {
+                    filteredSessions.sortedByDescending { it.startTime }
+                }
+                // The full history can grow into the hundreds; keep the section at a fixed
+                // max height and let it scroll internally instead of stretching the page.
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp)
+                ) {
+                    itemsIndexed(sortedSessions, key = { _, s -> s.id }) { index, session ->
+                        SessionRow(
+                            session,
+                            resolveTargetName(session),
+                            session.modeId.let { id ->
+                                modeById[id]?.let { localizedFocusModeName(it) } ?: defaultModeLabel
+                            },
+                            tagById
                         )
-                    )
+                        if (index != sortedSessions.lastIndex) HorizontalDivider(
+                            modifier = Modifier.padding(
+                                vertical = AppTheme.spaceMedium
+                            )
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
             }

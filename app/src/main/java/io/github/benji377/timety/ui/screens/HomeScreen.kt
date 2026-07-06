@@ -29,6 +29,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -83,10 +84,12 @@ fun HomeScreen(
     val userName = userProfile?.name ?: "User"
 
     val todayLocalDate = LocalDate.now()
-    val focusMinsToday = sessions.filter {
-        LocalDateTime.ofInstant(it.startTime, ZoneId.systemDefault())
-            .toLocalDate() == todayLocalDate
-    }.sumOf { it.totalSecondsFocused } / 60
+    val focusMinsToday = remember(sessions, todayLocalDate) {
+        sessions.filter {
+            LocalDateTime.ofInstant(it.startTime, ZoneId.systemDefault())
+                .toLocalDate() == todayLocalDate
+        }.sumOf { it.totalSecondsFocused } / 60
+    }
     val focusProgress =
         if (dailyTarget > 0) (focusMinsToday.toFloat() / dailyTarget.toFloat()).coerceIn(
             0f,
@@ -110,22 +113,29 @@ fun HomeScreen(
     }
 
     // Urgent tasks: incomplete tasks whose due day is today or earlier. Mirrors home_screen.dart.
-    val urgentTasks = tasks.filter { t ->
-        val dueDay = t.task.dueDate?.atZone(ZoneId.systemDefault())?.toLocalDate()
-        !t.task.isCompleted && dueDay != null && !dueDay.isAfter(todayLocalDate)
-    }.sortedBy { it.task.dueDate }
+    // Memoized: these full-list scans would otherwise re-run on every recomposition.
+    val urgentTasks = remember(tasks, todayLocalDate) {
+        tasks.filter { t ->
+            val dueDay = t.task.dueDate?.atZone(ZoneId.systemDefault())?.toLocalDate()
+            !t.task.isCompleted && dueDay != null && !dueDay.isAfter(todayLocalDate)
+        }.sortedBy { it.task.dueDate }
+    }
 
     // Upcoming tasks: incomplete tasks due strictly after today, within the configured horizon window.
-    val upcomingEndDate = todayLocalDate.plusDays(upcomingWindowDays.toLong())
-    val upcomingTasks = tasks.filter { t ->
-        val dueDay = t.task.dueDate?.atZone(ZoneId.systemDefault())?.toLocalDate()
-        !t.task.isCompleted && dueDay != null && dueDay.isAfter(todayLocalDate) && !dueDay.isAfter(
-            upcomingEndDate
-        )
-    }.sortedBy { it.task.dueDate }
+    val upcomingTasks = remember(tasks, todayLocalDate, upcomingWindowDays) {
+        val upcomingEndDate = todayLocalDate.plusDays(upcomingWindowDays.toLong())
+        tasks.filter { t ->
+            val dueDay = t.task.dueDate?.atZone(ZoneId.systemDefault())?.toLocalDate()
+            !t.task.isCompleted && dueDay != null && dueDay.isAfter(todayLocalDate) && !dueDay.isAfter(
+                upcomingEndDate
+            )
+        }.sortedBy { it.task.dueDate }
+    }
 
     // Today's habits: scheduled for today and not yet at their weekly target (excluding today's own completion).
-    val todaysHabits = habitsWithCompletions.filter { HabitUtils.isHabitDueToday(it) }
+    val todaysHabits = remember(habitsWithCompletions, todayLocalDate) {
+        habitsWithCompletions.filter { HabitUtils.isHabitDueToday(it) }
+    }
 
     Scaffold(
         topBar = {

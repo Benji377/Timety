@@ -73,13 +73,17 @@ object FocusTimerManager {
     ) {
         if (_timerState.value.isRunning) return
         val resuming = _timerState.value.isPaused
+        // isAwaitingContinue is deliberately NOT cleared here (startTimer does that): when
+        // continuing into the next phase, clearing it would emit a transient all-idle state
+        // that FocusTimerService's observer treats as "session over" - it then kills itself
+        // in a race with the incoming ACTION_START, losing the foreground notification and
+        // the phase-end sound alarm for the rest of the session.
         _timerState.update {
             it.copy(
                 modeName = name,
                 totalPhaseSeconds = totalPhaseSeconds,
                 secondsRemaining = if (resuming) it.secondsRemaining else totalPhaseSeconds,
                 isRestPhase = isRestPhase,
-                isAwaitingContinue = false,
                 isStopwatch = isStopwatch,
                 elapsedSeconds = if (resuming) it.elapsedSeconds else 0
             )
