@@ -57,6 +57,8 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.ui.components.common.TimetyElevatedButton as ElevatedButton
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import androidx.compose.foundation.BorderStroke
+import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 
 
 @Composable
@@ -83,15 +85,15 @@ fun FocusModeEditCard(
         if (!isEditing) tempPhases = phases
     }
 
-    androidx.compose.material3.Card(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 4.dp else 1.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = androidx.compose.foundation.BorderStroke(
+        border = BorderStroke(
             AppTheme.neoBorderWidth,
-            if (io.github.benji377.timety.ui.theme.LocalIsDarkTheme.current) Color.White else Color.Black
+            if (LocalIsDarkTheme.current) Color.White else Color.Black
         )
     ) {
         Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
@@ -209,7 +211,7 @@ private fun OverviewView(
         }
         if (mode.isSystem) {
             Box(modifier = Modifier.padding(AppTheme.spaceSmall)) {
-                Icon(Icons.Outlined.Lock, contentDescription = null, tint = Color.Gray)
+                Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             Row {
@@ -278,7 +280,7 @@ private fun EditorView(
     Text(
         stringResource(R.string.focusModeLabelTimelineDesc),
         fontSize = AppTheme.fsBodySmall,
-        color = Color.Gray
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
@@ -294,7 +296,7 @@ private fun EditorView(
                     modifier = Modifier
                         .width(24.dp)
                         .height(2.dp)
-                        .background(Color.LightGray)
+                        .background(MaterialTheme.colorScheme.outlineVariant)
                 )
             }
         }

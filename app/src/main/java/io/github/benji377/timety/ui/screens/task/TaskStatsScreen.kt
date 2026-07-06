@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.WeekNavigator
+import io.github.benji377.timety.ui.theme.ChartDeepOrange
+import io.github.benji377.timety.ui.theme.ChartTeal
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -87,7 +90,7 @@ fun TaskStatsScreen(
                     Text(
                         stringResource(R.string.taskStatsCreated),
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Box(
@@ -99,7 +102,7 @@ fun TaskStatsScreen(
                     Text(
                         stringResource(R.string.taskStatsCompleted),
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -126,7 +129,7 @@ fun TaskStatsScreen(
                 Text(
                     stringResource(R.string.taskStatsCompletedDaily),
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(modifier = Modifier.height(200.dp)) {
@@ -332,8 +335,8 @@ private fun CategoryBreakdownCard(tasks: List<TaskWithSubtasks>) {
         WarningColor,
         HabitColor,
         MaterialTheme.colorScheme.primary,
-        Color(0xFF009688),
-        Color(0xFFFF5722)
+        ChartTeal,
+        ChartDeepOrange
     )
 
     Column {

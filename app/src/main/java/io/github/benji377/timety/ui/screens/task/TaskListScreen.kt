@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.screens.task
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Search
@@ -25,14 +23,11 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,12 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskSortOption
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -95,38 +91,12 @@ fun TaskListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.taskListTitle),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+            TimetyTopBar(
+                title = stringResource(R.string.taskListTitle)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onNavigateToTaskDetail(null) },
-                modifier = Modifier.border(
-                    AppTheme.neoBorderWidth,
-                    MaterialTheme.colorScheme.outline,
-                    AppTheme.brNeo
-                ),
-                shape = AppTheme.brNeo,
-                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
-                    0.dp,
-                    0.dp,
-                    0.dp,
-                    0.dp
-                ),
-                containerColor = TaskColor,
-                contentColor = androidx.compose.ui.graphics.Color.White
-            ) {
-                Icon(Icons.Filled.Add, stringResource(R.string.commonLabelAdd))
-            }
+            TimetyFab(onClick = { onNavigateToTaskDetail(null) }, containerColor = TaskColor)
         }
     ) { paddingValues ->
         Column(

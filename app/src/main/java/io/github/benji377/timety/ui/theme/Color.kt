@@ -66,3 +66,29 @@ val SwitchTrackOffDark = Color(0xFF3A3A3A)
 // Neobrutalism border tokens
 val NeoBorderColorLight = BorderLight
 val NeoBorderColorDark = BorderDark
+
+// Material accent choices offered by color pickers (habit color, focus tag color).
+// Pickers prepend their section's own accent as the first/default choice.
+val PickerPalette = listOf(
+    Color(0xFFF44336), // red
+    Color(0xFFE91E63), // pink
+    Color(0xFFFFC107), // amber
+    Color(0xFFFF9800), // orange
+    Color(0xFF4CAF50), // green
+    Color(0xFF8BC34A), // light green
+    Color(0xFF009688), // teal
+    Color(0xFF2196F3), // blue
+    Color(0xFF00BCD4), // cyan
+    Color(0xFF3F51B5), // indigo
+    Color(0xFF9C27B0), // purple
+    Color(0xFF673AB7), // deep purple
+    Color(0xFF795548), // brown
+    Color(0xFF607D8B), // blue grey
+)
+
+// Streak flame inner-glow highlight.
+val FlameGlowColor = Color(0xFFFFE08A)
+
+// Extra hues for categorical charts once the core section palette runs out.
+val ChartTeal = Color(0xFF009688)
+val ChartDeepOrange = Color(0xFFFF5722)

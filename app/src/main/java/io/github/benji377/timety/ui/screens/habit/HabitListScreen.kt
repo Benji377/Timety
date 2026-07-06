@@ -1,20 +1,14 @@
 package io.github.benji377.timety.ui.screens.habit
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.TimetyFab
+import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
@@ -43,13 +40,15 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import androidx.compose.ui.platform.LocalLocale
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListScreen(
     viewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    settingsViewModel: io.github.benji377.timety.ui.viewmodel.SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onNavigateToHabitDetail: (String?) -> Unit
 ) {
     val habitsWithCompletions by viewModel.habitsWithCompletions.collectAsState()
@@ -58,30 +57,15 @@ fun HabitListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-                title = { Text(stringResource(R.string.habitsListTitle)) })
+            TimetyTopBar(
+                title = stringResource(R.string.habitsListTitle)
+            )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            TimetyFab(
                 onClick = { onNavigateToHabitDetail(null) },
-                modifier = Modifier.border(
-                    io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
-                    MaterialTheme.colorScheme.outline,
-                    io.github.benji377.timety.ui.theme.AppTheme.brNeo
-                ),
-                shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
-                elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
-                    0.dp,
-                    0.dp,
-                    0.dp,
-                    0.dp
-                ),
-                containerColor = io.github.benji377.timety.ui.theme.HabitColor,
-                contentColor = androidx.compose.ui.graphics.Color.White
-            ) {
-                Icon(Icons.Filled.Add, stringResource(R.string.commonLabelAdd))
-            }
+                containerColor = HabitColor
+            )
         }
     ) { paddingValues ->
         if (habitsWithCompletions.isEmpty()) {
@@ -237,7 +221,7 @@ private fun HabitTileWrapper(
     if (habit.targetTimeMinutes != null) {
         val time = LocalTime.of(habit.targetTimeMinutes / 60, habit.targetTimeMinutes % 60)
         val pattern = if (use24HourFormat) "HH:mm" else "hh:mm a"
-        val locale = androidx.compose.ui.platform.LocalLocale.current.platformLocale
+        val locale = LocalLocale.current.platformLocale
         val formatted = time.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
             .format(DateTimeFormatter.ofPattern(pattern, locale))
         subtitleText += " | $formatted"

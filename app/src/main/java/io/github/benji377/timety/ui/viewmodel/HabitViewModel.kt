@@ -17,6 +17,8 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import io.github.benji377.timety.services.ReminderScheduler
+import io.github.benji377.timety.widget.HabitWidget
 
 
 class HabitViewModel(
@@ -52,7 +54,7 @@ class HabitViewModel(
 
     private fun updateWidgets() {
         viewModelScope.launch {
-            io.github.benji377.timety.widget.HabitWidget().updateAll(application)
+            HabitWidget().updateAll(application)
         }
     }
 
@@ -81,12 +83,12 @@ class HabitViewModel(
     }
 
     private suspend fun scheduleHabitReminder(habit: HabitEntity) {
-        io.github.benji377.timety.services.ReminderScheduler.create(application)
+        ReminderScheduler.create(application)
             .scheduleHabitReminder(habit)
     }
 
     private suspend fun cancelHabitReminder(habitId: String) {
-        io.github.benji377.timety.services.ReminderScheduler.create(application)
+        ReminderScheduler.create(application)
             .cancelHabitReminder(habitId)
     }
 

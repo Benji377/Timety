@@ -29,7 +29,10 @@ import io.github.benji377.timety.ui.theme.BorderLight
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.PaperAltLight
 import io.github.benji377.timety.ui.theme.PaperLight
+import io.github.benji377.timety.ui.theme.ShadowColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import androidx.compose.ui.Alignment
+import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 
 
 @Composable
@@ -42,19 +45,19 @@ fun ModeTimeline(
 ) {
     if (phases.isEmpty()) return
 
-    val isDark = io.github.benji377.timety.ui.theme.LocalIsDarkTheme.current
+    val isDark = LocalIsDarkTheme.current
     val isCompleted = currentPhaseIndex >= phases.size
     val completionFill = if (isDark) PaperLight else PaperAltLight
     val isRunningOrAwaiting = isRunning || awaitingContinue
     val outline = MaterialTheme.colorScheme.outline
-    val shadowColor = Color(0xFF111111).copy(alpha = 0.12f)
+    val shadowColor = ShadowColor.copy(alpha = 0.12f)
     val lineColor = if (isDark) BorderDark else BorderLight
 
     Row(
         modifier = modifier
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = AppTheme.spaceXLarge, vertical = AppTheme.spaceMedium),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // Start node
         CompletionNode(

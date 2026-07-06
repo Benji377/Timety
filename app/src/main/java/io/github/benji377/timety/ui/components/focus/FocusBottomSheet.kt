@@ -59,13 +59,14 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
+import io.github.benji377.timety.data.model.focus.DistractionUIType
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DistractionBottomSheet(
     onDismissRequest: () -> Unit,
-    onEventSelected: (io.github.benji377.timety.data.model.focus.DistractionUIType) -> Unit,
+    onEventSelected: (DistractionUIType) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
     ModalBottomSheet(
@@ -81,7 +82,7 @@ fun DistractionBottomSheet(
                 modifier = Modifier.padding(AppTheme.spaceLarge),
             )
 
-            io.github.benji377.timety.data.model.focus.DistractionUIType.entries.forEach { type ->
+            DistractionUIType.entries.forEach { type ->
                 ListItem(
                     headlineContent = {
                         Text(
@@ -335,7 +336,7 @@ private fun HabitTab(
                     fontSize = AppTheme.fsCaption,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = AppTheme.lsWide,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(
                         start = AppTheme.spaceLarge,
                         end = AppTheme.spaceLarge,
@@ -388,25 +389,25 @@ private fun HabitRow(
             Icon(
                 if (isLocked) Icons.Outlined.Lock else HabitIcons.iconAt(habit.iconCodePoint),
                 contentDescription = null,
-                tint = if (isLocked) Color.Gray else Color(habit.colorValue),
+                tint = if (isLocked) MaterialTheme.colorScheme.onSurfaceVariant else Color(habit.colorValue),
             )
         },
         headlineContent = {
             Text(
                 habit.name,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isLocked) Color.Gray else Color.Unspecified,
+                color = if (isLocked) MaterialTheme.colorScheme.onSurfaceVariant else Color.Unspecified,
             )
         },
         supportingContent = {
             Text(
                 statusText,
-                color = if (isLocked) Color.Gray else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isLocked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         trailingContent = {
             when {
-                isLocked -> Icon(Icons.Filled.Lock, contentDescription = null, tint = Color.Gray)
+                isLocked -> Icon(Icons.Filled.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 isSelected -> Icon(
                     Icons.Filled.Check,
                     contentDescription = null,

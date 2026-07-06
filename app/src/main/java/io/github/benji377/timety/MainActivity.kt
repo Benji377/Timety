@@ -24,6 +24,9 @@ import io.github.benji377.timety.util.LocaleHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import androidx.compose.material3.SnackbarHostState
+import io.github.benji377.timety.ui.screens.MainScreen
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 
 class MainActivity : ComponentActivity() {
 
@@ -65,19 +68,19 @@ class MainActivity : ComponentActivity() {
 
             TimetyTheme(darkTheme = darkTheme) {
                 val snackbarHostState =
-                    androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
+                    androidx.compose.runtime.remember { SnackbarHostState() }
                 CompositionLocalProvider(
                     LocalDateFormatSettings provides DateFormatSettings(
                         use24HourFormat,
                         dateFormatCode
                     ),
-                    io.github.benji377.timety.ui.theme.LocalSnackbarHostState provides snackbarHostState
+                    LocalSnackbarHostState provides snackbarHostState
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        io.github.benji377.timety.ui.screens.MainScreen()
+                        MainScreen()
                     }
                 }
             }

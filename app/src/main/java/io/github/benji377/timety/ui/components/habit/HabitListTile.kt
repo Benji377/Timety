@@ -43,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,6 +56,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.util.habit.HabitIcons
 import kotlinx.coroutines.launch
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +79,7 @@ fun HabitListTile(
 ) {
     val color = Color(habit.colorValue)
     val lockedMessage = stringResource(R.string.focusSnackbarHabitLocked)
-    val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
+    val snackbarHostState = LocalSnackbarHostState.current
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     val tile: @Composable () -> Unit = {
@@ -241,7 +241,7 @@ private fun HabitTileContent(
                 )
                 .border(
                     width = 2.dp,
-                    color = if (isCompleted) color else (if (isLocked) Color.Gray else HabitColor),
+                    color = if (isCompleted) color else (if (isLocked) MaterialTheme.colorScheme.onSurfaceVariant else HabitColor),
                     shape = CircleShape,
                 )
                 .clickable { if (isLocked) onLockedTap() else onToggleCompleted() },
@@ -259,7 +259,7 @@ private fun HabitTileContent(
                     imageVector = Icons.Rounded.Lock,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

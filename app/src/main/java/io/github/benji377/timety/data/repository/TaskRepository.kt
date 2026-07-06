@@ -6,11 +6,12 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 
 class TaskRepository(
     private val taskDao: TaskDao
 ) {
-    val allTasks: Flow<List<io.github.benji377.timety.data.model.task.TaskWithSubtasks>> =
+    val allTasks: Flow<List<TaskWithSubtasks>> =
         taskDao.getAllTasks()
 
     suspend fun getTaskById(id: String): TaskEntity? = withContext(Dispatchers.IO) {

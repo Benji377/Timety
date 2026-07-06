@@ -42,6 +42,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
+import androidx.compose.runtime.Composable
 
 
 private sealed interface HabitWidgetRow {
@@ -181,7 +182,7 @@ class HabitWidget : GlanceAppWidget() {
         }
     }
 
-    @androidx.compose.runtime.Composable
+    @Composable
     @android.annotation.SuppressLint("NonObservableLocale")
     private fun RenderRow(row: HabitWidgetRow, openApp: androidx.glance.action.Action) {
         when (row) {
@@ -253,7 +254,7 @@ class HabitWidget : GlanceAppWidget() {
         }
     }
 
-    @androidx.compose.runtime.Composable
+    @Composable
     private fun androidx.glance.layout.RowScope.HabitRowContent(row: HabitWidgetRow.Habit) {
         Text(
             text = row.name,

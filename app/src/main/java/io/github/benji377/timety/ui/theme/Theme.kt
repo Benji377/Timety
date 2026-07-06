@@ -11,6 +11,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.compose.runtime.CompositionLocalProvider
 
 // Neobrutalist color schemes ported 1:1 from AppTheme.buildTheme() in app_theme.dart.
 // No Material You / dynamic color — the palette is fixed.
@@ -81,7 +82,7 @@ fun TimetyTheme(
         }
     }
 
-    androidx.compose.runtime.CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+    CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = TimetyTypography,

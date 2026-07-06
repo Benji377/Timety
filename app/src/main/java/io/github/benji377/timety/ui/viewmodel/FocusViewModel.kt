@@ -31,6 +31,13 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
+import io.github.benji377.timety.data.model.focus.DistractionType
+import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.repository.HabitRepository
+import io.github.benji377.timety.data.repository.SettingsRepository
+import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.widget.HabitWidget
 
 
 data class DistractionWithSession(
@@ -42,8 +49,8 @@ class FocusViewModel(
     application: android.app.Application,
     private val focusRepository: FocusRepository,
     private val userRepository: UserRepository,
-    private val habitRepository: io.github.benji377.timety.data.repository.HabitRepository,
-    private val settingsRepository: io.github.benji377.timety.data.repository.SettingsRepository
+    private val habitRepository: HabitRepository,
+    private val settingsRepository: SettingsRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
 
     // --- MODES / SESSIONS / TAGS (existing) ---
@@ -179,17 +186,17 @@ class FocusViewModel(
                                     val completions =
                                         habitRepository.getCompletionsForHabit(target.id).first()
                                     val hwc =
-                                        io.github.benji377.timety.data.model.habit.HabitWithCompletions(
+                                        HabitWithCompletions(
                                             hcEntity,
                                             completions
                                         )
-                                    if (!io.github.benji377.timety.util.habit.HabitUtils.isCompletedOn(
+                                    if (!HabitUtils.isCompletedOn(
                                             hwc,
                                             today
                                         )
                                     ) {
                                         habitRepository.insertCompletion(
-                                            io.github.benji377.timety.data.model.habit.HabitCompletionEntity(
+                                            HabitCompletionEntity(
                                                 habitId = hcEntity.id,
                                                 completionDate = Instant.now()
                                             )
@@ -197,7 +204,7 @@ class FocusViewModel(
                                         userRepository.addXp(ExperienceEngine.xpPerHabit)
                                         // Auto-completion bypasses HabitViewModel, so refresh
                                         // the habit widget here too.
-                                        io.github.benji377.timety.widget.HabitWidget()
+                                        HabitWidget()
                                             .updateAll(getApplication())
                                     }
                                 }
@@ -417,7 +424,7 @@ class FocusViewModel(
     }
 
     fun logDistraction(
-        type: io.github.benji377.timety.data.model.focus.DistractionType,
+        type: DistractionType,
         note: String = ""
     ) {
         pendingDistractions.add(

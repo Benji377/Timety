@@ -54,7 +54,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
@@ -65,14 +64,20 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
-import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.StatsUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.text.style.TextAlign
+import io.github.benji377.timety.data.model.focus.DistractionUIType
+import io.github.benji377.timety.ui.theme.WarningAccent
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
 
 
 @Composable
@@ -184,7 +189,7 @@ fun FocusStatsScreen(
                     )
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "${clockTotalMins / 60}h ${clockTotalMins % 60}m",
+                            AppDateFormatUtils.formatMinutesCompact(clockTotalMins),
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Black
                         )
@@ -193,7 +198,7 @@ fun FocusStatsScreen(
                                 R.string.focusStatsSectionClockSessions,
                                 clockSessions.size
                             ),
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -384,17 +389,17 @@ private fun DayPillSelector(
                         Modifier.clickable(
                             onClick = { onSelect(day) },
                             indication = null,
-                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() })
+                            interactionSource = remember { MutableInteractionSource() })
                     ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatWeekdayDay(
+                    text = AppDateFormatUtils.formatWeekdayDay(
                         day
                     ),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
-                    color = if (isSelected) Color.White else Color.Gray,
+                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -410,6 +415,7 @@ private fun FocusClockChart(
     val zone = remember { ZoneId.systemDefault() }
     val textMeasurer = rememberTextMeasurer()
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val markerColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     Canvas(modifier = modifier) {
         val center = Offset(size.width / 2f, size.height / 2f)
@@ -430,7 +436,7 @@ private fun FocusClockChart(
             val x = center.x + (r * kotlin.math.cos(rad)).toFloat()
             val y = center.y + (r * kotlin.math.sin(rad)).toFloat()
             val layout =
-                textMeasurer.measure(label, style = TextStyle(color = Color.Gray, fontSize = 10.sp))
+                textMeasurer.measure(label, style = TextStyle(color = markerColor, fontSize = 10.sp))
             drawText(
                 layout,
                 topLeft = Offset(x - layout.size.width / 2f, y - layout.size.height / 2f)
@@ -485,12 +491,12 @@ private fun SessionRow(
             }
         } ?: FocusColor)
     }
-    val dfs = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
-    val dateStr = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(
+    val dfs = LocalDateFormatSettings.current
+    val dateStr = AppDateFormatUtils.formatDate(
         session.startTime,
         dfs.dateFormatCode
     )
-    val timeStr = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+    val timeStr = AppDateFormatUtils.formatTime(
         session.startTime,
         dfs.use24HourFormat
     )
@@ -510,7 +516,7 @@ private fun SessionRow(
         Column {
             Text(targetName, fontWeight = FontWeight.SemiBold, color = color)
             Text(
-                "$dateStr | $timeStr | ${formatFocusMinutes(mins)} | $modeName",
+                "$dateStr | $timeStr | ${AppDateFormatUtils.formatMinutesCompact(mins)} | $modeName",
                 fontSize = AppTheme.fsBodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -520,13 +526,13 @@ private fun SessionRow(
 
 @Composable
 private fun DistractionRow(
-    entry: io.github.benji377.timety.ui.viewmodel.DistractionWithSession,
+    entry: DistractionWithSession,
     targetName: String
 ) {
     val type =
-        io.github.benji377.timety.data.model.focus.DistractionUIType.fromEntityType(entry.distraction.type)
+        DistractionUIType.fromEntityType(entry.distraction.type)
     val use24Hour =
-        io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
+        LocalDateFormatSettings.current.use24HourFormat
     val zone = remember { ZoneId.systemDefault() }
 
     Row(
@@ -537,7 +543,7 @@ private fun DistractionRow(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(io.github.benji377.timety.ui.theme.WarningAccent.copy(alpha = 0.12f)),
+                .background(WarningAccent.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(type.icon, contentDescription = null, tint = type.color)
@@ -547,7 +553,7 @@ private fun DistractionRow(
             Text(type.getLocalizedName(), fontWeight = FontWeight.SemiBold)
             Text(
                 "${
-                    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTimeWithSeconds(
+                    AppDateFormatUtils.formatTimeWithSeconds(
                         entry.distraction.time,
                         use24Hour,
                         zone
@@ -684,7 +690,7 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                 )
             }
             Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
-            Text(formatFocusMinutes(totalMinutes), fontSize = 20.sp, fontWeight = FontWeight.Black)
+            Text(AppDateFormatUtils.formatMinutesCompact(totalMinutes), fontSize = 20.sp, fontWeight = FontWeight.Black)
         }
         Spacer(modifier = Modifier.height(18.dp))
         Row(
@@ -698,7 +704,7 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Gray.copy(alpha = 0.15f))
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
                 )
             } else {
                 stats.filter { it.minutes > 0 }.forEach { stat ->
@@ -733,7 +739,7 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    formatFocusMinutes(stat.minutes),
+                    AppDateFormatUtils.formatMinutesCompact(stat.minutes),
                     fontSize = AppTheme.fsBodyMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -750,9 +756,3 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
     }
 }
 
-private fun formatFocusMinutes(minutes: Int): String {
-    if (minutes < 60) return "${minutes}m"
-    val hours = minutes / 60
-    val rem = minutes % 60
-    return if (rem == 0) "${hours}h" else "${hours}h ${rem}m"
-}

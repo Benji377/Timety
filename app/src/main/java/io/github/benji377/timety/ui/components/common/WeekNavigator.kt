@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -22,6 +21,8 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
 import java.util.Locale
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
 
 @Composable
@@ -37,10 +38,10 @@ fun WeekNavigator(
     val today = LocalDate.now()
     val isCurrentWeek = AppDateUtils.isWithinInclusive(today, startOfWeek, endOfWeek)
 
-    val dfs = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
+    val dfs = LocalDateFormatSettings.current
     val weekRangeLabel =
-        "${io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatShortDate(startOfWeek)} - ${
-            io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(
+        "${AppDateFormatUtils.formatShortDate(startOfWeek)} - ${
+            AppDateFormatUtils.formatDate(
                 endOfWeek,
                 dfs.dateFormatCode
             )
@@ -64,7 +65,7 @@ fun WeekNavigator(
             )
             Text(
                 text = weekRangeLabel,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp
             )
         }

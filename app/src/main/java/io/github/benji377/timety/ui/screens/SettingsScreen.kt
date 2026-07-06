@@ -63,12 +63,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -93,23 +93,26 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlin.math.roundToInt
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,7 +138,7 @@ fun SettingsScreen(
     val backupExportSubjectStr = stringResource(R.string.backupExportSubject)
     val backupShareFailureRaw = stringResource(R.string.backupShareFailure)
     val scope = rememberCoroutineScope()
-    val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
+    val snackbarHostState = LocalSnackbarHostState.current
     val backupService = remember {
         (context.applicationContext as TimetyApplication).container.backupService
     }
@@ -323,14 +326,8 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-                title = {
-                    Text(
-                        stringResource(R.string.settingsTitle),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+            TimetyTopBar(
+                title = stringResource(R.string.settingsTitle),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -378,7 +375,7 @@ fun SettingsScreen(
                         }
                         if (flagName != null) {
                             coil.compose.AsyncImage(
-                                model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
+                                model = coil.request.ImageRequest.Builder(LocalContext.current)
                                     .data("file:///android_asset/flags/$flagName.svg")
                                     .decoderFactory(coil.decode.SvgDecoder.Factory())
                                     .build(),
@@ -403,8 +400,8 @@ fun SettingsScreen(
                             checked = use24HourFormat,
                             onCheckedChange = { settingsViewModel.setUse24HourFormat(it) },
                             colors = SwitchDefaults.colors(
-                                checkedTrackColor = Color(0xFF4CAF50),
-                                uncheckedTrackColor = Color(0xFFFF5252)
+                                checkedTrackColor = SuccessColor,
+                                uncheckedTrackColor = ErrorColor
                             )
                         )
                     }
@@ -456,8 +453,8 @@ fun SettingsScreen(
                             checked = autoCompleteFocus,
                             onCheckedChange = { settingsViewModel.setAutoCompleteFocus(it) },
                             colors = SwitchDefaults.colors(
-                                checkedTrackColor = Color(0xFF4CAF50),
-                                uncheckedTrackColor = Color(0xFFFF5252)
+                                checkedTrackColor = SuccessColor,
+                                uncheckedTrackColor = ErrorColor
                             )
                         )
                     }
@@ -590,7 +587,7 @@ fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.settingsLabelDailyMotivation)) },
                     supportingContent = {
                         Text(
-                            formatTimeOfDay(
+                            AppDateFormatUtils.formatTimeOfDay(
                                 dailyMotivationTime,
                                 use24HourFormat
                             )
@@ -611,7 +608,7 @@ fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.settingsLabelEodCheckup)) },
                     supportingContent = {
                         Text(
-                            formatTimeOfDay(
+                            AppDateFormatUtils.formatTimeOfDay(
                                 endOfDayCheckupTime,
                                 use24HourFormat
                             )
@@ -673,7 +670,7 @@ fun SettingsScreen(
                             Icons.AutoMirrored.Filled.OpenInNew,
                             null,
                             modifier = Modifier.size(16.dp),
-                            tint = Color.Gray
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     modifier = Modifier.clickable {
@@ -695,7 +692,7 @@ fun SettingsScreen(
                             Icons.AutoMirrored.Filled.OpenInNew,
                             null,
                             modifier = Modifier.size(16.dp),
-                            tint = Color.Gray
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     modifier = Modifier.clickable {
@@ -749,7 +746,7 @@ fun SettingsScreen(
                         )
                         Text(
                             stringResource(R.string.settingsLabelVersion, versionName ?: "1.0.0"),
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -760,7 +757,7 @@ fun SettingsScreen(
                                 Icon(
                                     Icons.Filled.Person,
                                     null,
-                                    tint = Color(0xFFFF5722)
+                                    tint = WarningAccent
                                 )
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent)
@@ -780,7 +777,7 @@ fun SettingsScreen(
                                     Icons.AutoMirrored.Filled.OpenInNew,
                                     null,
                                     modifier = Modifier.size(16.dp),
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -802,7 +799,7 @@ fun SettingsScreen(
                                     Icons.AutoMirrored.Filled.OpenInNew,
                                     null,
                                     modifier = Modifier.size(16.dp),
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -965,7 +962,7 @@ private fun DropdownSettingsItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         currentLabel,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                     Spacer(Modifier.width(8.dp))
@@ -974,7 +971,7 @@ private fun DropdownSettingsItem(
                         contentDescription = null
                     )
                 }
-                androidx.compose.material3.DropdownMenu(
+                DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     modifier = Modifier
@@ -986,7 +983,7 @@ private fun DropdownSettingsItem(
                         )
                 ) {
                     options.forEach { (label, value) ->
-                        androidx.compose.material3.DropdownMenuItem(
+                        DropdownMenuItem(
                             text = { Text(label) },
                             leadingIcon = optionIcon?.let { { it(value) } },
                             onClick = {
@@ -1054,7 +1051,7 @@ private data class TimeDialogSpec(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerDialogRow(spec: TimeDialogSpec, onDismiss: () -> Unit) {
-    val (initialHour, initialMinute) = parseHHmm(spec.current)
+    val (initialHour, initialMinute) = AppDateFormatUtils.parseHHmm(spec.current)
     val is24Hour = LocalDateFormatSettings.current.use24HourFormat
     val timePickerState = rememberTimePickerState(
         initialHour = initialHour,
@@ -1081,19 +1078,5 @@ private fun TimePickerDialogRow(spec: TimeDialogSpec, onDismiss: () -> Unit) {
     )
 }
 
-private fun parseHHmm(value: String): Pair<Int, Int> {
-    return try {
-        val parts = value.split(":")
-        parts[0].trim().toInt() to parts[1].trim().toInt()
-    } catch (e: Exception) {
-        8 to 0
-    }
-}
 
 
-private fun formatTimeOfDay(hhmm: String, use24Hour: Boolean): String {
-    val (h, m) = parseHHmm(hhmm)
-    val time = LocalTime.of(h, m)
-    val pattern = if (use24Hour) "HH:mm" else "h:mm a"
-    return time.format(DateTimeFormatter.ofPattern(pattern, Locale.getDefault()))
-}

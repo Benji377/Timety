@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
+import io.github.benji377.timety.services.ReminderScheduler
+import io.github.benji377.timety.util.stats.ExperienceEngine
+import io.github.benji377.timety.widget.TaskWidget
 
 class TaskViewModel(
     private val application: android.app.Application,
@@ -28,7 +31,7 @@ class TaskViewModel(
 
     private fun updateWidgets() {
         viewModelScope.launch {
-            io.github.benji377.timety.widget.TaskWidget().updateAll(application)
+            TaskWidget().updateAll(application)
         }
     }
 
@@ -66,7 +69,7 @@ class TaskViewModel(
             taskRepository.updateTask(updatedTask)
             scheduleTaskReminders(updatedTask)
             updateWidgets()
-            val xpAmount = io.github.benji377.timety.util.stats.ExperienceEngine.xpPerTask
+            val xpAmount = ExperienceEngine.xpPerTask
             if (updatedTask.isCompleted) {
                 userRepository.addXp(xpAmount) // XP per task
             } else {
@@ -85,18 +88,18 @@ class TaskViewModel(
         viewModelScope.launch {
             taskRepository.updateTask(updatedTask)
             scheduleTaskReminders(updatedTask)
-            userRepository.addXp(io.github.benji377.timety.util.stats.ExperienceEngine.xpPerTask)
+            userRepository.addXp(ExperienceEngine.xpPerTask)
             updateWidgets()
         }
     }
 
     private suspend fun scheduleTaskReminders(task: TaskEntity) {
-        io.github.benji377.timety.services.ReminderScheduler.create(application)
+        ReminderScheduler.create(application)
             .scheduleTaskReminders(task)
     }
 
     private suspend fun cancelTaskReminders(taskId: String) {
-        io.github.benji377.timety.services.ReminderScheduler.create(application)
+        ReminderScheduler.create(application)
             .cancelTaskReminders(taskId)
     }
 

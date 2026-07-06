@@ -6,8 +6,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -41,9 +44,26 @@ data class TimerState(
 }
 
 
+/** Coarse running/paused flags; changes only on phase transitions, never per tick. */
+data class TimerFlags(val isRunning: Boolean = false, val isPaused: Boolean = false)
+
+
 object FocusTimerManager {
     private val _timerState = MutableStateFlow(TimerState())
     val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
+
+    /**
+     * Transition-level view of [timerState] for UI that only cares whether a session is
+     * active. StateFlow conflates equal values, so collectors recompose on state changes
+     * but not on every one-second tick.
+     */
+    val timerFlags: StateFlow<TimerFlags> = _timerState
+        .map { TimerFlags(it.isRunning, it.isPaused) }
+        .stateIn(
+            CoroutineScope(Dispatchers.Default + SupervisorJob()),
+            SharingStarted.Eagerly,
+            TimerFlags()
+        )
 
     val phaseCompleteEvent =
         kotlinx.coroutines.flow.MutableSharedFlow<Pair<Boolean, Int>>(extraBufferCapacity = 1)

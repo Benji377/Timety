@@ -12,8 +12,10 @@ android {
         applicationId = "io.github.benji377.timety"
         minSdk = 26
         targetSdk = 37
-        versionCode = 23
-        versionName = "1.5.1"
+        // F-Droid clients installed the Flutter app at versionCode 233 (1.5.1 arm64 split);
+        // the Kotlin rewrite ships a single universal APK, so this must stay above that.
+        versionCode = 240
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -34,8 +36,19 @@ android {
         }
     }
 
+    dependenciesInfo {
+        // Google Play's encrypted dependency block makes the APK/AAB differ from what anyone
+        // else can build from source; F-Droid requires it off for reproducible builds.
+        includeInApk = false
+        includeInBundle = false
+    }
     buildTypes {
         release {
+            vcsInfo {
+                // AGP embeds META-INF/version-control-info.textproto by default; any difference
+                // in git state between CI and the F-Droid builder breaks reproducible builds.
+                include = false
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

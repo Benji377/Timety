@@ -64,6 +64,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneId
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -155,7 +157,7 @@ private fun UnifiedCalendarSheetContent(
                 Icon(Icons.Filled.ChevronLeft, contentDescription = null)
             }
             Text(
-                text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatMonthYear(
+                text = AppDateFormatUtils.formatMonthYear(
                     displayedMonth.atDay(1)
                 ),
                 fontSize = 16.sp,
@@ -189,7 +191,7 @@ private fun UnifiedCalendarSheetContent(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     fontSize = AppTheme.fsBodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -290,7 +292,7 @@ private fun UnifiedCalendarSheetContent(
                     .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(stringResource(R.string.habitHistoryEmpty), color = Color.Gray)
+                Text(stringResource(R.string.habitHistoryEmpty), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(
@@ -319,9 +321,9 @@ private fun UnifiedCalendarSheetContent(
     // Remove-completion confirmation dialog
     val removalDate = dateForRemoval
     if (removalDate != null) {
-        val formattedDate = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(
+        val formattedDate = AppDateFormatUtils.formatDate(
             removalDate,
-            io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.dateFormatCode
+            LocalDateFormatSettings.current.dateFormatCode
         )
         ConfirmationDialog(
             visible = true,
@@ -344,7 +346,7 @@ private fun UnifiedCalendarSheetContent(
         val timePickerState = rememberTimePickerState(
             initialHour = now.hour,
             initialMinute = now.minute,
-            is24Hour = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat,
+            is24Hour = LocalDateFormatSettings.current.use24HourFormat,
         )
         AlertDialog(
             onDismissRequest = { dateForAdd = null },
@@ -380,7 +382,7 @@ private fun HistoryStatCard(label: String, count: String) {
             fontWeight = FontWeight.Bold,
             color = SuccessColor,
         )
-        Text(text = label, fontSize = AppTheme.fsBodySmall, color = Color.Gray)
+        Text(text = label, fontSize = AppTheme.fsBodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -390,11 +392,11 @@ private fun TimelineItem(
     isLast: Boolean,
     onDelete: () -> Unit,
 ) {
-    val dfs = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
-    val dateLabel = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(
+    val dfs = LocalDateFormatSettings.current
+    val dateLabel = AppDateFormatUtils.formatDate(
         completion.completionDate, dfs.dateFormatCode
     )
-    val timeLabel = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+    val timeLabel = AppDateFormatUtils.formatTime(
         completion.completionDate, dfs.use24HourFormat
     )
 
@@ -439,7 +441,7 @@ private fun TimelineItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.habitHistoryCompletedAt, timeLabel),
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                 )
             }
@@ -447,7 +449,7 @@ private fun TimelineItem(
                 Icon(
                     imageVector = Icons.Filled.DeleteOutline,
                     contentDescription = stringResource(R.string.habitHistoryRemoveTooltip),
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp),
                 )
             }

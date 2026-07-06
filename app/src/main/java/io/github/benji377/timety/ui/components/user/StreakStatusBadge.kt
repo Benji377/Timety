@@ -19,11 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.FlameGlowColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import kotlin.math.PI
 import kotlin.math.sin
@@ -81,7 +81,7 @@ fun StreakStatusBadge(
                     .graphicsLayer {
                         translationY = with(density) { (-1.0f * flameRise).dp.toPx() }
                     },
-                tint = Color(0xFFFFE08A),
+                tint = FlameGlowColor,
             )
         }
     }

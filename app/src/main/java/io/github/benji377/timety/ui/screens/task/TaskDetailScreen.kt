@@ -65,7 +65,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -91,6 +90,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.ReminderOption
@@ -104,6 +104,7 @@ import io.github.benji377.timety.ui.theme.InfoColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.AppUtils
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import kotlinx.coroutines.launch
@@ -115,11 +116,18 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.SelectableDates
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import io.github.benji377.timety.ui.screens.LocationPickerScreen
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 
 
 @OptIn(
     ExperimentalMaterial3Api::class,
-    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+    ExperimentalLayoutApi::class
 )
 @Composable
 fun TaskDetailScreen(
@@ -128,7 +136,7 @@ fun TaskDetailScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val allTasks by taskViewModel.allTasks.collectAsState()
-    val dateFmt = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current
+    val dateFmt = LocalDateFormatSettings.current
     val isNewTask = taskId == null
     val existingTaskWithSubtasks = taskId?.let { id -> allTasks.find { it.task.id == id } }
     val existingTask = existingTaskWithSubtasks?.task
@@ -224,9 +232,8 @@ fun TaskDetailScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-                title = { Text(appBarTitle, fontWeight = FontWeight.Bold) },
+            TimetyTopBar(
+                title = appBarTitle,
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -399,8 +406,8 @@ fun TaskDetailScreen(
                         value = dueDate?.let {
                             stringResource(
                                 R.string.taskDetailsLabelDueDate,
-                                formatDate(it, dateFmt.dateFormatCode),
-                                formatTime(it, dateFmt.use24HourFormat)
+                                AppDateFormatUtils.formatDate(it, dateFmt.dateFormatCode),
+                                AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
                             )
                         } ?: "",
                         onValueChange = {},
@@ -423,7 +430,7 @@ fun TaskDetailScreen(
                         )
                     }
                     Spacer(Modifier.height(AppTheme.spaceSmall))
-                    androidx.compose.foundation.layout.FlowRow(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
                     ) {
                         reminders.forEach { reminder ->
@@ -433,11 +440,11 @@ fun TaskDetailScreen(
                                 label = {
                                     Text(
                                         "${
-                                            formatDate(
+                                            AppDateFormatUtils.formatDate(
                                                 reminder,
                                                 dateFmt.dateFormatCode
                                             )
-                                        } - ${formatTime(reminder, dateFmt.use24HourFormat)}",
+                                        } - ${AppDateFormatUtils.formatTime(reminder, dateFmt.use24HourFormat)}",
                                         fontSize = AppTheme.fsBodySmall
                                     )
                                 },
@@ -481,13 +488,13 @@ fun TaskDetailScreen(
                 )
 
                 if (showLocationPicker) {
-                    androidx.compose.ui.window.Dialog(
+                    Dialog(
                         onDismissRequest = { showLocationPicker = false },
-                        properties = androidx.compose.ui.window.DialogProperties(
+                        properties = DialogProperties(
                             usePlatformDefaultWidth = false
                         )
                     ) {
-                        io.github.benji377.timety.ui.screens.LocationPickerScreen(
+                        LocationPickerScreen(
                             onLocationSelected = { selectedLocation ->
                                 location = selectedLocation
                                 showLocationPicker = false
@@ -559,7 +566,7 @@ fun TaskDetailScreen(
                         Icon(
                             Icons.Filled.SubdirectoryArrowRight,
                             contentDescription = null,
-                            tint = Color.Gray
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.width(AppTheme.spaceMedium))
                         OutlinedTextField(
@@ -635,7 +642,7 @@ fun TaskDetailScreen(
         val dueUtcMillis = dueDate?.atZone(zone)?.toLocalDate()
             ?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
         val selectableDates = remember(pickerTarget, dueUtcMillis, todayUtcMillis) {
-            object : androidx.compose.material3.SelectableDates {
+            object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean = when (pickerTarget) {
                     PickerTarget.DUE_DATE -> utcTimeMillis >= todayUtcMillis
                     PickerTarget.CUSTOM_REMINDER -> dueUtcMillis == null || utcTimeMillis <= dueUtcMillis
@@ -735,11 +742,6 @@ private fun disabledFieldColors(isEditing: Boolean) = if (isEditing) {
 }
 
 
-private fun formatDate(instant: Instant, dateFormatCode: String): String =
-    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatDate(instant, dateFormatCode)
-
-private fun formatTime(instant: Instant, use24Hour: Boolean): String =
-    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(instant, use24Hour)
 
 @Composable
 private fun SectionHeader(title: String, icon: ImageVector) {

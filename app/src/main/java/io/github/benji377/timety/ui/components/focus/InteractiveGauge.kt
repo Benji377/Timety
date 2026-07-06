@@ -60,6 +60,8 @@ import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.ui.unit.IntSize
+import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 
 
 @Composable
@@ -82,7 +84,7 @@ fun InteractiveGauge(
     var currentProgress by remember { mutableFloatStateOf(progress) }
     LaunchedEffect(progress, isInteractive) { currentProgress = progress }
 
-    val isDark = io.github.benji377.timety.ui.theme.LocalIsDarkTheme.current
+    val isDark = LocalIsDarkTheme.current
     val gaugeColor = color ?: MaterialTheme.colorScheme.primary
 
     val infiniteTransition = rememberInfiniteTransition(label = "gaugePulse")
@@ -98,7 +100,7 @@ fun InteractiveGauge(
     val paintProgress = if (isStopwatch) pulseValue else currentProgress
     val trackOpacity = if (isStopwatch) (1f - pulseValue).coerceIn(0.2f, 1f) else 1f
 
-    fun handlePointer(offset: Offset, size: androidx.compose.ui.unit.IntSize) {
+    fun handlePointer(offset: Offset, size: IntSize) {
         if (!isInteractive) return
         val center = Offset(size.width / 2f, size.height / 2f)
         val dx = offset.x - center.x

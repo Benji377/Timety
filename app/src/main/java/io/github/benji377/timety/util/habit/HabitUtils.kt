@@ -9,7 +9,7 @@ import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.Locale
+import androidx.compose.ui.platform.LocalLocale
 
 
 object HabitUtils {
@@ -71,7 +71,7 @@ object HabitUtils {
         return when (habit.frequency) {
             HabitFrequency.DAILY -> stringResource(R.string.habitFreqDaily)
             HabitFrequency.WEEKLY_EXACT -> {
-                val locale = androidx.compose.ui.platform.LocalLocale.current.platformLocale
+                val locale = LocalLocale.current.platformLocale
                 val days = parseWeekdays(habit.targetWeekdays).sorted()
                     .joinToString(", ") { AppDateUtils.weekdayToStringShort(locale, it) }
                 stringResource(R.string.habitFreqWeekly, days)

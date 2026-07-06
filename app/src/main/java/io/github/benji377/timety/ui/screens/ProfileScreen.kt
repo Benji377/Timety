@@ -38,8 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -72,15 +71,25 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.stats.StatCard
+import io.github.benji377.timety.ui.components.stats.StatCardStyle
+import io.github.benji377.timety.ui.components.user.StreakStatusBadge
+import io.github.benji377.timety.ui.components.user.UserStreakTimelineCard
+import io.github.benji377.timety.ui.components.user.UserXpBreakdownCard
+import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
+import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.util.stats.StreakCalculator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onNavigateToSettings: () -> Unit,
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    taskViewModel: io.github.benji377.timety.ui.viewmodel.TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    habitViewModel: io.github.benji377.timety.ui.viewmodel.HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    focusViewModel: io.github.benji377.timety.ui.viewmodel.FocusViewModel = io.github.benji377.timety.ui.viewmodel.activityScopedViewModel()
+    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = io.github.benji377.timety.ui.viewmodel.activityScopedViewModel()
 ) {
     val userProfile by userViewModel.userProfile.collectAsState()
     val tasks by taskViewModel.allTasks.collectAsState()
@@ -121,11 +130,11 @@ fun ProfileScreen(
     val allActivityDates = (taskDates + habitDates + focusDates).distinct().sorted()
 
     val currentStreak =
-        io.github.benji377.timety.util.stats.StreakCalculator.calculateCurrentStreak(
+        StreakCalculator.calculateCurrentStreak(
             allActivityDates
         )
     val highestStreak =
-        io.github.benji377.timety.util.stats.StreakCalculator.calculateBestStreak(allActivityDates)
+        StreakCalculator.calculateBestStreak(allActivityDates)
 
     val context = LocalContext.current
     val shareSubjectStr = stringResource(R.string.userShareSubject)
@@ -165,7 +174,7 @@ fun ProfileScreen(
                     coroutineScope.launch(Dispatchers.IO) {
                         try {
                             val bytes =
-                                io.github.benji377.timety.ui.utils.WrapUpImageGenerator.generate(
+                                WrapUpImageGenerator.generate(
                                     context,
                                     userName,
                                     level,
@@ -258,13 +267,8 @@ fun ProfileScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.userProfileTitle),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+            TimetyTopBar(
+                title = stringResource(R.string.userProfileTitle),
                 actions = {
                     IconButton(onClick = { showShareWrapupDialog = true }) {
                         Icon(
@@ -278,10 +282,7 @@ fun ProfileScreen(
                             contentDescription = stringResource(R.string.settingsTitle)
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+                }
             )
         }
     ) { paddingValues ->
@@ -350,7 +351,7 @@ fun ProfileScreen(
             // Name Section (streak flame sits left of the name)
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    io.github.benji377.timety.ui.components.user.StreakStatusBadge(isActive = currentStreak > 0)
+                    StreakStatusBadge(isActive = currentStreak > 0)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = userName,
@@ -366,7 +367,7 @@ fun ProfileScreen(
                         Icon(
                             Icons.Filled.Edit,
                             stringResource(R.string.userEditNameTitle),
-                            tint = Color.Gray
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -376,7 +377,7 @@ fun ProfileScreen(
 
             // XP Card
             item {
-                io.github.benji377.timety.ui.components.user.UserXpBreakdownCard(
+                UserXpBreakdownCard(
                     currentLevel = currentLevel,
                     levelTitle = levelTitle,
                     totalXp = totalXp,
@@ -388,7 +389,7 @@ fun ProfileScreen(
 
             // Streak Timeline Card Placeholder
             item {
-                io.github.benji377.timety.ui.components.user.UserStreakTimelineCard(
+                UserStreakTimelineCard(
                     activityDates = allActivityDates,
                     taskDates = taskDates,
                     focusDates = focusDates,
@@ -419,20 +420,20 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        io.github.benji377.timety.ui.components.stats.StatCard(
+                        StatCard(
                             title = stringResource(R.string.userStatTasksDone),
                             value = totalTasksDone.toString(),
                             icon = Icons.Filled.CheckCircle,
                             color = TaskColor,
-                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
                         )
-                        io.github.benji377.timety.ui.components.stats.StatCard(
+                        StatCard(
                             title = stringResource(R.string.userStatHabitsMet),
                             value = totalHabitsMet.toString(),
                             icon = Icons.Filled.Repeat,
                             color = HabitColor,
-                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -441,20 +442,20 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        io.github.benji377.timety.ui.components.stats.StatCard(
+                        StatCard(
                             title = stringResource(R.string.userStatFocusMins),
                             value = totalFocusMins.toString(),
                             icon = Icons.Filled.Timer,
                             color = FocusColor,
-                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
                         )
-                        io.github.benji377.timety.ui.components.stats.StatCard(
+                        StatCard(
                             title = stringResource(R.string.userStatSessions),
                             value = totalSessions.toString(),
                             icon = Icons.Filled.Timer,
                             color = FocusColor,
-                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -463,12 +464,12 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        io.github.benji377.timety.ui.components.stats.StatCard(
+                        StatCard(
                             title = stringResource(R.string.streakLegendStreakDay),
                             value = highestStreak.toString(),
                             icon = Icons.Filled.LocalFireDepartment,
                             color = WarningColor,
-                            style = io.github.benji377.timety.ui.components.stats.StatCardStyle.COMPACT_VERTICAL,
+                            style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
                         )
                         Spacer(modifier = Modifier.weight(1f))

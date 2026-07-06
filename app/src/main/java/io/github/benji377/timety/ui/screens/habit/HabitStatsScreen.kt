@@ -156,7 +156,7 @@ fun HabitStatsScreen(
                     Text(
                         text = stringResource(R.string.habitStatsLabelCompletionsDaily),
                         fontSize = AppTheme.fsBodySmall,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                     HabitVelocityChart(habits = habits, focusedDate = focusedDate)
@@ -220,7 +220,7 @@ fun HabitStatsScreen(
                                 Text(
                                     text = stringResource(R.string.habitStatsLabelBest, bestStreak),
                                     fontSize = AppTheme.fsCaption,
-                                    color = Color.Gray,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -287,7 +287,7 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(0.5f)
-                        .background(Color.Gray.copy(alpha = 0.1f), RoundedCornerShape(4.dp)),
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f), RoundedCornerShape(4.dp)),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
                     Box(
@@ -305,7 +305,7 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
                     text = weekdays[i],
                     fontSize = AppTheme.fsBodySmall,
                     fontWeight = if (isToday) AppTheme.fwBold else AppTheme.fwNormal,
-                    color = if (isToday) HabitColor else Color.Gray,
+                    color = if (isToday) HabitColor else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -384,7 +384,7 @@ private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
                 Text(
                     text = stringResource(R.string.habitStatsLabelCompletionsDistribution),
                     fontSize = AppTheme.fsBodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
@@ -415,7 +415,7 @@ private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Gray.copy(alpha = 0.12f)),
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f)),
                 )
             } else {
                 buckets.filter { it.count > 0 }.forEach { bucket ->

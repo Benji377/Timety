@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.PaddingValues
 
 
 object AppTheme {
@@ -48,10 +49,10 @@ object AppTheme {
 
     // Common padding configurations
     val paddingScreenHorizontal =
-        androidx.compose.foundation.layout.PaddingValues(horizontal = spaceLarge)
-    val paddingScreenVertical = androidx.compose.foundation.layout.PaddingValues(all = spaceLarge)
-    val paddingCard = androidx.compose.foundation.layout.PaddingValues(all = spaceLarge)
-    val paddingSection = androidx.compose.foundation.layout.PaddingValues(
+        PaddingValues(horizontal = spaceLarge)
+    val paddingScreenVertical = PaddingValues(all = spaceLarge)
+    val paddingCard = PaddingValues(all = spaceLarge)
+    val paddingSection = PaddingValues(
         start = spaceXLarge,
         top = spaceXLarge,
         end = spaceXLarge,
@@ -88,7 +89,7 @@ object AppTheme {
     val neoBorderWidth = 3.dp
     val listTileTrailingSpacing = 8.dp
     val listTileSwipeIconSize = 24.dp
-    val listTileScreenMargin = androidx.compose.foundation.layout.PaddingValues(
+    val listTileScreenMargin = PaddingValues(
         horizontal = spaceLarge,
         vertical = spaceXSmall
     )

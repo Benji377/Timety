@@ -9,6 +9,7 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.dataStore
 import io.github.benji377.timety.util.LocaleHelper
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.flow.first
 import java.time.Duration
@@ -117,7 +118,7 @@ class ReminderScheduler private constructor(private val context: Context) {
 
 
     fun scheduleDailyMotivation(time: String) {
-        val (hour, minute) = parseTime(time)
+        val (hour, minute) = AppDateFormatUtils.parseHHmm(time, defaultHour = 0, defaultMinute = 0)
         val quotes = listOf(
             context.getString(R.string.notificationQuote1),
             context.getString(R.string.notificationQuote2),
@@ -133,7 +134,7 @@ class ReminderScheduler private constructor(private val context: Context) {
 
 
     fun scheduleEndOfDayCheckup(time: String) {
-        val (hour, minute) = parseTime(time)
+        val (hour, minute) = AppDateFormatUtils.parseHHmm(time, defaultHour = 0, defaultMinute = 0)
         notificationService.scheduleEndOfDayCheckup(
             hour = hour,
             minute = minute,
@@ -142,13 +143,6 @@ class ReminderScheduler private constructor(private val context: Context) {
         )
     }
 
-
-    private fun parseTime(raw: String): Pair<Int, Int> {
-        val parts = raw.split(":")
-        val hour = parts.getOrNull(0)?.toIntOrNull()?.coerceIn(0, 23) ?: 0
-        val minute = parts.getOrNull(1)?.toIntOrNull()?.coerceIn(0, 59) ?: 0
-        return hour to minute
-    }
 
     companion object {
 

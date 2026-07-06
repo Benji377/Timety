@@ -33,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,6 +52,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
@@ -75,11 +75,11 @@ import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 import java.time.ZoneId
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.CircleShape
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
-private val GreyDefault = Color(0xFF9E9E9E)
-private val Grey300 = Color(0xFFE0E0E0)
-private val Grey400 = Color(0xFFBDBDBD)
-private val Grey600 = Color(0xFF757575)
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -126,9 +126,8 @@ fun CalendarScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-                title = { Text(stringResource(R.string.calendarTitle)) },
+            TimetyTopBar(
+                title = stringResource(R.string.calendarTitle),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -193,7 +192,7 @@ fun CalendarScreen(
                 if (selectedDate == null) {
                     Text(
                         text = stringResource(R.string.calendarLabelSelect),
-                        color = GreyDefault,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 } else {
@@ -262,7 +261,7 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
             Icon(Icons.Filled.ChevronLeft, contentDescription = null)
         }
         Text(
-            text = io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatMonthYear(
+            text = AppDateFormatUtils.formatMonthYear(
                 focusedMonth
             ),
             fontSize = 18.sp,
@@ -320,7 +319,7 @@ private fun CalendarGrid(
                         .padding(bottom = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(header, fontWeight = FontWeight.Bold, color = GreyDefault)
+                    Text(header, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Box(
@@ -399,7 +398,7 @@ private fun CalendarGrid(
                             Text(
                                 text = day.dayOfMonth.toString(),
                                 fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isCurrentMonth) MaterialTheme.colorScheme.onSurface else Grey400
+                                color = if (isCurrentMonth) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -436,14 +435,14 @@ private fun CalendarGrid(
                                     fontWeight = FontWeight.Bold
                                 )
                             ) { append("$weeklyTaskCount") }
-                            withStyle(SpanStyle(color = Grey600)) { append(" | ") }
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append(" | ") }
                             withStyle(
                                 SpanStyle(
                                     color = HabitColor,
                                     fontWeight = FontWeight.Bold
                                 )
                             ) { append("$weeklyHabitCount") }
-                            withStyle(SpanStyle(color = Grey600)) { append(" | ") }
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append(" | ") }
                             withStyle(
                                 SpanStyle(
                                     color = SuccessColor,
@@ -466,7 +465,7 @@ private fun Dot(color: Color) {
     Box(
         modifier = Modifier
             .size(5.dp)
-            .background(color, shape = androidx.compose.foundation.shape.CircleShape)
+            .background(color, shape = CircleShape)
     )
 }
 
@@ -487,7 +486,7 @@ private fun HabitsAccordion(
         if (habits.isEmpty()) {
             Text(
                 text = stringResource(R.string.calendarSectionHabitsEmpty),
-                color = GreyDefault,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)
             )
         } else {
@@ -500,7 +499,7 @@ private fun HabitsAccordion(
                         .clickable { onHabitClick(hwc) },
                     shape = AppTheme.brMedium,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                    border = androidx.compose.foundation.BorderStroke(
+                    border = BorderStroke(
                         1.dp,
                         if (isCompleted) HabitColor.copy(alpha = 0.3f) else HabitColor
                     ),
@@ -524,7 +523,7 @@ private fun HabitsAccordion(
                         Text(
                             text = hwc.habit.name,
                             textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
-                            color = if (isCompleted) GreyDefault else MaterialTheme.colorScheme.onSurface
+                            color = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -548,7 +547,7 @@ private fun TasksAccordion(
         if (tasks.isEmpty()) {
             Text(
                 text = stringResource(R.string.calendarSectionTasksEmpty),
-                color = GreyDefault,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)
             )
         } else {
@@ -561,7 +560,7 @@ private fun TasksAccordion(
                         .clickable { onTaskClick(taskWithSubtasks) },
                     shape = AppTheme.brMedium,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                    border = androidx.compose.foundation.BorderStroke(
+                    border = BorderStroke(
                         1.dp,
                         if (task.isCompleted) SuccessColor else TaskColor
                     ),
@@ -605,7 +604,7 @@ private fun FocusSessionsAccordion(
     val tags by focusViewModel.allTags.collectAsState()
     val zone = ZoneId.systemDefault()
     val use24Hour =
-        io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
+        LocalDateFormatSettings.current.use24HourFormat
     val ongoingLabel = stringResource(R.string.calendarLabelFocusOngoing)
     val untaggedLabel = stringResource(R.string.focusTargetUntagged)
 
@@ -617,7 +616,7 @@ private fun FocusSessionsAccordion(
         if (sessions.isEmpty()) {
             Text(
                 text = stringResource(R.string.calendarSectionFocusEmpty),
-                color = GreyDefault,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)
             )
         } else {
@@ -626,14 +625,14 @@ private fun FocusSessionsAccordion(
                 val tag = session.tagId?.let { tagId -> tags.firstOrNull { it.id == tagId } }
 
                 var timeString =
-                    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+                    AppDateFormatUtils.formatTime(
                         session.startTime,
                         use24Hour,
                         zone
                     )
                 timeString += if (session.endTime != null) {
                     " - ${
-                        io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+                        AppDateFormatUtils.formatTime(
                             session.endTime,
                             use24Hour,
                             zone
@@ -651,7 +650,7 @@ private fun FocusSessionsAccordion(
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     shape = AppTheme.brMedium,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Grey300),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Row(
@@ -663,7 +662,7 @@ private fun FocusSessionsAccordion(
                         Icon(
                             imageVector = Icons.Filled.Circle,
                             contentDescription = null,
-                            tint = tag?.let { Color(it.colorValue) } ?: Grey400
+                            tint = tag?.let { Color(it.colorValue) } ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
@@ -675,7 +674,7 @@ private fun FocusSessionsAccordion(
                             }
                             Text(
                                 text = timeString,
-                                color = Grey600,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )

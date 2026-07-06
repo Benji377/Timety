@@ -45,8 +45,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -70,8 +68,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
+import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
@@ -131,11 +132,14 @@ fun FocusScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val timerState by FocusTimerManager.timerState.collectAsState()
-    val isRunning = timerState.isRunning
-    val isPaused = timerState.isPaused
+    // Only phase-transition flags are collected here: the raw TimerState emits once a
+    // second while running, which would recompose this whole screen per tick. TimerGauge
+    // collects the full state itself, so tick updates stay local to the dial.
+    val timerFlags by FocusTimerManager.timerFlags.collectAsState()
+    val isRunning = timerFlags.isRunning
+    val isPaused = timerFlags.isPaused
 
-    androidx.compose.runtime.LaunchedEffect(focusViewModel) {
+    LaunchedEffect(focusViewModel) {
         focusViewModel.autoCompleteTaskEvent.collect { taskId ->
             taskViewModel.markTaskCompleted(taskId)
         }
@@ -253,67 +257,7 @@ fun FocusScreen(
     }
 
     // --- Gauge display state (mirrors the big `build()` computed-vars block in focus_screen.dart) ---
-    val focusLabelDefault = stringResource(R.string.focusLabelDefault).uppercase()
-    val focusLabelRest = stringResource(R.string.focusLabelRest).uppercase()
-    val focusLabelSetTime = stringResource(R.string.focusLabelSetTime).uppercase()
-    val focusLabelStopwatch = stringResource(R.string.focusLabelStopwatch).uppercase()
-
-    val isFlexibleMode = activeMode?.type == FocusModeType.FLEXIBLE
-    val canDrag = isFlexibleMode && !isRunning && !isPaused
-    val isStopwatchPhaseType = activeMode?.type == FocusModeType.STOPWATCH
     val currentPhase = activePhases.getOrNull(phaseIndex)
-
-    var gaugeProgress = 1f
-    var isStopwatchAnim = false
-    var gaugeLabel = focusLabelDefault
-    var centerText = "25:00"
-    var isResting = false
-
-    if (activeMode != null && currentPhase != null) {
-        when {
-            canDrag -> {
-                gaugeProgress = flexibleMinutes / 120f
-                gaugeLabel = focusLabelSetTime
-                centerText = AppDateFormatUtils.formatDuration(flexibleMinutes * 60)
-            }
-
-            !isStopwatchPhaseType -> {
-                if (isRunning || isPaused) {
-                    val total =
-                        if (timerState.totalPhaseSeconds > 0) timerState.totalPhaseSeconds else 1
-                    gaugeProgress = (timerState.secondsRemaining.toFloat() / total).coerceIn(0f, 1f)
-                    centerText = timerState.centerText
-                    isResting = timerState.isRestPhase
-                    gaugeLabel = if (timerState.isRestPhase) focusLabelRest else focusLabelDefault
-                } else {
-                    val totalPhaseSeconds =
-                        if (currentPhase.durationMinutes > 0) currentPhase.durationMinutes * 60 else 25 * 60
-                    gaugeProgress = 1f
-                    centerText = AppDateFormatUtils.formatDuration(totalPhaseSeconds)
-                    isResting = currentPhase.type == PhaseType.REST
-                    gaugeLabel = if (isResting) focusLabelRest else focusLabelDefault
-                }
-            }
-
-            else -> {
-                isStopwatchAnim = isRunning
-                gaugeProgress = 0f
-                gaugeLabel = focusLabelStopwatch
-                centerText = if (isRunning || isPaused) {
-                    timerState.centerText
-                } else {
-                    "00:00"
-                }
-            }
-        }
-    }
-
-    val gaugeColor = if (isResting) WarningColor else FocusColor
-    val bottomTextIcon = when (selectedTarget?.type) {
-        FocusTargetType.TASK -> Icons.Filled.Task
-        FocusTargetType.HABIT -> Icons.Filled.Alarm
-        else -> null
-    }
 
     val focusMinsToday = remember(allSessions) { focusViewModel.getMinutesFocusedToday() }
 
@@ -351,9 +295,8 @@ fun FocusScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.focusTitle), fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+            TimetyTopBar(
+                title = stringResource(R.string.focusTitle),
                 actions = {
                     IconButton(onClick = onNavigateToModes) {
                         Icon(
@@ -362,7 +305,7 @@ fun FocusScreen(
                         )
                     }
                     Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                },
+                }
             )
         },
     ) { paddingValues ->
@@ -384,7 +327,7 @@ fun FocusScreen(
                         Icons.Filled.ArrowBackIosNew,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Box(
@@ -409,7 +352,7 @@ fun FocusScreen(
                         Icons.AutoMirrored.Filled.ArrowForwardIos,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -450,28 +393,13 @@ fun FocusScreen(
                     .height(320.dp),
                 contentAlignment = Alignment.Center
             ) {
-                InteractiveGauge(
-                    progress = gaugeProgress,
-                    isStopwatch = isStopwatchAnim,
-                    color = gaugeColor,
-                    labelColor = gaugeColor,
-                    centerTextColor = gaugeColor,
-                    centerText = centerText,
-                    bottomText = selectedTarget?.label ?: stringResource(R.string.focusTargetEmpty),
-                    bottomTextColor = selectedTarget?.color ?: FocusColor,
-                    bottomTextIcon = bottomTextIcon,
-                    onBottomTextTapped = if (isRunning || isPaused) null else {
-                        { showTargetSelection = true }
-                    },
-                    isInteractive = canDrag,
-                    label = gaugeLabel,
-                    onChanged = { newProgress ->
-                        if (canDrag) {
-                            var newMins = (newProgress * 120).roundToInt()
-                            if (newMins < 1) newMins = 1
-                            flexibleMinutes = newMins
-                        }
-                    },
+                TimerGauge(
+                    activeMode = activeMode,
+                    currentPhase = currentPhase,
+                    flexibleMinutes = flexibleMinutes,
+                    onFlexibleMinutesChange = { flexibleMinutes = it },
+                    selectedTarget = selectedTarget,
+                    onTargetTapped = { showTargetSelection = true },
                 )
 
                 FilledTonalIconButton(
@@ -528,7 +456,7 @@ fun FocusScreen(
                         Icons.Filled.RestartAlt,
                         contentDescription = null,
                         modifier = Modifier.size(32.dp),
-                        tint = if (secondaryEnabled) Color.Gray else Color.Transparent,
+                        tint = if (secondaryEnabled) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent,
                     )
                 }
 
@@ -585,7 +513,7 @@ fun FocusScreen(
                         if (awaitingContinue) Icons.Filled.Stop else if (isPaused) Icons.Filled.PlayCircleFilled else Icons.Filled.Pause,
                         contentDescription = null,
                         modifier = Modifier.size(32.dp),
-                        tint = if (secondaryEnabled) Color.Gray else Color.Transparent,
+                        tint = if (secondaryEnabled) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent,
                     )
                 }
             }
@@ -712,4 +640,107 @@ fun FocusScreen(
             },
         )
     }
+}
+
+/**
+ * The timer dial. Collects the raw per-second [FocusTimerManager.timerState] itself so
+ * tick recompositions stay confined to this composable instead of the whole screen.
+ */
+@Composable
+private fun TimerGauge(
+    activeMode: FocusModeEntity?,
+    currentPhase: SessionPhaseEntity?,
+    flexibleMinutes: Int,
+    onFlexibleMinutesChange: (Int) -> Unit,
+    selectedTarget: FocusTargetSelection?,
+    onTargetTapped: () -> Unit,
+) {
+    val timerState by FocusTimerManager.timerState.collectAsState()
+    val isRunning = timerState.isRunning
+    val isPaused = timerState.isPaused
+
+    val focusLabelDefault = stringResource(R.string.focusLabelDefault).uppercase()
+    val focusLabelRest = stringResource(R.string.focusLabelRest).uppercase()
+    val focusLabelSetTime = stringResource(R.string.focusLabelSetTime).uppercase()
+    val focusLabelStopwatch = stringResource(R.string.focusLabelStopwatch).uppercase()
+
+    val isFlexibleMode = activeMode?.type == FocusModeType.FLEXIBLE
+    val canDrag = isFlexibleMode && !isRunning && !isPaused
+    val isStopwatchPhaseType = activeMode?.type == FocusModeType.STOPWATCH
+
+    var gaugeProgress = 1f
+    var isStopwatchAnim = false
+    var gaugeLabel = focusLabelDefault
+    var centerText = "25:00"
+    var isResting = false
+
+    if (activeMode != null && currentPhase != null) {
+        when {
+            canDrag -> {
+                gaugeProgress = flexibleMinutes / 120f
+                gaugeLabel = focusLabelSetTime
+                centerText = AppDateFormatUtils.formatDuration(flexibleMinutes * 60)
+            }
+
+            !isStopwatchPhaseType -> {
+                if (isRunning || isPaused) {
+                    val total =
+                        if (timerState.totalPhaseSeconds > 0) timerState.totalPhaseSeconds else 1
+                    gaugeProgress = (timerState.secondsRemaining.toFloat() / total).coerceIn(0f, 1f)
+                    centerText = timerState.centerText
+                    isResting = timerState.isRestPhase
+                    gaugeLabel = if (timerState.isRestPhase) focusLabelRest else focusLabelDefault
+                } else {
+                    val totalPhaseSeconds =
+                        if (currentPhase.durationMinutes > 0) currentPhase.durationMinutes * 60 else 25 * 60
+                    gaugeProgress = 1f
+                    centerText = AppDateFormatUtils.formatDuration(totalPhaseSeconds)
+                    isResting = currentPhase.type == PhaseType.REST
+                    gaugeLabel = if (isResting) focusLabelRest else focusLabelDefault
+                }
+            }
+
+            else -> {
+                isStopwatchAnim = isRunning
+                gaugeProgress = 0f
+                gaugeLabel = focusLabelStopwatch
+                centerText = if (isRunning || isPaused) {
+                    timerState.centerText
+                } else {
+                    "00:00"
+                }
+            }
+        }
+    }
+
+    val gaugeColor = if (isResting) WarningColor else FocusColor
+    val bottomTextIcon = when (selectedTarget?.type) {
+        FocusTargetType.TASK -> Icons.Filled.Task
+        FocusTargetType.HABIT -> Icons.Filled.Alarm
+        else -> null
+    }
+
+    InteractiveGauge(
+        progress = gaugeProgress,
+        isStopwatch = isStopwatchAnim,
+        color = gaugeColor,
+        labelColor = gaugeColor,
+        centerTextColor = gaugeColor,
+        centerText = centerText,
+        bottomText = selectedTarget?.label ?: stringResource(R.string.focusTargetEmpty),
+        bottomTextColor = selectedTarget?.color ?: FocusColor,
+        bottomTextIcon = bottomTextIcon,
+        onBottomTextTapped = if (isRunning || isPaused) null else {
+            { onTargetTapped() }
+        },
+        isInteractive = canDrag,
+        label = gaugeLabel,
+        onChanged = { newProgress ->
+            if (canDrag) {
+                var newMins = (newProgress * 120).roundToInt()
+                if (newMins < 1) newMins = 1
+                onFlexibleMinutesChange(newMins)
+            }
+        },
+    )
 }

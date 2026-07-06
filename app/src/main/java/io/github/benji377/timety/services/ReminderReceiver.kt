@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import io.github.benji377.timety.util.LocaleHelper
 
 
 class ReminderReceiver : BroadcastReceiver() {
@@ -54,7 +55,7 @@ class ReminderReceiver : BroadcastReceiver() {
     
     private suspend fun motivationBody(context: Context, fallback: String): String {
         val app = context.applicationContext as? TimetyApplication ?: return fallback
-        val localized = io.github.benji377.timety.util.LocaleHelper.wrap(
+        val localized = LocaleHelper.wrap(
             app,
             app.container.settingsRepository.appLocaleCodeFlow.first()
         )

@@ -10,12 +10,13 @@ import androidx.room.Update
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import kotlinx.coroutines.flow.Flow
+import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 
 @Dao
 interface TaskDao {
     @Transaction
     @Query("SELECT * FROM tasks ORDER BY createdAt DESC")
-    fun getAllTasks(): Flow<List<io.github.benji377.timety.data.model.task.TaskWithSubtasks>>
+    fun getAllTasks(): Flow<List<TaskWithSubtasks>>
 
     @Query("SELECT * FROM tasks WHERE id = :id")
     fun getTaskById(id: String): TaskEntity?

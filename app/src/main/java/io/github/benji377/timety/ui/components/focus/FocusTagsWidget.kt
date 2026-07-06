@@ -35,7 +35,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,22 +47,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import androidx.compose.material3.ButtonDefaults
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,19 +78,13 @@ fun FocusTagsWidget(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-                title = {
-                    Text(
-                        stringResource(R.string.focusTagsTitle),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+            TimetyTopBar(
+                title = stringResource(R.string.focusTagsTitle),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
-                },
+                }
             )
         },
     ) { padding ->
@@ -107,7 +100,7 @@ fun FocusTagsWidget(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(AppTheme.spaceLarge),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = FocusColor),
+                    colors = ButtonDefaults.buttonColors(containerColor = FocusColor),
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
@@ -289,20 +282,4 @@ private fun TagEditDialog(
     )
 }
 
-private val FOCUS_TAG_COLORS = listOf(
-    FocusColor,
-    Color(0xFFF44336),
-    Color(0xFFE91E63),
-    Color(0xFFFFC107),
-    Color(0xFFFF9800),
-    Color(0xFF4CAF50),
-    Color(0xFF8BC34A),
-    Color(0xFF009688),
-    Color(0xFF2196F3),
-    Color(0xFF00BCD4),
-    Color(0xFF3F51B5),
-    Color(0xFF9C27B0),
-    Color(0xFF673AB7),
-    Color(0xFF795548),
-    Color(0xFF607D8B),
-)
+private val FOCUS_TAG_COLORS = listOf(FocusColor) + PickerPalette

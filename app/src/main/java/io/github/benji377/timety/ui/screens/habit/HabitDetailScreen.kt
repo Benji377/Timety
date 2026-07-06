@@ -53,7 +53,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -68,9 +67,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
@@ -78,6 +77,7 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
@@ -88,6 +88,8 @@ import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -208,9 +210,8 @@ fun HabitDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-                title = { Text(appBarTitle, fontWeight = FontWeight.Bold) },
+            TimetyTopBar(
+                title = appBarTitle,
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
@@ -538,9 +539,9 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
                 val timeLabel = targetTimeMinutes?.let {
                     val time = LocalTime.of(it / 60, it % 60)
-                    io.github.benji377.timety.util.datetime.AppDateFormatUtils.formatTime(
+                    AppDateFormatUtils.formatTime(
                         time,
-                        io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat
+                        LocalDateFormatSettings.current.use24HourFormat
                     )
                 } ?: stringResource(R.string.habitDetailLabelReminderNoTime)
 
@@ -658,7 +659,7 @@ fun HabitDetailScreen(
             val timePickerState = rememberTimePickerState(
                 initialHour = initial?.let { it / 60 } ?: 8,
                 initialMinute = initial?.let { it % 60 } ?: 0,
-                is24Hour = io.github.benji377.timety.ui.utils.LocalDateFormatSettings.current.use24HourFormat,
+                is24Hour = LocalDateFormatSettings.current.use24HourFormat,
             )
             AlertDialog(
                 onDismissRequest = { showTimePicker = false },
@@ -681,23 +682,7 @@ fun HabitDetailScreen(
 }
 
 
-private val HABIT_DETAIL_COLORS = listOf(
-    HabitColor,
-    Color(0xFFF44336), // Colors.red
-    Color(0xFFE91E63), // Colors.pink
-    Color(0xFFFFC107), // Colors.amber
-    Color(0xFFFF9800), // Colors.orange
-    Color(0xFF4CAF50), // Colors.green
-    Color(0xFF8BC34A), // Colors.lightGreen
-    Color(0xFF009688), // Colors.teal
-    Color(0xFF2196F3), // Colors.blue
-    Color(0xFF00BCD4), // Colors.cyan
-    Color(0xFF3F51B5), // Colors.indigo
-    Color(0xFF9C27B0), // Colors.purple
-    Color(0xFF673AB7), // Colors.deepPurple
-    Color(0xFF795548), // Colors.brown
-    Color(0xFF607D8B), // Colors.blueGrey
-)
+private val HABIT_DETAIL_COLORS = listOf(HabitColor) + PickerPalette
 
 
 @Composable

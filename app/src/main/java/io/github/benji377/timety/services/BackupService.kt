@@ -28,6 +28,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
+import androidx.core.content.FileProvider
 
 
 class BackupService(
@@ -60,7 +61,7 @@ class BackupService(
             val dir = java.io.File(context.cacheDir, "shared").apply { mkdirs() }
             val file = java.io.File(dir, suggestedFileName())
             file.writeText(json, Charsets.UTF_8)
-            androidx.core.content.FileProvider.getUriForFile(
+            FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.fileprovider",
                 file

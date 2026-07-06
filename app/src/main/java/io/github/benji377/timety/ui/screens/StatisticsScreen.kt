@@ -32,7 +32,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -64,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.screens.focus.FocusStatsScreen
@@ -84,6 +84,7 @@ import java.time.ZoneId
 import java.util.Locale
 import kotlin.math.roundToInt
 import java.time.format.TextStyle as JavaTextStyle
+import androidx.compose.material3.IconButton
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,11 +110,10 @@ fun StatisticsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
-                title = { Text(stringResource(R.string.statsTitle), fontWeight = FontWeight.Bold) },
+            TimetyTopBar(
+                title = stringResource(R.string.statsTitle),
                 navigationIcon = {
-                    androidx.compose.material3.IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.commonBack)
@@ -274,7 +274,7 @@ private fun OverviewStatsScreen(
             Text(
                 text = stringResource(R.string.statsLabelSynergy),
                 fontSize = 12.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(16.dp))
 
@@ -288,7 +288,7 @@ private fun OverviewStatsScreen(
                 Text(
                     text = stringResource(R.string.statsLabelFocusMins),
                     fontSize = 12.sp,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.width(24.dp))
@@ -297,7 +297,7 @@ private fun OverviewStatsScreen(
                 Text(
                     text = stringResource(R.string.statsLabelTasksDone),
                     fontSize = 12.sp,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -401,7 +401,7 @@ private fun SynergyChart(
                     text = "$v",
                     style = TextStyle(
                         fontSize = 12.sp,
-                        color = Color.Gray,
+                        color = axisTextColor,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Right
                     )

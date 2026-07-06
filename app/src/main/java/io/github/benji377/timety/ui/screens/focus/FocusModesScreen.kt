@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,20 +26,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.focus.FocusModeEditCard
-import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,26 +54,20 @@ fun FocusModesScreen(
     val modes by focusViewModel.allModes.collectAsState()
     var pendingMode by remember { mutableStateOf<FocusModeEntity?>(null) }
     val newModeLabel = stringResource(R.string.focusModeLabelNew)
-    val snackbarHostState = io.github.benji377.timety.ui.theme.LocalSnackbarHostState.current
+    val snackbarHostState = LocalSnackbarHostState.current
     val modeSavedScope = androidx.compose.runtime.rememberCoroutineScope()
     val modeSavedMessage = stringResource(R.string.focusModeSnackbarSaved)
     val modeInUseMessage = stringResource(R.string.focusModeSnackbarInUse)
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = androidx.compose.material3.MaterialTheme.colorScheme.background),
-                title = {
-                    Text(
-                        stringResource(R.string.focusModesTitle),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+            TimetyTopBar(
+                title = stringResource(R.string.focusModesTitle),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
-                },
+                }
             )
         },
         floatingActionButton = {
@@ -86,12 +82,12 @@ fun FocusModesScreen(
                         )
                     },
                     modifier = Modifier.border(
-                        io.github.benji377.timety.ui.theme.AppTheme.neoBorderWidth,
-                        androidx.compose.material3.MaterialTheme.colorScheme.outline,
-                        io.github.benji377.timety.ui.theme.AppTheme.brNeo
+                        AppTheme.neoBorderWidth,
+                        MaterialTheme.colorScheme.outline,
+                        AppTheme.brNeo
                     ),
-                    shape = io.github.benji377.timety.ui.theme.AppTheme.brNeo,
-                    elevation = androidx.compose.material3.FloatingActionButtonDefaults.elevation(
+                    shape = AppTheme.brNeo,
+                    elevation = FloatingActionButtonDefaults.elevation(
                         0.dp,
                         0.dp,
                         0.dp,
@@ -99,7 +95,7 @@ fun FocusModesScreen(
                     ),
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text(newModeLabel) },
-                    containerColor = io.github.benji377.timety.ui.theme.FocusColor,
+                    containerColor = FocusColor,
                     contentColor = Color.White,
                 )
             }

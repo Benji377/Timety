@@ -5,6 +5,8 @@ import io.github.benji377.timety.data.repository.SettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import io.github.benji377.timety.data.repository.ThemeMode
+import io.github.benji377.timety.services.ReminderScheduler
 
 class SettingsViewModel(
     private val application: android.app.Application,
@@ -13,7 +15,7 @@ class SettingsViewModel(
     val themePref = repository.themePrefFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        io.github.benji377.timety.data.repository.ThemeMode.SYSTEM
+        ThemeMode.SYSTEM
     )
     val use24HourFormat = repository.use24HourFormatFlow.stateIn(
         viewModelScope,
@@ -71,7 +73,7 @@ class SettingsViewModel(
         "system"
     )
 
-    fun setThemePref(theme: io.github.benji377.timety.data.repository.ThemeMode) =
+    fun setThemePref(theme: ThemeMode) =
         viewModelScope.launch { repository.saveThemePref(theme) }
 
     fun setUse24HourFormat(use24Hour: Boolean) = viewModelScope.launch {
@@ -93,13 +95,13 @@ class SettingsViewModel(
 
     fun setDailyMotivationTime(time: String) = viewModelScope.launch {
         repository.saveDailyMotivationTime(time)
-        io.github.benji377.timety.services.ReminderScheduler.create(application)
+        ReminderScheduler.create(application)
             .scheduleDailyMotivation(time)
     }
 
     fun setEndOfDayCheckupTime(time: String) = viewModelScope.launch {
         repository.saveEndOfDayCheckupTime(time)
-        io.github.benji377.timety.services.ReminderScheduler.create(application)
+        ReminderScheduler.create(application)
             .scheduleEndOfDayCheckup(time)
     }
 
@@ -113,7 +115,7 @@ class SettingsViewModel(
 
 
     private suspend fun resyncNotifications() {
-        io.github.benji377.timety.services.ReminderScheduler.resyncAll(application)
+        ReminderScheduler.resyncAll(application)
     }
 
     suspend fun validateLocationApiEndpoint(url: String): Boolean {

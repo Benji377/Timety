@@ -16,6 +16,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.FocusColor
 
 
 data class FocusTargetSelection(
@@ -89,4 +90,4 @@ enum class DistractionUIType(
 
 
 val FocusColorArgb: Int
-    get() = io.github.benji377.timety.ui.theme.FocusColor.toArgb()
+    get() = FocusColor.toArgb()
