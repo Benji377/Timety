@@ -2,8 +2,9 @@
 
 Welcome to the full gallery of Timety's interface! Here is a closer look at the different features and screens that make up the application.
 
-> [!NOTE]
-> The screenshots are taken automatically using the custom [`screenshot_test` utility](../screenshot_test.dart) in light mode, but Timety also supports dark mode!
+## Generated Screenshots
+
+> The screenshots are taken automatically using Android UI testing tools in light mode, but Timety also supports dark mode!
 
 ---
 

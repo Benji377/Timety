@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    name: Flutter Analyze
+    name: Android Lint
     runs-on: ubuntu-latest
 
     permissions:
@@ -20,31 +20,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
-          channel: 'stable'
-          cache: true
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Run Android Lint
+        run: ./gradlew lintDebug
 
-      - name: Generate Hive Adapters
-        # Crucial: We must generate the Hive files before linting, or it will throw errors
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Analyze code
-        run: flutter analyze --machine > flutter_analyze.log || true
-
-      - name: Convert to SARIF
-        uses: advanced-security/dart-analyzer-sarif@main
-        with:
-          input: flutter_analyze.log
-          output: flutter.sarif
-
-      # 3. Upload to GitHub Code Scanning UI
-      - name: Upload analysis results to GitHub
+      - name: Upload SARIF to GitHub code scanning
+        if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: flutter.sarif
-          wait-for-processing: true
+          sarif_file: app/build/reports/lint-results-debug.sarif
+          category: android-lint
+
+      - name: Add lint summary
+        if: always()
+        run: |
+          echo "## Android Lint" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f app/build/reports/lint-results-debug.txt ]; then
+            tail -n 1 app/build/reports/lint-results-debug.txt >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No lint report generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lint-reports
+          path: |
+            app/build/reports/lint-results-debug.html
+            app/build/reports/lint-results-debug.txt
+            app/build/reports/lint-results-debug.sarif

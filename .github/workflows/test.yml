@@ -8,21 +8,39 @@ on:
 
 jobs:
   test:
+    name: Unit Tests
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+
     steps:
       - uses: actions/checkout@v7
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
-          channel: 'stable'
-          cache: true
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest
 
-      - name: Run Build Runner
-        run: dart run build_runner build --delete-conflicting-outputs
+      - name: Publish test results
+        if: always()
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: 'app/build/test-results/testDebugUnitTest/TEST-*.xml'
+          detailed_summary: true
+          include_passed: true
 
-      - name: Run Flutter tests
-        run: flutter test
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/test-results/testDebugUnitTest/

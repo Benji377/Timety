@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#151515" /> <!-- PaperDark -->
+    <stroke
+        android:width="3dp"
+        android:color="#F2E8D5" /> <!-- BorderDark -->
+    <corners android:radius="14dp" /> <!-- AppTheme.radiusNeo -->
+</shape>

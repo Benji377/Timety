@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Shared wrap-up images written to cacheDir/shared before ACTION_SEND. -->
+    <cache-path
+        name="shared"
+        path="shared/" />
+</paths>

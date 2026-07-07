@@ -4,7 +4,7 @@
   <img src="assets/banner_small.png" alt="Timety banner">
   <p align="center">
     <a href="https://github.com/Benji377/Timety/actions/workflows/lint.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/lint.yml?label=Lint&logo=flutter&style=for-the-badge&labelColor=555555" alt="lint">
+      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/lint.yml?label=Lint&logo=android&style=for-the-badge&labelColor=555555" alt="lint">
     </a>
     <a href="https://github.com/Benji377/Timety/actions/workflows/test.yml">
       <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/test.yml?label=Tests&logo=githubactions&style=for-the-badge&labelColor=555555" alt="test">
@@ -20,12 +20,12 @@
       <img src="https://img.shields.io/badge/Translate-Crowdin-2E3340?style=for-the-badge&logo=crowdin&logoColor=white&labelColor=555555" alt="translate">
     </a>
     <a href="mailto:apptimety@gmail.com">
-      <img src="https://img.shields.io/badge/Email-Contact-EA4335?style=for-the-badge&logo=gmail&logoColor=white&labelColor=555555" alt="email">
+      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/lint.yml?label=Lint&logo=android&style=for-the-badge&labelColor=555555" alt="lint">
     </a>
   </p>
 </p>
 
-Timety is an offline-first productivity and time-management application built with Flutter. It integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
+Timety is an offline-first productivity and time-management application built with Kotlin for Android. It integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
 
 <p align="center">
   <img src="screenshots/output/01_home_screen.png" width="32%" alt="Home Screen">
@@ -88,34 +88,29 @@ Choose your preferred way to stay productive.
 3. If prompted, enable "Install from Unknown Sources" in your settings.
 4. Follow the on-screen instructions to finish.
 
-## Getting Started
+## 💻 Installation and Setup
 
 ### Prerequisites
-*   Flutter SDK (Stable channel)
-*   Dart SDK
+*   Android Studio
+*   Java 17
+*   Android SDK
 
-### Installation
+### Build Instructions
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Benji377/Timety.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd Timety
-   ```
-3. Install dependencies:
-   ```bash
-   flutter pub get
-   ```
-4. **Crucial Step:** Generate the Hive database adapters:
-   ```bash
-   dart run build_runner build --delete-conflicting-outputs
-   ```
-5. Run the app:
-   ```bash
-   flutter run
-   ```
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/Benji377/Timety.git
+    cd Timety
+    ```
+
+2.  Open the project in Android Studio.
+
+3.  Sync Gradle dependencies.
+
+4.  Run the application on an emulator or a physical device:
+    ```bash
+    ./gradlew installDebug
+    ```
 
 ## Development & Roadmap
 
