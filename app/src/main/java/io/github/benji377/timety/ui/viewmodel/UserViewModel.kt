@@ -56,23 +56,6 @@ class UserViewModel(
         }
     }
 
-    fun addXp(amount: Int) {
-        viewModelScope.launch {
-            val current = userProfile.value
-            if (current != null) {
-                userRepository.updateUserProfile(current.copy(totalXp = current.totalXp + amount))
-            } else {
-                userRepository.insertUserProfile(
-                    UserProfileEntity(
-                        name = "Bobert",
-                        accountCreated = Instant.now(),
-                        totalXp = amount
-                    )
-                )
-            }
-        }
-    }
-
     fun updateName(newName: String) {
         viewModelScope.launch {
             val current = userProfile.value

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Instant
+import kotlin.time.Duration.Companion.milliseconds
 
 
 data class TimerState(
@@ -141,7 +142,7 @@ object FocusTimerManager {
         job = scope.launch {
             while (isActive) {
                 tick()
-                delay(1000)
+                delay(1000.milliseconds)
             }
         }
     }

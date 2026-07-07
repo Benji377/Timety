@@ -314,7 +314,6 @@ class NotificationService(private val context: Context) {
         // Reserved IDs, matching the Flutter reference exactly (`NotificationService` constants).
         const val DAILY_MOTIVATION_ID = 9999
         const val END_OF_DAY_CHECKUP_ID = 9998
-        const val FOCUS_TIMER_ID = 9997 // Owned by FocusTimerService; kept here for documentation.
 
         internal const val EXTRA_NOTIFICATION_ID = "notificationId"
         internal const val EXTRA_TITLE = "title"

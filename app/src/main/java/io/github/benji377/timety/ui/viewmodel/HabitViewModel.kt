@@ -92,15 +92,6 @@ class HabitViewModel(
             .cancelHabitReminder(habitId)
     }
 
-    fun logCompletion(habitId: String, date: Instant = Instant.now()) {
-        viewModelScope.launch {
-            habitRepository.insertCompletion(
-                HabitCompletionEntity(habitId = habitId, completionDate = date)
-            )
-            updateWidgets()
-        }
-    }
-
 
     fun toggleCompletionToday(habitId: String) {
         viewModelScope.launch {
@@ -113,12 +104,12 @@ class HabitViewModel(
             }
             if (todayCompletion != null) {
                 habitRepository.deleteCompletion(todayCompletion)
-                userRepository.addXp(-ExperienceEngine.xpPerHabit)
+                userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
             } else {
                 habitRepository.insertCompletion(
                     HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
                 )
-                userRepository.addXp(ExperienceEngine.xpPerHabit)
+                userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
             }
             updateWidgets()
         }
@@ -137,7 +128,7 @@ class HabitViewModel(
                 habitRepository.insertCompletion(
                     HabitCompletionEntity(habitId = habitId, completionDate = date)
                 )
-                userRepository.addXp(ExperienceEngine.xpPerHabit)
+                userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
                 updateWidgets()
             }
         }
@@ -153,7 +144,7 @@ class HabitViewModel(
             }
             if (completion != null) {
                 habitRepository.deleteCompletion(completion)
-                userRepository.addXp(-ExperienceEngine.xpPerHabit)
+                userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
                 updateWidgets()
             }
         }

@@ -92,7 +92,7 @@ fun InteractiveGauge(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(AppTheme.pulseDurationMs, easing = LinearEasing),
+            animation = tween(AppTheme.PULSE_DURATION_MS, easing = LinearEasing),
         ),
         label = "gaugePulseValue",
     )
@@ -184,7 +184,7 @@ fun InteractiveGauge(
                     (center.y + (radius - strokeWidth / 2f) * sin(thumbAngle)).toFloat(),
                 )
                 drawCircle(
-                    color = gaugeColor.copy(alpha = AppTheme.opacityLight),
+                    color = gaugeColor.copy(alpha = AppTheme.OPACITY_LIGHT),
                     radius = 20.dp.toPx(),
                     center = thumbCenter
                 )

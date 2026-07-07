@@ -389,8 +389,7 @@ fun ProfileScreen(
                     taskDates = taskDates,
                     focusDates = focusDates,
                     habitDates = habitDates,
-                    currentStreak = currentStreak,
-                    highestStreak = highestStreak
+                    currentStreak = currentStreak
                 )
             }
 

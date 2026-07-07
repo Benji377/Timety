@@ -361,9 +361,9 @@ class ScreenshotTest {
         val completedTasks = 1
         val habitCompletions = 4
         val focusMinutes = 45 + 40 + 30
-        val seededXp = completedTasks * ExperienceEngine.xpPerTask +
-            habitCompletions * ExperienceEngine.xpPerHabit +
-            focusMinutes * ExperienceEngine.xpPerFocusMin
+        val seededXp = completedTasks * ExperienceEngine.XP_PER_TASK +
+            habitCompletions * ExperienceEngine.XP_PER_HABIT +
+            focusMinutes * ExperienceEngine.XP_PER_FOCUS_MINS
         container.userRepository.insertUserProfile(
             UserProfileEntity(
                 name = "Bobert",

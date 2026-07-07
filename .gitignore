@@ -44,7 +44,6 @@ local.properties
 *.ap_
 *.aab
 *.dex
-*.class
 bin/
 gen/
 out/
@@ -58,9 +57,6 @@ captures/
 # Keystore files
 *.jks
 *.keystore
-
-# Mac OS
-.DS_Store
 
 # Kotlin tooling
 .kotlin/

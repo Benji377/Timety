@@ -17,9 +17,9 @@ import kotlin.math.sqrt
 
 
 object ExperienceEngine {
-    const val xpPerTask = 15
-    const val xpPerHabit = 10
-    const val xpPerFocusMin = 1
+    const val XP_PER_TASK = 15
+    const val XP_PER_HABIT = 10
+    const val XP_PER_FOCUS_MINS = 1
 
 
     fun calculateLevel(totalXp: Int): Int {

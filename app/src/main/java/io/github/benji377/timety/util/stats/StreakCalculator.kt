@@ -4,9 +4,6 @@ import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
 
 
-data class StreakResult(val current: Int, val highest: Int)
-
-
 object StreakCalculator {
 
 
@@ -54,13 +51,6 @@ object StreakCalculator {
         return current
     }
 
-
-    fun calculateBoth(dates: Iterable<LocalDate>): StreakResult {
-        return StreakResult(
-            current = calculateCurrentStreak(dates),
-            highest = calculateBestStreak(dates),
-        )
-    }
 
     private fun sortedUniqueDayKeys(dates: Iterable<LocalDate>): List<String> {
         return dates.map { AppDateUtils.dayKey(it) }.toSortedSet().toList()

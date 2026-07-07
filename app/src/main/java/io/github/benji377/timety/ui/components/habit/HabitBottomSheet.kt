@@ -419,7 +419,7 @@ private fun TimelineItem(
                         .padding(top = 16.dp)
                         .width(2.dp)
                         .fillMaxHeight()
-                        .background(HabitColor.copy(alpha = AppTheme.opacityLight)),
+                        .background(HabitColor.copy(alpha = AppTheme.OPACITY_LIGHT)),
                 )
             }
             Box(

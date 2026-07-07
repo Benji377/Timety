@@ -78,6 +78,7 @@ import io.github.benji377.timety.data.model.focus.DistractionUIType
 import io.github.benji377.timety.ui.theme.WarningAccent
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -752,7 +753,7 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                 )
                 Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
                 val pct =
-                    if (totalMinutes == 0) 0 else Math.round((stat.minutes.toFloat() / totalMinutes) * 100)
+                    if (totalMinutes == 0) 0 else ((stat.minutes.toFloat() / totalMinutes) * 100).roundToInt()
                 Text(
                     "$pct%",
                     fontSize = AppTheme.fsBodySmall,

@@ -37,7 +37,7 @@ import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as
 @Composable
 fun PhaseEditorDialog(
     initialPhase: SessionPhaseEntity?,
-    maxNodeMins: Int = AppTheme.maxNodeMins,
+    maxNodeMins: Int = AppTheme.MAX_NODE_MINS,
     onDismiss: () -> Unit,
     onSave: (PhaseType, Int) -> Unit,
     onDelete: (() -> Unit)? = null,

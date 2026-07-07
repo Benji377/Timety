@@ -50,7 +50,4 @@ class HabitRepository(
         habitDao.deleteCompletion(completion)
     }
 
-    suspend fun deleteCompletionByDate(habitId: String, date: Long) = withContext(Dispatchers.IO) {
-        habitDao.deleteCompletionByDate(habitId, date)
-    }
 }

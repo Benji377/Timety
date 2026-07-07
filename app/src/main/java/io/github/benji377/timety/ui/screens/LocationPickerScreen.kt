@@ -52,6 +52,7 @@ import org.json.JSONObject
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +77,7 @@ fun LocationPickerScreen(
         searchJob?.cancel()
         if (searchQuery.trim().length >= 3) {
             searchJob = coroutineScope.launch {
-                delay(600) // Debounce
+                delay(600.milliseconds) // Debounce
                 isLoading = true
                 errorState = null
 

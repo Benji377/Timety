@@ -60,7 +60,7 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = Color(0xFFE5DED1),
 )
 
-val LocalIsDarkTheme = androidx.compose.runtime.staticCompositionLocalOf<Boolean> { false }
+val LocalIsDarkTheme = androidx.compose.runtime.staticCompositionLocalOf { false }
 val LocalSnackbarHostState = androidx.compose.runtime.staticCompositionLocalOf<SnackbarHostState> {
     error("No SnackbarHostState provided")
 }

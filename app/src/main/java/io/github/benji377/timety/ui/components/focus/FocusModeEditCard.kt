@@ -66,7 +66,7 @@ fun FocusModeEditCard(
     mode: FocusModeEntity,
     phases: List<SessionPhaseEntity>,
     isNewMode: Boolean = false,
-    maxNodeMins: Int = AppTheme.maxNodeMins,
+    maxNodeMins: Int = AppTheme.MAX_NODE_MINS,
     onCancelNew: (() -> Unit)? = null,
     onSaveNew: (() -> Unit)? = null,
     onSave: (FocusModeEntity, List<SessionPhaseEntity>) -> Unit,
@@ -102,7 +102,6 @@ fun FocusModeEditCard(
                     name = name,
                     onNameChange = { name = it },
                     tempPhases = tempPhases,
-                    maxNodeMins = maxNodeMins,
                     onPhaseTapped = { index ->
                         editingPhaseIndex = index
                         phaseDialogOpen = true
@@ -241,7 +240,6 @@ private fun EditorView(
     name: String,
     onNameChange: (String) -> Unit,
     tempPhases: List<SessionPhaseEntity>,
-    maxNodeMins: Int,
     onPhaseTapped: (Int) -> Unit,
     onAddPhaseTapped: () -> Unit,
     onCancel: () -> Unit,

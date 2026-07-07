@@ -14,10 +14,6 @@ class TaskRepository(
     val allTasks: Flow<List<TaskWithSubtasks>> =
         taskDao.getAllTasks()
 
-    suspend fun getTaskById(id: String): TaskEntity? = withContext(Dispatchers.IO) {
-        taskDao.getTaskById(id)
-    }
-
     suspend fun getOpenTasksDueBefore(deadline: java.time.Instant): List<TaskEntity> =
         withContext(Dispatchers.IO) {
             taskDao.getOpenTasksDueBefore(deadline)
@@ -38,10 +34,6 @@ class TaskRepository(
     suspend fun clearAll() = withContext(Dispatchers.IO) {
         taskDao.clearAll()
     }
-
-    // Subtasks
-    fun getSubtasksForTask(taskId: String): Flow<List<SubtaskEntity>> =
-        taskDao.getSubtasksForTask(taskId)
 
     suspend fun insertSubtask(subtask: SubtaskEntity) = withContext(Dispatchers.IO) {
         taskDao.insertSubtask(subtask)

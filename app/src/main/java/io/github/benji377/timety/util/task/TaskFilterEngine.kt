@@ -12,9 +12,6 @@ data class TaskFilterEngine(
 ) {
 
 
-    fun process(tasks: List<TaskEntity>): List<TaskEntity> = process(tasks) { it }
-
-
     fun <T> process(items: List<T>, selector: (T) -> TaskEntity): List<T> {
         val filtered = applyFilters(items, selector)
         return applySorting(filtered, selector)

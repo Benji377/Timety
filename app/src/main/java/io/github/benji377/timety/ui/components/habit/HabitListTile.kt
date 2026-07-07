@@ -43,8 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,7 +83,7 @@ fun HabitListTile(
 
     val tile: @Composable () -> Unit = {
         if (isStacked) {
-            val barColor = if (isCompleted) color.copy(alpha = AppTheme.opacityLight) else color
+            val barColor = if (isCompleted) color.copy(alpha = AppTheme.OPACITY_LIGHT) else color
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -118,7 +116,7 @@ fun HabitListTile(
                 }
             }
         } else {
-            val borderColor = if (isCompleted) color.copy(alpha = AppTheme.opacityLight) else color
+            val borderColor = if (isCompleted) color.copy(alpha = AppTheme.OPACITY_LIGHT) else color
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -305,7 +303,7 @@ private fun HabitTileContent(
                     progress = { progressValue.coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth(),
                     color = color,
-                    trackColor = color.copy(alpha = AppTheme.opacityVeryLight),
+                    trackColor = color.copy(alpha = AppTheme.OPACITY_VERY_LIGHT),
                     drawStopIndicator = {}
                 )
             }

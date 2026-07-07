@@ -39,7 +39,7 @@ fun StreakStatusBadge(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(AppTheme.pulseDurationMs, easing = LinearEasing),
+            animation = tween(AppTheme.PULSE_DURATION_MS, easing = LinearEasing),
             repeatMode = RepeatMode.Restart,
         ),
         label = "streakStatusBadgeT",

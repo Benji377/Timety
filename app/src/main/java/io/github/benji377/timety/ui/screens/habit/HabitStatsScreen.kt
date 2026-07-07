@@ -73,13 +73,13 @@ import io.github.benji377.timety.util.stats.StatsUtils
 import io.github.benji377.timety.util.stats.StreakCalculator
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitStatsScreen(
-    viewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onBack: () -> Unit = {}
+    viewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val habits by viewModel.habitsWithCompletions.collectAsState()
     var focusedDate by remember { mutableStateOf(LocalDate.now()) }
@@ -310,7 +310,7 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
                             .fillMaxWidth()
                             .fillMaxHeight(fraction)
                             .background(
-                                color = if (isToday) HabitColor else HabitColor.copy(alpha = AppTheme.opacityMedium),
+                                color = if (isToday) HabitColor else HabitColor.copy(alpha = AppTheme.OPACITY_MEDIUM),
                                 shape = RoundedCornerShape(4.dp),
                             ),
                     )
@@ -345,10 +345,10 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
     var night = 0
     completions.forEach { c ->
         val hour = c.completionDate.atZone(zone).hour
-        when {
-            hour in 5..11 -> morning++
-            hour in 12..16 -> afternoon++
-            hour in 17..20 -> evening++
+        when (hour) {
+            in 5..11 -> morning++
+            in 12..16 -> afternoon++
+            in 17..20 -> evening++
             else -> night++
         }
     }
@@ -451,7 +451,7 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
         ) {
             buckets.forEach { bucket ->
                 val percent =
-                    if (total == 0) 0 else Math.round((bucket.count.toFloat() / total) * 100)
+                    if (total == 0) 0 else ((bucket.count.toFloat() / total) * 100).roundToInt()
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.47f)

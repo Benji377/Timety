@@ -11,6 +11,7 @@ import org.json.JSONObject
 import java.io.File
 import java.time.Instant
 import java.util.Locale
+import androidx.core.content.edit
 
 /**
  * TEMPORARY — one-shot migration of the old Flutter app's on-device data into the
@@ -44,17 +45,17 @@ object FlutterMigration {
 
         if (!hasFlutterData) {
             // Fresh install (or the old files are already gone): nothing to migrate, ever.
-            flags.edit()
-                .putBoolean(KEY_DATA_MIGRATED, true)
-                .putBoolean(KEY_SETTINGS_MIGRATED, true)
-                .apply()
+            flags.edit {
+                putBoolean(KEY_DATA_MIGRATED, true)
+                    .putBoolean(KEY_SETTINGS_MIGRATED, true)
+            }
             return
         }
 
         if (!dataMigrated) {
             try {
                 migrateData(hiveDir, container)
-                flags.edit().putBoolean(KEY_DATA_MIGRATED, true).apply()
+                flags.edit { putBoolean(KEY_DATA_MIGRATED, true) }
                 Log.i(TAG, "Flutter data migration completed")
             } catch (e: Exception) {
                 // Leave the Hive files and the flag untouched: the migration retries on
@@ -74,7 +75,7 @@ object FlutterMigration {
                 // meanwhile changed in the new app.
                 Log.e(TAG, "Flutter settings migration failed", e)
             } finally {
-                flags.edit().putBoolean(KEY_SETTINGS_MIGRATED, true).apply()
+                flags.edit { putBoolean(KEY_SETTINGS_MIGRATED, true) }
             }
         }
     }

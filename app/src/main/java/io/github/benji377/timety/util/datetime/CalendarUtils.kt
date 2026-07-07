@@ -29,7 +29,4 @@ object CalendarUtils {
     }
 
 
-    fun daysInMonth(date: LocalDate): Int {
-        return date.lengthOfMonth()
-    }
 }

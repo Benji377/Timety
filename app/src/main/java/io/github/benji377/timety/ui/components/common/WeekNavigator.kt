@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
-import java.util.Locale
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
@@ -31,7 +30,6 @@ fun WeekNavigator(
     onShiftWeek: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val locale = androidx.compose.ui.text.intl.Locale.current.platformLocale
     val startOfWeek = AppDateUtils.startOfWeekMonday(focusedDate)
     val endOfWeek = startOfWeek.plusDays(6)
 

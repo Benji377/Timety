@@ -967,7 +967,7 @@ private fun CategoryPicker(
                     value = category,
                     onValueChange = {},
                     readOnly = true,
-                    placeholder = { Text(if (category.isEmpty()) stringResource(R.string.taskDetailsLabelCategorySelect) else category) },
+                    placeholder = { Text(category.ifEmpty { stringResource(R.string.taskDetailsLabelCategorySelect) }) },
                     label = { Text(stringResource(R.string.taskDetailsLabelCategory)) },
                     leadingIcon = { Icon(Icons.AutoMirrored.Filled.Label, null) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },

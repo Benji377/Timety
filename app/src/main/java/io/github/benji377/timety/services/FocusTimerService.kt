@@ -63,7 +63,15 @@ class FocusTimerService : Service() {
         when (val action = intent?.action) {
             ACTION_START -> {
                 val state = FocusTimerManager.timerState.value
-                startForeground(NOTIFICATION_ID, buildNotification(state))
+                if (Build.VERSION.SDK_INT >= 34) {
+                    startForeground(
+                        NOTIFICATION_ID, 
+                        buildNotification(state), 
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+                    )
+                } else {
+                    startForeground(NOTIFICATION_ID, buildNotification(state))
+                }
                 FocusTimerManager.startTimer()
             }
 

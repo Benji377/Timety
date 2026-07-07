@@ -77,7 +77,7 @@ fun ModeTimeline(
             val isActive = isRunningOrAwaiting && currentPhaseIndex == i && !isCompleted
             var dotColor = if (phases[i].type == PhaseType.FOCUS) FocusColor else WarningColor
             if (isRunningOrAwaiting && currentPhaseIndex < i) {
-                dotColor = dotColor.copy(alpha = AppTheme.opacityLight)
+                dotColor = dotColor.copy(alpha = AppTheme.OPACITY_LIGHT)
             }
             PhaseDot(color = dotColor, active = isActive)
         }

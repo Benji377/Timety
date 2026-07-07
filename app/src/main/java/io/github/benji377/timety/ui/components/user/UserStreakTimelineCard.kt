@@ -49,7 +49,6 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
-import java.util.Locale
 import java.time.format.TextStyle as JavaTextStyle
 
 
@@ -61,7 +60,6 @@ fun UserStreakTimelineCard(
     focusDates: List<LocalDate>,
     habitDates: List<LocalDate>,
     currentStreak: Int,
-    highestStreak: Int,
     modifier: Modifier = Modifier,
 ) {
     val today = remember { LocalDate.now() }

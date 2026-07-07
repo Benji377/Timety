@@ -51,7 +51,6 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.Locale
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
@@ -184,8 +183,7 @@ fun TimeMachineDialog(
         },
         confirmButton = {
             Button(onClick = {
-                val mode = selectedMode
-                if (mode == null) return@Button
+                val mode = selectedMode ?: return@Button
                 if (endDateTime.isBefore(startDateTime)) {
                     errorText = endBeforeStartError
                     return@Button

@@ -36,6 +36,7 @@ import io.github.benji377.timety.util.stats.StatsUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -374,7 +375,7 @@ private fun CategoryBreakdownCard(tasks: List<TaskWithSubtasks>) {
 
         entries.forEachIndexed { index, entry ->
             val color = colors[index % colors.size]
-            val percent = ((entry.value.toFloat() / totalTasks) * 100).let { Math.round(it) }
+            val percent = ((entry.value.toFloat() / totalTasks) * 100).roundToInt()
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

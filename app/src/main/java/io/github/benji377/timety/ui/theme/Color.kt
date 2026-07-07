@@ -25,27 +25,6 @@ val ErrorColor = UserColor
 val WarningColor = WarningAccent
 val InfoColor = TaskColor
 
-// Type colors
-val TypeTaskColor = TaskColor
-val TypeHabitColor = HabitColor
-val TypeFocusColor = FocusColor
-
-// Phase type colors
-val PhaseFocusColor = FocusColor
-val PhaseBreakShortColor = WarningAccent
-val PhaseBreakLongColor = WarningAccent
-val PhaseRestColor = Color(0xFF6B7280)
-val PhaseSnackColor = HabitColor
-val PhaseDistractedColor = UserColor
-
-// Status colors
-val StatusCompleted = FocusColor
-val StatusOverdue = UserColor
-val StatusDueToday = WarningAccent
-val StatusDefault = TaskColor
-
-// Component colors
-val LocationPinColor = UserColor
 val WifiOffColor = Color(0xFF6B7280)
 val GaugeTrackLight = Color(0xFF7C7C7C)
 val GaugeBgLight = PaperLight
@@ -58,14 +37,6 @@ val GaugeLabelDark = Color(0xFFD4D4D4)
 
 // Surface helper colors used by the neobrutalist scheme
 val SurfaceAltDark = Color(0xFF2A2A2A)
-val UnselectedNavLight = Color(0xFF666666)
-val UnselectedNavDark = Color(0xFF9A9A9A)
-val SwitchTrackOffLight = Color(0xFFBDBDBD)
-val SwitchTrackOffDark = Color(0xFF3A3A3A)
-
-// Neobrutalism border tokens
-val NeoBorderColorLight = BorderLight
-val NeoBorderColorDark = BorderDark
 
 // Material accent choices offered by color pickers (habit color, focus tag color).
 // Pickers prepend their section's own accent as the first/default choice.

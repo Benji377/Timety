@@ -13,6 +13,7 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,16 +26,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import io.github.benji377.timety.ui.navigation.AppRoute
-import io.github.benji377.timety.ui.navigation.BottomNavItems
-import androidx.compose.material3.SnackbarHost
 import io.github.benji377.timety.ui.components.focus.FocusTagsWidget
+import io.github.benji377.timety.ui.navigation.AppRoute
 import io.github.benji377.timety.ui.navigation.BottomNavItem
-import io.github.benji377.timety.ui.screens.CalendarScreen
-import io.github.benji377.timety.ui.screens.HomeScreen
-import io.github.benji377.timety.ui.screens.ProfileScreen
-import io.github.benji377.timety.ui.screens.SettingsScreen
-import io.github.benji377.timety.ui.screens.StatisticsScreen
+import io.github.benji377.timety.ui.navigation.BottomNavItems
 import io.github.benji377.timety.ui.screens.focus.FocusModesScreen
 import io.github.benji377.timety.ui.screens.focus.FocusScreen
 import io.github.benji377.timety.ui.screens.habit.HabitDetailScreen

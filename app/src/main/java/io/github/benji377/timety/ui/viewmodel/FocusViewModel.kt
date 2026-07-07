@@ -167,7 +167,7 @@ class FocusViewModel(
                 if (!isRestPhase) {
                     val durationMinutes = durationSeconds / 60
                     if (durationMinutes > 0) {
-                        userRepository.addXp(durationMinutes * ExperienceEngine.xpPerFocusMin)
+                        userRepository.addXp(durationMinutes * ExperienceEngine.XP_PER_FOCUS_MINS)
                     }
                     sessionAccumulatedFocusSeconds += durationSeconds
 
@@ -201,7 +201,7 @@ class FocusViewModel(
                                                 completionDate = Instant.now()
                                             )
                                         )
-                                        userRepository.addXp(ExperienceEngine.xpPerHabit)
+                                        userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
                                         // Auto-completion bypasses HabitViewModel, so refresh
                                         // the habit widget here too.
                                         HabitWidget()
@@ -421,10 +421,6 @@ class FocusViewModel(
         }
     }
 
-    fun logSession(session: FocusSessionEntity) {
-        viewModelScope.launch { focusRepository.insertSession(session) }
-    }
-
     fun logDistraction(
         type: DistractionType,
         note: String = ""
@@ -439,7 +435,7 @@ class FocusViewModel(
         )
     }
 
-    suspend fun getPhasesForMode(modeId: String) = focusRepository.getPhasesForMode(modeId)
+    fun getPhasesForMode(modeId: String) = focusRepository.getPhasesForMode(modeId)
 
     fun saveMode(mode: FocusModeEntity, phases: List<SessionPhaseEntity>) {
         viewModelScope.launch { focusRepository.insertModeWithPhases(mode, phases) }
@@ -526,7 +522,7 @@ class FocusViewModel(
             )
             val focusMinutes = (totalSeconds / 60).toInt()
             if (focusMinutes > 0) {
-                userRepository.addXp(focusMinutes * ExperienceEngine.xpPerFocusMin)
+                userRepository.addXp(focusMinutes * ExperienceEngine.XP_PER_FOCUS_MINS)
             }
         }
     }

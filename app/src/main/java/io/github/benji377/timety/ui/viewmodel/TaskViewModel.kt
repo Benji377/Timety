@@ -69,7 +69,7 @@ class TaskViewModel(
             taskRepository.updateTask(updatedTask)
             scheduleTaskReminders(updatedTask)
             updateWidgets()
-            val xpAmount = ExperienceEngine.xpPerTask
+            val xpAmount = ExperienceEngine.XP_PER_TASK
             if (updatedTask.isCompleted) {
                 userRepository.addXp(xpAmount) // XP per task
             } else {
@@ -88,7 +88,7 @@ class TaskViewModel(
         viewModelScope.launch {
             taskRepository.updateTask(updatedTask)
             scheduleTaskReminders(updatedTask)
-            userRepository.addXp(ExperienceEngine.xpPerTask)
+            userRepository.addXp(ExperienceEngine.XP_PER_TASK)
             updateWidgets()
         }
     }
