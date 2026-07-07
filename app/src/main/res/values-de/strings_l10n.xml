@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate,UnusedResources">
     <string name="appTitle">Timety</string>
     <string name="globalLabelHabit">Gewohnheit</string>
     <string name="globalLabelHabits">Gewohnheiten</string>
@@ -105,6 +105,7 @@
     <string name="focusStatsSectionDistractionsEmpty">Keine Ablenkungen für diesen Tag protokolliert</string>
     <string name="focusStatsSectionDistractionsSubtitle">Gewählter Tag, neueste Ablenkungen zuerst</string>
     <string name="focusStatsSectionDistractionsTitle">Ablenkungen</string>
+    <string name="focusStatsSectionSessionsEmpty">No focus sessions for this day</string>
     <string name="focusStatsSectionSessionsSubtitle">Jede Sitzung zeigt das genaue Ziel und den Fokus-Modus</string>
     <string name="focusStatsSectionSessionsTitle">Fokus-Sitzungen</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Sitzungen mit Tags, Aufgaben- und Gewohnheits-Sitzungen</string>
@@ -196,6 +197,9 @@
     <string name="taskDetailsLabelEffort">Aufwand</string>
     <string name="taskDetailsLabelLocation">Ort</string>
     <string name="taskDetailsLabelPriority">Priorität</string>
+    <string name="taskDetailsLocationDetails">Place Details</string>
+    <string name="taskDetailsLocationNoInfo">No place information found for this location</string>
+    <string name="taskDetailsLocationOffline">No internet connection – location search and place details are unavailable</string>
     <string name="taskDetailsLabelReminderSet">Erinnerung einstellen</string>
     <string name="taskDetailsLabelReminderTooEarly">Die benutzerdefinierte Erinnerung muss vor dem Fälligkeitsdatum liegen</string>
     <string name="taskDetailsLabelSubtaskHint">Teilaufgaben hinzufügen…</string>
