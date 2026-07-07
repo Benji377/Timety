@@ -40,6 +40,9 @@ interface TaskDao {
     @Query("DELETE FROM tasks")
     fun clearAll(): Int
 
+    @Query("UPDATE tasks SET category = :newName WHERE category = :oldName")
+    fun renameCategory(oldName: String, newName: String)
+
     // Subtasks
     @Query("SELECT * FROM subtasks WHERE taskId = :taskId")
     fun getSubtasksForTask(taskId: String): Flow<List<SubtaskEntity>>

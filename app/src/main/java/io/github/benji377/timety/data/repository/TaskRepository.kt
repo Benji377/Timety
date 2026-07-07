@@ -19,6 +19,10 @@ class TaskRepository(
             taskDao.getOpenTasksDueBefore(deadline)
         }
 
+    suspend fun getTaskById(id: String): TaskEntity? = withContext(Dispatchers.IO) {
+        taskDao.getTaskById(id)
+    }
+
     suspend fun insertTask(task: TaskEntity) = withContext(Dispatchers.IO) {
         taskDao.insertTask(task)
     }
@@ -33,6 +37,10 @@ class TaskRepository(
 
     suspend fun clearAll() = withContext(Dispatchers.IO) {
         taskDao.clearAll()
+    }
+
+    suspend fun renameCategory(oldName: String, newName: String) = withContext(Dispatchers.IO) {
+        taskDao.renameCategory(oldName, newName)
     }
 
     suspend fun insertSubtask(subtask: SubtaskEntity) = withContext(Dispatchers.IO) {

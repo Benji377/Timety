@@ -80,13 +80,15 @@ class TaskViewModel(
     }
 
     fun markTaskCompleted(taskId: String) {
-        val taskWithSubtasks = allTasks.value.find { it.task.id == taskId } ?: return
-        if (taskWithSubtasks.task.isCompleted) return
-        val updatedTask = taskWithSubtasks.task.copy(
-            isCompleted = true,
-            completedAt = Instant.now()
-        )
         viewModelScope.launch {
+            // Fetched from the DB, not the allTasks snapshot: the flow may not have
+            // emitted yet when the focus auto-complete event fires.
+            val task = taskRepository.getTaskById(taskId) ?: return@launch
+            if (task.isCompleted) return@launch
+            val updatedTask = task.copy(
+                isCompleted = true,
+                completedAt = Instant.now()
+            )
             taskRepository.updateTask(updatedTask)
             scheduleTaskReminders(updatedTask)
             userRepository.addXp(ExperienceEngine.XP_PER_TASK)
@@ -116,17 +118,13 @@ class TaskViewModel(
 
     fun renameCategory(oldName: String, newName: String) {
         viewModelScope.launch {
-            allTasks.value.filter { it.task.category == oldName }.forEach { taskWithSubtasks ->
-                taskRepository.updateTask(taskWithSubtasks.task.copy(category = newName))
-            }
+            taskRepository.renameCategory(oldName, newName)
         }
     }
 
     fun deleteCategory(categoryName: String) {
         viewModelScope.launch {
-            allTasks.value.filter { it.task.category == categoryName }.forEach { taskWithSubtasks ->
-                taskRepository.updateTask(taskWithSubtasks.task.copy(category = ""))
-            }
+            taskRepository.renameCategory(categoryName, "")
         }
     }
 

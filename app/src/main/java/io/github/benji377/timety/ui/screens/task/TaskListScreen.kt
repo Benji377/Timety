@@ -73,10 +73,8 @@ fun TaskListScreen(
     var isAscending by remember { mutableStateOf(true) }
     var sortMenuExpanded by remember { mutableStateOf(false) }
 
-    // Extract unique categories from tasks (trimmed, non-empty, sorted).
-    val allCategories = remember(tasks) {
-        tasks.map { it.task.category.trim() }.filter { it.isNotEmpty() }.distinct().sorted()
-    }
+    // Untrimmed so each pill matches TaskFilterEngine's exact category comparison.
+    val allCategories by viewModel.allCategories.collectAsState()
 
     val processedTasks =
         remember(tasks, searchQuery, selectedCategoryFilter, sortOption, isAscending) {
