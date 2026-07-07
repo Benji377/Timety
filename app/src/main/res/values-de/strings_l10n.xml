@@ -397,10 +397,12 @@
     <string name="wrapUpStatStreakLabel">Aktiver Streak</string>
     <string name="wrapUpStatStreakValue">%1$d Tag</string>
     <string name="wrapUpStatTasksLabel">Aufgaben erledigt</string>
+    <string name="categoryAddLabel">Add Category</string>
+    <string name="categoryColorLabel">Color</string>
     <string name="categoryDeleteContent">Bist du sicher, dass du \"%1$s\" löschen möchtest? Aufgaben mit dieser Kategorie werden kategorielos.</string>
     <string name="categoryDeleteTitle">Kategorie löschen?</string>
     <string name="categoryEditTitle">Kategorie bearbeiten</string>
-    <string name="categoryEmpty">Noch keine Kategorien. Erstelle eine, indem du eine Aufgabe mit einer Kategorie hinzufügst.</string>
+    <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
     <string name="categoryNameLabel">Kategoriename</string>
     <string name="categoryTaskCountZero">Keine Aufgaben</string>
     <plurals name="categoryTaskCount">
