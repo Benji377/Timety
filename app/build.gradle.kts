@@ -23,6 +23,12 @@ android {
         }
     }
 
+    // Room writes a JSON snapshot of every schema version here (committed to git);
+    // these are what MigrationTestHelper replays to test future migrations.
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+
     signingConfigs {
         // Used by the release CI workflow; falls back to an unsigned build locally.
         val keystorePath = System.getenv("KEYSTORE_PATH")

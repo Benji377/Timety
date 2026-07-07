@@ -34,7 +34,7 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
         UserProfileEntity::class
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class TimetyDatabase : RoomDatabase() {
