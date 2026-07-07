@@ -75,7 +75,13 @@ class BackupService(
             val text = context.contentResolver.openInputStream(uri)?.use { input ->
                 input.bufferedReader(Charsets.UTF_8).readText()
             } ?: error("Unable to open input stream for $uri")
-            val json = JSONObject(text)
+            importFromJson(JSONObject(text)).getOrThrow()
+        }
+    }
+
+    /** Restores an already-parsed backup payload. Also used by the Flutter data migration. */
+    suspend fun importFromJson(json: JSONObject): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
             val schemaVersion = json.optInt("schemaVersion", SCHEMA_VERSION)
             if (schemaVersion > SCHEMA_VERSION) {
                 error("This backup was created by a newer version of Timety and cannot be imported.")
