@@ -75,15 +75,11 @@ Choose your preferred way to stay productive.
 
 1. Go to the **[GitHub Latest Release Page](https://github.com/Benji377/Timety/releases/latest)**.
 2. Scroll down to the **Assets** section.
-3. Download the correct file for your device based on the guide below:
-
-* **`arm64-v8a`** - Most modern Android phones (64-bit) **(Recommended for almost all newer devices)**
-* **`armeabi-v7a`** - Older or budget Android phones and devices (32-bit)
-* **`x86_64`** - Android emulators running on a PC, or specific Intel/AMD-based tablets
-* **`.aab` (Universal Bundle)** - A single file containing all architectures, best if you use a dedicated App Bundle installer app
+3. Download the `.apk` file (the universal APK works on all devices).
+   *(Note: The `.aab` file is for app stores and bundle installers; most users should download the `.apk`)*
 
 #### **How to install:**
-1. Download the `.apk` file corresponding to your device.
+1. Download the `.apk` file.
 2. Open the file on your Android device.
 3. If prompted, enable "Install from Unknown Sources" in your settings.
 4. Follow the on-screen instructions to finish.
