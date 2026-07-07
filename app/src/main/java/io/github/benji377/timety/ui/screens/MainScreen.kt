@@ -112,7 +112,15 @@ fun MainScreen() {
         ) {
             composable(BottomNavItem.Home.route) {
                 HomeScreen(
-                    onNavigateToFocus = { navController.navigate(BottomNavItem.Focus.route) },
+                    onNavigateToFocus = {
+                        navController.navigate(BottomNavItem.Focus.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     onNavigateToTaskDetail = { taskId ->
                         navController.navigate(AppRoute.taskDetail(taskId))
                     },
@@ -125,7 +133,8 @@ fun MainScreen() {
             }
             composable(BottomNavItem.Focus.route) {
                 FocusScreen(
-                    onNavigateToModes = { navController.navigate(AppRoute.FOCUS_MODES.route) }
+                    onNavigateToModes = { navController.navigate(AppRoute.FOCUS_MODES.route) },
+                    onNavigateToSettings = { navController.navigate(AppRoute.SETTINGS.route) }
                 )
             }
             composable(AppRoute.FOCUS_MODES.route) {
