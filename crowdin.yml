@@ -4,3 +4,5 @@ files:
     languages_mapping:
       android_code:
         lld: b+lld
+        de: de
+        it: it
