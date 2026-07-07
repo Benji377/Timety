@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate,UnusedResources">
     <string name="appTitle">Timety</string>
     <string name="globalLabelHabit">Abitudine</string>
     <string name="globalLabelHabits">Abitudini</string>
@@ -105,6 +105,7 @@
     <string name="focusStatsSectionDistractionsEmpty">Nessuna distrazione registrata per questo giorno</string>
     <string name="focusStatsSectionDistractionsSubtitle">Giorno selezionato, distrazioni più recenti per prime</string>
     <string name="focusStatsSectionDistractionsTitle">Distrazioni</string>
+    <string name="focusStatsSectionSessionsEmpty">No focus sessions for this day</string>
     <string name="focusStatsSectionSessionsSubtitle">Ogni sessione mostra il target esatto e la modalità di focus</string>
     <string name="focusStatsSectionSessionsTitle">Sessioni di focus</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Sessioni con etichette, collegate ad attività e ad abitudini</string>
@@ -133,7 +134,7 @@
     <string name="habitDetailLabelFrequencyExact">Specifica</string>
     <string name="habitDetailLabelFrequencyFlexible">Flessibile</string>
     <string name="habitDetailLabelGoalZero">Obiettivo: Giornaliero</string>
-    <plurals name="habitDetailLabelGoal" tools:ignore="MissingQuantity">
+    <plurals name="habitDetailLabelGoal">
         <item quantity="one">Obiettivo: 1 giorno a settimana</item>
         <item quantity="other">Obiettivo: %d giorni a settimana</item>
     </plurals>
@@ -196,6 +197,9 @@
     <string name="taskDetailsLabelEffort">Sforzo</string>
     <string name="taskDetailsLabelLocation">Luogo</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
+    <string name="taskDetailsLocationDetails">Place Details</string>
+    <string name="taskDetailsLocationNoInfo">No place information found for this location</string>
+    <string name="taskDetailsLocationOffline">No internet connection – location search and place details are unavailable</string>
     <string name="taskDetailsLabelReminderSet">Imposta promemoria</string>
     <string name="taskDetailsLabelReminderTooEarly">Il promemoria personalizzato deve essere precedente alla data di scadenza</string>
     <string name="taskDetailsLabelSubtaskHint">Aggiungi sotto-attività…</string>
@@ -399,7 +403,7 @@
     <string name="categoryEmpty">Ancora nessuna categoria. Creane una aggiungendo un\'attività con una categoria.</string>
     <string name="categoryNameLabel">Nome della categoria</string>
     <string name="categoryTaskCountZero">Nessuna attività</string>
-    <plurals name="categoryTaskCount" tools:ignore="MissingQuantity">
+    <plurals name="categoryTaskCount">
         <item quantity="one">1 attività</item>
         <item quantity="other">%d attività</item>
     </plurals>
@@ -439,7 +443,7 @@
     <string name="streakStatusNone">Ancora nessuna serie. Completa qualcosa oggi per iniziarne una.</string>
     <string name="streakStatusStart">Inizia oggi per costruire una serie che prosegua nel futuro.</string>
     <string name="streakTimelineCurrent">Serie attuale</string>
-    <plurals name="streakTimelineDays" tools:ignore="MissingQuantity">
+    <plurals name="streakTimelineDays">
         <item quantity="one">1 giorno</item>
         <item quantity="other">%d giorni</item>
     </plurals>
@@ -458,30 +462,30 @@
     <string name="widgetTasksDue">Attività in scadenza (%1$d)</string>
     <string name="widgetNoUrgentTasks">Nessuna attività urgente</string>
     <string name="widgetMoreTasks">+%1$d di più</string>
-    <plurals name="nTaskReminderPrefixDays" tools:ignore="MissingQuantity">
+    <plurals name="nTaskReminderPrefixDays">
         <item quantity="one">Domani</item>
         <item quantity="other">Tra %d giorni</item>
     </plurals>
-    <plurals name="nTaskReminderPrefixHours" tools:ignore="MissingQuantity">
+    <plurals name="nTaskReminderPrefixHours">
         <item quantity="one">Tra 1 ora</item>
         <item quantity="other">Tra %d ore</item>
     </plurals>
-    <plurals name="nTaskReminderPrefixMinutes" tools:ignore="MissingQuantity">
+    <plurals name="nTaskReminderPrefixMinutes">
         <item quantity="one">Tra 1 minuto</item>
         <item quantity="other">Tra %d minuti</item>
     </plurals>
     <string name="nTasksCountZero">Nessuna attività</string>
-    <plurals name="nTasksCount" tools:ignore="MissingQuantity">
+    <plurals name="nTasksCount">
         <item quantity="one">1 attività</item>
         <item quantity="other">%d attività</item>
     </plurals>
     <string name="nHabitsCountZero">Nessun completamento</string>
-    <plurals name="nHabitsCount" tools:ignore="MissingQuantity">
+    <plurals name="nHabitsCount">
         <item quantity="one">1 completamento</item>
         <item quantity="other">%d completamenti</item>
     </plurals>
     <string name="nMinutesCountZero">Nessun minuto</string>
-    <plurals name="nMinutesCount" tools:ignore="MissingQuantity">
+    <plurals name="nMinutesCount">
         <item quantity="one">1 minuto</item>
         <item quantity="other">%d minuti</item>
     </plurals>
