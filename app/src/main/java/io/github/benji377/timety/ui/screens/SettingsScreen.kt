@@ -180,7 +180,8 @@ fun SettingsScreen(
     val locationApiEndpoint by settingsViewModel.locationApiEndpoint.collectAsState()
 
     val focusTags by focusViewModel.allTags.collectAsState()
-    val categoryCount = taskViewModel.getAllCategories().size
+    val categories by taskViewModel.allCategories.collectAsState()
+    val categoryCount = categories.size
 
     val versionName = try {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName

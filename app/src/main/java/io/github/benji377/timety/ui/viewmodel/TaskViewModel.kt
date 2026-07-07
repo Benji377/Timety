@@ -12,6 +12,7 @@ import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -103,10 +104,15 @@ class TaskViewModel(
             .cancelTaskReminders(taskId)
     }
 
-    fun getAllCategories(): List<String> {
-        return allTasks.value.map { it.task.category }.filter { it.isNotBlank() }.distinct()
-            .sorted()
-    }
+    val allCategories: StateFlow<List<String>> = taskRepository.allTasks
+        .map { tasks ->
+            tasks.map { it.task.category }.filter { it.isNotBlank() }.distinct().sorted()
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun renameCategory(oldName: String, newName: String) {
         viewModelScope.launch {

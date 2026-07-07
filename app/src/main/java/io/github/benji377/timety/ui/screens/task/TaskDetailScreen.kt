@@ -147,6 +147,7 @@ fun TaskDetailScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val allTasks by taskViewModel.allTasks.collectAsState()
+    val allCategories by taskViewModel.allCategories.collectAsState()
     val dateFmt = LocalDateFormatSettings.current
     val isNewTask = taskId == null
     val existingTaskWithSubtasks = taskId?.let { id -> allTasks.find { it.task.id == id } }
@@ -336,7 +337,7 @@ fun TaskDetailScreen(
                     onIsAddingNewCategoryChange = { isAddingNewCategory = it },
                     newCategoryText = newCategoryText,
                     onNewCategoryTextChange = { newCategoryText = it },
-                    existingCategories = taskViewModel.getAllCategories()
+                    existingCategories = allCategories
                 )
 
                 Spacer(Modifier.height(AppTheme.spaceLarge))

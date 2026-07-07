@@ -52,7 +52,7 @@ fun TaskCategoriesScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
-    val categories = taskViewModel.getAllCategories()
+    val categories by taskViewModel.allCategories.collectAsState()
 
     var editingCategory by remember { mutableStateOf<String?>(null) }
     var deletingCategory by remember { mutableStateOf<String?>(null) }
