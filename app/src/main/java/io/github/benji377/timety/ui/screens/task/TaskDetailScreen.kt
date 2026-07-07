@@ -438,7 +438,11 @@ fun TaskDetailScreen(
                         ReminderInput(
                             selected = selectedReminderOption,
                             onSelectedChange = { selectedReminderOption = it },
-                            onAdd = { onAddReminderClicked() }
+                            onAdd = { onAddReminderClicked() },
+                            // CUSTOM picks an absolute time, so it works without a due date;
+                            // the relative options need one to compute the reminder from.
+                            addEnabled = dueDate != null ||
+                                    selectedReminderOption == ReminderOption.CUSTOM
                         )
                     }
                     Spacer(Modifier.height(AppTheme.spaceSmall))
@@ -894,7 +898,8 @@ private fun <T> AccordionSelector(
 private fun ReminderInput(
     selected: ReminderOption,
     onSelectedChange: (ReminderOption) -> Unit,
-    onAdd: () -> Unit
+    onAdd: () -> Unit,
+    addEnabled: Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -926,7 +931,7 @@ private fun ReminderInput(
             }
         }
         Spacer(Modifier.width(AppTheme.spaceSmall))
-        Button(onClick = onAdd) { Text(stringResource(R.string.commonLabelAdd)) }
+        Button(onClick = onAdd, enabled = addEnabled) { Text(stringResource(R.string.commonLabelAdd)) }
     }
 }
 

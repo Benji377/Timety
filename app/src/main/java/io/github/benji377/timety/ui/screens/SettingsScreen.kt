@@ -95,7 +95,6 @@ import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -400,10 +399,7 @@ fun SettingsScreen(
                         Switch(
                             checked = use24HourFormat,
                             onCheckedChange = { settingsViewModel.setUse24HourFormat(it) },
-                            colors = SwitchDefaults.colors(
-                                checkedTrackColor = SuccessColor,
-                                uncheckedTrackColor = ErrorColor
-                            )
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
                         )
                     }
                 )
@@ -453,10 +449,7 @@ fun SettingsScreen(
                         Switch(
                             checked = autoCompleteFocus,
                             onCheckedChange = { settingsViewModel.setAutoCompleteFocus(it) },
-                            colors = SwitchDefaults.colors(
-                                checkedTrackColor = SuccessColor,
-                                uncheckedTrackColor = ErrorColor
-                            )
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
                         )
                     }
                 )
