@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -45,7 +45,7 @@ jobs:
           mv app/build/outputs/bundle/release/app-release.aab timety-v${{ github.event.inputs.version }}.aab
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: timety-release-artifacts
           path: |
@@ -58,7 +58,7 @@ jobs:
     permissions: write-all
     needs: [build_release]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: timety-release-artifacts
           path: artifacts
@@ -71,10 +71,11 @@ jobs:
             artifacts/*.aab
 
       - name: Release to GitHub
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           generate_release_notes: true
+          overwrite_files: false
           name: Timety v${{ github.event.inputs.version }}
           tag_name: v${{ github.event.inputs.version }}
           files: |
