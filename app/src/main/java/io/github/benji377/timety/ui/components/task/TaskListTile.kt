@@ -161,6 +161,7 @@ fun TaskListTile(
                                     .clip(RoundedCornerShape(4.dp)),
                                 color = if (task.isCompleted) SuccessColor else borderColor,
                                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                drawStopIndicator = {}
                             )
                         }
                     }

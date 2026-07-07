@@ -39,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -405,6 +406,10 @@ fun FocusScreen(
                 FilledTonalIconButton(
                     onClick = { showTimeMachine = true },
                     enabled = !isRunning && !isPaused,
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = FocusColor.copy(alpha = 0.2f),
+                        contentColor = FocusColor
+                    ),
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.TopStart),
@@ -412,13 +417,17 @@ fun FocusScreen(
                     Icon(
                         Icons.Filled.History,
                         contentDescription = stringResource(R.string.commonTooltipTimeMachine),
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(28.dp),
                     )
                 }
 
                 FilledTonalIconButton(
                     onClick = { showDistraction = true },
                     enabled = isRunning || isPaused,
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = WarningColor.copy(alpha = 0.2f),
+                        contentColor = WarningColor
+                    ),
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.TopEnd),

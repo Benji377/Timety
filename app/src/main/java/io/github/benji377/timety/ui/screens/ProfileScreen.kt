@@ -22,14 +22,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Coffee
+import androidx.compose.material.icons.outlined.MilitaryTech
+import androidx.compose.material.icons.outlined.Repeat
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -215,7 +216,7 @@ fun ProfileScreen(
                                     )
                                 )
                             }
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             withContext(Dispatchers.Main) {
                                 android.widget.Toast.makeText(
                                     context,
@@ -423,7 +424,7 @@ fun ProfileScreen(
                         StatCard(
                             title = stringResource(R.string.userStatTasksDone),
                             value = totalTasksDone.toString(),
-                            icon = Icons.Filled.CheckCircle,
+                            icon = Icons.Outlined.CheckCircle,
                             color = TaskColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
@@ -431,7 +432,7 @@ fun ProfileScreen(
                         StatCard(
                             title = stringResource(R.string.userStatHabitsMet),
                             value = totalHabitsMet.toString(),
-                            icon = Icons.Filled.Repeat,
+                            icon = Icons.Outlined.Repeat,
                             color = HabitColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
@@ -445,7 +446,7 @@ fun ProfileScreen(
                         StatCard(
                             title = stringResource(R.string.userStatFocusMins),
                             value = totalFocusMins.toString(),
-                            icon = Icons.Filled.Timer,
+                            icon = Icons.Outlined.Timer,
                             color = FocusColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
@@ -453,7 +454,7 @@ fun ProfileScreen(
                         StatCard(
                             title = stringResource(R.string.userStatSessions),
                             value = totalSessions.toString(),
-                            icon = Icons.Filled.Timer,
+                            icon = Icons.Outlined.Coffee,
                             color = FocusColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)
@@ -467,7 +468,7 @@ fun ProfileScreen(
                         StatCard(
                             title = stringResource(R.string.streakLegendStreakDay),
                             value = highestStreak.toString(),
-                            icon = Icons.Filled.LocalFireDepartment,
+                            icon = Icons.Outlined.MilitaryTech,
                             color = WarningColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
                             modifier = Modifier.weight(1f)

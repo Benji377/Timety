@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +58,7 @@ fun GroupedHabitsSection(
             val completedCount = HabitUtils.getStackCompletionCount(globalStack, targetDate)
             val allDone = HabitUtils.isStackFullyCompleted(globalStack, targetDate)
 
-            var isExpanded by remember(stackName) { mutableStateOf(!allDone) }
+            var isExpanded by rememberSaveable(stackName) { mutableStateOf(false) }
 
             Card(
                 modifier = Modifier

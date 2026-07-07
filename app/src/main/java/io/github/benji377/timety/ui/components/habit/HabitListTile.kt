@@ -43,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,7 +76,6 @@ fun HabitListTile(
     onDelete: (() -> Unit)? = null,
     onMarkPastCompletion: (() -> Unit)? = null,
     enableDismissible: Boolean = true,
-    // Mirrors AppTheme.paddingScreenHorizontal.
     margin: PaddingValues = AppTheme.paddingScreenHorizontal,
 ) {
     val color = Color(habit.colorValue)
@@ -89,8 +90,6 @@ fun HabitListTile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(IntrinsicSize.Min)
-                    // Unlocked stack members get the same surface background as standalone
-                    // habits; only locked ones let the dim stack card shine through.
                     .background(if (isLocked) Color.Transparent else MaterialTheme.colorScheme.surface)
             ) {
                 Box(
@@ -307,6 +306,7 @@ private fun HabitTileContent(
                     modifier = Modifier.fillMaxWidth(),
                     color = color,
                     trackColor = color.copy(alpha = AppTheme.opacityVeryLight),
+                    drawStopIndicator = {}
                 )
             }
         }
