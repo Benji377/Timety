@@ -64,7 +64,7 @@ jobs:
           path: artifacts
 
       - name: Create attestation for build
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             artifacts/*.apk
