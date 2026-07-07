@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate,UnusedResources">
     <string name="appTitle">Timety</string>
     <string name="globalLabelHabit">Usanza</string>
     <string name="globalLabelHabits">Usanzes</string>
@@ -105,6 +105,7 @@
     <string name="focusStatsSectionDistractionsEmpty">Deguna distrazions registredes per chësc di</string>
     <string name="focusStatsSectionDistractionsSubtitle">Di crì ora, distrazions plu nueves dant</string>
     <string name="focusStatsSectionDistractionsTitle">Distrazions</string>
+    <string name="focusStatsSectionSessionsEmpty">No focus sessions for this day</string>
     <string name="focusStatsSectionSessionsSubtitle">Unya sescion mostra l travert y la modalità de focus</string>
     <string name="focusStatsSectionSessionsTitle">Sescions de focus</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Sescions cun etichetes, liejedes a ncëries y abitudins</string>
@@ -134,7 +135,11 @@
     <string name="habitDetailLabelFrequencyFlexible">Flessibl</string>
     <string name="habitDetailLabelGoalZero">Travert: A uni di</string>
     <plurals name="habitDetailLabelGoal">
-        <item quantity="one">Travert: 1 di a l\'ena</item>
+        <item quantity="zero">Travert: 1 di a l\'ena</item>
+        <item quantity="one">Travert: %d dis a l\'ena</item>
+        <item quantity="two">Travert: %d dis a l\'ena</item>
+        <item quantity="few">Travert: %d dis a l\'ena</item>
+        <item quantity="many">Travert: %d dis a l\'ena</item>
         <item quantity="other">Travert: %d dis a l\'ena</item>
     </plurals>
     <string name="habitDetailLabelIcon">Cëria ora n\'icona</string>
@@ -196,6 +201,9 @@
     <string name="taskDetailsLabelEffort">Sforz</string>
     <string name="taskDetailsLabelLocation">Luelg</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
+    <string name="taskDetailsLocationDetails">Place Details</string>
+    <string name="taskDetailsLocationNoInfo">No place information found for this location</string>
+    <string name="taskDetailsLocationOffline">No internet connection – location search and place details are unavailable</string>
     <string name="taskDetailsLabelReminderSet">Mët lezit</string>
     <string name="taskDetailsLabelReminderTooEarly">L lezit persunalisà muessa vester dant ala data de scadënza</string>
     <string name="taskDetailsLabelSubtaskHint">Njunté sot-ncëries…</string>
@@ -400,7 +408,11 @@
     <string name="categoryNameLabel">Inuem dla categoria</string>
     <string name="categoryTaskCountZero">Deguna ncëries</string>
     <plurals name="categoryTaskCount">
-        <item quantity="one">1 ncëria</item>
+        <item quantity="zero">1 ncëria</item>
+        <item quantity="one">%d ncëries</item>
+        <item quantity="two">%d ncëries</item>
+        <item quantity="few">%d ncëries</item>
+        <item quantity="many">%d ncëries</item>
         <item quantity="other">%d ncëries</item>
     </plurals>
     <string name="categoryTitle">Categuries</string>
@@ -440,7 +452,11 @@
     <string name="streakStatusStart">Taca ncuei per striché na sëria inant.</string>
     <string name="streakTimelineCurrent">Sëria atuëla</string>
     <plurals name="streakTimelineDays">
-        <item quantity="one">1 di</item>
+        <item quantity="zero">1 di</item>
+        <item quantity="one">%d dis</item>
+        <item quantity="two">%d dis</item>
+        <item quantity="few">%d dis</item>
+        <item quantity="many">%d dis</item>
         <item quantity="other">%d dis</item>
     </plurals>
     <string name="streakTimelineSubtitle">Mustra l\'ultimi 7 dis</string>
@@ -459,30 +475,54 @@
     <string name="widgetNoUrgentTasks">Net nia de urgente</string>
     <string name="widgetMoreTasks">+%1$d de plu</string>
     <plurals name="nTaskReminderPrefixDays">
-        <item quantity="one">Duman</item>
+        <item quantity="zero">Duman</item>
+        <item quantity="one">Te %d dis</item>
+        <item quantity="two">Te %d dis</item>
+        <item quantity="few">Te %d dis</item>
+        <item quantity="many">Te %d dis</item>
         <item quantity="other">Te %d dis</item>
     </plurals>
     <plurals name="nTaskReminderPrefixHours">
-        <item quantity="one">Te 1 ëura</item>
+        <item quantity="zero">Te 1 ëura</item>
+        <item quantity="one">Te %d ëures</item>
+        <item quantity="two">Te %d ëures</item>
+        <item quantity="few">Te %d ëures</item>
+        <item quantity="many">Te %d ëures</item>
         <item quantity="other">Te %d ëures</item>
     </plurals>
     <plurals name="nTaskReminderPrefixMinutes">
-        <item quantity="one">Te 1 menut</item>
+        <item quantity="zero">Te 1 menut</item>
+        <item quantity="one">Te %d menuc</item>
+        <item quantity="two">Te %d menuc</item>
+        <item quantity="few">Te %d menuc</item>
+        <item quantity="many">Te %d menuc</item>
         <item quantity="other">Te %d menuc</item>
     </plurals>
     <string name="nTasksCountZero">Deguna ncëries</string>
     <plurals name="nTasksCount">
-        <item quantity="one">1 ncëria</item>
+        <item quantity="zero">1 ncëria</item>
+        <item quantity="one">%d ncëries</item>
+        <item quantity="two">%d ncëries</item>
+        <item quantity="few">%d ncëries</item>
+        <item quantity="many">%d ncëries</item>
         <item quantity="other">%d ncëries</item>
     </plurals>
     <string name="nHabitsCountZero">Degun abitudins finades</string>
     <plurals name="nHabitsCount">
-        <item quantity="one">1 abitudin finada</item>
+        <item quantity="zero">1 abitudin finada</item>
+        <item quantity="one">%d abitudins finades</item>
+        <item quantity="two">%d abitudins finades</item>
+        <item quantity="few">%d abitudins finades</item>
+        <item quantity="many">%d abitudins finades</item>
         <item quantity="other">%d abitudins finades</item>
     </plurals>
     <string name="nMinutesCountZero">Degun menuc</string>
     <plurals name="nMinutesCount">
-        <item quantity="one">1 menut</item>
+        <item quantity="zero">1 menut</item>
+        <item quantity="one">%d menuc</item>
+        <item quantity="two">%d menuc</item>
+        <item quantity="few">%d menuc</item>
+        <item quantity="many">%d menuc</item>
         <item quantity="other">%d menuc</item>
     </plurals>
     <string name="distractionDistracted">Daujin (Distrat/a)</string>
