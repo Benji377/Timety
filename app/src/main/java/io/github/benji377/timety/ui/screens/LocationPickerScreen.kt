@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,19 +41,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
-import androidx.compose.runtime.LaunchedEffect
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.util.location.LocationApi
 import io.github.benji377.timety.util.location.LocationServerException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
-import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
-import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import kotlin.time.Duration.Companion.milliseconds
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -158,7 +158,11 @@ fun LocationPickerScreen(
             val currentError = errorState
             if (currentError != null) {
                 val errorMsg = when (currentError) {
-                    is LocationError.Server -> stringResource(R.string.locationPickerServerError, currentError.code)
+                    is LocationError.Server -> stringResource(
+                        R.string.locationPickerServerError,
+                        currentError.code
+                    )
+
                     is LocationError.Network -> stringResource(R.string.locationPickerNetworkError)
                 }
                 Text(

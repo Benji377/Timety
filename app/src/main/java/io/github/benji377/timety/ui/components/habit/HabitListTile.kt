@@ -53,10 +53,10 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.util.habit.HabitIcons
 import kotlinx.coroutines.launch
-import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 
 
 @OptIn(ExperimentalMaterial3Api::class)

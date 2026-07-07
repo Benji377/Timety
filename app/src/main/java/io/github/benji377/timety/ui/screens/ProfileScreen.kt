@@ -58,30 +58,30 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
-import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.HabitColor
-import io.github.benji377.timety.ui.theme.TaskColor
-import io.github.benji377.timety.ui.theme.UserColor
-import io.github.benji377.timety.ui.theme.WarningColor
-import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
-import io.github.benji377.timety.ui.viewmodel.UserViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.components.stats.StatCardStyle
 import io.github.benji377.timety.ui.components.user.StreakStatusBadge
 import io.github.benji377.timety.ui.components.user.UserStreakTimelineCard
 import io.github.benji377.timety.ui.components.user.UserXpBreakdownCard
+import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.UserColor
+import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
+import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.util.stats.StreakCalculator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

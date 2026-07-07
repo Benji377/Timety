@@ -8,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -62,6 +64,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -93,8 +96,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.ReminderOption
@@ -103,6 +107,8 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.screens.LocationPickerScreen
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.InfoColor
@@ -110,12 +116,13 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.AppUtils
-import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.location.LocationApi
-import io.github.benji377.timety.util.location.LocationServerException
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.location.LocationApi
+import io.github.benji377.timety.util.location.LocationServerException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -127,13 +134,6 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.material3.SelectableDates
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import io.github.benji377.timety.ui.screens.LocationPickerScreen
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 
 
 @OptIn(
@@ -455,7 +455,12 @@ fun TaskDetailScreen(
                                                 reminder,
                                                 dateFmt.dateFormatCode
                                             )
-                                        } - ${AppDateFormatUtils.formatTime(reminder, dateFmt.use24HourFormat)}",
+                                        } - ${
+                                            AppDateFormatUtils.formatTime(
+                                                reminder,
+                                                dateFmt.use24HourFormat
+                                            )
+                                        }",
                                         fontSize = AppTheme.fsBodySmall
                                     )
                                 },
@@ -780,7 +785,6 @@ private fun disabledFieldColors(isEditing: Boolean) = if (isEditing) {
         errorContainerColor = MaterialTheme.colorScheme.surface
     )
 }
-
 
 
 @Composable

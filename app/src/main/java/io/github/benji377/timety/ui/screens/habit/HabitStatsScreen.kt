@@ -302,7 +302,10 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(0.5f)
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f), RoundedCornerShape(4.dp)),
+                        .background(
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
+                            RoundedCornerShape(4.dp)
+                        ),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
                     Box(

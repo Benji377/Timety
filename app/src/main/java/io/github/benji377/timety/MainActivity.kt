@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -17,6 +18,8 @@ import androidx.lifecycle.lifecycleScope
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.data.repository.dataStore
+import io.github.benji377.timety.ui.screens.MainScreen
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TimetyTheme
 import io.github.benji377.timety.ui.utils.DateFormatSettings
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
@@ -24,9 +27,6 @@ import io.github.benji377.timety.util.LocaleHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import androidx.compose.material3.SnackbarHostState
-import io.github.benji377.timety.ui.screens.MainScreen
-import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 
 class MainActivity : ComponentActivity() {
 

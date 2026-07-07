@@ -7,14 +7,14 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.data.repository.UserRepository
+import io.github.benji377.timety.services.ReminderScheduler
+import io.github.benji377.timety.util.stats.ExperienceEngine
+import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
-import io.github.benji377.timety.services.ReminderScheduler
-import io.github.benji377.timety.util.stats.ExperienceEngine
-import io.github.benji377.timety.widget.TaskWidget
 
 class TaskViewModel(
     private val application: android.app.Application,

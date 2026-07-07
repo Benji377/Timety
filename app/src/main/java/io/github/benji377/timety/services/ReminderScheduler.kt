@@ -155,7 +155,7 @@ class ReminderScheduler private constructor(private val context: Context) {
             return ReminderScheduler(LocaleHelper.wrap(appContext, code))
         }
 
-        
+
         suspend fun resyncAll(context: Context) {
             val app = context.applicationContext as? TimetyApplication ?: return
             val scheduler = create(app)

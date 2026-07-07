@@ -3,10 +3,10 @@ package io.github.benji377.timety.data.repository
 import io.github.benji377.timety.data.local.dao.TaskDao
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
+import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 
 class TaskRepository(
     private val taskDao: TaskDao

@@ -2,11 +2,11 @@ package io.github.benji377.timety.ui.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.repository.SettingsRepository
+import io.github.benji377.timety.data.repository.ThemeMode
+import io.github.benji377.timety.services.ReminderScheduler
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import io.github.benji377.timety.data.repository.ThemeMode
-import io.github.benji377.timety.services.ReminderScheduler
 
 class SettingsViewModel(
     private val application: android.app.Application,

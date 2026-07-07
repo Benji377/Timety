@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.focus.DistractionEntity
+import io.github.benji377.timety.data.model.focus.DistractionType
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
@@ -12,11 +13,17 @@ import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.repository.FocusRepository
+import io.github.benji377.timety.data.repository.HabitRepository
+import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.stats.ExperienceEngine
+import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,13 +38,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
-import io.github.benji377.timety.data.model.focus.DistractionType
-import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
-import io.github.benji377.timety.data.model.habit.HabitWithCompletions
-import io.github.benji377.timety.data.repository.HabitRepository
-import io.github.benji377.timety.data.repository.SettingsRepository
-import io.github.benji377.timety.util.habit.HabitUtils
-import io.github.benji377.timety.widget.HabitWidget
 
 
 data class DistractionWithSession(
@@ -300,7 +300,7 @@ class FocusViewModel(
                 targetLabel = target?.label,
             )
             val distractionsToLog = pendingDistractions.toList()
-            
+
             viewModelScope.launch {
                 focusRepository.insertSession(sessionToLog)
                 distractionsToLog.forEach { focusRepository.insertDistraction(it) }

@@ -2,6 +2,7 @@ package io.github.benji377.timety.services
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.room.withTransaction
 import io.github.benji377.timety.data.local.TimetyDatabase
@@ -28,7 +29,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
-import androidx.core.content.FileProvider
 
 
 class BackupService(

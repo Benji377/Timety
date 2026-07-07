@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,9 +53,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.focus.DistractionUIType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
@@ -64,20 +67,17 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
-import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.ui.theme.WarningAccent
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.StatsUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.ui.text.style.TextAlign
-import io.github.benji377.timety.data.model.focus.DistractionUIType
-import io.github.benji377.timety.ui.theme.WarningAccent
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
-import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
 import kotlin.math.roundToInt
 
 
@@ -444,7 +444,10 @@ private fun FocusClockChart(
             val x = center.x + (r * kotlin.math.cos(rad)).toFloat()
             val y = center.y + (r * kotlin.math.sin(rad)).toFloat()
             val layout =
-                textMeasurer.measure(label, style = TextStyle(color = markerColor, fontSize = 10.sp))
+                textMeasurer.measure(
+                    label,
+                    style = TextStyle(color = markerColor, fontSize = 10.sp)
+                )
             drawText(
                 layout,
                 topLeft = Offset(x - layout.size.width / 2f, y - layout.size.height / 2f)
@@ -698,7 +701,11 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                 )
             }
             Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
-            Text(AppDateFormatUtils.formatMinutesCompact(totalMinutes), fontSize = 20.sp, fontWeight = FontWeight.Black)
+            Text(
+                AppDateFormatUtils.formatMinutesCompact(totalMinutes),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Black
+            )
         }
         Spacer(modifier = Modifier.height(18.dp))
         Row(

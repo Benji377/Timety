@@ -17,31 +17,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
-import io.github.benji377.timety.ui.components.common.TimetyFab
-import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.ui.components.common.ExpansionSection
+import io.github.benji377.timety.ui.components.common.TimetyFab
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitBottomSheet
 import io.github.benji377.timety.ui.components.habit.HabitListTile
+import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.InfoColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import androidx.compose.ui.platform.LocalLocale
-import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)

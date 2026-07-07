@@ -2,6 +2,7 @@ package io.github.benji377.timety.migration
 
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.di.AppContainer
@@ -11,7 +12,6 @@ import org.json.JSONObject
 import java.io.File
 import java.time.Instant
 import java.util.Locale
-import androidx.core.content.edit
 
 /**
  * TEMPORARY — one-shot migration of the old Flutter app's on-device data into the

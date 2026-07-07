@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -27,12 +28,11 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.BorderDark
 import io.github.benji377.timety.ui.theme.BorderLight
 import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 import io.github.benji377.timety.ui.theme.PaperAltLight
 import io.github.benji377.timety.ui.theme.PaperLight
 import io.github.benji377.timety.ui.theme.ShadowColor
 import io.github.benji377.timety.ui.theme.WarningColor
-import androidx.compose.ui.Alignment
-import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 
 
 @Composable

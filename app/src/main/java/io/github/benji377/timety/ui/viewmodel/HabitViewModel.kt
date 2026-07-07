@@ -7,7 +7,9 @@ import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.UserRepository
+import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.util.stats.ExperienceEngine
+import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
@@ -17,8 +19,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import io.github.benji377.timety.services.ReminderScheduler
-import io.github.benji377.timety.widget.HabitWidget
 
 
 class HabitViewModel(

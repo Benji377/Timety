@@ -256,7 +256,10 @@ private fun DayTile(info: StreakDayInfo, modifier: Modifier = Modifier) {
     ) {
         Text(
             text = if (info.isToday) stringResource(R.string.streakDayToday)
-            else info.date.dayOfWeek.getDisplayName(JavaTextStyle.SHORT, androidx.compose.ui.text.intl.Locale.current.platformLocale),
+            else info.date.dayOfWeek.getDisplayName(
+                JavaTextStyle.SHORT,
+                androidx.compose.ui.text.intl.Locale.current.platformLocale
+            ),
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -56,12 +57,11 @@ import io.github.benji377.timety.ui.theme.GaugeLabelDark
 import io.github.benji377.timety.ui.theme.GaugeTrackDark
 import io.github.benji377.timety.ui.theme.GaugeTrackLight
 import io.github.benji377.timety.ui.theme.GaugeWhite
+import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
-import androidx.compose.ui.unit.IntSize
-import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 
 
 @Composable

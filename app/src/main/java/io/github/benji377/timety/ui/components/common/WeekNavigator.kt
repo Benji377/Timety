@@ -18,10 +18,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
-import io.github.benji377.timety.util.datetime.AppDateUtils
-import java.time.LocalDate
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.datetime.AppDateUtils
+import java.time.LocalDate
 
 
 @Composable

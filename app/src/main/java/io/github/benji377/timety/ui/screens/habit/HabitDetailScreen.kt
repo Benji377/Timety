@@ -69,18 +69,20 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.PickerPalette
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.launch
@@ -88,8 +90,6 @@ import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
-import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -450,7 +450,9 @@ fun HabitDetailScreen(
                         shape = AppTheme.brNeo,
                         border = BorderStroke(
                             AppTheme.neoBorderWidth,
-                            if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                            if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = 0.12f
+                            )
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 6.dp else 0.dp),
                         colors = CardDefaults.cardColors(containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent)
@@ -488,7 +490,9 @@ fun HabitDetailScreen(
                         shape = AppTheme.brNeo,
                         border = BorderStroke(
                             AppTheme.neoBorderWidth,
-                            if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                            if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = 0.12f
+                            )
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 6.dp else 0.dp),
                         colors = CardDefaults.cardColors(containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent)

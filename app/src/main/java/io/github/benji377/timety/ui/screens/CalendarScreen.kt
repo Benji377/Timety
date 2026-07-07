@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -52,34 +54,31 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
+import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.AppUtils
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
-import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 import java.time.ZoneId
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.shape.CircleShape
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
-import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -319,7 +318,11 @@ private fun CalendarGrid(
                         .padding(bottom = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(header, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        header,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             Box(
@@ -398,7 +401,9 @@ private fun CalendarGrid(
                             Text(
                                 text = day.dayOfMonth.toString(),
                                 fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isCurrentMonth) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                color = if (isCurrentMonth) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                    alpha = 0.5f
+                                )
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -435,14 +440,22 @@ private fun CalendarGrid(
                                     fontWeight = FontWeight.Bold
                                 )
                             ) { append("$weeklyTaskCount") }
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append(" | ") }
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                                append(
+                                    " | "
+                                )
+                            }
                             withStyle(
                                 SpanStyle(
                                     color = HabitColor,
                                     fontWeight = FontWeight.Bold
                                 )
                             ) { append("$weeklyHabitCount") }
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append(" | ") }
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                                append(
+                                    " | "
+                                )
+                            }
                             withStyle(
                                 SpanStyle(
                                     color = SuccessColor,
@@ -662,7 +675,8 @@ private fun FocusSessionsAccordion(
                         Icon(
                             imageVector = Icons.Filled.Circle,
                             contentDescription = null,
-                            tint = tag?.let { Color(it.colorValue) } ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            tint = tag?.let { Color(it.colorValue) }
+                                ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {

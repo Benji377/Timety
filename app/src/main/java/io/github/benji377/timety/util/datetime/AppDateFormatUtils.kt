@@ -133,7 +133,8 @@ object AppDateFormatUtils {
     fun formatMonthYear(
         date: LocalDate,
         locale: Locale = Locale.getDefault()
-    ): String = date.format(cached("my|$locale") { DateTimeFormatter.ofPattern("MMMM yyyy", locale) })
+    ): String =
+        date.format(cached("my|$locale") { DateTimeFormatter.ofPattern("MMMM yyyy", locale) })
 
 
     fun formatShortDate(

@@ -59,13 +59,13 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneId
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
-import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -292,7 +292,10 @@ private fun UnifiedCalendarSheetContent(
                     .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(stringResource(R.string.habitHistoryEmpty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(R.string.habitHistoryEmpty),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             LazyColumn(
@@ -350,7 +353,13 @@ private fun UnifiedCalendarSheetContent(
         )
         AlertDialog(
             onDismissRequest = { dateForAdd = null },
-            title = { Text(stringResource(R.string.habitHistoryTimePrompt), fontWeight = FontWeight.Normal, style = MaterialTheme.typography.bodyLarge) },
+            title = {
+                Text(
+                    stringResource(R.string.habitHistoryTimePrompt),
+                    fontWeight = FontWeight.Normal,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
             text = { TimePicker(state = timePickerState) },
             confirmButton = {
                 TextButton(onClick = {
@@ -382,7 +391,11 @@ private fun HistoryStatCard(label: String, count: String) {
             fontWeight = FontWeight.Bold,
             color = SuccessColor,
         )
-        Text(text = label, fontSize = AppTheme.fsBodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text = label,
+            fontSize = AppTheme.fsBodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

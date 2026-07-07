@@ -1,6 +1,7 @@
 package io.github.benji377.timety.util.habit
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
@@ -9,7 +10,6 @@ import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
 import java.time.ZoneId
-import androidx.compose.ui.platform.LocalLocale
 
 
 object HabitUtils {

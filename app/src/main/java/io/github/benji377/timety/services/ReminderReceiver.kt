@@ -6,13 +6,13 @@ import android.content.Intent
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.util.LocaleHelper
 import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import io.github.benji377.timety.util.LocaleHelper
 
 
 class ReminderReceiver : BroadcastReceiver() {
@@ -52,7 +52,6 @@ class ReminderReceiver : BroadcastReceiver() {
     }
 
 
-    
     private suspend fun motivationBody(context: Context, fallback: String): String {
         val app = context.applicationContext as? TimetyApplication ?: return fallback
         val localized = LocaleHelper.wrap(

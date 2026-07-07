@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.focus.DistractionUIType
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.habit.HabitEntity
@@ -59,7 +60,6 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
-import io.github.benji377.timety.data.model.focus.DistractionUIType
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -407,7 +407,12 @@ private fun HabitRow(
         },
         trailingContent = {
             when {
-                isLocked -> Icon(Icons.Filled.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                isLocked -> Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
                 isSelected -> Icon(
                     Icons.Filled.Check,
                     contentDescription = null,

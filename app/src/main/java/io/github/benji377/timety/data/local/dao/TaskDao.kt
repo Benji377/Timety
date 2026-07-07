@@ -9,8 +9,8 @@ import androidx.room.Transaction
 import androidx.room.Update
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
-import kotlinx.coroutines.flow.Flow
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {

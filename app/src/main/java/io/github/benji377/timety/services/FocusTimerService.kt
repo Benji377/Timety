@@ -65,8 +65,8 @@ class FocusTimerService : Service() {
                 val state = FocusTimerManager.timerState.value
                 if (Build.VERSION.SDK_INT >= 34) {
                     startForeground(
-                        NOTIFICATION_ID, 
-                        buildNotification(state), 
+                        NOTIFICATION_ID,
+                        buildNotification(state),
                         android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
                     )
                 } else {
@@ -79,6 +79,7 @@ class FocusTimerService : Service() {
                 FocusTimerManager.pauseTimer()
                 cancelAlarm()
             }
+
             ACTION_STOP, ACTION_DISCARD -> {
                 FocusTimerManager.stopTimer(discard = action == ACTION_DISCARD)
                 stopForeground(STOP_FOREGROUND_REMOVE)

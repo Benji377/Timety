@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.components.focus
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -52,13 +53,12 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.ui.components.common.TimetyElevatedButton as ElevatedButton
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
-import androidx.compose.foundation.BorderStroke
-import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 
 
 @Composable
@@ -210,7 +210,11 @@ private fun OverviewView(
         }
         if (mode.isSystem) {
             Box(modifier = Modifier.padding(AppTheme.spaceSmall)) {
-                Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    Icons.Outlined.Lock,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
             Row {
