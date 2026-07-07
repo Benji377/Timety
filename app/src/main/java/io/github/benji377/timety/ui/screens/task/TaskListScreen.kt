@@ -47,6 +47,7 @@ import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -73,8 +74,16 @@ fun TaskListScreen(
     var isAscending by remember { mutableStateOf(true) }
     var sortMenuExpanded by remember { mutableStateOf(false) }
 
-    // Untrimmed so each pill matches TaskFilterEngine's exact category comparison.
-    val allCategories by viewModel.allCategories.collectAsState()
+    // Filter pills come from the tasks themselves (not the task_categories table) so
+    // only categories that actually match something are offered; untrimmed so each
+    // pill matches TaskFilterEngine's exact category comparison.
+    val allCategories = remember(tasks) {
+        tasks.map { it.task.category }.filter { it.isNotBlank() }.distinct().sorted()
+    }
+    val categoryEntities by viewModel.allCategories.collectAsState()
+    val categoryColors = remember(categoryEntities) {
+        categoryEntities.associate { it.name to it.colorValue }
+    }
 
     val processedTasks =
         remember(tasks, searchQuery, selectedCategoryFilter, sortOption, isAscending) {
@@ -178,7 +187,10 @@ fun TaskListScreen(
                             onClick = {
                                 selectedCategoryFilter = if (isSelected) null else category
                             },
-                            label = { Text(category) }
+                            label = { Text(category) },
+                            leadingIcon = {
+                                categoryColors[category]?.let { AppUtils.CategoryDot(it) }
+                            }
                         )
                     }
                 }

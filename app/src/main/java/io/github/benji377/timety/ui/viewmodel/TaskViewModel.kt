@@ -3,6 +3,7 @@ package io.github.benji377.timety.ui.viewmodel
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.data.repository.TaskRepository
@@ -12,10 +13,10 @@ import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.util.UUID
 
 class TaskViewModel(
     private val application: android.app.Application,
@@ -106,25 +107,40 @@ class TaskViewModel(
             .cancelTaskReminders(taskId)
     }
 
-    val allCategories: StateFlow<List<String>> = taskRepository.allTasks
-        .map { tasks ->
-            tasks.map { it.task.category }.filter { it.isNotBlank() }.distinct().sorted()
-        }
+    val allCategories: StateFlow<List<TaskCategoryEntity>> = taskRepository.allCategories
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    fun renameCategory(oldName: String, newName: String) {
+    fun createCategory(
+        name: String,
+        colorValue: Int = TaskCategoryEntity.DEFAULT_COLOR_VALUE
+    ) {
         viewModelScope.launch {
-            taskRepository.renameCategory(oldName, newName)
+            taskRepository.createCategory(
+                TaskCategoryEntity(
+                    id = UUID.randomUUID().toString(),
+                    name = name,
+                    colorValue = colorValue
+                )
+            )
         }
     }
 
-    fun deleteCategory(categoryName: String) {
+    fun updateCategory(category: TaskCategoryEntity, newName: String, newColorValue: Int) {
         viewModelScope.launch {
-            taskRepository.renameCategory(categoryName, "")
+            taskRepository.updateCategory(
+                oldName = category.name,
+                updated = category.copy(name = newName, colorValue = newColorValue)
+            )
+        }
+    }
+
+    fun deleteCategory(category: TaskCategoryEntity) {
+        viewModelScope.launch {
+            taskRepository.deleteCategory(category)
         }
     }
 

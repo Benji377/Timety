@@ -15,6 +15,7 @@ import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 
@@ -22,6 +23,7 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
     entities = [
         TaskEntity::class,
         SubtaskEntity::class,
+        TaskCategoryEntity::class,
         FocusModeEntity::class,
         SessionPhaseEntity::class,
         FocusSessionEntity::class,

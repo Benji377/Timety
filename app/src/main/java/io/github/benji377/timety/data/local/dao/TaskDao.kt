@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import kotlinx.coroutines.flow.Flow
@@ -40,8 +41,40 @@ interface TaskDao {
     @Query("DELETE FROM tasks")
     fun clearAll(): Int
 
+    // Categories
+    @Query("SELECT * FROM task_categories ORDER BY name COLLATE NOCASE ASC")
+    fun getAllCategories(): Flow<List<TaskCategoryEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertCategory(category: TaskCategoryEntity)
+
+    /** Creation path: an existing category with the same name wins, keeping its color. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertCategoryIfAbsent(category: TaskCategoryEntity)
+
+    @Delete
+    fun deleteCategory(category: TaskCategoryEntity)
+
+    @Query("DELETE FROM task_categories")
+    fun clearAllCategories()
+
+    @Query("SELECT DISTINCT category FROM tasks WHERE category != ''")
+    fun getDistinctTaskCategoryNames(): List<String>
+
     @Query("UPDATE tasks SET category = :newName WHERE category = :oldName")
-    fun renameCategory(oldName: String, newName: String)
+    fun renameTaskCategory(oldName: String, newName: String)
+
+    @Transaction
+    fun updateCategoryAndTasks(oldName: String, updated: TaskCategoryEntity) {
+        insertCategory(updated)
+        if (updated.name != oldName) renameTaskCategory(oldName, updated.name)
+    }
+
+    @Transaction
+    fun deleteCategoryAndClearTasks(category: TaskCategoryEntity) {
+        deleteCategory(category)
+        renameTaskCategory(category.name, "")
+    }
 
     // Subtasks
     @Query("SELECT * FROM subtasks WHERE taskId = :taskId")

@@ -19,6 +19,7 @@ import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.user.UserProfileEntity
@@ -111,6 +112,7 @@ class BackupService(
                 userProfileToJson(userDao.getUserProfileSynchronous()) ?: JSONObject.NULL
             )
             put("tasks", tasksToJson())
+            put("taskCategories", taskCategoriesToJson())
             put("habits", habitsToJson())
             put("focus", focusToJson())
         }
@@ -157,6 +159,20 @@ class BackupService(
                 )
             }
             array.put(taskObj)
+        }
+        return array
+    }
+
+    private suspend fun taskCategoriesToJson(): JSONArray {
+        val array = JSONArray()
+        for (category in taskDao.getAllCategories().first()) {
+            array.put(
+                JSONObject().apply {
+                    put("id", category.id)
+                    put("name", category.name)
+                    put("colorValue", category.colorValue)
+                }
+            )
         }
         return array
     }
@@ -280,6 +296,7 @@ class BackupService(
         userDao.insertUserProfile(userProfileFromJson(userProfileJson))
 
         restoreTasks(json.optJSONArray("tasks") ?: JSONArray())
+        restoreTaskCategories(json.optJSONArray("taskCategories") ?: JSONArray())
         restoreHabits(json.optJSONArray("habits") ?: JSONArray())
         json.optJSONObject("focus")?.let { restoreFocus(it) }
     }
@@ -340,6 +357,37 @@ class BackupService(
                     )
                 )
             }
+        }
+    }
+
+    /** Must run after [restoreTasks]: missing entries are derived from the restored tasks. */
+    private fun restoreTaskCategories(categoriesJson: JSONArray) {
+        taskDao.clearAllCategories()
+        for (i in 0 until categoriesJson.length()) {
+            val categoryJson = categoriesJson.getJSONObject(i)
+            val name = readString(categoryJson, "name")?.takeIf { it.isNotBlank() } ?: continue
+            taskDao.insertCategoryIfAbsent(
+                TaskCategoryEntity(
+                    id = readString(categoryJson, "id")
+                        ?: java.util.UUID.randomUUID().toString(),
+                    name = name,
+                    colorValue = categoryJson.optInt(
+                        "colorValue",
+                        TaskCategoryEntity.DEFAULT_COLOR_VALUE
+                    ),
+                )
+            )
+        }
+        // Flutter payloads (and pre-category Kotlin backups) carry no taskCategories
+        // array: fill the table from the category names on the restored tasks.
+        for (name in taskDao.getDistinctTaskCategoryNames()) {
+            taskDao.insertCategoryIfAbsent(
+                TaskCategoryEntity(
+                    id = java.util.UUID.randomUUID().toString(),
+                    name = name,
+                    colorValue = TaskCategoryEntity.DEFAULT_COLOR_VALUE,
+                )
+            )
         }
     }
 

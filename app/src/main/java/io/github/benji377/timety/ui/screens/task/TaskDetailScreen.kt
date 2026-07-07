@@ -103,6 +103,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
@@ -337,7 +338,8 @@ fun TaskDetailScreen(
                     onIsAddingNewCategoryChange = { isAddingNewCategory = it },
                     newCategoryText = newCategoryText,
                     onNewCategoryTextChange = { newCategoryText = it },
-                    existingCategories = allCategories
+                    existingCategories = allCategories,
+                    onCreateCategory = { taskViewModel.createCategory(it) }
                 )
 
                 Spacer(Modifier.height(AppTheme.spaceLarge))
@@ -954,8 +956,15 @@ private fun CategoryPicker(
     onIsAddingNewCategoryChange: (Boolean) -> Unit,
     newCategoryText: String,
     onNewCategoryTextChange: (String) -> Unit,
-    existingCategories: List<String>,
+    existingCategories: List<TaskCategoryEntity>,
+    onCreateCategory: (String) -> Unit,
 ) {
+    val selectedColorValue = existingCategories.firstOrNull { it.name == category }?.colorValue
+    val categoryLeadingIcon: @Composable () -> Unit = {
+        if (selectedColorValue != null) AppUtils.CategoryDot(selectedColorValue)
+        else Icon(Icons.AutoMirrored.Filled.Label, null)
+    }
+
     if (!isEditing) {
         OutlinedTextField(
             value = category.ifEmpty { stringResource(R.string.taskDetailsLabelCategoryEmpty) },
@@ -963,7 +972,7 @@ private fun CategoryPicker(
             enabled = false,
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.taskDetailsLabelCategory)) },
-            leadingIcon = { Icon(Icons.AutoMirrored.Filled.Label, null) },
+            leadingIcon = categoryLeadingIcon,
             colors = disabledFieldColors(isEditing = false)
         )
         return
@@ -979,7 +988,7 @@ private fun CategoryPicker(
                     readOnly = true,
                     placeholder = { Text(category.ifEmpty { stringResource(R.string.taskDetailsLabelCategorySelect) }) },
                     label = { Text(stringResource(R.string.taskDetailsLabelCategory)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Label, null) },
+                    leadingIcon = categoryLeadingIcon,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     modifier = Modifier
                         .menuAnchor(MenuAnchorType.PrimaryNotEditable)
@@ -995,9 +1004,10 @@ private fun CategoryPicker(
                     )
                     existingCategories.forEach { cat ->
                         DropdownMenuItem(
-                            text = { Text(cat) },
+                            text = { Text(cat.name) },
+                            leadingIcon = { AppUtils.CategoryDot(cat.colorValue) },
                             onClick = {
-                                onCategoryChange(cat)
+                                onCategoryChange(cat.name)
                                 expanded = false
                             }
                         )
@@ -1037,6 +1047,7 @@ private fun CategoryPicker(
                         IconButton(onClick = {
                             val trimmed = newCategoryText.trim()
                             if (trimmed.isNotEmpty()) {
+                                onCreateCategory(trimmed)
                                 onCategoryChange(trimmed)
                                 onIsAddingNewCategoryChange(false)
                                 onNewCategoryTextChange("")

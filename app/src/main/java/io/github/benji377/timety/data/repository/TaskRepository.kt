@@ -2,6 +2,7 @@ package io.github.benji377.timety.data.repository
 
 import io.github.benji377.timety.data.local.dao.TaskDao
 import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,9 @@ class TaskRepository(
 ) {
     val allTasks: Flow<List<TaskWithSubtasks>> =
         taskDao.getAllTasks()
+
+    val allCategories: Flow<List<TaskCategoryEntity>> =
+        taskDao.getAllCategories()
 
     suspend fun getOpenTasksDueBefore(deadline: java.time.Instant): List<TaskEntity> =
         withContext(Dispatchers.IO) {
@@ -39,8 +43,17 @@ class TaskRepository(
         taskDao.clearAll()
     }
 
-    suspend fun renameCategory(oldName: String, newName: String) = withContext(Dispatchers.IO) {
-        taskDao.renameCategory(oldName, newName)
+    suspend fun createCategory(category: TaskCategoryEntity) = withContext(Dispatchers.IO) {
+        taskDao.insertCategoryIfAbsent(category)
+    }
+
+    suspend fun updateCategory(oldName: String, updated: TaskCategoryEntity) =
+        withContext(Dispatchers.IO) {
+            taskDao.updateCategoryAndTasks(oldName, updated)
+        }
+
+    suspend fun deleteCategory(category: TaskCategoryEntity) = withContext(Dispatchers.IO) {
+        taskDao.deleteCategoryAndClearTasks(category)
     }
 
     suspend fun insertSubtask(subtask: SubtaskEntity) = withContext(Dispatchers.IO) {
