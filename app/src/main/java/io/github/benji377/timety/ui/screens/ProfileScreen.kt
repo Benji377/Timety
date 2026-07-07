@@ -102,12 +102,6 @@ fun ProfileScreen(
 
     val userName = userProfile?.name ?: "User"
     val totalXp = userProfile?.totalXp ?: 0
-    val levelThresholds = listOf(0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500)
-    val level = levelThresholds.indexOfLast { totalXp >= it }.coerceAtLeast(0) + 1
-    val currentLevelXp = levelThresholds.getOrElse(level - 1) { 0 }
-    val nextLevelXp = levelThresholds.getOrElse(level) { currentLevelXp + 1000 }
-    val progress =
-        if (nextLevelXp > currentLevelXp) (totalXp - currentLevelXp).toFloat() / (nextLevelXp - currentLevelXp) else 1f
 
     val totalTasksDone = tasks.count { it.task.isCompleted }
     val totalHabitsMet = habitsWithCompletions.sumOf { it.completions.size }
@@ -178,7 +172,7 @@ fun ProfileScreen(
                                 WrapUpImageGenerator.generate(
                                     context,
                                     userName,
-                                    level,
+                                    currentLevel,
                                     levelTitle,
                                     highestStreak,
                                     totalTasksDone,
