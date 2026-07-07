@@ -466,7 +466,7 @@ fun ProfileScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         StatCard(
-                            title = stringResource(R.string.streakLegendStreakDay),
+                            title = stringResource(R.string.userStatBestStreak),
                             value = highestStreak.toString(),
                             icon = Icons.Outlined.MilitaryTech,
                             color = WarningColor,

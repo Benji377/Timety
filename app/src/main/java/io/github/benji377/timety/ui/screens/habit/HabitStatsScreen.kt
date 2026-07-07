@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.stats.StatCard
@@ -94,7 +95,21 @@ fun HabitStatsScreen(
                 Text(stringResource(R.string.habitStatsLabelEmpty))
             }
         } else {
-            val totalCompletions = habits.sumOf { it.completions.size }
+            // The summary cards and the time-of-day breakdown follow the week selector, so
+            // shifting the week visibly updates the stats. Streaks stay all-time: a
+            // per-week streak is meaningless.
+            val startOfWeek = AppDateUtils.startOfWeekMonday(focusedDate)
+            val endOfWeek = startOfWeek.plusDays(6)
+            val zone = ZoneId.systemDefault()
+            val weekCompletions = habits.flatMap { hwc ->
+                hwc.completions.filter { c ->
+                    AppDateUtils.isWithinInclusive(
+                        c.completionDate.atZone(zone).toLocalDate(),
+                        startOfWeek,
+                        endOfWeek
+                    )
+                }
+            }
             val allTimeBestStreak = habits.maxOfOrNull { hwc ->
                 StreakCalculator.calculateBestStreak(completionDates(hwc))
             } ?: 0
@@ -124,7 +139,7 @@ fun HabitStatsScreen(
                     ) {
                         StatCard(
                             title = stringResource(R.string.habitStatsLabelTotal),
-                            value = totalCompletions.toString(),
+                            value = weekCompletions.size.toString(),
                             icon = Icons.Filled.Timeline,
                             color = HabitColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
@@ -164,7 +179,7 @@ fun HabitStatsScreen(
                 }
 
                 item {
-                    TimeOfDayBreakdownCard(habits)
+                    TimeOfDayBreakdownCard(weekCompletions)
                     Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
                 }
 
@@ -322,21 +337,19 @@ private data class TimeOfDayBucket(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TimeOfDayBreakdownCard(habits: List<HabitWithCompletions>) {
+private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
     val zone = ZoneId.systemDefault()
     var morning = 0
     var afternoon = 0
     var evening = 0
     var night = 0
-    habits.forEach { hwc ->
-        hwc.completions.forEach { c ->
-            val hour = c.completionDate.atZone(zone).hour
-            when {
-                hour in 5..11 -> morning++
-                hour in 12..16 -> afternoon++
-                hour in 17..20 -> evening++
-                else -> night++
-            }
+    completions.forEach { c ->
+        val hour = c.completionDate.atZone(zone).hour
+        when {
+            hour in 5..11 -> morning++
+            hour in 12..16 -> afternoon++
+            hour in 17..20 -> evening++
+            else -> night++
         }
     }
     val total = morning + afternoon + evening + night

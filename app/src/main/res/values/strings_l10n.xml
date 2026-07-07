@@ -105,7 +105,8 @@
     <string name="focusStatsSectionDistractionsEmpty">No distractions logged for this day</string>
     <string name="focusStatsSectionDistractionsSubtitle">Selected day, newest distractions first</string>
     <string name="focusStatsSectionDistractionsTitle">Distractions</string>
-    <string name="focusStatsSectionSessionsSubtitle">Each session shows the exact target and focus mode</string>
+    <string name="focusStatsSectionSessionsEmpty">No focus sessions for this day</string>
+    <string name="focusStatsSectionSessionsSubtitle">Selected day, each session shows the exact target and focus mode</string>
     <string name="focusStatsSectionSessionsTitle">Focus Sessions</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Tagged sessions, task-linked sessions, and habit-linked sessions</string>
     <string name="focusStatsSectionTargetBreakdownTitle">Focus by Target Type</string>
@@ -196,6 +197,9 @@
     <string name="taskDetailsLabelEffort">Effort</string>
     <string name="taskDetailsLabelLocation">Location</string>
     <string name="taskDetailsLabelPriority">Priority</string>
+    <string name="taskDetailsLocationDetails">Place Details</string>
+    <string name="taskDetailsLocationNoInfo">No place information found for this location</string>
+    <string name="taskDetailsLocationOffline">No internet connection – location search and place details are unavailable</string>
     <string name="taskDetailsLabelReminderSet">Set Reminder</string>
     <string name="taskDetailsLabelReminderTooEarly">Custom reminder must be before the Due Date</string>
     <string name="taskDetailsLabelSubtaskHint">Add subtasks…</string>

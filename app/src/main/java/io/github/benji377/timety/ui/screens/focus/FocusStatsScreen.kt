@@ -164,7 +164,7 @@ fun FocusStatsScreen(
             Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
 
             TagFilterRow(
-                sessions = filteredSessionsForCounts(sessions, tags),
+                sessions = sessions,
                 tags = tags,
                 selectedTagId = selectedTagFilterId,
                 onSelect = { selectedTagFilterId = it },
@@ -205,16 +205,25 @@ fun FocusStatsScreen(
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
-            if (filteredSessions.isNotEmpty()) {
-                SectionHeader(
-                    stringResource(R.string.focusStatsSectionSessionsTitle),
-                    stringResource(R.string.focusStatsSectionSessionsSubtitle),
-                )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                val sortedSessions = remember(filteredSessions) {
-                    filteredSessions.sortedByDescending { it.startTime }
+            SectionHeader(
+                stringResource(R.string.focusStatsSectionSessionsTitle),
+                stringResource(R.string.focusStatsSectionSessionsSubtitle),
+            )
+            Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+            val sortedSessions = remember(clockSessions) {
+                clockSessions.sortedByDescending { it.startTime }
+            }
+            if (sortedSessions.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = AppTheme.spaceXLarge),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(R.string.focusStatsSectionSessionsEmpty))
                 }
-                // The full history can grow into the hundreds; keep the section at a fixed
+            } else {
+                // A single day can still hold many sessions; keep the section at a fixed
                 // max height and let it scroll internally instead of stretching the page.
                 LazyColumn(
                     modifier = Modifier
@@ -237,8 +246,8 @@ fun FocusStatsScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
             }
+            Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
             SectionHeader(
                 stringResource(R.string.focusStatsSectionDistractionsTitle),
@@ -276,16 +285,14 @@ fun FocusStatsScreen(
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
-            TargetBreakdownSection(filteredSessions)
+            // Deliberately unfiltered: this section is an all-time summary. Task- and
+            // habit-linked sessions carry no tagId, so applying the tag filter here would
+            // zero out their bars and make the breakdown look broken.
+            TargetBreakdownSection(sessions)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
         }
     }
 }
-
-private fun filteredSessionsForCounts(
-    sessions: List<FocusSessionEntity>,
-    tags: List<FocusTagEntity>
-): List<FocusSessionEntity> = sessions
 
 @Composable
 private fun SectionHeader(title: String, subtitle: String) {

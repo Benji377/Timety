@@ -42,14 +42,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.R
-import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.LaunchedEffect
+import io.github.benji377.timety.util.location.LocationApi
+import io.github.benji377.timety.util.location.LocationServerException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
@@ -60,10 +59,11 @@ fun LocationPickerScreen(
     settingsViewModel: SettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
         factory = AppViewModelProvider.Factory
     ),
+    initialQuery: String = "",
     onLocationSelected: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    var query by remember { mutableStateOf("") }
+    var query by remember { mutableStateOf(initialQuery) }
     var isLoading by remember { mutableStateOf(false) }
     var searchResults by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var errorState by remember { mutableStateOf<LocationError?>(null) }
@@ -81,39 +81,8 @@ fun LocationPickerScreen(
                 errorState = null
 
                 try {
-                    val endpoint = locationApiEndpoint
-                    val baseUrl = if (endpoint.endsWith("/")) endpoint else "$endpoint/"
-
-                    val results = withContext(Dispatchers.IO) {
-                        val url = URL("${baseUrl}?q=${searchQuery.trim()}&limit=10")
-                        val connection = url.openConnection() as HttpURLConnection
-                        connection.requestMethod = "GET"
-                        connection.setRequestProperty(
-                            "User-Agent",
-                            "timety/1.0 (io.github.benji377.timety)"
-                        )
-                        connection.setRequestProperty("Accept", "application/json")
-                        connection.connectTimeout = 5000
-                        connection.readTimeout = 5000
-
-                        if (connection.responseCode == 200) {
-                            val responseStr =
-                                connection.inputStream.bufferedReader().use { it.readText() }
-                            val json = JSONObject(responseStr)
-                            val featuresArray = json.optJSONArray("features")
-                            val list = mutableListOf<JSONObject>()
-                            if (featuresArray != null) {
-                                for (i in 0 until featuresArray.length()) {
-                                    list.add(featuresArray.getJSONObject(i))
-                                }
-                            }
-                            list
-                        } else {
-                            throw ServerException(connection.responseCode)
-                        }
-                    }
-                    searchResults = results
-                } catch (e: ServerException) {
+                    searchResults = LocationApi.search(locationApiEndpoint, searchQuery)
+                } catch (e: LocationServerException) {
                     errorState = LocationError.Server(e.code)
                     searchResults = emptyList()
                 } catch (e: Exception) {
@@ -128,6 +97,10 @@ fun LocationPickerScreen(
             isLoading = false
             errorState = null
         }
+    }
+
+    LaunchedEffect(Unit) {
+        if (initialQuery.isNotBlank()) performSearch(initialQuery)
     }
 
     Scaffold(
@@ -232,9 +205,9 @@ fun LocationPickerScreen(
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(searchResults) { feature ->
                             val properties = feature.optJSONObject("properties") ?: JSONObject()
-                            val title = getPrimaryName(properties)
+                            val title = LocationApi.primaryName(properties)
                                 .ifEmpty { stringResource(R.string.locationPickerUnknown) }
-                            val subtitle = buildDetailsString(properties)
+                            val subtitle = LocationApi.detailsString(properties)
 
                             ListItem(
                                 headlineContent = { Text(title, fontWeight = FontWeight.Bold) },
@@ -266,60 +239,6 @@ fun LocationPickerScreen(
         }
     }
 }
-
-private fun getPrimaryName(p: JSONObject): String {
-    val name = p.optString("name", "")
-    if (name.isNotEmpty()) return name
-
-    val street = p.optString("street", "")
-    val number = p.optString("housenumber", "")
-    if (street.isNotEmpty()) {
-        return if (number.isNotEmpty()) "$street $number" else street
-    }
-
-    val city = p.optString("city", "")
-    val state = p.optString("state", "")
-    if (city.isNotEmpty()) return city
-    if (state.isNotEmpty()) return state
-
-    return ""
-}
-
-private fun buildDetailsString(p: JSONObject): String {
-    val parts = mutableListOf<String>()
-
-    val type = p.optString("osm_value", "")
-    if (type.isNotEmpty() && type != "yes") {
-        parts.add(type.replaceFirstChar { it.uppercase() })
-    }
-
-    val street = p.optString("street", "")
-    val number = p.optString("housenumber", "")
-    var streetInfo = ""
-    if (street.isNotEmpty()) streetInfo += street
-    if (street.isNotEmpty() && number.isNotEmpty()) streetInfo += " $number"
-    if (streetInfo.isNotEmpty()) parts.add(streetInfo)
-
-    var cityStr = p.optString("city", "")
-    if (cityStr.isEmpty()) cityStr = p.optString("town", "")
-    if (cityStr.isEmpty()) cityStr = p.optString("village", "")
-
-    val state = p.optString("state", "")
-    val postcode = p.optString("postcode", "")
-
-    val locationParts = mutableListOf<String>()
-    if (cityStr.isNotEmpty()) locationParts.add(cityStr)
-    if (state.isNotEmpty()) locationParts.add(state)
-    if (postcode.isNotEmpty()) locationParts.add(postcode)
-
-    if (locationParts.isNotEmpty()) {
-        parts.add(locationParts.joinToString(", "))
-    }
-
-    return parts.joinToString(" • ")
-}
-
-private class ServerException(val code: Int) : Exception("Server error: $code")
 
 private sealed class LocationError {
     class Server(val code: Int) : LocationError()

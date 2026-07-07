@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.filled.Title
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
@@ -56,6 +57,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -68,6 +70,7 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -83,6 +86,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -98,16 +102,23 @@ import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.InfoColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.location.LocationApi
+import io.github.benji377.timety.util.location.LocationServerException
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -487,6 +498,34 @@ fun TaskDetailScreen(
                     }
                 )
 
+                // The location search and the place details both need the network; the app
+                // is offline-first, so a missing connection is surfaced as a small inline
+                // label instead of a dialog.
+                val isOnline = LocationApi.isOnline(LocalContext.current)
+                if (!isOnline && (isEditing || location.isNotBlank())) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = AppTheme.spaceSmall)
+                    ) {
+                        Icon(
+                            Icons.Outlined.CloudOff,
+                            contentDescription = null,
+                            tint = WarningColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                        Text(
+                            stringResource(R.string.taskDetailsLocationOffline),
+                            fontSize = AppTheme.fsBodySmall,
+                            color = WarningColor
+                        )
+                    }
+                }
+
+                if (!isEditing && location.isNotBlank() && isOnline) {
+                    PlaceDetailsSection(location = location)
+                }
+
                 if (showLocationPicker) {
                     Dialog(
                         onDismissRequest = { showLocationPicker = false },
@@ -495,6 +534,7 @@ fun TaskDetailScreen(
                         )
                     ) {
                         LocationPickerScreen(
+                            initialQuery = location,
                             onLocationSelected = { selectedLocation ->
                                 location = selectedLocation
                                 showLocationPicker = false
@@ -1008,6 +1048,127 @@ private fun CategoryPicker(
                     }
                 }
             )
+        }
+    }
+}
+
+/**
+ * Expandable place details for the saved location, resolved on demand through the
+ * configured location API. Only composed while online: the caller shows an inline
+ * offline label instead when there is no connection.
+ */
+@Composable
+private fun PlaceDetailsSection(
+    location: String,
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+) {
+    val locationApiEndpoint by settingsViewModel.locationApiEndpoint.collectAsState()
+    var place by remember(location) { mutableStateOf<JSONObject?>(null) }
+    var isLoading by remember(location) { mutableStateOf(false) }
+    var serverErrorCode by remember(location) { mutableStateOf<Int?>(null) }
+    var networkError by remember(location) { mutableStateOf(false) }
+    var fetched by remember(location) { mutableStateOf(false) }
+
+    StyledExpansionTile(
+        title = stringResource(R.string.taskDetailsLocationDetails),
+        titleColor = TaskColor,
+    ) {
+        // The tile content only composes while expanded, so the lookup is lazy and
+        // runs once per location.
+        LaunchedEffect(location) {
+            if (fetched) return@LaunchedEffect
+            isLoading = true
+            try {
+                place = LocationApi.search(locationApiEndpoint, location, limit = 1).firstOrNull()
+                fetched = true
+            } catch (e: CancellationException) {
+                // Collapsing the tile mid-load cancels this effect; not a network failure.
+                throw e
+            } catch (e: LocationServerException) {
+                serverErrorCode = e.code
+                fetched = true
+            } catch (e: Exception) {
+                networkError = true
+                fetched = true
+            } finally {
+                isLoading = false
+            }
+        }
+
+        Column(modifier = Modifier.padding(horizontal = AppTheme.spaceLarge)) {
+            val errorCode = serverErrorCode
+            when {
+                isLoading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+
+                errorCode != null -> Text(
+                    stringResource(R.string.locationPickerServerError, errorCode),
+                    fontSize = AppTheme.fsBodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+
+                networkError -> Text(
+                    stringResource(R.string.locationPickerNetworkError),
+                    fontSize = AppTheme.fsBodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+
+                place == null -> Text(
+                    stringResource(R.string.taskDetailsLocationNoInfo),
+                    fontSize = AppTheme.fsBodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                else -> place?.let { feature ->
+                    val props = feature.optJSONObject("properties") ?: JSONObject()
+                    val name = LocationApi.primaryName(props)
+                        .ifEmpty { stringResource(R.string.locationPickerUnknown) }
+                    val details = LocationApi.detailsString(props)
+                    val country = props.optString("country", "")
+                    val coordinates = feature.optJSONObject("geometry")
+                        ?.optJSONArray("coordinates")
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Outlined.LocationOn,
+                            contentDescription = null,
+                            tint = TaskColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                        Text(name, fontWeight = FontWeight.Bold)
+                    }
+                    if (details.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                        Text(
+                            details,
+                            fontSize = AppTheme.fsBodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (country.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                        Text(
+                            country,
+                            fontSize = AppTheme.fsBodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (coordinates != null && coordinates.length() >= 2) {
+                        Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                        Text(
+                            // GeoJSON stores [longitude, latitude]; display as "lat, lon".
+                            String.format(
+                                java.util.Locale.ROOT,
+                                "%.5f, %.5f",
+                                coordinates.optDouble(1),
+                                coordinates.optDouble(0)
+                            ),
+                            fontSize = AppTheme.fsBodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
     }
 }

@@ -282,7 +282,9 @@ class FocusViewModel(
 
     fun completeSessionAndLog() {
         val modeId = activeSessionModeId ?: allModes.value.getOrNull(currentModeIndex.value)?.id
-        if (sessionAccumulatedFocusSeconds > 0 && modeId != null) {
+        // Sessions under a minute round down to "0m" everywhere in the UI and only add noise
+        // to the stats and calendar, so they are dropped instead of logged.
+        if (sessionAccumulatedFocusSeconds >= 60 && modeId != null) {
             val target = selectedTarget.value
             val sessionToLog = FocusSessionEntity(
                 id = currentSessionId,
