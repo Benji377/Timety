@@ -397,10 +397,12 @@
     <string name="wrapUpStatStreakLabel">Serie attiva</string>
     <string name="wrapUpStatStreakValue">%1$d giorno</string>
     <string name="wrapUpStatTasksLabel">Attività completate</string>
+    <string name="categoryAddLabel">Add Category</string>
+    <string name="categoryColorLabel">Color</string>
     <string name="categoryDeleteContent">Sei sicuro di voler eliminare \"%1$s\"? Le attività con questa categoria rimarranno senza categoria.</string>
     <string name="categoryDeleteTitle">Eliminare la categoria?</string>
     <string name="categoryEditTitle">Modifica categoria</string>
-    <string name="categoryEmpty">Ancora nessuna categoria. Creane una aggiungendo un\'attività con una categoria.</string>
+    <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
     <string name="categoryNameLabel">Nome della categoria</string>
     <string name="categoryTaskCountZero">Nessuna attività</string>
     <plurals name="categoryTaskCount">
