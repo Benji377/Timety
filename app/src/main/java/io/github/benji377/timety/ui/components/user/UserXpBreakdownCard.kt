@@ -156,6 +156,7 @@ fun UserXpBreakdownCard(
                     .clip(RoundedCornerShape(999.dp)),
                 color = TaskColor,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                drawStopIndicator = {},
             )
 
             Spacer(Modifier.height(18.dp))
