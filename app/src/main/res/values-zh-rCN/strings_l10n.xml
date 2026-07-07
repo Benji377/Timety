@@ -20,8 +20,8 @@
     <string name="commonLabelConfirm">Confirm</string>
     <string name="commonLabelDelete">Delete</string>
     <string name="commonLabelRemove">Remove</string>
-    <string name="commonLabelSave">Save</string>
-    <string name="commonLabelShare">Share</string>
+    <string name="commonLabelSave">保存</string>
+    <string name="commonLabelShare">分享</string>
     <string name="commonLabelClose">Close</string>
     <string name="commonBack">Back</string>
     <string name="commonClear">Clear</string>
@@ -396,10 +396,12 @@
     <string name="wrapUpStatStreakLabel">Active Streak</string>
     <string name="wrapUpStatStreakValue">%1$d Day</string>
     <string name="wrapUpStatTasksLabel">Tasks Completed</string>
+    <string name="categoryAddLabel">Add Category</string>
+    <string name="categoryColorLabel">Color</string>
     <string name="categoryDeleteContent">Are you sure you want to delete \"%1$s\"? Tasks with this category will be uncategorized.</string>
     <string name="categoryDeleteTitle">Delete Category?</string>
     <string name="categoryEditTitle">Edit Category</string>
-    <string name="categoryEmpty">No categories yet. Create one by adding a task with a category.</string>
+    <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
     <string name="categoryNameLabel">Category Name</string>
     <string name="categoryTaskCountZero">No tasks</string>
     <plurals name="categoryTaskCount">
