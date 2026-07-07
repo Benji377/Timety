@@ -401,10 +401,12 @@
     <string name="wrapUpStatStreakLabel">Sëria ativa</string>
     <string name="wrapUpStatStreakValue">%1$d Di</string>
     <string name="wrapUpStatTasksLabel">Ncëries finedes</string>
+    <string name="categoryAddLabel">Add Category</string>
+    <string name="categoryColorLabel">Color</string>
     <string name="categoryDeleteContent">T\'es segur de ulëi scancelé \"%1$s\"? La ncëries cun chësta categoria restarà zënza.</string>
     <string name="categoryDeleteTitle">Scancelé la categoria?</string>
     <string name="categoryEditTitle">Mudé categoria</string>
-    <string name="categoryEmpty">Niamò deguna categoria. Crieila njuntan na ncëria cun na categoria.</string>
+    <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
     <string name="categoryNameLabel">Inuem dla categoria</string>
     <string name="categoryTaskCountZero">Deguna ncëries</string>
     <plurals name="categoryTaskCount">
