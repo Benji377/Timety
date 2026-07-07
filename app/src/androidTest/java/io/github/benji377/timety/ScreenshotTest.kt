@@ -121,6 +121,8 @@ class ScreenshotTest {
         takeScreenshot("04_habits_screen")
 
         // Habit detail (first habit of the morning stack)
+        composeTestRule.onNodeWithText("MORNING ROUTINE").performClick()
+        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("Drink Water").performClick()
         composeTestRule.waitForIdle()
         takeScreenshot("10_habit_detail_screen")
