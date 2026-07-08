@@ -105,7 +105,7 @@
     <string name="focusStatsSectionDistractionsEmpty">Nessuna distrazione registrata per questo giorno</string>
     <string name="focusStatsSectionDistractionsSubtitle">Giorno selezionato, distrazioni più recenti per prime</string>
     <string name="focusStatsSectionDistractionsTitle">Distrazioni</string>
-    <string name="focusStatsSectionSessionsEmpty">No focus sessions for this day</string>
+    <string name="focusStatsSectionSessionsEmpty">Nessuna sessione di focus per questo giorno</string>
     <string name="focusStatsSectionSessionsSubtitle">Ogni sessione mostra il target esatto e la modalità di focus</string>
     <string name="focusStatsSectionSessionsTitle">Sessioni di focus</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Sessioni con etichette, collegate ad attività e ad abitudini</string>
@@ -197,9 +197,9 @@
     <string name="taskDetailsLabelEffort">Sforzo</string>
     <string name="taskDetailsLabelLocation">Luogo</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
-    <string name="taskDetailsLocationDetails">Place Details</string>
-    <string name="taskDetailsLocationNoInfo">No place information found for this location</string>
-    <string name="taskDetailsLocationOffline">No internet connection – location search and place details are unavailable</string>
+    <string name="taskDetailsLocationDetails">Dettagli del luogo</string>
+    <string name="taskDetailsLocationNoInfo">Nessuna informazione sul luogo trovata per questa posizione</string>
+    <string name="taskDetailsLocationOffline">Nessuna connessione a internet: la ricerca della posizione e i dettagli del luogo non sono disponibili</string>
     <string name="taskDetailsLabelReminderSet">Imposta promemoria</string>
     <string name="taskDetailsLabelReminderTooEarly">Il promemoria personalizzato deve essere precedente alla data di scadenza</string>
     <string name="taskDetailsLabelSubtaskHint">Aggiungi sotto-attività…</string>
@@ -397,12 +397,12 @@
     <string name="wrapUpStatStreakLabel">Serie attiva</string>
     <string name="wrapUpStatStreakValue">%1$d giorno</string>
     <string name="wrapUpStatTasksLabel">Attività completate</string>
-    <string name="categoryAddLabel">Add Category</string>
-    <string name="categoryColorLabel">Color</string>
+    <string name="categoryAddLabel">Aggiungi Categoria</string>
+    <string name="categoryColorLabel">Colore</string>
     <string name="categoryDeleteContent">Sei sicuro di voler eliminare \"%1$s\"? Le attività con questa categoria rimarranno senza categoria.</string>
     <string name="categoryDeleteTitle">Eliminare la categoria?</string>
     <string name="categoryEditTitle">Modifica categoria</string>
-    <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
+    <string name="categoryEmpty">Ancora nessuna categoria. Premi il pulsante qui sopra per aggiungerne una.</string>
     <string name="categoryNameLabel">Nome della categoria</string>
     <string name="categoryTaskCountZero">Nessuna attività</string>
     <plurals name="categoryTaskCount">
@@ -415,8 +415,8 @@
         <item quantity="other">%d tags</item>
     </plurals>
     <plurals name="settingsCategoriesCount">
-        <item quantity="one">%d category</item>
-        <item quantity="other">%d categories</item>
+        <item quantity="one">%d categoria</item>
+        <item quantity="other">%d categorie</item>
     </plurals>
     <string name="dialogTimeMachineEndTime">Orario di fine</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">L\'orario di fine deve essere successivo a quello di inizio</string>
