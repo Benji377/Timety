@@ -84,7 +84,7 @@ Choose your preferred way to stay productive.
 3. If prompted, enable "Install from Unknown Sources" in your settings.
 4. Follow the on-screen instructions to finish.
 
-## 💻 Installation and Setup
+## Installation and Setup
 
 ### Prerequisites
 *   Android Studio
