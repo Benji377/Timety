@@ -418,6 +418,22 @@
         <item quantity="other">%d ncëries</item>
     </plurals>
     <string name="categoryTitle">Categuries</string>
+    <plurals name="settingsTagsCount">
+        <item quantity="zero">%d tags</item>
+        <item quantity="one">%d tag</item>
+        <item quantity="two">%d tags</item>
+        <item quantity="few">%d tags</item>
+        <item quantity="many">%d tags</item>
+        <item quantity="other">%d tags</item>
+    </plurals>
+    <plurals name="settingsCategoriesCount">
+        <item quantity="zero">%d categories</item>
+        <item quantity="one">%d category</item>
+        <item quantity="two">%d categories</item>
+        <item quantity="few">%d categories</item>
+        <item quantity="many">%d categories</item>
+        <item quantity="other">%d categories</item>
+    </plurals>
     <string name="dialogTimeMachineEndTime">Ora de fin</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">L\'ora de fin muessa vester do l\'ora de taché</string>
     <string name="dialogTimeMachineMode">Modalità de Focus</string>
