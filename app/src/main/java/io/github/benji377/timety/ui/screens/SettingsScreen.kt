@@ -514,8 +514,10 @@ fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.settingsLabelTags)) },
                     supportingContent = {
                         Text(
-                            stringResource(
-                                R.string.settingsLabelTagsSubtitle,
+                            quantityString(
+                                R.plurals.settingsTagsCount,
+                                focusTags.size,
+                                0,
                                 focusTags.size
                             )
                         )
@@ -529,8 +531,10 @@ fun SettingsScreen(
                     headlineContent = { Text(stringResource(R.string.settingsLabelCategories)) },
                     supportingContent = {
                         Text(
-                            stringResource(
-                                R.string.settingsLabelCategoriesSubtitle,
+                            quantityString(
+                                R.plurals.settingsCategoriesCount,
+                                categoryCount,
+                                0,
                                 categoryCount
                             )
                         )

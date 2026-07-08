@@ -410,6 +410,14 @@
         <item quantity="other">%d tasks</item>
     </plurals>
     <string name="categoryTitle">Categories</string>
+    <plurals name="settingsTagsCount">
+        <item quantity="one">%d tag</item>
+        <item quantity="other">%d tags</item>
+    </plurals>
+    <plurals name="settingsCategoriesCount">
+        <item quantity="one">%d category</item>
+        <item quantity="other">%d categories</item>
+    </plurals>
     <string name="dialogTimeMachineEndTime">End Time</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">End time must be after start time</string>
     <string name="dialogTimeMachineMode">Focus Mode</string>
