@@ -25,6 +25,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
+/** A destination in the bottom navigation bar, with its icons and section accent color. */
 sealed class BottomNavItem(
     val route: String,
     @param:StringRes val titleRes: Int,
@@ -89,6 +90,7 @@ sealed class BottomNavItem(
     )
 }
 
+/** Items shown in the bottom navigation bar, in display order. */
 val BottomNavItems = listOf(
     BottomNavItem.Home,
     BottomNavItem.Focus,

@@ -76,6 +76,10 @@ import java.time.ZoneId
 import kotlin.math.roundToInt
 
 
+/**
+ * Habit statistics: weekly summary cards, a daily completion chart, a time-of-day breakdown, and
+ * per-habit streaks. Streaks are computed all-time; the other sections follow the selected week.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitStatsScreen(

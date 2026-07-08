@@ -45,6 +45,7 @@ import java.time.LocalDate
 import java.util.Locale
 
 
+/** A single flattened row in the widget's habit list: a stack header/footer or a habit entry. */
 private sealed interface HabitWidgetRow {
     data class StackHeader(val name: String, val completed: Int, val total: Int) : HabitWidgetRow
     data class Habit(
@@ -59,6 +60,7 @@ private sealed interface HabitWidgetRow {
 }
 
 
+/** Home-screen widget showing today's due habits, including stacked-habit lock state. */
 class HabitWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appContainer = (context.applicationContext as TimetyApplication).container
@@ -92,6 +94,8 @@ class HabitWidget : GlanceAppWidget() {
 
         val rows = buildList {
             for ((stackName, stackHabitsList) in grouped) {
+                // Incomplete habits sort before completed ones within a stack, so completed items
+                // sink to the bottom as they're checked off; ties break on the stored stack order.
                 val stackHabits = stackHabitsList.sortedWith(
                     compareBy<HabitWithCompletions> { completionStatus[it.habit.id] == true }
                         .thenBy { it.habit.stackOrder ?: 99 }

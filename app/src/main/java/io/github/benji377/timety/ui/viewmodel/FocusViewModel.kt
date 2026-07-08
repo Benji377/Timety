@@ -40,11 +40,16 @@ import java.time.ZoneId
 import java.util.UUID
 
 
+/** A logged distraction paired with the focus session it was recorded against. */
 data class DistractionWithSession(
     val distraction: DistractionEntity,
     val session: FocusSessionEntity
 )
 
+/**
+ * Drives focus mode selection, active session/phase navigation, and session logging, including
+ * XP awards and auto-completion of the linked task or habit when a focus phase finishes.
+ */
 class FocusViewModel(
     application: android.app.Application,
     private val focusRepository: FocusRepository,
@@ -53,7 +58,7 @@ class FocusViewModel(
     private val settingsRepository: SettingsRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
 
-    // --- MODES / SESSIONS / TAGS (existing) ---
+    // Modes, sessions, and tags.
     val allModes: StateFlow<List<FocusModeEntity>> = focusRepository.allModes
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -78,7 +83,7 @@ class FocusViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // --- ACTIVE MODE / PHASE NAVIGATION ---
+    // Active mode / phase navigation state.
     private val _currentModeIndex = MutableStateFlow(0)
     val currentModeIndex = _currentModeIndex.asStateFlow()
     fun setCurrentModeIndex(index: Int) {
@@ -106,7 +111,7 @@ class FocusViewModel(
     private val _autoCompleteTaskEvent = MutableSharedFlow<String>()
     val autoCompleteTaskEvent = _autoCompleteTaskEvent.asSharedFlow()
 
-    // --- SESSION TARGET (tag / task / habit) ---
+    // Session target: tag, task, or habit.
     private val _selectedTarget = MutableStateFlow<FocusTargetSelection?>(null)
     val selectedTarget: StateFlow<FocusTargetSelection?> = _selectedTarget.asStateFlow()
 
@@ -133,14 +138,11 @@ class FocusViewModel(
     }
 
     init {
-        // Seed the default tag + the three built-in system modes on first run, and default the
-        // selected target to the first tag. Mirrors `FocusProvider.loadFocusData`.
-        // NOTE (viewmodel addition - see report): nothing seeded these before; without this the
-        // app launched with zero focus modes and no usable target. This collects the *raw*
-        // repository flows (not the `stateIn`-wrapped `allTags`/`allModes` above) so the check
-        // only sees genuine Room emissions - `stateIn`'s synthetic `emptyList()` initial value
-        // would otherwise look like "no tags yet" on every launch and stomp a user-renamed
-        // default tag.
+        // Seed the default tag and the three built-in system modes on first run, and default the
+        // selected target to the first tag. This collects the *raw* repository flows (not the
+        // `stateIn`-wrapped `allTags`/`allModes` above) so the check only sees genuine Room
+        // emissions - `stateIn`'s synthetic `emptyList()` initial value would otherwise look like
+        // "no tags yet" on every launch and stomp a user-renamed default tag.
         viewModelScope.launch {
             focusRepository.allTags.collect { tags ->
                 if (tags.isEmpty()) {
@@ -171,7 +173,7 @@ class FocusViewModel(
                     }
                     sessionAccumulatedFocusSeconds += durationSeconds
 
-                    // --- Auto-completion logic ---
+                    // Auto-completion logic.
                     val autoCompleteEnabled = settingsRepository.autoCompleteFocusFlow.first()
                     if (autoCompleteEnabled && target != null) {
                         when (target.type) {
@@ -454,7 +456,7 @@ class FocusViewModel(
         }
     }
 
-    // --- TAGS ---
+    // Tags.
     fun createTag(name: String, colorValue: Int) {
         viewModelScope.launch {
             val tag = FocusTagEntity(
@@ -482,8 +484,7 @@ class FocusViewModel(
         }
     }
 
-    // --- STATS HELPERS ---
-
+    // Stats helpers.
 
     fun getMinutesFocusedOnDay(day: LocalDate, zone: ZoneId = ZoneId.systemDefault()): Int {
         val totalSeconds = allSessions.value
@@ -496,6 +497,7 @@ class FocusViewModel(
         getMinutesFocusedOnDay(LocalDate.now(), zone)
 
 
+    /** Logs a manually backfilled session for a time range that already elapsed, and awards its XP. */
     fun logPastSession(
         mode: FocusModeEntity,
         startTime: Instant,

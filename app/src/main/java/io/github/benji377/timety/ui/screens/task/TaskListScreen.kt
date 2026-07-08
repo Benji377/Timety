@@ -60,6 +60,10 @@ import java.time.ZoneId
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/**
+ * Shows all tasks grouped into overdue, due-today, upcoming, and completed sections, with search,
+ * category filtering, and sorting controls.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
@@ -111,7 +115,7 @@ fun TaskListScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // --- SEARCH & SORT HEADER ---
+            // Search field and sort controls.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,7 +167,7 @@ fun TaskListScreen(
                 }
             }
 
-            // --- CATEGORY PILLS ---
+            // Category filter pills.
             if (allCategories.isNotEmpty()) {
                 LazyRow(
                     modifier = Modifier
@@ -196,7 +200,7 @@ fun TaskListScreen(
                 }
             }
 
-            // --- TASKS SCROLLABLE LIST ---
+            // Scrollable task list.
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -217,7 +221,7 @@ fun TaskListScreen(
                         )
                     }
                 } else {
-                    // Grouping Logic (mirrors Flutter: completed -> overdue -> due today -> todo)
+                    // Group tasks into overdue, due-today, upcoming, and completed buckets.
                     val zone = ZoneId.systemDefault()
                     val now = Instant.now()
                     val today = now.atZone(zone).toLocalDate()
@@ -243,9 +247,8 @@ fun TaskListScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
-                        // Mirrors Flutter's ExpansionSection, which renders nothing when its
-                        // task list is empty; the shared Kotlin ExpansionSection doesn't take a
-                        // list so callers guard emptiness themselves.
+                        // ExpansionSection doesn't accept a list directly, so each section is guarded
+                        // against being empty before it's rendered.
                         if (overdue.isNotEmpty()) {
                             item {
                                 ExpansionSection(

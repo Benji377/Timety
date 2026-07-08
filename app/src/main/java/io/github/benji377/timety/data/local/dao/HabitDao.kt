@@ -10,6 +10,7 @@ import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import kotlinx.coroutines.flow.Flow
 
+/** Data access object for habits and their completion records. */
 @Dao
 interface HabitDao {
     @Query("SELECT * FROM habits ORDER BY createdAt DESC")

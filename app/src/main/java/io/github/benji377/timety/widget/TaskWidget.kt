@@ -44,11 +44,13 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 
+/** Home-screen widget listing open tasks due today or earlier, sorted by priority then due date. */
 class TaskWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appContainer = (context.applicationContext as TimetyApplication).container
         val taskRepository = appContainer.taskRepository
 
+        // Midnight at the start of tomorrow, i.e. the exclusive cutoff for "due today or earlier".
         val endOfToday = Instant.now().atZone(ZoneId.systemDefault())
             .truncatedTo(ChronoUnit.DAYS)
             .plusDays(1)

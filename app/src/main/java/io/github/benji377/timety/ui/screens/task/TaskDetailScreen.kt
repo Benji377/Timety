@@ -137,6 +137,11 @@ import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/**
+ * Shows a single task for viewing, creating, or editing: title, category, description, priority,
+ * effort size, due date and reminders, location, and a subtask checklist. Pass a null [taskId] to
+ * create a new task; an existing one opens in read-only mode with an edit toggle.
+ */
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalLayoutApi::class
@@ -156,7 +161,7 @@ fun TaskDetailScreen(
 
     var isEditing by remember(taskId) { mutableStateOf(isNewTask) }
 
-    // --- Form state (mirrors Flutter's controllers/state variables) ---
+    // Form state.
     var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
     var description by remember(existingTask) { mutableStateOf(existingTask?.description ?: "") }
     var location by remember(existingTask) { mutableStateOf(existingTask?.location ?: "") }
@@ -193,7 +198,7 @@ fun TaskDetailScreen(
     val reminderNoDueMsg = stringResource(R.string.taskDetailsSnackbarReminderNoDue)
     val reminderTooEarlyMsg = stringResource(R.string.taskDetailsLabelReminderTooEarly)
 
-    // --- Date + time picker flow (mirrors AppDatePickers.pickDateTime: date, then time) ---
+    // Date and time picker flow: a date is picked first, then a time.
     var pickerTarget by remember { mutableStateOf<PickerTarget?>(null) }
     var pickerStep by remember { mutableIntStateOf(0) } // 0 = none, 1 = date, 2 = time
     var pickedLocalDate by remember { mutableStateOf<LocalDate?>(null) }
@@ -311,7 +316,7 @@ fun TaskDetailScreen(
                 .padding(paddingValues)
                 .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall)
         ) {
-            // --- SECTION: THE BASICS ---
+            // The basics: title, category, description.
             item {
                 SectionHeader(
                     stringResource(R.string.taskDetailsSectionInfo),
@@ -355,7 +360,7 @@ fun TaskDetailScreen(
                 )
             }
 
-            // --- SECTION: PRIORITY & SIZE ---
+            // Priority and effort size.
             item {
                 SectionHeader(
                     stringResource(R.string.taskDetailsSectionPriorityAndEffort),
@@ -400,7 +405,7 @@ fun TaskDetailScreen(
                 )
             }
 
-            // --- SECTION: TIME ---
+            // Scheduling: due date and reminders.
             item {
                 SectionHeader(
                     stringResource(R.string.taskDetailsSectionScheduling),
@@ -486,7 +491,7 @@ fun TaskDetailScreen(
                 }
             }
 
-            // --- SECTION: LOCATION ---
+            // Location.
             item {
                 SectionHeader(
                     stringResource(R.string.taskDetailsSectionLocation),
@@ -557,7 +562,7 @@ fun TaskDetailScreen(
                 }
             }
 
-            // --- SUBTASKS ---
+            // Checklist / subtasks.
             item {
                 SectionHeader(
                     stringResource(R.string.taskDetailsSectionChecklist),
@@ -669,7 +674,7 @@ fun TaskDetailScreen(
         }
     }
 
-    // --- Delete confirmation ---
+    // Delete confirmation dialog.
     ConfirmationDialog(
         visible = showDeleteConfirm,
         title = stringResource(R.string.taskDeleteTitle),
@@ -684,10 +689,9 @@ fun TaskDetailScreen(
         onDismiss = { showDeleteConfirm = false }
     )
 
-    // --- Date + time picker dialogs (mirrors AppDatePickers.pickDateTime) ---
+    // Date and time picker dialogs.
     if (pickerStep == 1) {
-        // Mirror AppDatePickers.pickDateTime constraints: due dates can't be before today; a custom
-        // reminder can't be after the task's due date.
+        // Due dates can't be before today; a custom reminder can't be after the task's due date.
         val zone = ZoneId.systemDefault()
         val todayUtcMillis =
             LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -820,6 +824,10 @@ private fun SectionHeader(title: String, icon: ImageVector) {
 }
 
 
+/**
+ * Segmented selector where the selected segment expands to show its label; the rest stay
+ * icon-only. Disabled (non-editing) segments render dimmed and ignore taps.
+ */
 @Composable
 private fun <T> AccordionSelector(
     values: List<T>,
@@ -1108,7 +1116,7 @@ private fun PlaceDetailsSection(
             } catch (e: LocationServerException) {
                 serverErrorCode = e.code
                 fetched = true
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 networkError = true
                 fetched = true
             } finally {

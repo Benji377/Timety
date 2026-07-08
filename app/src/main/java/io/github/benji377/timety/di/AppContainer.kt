@@ -11,6 +11,10 @@ import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.data.repository.dataStore
 import io.github.benji377.timety.services.BackupService
 
+/**
+ * Provides access to the app's repositories and services, constructed once and held by the
+ * [Application][io.github.benji377.timety.TimetyApplication].
+ */
 interface AppContainer {
     val taskRepository: TaskRepository
     val habitRepository: HabitRepository
@@ -20,6 +24,7 @@ interface AppContainer {
     val backupService: BackupService
 }
 
+/** Default [AppContainer] that lazily builds the Room database and its dependent repositories. */
 class DefaultAppContainer(private val context: Context) : AppContainer {
     private val database: TimetyDatabase by lazy {
         Room.databaseBuilder(

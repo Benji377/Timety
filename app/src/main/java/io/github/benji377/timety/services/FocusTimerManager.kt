@@ -19,6 +19,7 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 
 
+/** Snapshot of the focus timer's current state, exposed to the UI via [FocusTimerManager.timerState]. */
 data class TimerState(
     val isRunning: Boolean = false,
     val isPaused: Boolean = false,
@@ -50,6 +51,10 @@ data class TimerState(
 data class TimerFlags(val isRunning: Boolean = false, val isPaused: Boolean = false)
 
 
+/**
+ * Owns the focus/stopwatch timer state machine. Ticks once per second while running and exposes
+ * its state as a [StateFlow] consumed by [FocusTimerService] and the UI.
+ */
 object FocusTimerManager {
     private val _timerState = MutableStateFlow(TimerState())
     val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
@@ -71,6 +76,7 @@ object FocusTimerManager {
         kotlinx.coroutines.flow.MutableSharedFlow<Pair<Boolean, Int>>(extraBufferCapacity = 1)
 
 
+    /** Emitted by [stopEvent] when a session ends, carrying the elapsed time to bank. */
     data class StopInfo(
         val elapsedFocusSeconds: Int,
         val wasRestPhase: Boolean,
@@ -87,6 +93,7 @@ object FocusTimerManager {
     private var accumulatedElapsed: Int = 0
 
 
+    /** Configures the timer for a new phase without starting it; call [startTimer] to begin ticking. */
     fun setMode(
         name: String,
         totalPhaseSeconds: Int,
@@ -116,6 +123,7 @@ object FocusTimerManager {
         }
     }
 
+    /** Starts or resumes ticking from the current phase state. */
     fun startTimer() {
         if (_timerState.value.isRunning) return
         // Must be read before the state update below clears the paused flag, otherwise the
@@ -148,17 +156,19 @@ object FocusTimerManager {
         }
     }
 
+    /** Pauses ticking, preserving the elapsed time so [startTimer] can resume from it. */
     fun pauseTimer() {
         job?.cancel()
         _timerState.update { it.copy(isRunning = false, isPaused = true) }
     }
 
+    /** Stops the timer and, if a session was active, emits its banked elapsed time via [stopEvent]. */
     fun stopTimer(discard: Boolean = false) {
         job?.cancel()
         val state = _timerState.value
         val wasActive = state.isRunning || state.isPaused || state.isAwaitingContinue
         val elapsed = when {
-            state.isAwaitingContinue -> 0 // already banked via phaseCompleteEvent
+            state.isAwaitingContinue -> 0 // Already banked via phaseCompleteEvent.
             state.isStopwatch -> state.elapsedSeconds
             else -> (state.totalPhaseSeconds - state.secondsRemaining).coerceAtLeast(0)
         }

@@ -61,6 +61,12 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 
+/**
+ * Card row for a single task: checkbox, title/description, optional subtask progress and due date,
+ * and a size/priority trailing indicator. Border color reflects completion, overdue, and due-today
+ * state. When [enableDismissible] and [onDelete] are set, swiping end-to-start asks for confirmation
+ * before deleting.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListTile(
@@ -100,7 +106,7 @@ fun TaskListTile(
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         ) {
             // Custom row instead of ListItem: M3 ListItem top-aligns leading/trailing
-            // content on three-line items, whereas Flutter's ListTile keeps them
+            // content on three-line items, whereas the custom ListTile keeps them
             // vertically centered.
             Row(
                 modifier = Modifier
@@ -176,9 +182,6 @@ fun TaskListTile(
                                 tint = borderColor,
                             )
                             Spacer(Modifier.width(4.dp))
-                            // NOTE: Flutter uses settings.getFormattedDateTime (24h flag + locale
-                            // aware). No centralized Kotlin equivalent exists yet, so this falls
-                            // back to a locale-aware medium date/time formatter.
                             Text(
                                 text = formatDueDateTime(
                                     task.dueDate,

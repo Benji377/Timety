@@ -26,6 +26,10 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 
+/**
+ * Foreground service that keeps a focus/stopwatch session alive and visible while [FocusTimerManager]
+ * ticks in the background, rendering its state as an ongoing notification and arming the phase-end alarm.
+ */
 class FocusTimerService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -36,10 +40,9 @@ class FocusTimerService : Service() {
         super.onCreate()
         NotificationService(this).ensureChannels()
 
-        // Only re-render/re-schedule on meaningful state transitions (mirrors Flutter, which only
-        // calls `_updateNotification` at transition points, never once per tick) - re-notifying and
-        // re-arming the exact alarm every second was wasteful and unnecessary since the chronometer
-        // counts down on its own once set.
+        // Only re-render/re-schedule on meaningful state transitions - re-notifying and re-arming the
+        // exact alarm every second would be wasteful and unnecessary since the chronometer counts down
+        // on its own once set.
         FocusTimerManager.timerState
             .distinctUntilChanged { old, new ->
                 old.isRunning == new.isRunning &&
@@ -100,12 +103,11 @@ class FocusTimerService : Service() {
     private fun updateNotification(state: TimerState) {
         try {
             notificationManager.notify(NOTIFICATION_ID, buildNotification(state))
-        } catch (e: SecurityException) {
+        } catch (_: SecurityException) {
             // Notification permission not granted; the foreground service keeps running silently.
         }
 
-        // A single exact alarm per phase, targeting the phase's absolute end time - mirrors
-        // `showCustomNotification`'s `targetTimeMs`-based scheduling (not re-armed every tick).
+        // A single exact alarm per phase, targeting the phase's absolute end time; not re-armed every tick.
         if (state.isRunning && !state.isPaused && !state.isStopwatch && state.secondsRemaining > 0) {
             scheduleAlarm(state.secondsRemaining)
         }
@@ -147,8 +149,7 @@ class FocusTimerService : Service() {
 
     private fun buildNotification(state: TimerState): Notification {
         // "Static" rendering (paused readout, frozen accent) covers both a real pause and the
-        // "ready to continue" gap between phases - mirrors `_updateNotification(asPaused: true)`
-        // being called from both `pauseSession()` and the natural-completion path.
+        // "ready to continue" gap between phases.
         val isStatic = state.isPaused || state.isAwaitingContinue
 
         val title = when {
@@ -213,11 +214,10 @@ class FocusTimerService : Service() {
             .setShowWhen(false)
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
-        // Kotlin-only enhancement (no Flutter equivalent): interactive actions. The pause/resume
-        // action is omitted while awaiting continue - resuming there needs the next phase's
-        // config, which only `FocusScreen`/`FocusViewModel` know, so only "Stop" is offered.
-        // Session bookkeeping for Stop happens app-side via [FocusTimerManager.stopEvent], so the
-        // action stays correct while the app is backgrounded.
+        // The pause/resume action is omitted while awaiting continue - resuming there needs the next
+        // phase's config, which only the focus screen and its view model know, so only "Stop" is
+        // offered. Session bookkeeping for Stop happens app-side via [FocusTimerManager.stopEvent], so
+        // the action stays correct while the app is backgrounded.
         if (!state.isAwaitingContinue) {
             val pauseResumeIntent = Intent(this, FocusTimerService::class.java).apply {
                 action = if (state.isRunning) ACTION_PAUSE else ACTION_START

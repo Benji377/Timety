@@ -52,6 +52,11 @@ import java.time.LocalDate
 import java.time.format.TextStyle as JavaTextStyle
 
 
+/**
+ * Card showing the last 7 days as a scrollable strip of [DayTile]s, each marked with which activity
+ * types (task, habit, focus) occurred and whether the day is part of the current streak, plus a legend
+ * and a status line summarizing streak progress.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun UserStreakTimelineCard(
@@ -192,6 +197,10 @@ private data class StreakDayInfo(
 )
 
 
+/**
+ * Walks backward from today (or yesterday, if today has no activity yet) through consecutive
+ * active days, returning the day keys that make up the still-unbroken current streak.
+ */
 private fun buildCurrentStreakDayKeys(dates: List<LocalDate>): Set<String> {
     val dayKeys = dates.map { AppDateUtils.dayKey(it) }.toSet()
     if (dayKeys.isEmpty()) return emptySet()
@@ -212,6 +221,7 @@ private fun buildCurrentStreakDayKeys(dates: List<LocalDate>): Set<String> {
 }
 
 
+/** Picks a status message: active today, frozen (active yesterday, not yet today), building, or none. */
 @Composable
 private fun streakStatusText(activityDates: List<LocalDate>, currentStreak: Int): String {
     if (activityDates.isEmpty()) return stringResource(R.string.streakStatusNone)

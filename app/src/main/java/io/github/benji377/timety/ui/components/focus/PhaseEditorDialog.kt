@@ -33,6 +33,11 @@ import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/**
+ * Dialog for adding or editing a session phase: its type (focus or rest) and duration in
+ * minutes, capped at [maxNodeMins]. Pass [initialPhase] to edit an existing phase, or null to
+ * create a new one. [onDelete] is only offered when editing.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhaseEditorDialog(

@@ -8,9 +8,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// Flutter's AppTheme does not override the global textTheme (only per-component
-// title styles), so the Material 3 baseline typography is the faithful default.
-// Individual composables set their own font size/weight inline, matching Flutter.
+// Policy: no global text theme overrides beyond titleLarge below. Composables set their own
+// font size and weight inline via AppTheme's typography tokens where they need something other
+// than the Material 3 baseline.
 val TimetyTypography = Typography(
     titleLarge = TextStyle(
         fontWeight = FontWeight.ExtraBold,

@@ -114,6 +114,10 @@ import kotlin.math.roundToInt
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/**
+ * App settings screen: appearance, locale/formatting, focus limits, organization shortcuts,
+ * notifications, backup import/export, and about/support links.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -141,7 +145,7 @@ fun SettingsScreen(
     val backupService = remember {
         (context.applicationContext as TimetyApplication).container.backupService
     }
-    // Import runs in two steps to mirror Flutter: pick file -> confirm overwrite -> restore -> restart dialog.
+    // Import flow: pick a file, confirm the overwrite, restore the backup, then prompt a restart.
     var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
     var showRestartDialog by remember { mutableStateOf(false) }
     var showExportOptions by remember { mutableStateOf(false) }
@@ -188,7 +192,7 @@ fun SettingsScreen(
         "1.0.0"
     }
 
-    // --- DIALOG STATE ---
+    // Dialog state.
 
     var showLocationDialog by remember { mutableStateOf(false) }
     var pendingLocationUrl by remember { mutableStateOf(locationApiEndpoint) }
@@ -197,7 +201,7 @@ fun SettingsScreen(
     var numberDialogSpec by remember { mutableStateOf<NumberDialogSpec?>(null) }
     var timeDialogSpec by remember { mutableStateOf<TimeDialogSpec?>(null) }
 
-    // --- OPTION LABEL MAPS (value -> display, mirrors the Flutter dropdown item lists exactly) ---
+    // Option label maps: each pair is (display label, stored value) for a settings dropdown.
     val themeOptions = listOf(
         stringResource(R.string.settingsLabelThemeLight) to ThemeMode.LIGHT.storageValue,
         stringResource(R.string.settingsLabelThemeDark) to ThemeMode.DARK.storageValue,
@@ -229,7 +233,7 @@ fun SettingsScreen(
     val minutesUnit = stringResource(R.string.settingsDialogUnitMinutes)
     val daysUnit = stringResource(R.string.settingsDialogUnitDays)
 
-    // --- DIALOGS ---
+    // Dialogs.
 
     if (showLocationDialog) {
         AlertDialog(
@@ -342,7 +346,6 @@ fun SettingsScreen(
                 .padding(paddingValues),
             contentPadding = PaddingValues(bottom = 40.dp)
         ) {
-            // --- APPEARANCE ---
             item { SettingsHeader(stringResource(R.string.settingsSectionAppearance)) }
             item {
                 DropdownSettingsItem(
@@ -356,7 +359,6 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
 
-            // --- LOCALIZATION & FORMATTING ---
             item { SettingsHeader(stringResource(R.string.settingsSectionLocaleFormat)) }
             item {
                 DropdownSettingsItem(
@@ -414,7 +416,6 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
 
-            // --- FOCUS & PRODUCTIVITY ---
             item { SettingsHeader(stringResource(R.string.settingsSectionFocusProductivity)) }
             item {
                 ListItem(
@@ -506,7 +507,6 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
 
-            // --- ORGANIZATION ---
             item { SettingsHeader(stringResource(R.string.settingsSectionOrganization)) }
             item {
                 ListItem(
@@ -553,7 +553,6 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
 
-            // --- API & SERVICES ---
             item { SettingsHeader(stringResource(R.string.settingsSectionApi)) }
             item {
                 ListItem(
@@ -577,7 +576,6 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
 
-            // --- NOTIFICATIONS ---
             item { SettingsHeader(stringResource(R.string.settingsSectionNotifications)) }
             item {
                 ListItem(
@@ -632,7 +630,6 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
 
-            // --- DATA & BACKUP ---
             item { SettingsHeader(stringResource(R.string.settingsSectionDataBackup)) }
             item {
                 ListItem(
@@ -655,7 +652,6 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
 
-            // --- SUPPORT & FEEDBACK ---
             item { SettingsHeader(stringResource(R.string.settingsSectionSupport)) }
             item {
                 ListItem(
@@ -706,7 +702,7 @@ fun SettingsScreen(
 
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp)) }
 
-            // --- ABOUT & INFO SECTION ---
+            // About card: app icon, version, and support links.
             item {
                 Card(
                     modifier = Modifier
@@ -816,7 +812,7 @@ fun SettingsScreen(
         }
     }
 
-    // Import confirmation (overwrite warning), mirrors Flutter's showConfirmation before restore.
+    // Import confirmation dialog warning that restoring a backup overwrites existing data.
     ConfirmationDialog(
         visible = pendingImportUri != null,
         title = stringResource(R.string.backupImportConfirmTitle),
@@ -838,7 +834,7 @@ fun SettingsScreen(
         onDismiss = { pendingImportUri = null }
     )
 
-    // Restore-success dialog telling the user to restart the app, mirrors Flutter's success dialog.
+    // Export options dialog: save the backup to device storage or share it elsewhere.
     if (showExportOptions) {
         AlertDialog(
             onDismissRequest = { showExportOptions = false },
@@ -912,6 +908,7 @@ fun SettingsScreen(
         )
     }
 
+    // Prompts the user to restart the app after a successful backup restore.
     if (showRestartDialog) {
         AlertDialog(
             onDismissRequest = { showRestartDialog = false },

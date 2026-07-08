@@ -18,6 +18,7 @@ import java.time.Instant
     ],
     indices = [Index("habitId")]
 )
+/** A single completion record for a habit on a given date. */
 data class HabitCompletionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

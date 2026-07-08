@@ -32,6 +32,10 @@ import org.json.JSONObject
 import java.time.Instant
 
 
+/**
+ * Exports the app database and preferences to a portable JSON payload and restores them back,
+ * including payloads produced by legacy backups.
+ */
 class BackupService(
     private val context: Context,
     private val database: TimetyDatabase,
@@ -80,7 +84,7 @@ class BackupService(
         }
     }
 
-    /** Restores an already-parsed backup payload. Also used by the Flutter data migration. */
+    /** Restores an already-parsed backup payload; also used when importing legacy backups. */
     suspend fun importFromJson(json: JSONObject): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val schemaVersion = json.optInt("schemaVersion", SCHEMA_VERSION)
@@ -93,7 +97,7 @@ class BackupService(
         }
     }
 
-    // --- EXPORT ---
+    // Export.
 
     private suspend fun buildPayload(): JSONObject {
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
@@ -285,7 +289,7 @@ class BackupService(
         }
     }
 
-    // --- RESTORE ---
+    // Restore.
 
     private suspend fun restorePayload(json: JSONObject) {
         json.optJSONObject("preferences")?.let { prefsJson ->
@@ -378,8 +382,8 @@ class BackupService(
                 )
             )
         }
-        // Flutter payloads (and pre-category Kotlin backups) carry no taskCategories
-        // array: fill the table from the category names on the restored tasks.
+        // Legacy backups (and pre-category backups) carry no taskCategories array: fill the
+        // table from the category names on the restored tasks.
         for (name in taskDao.getDistinctTaskCategoryNames()) {
             taskDao.insertCategoryIfAbsent(
                 TaskCategoryEntity(
@@ -516,7 +520,7 @@ class BackupService(
         }
     }
 
-    // --- JSON read helpers (mirror backup_service.dart's `_read*` helpers) ---
+    // JSON read helpers.
 
     private fun readString(json: JSONObject, key: String): String? =
         if (json.has(key) && !json.isNull(key)) json.optString(key) else null
@@ -550,7 +554,7 @@ class BackupService(
 
     private inline fun <reified T : Enum<T>> enumOrDefault(name: String?, default: T): T {
         if (name == null) return default
-        // To support importing from older Flutter versions, try converting camelCase to UPPER_SNAKE_CASE
+        // To support importing from legacy app versions, try converting camelCase to UPPER_SNAKE_CASE.
         val normalizedName = name.replace(Regex("([a-z])([A-Z]+)"), "$1_$2").uppercase()
         return try {
             enumValueOf<T>(normalizedName)

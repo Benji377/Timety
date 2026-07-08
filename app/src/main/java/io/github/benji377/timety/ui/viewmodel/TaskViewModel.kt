@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.UUID
 
+/** Exposes tasks, subtasks, and categories, and applies XP/reminder/widget side effects for changes to them. */
 class TaskViewModel(
     private val application: android.app.Application,
     private val taskRepository: TaskRepository,
@@ -73,13 +74,14 @@ class TaskViewModel(
             updateWidgets()
             val xpAmount = ExperienceEngine.XP_PER_TASK
             if (updatedTask.isCompleted) {
-                userRepository.addXp(xpAmount) // XP per task
+                userRepository.addXp(xpAmount)
             } else {
-                userRepository.addXp(-xpAmount) // Revert XP
+                userRepository.addXp(-xpAmount)
             }
         }
     }
 
+    /** Marks the task complete and awards XP; used by the focus auto-complete flow. */
     fun markTaskCompleted(taskId: String) {
         viewModelScope.launch {
             // Fetched from the DB, not the allTasks snapshot: the flow may not have

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.time.Instant
 
+/** Repository for the user profile, wrapping [UserDao] with IO dispatching and XP bookkeeping. */
 class UserRepository(
     private val userDao: UserDao
 ) {
@@ -16,6 +17,7 @@ class UserRepository(
         userDao.getUserProfileSynchronous()
     }
 
+    /** Creates a default user profile if one doesn't already exist. */
     suspend fun initializeIfNeeded() = withContext(Dispatchers.IO) {
         val current = userDao.getUserProfileSynchronous()
         if (current == null) {
@@ -37,6 +39,7 @@ class UserRepository(
         userDao.updateUserProfile(userProfile)
     }
 
+    /** Adds XP to the existing profile, creating a default profile first if none exists yet. */
     suspend fun addXp(amount: Int) = withContext(Dispatchers.IO) {
         val current = userDao.getUserProfileSynchronous()
         if (current != null) {

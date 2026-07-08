@@ -68,6 +68,10 @@ import java.time.YearMonth
 import java.time.ZoneId
 
 
+/**
+ * Bottom sheet showing a habit's completion history: stat summary, a month calendar, and a
+ * chronological timeline. Tapping a past date adds or removes a completion for it.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitBottomSheet(
@@ -145,7 +149,7 @@ private fun UnifiedCalendarSheetContent(
 
         HorizontalDivider(modifier = Modifier.padding(vertical = AppTheme.spaceXLarge))
 
-        // --- Calendar header ---
+        // Calendar header.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -170,7 +174,7 @@ private fun UnifiedCalendarSheetContent(
 
         Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
 
-        // --- Weekday header ---
+        // Weekday header.
         val weekdayLabels = listOf(
             stringResource(R.string.commonWeekdayMon),
             stringResource(R.string.commonWeekdayTue),
@@ -196,7 +200,7 @@ private fun UnifiedCalendarSheetContent(
             }
         }
 
-        // --- Calendar grid ---
+        // Calendar grid.
         val daysInMonth = displayedMonth.lengthOfMonth()
         val firstDayOfWeek = displayedMonth.atDay(1).dayOfWeek.value // 1=Mon..7=Sun
         val emptySlotsPrefix = firstDayOfWeek - 1
@@ -225,7 +229,7 @@ private fun UnifiedCalendarSheetContent(
                                 .aspectRatio(1.1f)
                         ) {
                             if (date == null) {
-                                // empty slot
+                                // Empty slot.
                             } else {
                                 val isToday = date == today
                                 val isCompleted = completionDates.contains(date)
@@ -284,7 +288,7 @@ private fun UnifiedCalendarSheetContent(
         Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
         HorizontalDivider()
 
-        // --- Timeline ---
+        // Timeline.
         if (completions.isEmpty()) {
             Box(
                 modifier = Modifier
@@ -321,7 +325,7 @@ private fun UnifiedCalendarSheetContent(
         }
     }
 
-    // Remove-completion confirmation dialog
+    // Remove-completion confirmation dialog.
     val removalDate = dateForRemoval
     if (removalDate != null) {
         val formattedDate = AppDateFormatUtils.formatDate(
@@ -342,7 +346,7 @@ private fun UnifiedCalendarSheetContent(
         )
     }
 
-    // Add-completion time picker
+    // Add-completion time picker.
     val addDate = dateForAdd
     if (addDate != null) {
         val now = LocalTime.now()
@@ -419,7 +423,7 @@ private fun TimelineItem(
             .height(IntrinsicSize.Min)
             .padding(horizontal = AppTheme.spaceLarge),
     ) {
-        // Left: timeline graphics (dot + connecting line)
+        // Left: timeline graphics (dot + connecting line).
         Box(
             modifier = Modifier
                 .width(32.dp)

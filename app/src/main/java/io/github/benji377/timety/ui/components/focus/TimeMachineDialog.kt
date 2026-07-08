@@ -55,6 +55,10 @@ import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/**
+ * Dialog for logging a past focus session: pick a mode, an optional tag, and a start/end date
+ * and time, then call [onLog]. Rejects an end time before the start time.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimeMachineDialog(
@@ -73,7 +77,7 @@ fun TimeMachineDialog(
     var modeExpanded by remember { mutableStateOf(false) }
     var tagExpanded by remember { mutableStateOf(false) }
 
-    // Date+time picker flow shared by both start/end fields (mirrors AppDatePickers.pickDateTime).
+    // Date+time picker flow shared by both start/end fields: pick a date, then a time.
     var pickerTarget by remember { mutableStateOf<TimeMachineTarget?>(null) }
     var pickerStep by remember { mutableIntStateOf(0) } // 0 = none, 1 = date, 2 = time
     var pickedLocalDate by remember { mutableStateOf<LocalDate?>(null) }

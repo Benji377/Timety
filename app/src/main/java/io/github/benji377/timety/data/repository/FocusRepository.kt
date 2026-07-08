@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
+/** Repository for focus modes, sessions, phases, tags, and distractions, wrapping [FocusDao] with IO dispatching. */
 class FocusRepository(
     private val focusDao: FocusDao
 ) {

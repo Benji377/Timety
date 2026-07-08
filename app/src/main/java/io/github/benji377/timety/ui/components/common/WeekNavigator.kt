@@ -24,6 +24,10 @@ import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
 
 
+/**
+ * Header for stepping through Monday-to-Sunday weeks around [focusedDate]. The forward arrow is
+ * disabled once the current week is reached, so navigation cannot go into the future.
+ */
 @Composable
 fun WeekNavigator(
     focusedDate: LocalDate,

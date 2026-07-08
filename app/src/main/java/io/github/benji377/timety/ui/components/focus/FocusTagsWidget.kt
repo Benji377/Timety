@@ -65,6 +65,7 @@ import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/** Screen listing focus tags, with actions to create, edit, and delete them. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusTagsWidget(

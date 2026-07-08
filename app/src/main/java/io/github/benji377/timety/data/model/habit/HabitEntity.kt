@@ -6,12 +6,14 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 import java.time.Instant
 
+/** How often a habit is expected to be completed. */
 enum class HabitFrequency(val value: Int) {
     DAILY(0),
     WEEKLY_EXACT(1),
     WEEKLY_FLEXIBLE(2)
 }
 
+/** A user-defined habit with its recurrence rule, display, and optional stack placement. */
 @Entity(tableName = "habits")
 data class HabitEntity(
     @PrimaryKey
@@ -19,8 +21,8 @@ data class HabitEntity(
     val name: String,
     val frequency: HabitFrequency,
     val targetDaysPerWeek: Int? = null,
-    val targetWeekdays: String? = null, // Stored as JSON string "[1,3,5]" for simplicity
-    val targetTimeMinutes: Int? = null, // Minutes from midnight
+    val targetWeekdays: String? = null, // Stored as a JSON string, e.g. "[1,3,5]".
+    val targetTimeMinutes: Int? = null, // Minutes from midnight.
     val createdAt: Instant,
     val colorValue: Int,
     val notes: String? = null,
@@ -29,7 +31,7 @@ data class HabitEntity(
     val stackOrder: Int? = null
 )
 
-
+/** A habit paired with all of its completion records, for a Room `@Relation` query. */
 data class HabitWithCompletions(
     @Embedded
     val habit: HabitEntity,

@@ -57,6 +57,10 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 
+/**
+ * Home screen: greeting, the daily focus-goal gauge, and accordion lists of due tasks, today's
+ * habits, and upcoming tasks.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -109,7 +113,7 @@ fun HomeScreen(
         else -> stringResource(R.string.greetingNightMotivation)
     }
 
-    // Urgent tasks: incomplete tasks whose due day is today or earlier. Mirrors home_screen.dart.
+    // Urgent tasks: incomplete tasks whose due day is today or earlier.
     // Memoized: these full-list scans would otherwise re-run on every recomposition.
     val urgentTasks = remember(tasks, todayLocalDate) {
         tasks.filter { t ->
@@ -163,7 +167,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // --- GREETING & MOTIVATION SECTION ---
+            // Greeting and motivation text.
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -183,7 +187,7 @@ fun HomeScreen(
                 )
             }
 
-            // --- DAILY GOAL GAUGE SECTION ---
+            // Daily focus-goal gauge.
             Box(
                 modifier = Modifier
                     .weight(5f)
@@ -206,7 +210,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
 
-            // --- TASKS & HABITS LIST SECTION ---
+            // Tasks and habits list.
             Box(
                 modifier = Modifier
                     .weight(6f)
@@ -223,7 +227,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
                     ) {
-                        // --- DUE TASKS ACCORDION ---
+                        // Due tasks accordion.
                         if (urgentTasks.isNotEmpty()) {
                             item {
                                 StyledExpansionTile(
@@ -257,7 +261,7 @@ fun HomeScreen(
                             }
                         }
 
-                        // --- TODAY'S HABITS ACCORDION ---
+                        // Today's habits accordion.
                         if (todaysHabits.isNotEmpty()) {
                             item {
                                 StyledExpansionTile(
@@ -299,7 +303,7 @@ fun HomeScreen(
                             }
                         }
 
-                        // --- UPCOMING TASKS ACCORDION ---
+                        // Upcoming tasks accordion.
                         if (upcomingTasks.isNotEmpty()) {
                             item {
                                 StyledExpansionTile(

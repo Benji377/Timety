@@ -61,6 +61,11 @@ import io.github.benji377.timety.ui.components.common.TimetyElevatedButton as El
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/**
+ * Card that shows a focus mode's timeline and, when in editing mode, lets its name and phases be
+ * changed. System modes can't be edited or deleted. Set [isNewMode] to start the card in editing
+ * mode for a mode that hasn't been saved yet.
+ */
 @Composable
 fun FocusModeEditCard(
     mode: FocusModeEntity,
@@ -80,7 +85,7 @@ fun FocusModeEditCard(
     var editingPhaseIndex by remember { mutableStateOf<Int?>(null) }
 
     // Keep the working copy in sync with freshly-loaded phases (async Room Flow) as long as the
-    // user isn't mid-edit, mirroring Flutter's `didUpdateWidget` reset-on-mode-change behavior.
+    // user isn't mid-edit, so an in-progress edit isn't overwritten by a fresh emission.
     LaunchedEffect(phases) {
         if (!isEditing) tempPhases = phases
     }

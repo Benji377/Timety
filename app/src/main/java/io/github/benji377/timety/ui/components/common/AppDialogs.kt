@@ -18,6 +18,7 @@ import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/** Alert dialog with cancel/confirm actions; renders nothing while [visible] is false. */
 @Composable
 fun ConfirmationDialog(
     visible: Boolean,
@@ -52,6 +53,7 @@ fun ConfirmationDialog(
 }
 
 
+/** Alert dialog with a single text field, confirming only if the trimmed input is non-empty. */
 @Composable
 fun TextInputDialog(
     visible: Boolean,

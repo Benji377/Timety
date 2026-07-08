@@ -7,6 +7,10 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 
 
+/**
+ * Resolves a plural string resource for [count], substituting [zeroRes] instead when [count] is
+ * zero and a zero-specific string was provided.
+ */
 @Composable
 fun quantityString(
     @PluralsRes pluralRes: Int,

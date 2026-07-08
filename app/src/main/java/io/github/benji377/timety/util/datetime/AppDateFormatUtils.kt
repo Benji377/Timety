@@ -11,9 +11,11 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 
+/** Locale- and user-preference-aware date/time formatting shared across the app's UI. */
 object AppDateFormatUtils {
 
 
+    /** Formats a duration as `mm:ss`, e.g. a focus timer's elapsed or remaining time. */
     fun formatDuration(totalSeconds: Int): String {
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60

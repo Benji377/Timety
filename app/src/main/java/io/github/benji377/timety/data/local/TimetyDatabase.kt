@@ -36,6 +36,7 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
     version = 1,
     exportSchema = true
 )
+/** Room database for Timety, exposing DAOs for tasks, habits, focus sessions, and the user profile. */
 @TypeConverters(Converters::class)
 abstract class TimetyDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao

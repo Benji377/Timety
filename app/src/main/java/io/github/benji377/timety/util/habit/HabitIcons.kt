@@ -44,7 +44,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.outlined.Brush as BrushOutlined
 
 
+/** Curated icon set users can pick from when customizing a habit's appearance. */
 object HabitIcons {
+    /** Icons offered in the habit icon picker, grouped by theme for display. */
     val availableIcons: List<ImageVector> = listOf(
         // Health & Fitness
         Icons.Filled.FitnessCenter,
@@ -101,9 +103,11 @@ object HabitIcons {
     )
 
 
+    /** Fallback icon for habits with no icon selected or an out-of-range stored index. */
     val defaultIcon: ImageVector = Icons.Filled.Circle
 
 
+    /** Looks up an icon by its stored [index], falling back to [defaultIcon] when invalid. */
     fun iconAt(index: Int?): ImageVector {
         if (index == null || index !in availableIcons.indices) return defaultIcon
         return availableIcons[index]

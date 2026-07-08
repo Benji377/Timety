@@ -4,9 +4,14 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 
 
+/** Builds the Monday-start week grid used by the calendar month view. */
 object CalendarUtils {
 
 
+    /**
+     * Splits [month] into full Monday-to-Sunday weeks that together cover every day of the
+     * month, padded with the trailing/leading days of adjacent months so each week has 7 days.
+     */
     fun generateWeeks(month: LocalDate): List<List<LocalDate>> {
         val firstDayOfMonth = LocalDate.of(month.year, month.monthValue, 1)
         val lastDayOfMonth = firstDayOfMonth.plusMonths(1).minusDays(1)
@@ -16,6 +21,8 @@ object CalendarUtils {
 
         val weeks = mutableListOf<List<LocalDate>>()
 
+        // Keep adding weeks until we've passed the end of the month and landed back on a Monday,
+        // so the last week is always complete.
         while (currentDay.isBefore(lastDayOfMonth) || currentDay.dayOfWeek != DayOfWeek.MONDAY) {
             val week = mutableListOf<LocalDate>()
             for (i in 0 until 7) {

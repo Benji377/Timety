@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
+/** Handles a fired reminder alarm by showing its notification and re-arming it if it repeats. */
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val notificationId = intent.getIntExtra(NotificationService.EXTRA_NOTIFICATION_ID, -1)
@@ -80,6 +81,7 @@ class ReminderReceiver : BroadcastReceiver() {
             .map { it.habit.name }
         if (todaysHabits.isEmpty()) return ""
 
+        // List up to two habit names, appending an "and more" suffix if there are additional ones.
         var habitList = todaysHabits.take(2).joinToString(", ")
         if (todaysHabits.size > 2) {
             habitList += context.getString(R.string.notificationHabitListSuffix)

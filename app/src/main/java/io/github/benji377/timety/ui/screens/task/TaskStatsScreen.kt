@@ -38,6 +38,10 @@ import java.time.ZoneId
 import kotlin.math.roundToInt
 
 
+/**
+ * Shows weekly task velocity and productivity charts plus an all-time category breakdown for the
+ * selected week.
+ */
 @Composable
 fun TaskStatsScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -72,7 +76,7 @@ fun TaskStatsScreen(
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // TASK VELOCITY CHART
+            // Task velocity chart.
             item {
                 Text(
                     stringResource(R.string.taskStatsVelocity),
@@ -118,7 +122,7 @@ fun TaskStatsScreen(
             }
             item { Spacer(modifier = Modifier.height(40.dp)) }
 
-            // PRODUCTIVITY BAR CHART
+            // Productivity bar chart.
             item {
                 Text(
                     stringResource(R.string.taskStatsProductivity),
@@ -144,7 +148,7 @@ fun TaskStatsScreen(
             }
             item { Spacer(modifier = Modifier.height(40.dp)) }
 
-            // CATEGORY BREAKDOWN (ALL TIME)
+            // Category breakdown, all time.
             item { CategoryBreakdownCard(tasks) }
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
@@ -246,7 +250,7 @@ private fun SimpleBarChart(
         stringResource(R.string.commonWeekdaySun)
     )
     val todayIndex = if (isCurrentRealWeek) Instant.now().atZone(zone).dayOfWeek.value - 1 else -1
-    // Mirrors Flutter's `maxY: maxY + 1` headroom above the tallest bar.
+    // Add one unit of headroom above the tallest bar so it doesn't touch the top edge.
     val denom = (maxVal + 1).toFloat()
 
     Row(

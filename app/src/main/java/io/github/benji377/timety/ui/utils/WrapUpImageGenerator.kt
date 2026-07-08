@@ -15,6 +15,7 @@ import androidx.core.graphics.toColorInt
 import io.github.benji377.timety.R
 import java.io.ByteArrayOutputStream
 
+/** Renders the shareable "year/period wrap-up" summary card as a PNG, drawn directly on a Canvas. */
 object WrapUpImageGenerator {
     private const val W = 1080f
     private const val H = 1920f
@@ -23,7 +24,7 @@ object WrapUpImageGenerator {
     private const val STAT_ROW_HEIGHT = 108f
     private const val STAT_ROW_GAP = 52f
 
-    // Colors matching AppTheme
+    // Colors matching the app's theme palette.
     private val PAPER_DARK = "#151515".toColorInt()
     private val GRADIENT_MID = "#2A2418".toColorInt()
     private val TASK_COLOR = "#2563EB".toColorInt()
@@ -32,6 +33,7 @@ object WrapUpImageGenerator {
     private val SUCCESS_COLOR = "#16A34A".toColorInt()
     private val HABIT_COLOR = "#7C3AED".toColorInt()
 
+    /** Draws the wrap-up card for the given stats and returns it encoded as a PNG byte array. */
     fun generate(
         context: Context,
         name: String,

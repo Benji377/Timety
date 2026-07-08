@@ -14,6 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Application entry point that builds the DI container, runs the one-time legacy-data migration,
+ * and resyncs reminder alarms on process start.
+ */
 class TimetyApplication : Application() {
     lateinit var container: AppContainer
 
@@ -31,7 +35,7 @@ class TimetyApplication : Application() {
         NotificationService(this).ensureChannels()
 
         applicationScope.launch {
-            // One-shot Flutter→Kotlin data migration (docs/flutter-migration.md).
+            // One-shot legacy-data migration (docs/flutter-migration.md).
             // Must finish before the UI and the reminder resync touch the database.
             try {
                 FlutterMigration.runIfNeeded(this@TimetyApplication, container)

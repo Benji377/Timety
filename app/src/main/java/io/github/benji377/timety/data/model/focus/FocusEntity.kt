@@ -6,6 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.Instant
 
+/** Type of interruption logged against a focus session. */
 enum class DistractionType {
     DISTRACTED,
     HYDRATED,
@@ -14,6 +15,7 @@ enum class DistractionType {
     RESTROOM
 }
 
+/** Timing behavior of a focus mode. */
 enum class FocusModeType(val value: Int) {
     STOPWATCH(0),
     POMODORO(1),
@@ -21,11 +23,13 @@ enum class FocusModeType(val value: Int) {
     CUSTOM(3)
 }
 
+/** Whether a session phase is a focus period or a rest period. */
 enum class PhaseType(val value: Int) {
     FOCUS(0),
     REST(1)
 }
 
+/** A focus mode definition, either user-created or one of the built-in system modes. */
 @Entity(tableName = "focus_modes")
 data class FocusModeEntity(
     @PrimaryKey
@@ -43,6 +47,7 @@ data class FocusModeEntity(
     }
 }
 
+/** A single phase (focus or rest) within a focus mode's sequence. */
 @Entity(
     tableName = "session_phases",
     foreignKeys = [
@@ -61,15 +66,17 @@ data class SessionPhaseEntity(
     val modeId: String,
     val type: PhaseType,
     val durationMinutes: Int,
-    val orderIndex: Int // Important for maintaining the sequence
+    val orderIndex: Int // Determines the phase's position within the mode.
 )
 
+/** What a focus session or tag selection is attributed to. */
 enum class FocusTargetType(val value: Int) {
     TAG(0),
     TASK(1),
     HABIT(2)
 }
 
+/** A user-defined label for categorizing focus sessions. */
 @Entity(tableName = "focus_tags")
 data class FocusTagEntity(
     @PrimaryKey
@@ -78,6 +85,7 @@ data class FocusTagEntity(
     val colorValue: Int
 )
 
+/** A single recorded focus session, including its timing, completion state, and target. */
 @Entity(
     tableName = "focus_sessions",
     foreignKeys = [
@@ -104,6 +112,7 @@ data class FocusSessionEntity(
     val targetLabel: String? = null
 )
 
+/** A logged interruption during a focus session. */
 @Entity(
     tableName = "distractions",
     foreignKeys = [

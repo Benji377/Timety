@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.TextUnit
 import io.github.benji377.timety.ui.theme.AppTheme
 
 
+/** Row of a tinted icon followed by a bold title, used to head a list or section. */
 @Composable
 fun ListSectionHeader(
     title: String,

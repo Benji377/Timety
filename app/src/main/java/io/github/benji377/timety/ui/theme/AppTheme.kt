@@ -7,8 +7,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 
+/** Design tokens (font sizes, weights, spacing, radii, and misc constants) shared across the UI. */
 object AppTheme {
-    // ===== TYPOGRAPHY =====
+    // Typography.
     val fsHeadingLarge = 24.sp
     val fsHeadingMedium = 20.sp
     val fsHeadingSmall = 18.sp
@@ -48,7 +49,7 @@ object AppTheme {
     val brMedium = RoundedCornerShape(radiusMedium)
     val brNeo = RoundedCornerShape(radiusNeo)
 
-    // ===== DIMENSIONS =====
+    // Dimensions.
     val gaugeSize = 300.dp
     val gaugeStrokeWidth = 16.dp
     val iconSizeSmall = 18.dp
@@ -60,10 +61,10 @@ object AppTheme {
 
     const val PULSE_DURATION_MS = 2000
 
-    // ===== SETTINGS DEFAULTS =====
+    // Settings defaults.
     const val MAX_NODE_MINS = 240
 
-    // ===== OPACITY VALUES =====
+    // Opacity values.
     const val OPACITY_MEDIUM = 0.5f
     const val OPACITY_LIGHT = 0.3f
     const val OPACITY_VERY_LIGHT = 0.1f

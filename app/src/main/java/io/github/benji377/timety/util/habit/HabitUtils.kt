@@ -12,9 +12,11 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 
+/** Habit scheduling, completion, and stack-locking rules shared by the habit list and widgets. */
 object HabitUtils {
 
 
+    /** Parses a `"[1,3,5]"`-style stored weekday set back into ISO weekday numbers (1 = Monday). */
     fun parseWeekdays(raw: String?): Set<Int> {
         if (raw.isNullOrBlank()) return emptySet()
         return raw.removePrefix("[").removeSuffix("]")
@@ -24,6 +26,7 @@ object HabitUtils {
     }
 
 
+    /** Serializes weekday numbers into the `"[1,3,5]"` format read by [parseWeekdays]. */
     fun serializeWeekdays(days: Set<Int>): String =
         days.sorted().joinToString(separator = ",", prefix = "[", postfix = "]")
 
@@ -34,6 +37,10 @@ object HabitUtils {
         }
 
 
+    /**
+     * Counts completions in the current Monday-based week. [includeToday] set to `false` excludes
+     * today, which callers use when checking whether a flexible-frequency goal is still open.
+     */
     fun getCompletionsThisWeek(hwc: HabitWithCompletions, includeToday: Boolean = true): Int {
         val today = LocalDate.now()
         val startOfWeek = AppDateUtils.startOfWeekMonday(today)
@@ -46,6 +53,11 @@ object HabitUtils {
     }
 
 
+    /**
+     * Whether [hwc] should appear in today's habit list: daily habits always are, exact-weekday
+     * habits check today against their target days, and flexible habits are due as long as this
+     * week's target count hasn't already been reached (excluding today's own completion).
+     */
     fun isHabitDueToday(hwc: HabitWithCompletions): Boolean {
         val habit = hwc.habit
         return when (habit.frequency) {
@@ -59,6 +71,7 @@ object HabitUtils {
     }
 
 
+    /** Whether a flexible-frequency habit already met its weekly target before today. */
     fun isWeeklyGoalMet(hwc: HabitWithCompletions): Boolean {
         if (hwc.habit.frequency != HabitFrequency.WEEKLY_FLEXIBLE) return false
         val doneThisWeek = getCompletionsThisWeek(hwc, includeToday = false)
@@ -66,6 +79,7 @@ object HabitUtils {
     }
 
 
+    /** Localized subtitle describing a habit's schedule, e.g. "Daily" or "3/5 this week". */
     @Composable
     fun buildHabitSubtitle(habit: HabitEntity, completionsThisWeek: Int): String {
         return when (habit.frequency) {
@@ -85,6 +99,10 @@ object HabitUtils {
     }
 
 
+    /**
+     * A stacked habit is locked until the one before it in the stack is done: the first habit in
+     * a stack ([index] 0) is never locked, and any already-completed habit is never locked either.
+     */
     fun isHabitLocked(
         index: Int,
         isCurrentHabitDone: Boolean,

@@ -44,6 +44,9 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
+/**
+ * Lists the user's habits grouped into due-today, upcoming, and done sections for the current day.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListScreen(

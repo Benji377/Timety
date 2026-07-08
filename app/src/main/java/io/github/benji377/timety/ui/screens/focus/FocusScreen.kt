@@ -106,16 +106,21 @@ import kotlin.math.roundToInt
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 
 
+// durationMinutes encodes special cases: 0 means a stopwatch phase with no fixed length, and -1
+// means a flexible phase whose length is set by the user via flexibleMinutes.
 private fun secondsForPhase(
     phase: SessionPhaseEntity,
     flexibleMinutes: Int
 ): Int = when (phase.durationMinutes) {
-    0 -> 0 // Stopwatch
+    0 -> 0
     -1 -> flexibleMinutes * 60
     else -> phase.durationMinutes * 60
 }
 
 
+/**
+ * The main focus timer screen: mode selector, timer gauge, phase timeline, and session controls.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusScreen(
@@ -230,7 +235,8 @@ fun FocusScreen(
         sendAction(FocusTimerService.ACTION_START)
     }
 
-    // --- Target lock check (mirrors FocusProvider.selectedTargetIsLocked) ---
+    // A habit target is locked if it belongs to a stack and the habit before it in that stack
+    // hasn't been completed yet.
     val targetLocked = remember(selectedTarget, habitsWithCompletions) {
         val target = selectedTarget
         if (target?.type != FocusTargetType.HABIT) {
@@ -257,7 +263,7 @@ fun FocusScreen(
         }
     }
 
-    // --- Gauge display state (mirrors the big `build()` computed-vars block in focus_screen.dart) ---
+    // Derived display state for the gauge, mode label, and control locking below.
     val currentPhase = activePhases.getOrNull(phaseIndex)
 
     val focusMinsToday = remember(allSessions) { focusViewModel.getMinutesFocusedToday() }
@@ -318,7 +324,7 @@ fun FocusScreen(
         ) {
             Spacer(modifier = Modifier.height(10.dp))
 
-            // --- FOCUS MODE SELECTOR ---
+            // Focus mode selector.
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -360,7 +366,7 @@ fun FocusScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // --- DAILY GOAL BADGE ---
+            // Daily goal badge.
             Box(
                 modifier = Modifier
                     .padding(bottom = AppTheme.spaceMedium)
@@ -387,7 +393,7 @@ fun FocusScreen(
                 }
             }
 
-            // --- INTERACTIVE TIMER GAUGE ---
+            // Interactive timer gauge.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -440,7 +446,7 @@ fun FocusScreen(
                 }
             }
 
-            // --- PHASE TIMELINE ---
+            // Phase timeline.
             ModeTimeline(
                 phases = activePhases,
                 currentPhaseIndex = phaseIndex,
@@ -450,7 +456,7 @@ fun FocusScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // --- PLAY/PAUSE CONTROLS ---
+            // Play/pause controls.
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -531,7 +537,7 @@ fun FocusScreen(
         }
     }
 
-    // --- BOTTOM SHEETS & DIALOGS ---
+    // Bottom sheets and dialogs.
     if (showTargetSelection) {
         TargetSelectorBottomSheet(
             onDismissRequest = { showTargetSelection = false },

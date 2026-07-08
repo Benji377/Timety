@@ -8,6 +8,7 @@ import androidx.room.Update
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 import kotlinx.coroutines.flow.Flow
 
+/** Data access object for the singleton user profile. */
 @Dao
 interface UserDao {
     @Query("SELECT * FROM user_profile WHERE id = 1 LIMIT 1")

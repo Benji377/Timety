@@ -5,6 +5,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.Instant
 
+/** Priority level of a task, from low to very high. */
 enum class Priority(val value: Int) {
     LOW(0),
     MEDIUM(1),
@@ -12,6 +13,7 @@ enum class Priority(val value: Int) {
     VERY_HIGH(3)
 }
 
+/** Relative size/effort estimate for a task. */
 enum class TaskSize(val value: Int) {
     SMALL(0),
     MEDIUM(1),
@@ -19,6 +21,7 @@ enum class TaskSize(val value: Int) {
     VERY_LARGE(3)
 }
 
+/** Available sort orders for the task list. */
 enum class TaskSortOption {
     DUE_DATE,
     PRIORITY,
@@ -27,6 +30,7 @@ enum class TaskSortOption {
     CATEGORY
 }
 
+/** Predefined offsets (or a custom one) for scheduling a task reminder relative to its due date. */
 enum class ReminderOption {
     ON_TIME,
     MINUTES_30_BEFORE,
@@ -36,9 +40,9 @@ enum class ReminderOption {
 }
 
 /**
- * Managed category list, mirroring [io.github.benji377.timety.data.model.focus.FocusTagEntity].
- * Tasks reference categories by [name] (TaskEntity.category), not by id, so renames must
- * update both (see TaskDao.updateCategoryAndTasks).
+ * A user-defined category used to group tasks, identified by a unique name and display color.
+ * Tasks reference categories by [name] ([TaskEntity.category]), not by id, so renaming a category
+ * must also update every task's stored name (see `TaskDao.updateCategoryAndTasks`).
  */
 @Entity(
     tableName = "task_categories",
@@ -51,12 +55,13 @@ data class TaskCategoryEntity(
     val colorValue: Int
 ) {
     companion object {
-        // Matches ui.theme.TaskColor; used when a category is created without an
-        // explicit color (task form quick-add, backup/Flutter import derivation).
+        // Matches ui.theme.TaskColor; used when a category is created without an explicit color
+        // (task form quick-add, legacy backup import).
         const val DEFAULT_COLOR_VALUE = 0xFF2563EB.toInt()
     }
 }
 
+/** A single task with its scheduling, categorization, and completion state. */
 @Entity(tableName = "tasks")
 data class TaskEntity(
     @PrimaryKey
@@ -74,6 +79,7 @@ data class TaskEntity(
     val reminders: List<Instant> = emptyList()
 )
 
+/** A task paired with its subtasks, for a Room `@Relation` query. */
 data class TaskWithSubtasks(
     @androidx.room.Embedded val task: TaskEntity,
     @androidx.room.Relation(

@@ -21,6 +21,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 
+/** Exposes habits and their completions, and applies XP/reminder/widget side effects for changes to them. */
 class HabitViewModel(
     private val application: android.app.Application,
     private val habitRepository: HabitRepository,
@@ -93,6 +94,7 @@ class HabitViewModel(
     }
 
 
+    /** Toggles today's completion for [habitId] and awards/reverts XP accordingly. */
     fun toggleCompletionToday(habitId: String) {
         viewModelScope.launch {
             val habitWithCompletions =
@@ -116,6 +118,7 @@ class HabitViewModel(
     }
 
 
+    /** Marks [habitId] complete on [date] and awards XP, unless it is already marked complete that day. */
     fun markCompletionOnDate(habitId: String, date: Instant) {
         viewModelScope.launch {
             val habitWithCompletions =
@@ -135,6 +138,7 @@ class HabitViewModel(
     }
 
 
+    /** Removes [habitId]'s completion on [date], if any, and reverts the XP it had granted. */
     fun unmarkCompletionOnDate(habitId: String, date: LocalDate) {
         viewModelScope.launch {
             val habitWithCompletions =

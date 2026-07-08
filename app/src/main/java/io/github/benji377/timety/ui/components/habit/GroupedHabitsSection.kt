@@ -37,6 +37,12 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 
 
+/**
+ * Renders [habits] for [targetDate], grouping any that share a stack name into a collapsible card
+ * with a completion count, and rendering the rest standalone. Each habit is rendered via
+ * [habitBuilder], which also receives whether the habit is locked (a stacked habit becomes
+ * unlockable only once the previous one in the stack is completed).
+ */
 @Composable
 fun GroupedHabitsSection(
     habits: List<HabitWithCompletions>,

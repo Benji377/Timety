@@ -2,7 +2,7 @@ package io.github.benji377.timety.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ===== CORE PALETTE (mirrors AppTheme in app_theme.dart) =====
+// Core palette shared across the app's sections.
 val TaskColor = Color(0xFF2563EB)
 val FocusColor = Color(0xFF16A34A)
 val HabitColor = Color(0xFF7C3AED)
@@ -19,7 +19,7 @@ val BorderLight = Color(0xFF111111)
 val BorderDark = Color(0xFFF2E8D5)
 val ShadowColor = Color(0xFF111111)
 
-// ===== SEMANTIC COLORS =====
+// Semantic colors derived from the core palette.
 val SuccessColor = FocusColor
 val ErrorColor = UserColor
 val WarningColor = WarningAccent

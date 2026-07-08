@@ -92,6 +92,10 @@ import java.util.UUID
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/**
+ * Creates, views, or edits a habit. With a null [habitId] the screen starts in creation mode;
+ * otherwise it opens in read-only view mode until the user taps edit.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HabitDetailScreen(
@@ -105,7 +109,7 @@ fun HabitDetailScreen(
 
     var isEditing by remember { mutableStateOf(isNewHabit) }
 
-    // --- Form state ---
+    // Form state.
     var name by remember(existingHabit) { mutableStateOf(existingHabit?.name ?: "") }
     var nameError by remember { mutableStateOf(false) }
     var notes by remember(existingHabit) { mutableStateOf(existingHabit?.notes ?: "") }
@@ -258,7 +262,7 @@ fun HabitDetailScreen(
                 .padding(paddingValues)
                 .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall)
         ) {
-            // --- HABIT NAME ---
+            // Habit name.
             item {
                 OutlinedTextField(
                     value = name,
@@ -279,7 +283,7 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // --- HABIT STACKING (name autocomplete + order) ---
+            // Habit stacking: name autocomplete and order.
             item {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     ExposedDropdownMenuBox(
@@ -354,7 +358,7 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // --- APPEARANCE (icon & color) ---
+            // Appearance: icon and color.
             item {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     PickerField(
@@ -389,7 +393,7 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // --- NOTES ---
+            // Notes.
             item {
                 OutlinedTextField(
                     value = notes,
@@ -405,7 +409,7 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // --- FREQUENCY ---
+            // Frequency.
             item {
                 Text(
                     stringResource(R.string.habitDetailLabelFrequency),
@@ -534,7 +538,7 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // --- TIME REMINDER ---
+            // Time reminder.
             item {
                 Text(
                     stringResource(R.string.habitDetailLabelReminder),
@@ -570,7 +574,7 @@ fun HabitDetailScreen(
             }
         }
 
-        // --- Icon picker dialog ---
+        // Icon picker dialog.
         if (showIconPicker) {
             AlertDialog(
                 onDismissRequest = { showIconPicker = false },
@@ -614,7 +618,7 @@ fun HabitDetailScreen(
             )
         }
 
-        // --- Color picker dialog ---
+        // Color picker dialog.
         if (showColorPicker) {
             AlertDialog(
                 onDismissRequest = { showColorPicker = false },
@@ -657,7 +661,7 @@ fun HabitDetailScreen(
             )
         }
 
-        // --- Time picker dialog ---
+        // Time picker dialog.
         if (showTimePicker) {
             val initial = targetTimeMinutes
             val timePickerState = rememberTimePickerState(

@@ -54,6 +54,10 @@ import org.json.JSONObject
 import kotlin.time.Duration.Companion.milliseconds
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
+/**
+ * Screen for searching a location by name and picking one of the results, debouncing requests
+ * as the user types.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationPickerScreen(
@@ -77,7 +81,7 @@ fun LocationPickerScreen(
         searchJob?.cancel()
         if (searchQuery.trim().length >= 3) {
             searchJob = coroutineScope.launch {
-                delay(600.milliseconds) // Debounce
+                delay(600.milliseconds) // Debounce.
                 isLoading = true
                 errorState = null
 

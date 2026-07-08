@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
+/** Repository for habits and their completions, wrapping [HabitDao] with IO dispatching. */
 class HabitRepository(
     private val habitDao: HabitDao
 ) {

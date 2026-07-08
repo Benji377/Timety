@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
+/** Repository for tasks, task categories, and subtasks, wrapping [TaskDao] with IO dispatching. */
 class TaskRepository(
     private val taskDao: TaskDao
 ) {

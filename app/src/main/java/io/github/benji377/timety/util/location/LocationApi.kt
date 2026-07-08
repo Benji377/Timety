@@ -53,6 +53,7 @@ object LocationApi {
             }
         }
 
+    /** Best single-line label for a search result: its name, else street, else city/state. */
     fun primaryName(p: JSONObject): String {
         val name = p.optString("name", "")
         if (name.isNotEmpty()) return name
@@ -71,6 +72,7 @@ object LocationApi {
         return ""
     }
 
+    /** Secondary detail line for a search result: type, street/number, and city/state/postcode. */
     fun detailsString(p: JSONObject): String {
         val parts = mutableListOf<String>()
 

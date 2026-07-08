@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/** Exposes user-configurable app settings as state and persists changes through [SettingsRepository]. */
 class SettingsViewModel(
     private val application: android.app.Application,
     private val repository: SettingsRepository
@@ -118,6 +119,7 @@ class SettingsViewModel(
         ReminderScheduler.resyncAll(application)
     }
 
+    /** Checks that [url] is a reachable Photon-compatible geocoding endpoint before it is saved. */
     suspend fun validateLocationApiEndpoint(url: String): Boolean {
         if (url.isEmpty()) return false
         if (!url.startsWith("http://") && !url.startsWith("https://")) return false

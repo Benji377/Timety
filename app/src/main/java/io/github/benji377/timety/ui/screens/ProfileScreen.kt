@@ -83,6 +83,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
+/**
+ * Displays the user's profile: avatar, name, XP progress, streak timeline, and all-time stats,
+ * with options to edit the name or share a "wrap-up" summary image.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -107,6 +111,7 @@ fun ProfileScreen(
     val totalHabitsMet = habitsWithCompletions.sumOf { it.completions.size }
     val totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60
     val totalSessions = sessions.size
+    // Gather completion dates across tasks, habits, and focus sessions to feed the streak calculation.
     val taskDates = tasks.mapNotNull {
         if (it.task.isCompleted) it.task.completedAt?.atZone(java.time.ZoneId.systemDefault())
             ?.toLocalDate() else null
@@ -382,7 +387,7 @@ fun ProfileScreen(
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
 
-            // Streak Timeline Card Placeholder
+            // Streak Timeline Card
             item {
                 UserStreakTimelineCard(
                     activityDates = allActivityDates,

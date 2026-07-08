@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
 
+/** Collapsible section with a colored, icon-led header, built on [StyledExpansionTile]. */
 @Composable
 fun ExpansionSection(
     title: String,

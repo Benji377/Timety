@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/** Collapsible tile with a plain-text title; tapping the header toggles [content]'s visibility. */
 @Composable
 fun StyledExpansionTile(
     title: String,
@@ -64,6 +65,7 @@ fun StyledExpansionTile(
 }
 
 
+/** Overload of [StyledExpansionTile] that takes an arbitrary composable as the title. */
 @Composable
 fun StyledExpansionTile(
     title: @Composable () -> Unit,

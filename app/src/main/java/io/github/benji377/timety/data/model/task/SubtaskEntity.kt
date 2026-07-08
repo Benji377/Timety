@@ -17,6 +17,7 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("taskId")]
 )
+/** A checklist item belonging to a task. */
 data class SubtaskEntity(
     @PrimaryKey
     val id: String,

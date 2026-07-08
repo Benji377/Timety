@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 
+/** Display theme options, persisted using their [storageValue] string. */
 enum class ThemeMode(val storageValue: String) {
     LIGHT("Light"),
     DARK("Dark"),
@@ -26,6 +27,7 @@ enum class ThemeMode(val storageValue: String) {
     }
 }
 
+/** Repository for user preferences backed by DataStore, covering theme, formatting, and reminder-timing settings. */
 class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     companion object {

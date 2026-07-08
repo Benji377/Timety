@@ -16,23 +16,39 @@ import kotlin.math.floor
 import kotlin.math.sqrt
 
 
+/**
+ * Converts completed tasks, habits, and focus time into XP, and XP into a level, title, and
+ * badge color for the stats screen.
+ *
+ * Levels use a quadratic curve (`xpForLevel(n) = 100 * (n - 1)^2`) so each level requires
+ * progressively more XP than the last, keeping early levels quick and later ones a longer grind.
+ * [calculateLevel] is the algebraic inverse of that curve.
+ */
 object ExperienceEngine {
+    /** XP granted for completing a task. */
     const val XP_PER_TASK = 15
+
+    /** XP granted for completing a habit occurrence. */
     const val XP_PER_HABIT = 10
+
+    /** XP granted per minute of completed focus-timer time. */
     const val XP_PER_FOCUS_MINS = 1
 
 
+    /** Derives the current level from total XP by inverting the [getXpForLevel] curve. */
     fun calculateLevel(totalXp: Int): Int {
         return floor(sqrt(totalXp / 100.0)).toInt() + 1
     }
 
 
+    /** Total XP required to reach [level]; the quadratic curve levels are based on. */
     fun getXpForLevel(level: Int): Int {
         val base = (level - 1)
         return 100 * base * base
     }
 
 
+    /** Player-facing title for a level, escalating from "Novice Planner" to "Time God". */
     fun getTitle(level: Int): String {
         return when {
             level < 5 -> "Novice Planner"
@@ -46,6 +62,7 @@ object ExperienceEngine {
     }
 
 
+    /** Badge icon matching the title tier returned by [getTitle]. */
     fun getTitleIcon(level: Int): ImageVector {
         return when {
             level < 5 -> Icons.Outlined.EmojiEvents
@@ -59,6 +76,7 @@ object ExperienceEngine {
     }
 
 
+    /** Badge color matching the title tier returned by [getTitle]. */
     fun getTitleColor(level: Int): Color {
         return when {
             level < 5 -> WarningColor
@@ -72,6 +90,7 @@ object ExperienceEngine {
     }
 
 
+    /** Fraction (0.0-1.0) of progress through the current level, for a level-up progress bar. */
     fun getLevelProgress(totalXp: Int): Double {
         val currentLevel = calculateLevel(totalXp)
         val currentTierXp = getXpForLevel(currentLevel)

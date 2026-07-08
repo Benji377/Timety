@@ -27,9 +27,11 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.ui.theme.AppTheme
 
 
+/** Layout variants for [StatCard]. */
 enum class StatCardStyle { KPI, COMPACT_VERTICAL, COMPACT_HEADER }
 
 
+/** Bordered card showing an icon, [value], and [title]; [style] picks the layout and sizing. */
 @Composable
 fun StatCard(
     title: String,

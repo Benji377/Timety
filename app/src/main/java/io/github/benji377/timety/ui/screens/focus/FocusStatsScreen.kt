@@ -81,6 +81,10 @@ import java.time.ZoneId
 import kotlin.math.roundToInt
 
 
+/**
+ * Focus session statistics: a 24-hour clock of the selected day's sessions, a session list,
+ * distraction log, weekly volume chart, and an all-time breakdown by target type.
+ */
 @Composable
 fun FocusStatsScreen(
     focusViewModel: FocusViewModel = activityScopedViewModel(),
@@ -414,6 +418,8 @@ private fun DayPillSelector(
     }
 }
 
+// Draws a 24-hour clock face with an arc per session, starting at 00:00 at the top and
+// sweeping clockwise. A session that crosses midnight is clipped to the end of the day.
 @Composable
 private fun FocusClockChart(
     sessions: List<FocusSessionEntity>,

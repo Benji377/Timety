@@ -62,6 +62,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 
 
+/** Bottom sheet listing distraction event types; invokes [onEventSelected] when one is tapped. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DistractionBottomSheet(
@@ -105,6 +106,10 @@ fun DistractionBottomSheet(
 }
 
 
+/**
+ * Bottom sheet for picking the target of a focus session: a tag, a task, or a habit, presented
+ * as separate tabs.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TargetSelectorBottomSheet(

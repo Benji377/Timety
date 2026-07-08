@@ -13,8 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Neobrutalist color schemes ported 1:1 from AppTheme.buildTheme() in app_theme.dart.
-// No Material You / dynamic color — the palette is fixed.
+// Fixed neobrutalist color schemes for light and dark mode. No Material You / dynamic color —
+// the palette is always the same regardless of device wallpaper.
 
 private val DarkColorScheme = darkColorScheme(
     primary = TaskColor,
@@ -27,9 +27,9 @@ private val DarkColorScheme = darkColorScheme(
     onError = Color.White,
     background = PaperDark,
     onBackground = InkDark,
-    surface = PaperAltDark,          // _surfaceColor(dark) = paperAltDark
-    onSurface = InkDark,             // _foregroundColor(dark)
-    surfaceVariant = SurfaceAltDark, // _surfaceAltColor(dark) = 0xFF2A2A2A
+    surface = PaperAltDark,
+    onSurface = InkDark,
+    surfaceVariant = SurfaceAltDark,
     onSurfaceVariant = Color(0xFFCACACA),
     surfaceContainerHighest = SurfaceAltDark,
     surfaceContainerHigh = SurfaceAltDark,
@@ -49,9 +49,9 @@ private val LightColorScheme = lightColorScheme(
     onError = Color.White,
     background = PaperLight,
     onBackground = InkLight,
-    surface = Color.White,           // _surfaceColor(light) = white
-    onSurface = InkLight,            // _foregroundColor(light)
-    surfaceVariant = PaperAltLight,  // _surfaceAltColor(light) = paperAltLight
+    surface = Color.White,
+    onSurface = InkLight,
+    surfaceVariant = PaperAltLight,
     onSurfaceVariant = Color(0xFF4A4A4A),
     surfaceContainerHighest = PaperAltLight,
     surfaceContainerHigh = PaperAltLight,
@@ -65,6 +65,7 @@ val LocalSnackbarHostState = androidx.compose.runtime.staticCompositionLocalOf<S
     error("No SnackbarHostState provided")
 }
 
+/** Applies the app's fixed light/dark Material 3 color scheme, typography, and shapes. */
 @Composable
 fun TimetyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

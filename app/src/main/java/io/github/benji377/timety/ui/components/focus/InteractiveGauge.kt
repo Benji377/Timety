@@ -64,6 +64,11 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
+/**
+ * Circular progress gauge used for focus sessions, with a label, a large center value, and a
+ * bottom pill. When [isInteractive] is true, the progress can be changed by dragging or tapping
+ * the ring. When [isStopwatch] is true, the ring pulses instead of showing a fixed progress arc.
+ */
 @Composable
 fun InteractiveGauge(
     progress: Float,
@@ -198,8 +203,7 @@ fun InteractiveGauge(
             }
         }
 
-        // Label, time and tag pill spread evenly over the inner disc's full height,
-        // centered both ways (Flutter achieves this with a FittedBox inside the disc).
+        // Label, time and tag pill spread evenly over the inner disc's full height, centered both ways.
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
@@ -223,8 +227,7 @@ fun InteractiveGauge(
             } else {
                 bodyLargeColor
             }
-            // Auto-shrinks for long stopwatch values (e.g. "120:00"), like Flutter's
-            // FittedBox(scaleDown).
+            // Auto-shrinks for long stopwatch values (e.g. "120:00") so they still fit on one line.
             BasicText(
                 text = centerText,
                 maxLines = 1,

@@ -4,6 +4,11 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSortOption
 
 
+/**
+ * Immutable filter/sort configuration for a task list, applied via [process]. Works over any item
+ * type `T` by taking a [selector] to the underlying [TaskEntity], so it can filter/sort either raw
+ * tasks or wrapper types that carry a task alongside other data.
+ */
 data class TaskFilterEngine(
     val searchQuery: String = "",
     val categoryFilter: String? = null,
@@ -12,6 +17,7 @@ data class TaskFilterEngine(
 ) {
 
 
+    /** Applies the category/search filters, then the configured sort, to [items]. */
     fun <T> process(items: List<T>, selector: (T) -> TaskEntity): List<T> {
         val filtered = applyFilters(items, selector)
         return applySorting(filtered, selector)
@@ -22,12 +28,10 @@ data class TaskFilterEngine(
         return items.filter { item ->
             val task = selector(item)
 
-            // Category filter
             if (!categoryFilter.isNullOrEmpty() && task.category != categoryFilter) {
                 return@filter false
             }
 
-            // Text search
             if (searchQuery.isEmpty()) return@filter true
             val q = searchQuery.lowercase()
             task.title.lowercase().contains(q) || task.description.lowercase().contains(q)
@@ -53,6 +57,7 @@ data class TaskFilterEngine(
     }
 
 
+    /** Tasks without a due date sort after tasks with one. */
     private fun compareDueDates(a: TaskEntity, b: TaskEntity): Int {
         if (a.dueDate == null && b.dueDate == null) return 0
         if (a.dueDate == null) return 1

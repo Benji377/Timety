@@ -17,11 +17,12 @@ import java.time.Instant
 import java.time.LocalDate
 
 
+/** Builds and cancels the reminder notifications for tasks, habits, and daily/evening check-ins. */
 class ReminderScheduler private constructor(private val context: Context) {
 
     private val notificationService = NotificationService(context)
 
-    // --- TASKS ---
+    // Tasks.
 
 
     fun scheduleTaskReminders(task: TaskEntity) {
@@ -91,7 +92,7 @@ class ReminderScheduler private constructor(private val context: Context) {
         return context.getString(R.string.taskReminderBody, prefix, task.title)
     }
 
-    // --- HABITS ---
+    // Habits.
 
 
     fun scheduleHabitReminder(habit: HabitEntity) {
@@ -114,7 +115,7 @@ class ReminderScheduler private constructor(private val context: Context) {
 
     fun cancelHabitReminder(habitId: String) = notificationService.cancelHabitReminder(habitId)
 
-    // --- DAILY MOTIVATION / EVENING CHECKUP ---
+    // Daily motivation / evening checkup.
 
 
     fun scheduleDailyMotivation(time: String) {
@@ -149,6 +150,7 @@ class ReminderScheduler private constructor(private val context: Context) {
         private const val TASK_ID_SLOTS = 11
 
 
+        /** Builds a scheduler whose string resources are resolved in the app's configured locale. */
         suspend fun create(context: Context): ReminderScheduler {
             val appContext = context.applicationContext
             val code = SettingsRepository(appContext.dataStore).appLocaleCodeFlow.first()
@@ -156,6 +158,7 @@ class ReminderScheduler private constructor(private val context: Context) {
         }
 
 
+        /** Re-schedules every task, habit, and general reminder; used after boot/app-update since the OS clears pending alarms. */
         suspend fun resyncAll(context: Context) {
             val app = context.applicationContext as? TimetyApplication ?: return
             val scheduler = create(app)

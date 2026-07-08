@@ -87,6 +87,9 @@ import kotlin.math.roundToInt
 import java.time.format.TextStyle as JavaTextStyle
 
 
+/**
+ * Tab-based statistics screen: an overview tab plus dedicated tabs for tasks, focus, and habits.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
@@ -329,6 +332,8 @@ private fun LegendDot(color: Color) {
 }
 
 
+// Draws the 7-day focus-minutes vs. tasks-completed trend as two smoothed lines with a
+// drag-to-inspect tooltip.
 @Composable
 private fun SynergyChart(
     last7Days: List<LocalDate>,
@@ -458,7 +463,7 @@ private fun SynergyChart(
                     color = color,
                     style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
                 )
-                // Per-point dots, matching fl_chart's default FlDotData in the Flutter app.
+                // Per-point dots marking each day's value along the line.
                 points.forEach { point ->
                     drawCircle(color = color, radius = 4.dp.toPx(), center = point)
                 }

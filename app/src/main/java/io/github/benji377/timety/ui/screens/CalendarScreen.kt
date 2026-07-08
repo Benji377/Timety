@@ -81,6 +81,10 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 
+/**
+ * Calendar screen showing a month grid plus, for the selected day, accordion lists of due tasks,
+ * scheduled habits, and focus sessions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
@@ -99,7 +103,7 @@ fun CalendarScreen(
     var focusedMonth by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(LocalDate.now()) }
 
-    // --- FILTER & SORT ACCORDION DATA (for the selected day) ---
+    // Filter and sort the task/session/habit data for the selected day's accordion lists.
     val selectedDayTasks = remember(tasks, selectedDate) {
         selectedDate?.let { d ->
             tasks.filter { t -> t.task.dueDate?.atZone(zone)?.toLocalDate() == d }
@@ -154,7 +158,7 @@ fun CalendarScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // --- TOP HALF: THE CALENDAR ---
+            // Top half: the month calendar grid.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -181,7 +185,7 @@ fun CalendarScreen(
 
             HorizontalDivider(thickness = 1.dp)
 
-            // --- BOTTOM HALF: ACCORDION LISTS ---
+            // Bottom half: accordion lists for the selected day.
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -378,8 +382,7 @@ private fun CalendarGrid(
                     val hasFocus = sessionDateKeys.contains(dateKey)
                     val hasHabits = habitDateKeys.contains(dateKey)
 
-                    // Padding sits outside the fixed height (Flutter: margin around a
-                    // 45-tall container), so the selection outline keeps clear of the dots.
+                    // Padding sits outside the fixed height so the selection outline keeps clear of the dots.
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -482,7 +485,7 @@ private fun Dot(color: Color) {
     )
 }
 
-// --- ACCORDION WIDGETS ---
+// Accordion widgets for the day-detail lists below.
 
 @Composable
 private fun HabitsAccordion(

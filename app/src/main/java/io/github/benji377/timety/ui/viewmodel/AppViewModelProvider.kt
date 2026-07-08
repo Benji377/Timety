@@ -11,6 +11,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.TimetyApplication
 
 
+/**
+ * Returns a [VM] scoped to the current activity rather than the current navigation destination,
+ * so the same instance is shared across composables/screens.
+ */
 @Composable
 inline fun <reified VM : ViewModel> activityScopedViewModel(): VM {
     val activity = checkNotNull(LocalActivity.current as? ComponentActivity) {
@@ -19,6 +23,7 @@ inline fun <reified VM : ViewModel> activityScopedViewModel(): VM {
     return viewModel(viewModelStoreOwner = activity, factory = AppViewModelProvider.Factory)
 }
 
+/** Factory that builds each app [ViewModel] with its repositories from [TimetyApplication.container]. */
 object AppViewModelProvider {
     val Factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(

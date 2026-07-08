@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+/** Single-activity entry point that sets up localization, theme, and the Compose UI tree. */
 class MainActivity : ComponentActivity() {
 
     // Locale code applied when this Activity's base context was attached. Used to
@@ -80,9 +81,9 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        // Hold off until the Flutter data migration (if any) has finished:
-                        // composing earlier would seed default data into the empty database
-                        // and abort the migration. Normal launches flip this immediately.
+                        // Hold off until the legacy-data migration (if any) has finished: composing earlier
+                        // would seed default data into the empty database and abort the migration. Normal
+                        // launches flip this immediately.
                         val startupComplete by (application as TimetyApplication)
                             .startupComplete.collectAsState()
                         if (startupComplete) {

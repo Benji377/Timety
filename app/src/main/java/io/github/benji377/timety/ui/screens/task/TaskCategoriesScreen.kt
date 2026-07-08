@@ -67,6 +67,9 @@ import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
+/**
+ * Lists task categories with per-category task counts and lets the user add, edit, or delete them.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCategoriesScreen(

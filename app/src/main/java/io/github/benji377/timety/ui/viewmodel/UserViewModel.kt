@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
 
+/** Exposes the user's profile and derived level/XP state, creating a default profile on first launch. */
 class UserViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {

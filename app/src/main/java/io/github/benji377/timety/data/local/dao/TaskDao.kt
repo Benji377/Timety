@@ -13,6 +13,7 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import kotlinx.coroutines.flow.Flow
 
+/** Data access object for tasks, task categories, and subtasks. */
 @Dao
 interface TaskDao {
     @Transaction
@@ -48,7 +49,7 @@ interface TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertCategory(category: TaskCategoryEntity)
 
-    /** Creation path: an existing category with the same name wins, keeping its color. */
+    // Creation path: an existing category with the same name wins, keeping its color.
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertCategoryIfAbsent(category: TaskCategoryEntity)
 

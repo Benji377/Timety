@@ -29,6 +29,10 @@ import kotlin.math.PI
 import kotlin.math.sin
 
 
+/**
+ * Flame icon indicating whether the user's streak is active. When [isActive], the flame rises and
+ * flickers on an infinite loop and gains a glowing core and halo; otherwise it renders dimmed and static.
+ */
 @Composable
 fun StreakStatusBadge(
     isActive: Boolean,
@@ -45,6 +49,8 @@ fun StreakStatusBadge(
         label = "streakStatusBadgeT",
     )
 
+    // One full sine cycle per animation period for the rise/fall, two cycles (double frequency) for a
+    // faster, subtler flicker on top of it.
     val flameRise = if (isActive) sin(t * PI.toFloat() * 2f) else 0f
     val flicker = if (isActive) 1f + (sin(t * PI.toFloat() * 4f) * 0.05f) else 1f
     val density = LocalDensity.current

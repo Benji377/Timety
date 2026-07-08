@@ -59,6 +59,12 @@ import io.github.benji377.timety.util.habit.HabitIcons
 import kotlinx.coroutines.launch
 
 
+/**
+ * List row for a single habit, with a completion toggle, icon, name, notes, and optional progress
+ * bar. Renders as a bordered card standalone, or as a slimmer row with a leading color bar when
+ * [isStacked]. When [isLocked], the completion toggle is disabled and taps show a snackbar
+ * instead. Swipe-to-delete is enabled by default when [onDelete] is provided.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitListTile(

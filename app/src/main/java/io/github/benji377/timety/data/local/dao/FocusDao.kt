@@ -14,6 +14,7 @@ import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import kotlinx.coroutines.flow.Flow
 
+/** Data access object for focus modes, session phases, focus sessions, distractions, and tags. */
 @Dao
 interface FocusDao {
     // Modes

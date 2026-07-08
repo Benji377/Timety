@@ -23,6 +23,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
 
+/** Small shared UI helpers: size/priority glyphs and a category color swatch. */
 object AppUtils {
 
     fun getSizeEmoji(size: TaskSize): String {
@@ -46,6 +47,7 @@ object AppUtils {
         )
     }
 
+    /** Icon indicating a task's priority level, colored by severity. */
     @Composable
     fun PriorityIcon(priority: Priority) {
         val (icon, color) = when (priority) {

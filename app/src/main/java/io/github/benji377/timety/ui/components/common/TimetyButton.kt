@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
+/** Filled [Button] restyled with the app's neobrutalist border and no elevation by default. */
 @Composable
 fun TimetyButton(
     onClick: () -> Unit,
@@ -43,6 +44,7 @@ fun TimetyButton(
     )
 }
 
+/** Elevated variant of [TimetyButton], restyled with the app's neobrutalist border. */
 @Composable
 fun TimetyElevatedButton(
     onClick: () -> Unit,

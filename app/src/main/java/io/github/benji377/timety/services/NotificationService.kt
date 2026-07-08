@@ -22,6 +22,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 
+/** Creates notification channels and schedules/cancels the exact alarms that back task, habit, and general reminders. */
 class NotificationService(private val context: Context) {
 
     private val notificationManager = NotificationManagerCompat.from(context)
@@ -64,7 +65,7 @@ class NotificationService(private val context: Context) {
         channels.forEach { systemManager.createNotificationChannel(it) }
     }
 
-    // --- TASKS ---
+    // Tasks.
 
 
     fun scheduleTaskReminder(
@@ -84,9 +85,10 @@ class NotificationService(private val context: Context) {
         scheduleExact(scheduledTime.toEpochMilli(), notificationId, intent)
     }
 
-    // --- HABITS ---
+    // Habits.
 
 
+    /** Schedules a repeating reminder for [habitId]: daily if [targetWeekdays] is null or empty, otherwise once per selected weekday. */
     fun scheduleHabitReminder(
         habitId: String,
         title: String,
@@ -123,7 +125,7 @@ class NotificationService(private val context: Context) {
         for (weekday in 1..7) cancelAlarmAndNotification(habitReminderId(habitId, weekday))
     }
 
-    // --- DAILY MOTIVATION ---
+    // Daily motivation.
 
 
     fun scheduleDailyMotivation(hour: Int, minute: Int, title: String, body: String) {
@@ -140,7 +142,7 @@ class NotificationService(private val context: Context) {
         scheduleExact(triggerAt, DAILY_MOTIVATION_ID, intent)
     }
 
-    // --- END OF DAY CHECKUP ---
+    // End of day checkup.
 
 
     fun scheduleEndOfDayCheckup(hour: Int, minute: Int, title: String, body: String) {
@@ -157,12 +159,12 @@ class NotificationService(private val context: Context) {
         scheduleExact(triggerAt, END_OF_DAY_CHECKUP_ID, intent)
     }
 
-    // --- CANCEL ---
+    // Cancel.
 
 
     fun cancelNotification(notificationId: Int) = cancelAlarmAndNotification(notificationId)
 
-    // --- Called by ReminderReceiver when an alarm fires ---
+    // Called by ReminderReceiver when an alarm fires.
 
     internal fun showNotification(id: Int, channelId: String, title: String, body: String) {
         val contentIntent = Intent(context, MainActivity::class.java).apply {
@@ -200,6 +202,7 @@ class NotificationService(private val context: Context) {
         else -> UserColor
     }.toArgb()
 
+    /** Re-arms a fired alarm for its next occurrence if it was scheduled as daily/weekly repeating. */
     internal fun rescheduleIfRepeating(intent: Intent) {
         val repeat = Repeat.fromExtra(intent.getStringExtra(EXTRA_REPEAT))
         if (repeat == Repeat.NONE) return
@@ -211,7 +214,7 @@ class NotificationService(private val context: Context) {
         scheduleExact(triggerAt, id, intent)
     }
 
-    // --- internals ---
+    // Internals.
 
     private fun scheduleExact(triggerAtMillis: Long, requestCode: Int, intent: Intent) {
         val pendingIntent = PendingIntent.getBroadcast(
@@ -290,6 +293,8 @@ class NotificationService(private val context: Context) {
             now.plusDays(daysUntil.toLong()).withHour(hour).withMinute(minute).withSecond(0)
                 .withNano(0)
         }
+        // Roll over to the next occurrence if the computed time has already passed, or if the
+        // caller (an already-fired repeating alarm) forces it.
         if (forceRollover || scheduled.isBefore(now) || !scheduled.isAfter(now)) {
             scheduled = if (weekday == null) scheduled.plusDays(1) else scheduled.plusDays(7)
         }
@@ -311,7 +316,7 @@ class NotificationService(private val context: Context) {
         const val CHANNEL_EVENING = "evening_checkup_channel"
         const val CHANNEL_FOCUS = "focus_timer_channel"
 
-        // Reserved IDs, matching the Flutter reference exactly (`NotificationService` constants).
+        // Reserved IDs; kept stable to match legacy app versions so existing scheduled alarms still resolve.
         const val DAILY_MOTIVATION_ID = 9999
         const val END_OF_DAY_CHECKUP_ID = 9998
 
@@ -326,6 +331,7 @@ class NotificationService(private val context: Context) {
         internal const val EXTRA_REPEAT = "repeat"
 
 
+        /** Deterministic notification/request-code ID for a habit's reminder, optionally scoped to one weekday. */
         fun habitReminderId(habitId: String, weekday: Int?): Int {
             val suffix = if (weekday == null) "daily" else "weekday_$weekday"
             return "habit_time_${habitId}_$suffix".hashCode()

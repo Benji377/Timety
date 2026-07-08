@@ -56,6 +56,10 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.util.stats.ExperienceEngine
 
 
+/**
+ * Card showing the user's level, title, and XP progress toward the next level, with a collapsible
+ * breakdown of how XP is earned per activity type.
+ */
 @Composable
 fun UserXpBreakdownCard(
     currentLevel: Int,

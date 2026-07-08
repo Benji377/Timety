@@ -17,6 +17,10 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
 
+/**
+ * UI-facing selection of what a focus session targets (tag, task, or habit), carrying a display
+ * label and color alongside the underlying id.
+ */
 data class FocusTargetSelection(
     val type: FocusTargetType,
     val id: String,
@@ -50,6 +54,7 @@ data class FocusTargetSelection(
 }
 
 
+/** UI presentation (icon, color, localized label) for each [DistractionType]. */
 enum class DistractionUIType(
     val entityType: DistractionType,
     val icon: ImageVector,

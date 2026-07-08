@@ -10,6 +10,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 
+/**
+ * Re-arms scheduled reminders after a device reboot or app update, since the OS clears all
+ * pending alarms in both cases.
+ */
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action !in REARM_ACTIONS) return

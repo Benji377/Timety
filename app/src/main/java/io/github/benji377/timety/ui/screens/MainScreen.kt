@@ -39,6 +39,9 @@ import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.TaskListScreen
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 
+/**
+ * Root screen hosting the navigation graph and bottom navigation bar for the app's main sections.
+ */
 @Composable
 fun MainScreen() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

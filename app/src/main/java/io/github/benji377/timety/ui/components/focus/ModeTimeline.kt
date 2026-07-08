@@ -35,6 +35,7 @@ import io.github.benji377.timety.ui.theme.ShadowColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
 
+/** Horizontal row of connected dots showing a focus mode's phases and the currently active one. */
 @Composable
 fun ModeTimeline(
     phases: List<SessionPhaseEntity>,
@@ -145,6 +146,7 @@ private fun ConnectorLine(isPast: Boolean, isRunningOrAwaiting: Boolean, lineCol
 }
 
 
+/** Returns the localized display name for a system focus mode, or [mode]'s own name otherwise. */
 @Composable
 fun localizedFocusModeName(mode: FocusModeEntity): String {
     if (!mode.isSystem) return mode.name

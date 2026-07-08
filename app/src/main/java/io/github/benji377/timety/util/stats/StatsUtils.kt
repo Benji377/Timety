@@ -1,9 +1,11 @@
 package io.github.benji377.timety.util.stats
 
 
+/** Small numeric helpers for building stats charts. */
 object StatsUtils {
 
 
+    /** Largest value in [values], never lower than [minimum] (useful as a chart axis ceiling). */
     fun maxValue(values: Iterable<Number>, minimum: Double = 0.0): Double {
         var maxValue = minimum
         for (value in values) {

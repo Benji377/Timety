@@ -23,6 +23,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
+/**
+ * Outlined text field built on [BasicTextField] with M3's [OutlinedTextFieldDefaults] decoration,
+ * so the app's custom [shape] and border widths can be applied without fighting M3's own OutlinedTextField.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimetyOutlinedTextField(
