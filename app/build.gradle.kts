@@ -89,6 +89,11 @@ android {
         // SARIF is uploaded to GitHub code scanning by the lint workflow.
         sarifReport = true
     }
+    packaging {
+        jniLibs {
+            keepDebugSymbols.add("**/*.so")
+        }
+    }
 }
 
 dependencies {
