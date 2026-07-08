@@ -105,7 +105,7 @@
     <string name="focusStatsSectionDistractionsEmpty">Deguna distrazions registredes per chësc di</string>
     <string name="focusStatsSectionDistractionsSubtitle">Di crì ora, distrazions plu nueves dant</string>
     <string name="focusStatsSectionDistractionsTitle">Distrazions</string>
-    <string name="focusStatsSectionSessionsEmpty">No focus sessions for this day</string>
+    <string name="focusStatsSectionSessionsEmpty">Deguna session de focus per ncuei</string>
     <string name="focusStatsSectionSessionsSubtitle">Unya sescion mostra l travert y la modalità de focus</string>
     <string name="focusStatsSectionSessionsTitle">Sescions de focus</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Sescions cun etichetes, liejedes a ncëries y abitudins</string>
@@ -201,9 +201,9 @@
     <string name="taskDetailsLabelEffort">Sforz</string>
     <string name="taskDetailsLabelLocation">Luelg</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
-    <string name="taskDetailsLocationDetails">Place Details</string>
-    <string name="taskDetailsLocationNoInfo">No place information found for this location</string>
-    <string name="taskDetailsLocationOffline">No internet connection – location search and place details are unavailable</string>
+    <string name="taskDetailsLocationDetails">detail dl post</string>
+    <string name="taskDetailsLocationNoInfo">Deguna infurmazions per chesc post</string>
+    <string name="taskDetailsLocationOffline">Deguna cunession a internet - Cri post y nfurmazios ie nia mesum</string>
     <string name="taskDetailsLabelReminderSet">Mët lezit</string>
     <string name="taskDetailsLabelReminderTooEarly">L lezit persunalisà muessa vester dant ala data de scadënza</string>
     <string name="taskDetailsLabelSubtaskHint">Njunté sot-ncëries…</string>
@@ -401,12 +401,12 @@
     <string name="wrapUpStatStreakLabel">Sëria ativa</string>
     <string name="wrapUpStatStreakValue">%1$d Di</string>
     <string name="wrapUpStatTasksLabel">Ncëries finedes</string>
-    <string name="categoryAddLabel">Add Category</string>
-    <string name="categoryColorLabel">Color</string>
+    <string name="categoryAddLabel">Njunté nueva categoria</string>
+    <string name="categoryColorLabel">Culëur</string>
     <string name="categoryDeleteContent">T\'es segur de ulëi scancelé \"%1$s\"? La ncëries cun chësta categoria restarà zënza.</string>
     <string name="categoryDeleteTitle">Scancelé la categoria?</string>
     <string name="categoryEditTitle">Mudé categoria</string>
-    <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
+    <string name="categoryEmpty">Mo deguna categories. Njonta una la su</string>
     <string name="categoryNameLabel">Inuem dla categoria</string>
     <string name="categoryTaskCountZero">Deguna ncëries</string>
     <plurals name="categoryTaskCount">
@@ -427,12 +427,12 @@
         <item quantity="other">%d tags</item>
     </plurals>
     <plurals name="settingsCategoriesCount">
-        <item quantity="zero">%d categories</item>
-        <item quantity="one">%d category</item>
-        <item quantity="two">%d categories</item>
-        <item quantity="few">%d categories</item>
-        <item quantity="many">%d categories</item>
-        <item quantity="other">%d categories</item>
+        <item quantity="zero">%d categuries</item>
+        <item quantity="one">%d categuria</item>
+        <item quantity="two">%d categuries</item>
+        <item quantity="few">%d categuries</item>
+        <item quantity="many">%d categuries</item>
+        <item quantity="other">%d categuries</item>
     </plurals>
     <string name="dialogTimeMachineEndTime">Ora de fin</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">L\'ora de fin muessa vester do l\'ora de taché</string>
