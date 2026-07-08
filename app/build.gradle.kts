@@ -21,6 +21,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        resourceConfigurations += setOf("en", "de", "it", "b+lld")
     }
 
     // Room writes a JSON snapshot of every schema version here (committed to git);
