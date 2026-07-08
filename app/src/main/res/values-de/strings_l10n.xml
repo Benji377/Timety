@@ -105,7 +105,7 @@
     <string name="focusStatsSectionDistractionsEmpty">Keine Ablenkungen für diesen Tag protokolliert</string>
     <string name="focusStatsSectionDistractionsSubtitle">Gewählter Tag, neueste Ablenkungen zuerst</string>
     <string name="focusStatsSectionDistractionsTitle">Ablenkungen</string>
-    <string name="focusStatsSectionSessionsEmpty">No focus sessions for this day</string>
+    <string name="focusStatsSectionSessionsEmpty">Keine Fokussitzungen für diesen Tag</string>
     <string name="focusStatsSectionSessionsSubtitle">Jede Sitzung zeigt das genaue Ziel und den Fokus-Modus</string>
     <string name="focusStatsSectionSessionsTitle">Fokus-Sitzungen</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Sitzungen mit Tags, Aufgaben- und Gewohnheits-Sitzungen</string>
@@ -197,9 +197,9 @@
     <string name="taskDetailsLabelEffort">Aufwand</string>
     <string name="taskDetailsLabelLocation">Ort</string>
     <string name="taskDetailsLabelPriority">Priorität</string>
-    <string name="taskDetailsLocationDetails">Place Details</string>
-    <string name="taskDetailsLocationNoInfo">No place information found for this location</string>
-    <string name="taskDetailsLocationOffline">No internet connection – location search and place details are unavailable</string>
+    <string name="taskDetailsLocationDetails">Details zum Ort</string>
+    <string name="taskDetailsLocationNoInfo">Keine Ortsinformationen für diesen Standort gefunden</string>
+    <string name="taskDetailsLocationOffline">Keine Internetverbindung - Standortsuche und Ortsinformationen sind nicht verfügbar</string>
     <string name="taskDetailsLabelReminderSet">Erinnerung einstellen</string>
     <string name="taskDetailsLabelReminderTooEarly">Die benutzerdefinierte Erinnerung muss vor dem Fälligkeitsdatum liegen</string>
     <string name="taskDetailsLabelSubtaskHint">Teilaufgaben hinzufügen…</string>
@@ -397,12 +397,12 @@
     <string name="wrapUpStatStreakLabel">Aktiver Streak</string>
     <string name="wrapUpStatStreakValue">%1$d Tag</string>
     <string name="wrapUpStatTasksLabel">Aufgaben erledigt</string>
-    <string name="categoryAddLabel">Add Category</string>
-    <string name="categoryColorLabel">Color</string>
+    <string name="categoryAddLabel">Kategorie hinzufügen</string>
+    <string name="categoryColorLabel">Farbe</string>
     <string name="categoryDeleteContent">Bist du sicher, dass du \"%1$s\" löschen möchtest? Aufgaben mit dieser Kategorie werden kategorielos.</string>
     <string name="categoryDeleteTitle">Kategorie löschen?</string>
     <string name="categoryEditTitle">Kategorie bearbeiten</string>
-    <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
+    <string name="categoryEmpty">Noch keine Kategorien. Tippen Sie auf den obigen Knopf, um eine hinzuzufügen.</string>
     <string name="categoryNameLabel">Kategoriename</string>
     <string name="categoryTaskCountZero">Keine Aufgaben</string>
     <plurals name="categoryTaskCount">
@@ -415,8 +415,8 @@
         <item quantity="other">%d tags</item>
     </plurals>
     <plurals name="settingsCategoriesCount">
-        <item quantity="one">%d category</item>
-        <item quantity="other">%d categories</item>
+        <item quantity="one">%d Kategorie</item>
+        <item quantity="other">%d Kategorien</item>
     </plurals>
     <string name="dialogTimeMachineEndTime">Endzeit</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">Die Endzeit muss nach der Startzeit liegen</string>
