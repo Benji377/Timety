@@ -410,6 +410,14 @@
         <item quantity="other">%d attività</item>
     </plurals>
     <string name="categoryTitle">Categorie</string>
+    <plurals name="settingsTagsCount">
+        <item quantity="one">%d tag</item>
+        <item quantity="other">%d tags</item>
+    </plurals>
+    <plurals name="settingsCategoriesCount">
+        <item quantity="one">%d category</item>
+        <item quantity="other">%d categories</item>
+    </plurals>
     <string name="dialogTimeMachineEndTime">Orario di fine</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">L\'orario di fine deve essere successivo a quello di inizio</string>
     <string name="dialogTimeMachineMode">Modalità di focus</string>
