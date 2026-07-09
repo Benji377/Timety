@@ -507,4 +507,34 @@
     <string name="distractionSnack">Spuntino</string>
     <string name="distractionStretched">Stretching</string>
     <string name="targetSheetTitle">Seleziona target del focus</string>
+    <string name="notificationChannelQuickHabitsName">Quick Habit Reminders</string>
+    <string name="notificationChannelQuickHabitsDesc">Interval nudges like drinking water</string>
+    <string name="quickHabitNotificationTitle">Quick Habit</string>
+    <string name="quickHabitsTitle">Quick Habits</string>
+    <string name="quickHabitsScreenEmpty">No quick habits yet! Tap Add to set an interval reminder</string>
+    <string name="quickHabitAddLabel">Add Quick Habit</string>
+    <string name="quickHabitEditTitle">Edit Quick Habit</string>
+    <string name="quickHabitNameLabel">Name</string>
+    <string name="quickHabitNameHint">e.g. Drink water</string>
+    <string name="quickHabitIntervalLabel">Repeat every</string>
+    <string name="quickHabitUnitMinutes">Minutes</string>
+    <string name="quickHabitUnitHours">Hours</string>
+    <string name="quickHabitAllDayLabel">All day</string>
+    <string name="quickHabitDaysLabel">Days</string>
+    <string name="quickHabitEveryDay">Every day</string>
+    <string name="quickHabitSpecificDays">Specific days</string>
+    <string name="quickHabitStartLabel">From</string>
+    <string name="quickHabitEndLabel">To</string>
+    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
+    <string name="quickHabitWindowFormat">%1$s–%2$s</string>
+    <string name="quickHabitDeleteTitle">Delete Quick Habit</string>
+    <string name="quickHabitDeleteContent">Are you sure you want to delete \"%1$s\"?</string>
+    <plurals name="quickHabitEveryHours">
+        <item quantity="one">Every %d hour</item>
+        <item quantity="other">Every %d hours</item>
+    </plurals>
+    <plurals name="quickHabitEveryMinutes">
+        <item quantity="one">Every %d minute</item>
+        <item quantity="other">Every %d minutes</item>
+    </plurals>
 </resources>
