@@ -462,6 +462,8 @@
     <string name="locationPickerTitle">Cëria Luelg</string>
     <string name="locationPickerUnknown">Luelg descunësciu</string>
     <string name="streakDayToday">Ncuei</string>
+    <string name="streakDontMissTwice">Don\'t miss twice!</string>
+    <string name="streakLegendBend">Saved</string>
     <string name="streakLegendStreakDay">Di de sëria</string>
     <string name="streakStatusActive">Ncuei iel atif y l prolungëia ti sëria.</string>
     <string name="streakStatusBuilding">Ncuei l cunta, ma la sëria ne n\'ie mo nia daldut njunteda.</string>
