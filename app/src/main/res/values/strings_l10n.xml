@@ -446,6 +446,8 @@
     <string name="locationPickerTitle">Search Location</string>
     <string name="locationPickerUnknown">Unknown Location</string>
     <string name="streakDayToday">Today</string>
+    <string name="streakDontMissTwice">Don\'t miss twice!</string>
+    <string name="streakLegendBend">Saved</string>
     <string name="streakLegendStreakDay">Streak day</string>
     <string name="streakStatusActive">Today is active and extending your streak.</string>
     <string name="streakStatusBuilding">Today counts, but the streak has not fully connected yet.</string>

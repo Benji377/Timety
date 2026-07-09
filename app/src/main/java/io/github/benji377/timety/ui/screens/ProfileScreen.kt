@@ -129,10 +129,8 @@ fun ProfileScreen(
     }
     val allActivityDates = (taskDates + habitDates + focusDates).distinct().sorted()
 
-    val currentStreak =
-        StreakCalculator.calculateCurrentStreak(
-            allActivityDates
-        )
+    val currentStreakInfo = StreakCalculator.currentStreak(allActivityDates)
+    val currentStreak = currentStreakInfo.length
     val highestStreak =
         StreakCalculator.calculateBestStreak(allActivityDates)
 
@@ -351,7 +349,10 @@ fun ProfileScreen(
             // Name Section (streak flame sits left of the name)
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    StreakStatusBadge(isActive = currentStreak > 0)
+                    StreakStatusBadge(
+                        isActive = currentStreak > 0,
+                        atRisk = currentStreakInfo.atRisk,
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = userName,

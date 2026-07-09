@@ -35,30 +35,69 @@ object StreakCalculator {
 
 
     /**
-     * Current streak ending today. If today has no completion yet, the streak still counts as
-     * active as long as yesterday was completed (so the streak isn't lost until the day passes
-     * with no completion); otherwise it walks backward day by day while completions exist.
+     * The forgiving current streak, following the Atomic Habits "never miss twice" rule: a single
+     * isolated missed day does not break the run (it just doesn't count), only two consecutive
+     * missed days do.
+     *
+     * @property length completed days in the run; bridged misses do not count.
+     * @property streakDayKeys day keys of the completed days in the run.
+     * @property bridgedDayKeys day keys of the isolated missed days bridged inside the run (the "bends").
+     * @property atRisk true when yesterday was missed and today is not done yet — the next miss breaks it.
      */
-    fun calculateCurrentStreak(completions: Iterable<LocalDate>): Int {
-        val dayKeys = completions.map { AppDateUtils.dayKey(it) }.toSet()
-        if (dayKeys.isEmpty()) return 0
-
-        var checkDate = LocalDate.now()
-
-        if (!dayKeys.contains(AppDateUtils.dayKey(checkDate))) {
-            val yesterday = checkDate.minusDays(1)
-            if (!dayKeys.contains(AppDateUtils.dayKey(yesterday))) return 0
-            checkDate = yesterday
+    data class CurrentStreak(
+        val length: Int,
+        val streakDayKeys: Set<String>,
+        val bridgedDayKeys: Set<String>,
+        val atRisk: Boolean,
+    ) {
+        companion object {
+            val EMPTY = CurrentStreak(0, emptySet(), emptySet(), false)
         }
+    }
 
-        var current = 0
-        while (dayKeys.contains(AppDateUtils.dayKey(checkDate))) {
-            current++
+    /**
+     * Walks backward from today applying the never-miss-twice rule. An incomplete *today* is never
+     * counted as a miss (the day hasn't ended), so the walk starts at yesterday in that case.
+     */
+    fun currentStreak(completions: Iterable<LocalDate>): CurrentStreak {
+        val dayKeys = completions.map { AppDateUtils.dayKey(it) }.toSet()
+        if (dayKeys.isEmpty()) return CurrentStreak.EMPTY
+
+        val today = LocalDate.now()
+        val earliest = LocalDate.parse(dayKeys.min())
+        fun done(day: LocalDate) = dayKeys.contains(AppDateUtils.dayKey(day))
+
+        // Today leniency: an incomplete today isn't a miss, so begin the walk at yesterday.
+        var checkDate = if (done(today)) today else today.minusDays(1)
+
+        val completed = mutableSetOf<String>()
+        val bridged = mutableSetOf<String>()
+        val pendingMisses = mutableListOf<String>()
+        var consecutiveMisses = 0
+
+        while (!checkDate.isBefore(earliest)) {
+            val key = AppDateUtils.dayKey(checkDate)
+            if (dayKeys.contains(key)) {
+                completed.add(key)
+                // A miss only counts as a bend once an older completion is found to sandwich it.
+                bridged.addAll(pendingMisses)
+                pendingMisses.clear()
+                consecutiveMisses = 0
+            } else {
+                consecutiveMisses++
+                if (consecutiveMisses >= 2) break
+                pendingMisses.add(key)
+            }
             checkDate = checkDate.minusDays(1)
         }
 
-        return current
+        val atRisk = completed.isNotEmpty() && !done(today) && !done(today.minusDays(1))
+        return CurrentStreak(completed.size, completed, bridged, atRisk)
     }
+
+    /** Length of the forgiving [currentStreak]; used by the profile and per-habit stats. */
+    fun calculateCurrentStreak(completions: Iterable<LocalDate>): Int =
+        currentStreak(completions).length
 
 
     private fun sortedUniqueDayKeys(dates: Iterable<LocalDate>): List<String> {
