@@ -5,6 +5,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.dataStore
@@ -67,7 +68,9 @@ class ReminderScheduler private constructor(private val context: Context) {
         dueDate: Instant? = null,
         exactDueDate: Boolean = false,
     ): String {
-        if (exactDueDate) return context.getString(R.string.taskReminderBodyExact, task.title)
+        if (exactDueDate) {
+            return context.getString(R.string.taskReminderBodyExact, task.title) + descriptionHint(task)
+        }
 
         val reference = dueDate ?: reminderTime
         val minutesUntilDue = Duration.between(reminderTime, reference).toMinutes()
@@ -89,7 +92,13 @@ class ReminderScheduler private constructor(private val context: Context) {
                 res.getQuantityString(R.plurals.nTaskReminderPrefixDays, d, d)
             }
         }
-        return context.getString(R.string.taskReminderBody, prefix, task.title)
+        return context.getString(R.string.taskReminderBody, prefix, task.title) + descriptionHint(task)
+    }
+
+    /** The task description's first non-empty line, appended on its own line so `BigTextStyle` surfaces the "why". */
+    private fun descriptionHint(task: TaskEntity): String {
+        val hint = task.description.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
+        return if (hint.isEmpty()) "" else "\n" + hint.take(100)
     }
 
     // Habits.
@@ -114,6 +123,28 @@ class ReminderScheduler private constructor(private val context: Context) {
     }
 
     fun cancelHabitReminder(habitId: String) = notificationService.cancelHabitReminder(habitId)
+
+    // Quick habits (interval reminders).
+
+
+    /** Schedules (or reschedules) a quick habit's interval alarm; disabled quick habits are only cancelled. */
+    fun scheduleQuickHabit(quickHabit: QuickHabitEntity) {
+        if (!quickHabit.isEnabled) {
+            notificationService.cancelQuickHabit(quickHabit.id)
+            return
+        }
+        notificationService.scheduleQuickHabit(
+            id = quickHabit.id,
+            title = context.getString(R.string.quickHabitNotificationTitle),
+            body = quickHabit.name,
+            intervalMinutes = quickHabit.intervalMinutes,
+            startMinuteOfDay = quickHabit.startMinuteOfDay,
+            endMinuteOfDay = quickHabit.endMinuteOfDay,
+            allowedWeekdays = HabitUtils.parseWeekdays(quickHabit.targetWeekdays),
+        )
+    }
+
+    fun cancelQuickHabit(id: String) = notificationService.cancelQuickHabit(id)
 
     // Daily motivation / evening checkup.
 
@@ -168,6 +199,8 @@ class ReminderScheduler private constructor(private val context: Context) {
                 .forEach { scheduler.scheduleTaskReminders(it.task) }
             app.container.habitRepository.allHabits.first()
                 .forEach { scheduler.scheduleHabitReminder(it) }
+            app.container.quickHabitRepository.allQuickHabits.first()
+                .forEach { scheduler.scheduleQuickHabit(it) }
             scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
             scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
         }

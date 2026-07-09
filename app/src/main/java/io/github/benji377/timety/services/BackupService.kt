@@ -17,6 +17,7 @@ import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
@@ -43,6 +44,7 @@ class BackupService(
 ) {
     private val taskDao get() = database.taskDao()
     private val habitDao get() = database.habitDao()
+    private val quickHabitDao get() = database.quickHabitDao()
     private val focusDao get() = database.focusDao()
     private val userDao get() = database.userDao()
 
@@ -118,6 +120,7 @@ class BackupService(
             put("tasks", tasksToJson())
             put("taskCategories", taskCategoriesToJson())
             put("habits", habitsToJson())
+            put("quickHabits", quickHabitsToJson())
             put("focus", focusToJson())
         }
     }
@@ -203,6 +206,25 @@ class BackupService(
                 put("completions", JSONArray(completions.map { it.completionDate.toString() }))
             }
             array.put(habitObj)
+        }
+        return array
+    }
+
+    private suspend fun quickHabitsToJson(): JSONArray {
+        val array = JSONArray()
+        for (quickHabit in quickHabitDao.getAll().first()) {
+            array.put(
+                JSONObject().apply {
+                    put("id", quickHabit.id)
+                    put("name", quickHabit.name)
+                    put("intervalMinutes", quickHabit.intervalMinutes)
+                    put("startMinuteOfDay", quickHabit.startMinuteOfDay ?: JSONObject.NULL)
+                    put("endMinuteOfDay", quickHabit.endMinuteOfDay ?: JSONObject.NULL)
+                    put("targetWeekdays", quickHabit.targetWeekdays ?: JSONObject.NULL)
+                    put("isEnabled", quickHabit.isEnabled)
+                    put("createdAt", quickHabit.createdAt.toString())
+                }
+            )
         }
         return array
     }
@@ -302,6 +324,7 @@ class BackupService(
         restoreTasks(json.optJSONArray("tasks") ?: JSONArray())
         restoreTaskCategories(json.optJSONArray("taskCategories") ?: JSONArray())
         restoreHabits(json.optJSONArray("habits") ?: JSONArray())
+        restoreQuickHabits(json.optJSONArray("quickHabits") ?: JSONArray())
         json.optJSONObject("focus")?.let { restoreFocus(it) }
     }
 
@@ -443,6 +466,27 @@ class BackupService(
     }
 
 
+    private fun restoreQuickHabits(quickHabitsJson: JSONArray) {
+        quickHabitDao.clearAll()
+        for (i in 0 until quickHabitsJson.length()) {
+            val json = quickHabitsJson.getJSONObject(i)
+            val id = readString(json, "id") ?: Instant.now().toEpochMilli().toString()
+            quickHabitDao.insert(
+                QuickHabitEntity(
+                    id = id,
+                    name = readString(json, "name") ?: "",
+                    intervalMinutes = json.optInt("intervalMinutes", 60).coerceAtLeast(1),
+                    startMinuteOfDay = readOptInt(json, "startMinuteOfDay"),
+                    endMinuteOfDay = readOptInt(json, "endMinuteOfDay"),
+                    targetWeekdays = readString(json, "targetWeekdays"),
+                    isEnabled = json.optBoolean("isEnabled", true),
+                    createdAt = readInstant(json, "createdAt") ?: Instant.now(),
+                )
+            )
+        }
+    }
+
+
     private fun restoreFocus(focusJson: JSONObject) {
         focusDao.clearAllSessions()
         focusDao.clearAllModes()
@@ -524,6 +568,9 @@ class BackupService(
 
     private fun readString(json: JSONObject, key: String): String? =
         if (json.has(key) && !json.isNull(key)) json.optString(key) else null
+
+    private fun readOptInt(json: JSONObject, key: String): Int? =
+        if (json.has(key) && !json.isNull(key)) json.optInt(key) else null
 
     private fun readInstant(json: JSONObject, key: String): Instant? {
         val raw = readString(json, key) ?: return null

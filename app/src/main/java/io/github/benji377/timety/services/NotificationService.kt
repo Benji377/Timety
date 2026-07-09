@@ -16,6 +16,7 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
+import io.github.benji377.timety.util.habit.QuickHabitScheduling
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZoneId
@@ -43,6 +44,11 @@ class NotificationService(private val context: Context) {
                 context.getString(R.string.notificationChannelHabitsName),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply { description = context.getString(R.string.notificationChannelHabitsDesc) },
+            NotificationChannel(
+                CHANNEL_QUICK_HABITS,
+                context.getString(R.string.notificationChannelQuickHabitsName),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply { description = context.getString(R.string.notificationChannelQuickHabitsDesc) },
             NotificationChannel(
                 CHANNEL_MOTIVATION,
                 context.getString(R.string.notificationChannelMotivationName),
@@ -125,6 +131,48 @@ class NotificationService(private val context: Context) {
         for (weekday in 1..7) cancelAlarmAndNotification(habitReminderId(habitId, weekday))
     }
 
+    // Quick habits (interval reminders).
+
+
+    /**
+     * Schedules the next occurrence of a quick habit as a single exact alarm; [rescheduleIfRepeating]
+     * chains the following one when it fires. Cancels any existing alarm first, so this doubles as
+     * the "reschedule after edit" path.
+     */
+    fun scheduleQuickHabit(
+        id: String,
+        title: String,
+        body: String,
+        intervalMinutes: Int,
+        startMinuteOfDay: Int?,
+        endMinuteOfDay: Int?,
+        allowedWeekdays: Set<Int>,
+    ) {
+        val notificationId = quickHabitId(id)
+        cancelAlarmAndNotification(notificationId)
+        val triggerAt = QuickHabitScheduling.nextTrigger(
+            now = Instant.now(),
+            intervalMinutes = intervalMinutes,
+            startMinuteOfDay = startMinuteOfDay,
+            endMinuteOfDay = endMinuteOfDay,
+            allowedWeekdays = allowedWeekdays,
+        )
+        val intent = reminderIntent(
+            notificationId = notificationId,
+            title = title,
+            body = body,
+            channelId = CHANNEL_QUICK_HABITS,
+            repeat = Repeat.INTERVAL,
+            intervalMinutes = intervalMinutes,
+            startMinuteOfDay = startMinuteOfDay ?: -1,
+            endMinuteOfDay = endMinuteOfDay ?: -1,
+            weekdaysCsv = allowedWeekdays.sorted().joinToString(","),
+        )
+        scheduleExact(triggerAt.toEpochMilli(), notificationId, intent)
+    }
+
+    fun cancelQuickHabit(id: String) = cancelAlarmAndNotification(quickHabitId(id))
+
     // Daily motivation.
 
 
@@ -197,16 +245,32 @@ class NotificationService(private val context: Context) {
 
     private fun channelAccentColor(channelId: String): Int = when (channelId) {
         CHANNEL_TASKS -> TaskColor
-        CHANNEL_HABITS -> HabitColor
+        CHANNEL_HABITS, CHANNEL_QUICK_HABITS -> HabitColor
         CHANNEL_FOCUS, CHANNEL_MOTIVATION -> FocusColor
         else -> UserColor
     }.toArgb()
 
-    /** Re-arms a fired alarm for its next occurrence if it was scheduled as daily/weekly repeating. */
+    /** Re-arms a fired alarm for its next occurrence if it was scheduled as daily/weekly/interval repeating. */
     internal fun rescheduleIfRepeating(intent: Intent) {
         val repeat = Repeat.fromExtra(intent.getStringExtra(EXTRA_REPEAT))
         if (repeat == Repeat.NONE) return
         val id = intent.getIntExtra(EXTRA_NOTIFICATION_ID, 0)
+        if (repeat == Repeat.INTERVAL) {
+            val weekdays = intent.getStringExtra(EXTRA_WEEKDAYS)
+                ?.split(",")
+                ?.mapNotNull { it.toIntOrNull() }
+                ?.toSet()
+                .orEmpty()
+            val triggerAt = QuickHabitScheduling.nextTrigger(
+                now = Instant.now(),
+                intervalMinutes = intent.getIntExtra(EXTRA_INTERVAL, 60),
+                startMinuteOfDay = intent.getIntExtra(EXTRA_START_MIN, -1).takeIf { it >= 0 },
+                endMinuteOfDay = intent.getIntExtra(EXTRA_END_MIN, -1).takeIf { it >= 0 },
+                allowedWeekdays = weekdays,
+            )
+            scheduleExact(triggerAt.toEpochMilli(), id, intent)
+            return
+        }
         val hour = intent.getIntExtra(EXTRA_HOUR, 0)
         val minute = intent.getIntExtra(EXTRA_MINUTE, 0)
         val weekday = if (repeat == Repeat.WEEKLY) intent.getIntExtra(EXTRA_WEEKDAY, -1) else null
@@ -264,6 +328,10 @@ class NotificationService(private val context: Context) {
         weekday: Int = -1,
         hour: Int = -1,
         minute: Int = -1,
+        intervalMinutes: Int = -1,
+        startMinuteOfDay: Int = -1,
+        endMinuteOfDay: Int = -1,
+        weekdaysCsv: String = "",
     ): Intent = Intent(context, ReminderReceiver::class.java).apply {
         putExtra(EXTRA_NOTIFICATION_ID, notificationId)
         putExtra(EXTRA_TITLE, title)
@@ -274,6 +342,10 @@ class NotificationService(private val context: Context) {
         putExtra(EXTRA_WEEKDAY, weekday)
         putExtra(EXTRA_HOUR, hour)
         putExtra(EXTRA_MINUTE, minute)
+        putExtra(EXTRA_INTERVAL, intervalMinutes)
+        putExtra(EXTRA_START_MIN, startMinuteOfDay)
+        putExtra(EXTRA_END_MIN, endMinuteOfDay)
+        putExtra(EXTRA_WEEKDAYS, weekdaysCsv)
     }
 
 
@@ -302,7 +374,7 @@ class NotificationService(private val context: Context) {
     }
 
     private enum class Repeat {
-        NONE, DAILY, WEEKLY;
+        NONE, DAILY, WEEKLY, INTERVAL;
 
         companion object {
             fun fromExtra(value: String?): Repeat = entries.find { it.name == value } ?: NONE
@@ -312,6 +384,7 @@ class NotificationService(private val context: Context) {
     companion object {
         const val CHANNEL_TASKS = "task_reminders_channel"
         const val CHANNEL_HABITS = "habit_reminders_channel"
+        const val CHANNEL_QUICK_HABITS = "quick_habit_reminders_channel"
         const val CHANNEL_MOTIVATION = "daily_motivation_channel"
         const val CHANNEL_EVENING = "evening_checkup_channel"
         const val CHANNEL_FOCUS = "focus_timer_channel"
@@ -329,6 +402,10 @@ class NotificationService(private val context: Context) {
         internal const val EXTRA_HOUR = "hour"
         internal const val EXTRA_MINUTE = "minute"
         internal const val EXTRA_REPEAT = "repeat"
+        internal const val EXTRA_INTERVAL = "intervalMinutes"
+        internal const val EXTRA_START_MIN = "startMinuteOfDay"
+        internal const val EXTRA_END_MIN = "endMinuteOfDay"
+        internal const val EXTRA_WEEKDAYS = "allowedWeekdays"
 
 
         /** Deterministic notification/request-code ID for a habit's reminder, optionally scoped to one weekday. */
@@ -336,5 +413,13 @@ class NotificationService(private val context: Context) {
             val suffix = if (weekday == null) "daily" else "weekday_$weekday"
             return "habit_time_${habitId}_$suffix".hashCode()
         }
+
+        /**
+         * Deterministic notification/request-code ID for a quick habit. XOR-masked so it can never
+         * collide with a task reminder's slots (`task.id.hashCode() + 0..10`) even for equal ids.
+         */
+        fun quickHabitId(id: String): Int = id.hashCode() xor QUICK_HABIT_ID_MASK
+
+        private const val QUICK_HABIT_ID_MASK = 0x5175_4842 // "QuHB"
     }
 }

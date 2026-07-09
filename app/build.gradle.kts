@@ -33,6 +33,13 @@ android {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
 
+    // Expose the committed schema JSONs to MigrationTestHelper as instrumentation-test assets.
+    sourceSets {
+        getByName("androidTest") {
+            assets.srcDirs(files("$projectDir/schemas"))
+        }
+    }
+
     signingConfigs {
         // Used by the release CI workflow; falls back to an unsigned build locally.
         val keystorePath = System.getenv("KEYSTORE_PATH")
@@ -96,6 +103,18 @@ android {
     }
 }
 
+// room-testing 2.8.4 parses the schema JSONs with kotlinx-serialization 1.8.x, but
+// navigation-compose pins the whole group to 1.7.3 (strictly), which crashes MigrationTestHelper
+// with an AbstractMethodError. Force the newer, backward-compatible version for the test classpath.
+configurations.matching { it.name.contains("AndroidTest") }.configureEach {
+    resolutionStrategy.force(
+        "org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.8.1",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.1",
+    )
+}
+
 dependencies {
     // Core
     implementation("androidx.core:core-ktx:1.19.0")
@@ -123,6 +142,7 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
+    androidTestImplementation("androidx.room:room-testing:$roomVersion")
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.2.1")

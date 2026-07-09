@@ -81,14 +81,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        // Hold off until the legacy-data migration (if any) has finished: composing earlier
-                        // would seed default data into the empty database and abort the migration. Normal
-                        // launches flip this immediately.
-                        val startupComplete by (application as TimetyApplication)
-                            .startupComplete.collectAsState()
-                        if (startupComplete) {
-                            MainScreen()
-                        }
+                        MainScreen()
                     }
                 }
             }

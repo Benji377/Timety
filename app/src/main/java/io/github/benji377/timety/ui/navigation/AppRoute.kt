@@ -7,6 +7,7 @@ enum class AppRoute(val route: String) {
     FOCUS_TAGS("focus_tags"),
     SETTINGS("settings"),
     TASK_CATEGORIES("task_categories"),
+    QUICK_HABITS("quick_habits"),
     TASK_DETAIL("task_detail"),
     HABIT_DETAIL("habit_detail");
 

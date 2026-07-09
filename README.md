@@ -134,4 +134,4 @@ How to contribute:
 *Note: If you ever need context for a specific word or phrase, drop by our GitHub Discussions and ask!*
 
 ## Privacy
-Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Hive. No accounts, no cloud sync, no tracking.
+Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Room. No accounts, no cloud sync, no tracking.

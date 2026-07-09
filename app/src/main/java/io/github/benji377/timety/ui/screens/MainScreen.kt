@@ -34,6 +34,7 @@ import io.github.benji377.timety.ui.screens.focus.FocusModesScreen
 import io.github.benji377.timety.ui.screens.focus.FocusScreen
 import io.github.benji377.timety.ui.screens.habit.HabitDetailScreen
 import io.github.benji377.timety.ui.screens.habit.HabitListScreen
+import io.github.benji377.timety.ui.screens.habit.QuickHabitsScreen
 import io.github.benji377.timety.ui.screens.task.TaskCategoriesScreen
 import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.TaskListScreen
@@ -156,7 +157,8 @@ fun MainScreen() {
                 HabitListScreen(
                     onNavigateToHabitDetail = { habitId ->
                         navController.navigate(AppRoute.habitDetail(habitId))
-                    }
+                    },
+                    onNavigateToQuickHabits = { navController.navigate(AppRoute.QUICK_HABITS.route) }
                 )
             }
             composable(BottomNavItem.Profile.route) {
@@ -196,6 +198,11 @@ fun MainScreen() {
             }
             composable(AppRoute.TASK_CATEGORIES.route) {
                 TaskCategoriesScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(AppRoute.QUICK_HABITS.route) {
+                QuickHabitsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

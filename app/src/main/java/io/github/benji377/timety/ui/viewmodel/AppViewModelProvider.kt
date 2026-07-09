@@ -50,6 +50,13 @@ object AppViewModelProvider {
                     )
                 }
 
+                modelClass.isAssignableFrom(QuickHabitViewModel::class.java) -> {
+                    QuickHabitViewModel(
+                        application,
+                        container.quickHabitRepository
+                    )
+                }
+
                 modelClass.isAssignableFrom(FocusViewModel::class.java) -> {
                     FocusViewModel(
                         application,
