@@ -3,7 +3,7 @@ package io.github.benji377.timety.data.local
 import androidx.room.TypeConverter
 import java.time.Instant
 
-/** Room type converters for [Instant], lists of [Instant], and lists of [String]. */
+/** Room type converters for [Instant] and for lists of [Instant], [Int], and [String]. */
 class Converters {
     @TypeConverter
     fun fromTimestamp(value: Long?): Instant? {
@@ -30,6 +30,17 @@ class Converters {
                 null
             }
         }
+    }
+
+    @TypeConverter
+    fun fromIntList(values: List<Int>?): String {
+        return values?.joinToString(",") ?: ""
+    }
+
+    @TypeConverter
+    fun toIntList(data: String?): List<Int> {
+        if (data.isNullOrBlank()) return emptyList()
+        return data.split(",").mapNotNull { it.trim().toIntOrNull() }
     }
 
     @TypeConverter

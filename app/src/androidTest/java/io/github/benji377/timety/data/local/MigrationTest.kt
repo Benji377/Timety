@@ -25,7 +25,7 @@ class MigrationTest {
     )
 
     @Test
-    fun migrate1To2_addsQuickHabitsAndKeepsData() {
+    fun migrate1To2_addsNewTablesAndKeepsData() {
         val dbName = "migration-test"
 
         // Create the released v1 database and seed a habit that must survive the upgrade.
@@ -45,10 +45,12 @@ class MigrationTest {
             cursor.moveToFirst()
             assertEquals("Read", cursor.getString(0))
         }
-        // The new table exists and is queryable.
-        db.query("SELECT COUNT(*) FROM quick_habits").use { cursor ->
-            cursor.moveToFirst()
-            assertEquals(0, cursor.getInt(0))
+        // The new quick_habits and recurring-task tables exist and are queryable.
+        listOf("quick_habits", "recurring_tasks", "recurring_occurrences").forEach { table ->
+            db.query("SELECT COUNT(*) FROM $table").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(0, cursor.getInt(0))
+            }
         }
         db.close()
     }

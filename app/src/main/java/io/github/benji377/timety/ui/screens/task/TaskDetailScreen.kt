@@ -288,7 +288,7 @@ fun TaskDetailScreen(
                                 reminders = reminders,
                                 isCompleted = existingTask?.isCompleted ?: false,
                                 completedAt = existingTask?.completedAt,
-                                createdAt = existingTask?.createdAt ?: Instant.now()
+                                createdAt = existingTask?.createdAt ?: Instant.now(),
                             )
                             if (isNewTask) {
                                 val subtasksToSave =

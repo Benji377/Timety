@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -68,7 +69,8 @@ import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as
 @Composable
 fun TaskListScreen(
     viewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onNavigateToTaskDetail: (String?) -> Unit
+    onNavigateToTaskDetail: (String?) -> Unit,
+    onNavigateToRecurring: () -> Unit = {},
 ) {
     val tasks by viewModel.allTasks.collectAsState()
 
@@ -103,7 +105,15 @@ fun TaskListScreen(
     Scaffold(
         topBar = {
             TimetyTopBar(
-                title = stringResource(R.string.taskListTitle)
+                title = stringResource(R.string.taskListTitle),
+                actions = {
+                    IconButton(onClick = onNavigateToRecurring) {
+                        Icon(
+                            imageVector = Icons.Filled.Repeat,
+                            contentDescription = stringResource(R.string.recurringTasksTitle),
+                        )
+                    }
+                }
             )
         },
         floatingActionButton = {

@@ -42,6 +42,14 @@ object AppViewModelProvider {
                     )
                 }
 
+                modelClass.isAssignableFrom(RecurringTaskViewModel::class.java) -> {
+                    RecurringTaskViewModel(
+                        application,
+                        container.recurringTaskRepository,
+                        container.userRepository
+                    )
+                }
+
                 modelClass.isAssignableFrom(HabitViewModel::class.java) -> {
                     HabitViewModel(
                         application,

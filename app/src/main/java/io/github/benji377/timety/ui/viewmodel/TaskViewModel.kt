@@ -64,20 +64,20 @@ class TaskViewModel(
     }
 
     fun toggleTaskCompletion(task: TaskEntity) {
-        val updatedTask = task.copy(
-            isCompleted = !task.isCompleted,
-            completedAt = if (!task.isCompleted) Instant.now() else null
-        )
         viewModelScope.launch {
+            val updatedTask = task.copy(
+                isCompleted = !task.isCompleted,
+                completedAt = if (!task.isCompleted) Instant.now() else null
+            )
             taskRepository.updateTask(updatedTask)
             scheduleTaskReminders(updatedTask)
-            updateWidgets()
             val xpAmount = ExperienceEngine.XP_PER_TASK
             if (updatedTask.isCompleted) {
                 userRepository.addXp(xpAmount)
             } else {
                 userRepository.addXp(-xpAmount)
             }
+            updateWidgets()
         }
     }
 
