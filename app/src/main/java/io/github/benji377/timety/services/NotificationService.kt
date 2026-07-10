@@ -1,6 +1,7 @@
 package io.github.benji377.timety.services
 
 import android.app.AlarmManager
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -12,13 +13,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
+import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.QuickHabitScheduling
 import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -215,6 +219,52 @@ class NotificationService(private val context: Context) {
     // Called by ReminderReceiver when an alarm fires.
 
     internal fun showNotification(id: Int, channelId: String, title: String, body: String) {
+        notifySafely(id, reminderNotification(id, channelId, title, body).build())
+    }
+
+    /**
+     * Shows the end-of-day checkup with one-tap Bad/OK/Great rating actions handled by
+     * [DayRatingReceiver]. The rated day is captured at post time, so a tap after midnight still
+     * rates the evening's day. [localized] resolves the action labels in the app locale.
+     */
+    internal fun showEndOfDayNotification(
+        id: Int,
+        title: String,
+        body: String,
+        localized: Context,
+    ) {
+        val dayKey = AppDateUtils.dayKey(LocalDate.now())
+        val builder = reminderNotification(id, CHANNEL_EVENING, title, body)
+        DayRating.entries.forEach { rating ->
+            val actionIntent = Intent(context, DayRatingReceiver::class.java).apply {
+                putExtra(DayRatingReceiver.EXTRA_DAY_KEY, dayKey)
+                putExtra(DayRatingReceiver.EXTRA_RATING, rating.value)
+            }
+            val pendingAction = PendingIntent.getBroadcast(
+                context,
+                // Distinct request code per rating: extras alone don't distinguish PendingIntents.
+                rating.value,
+                actionIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+            builder.addAction(0, dayRatingActionLabel(localized, rating), pendingAction)
+        }
+        notifySafely(id, builder.build())
+    }
+
+    private fun dayRatingActionLabel(localized: Context, rating: DayRating): String =
+        when (rating) {
+            DayRating.BAD -> localized.getString(R.string.dayRatingBad)
+            DayRating.OK -> localized.getString(R.string.dayRatingOk)
+            DayRating.GREAT -> localized.getString(R.string.dayRatingGreat)
+        }
+
+    private fun reminderNotification(
+        id: Int,
+        channelId: String,
+        title: String,
+        body: String,
+    ): NotificationCompat.Builder {
         val contentIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -224,7 +274,7 @@ class NotificationService(private val context: Context) {
             contentIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val notification = NotificationCompat.Builder(context, channelId)
+        return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
@@ -234,7 +284,9 @@ class NotificationService(private val context: Context) {
             .setColor(channelAccentColor(channelId))
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
+    }
+
+    private fun notifySafely(id: Int, notification: Notification) {
         try {
             notificationManager.notify(id, notification)
         } catch (e: SecurityException) {

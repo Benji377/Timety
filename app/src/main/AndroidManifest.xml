@@ -53,6 +53,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".services.DayRatingReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".services.TimerSoundReceiver"
             android:exported="false" />
 

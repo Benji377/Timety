@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import io.github.benji377.timety.data.local.ALL_MIGRATIONS
 import io.github.benji377.timety.data.local.TimetyDatabase
+import io.github.benji377.timety.data.repository.DayRatingRepository
 import io.github.benji377.timety.data.repository.FocusRepository
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.QuickHabitRepository
@@ -25,6 +26,7 @@ interface AppContainer {
     val quickHabitRepository: QuickHabitRepository
     val focusRepository: FocusRepository
     val userRepository: UserRepository
+    val dayRatingRepository: DayRatingRepository
     val settingsRepository: SettingsRepository
     val backupService: BackupService
 }
@@ -61,6 +63,10 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val userRepository: UserRepository by lazy {
         UserRepository(database.userDao())
+    }
+
+    override val dayRatingRepository: DayRatingRepository by lazy {
+        DayRatingRepository(database.dayRatingDao())
     }
 
     override val settingsRepository: SettingsRepository by lazy {

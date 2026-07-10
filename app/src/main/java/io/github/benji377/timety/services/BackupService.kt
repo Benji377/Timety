@@ -27,6 +27,8 @@ import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
+import io.github.benji377.timety.data.model.user.DayRating
+import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -52,6 +54,7 @@ class BackupService(
     private val quickHabitDao get() = database.quickHabitDao()
     private val focusDao get() = database.focusDao()
     private val userDao get() = database.userDao()
+    private val dayRatingDao get() = database.dayRatingDao()
 
 
     fun suggestedFileName(): String = "Timety_Export_${System.currentTimeMillis()}.json"
@@ -127,6 +130,7 @@ class BackupService(
             put("recurringTasks", recurringTasksToJson())
             put("habits", habitsToJson())
             put("quickHabits", quickHabitsToJson())
+            put("dayRatings", dayRatingsToJson())
             put("focus", focusToJson())
         }
     }
@@ -265,6 +269,20 @@ class BackupService(
         return array
     }
 
+    private suspend fun dayRatingsToJson(): JSONArray {
+        val array = JSONArray()
+        for (rating in dayRatingDao.getAll().first()) {
+            array.put(
+                JSONObject().apply {
+                    put("dayKey", rating.dayKey)
+                    put("rating", rating.rating)
+                    put("createdAt", rating.createdAt.toString())
+                }
+            )
+        }
+        return array
+    }
+
     private suspend fun focusToJson(): JSONObject {
         val modes = focusDao.getAllModes().first()
         val modesArray = JSONArray()
@@ -363,6 +381,7 @@ class BackupService(
         restoreRecurringTasks(json.optJSONArray("recurringTasks") ?: JSONArray())
         restoreHabits(json.optJSONArray("habits") ?: JSONArray())
         restoreQuickHabits(json.optJSONArray("quickHabits") ?: JSONArray())
+        restoreDayRatings(json.optJSONArray("dayRatings") ?: JSONArray())
         json.optJSONObject("focus")?.let { restoreFocus(it) }
     }
 
@@ -554,6 +573,24 @@ class BackupService(
                     endMinuteOfDay = readOptInt(json, "endMinuteOfDay"),
                     targetWeekdays = readString(json, "targetWeekdays"),
                     isEnabled = json.optBoolean("isEnabled", true),
+                    createdAt = readInstant(json, "createdAt") ?: Instant.now(),
+                )
+            )
+        }
+    }
+
+
+    private fun restoreDayRatings(ratingsJson: JSONArray) {
+        dayRatingDao.clearAll()
+        for (i in 0 until ratingsJson.length()) {
+            val json = ratingsJson.getJSONObject(i)
+            val dayKey = readString(json, "dayKey") ?: continue
+            // Skip ratings outside the known scale rather than importing garbage.
+            val rating = DayRating.fromValue(json.optInt("rating")) ?: continue
+            dayRatingDao.upsert(
+                DayRatingEntity(
+                    dayKey = dayKey,
+                    rating = rating.value,
                     createdAt = readInstant(json, "createdAt") ?: Instant.now(),
                 )
             )

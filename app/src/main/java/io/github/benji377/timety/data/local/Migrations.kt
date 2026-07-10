@@ -9,8 +9,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  */
 
 /**
- * 2.1.0 schema additions: the `quick_habits` table (interval reminders) and the `recurring_tasks`
- * / `recurring_occurrences` tables (recurring tasks with their completion log).
+ * 2.1.0 schema additions: the `quick_habits` table (interval reminders), the `recurring_tasks`
+ * / `recurring_occurrences` tables (recurring tasks with their completion log), and the
+ * `day_ratings` table (end-of-day quality ratings).
  */
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -40,6 +41,11 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL(
             "CREATE INDEX IF NOT EXISTS `index_recurring_occurrences_recurringTaskId` " +
                 "ON `recurring_occurrences` (`recurringTaskId`)"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `day_ratings` (" +
+                "`dayKey` TEXT NOT NULL, `rating` INTEGER NOT NULL, " +
+                "`createdAt` INTEGER NOT NULL, PRIMARY KEY(`dayKey`))"
         )
     }
 }

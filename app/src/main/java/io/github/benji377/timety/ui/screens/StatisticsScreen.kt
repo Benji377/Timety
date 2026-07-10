@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -65,22 +66,29 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.user.DayRating
+import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.screens.focus.FocusStatsScreen
 import io.github.benji377.timety.ui.screens.habit.HabitStatsScreen
 import io.github.benji377.timety.ui.screens.task.TaskStatsScreen
+import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.DayRatingViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.stats.DayQualityCalculator
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
@@ -195,9 +203,11 @@ private fun OverviewStatsScreen(
     recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    dayRatingViewModel: DayRatingViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
+    val dayRatings by dayRatingViewModel.allRatings.collectAsState()
     val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
     // Collected so the KPI/chart recompute whenever new sessions are logged.
     val sessions by focusViewModel.allSessions.collectAsState()
@@ -220,6 +230,15 @@ private fun OverviewStatsScreen(
             map[day] = (map[day] ?: 0) + 1
         }
         map
+    }
+
+    // Day-keyed activity maps for the day-quality breakdown.
+    val focusMinutesByDayKey = remember(sessions) {
+        sessions.groupBy { AppDateUtils.dayKey(it.startTime.atZone(zone).toLocalDate()) }
+            .mapValues { (_, daySessions) -> daySessions.sumOf { it.totalSecondsFocused } / 60 }
+    }
+    val tasksByDayKey = remember(tasksPerDay) {
+        tasksPerDay.mapKeys { (day, _) -> AppDateUtils.dayKey(day) }
     }
 
     val tasksCompletedToday = tasksPerDay[now] ?: 0
@@ -323,8 +342,118 @@ private fun OverviewStatsScreen(
                     .height(250.dp)
             )
             Spacer(Modifier.height(40.dp))
+
+            DayQualityCard(
+                ratings = dayRatings,
+                focusMinutesByDay = focusMinutesByDayKey,
+                tasksCompletedByDay = tasksByDayKey,
+            )
+            Spacer(Modifier.height(40.dp))
         }
     }
+}
+
+/**
+ * Day-quality breakdown from the evening checkup ratings: the average rating plus, per rating,
+ * how much focus and how many completed tasks those days averaged.
+ */
+@Composable
+private fun DayQualityCard(
+    ratings: List<DayRatingEntity>,
+    focusMinutesByDay: Map<String, Int>,
+    tasksCompletedByDay: Map<String, Int>,
+) {
+    Text(
+        text = stringResource(R.string.statsDayQualityTitle),
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold
+    )
+    Spacer(Modifier.height(4.dp))
+    Text(
+        text = stringResource(R.string.statsDayQualitySubtitle),
+        fontSize = 12.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Spacer(Modifier.height(16.dp))
+
+    val average = DayQualityCalculator.averageRating(ratings)
+    if (average == null) {
+        Text(
+            text = stringResource(R.string.statsDayQualityEmpty),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        return
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(stringResource(R.string.statsDayQualityAverage), fontWeight = FontWeight.SemiBold)
+        Text(
+            text = String.format(
+                LocalLocale.current.platformLocale, "%.1f / %d", average, DayRating.GREAT.value
+            ),
+            fontWeight = FontWeight.Bold
+        )
+    }
+    Spacer(Modifier.height(16.dp))
+
+    DayQualityCalculator.buckets(ratings, focusMinutesByDay, tasksCompletedByDay)
+        .forEach { bucket ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LegendDot(dayRatingColor(bucket.rating))
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = dayRatingLabel(bucket.rating),
+                            fontWeight = FontWeight.Bold,
+                            color = dayRatingColor(bucket.rating)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = quantityString(
+                                R.plurals.statsDayQualityDays,
+                                bucket.dayCount,
+                                0,
+                                bucket.dayCount
+                            ),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        text = stringResource(
+                            R.string.statsDayQualityRowStats,
+                            bucket.avgFocusMinutes,
+                            bucket.avgTasksCompleted
+                        ),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+}
+
+@Composable
+private fun dayRatingLabel(rating: DayRating): String = when (rating) {
+    DayRating.BAD -> stringResource(R.string.dayRatingBad)
+    DayRating.OK -> stringResource(R.string.dayRatingOk)
+    DayRating.GREAT -> stringResource(R.string.dayRatingGreat)
+}
+
+private fun dayRatingColor(rating: DayRating): Color = when (rating) {
+    DayRating.BAD -> ErrorColor
+    DayRating.OK -> WarningColor
+    DayRating.GREAT -> SuccessColor
 }
 
 @Composable

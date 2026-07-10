@@ -48,17 +48,42 @@ class ReminderReceiver : BroadcastReceiver() {
             return
         }
 
+        if (channelId == NotificationService.CHANNEL_EVENING) {
+            val pendingResult = goAsync()
+            CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                try {
+                    notificationService.showEndOfDayNotification(
+                        notificationId,
+                        title,
+                        body,
+                        localized = localizedContext(appContext),
+                    )
+                    notificationService.rescheduleIfRepeating(intent)
+                } finally {
+                    pendingResult.finish()
+                }
+            }
+            return
+        }
+
         notificationService.showNotification(notificationId, channelId, title, body)
         notificationService.rescheduleIfRepeating(intent)
     }
 
 
-    private suspend fun motivationBody(context: Context, fallback: String): String {
-        val app = context.applicationContext as? TimetyApplication ?: return fallback
-        val localized = LocaleHelper.wrap(
+    /** [context] wrapped in the user's chosen app locale; the plain context if unavailable. */
+    private suspend fun localizedContext(context: Context): Context {
+        val app = context.applicationContext as? TimetyApplication ?: return context
+        return LocaleHelper.wrap(
             app,
             app.container.settingsRepository.appLocaleCodeFlow.first()
         )
+    }
+
+
+    private suspend fun motivationBody(context: Context, fallback: String): String {
+        val app = context.applicationContext as? TimetyApplication ?: return fallback
+        val localized = localizedContext(app)
         val quotes = listOf(
             localized.getString(R.string.notificationQuote1),
             localized.getString(R.string.notificationQuote2),

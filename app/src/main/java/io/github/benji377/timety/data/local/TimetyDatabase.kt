@@ -3,6 +3,7 @@ package io.github.benji377.timety.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import io.github.benji377.timety.data.local.dao.DayRatingDao
 import io.github.benji377.timety.data.local.dao.FocusDao
 import io.github.benji377.timety.data.local.dao.HabitDao
 import io.github.benji377.timety.data.local.dao.QuickHabitDao
@@ -22,6 +23,7 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
+import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 
 @Database(
@@ -39,7 +41,8 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
         HabitEntity::class,
         HabitCompletionEntity::class,
         QuickHabitEntity::class,
-        UserProfileEntity::class
+        UserProfileEntity::class,
+        DayRatingEntity::class
     ],
     version = 2,
     exportSchema = true
@@ -53,4 +56,5 @@ abstract class TimetyDatabase : RoomDatabase() {
     abstract fun quickHabitDao(): QuickHabitDao
     abstract fun focusDao(): FocusDao
     abstract fun userDao(): UserDao
+    abstract fun dayRatingDao(): DayRatingDao
 }
