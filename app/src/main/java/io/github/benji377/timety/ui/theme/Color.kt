@@ -60,6 +60,10 @@ val PickerPalette = listOf(
 // Streak flame inner-glow highlight.
 val FlameGlowColor = Color(0xFFFFE08A)
 
+// Frozen-streak flame: icy body and pale core, used when the streak is on the "don't miss twice" brink.
+val FrostColor = Color(0xFF60A5FA)
+val FrostGlowColor = Color(0xFFCFE8FF)
+
 // Extra hues for categorical charts once the core section palette runs out.
 val ChartTeal = Color(0xFF009688)
 val ChartDeepOrange = Color(0xFFFF5722)

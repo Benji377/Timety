@@ -74,6 +74,7 @@ import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.util.stats.StreakCalculator
@@ -94,11 +95,13 @@ fun ProfileScreen(
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory),
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = io.github.benji377.timety.ui.viewmodel.activityScopedViewModel()
 ) {
     val userProfile by userViewModel.userProfile.collectAsState()
     val tasks by taskViewModel.allTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
+    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
     val currentLevel by userViewModel.currentLevel.collectAsState()
     val levelTitle by userViewModel.levelTitle.collectAsState()
@@ -107,7 +110,9 @@ fun ProfileScreen(
     val userName = userProfile?.name ?: "User"
     val totalXp = userProfile?.totalXp ?: 0
 
-    val totalTasksDone = tasks.count { it.task.isCompleted }
+    // Each logged recurring occurrence counts as a completed task.
+    val totalTasksDone = tasks.count { it.task.isCompleted } +
+        recurringItems.sumOf { it.occurrences.size }
     val totalHabitsMet = habitsWithCompletions.sumOf { it.completions.size }
     val totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60
     val totalSessions = sessions.size
@@ -115,6 +120,10 @@ fun ProfileScreen(
     val taskDates = tasks.mapNotNull {
         if (it.task.isCompleted) it.task.completedAt?.atZone(java.time.ZoneId.systemDefault())
             ?.toLocalDate() else null
+    } + recurringItems.flatMap { item ->
+        item.occurrences.map {
+            it.completedAt.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        }
     }
     val habitDates = habitsWithCompletions.flatMap {
         it.completions.map { c ->
@@ -129,10 +138,8 @@ fun ProfileScreen(
     }
     val allActivityDates = (taskDates + habitDates + focusDates).distinct().sorted()
 
-    val currentStreak =
-        StreakCalculator.calculateCurrentStreak(
-            allActivityDates
-        )
+    val currentStreakInfo = StreakCalculator.currentStreak(allActivityDates)
+    val currentStreak = currentStreakInfo.length
     val highestStreak =
         StreakCalculator.calculateBestStreak(allActivityDates)
 
@@ -351,7 +358,10 @@ fun ProfileScreen(
             // Name Section (streak flame sits left of the name)
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    StreakStatusBadge(isActive = currentStreak > 0)
+                    StreakStatusBadge(
+                        isActive = currentStreak > 0,
+                        atRisk = currentStreakInfo.atRisk,
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = userName,

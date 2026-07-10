@@ -6,6 +6,7 @@ import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
+import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.dataStore
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 
 /** Builds and cancels the reminder notifications for tasks, habits, and daily/evening check-ins. */
@@ -39,7 +41,7 @@ class ReminderScheduler private constructor(private val context: Context) {
                 notificationService.scheduleTaskReminder(
                     notificationId = baseId + slot,
                     title = context.getString(R.string.taskReminderTitle, task.title),
-                    body = buildReminderBody(task, reminder, dueDate = task.dueDate),
+                    body = buildReminderBody(task.title, task.description, reminder, dueDate = task.dueDate),
                     scheduledTime = reminder,
                 )
                 slot++
@@ -50,7 +52,7 @@ class ReminderScheduler private constructor(private val context: Context) {
             notificationService.scheduleTaskReminder(
                 notificationId = baseId,
                 title = context.getString(R.string.taskReminderTitle, task.title),
-                body = buildReminderBody(task, task.dueDate, exactDueDate = true),
+                body = buildReminderBody(task.title, task.description, task.dueDate, exactDueDate = true),
                 scheduledTime = task.dueDate,
             )
         }
@@ -61,15 +63,57 @@ class ReminderScheduler private constructor(private val context: Context) {
         for (i in 0 until TASK_ID_SLOTS) notificationService.cancelNotification(baseId + i)
     }
 
+    // Recurring tasks.
+
+
+    /**
+     * Schedules the reminders for a recurring task's *next* occurrence only; completing the
+     * occurrence advances the due date and calls this again for the one after.
+     */
+    fun scheduleRecurringTaskReminders(task: RecurringTaskEntity) {
+        cancelRecurringTaskReminders(task.id)
+
+        val now = Instant.now()
+        val baseId = NotificationService.recurringTaskReminderBaseId(task.id)
+        // No offsets configured = a single reminder at the due time, like plain tasks.
+        val offsets = task.reminderOffsetsMinutes.ifEmpty { listOf(0) }.distinct().sorted()
+        var slot = 0
+
+        offsets.forEach { minutesBefore ->
+            val reminder = task.dueDate.minus(minutesBefore.toLong(), ChronoUnit.MINUTES)
+            if (reminder.isAfter(now) && slot < TASK_ID_SLOTS) {
+                notificationService.scheduleTaskReminder(
+                    notificationId = baseId + slot,
+                    title = context.getString(R.string.taskReminderTitle, task.title),
+                    body = buildReminderBody(
+                        task.title,
+                        task.description,
+                        reminder,
+                        dueDate = task.dueDate,
+                        exactDueDate = minutesBefore == 0,
+                    ),
+                    scheduledTime = reminder,
+                )
+                slot++
+            }
+        }
+    }
+
+    fun cancelRecurringTaskReminders(id: String) {
+        val baseId = NotificationService.recurringTaskReminderBaseId(id)
+        for (i in 0 until TASK_ID_SLOTS) notificationService.cancelNotification(baseId + i)
+    }
+
 
     private fun buildReminderBody(
-        task: TaskEntity,
+        title: String,
+        description: String,
         reminderTime: Instant,
         dueDate: Instant? = null,
         exactDueDate: Boolean = false,
     ): String {
         if (exactDueDate) {
-            return context.getString(R.string.taskReminderBodyExact, task.title) + descriptionHint(task)
+            return context.getString(R.string.taskReminderBodyExact, title) + descriptionHint(description)
         }
 
         val reference = dueDate ?: reminderTime
@@ -92,12 +136,12 @@ class ReminderScheduler private constructor(private val context: Context) {
                 res.getQuantityString(R.plurals.nTaskReminderPrefixDays, d, d)
             }
         }
-        return context.getString(R.string.taskReminderBody, prefix, task.title) + descriptionHint(task)
+        return context.getString(R.string.taskReminderBody, prefix, title) + descriptionHint(description)
     }
 
-    /** The task description's first non-empty line, appended on its own line so `BigTextStyle` surfaces the "why". */
-    private fun descriptionHint(task: TaskEntity): String {
-        val hint = task.description.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
+    /** The description's first non-empty line, appended on its own line so `BigTextStyle` surfaces the "why". */
+    private fun descriptionHint(description: String): String {
+        val hint = description.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
         return if (hint.isEmpty()) "" else "\n" + hint.take(100)
     }
 
@@ -197,6 +241,8 @@ class ReminderScheduler private constructor(private val context: Context) {
 
             app.container.taskRepository.allTasks.first()
                 .forEach { scheduler.scheduleTaskReminders(it.task) }
+            app.container.recurringTaskRepository.allRecurringTasks.first()
+                .forEach { scheduler.scheduleRecurringTaskReminders(it.task) }
             app.container.habitRepository.allHabits.first()
                 .forEach { scheduler.scheduleHabitReminder(it) }
             app.container.quickHabitRepository.allQuickHabits.first()

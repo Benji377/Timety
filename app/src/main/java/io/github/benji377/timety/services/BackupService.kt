@@ -18,7 +18,11 @@ import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
+import io.github.benji377.timety.data.model.task.MonthlyMode
 import io.github.benji377.timety.data.model.task.Priority
+import io.github.benji377.timety.data.model.task.RecurrenceUnit
+import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -43,6 +47,7 @@ class BackupService(
     private val settingsRepository: SettingsRepository,
 ) {
     private val taskDao get() = database.taskDao()
+    private val recurringTaskDao get() = database.recurringTaskDao()
     private val habitDao get() = database.habitDao()
     private val quickHabitDao get() = database.quickHabitDao()
     private val focusDao get() = database.focusDao()
@@ -119,6 +124,7 @@ class BackupService(
             )
             put("tasks", tasksToJson())
             put("taskCategories", taskCategoriesToJson())
+            put("recurringTasks", recurringTasksToJson())
             put("habits", habitsToJson())
             put("quickHabits", quickHabitsToJson())
             put("focus", focusToJson())
@@ -178,6 +184,36 @@ class BackupService(
                     put("id", category.id)
                     put("name", category.name)
                     put("colorValue", category.colorValue)
+                }
+            )
+        }
+        return array
+    }
+
+    private suspend fun recurringTasksToJson(): JSONArray {
+        val array = JSONArray()
+        for (entry in recurringTaskDao.getAllWithOccurrences().first()) {
+            val task = entry.task
+            array.put(
+                JSONObject().apply {
+                    put("id", task.id)
+                    put("title", task.title)
+                    put("description", task.description)
+                    put("category", task.category)
+                    put("dueDate", task.dueDate.toString())
+                    put("unit", task.unit.name)
+                    put("interval", task.interval)
+                    put("daysOfWeek", task.daysOfWeek ?: JSONObject.NULL)
+                    put("monthlyMode", task.monthlyMode.name)
+                    put("monthlyDay", task.monthlyDay ?: JSONObject.NULL)
+                    put("monthlyOrdinal", task.monthlyOrdinal ?: JSONObject.NULL)
+                    put("monthlyWeekday", task.monthlyWeekday ?: JSONObject.NULL)
+                    put("reminderOffsetsMinutes", JSONArray(task.reminderOffsetsMinutes))
+                    put("createdAt", task.createdAt.toString())
+                    put(
+                        "occurrences",
+                        JSONArray(entry.occurrences.map { it.completedAt.toString() })
+                    )
                 }
             )
         }
@@ -323,6 +359,8 @@ class BackupService(
 
         restoreTasks(json.optJSONArray("tasks") ?: JSONArray())
         restoreTaskCategories(json.optJSONArray("taskCategories") ?: JSONArray())
+        // Optional key: older and legacy backups simply carry no recurring tasks.
+        restoreRecurringTasks(json.optJSONArray("recurringTasks") ?: JSONArray())
         restoreHabits(json.optJSONArray("habits") ?: JSONArray())
         restoreQuickHabits(json.optJSONArray("quickHabits") ?: JSONArray())
         json.optJSONObject("focus")?.let { restoreFocus(it) }
@@ -415,6 +453,42 @@ class BackupService(
                     colorValue = TaskCategoryEntity.DEFAULT_COLOR_VALUE,
                 )
             )
+        }
+    }
+
+    private fun restoreRecurringTasks(recurringJson: JSONArray) {
+        recurringTaskDao.clearAll()
+        for (i in 0 until recurringJson.length()) {
+            val json = recurringJson.getJSONObject(i)
+            val id = readString(json, "id") ?: Instant.now().toEpochMilli().toString()
+            recurringTaskDao.insert(
+                RecurringTaskEntity(
+                    id = id,
+                    title = readString(json, "title") ?: "",
+                    description = readString(json, "description") ?: "",
+                    category = readString(json, "category") ?: "",
+                    dueDate = readInstant(json, "dueDate") ?: Instant.now(),
+                    unit = enumOrDefault(readString(json, "unit"), RecurrenceUnit.WEEK),
+                    interval = json.optInt("interval", 1).coerceAtLeast(1),
+                    daysOfWeek = readString(json, "daysOfWeek"),
+                    monthlyMode = enumOrDefault(
+                        readString(json, "monthlyMode"),
+                        MonthlyMode.DAY_OF_MONTH
+                    ),
+                    monthlyDay = readOptInt(json, "monthlyDay"),
+                    monthlyOrdinal = readOptInt(json, "monthlyOrdinal"),
+                    monthlyWeekday = readOptInt(json, "monthlyWeekday"),
+                    reminderOffsetsMinutes = readIntList(json, "reminderOffsetsMinutes"),
+                    createdAt = readInstant(json, "createdAt") ?: Instant.now(),
+                )
+            )
+            val occurrencesJson = json.optJSONArray("occurrences") ?: JSONArray()
+            for (j in 0 until occurrencesJson.length()) {
+                val instant = parseInstantFlexible(occurrencesJson.getString(j)) ?: continue
+                recurringTaskDao.insertOccurrence(
+                    RecurringOccurrenceEntity(recurringTaskId = id, completedAt = instant)
+                )
+            }
         }
     }
 
@@ -575,6 +649,11 @@ class BackupService(
     private fun readInstant(json: JSONObject, key: String): Instant? {
         val raw = readString(json, key) ?: return null
         return parseInstantFlexible(raw)
+    }
+
+    private fun readIntList(json: JSONObject, key: String): List<Int> {
+        val array = json.optJSONArray(key) ?: return emptyList()
+        return (0 until array.length()).map { array.getInt(it) }
     }
 
     private fun readInstantList(json: JSONObject, key: String): List<Instant> {

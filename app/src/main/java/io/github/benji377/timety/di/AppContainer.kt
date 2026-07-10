@@ -7,6 +7,7 @@ import io.github.benji377.timety.data.local.TimetyDatabase
 import io.github.benji377.timety.data.repository.FocusRepository
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.QuickHabitRepository
+import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.data.repository.UserRepository
@@ -19,6 +20,7 @@ import io.github.benji377.timety.services.BackupService
  */
 interface AppContainer {
     val taskRepository: TaskRepository
+    val recurringTaskRepository: RecurringTaskRepository
     val habitRepository: HabitRepository
     val quickHabitRepository: QuickHabitRepository
     val focusRepository: FocusRepository
@@ -39,6 +41,10 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val taskRepository: TaskRepository by lazy {
         TaskRepository(database.taskDao())
+    }
+
+    override val recurringTaskRepository: RecurringTaskRepository by lazy {
+        RecurringTaskRepository(database.recurringTaskDao())
     }
 
     override val habitRepository: HabitRepository by lazy {

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -58,12 +59,17 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringTaskEntity
+import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
+import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.AppUtils
@@ -71,12 +77,14 @@ import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -91,13 +99,18 @@ fun CalendarScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = activityScopedViewModel(),
+    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onNavigateToTask: (String) -> Unit = {},
     onNavigateToHabit: (String) -> Unit = {},
+    onNavigateToRecurring: (String) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
+    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
+    val completeRecurring =
+        rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
     val zone = ZoneId.systemDefault()
 
     var focusedMonth by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
@@ -115,6 +128,26 @@ fun CalendarScreen(
         selectedDate?.let { d ->
             sessions.filter { s -> s.startTime.atZone(zone).toLocalDate() == d }
                 .sortedBy { it.startTime }
+        } ?: emptyList()
+    }
+
+    // Recurring tasks due on the selected day plus occurrences completed on it. Completing one
+    // advances its due date, so the upcoming entry moves to the next cycle on its own while the
+    // logged occurrence keeps the completion day marked.
+    val selectedDayRecurringDue = remember(recurringItems, selectedDate) {
+        selectedDate?.let { d ->
+            recurringItems.map { it.task }
+                .filter { it.dueDate.atZone(zone).toLocalDate() == d }
+                .sortedBy { it.dueDate }
+        } ?: emptyList()
+    }
+    val selectedDayRecurringDone = remember(recurringItems, selectedDate) {
+        selectedDate?.let { d ->
+            recurringItems.flatMap { item ->
+                item.occurrences
+                    .filter { it.completedAt.atZone(zone).toLocalDate() == d }
+                    .map { item.task to it }
+            }.sortedBy { it.second.completedAt }
         } ?: emptyList()
     }
 
@@ -178,6 +211,7 @@ fun CalendarScreen(
                         tasks = tasks,
                         sessions = sessions,
                         habitsWithCompletions = habitsWithCompletions,
+                        recurringItems = recurringItems,
                         onDaySelected = { selectedDate = it }
                     )
                 }
@@ -226,8 +260,15 @@ fun CalendarScreen(
                         item {
                             TasksAccordion(
                                 tasks = selectedDayTasks,
+                                recurringDue = selectedDayRecurringDue,
+                                recurringDone = selectedDayRecurringDone,
                                 onToggle = { task -> taskViewModel.toggleTaskCompletion(task.task) },
-                                onTaskClick = { task -> onNavigateToTask(task.task.id) }
+                                onTaskClick = { task -> onNavigateToTask(task.task.id) },
+                                onCompleteRecurring = completeRecurring,
+                                onUncheckRecurring = { occurrence ->
+                                    recurringViewModel.deleteOccurrence(occurrence)
+                                },
+                                onRecurringClick = { task -> onNavigateToRecurring(task.id) },
                             )
                         }
                         item {
@@ -283,6 +324,7 @@ private fun CalendarGrid(
     tasks: List<TaskWithSubtasks>,
     sessions: List<FocusSessionEntity>,
     habitsWithCompletions: List<HabitWithCompletions>,
+    recurringItems: List<RecurringTaskWithOccurrences>,
     onDaySelected: (LocalDate) -> Unit
 ) {
     val zone = ZoneId.systemDefault()
@@ -290,9 +332,14 @@ private fun CalendarGrid(
     val today = LocalDate.now()
 
     // Pre-compute sets of dates with activity for O(1) lookup during grid generation.
-    val taskDateKeys = remember(tasks) {
-        tasks.mapNotNull { it.task.dueDate }
-            .map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }.toSet()
+    // Recurring tasks mark their next due day and every completed occurrence's day.
+    val taskDateKeys = remember(tasks, recurringItems) {
+        val taskDays = tasks.mapNotNull { it.task.dueDate }
+            .map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }
+        val recurringDays = recurringItems.flatMap { item ->
+            item.occurrences.map { it.completedAt } + item.task.dueDate
+        }.map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }
+        (taskDays + recurringDays).toSet()
     }
     val sessionDateKeys = remember(sessions) {
         sessions.map { AppDateUtils.dayKey(it.startTime.atZone(zone).toLocalDate()) }.toSet()
@@ -346,14 +393,20 @@ private fun CalendarGrid(
 
         // Memoized: these scans touch every task/completion/session for all ~6 week rows and
         // would otherwise re-run on every recomposition (e.g. each day tap).
-        val weeklyCounts = remember(weeks, tasks, sessions, habitsWithCompletions) {
+        val weeklyCounts = remember(weeks, tasks, sessions, habitsWithCompletions, recurringItems) {
             weeks.associateWith { week ->
                 val weekStart = week.first()
                 val weekEnd = week.last()
-                val taskCount = tasks.count { t ->
-                    val d = t.task.dueDate?.atZone(zone)?.toLocalDate()
-                    d != null && !d.isBefore(weekStart) && !d.isAfter(weekEnd)
+                fun inWeek(instant: Instant): Boolean {
+                    val d = instant.atZone(zone).toLocalDate()
+                    return !d.isBefore(weekStart) && !d.isAfter(weekEnd)
                 }
+                val taskCount = tasks.count { t ->
+                    t.task.dueDate != null && inWeek(t.task.dueDate)
+                } + recurringItems.count { inWeek(it.task.dueDate) } +
+                    recurringItems.sumOf { item ->
+                        item.occurrences.count { inWeek(it.completedAt) }
+                    }
                 val habitCount = habitsWithCompletions.sumOf { h ->
                     h.completions.count { c ->
                         val d = c.completionDate.atZone(zone).toLocalDate()
@@ -552,15 +605,21 @@ private fun HabitsAccordion(
 @Composable
 private fun TasksAccordion(
     tasks: List<TaskWithSubtasks>,
+    recurringDue: List<RecurringTaskEntity>,
+    recurringDone: List<Pair<RecurringTaskEntity, RecurringOccurrenceEntity>>,
     onToggle: (TaskWithSubtasks) -> Unit,
-    onTaskClick: (TaskWithSubtasks) -> Unit
+    onTaskClick: (TaskWithSubtasks) -> Unit,
+    onCompleteRecurring: (RecurringTaskEntity) -> Unit,
+    onUncheckRecurring: (RecurringOccurrenceEntity) -> Unit,
+    onRecurringClick: (RecurringTaskEntity) -> Unit,
 ) {
+    val totalCount = tasks.size + recurringDue.size + recurringDone.size
     StyledExpansionTile(
-        title = stringResource(R.string.calendarSectionTasks, tasks.size),
+        title = stringResource(R.string.calendarSectionTasks, totalCount),
         titleColor = TaskColor,
         initiallyExpanded = false
     ) {
-        if (tasks.isEmpty()) {
+        if (totalCount == 0) {
             Text(
                 text = stringResource(R.string.calendarSectionTasksEmpty),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -569,46 +628,92 @@ private fun TasksAccordion(
         } else {
             tasks.forEach { taskWithSubtasks ->
                 val task = taskWithSubtasks.task
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .clickable { onTaskClick(taskWithSubtasks) },
-                    shape = AppTheme.brMedium,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                    border = BorderStroke(
-                        1.dp,
-                        if (task.isCompleted) SuccessColor else TaskColor
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = task.isCompleted,
-                            onCheckedChange = { onToggle(taskWithSubtasks) },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = SuccessColor,
-                                uncheckedColor = TaskColor,
-                                checkmarkColor = Color.White
-                            )
-                        )
-                        Text(
-                            text = task.title,
-                            modifier = Modifier.weight(1f),
-                            textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null
-                        )
-                        AppUtils.PriorityIcon(priority = task.priority)
-                    }
-                }
+                DayTaskRow(
+                    title = task.title,
+                    isCompleted = task.isCompleted,
+                    onToggle = { onToggle(taskWithSubtasks) },
+                    onClick = { onTaskClick(taskWithSubtasks) },
+                    trailing = { AppUtils.PriorityIcon(priority = task.priority) },
+                )
+            }
+            recurringDue.forEach { task ->
+                DayTaskRow(
+                    title = task.title,
+                    isCompleted = false,
+                    onToggle = { onCompleteRecurring(task) },
+                    onClick = { onRecurringClick(task) },
+                    trailing = { RecurringMarkerIcon() },
+                )
+            }
+            recurringDone.forEach { (task, occurrence) ->
+                DayTaskRow(
+                    title = task.title,
+                    isCompleted = true,
+                    onToggle = { onUncheckRecurring(occurrence) },
+                    onClick = { onRecurringClick(task) },
+                    trailing = { RecurringMarkerIcon() },
+                )
             }
             Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
         }
     }
+}
+
+/** Checkbox row card shared by normal and recurring tasks in the day-detail task accordion. */
+@Composable
+private fun DayTaskRow(
+    title: String,
+    isCompleted: Boolean,
+    onToggle: () -> Unit,
+    onClick: () -> Unit,
+    trailing: @Composable () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable { onClick() },
+        shape = AppTheme.brMedium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+        border = BorderStroke(
+            1.dp,
+            if (isCompleted) SuccessColor else TaskColor
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = isCompleted,
+                onCheckedChange = { onToggle() },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = SuccessColor,
+                    uncheckedColor = TaskColor,
+                    checkmarkColor = Color.White
+                )
+            )
+            Text(
+                text = title,
+                modifier = Modifier.weight(1f),
+                textDecoration = if (isCompleted) TextDecoration.LineThrough else null
+            )
+            trailing()
+        }
+    }
+}
+
+@Composable
+private fun RecurringMarkerIcon() {
+    Icon(
+        imageVector = Icons.Filled.Repeat,
+        contentDescription = null,
+        tint = TaskColor,
+        modifier = Modifier.size(AppTheme.iconSizeSmall),
+    )
 }
 
 @Composable

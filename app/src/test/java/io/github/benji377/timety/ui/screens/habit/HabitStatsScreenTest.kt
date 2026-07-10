@@ -30,10 +30,18 @@ class HabitStatsScreenTest {
             calculateCurrentStreak(listOf(today.minusDays(1)))
         )
 
-        // Completed 2 days ago (streak broken)
+        // Completed 2 days ago, nothing since: yesterday is a single miss, so the "never miss
+        // twice" streak survives (today is not yet a miss) until a second consecutive miss.
+        assertEquals(
+            1,
+            calculateCurrentStreak(listOf(today.minusDays(2)))
+        )
+
+        // Completed 3 days ago only: yesterday and the day before are two consecutive misses,
+        // so the streak is genuinely broken.
         assertEquals(
             0,
-            calculateCurrentStreak(listOf(today.minusDays(2)))
+            calculateCurrentStreak(listOf(today.minusDays(3)))
         )
     }
 

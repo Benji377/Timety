@@ -77,6 +77,7 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
@@ -191,10 +192,12 @@ fun StatisticsScreen(
 @Composable
 private fun OverviewStatsScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
+    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
     // Collected so the KPI/chart recompute whenever new sessions are logged.
     val sessions by focusViewModel.allSessions.collectAsState()
@@ -202,7 +205,8 @@ private fun OverviewStatsScreen(
     val zone = remember { ZoneId.systemDefault() }
     val now = remember { LocalDate.now() }
 
-    val tasksPerDay = remember(tasks) {
+    // Completed recurring occurrences count as tasks done on their completion day.
+    val tasksPerDay = remember(tasks, recurringItems) {
         val map = mutableMapOf<LocalDate, Int>()
         tasks.forEach { t ->
             val completedAt = t.task.completedAt
@@ -210,6 +214,10 @@ private fun OverviewStatsScreen(
                 val day = completedAt.atZone(zone).toLocalDate()
                 map[day] = (map[day] ?: 0) + 1
             }
+        }
+        recurringItems.flatMap { it.occurrences }.forEach { occurrence ->
+            val day = occurrence.completedAt.atZone(zone).toLocalDate()
+            map[day] = (map[day] ?: 0) + 1
         }
         map
     }

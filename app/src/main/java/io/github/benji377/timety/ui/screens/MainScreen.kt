@@ -35,6 +35,8 @@ import io.github.benji377.timety.ui.screens.focus.FocusScreen
 import io.github.benji377.timety.ui.screens.habit.HabitDetailScreen
 import io.github.benji377.timety.ui.screens.habit.HabitListScreen
 import io.github.benji377.timety.ui.screens.habit.QuickHabitsScreen
+import io.github.benji377.timety.ui.screens.task.RecurringTaskDetailScreen
+import io.github.benji377.timety.ui.screens.task.RecurringTasksScreen
 import io.github.benji377.timety.ui.screens.task.TaskCategoriesScreen
 import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.TaskListScreen
@@ -131,6 +133,9 @@ fun MainScreen() {
                     onNavigateToHabitDetail = { habitId ->
                         navController.navigate(AppRoute.habitDetail(habitId))
                     },
+                    onNavigateToRecurringDetail = { taskId ->
+                        navController.navigate(AppRoute.recurringTaskDetail(taskId))
+                    },
                     onNavigateToCalendar = { navController.navigate(BottomNavItem.Calendar.route) },
                     onNavigateToStatistics = { navController.navigate(BottomNavItem.Statistics.route) }
                 )
@@ -150,6 +155,10 @@ fun MainScreen() {
                 TaskListScreen(
                     onNavigateToTaskDetail = { taskId ->
                         navController.navigate(AppRoute.taskDetail(taskId))
+                    },
+                    onNavigateToRecurring = { navController.navigate(AppRoute.RECURRING_TASKS.route) },
+                    onNavigateToRecurringDetail = { taskId ->
+                        navController.navigate(AppRoute.recurringTaskDetail(taskId))
                     }
                 )
             }
@@ -175,6 +184,9 @@ fun MainScreen() {
                                 habitId
                             )
                         )
+                    },
+                    onNavigateToRecurring = { taskId ->
+                        navController.navigate(AppRoute.recurringTaskDetail(taskId))
                     },
                     onNavigateBack = { navController.popBackStack() }
                 )
@@ -203,6 +215,32 @@ fun MainScreen() {
             }
             composable(AppRoute.QUICK_HABITS.route) {
                 QuickHabitsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(AppRoute.RECURRING_TASKS.route) {
+                RecurringTasksScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { taskId ->
+                        navController.navigate(AppRoute.recurringTaskDetail(taskId))
+                    }
+                )
+            }
+            composable(AppRoute.RECURRING_TASK_DETAIL.route) {
+                RecurringTaskDetailScreen(
+                    recurringTaskId = null,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(
+                route = AppRoute.RECURRING_TASK_DETAIL_WITH_ID,
+                arguments = listOf(androidx.navigation.navArgument(AppRoute.ARG_TASK_ID) {
+                    type = androidx.navigation.NavType.StringType
+                })
+            ) { backStackEntry ->
+                val taskId = backStackEntry.arguments?.getString(AppRoute.ARG_TASK_ID)
+                RecurringTaskDetailScreen(
+                    recurringTaskId = taskId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

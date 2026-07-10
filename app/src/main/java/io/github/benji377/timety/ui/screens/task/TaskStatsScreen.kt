@@ -29,6 +29,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.StatsUtils
@@ -44,10 +45,19 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun TaskStatsScreen(
-    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
+    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     var focusedDate by remember { mutableStateOf(LocalDate.now()) }
+
+    // Recurring tasks feed the charts too: templates count as created once, each logged
+    // occurrence as one completion.
+    val recurringCreated = remember(recurringItems) { recurringItems.map { it.task.createdAt } }
+    val recurringCompleted = remember(recurringItems) {
+        recurringItems.flatMap { item -> item.occurrences.map { it.completedAt } }
+    }
 
     val zone = ZoneId.systemDefault()
     val startOfWeek = AppDateUtils.startOfWeekMonday(focusedDate)
@@ -58,7 +68,7 @@ fun TaskStatsScreen(
     val isCurrentRealWeek =
         AppDateUtils.isWithinInclusive(LocalDate.now(), startOfWeek, endOfWeekLocal)
 
-    if (tasks.isEmpty()) {
+    if (tasks.isEmpty() && recurringItems.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(stringResource(R.string.taskStatsEmpty))
         }
@@ -113,6 +123,8 @@ fun TaskStatsScreen(
                 Box(modifier = Modifier.height(200.dp)) {
                     VelocityChart(
                         tasks,
+                        recurringCreated,
+                        recurringCompleted,
                         startOfWeekInstant,
                         endOfWeekInstant,
                         isCurrentRealWeek,
@@ -139,6 +151,7 @@ fun TaskStatsScreen(
                 Box(modifier = Modifier.height(200.dp)) {
                     ProductivityChart(
                         tasks,
+                        recurringCompleted,
                         startOfWeekInstant,
                         endOfWeekInstant,
                         isCurrentRealWeek,
@@ -149,7 +162,7 @@ fun TaskStatsScreen(
             item { Spacer(modifier = Modifier.height(40.dp)) }
 
             // Category breakdown, all time.
-            item { CategoryBreakdownCard(tasks) }
+            item { CategoryBreakdownCard(tasks, recurringItems.map { it.task.category }) }
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
     }
@@ -158,6 +171,8 @@ fun TaskStatsScreen(
 @Composable
 private fun VelocityChart(
     tasks: List<TaskWithSubtasks>,
+    recurringCreated: List<Instant>,
+    recurringCompleted: List<Instant>,
     startOfWeek: Instant,
     endOfWeek: Instant,
     isCurrentRealWeek: Boolean,
@@ -165,22 +180,20 @@ private fun VelocityChart(
 ) {
     val dailyCreated = IntArray(7)
     val dailyCompleted = IntArray(7)
-
-    tasks.forEach {
-        val createdAt = it.task.createdAt
-        if (!createdAt.isBefore(startOfWeek) && createdAt.isBefore(endOfWeek)) {
-            dailyCreated[createdAt.atZone(zone).dayOfWeek.value - 1]++
-        }
-        if (it.task.isCompleted) {
-            val completedAt = it.task.completedAt
-            if (completedAt != null && !completedAt.isBefore(startOfWeek) && completedAt.isBefore(
-                    endOfWeek
-                )
-            ) {
-                dailyCompleted[completedAt.atZone(zone).dayOfWeek.value - 1]++
-            }
+    fun IntArray.countInWeek(instant: Instant) {
+        if (!instant.isBefore(startOfWeek) && instant.isBefore(endOfWeek)) {
+            this[instant.atZone(zone).dayOfWeek.value - 1]++
         }
     }
+
+    tasks.forEach {
+        dailyCreated.countInWeek(it.task.createdAt)
+        if (it.task.isCompleted) {
+            it.task.completedAt?.let { completedAt -> dailyCompleted.countInWeek(completedAt) }
+        }
+    }
+    recurringCreated.forEach { dailyCreated.countInWeek(it) }
+    recurringCompleted.forEach { dailyCompleted.countInWeek(it) }
 
     val maxY = StatsUtils.maxValue((dailyCreated.toList() + dailyCompleted.toList()), minimum = 5.0)
 
@@ -198,22 +211,19 @@ private fun VelocityChart(
 @Composable
 private fun ProductivityChart(
     tasks: List<TaskWithSubtasks>,
+    recurringCompleted: List<Instant>,
     startOfWeek: Instant,
     endOfWeek: Instant,
     isCurrentRealWeek: Boolean,
     zone: ZoneId
 ) {
     val dailyCompleted = IntArray(7)
+    val completions = tasks.mapNotNull { if (it.task.isCompleted) it.task.completedAt else null } +
+        recurringCompleted
 
-    tasks.forEach {
-        if (it.task.isCompleted) {
-            val completedAt = it.task.completedAt
-            if (completedAt != null && !completedAt.isBefore(startOfWeek) && completedAt.isBefore(
-                    endOfWeek
-                )
-            ) {
-                dailyCompleted[completedAt.atZone(zone).dayOfWeek.value - 1]++
-            }
+    completions.forEach { completedAt ->
+        if (!completedAt.isBefore(startOfWeek) && completedAt.isBefore(endOfWeek)) {
+            dailyCompleted[completedAt.atZone(zone).dayOfWeek.value - 1]++
         }
     }
 
@@ -307,12 +317,15 @@ private fun SimpleBarChart(
 }
 
 @Composable
-private fun CategoryBreakdownCard(tasks: List<TaskWithSubtasks>) {
+private fun CategoryBreakdownCard(
+    tasks: List<TaskWithSubtasks>,
+    recurringCategories: List<String>,
+) {
     val uncategorized = stringResource(R.string.taskStatsCategoryUncategorized)
-    val categoryCounts = remember(tasks) {
+    val categoryCounts = remember(tasks, recurringCategories) {
         val counts = LinkedHashMap<String, Int>()
-        tasks.forEach {
-            val cat = it.task.category.ifBlank { uncategorized }
+        (tasks.map { it.task.category } + recurringCategories).forEach {
+            val cat = it.ifBlank { uncategorized }
             counts[cat] = (counts[cat] ?: 0) + 1
         }
         counts

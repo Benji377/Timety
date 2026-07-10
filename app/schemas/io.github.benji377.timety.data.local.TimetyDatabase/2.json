@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "657f690c0a706499cf6e5733c0915222",
+    "identityHash": "b7f3ec1bff3b923506d1060fe8eb81a7",
     "entities": [
       {
         "tableName": "tasks",
@@ -184,6 +184,152 @@
             ],
             "orders": [],
             "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_task_categories_name` ON `${TABLE_NAME}` (`name`)"
+          }
+        ]
+      },
+      {
+        "tableName": "recurring_tasks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `category` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dueDate",
+            "columnName": "dueDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unit",
+            "columnName": "unit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "interval",
+            "columnName": "interval",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "daysOfWeek",
+            "columnName": "daysOfWeek",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "monthlyMode",
+            "columnName": "monthlyMode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monthlyDay",
+            "columnName": "monthlyDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "monthlyOrdinal",
+            "columnName": "monthlyOrdinal",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "monthlyWeekday",
+            "columnName": "monthlyWeekday",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "reminderOffsetsMinutes",
+            "columnName": "reminderOffsetsMinutes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "recurring_occurrences",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `recurringTaskId` TEXT NOT NULL, `completedAt` INTEGER NOT NULL, FOREIGN KEY(`recurringTaskId`) REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recurringTaskId",
+            "columnName": "recurringTaskId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedAt",
+            "columnName": "completedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_recurring_occurrences_recurringTaskId",
+            "unique": false,
+            "columnNames": [
+              "recurringTaskId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurring_occurrences_recurringTaskId` ON `${TABLE_NAME}` (`recurringTaskId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "recurring_tasks",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "recurringTaskId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
           }
         ]
       },
@@ -715,7 +861,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '657f690c0a706499cf6e5733c0915222')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b7f3ec1bff3b923506d1060fe8eb81a7')"
     ]
   }
 }

@@ -21,9 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FlameGlowColor
+import io.github.benji377.timety.ui.theme.FrostColor
+import io.github.benji377.timety.ui.theme.FrostGlowColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import kotlin.math.PI
 import kotlin.math.sin
@@ -32,11 +36,14 @@ import kotlin.math.sin
 /**
  * Flame icon indicating whether the user's streak is active. When [isActive], the flame rises and
  * flickers on an infinite loop and gains a glowing core and halo; otherwise it renders dimmed and static.
+ * When [atRisk] (yesterday missed but the streak still alive), it burns in an urgent warning tone with
+ * a stronger halo to signal the "don't miss twice" moment.
  */
 @Composable
 fun StreakStatusBadge(
     isActive: Boolean,
     modifier: Modifier = Modifier,
+    atRisk: Boolean = false,
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "streakStatusBadge")
     val t by infiniteTransition.animateFloat(
@@ -49,32 +56,44 @@ fun StreakStatusBadge(
         label = "streakStatusBadgeT",
     )
 
+    // At risk, the flame "freezes": the rise/flicker animation stops and it turns icy, reading as
+    // preserved-but-on-ice rather than lively (healthy) or grey (broken).
+    val animate = isActive && !atRisk
     // One full sine cycle per animation period for the rise/fall, two cycles (double frequency) for a
     // faster, subtler flicker on top of it.
-    val flameRise = if (isActive) sin(t * PI.toFloat() * 2f) else 0f
-    val flicker = if (isActive) 1f + (sin(t * PI.toFloat() * 4f) * 0.05f) else 1f
+    val flameRise = if (animate) sin(t * PI.toFloat() * 2f) else 0f
+    val flicker = if (animate) 1f + (sin(t * PI.toFloat() * 4f) * 0.05f) else 1f
     val density = LocalDensity.current
     val dimColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    val flameDescription =
+        if (atRisk) stringResource(R.string.streakDontMissTwice) else null
 
     Box(modifier = modifier.size(32.dp), contentAlignment = Alignment.Center) {
         if (isActive) {
             Box(
                 modifier = Modifier
                     .size(32.dp)
-                    .background(WarningColor.copy(alpha = 0.18f), CircleShape),
+                    .background(
+                        if (atRisk) FrostColor.copy(alpha = 0.22f) else WarningColor.copy(alpha = 0.18f),
+                        CircleShape,
+                    ),
             )
         }
 
         Icon(
             imageVector = Icons.Filled.LocalFireDepartment,
-            contentDescription = null,
+            contentDescription = flameDescription,
             modifier = Modifier
                 .size(32.dp)
                 .graphicsLayer {
                     translationY = with(density) { (-0.5f * flameRise).dp.toPx() }
                 }
                 .scale(flicker),
-            tint = if (isActive) WarningColor.copy(alpha = 0.6f) else dimColor.copy(alpha = 0.5f),
+            tint = when {
+                atRisk -> FrostColor
+                isActive -> WarningColor.copy(alpha = 0.6f)
+                else -> dimColor.copy(alpha = 0.5f)
+            },
         )
 
         if (isActive) {
@@ -87,7 +106,7 @@ fun StreakStatusBadge(
                     .graphicsLayer {
                         translationY = with(density) { (-1.0f * flameRise).dp.toPx() }
                     },
-                tint = FlameGlowColor,
+                tint = if (atRisk) FrostGlowColor else FlameGlowColor,
             )
         }
     }

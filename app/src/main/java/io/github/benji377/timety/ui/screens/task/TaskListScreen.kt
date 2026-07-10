@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -40,20 +41,28 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.TaskSortOption
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
+import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.util.task.RecurrenceUtils
+import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.TaskFilterEngine
 import java.time.Instant
 import java.time.ZoneId
@@ -68,9 +77,17 @@ import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as
 @Composable
 fun TaskListScreen(
     viewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    onNavigateToTaskDetail: (String?) -> Unit
+    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    onNavigateToTaskDetail: (String?) -> Unit,
+    onNavigateToRecurring: () -> Unit = {},
+    onNavigateToRecurringDetail: (String) -> Unit = {},
 ) {
     val tasks by viewModel.allTasks.collectAsState()
+    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
+    val horizonDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
+    val completeRecurring =
+        rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategoryFilter by remember { mutableStateOf<String?>(null) }
@@ -81,8 +98,29 @@ fun TaskListScreen(
     // Filter pills come from the tasks themselves (not the task_categories table) so
     // only categories that actually match something are offered; untrimmed so each
     // pill matches TaskFilterEngine's exact category comparison.
-    val allCategories = remember(tasks) {
-        tasks.map { it.task.category }.filter { it.isNotBlank() }.distinct().sorted()
+    val allCategories = remember(tasks, recurringItems) {
+        (tasks.map { it.task.category } + recurringItems.map { it.task.category })
+            .filter { it.isNotBlank() }.distinct().sorted()
+    }
+
+    // Recurring tasks join the list only while actionable (overdue, due today, or within the
+    // horizon) and are never shown as done: completing one just moves its due date forward.
+    val actionableRecurring = remember(recurringItems, horizonDays) {
+        val now = Instant.now()
+        recurringItems.map { it.task }
+            .sortedBy { it.dueDate }
+            .groupBy { RecurrenceUtils.statusOf(it, now, horizonDays) }
+            .filterKeys { it != RecurringStatus.SCHEDULED }
+    }
+    val filteredRecurring = remember(actionableRecurring, searchQuery, selectedCategoryFilter) {
+        actionableRecurring.mapValues { (_, grouped) ->
+            grouped.filter { task ->
+                (selectedCategoryFilter.isNullOrEmpty() || task.category == selectedCategoryFilter) &&
+                    (searchQuery.isEmpty() ||
+                        task.title.lowercase().contains(searchQuery.lowercase()) ||
+                        task.description.lowercase().contains(searchQuery.lowercase()))
+            }
+        }
     }
     val categoryEntities by viewModel.allCategories.collectAsState()
     val categoryColors = remember(categoryEntities) {
@@ -103,7 +141,15 @@ fun TaskListScreen(
     Scaffold(
         topBar = {
             TimetyTopBar(
-                title = stringResource(R.string.taskListTitle)
+                title = stringResource(R.string.taskListTitle),
+                actions = {
+                    IconButton(onClick = onNavigateToRecurring) {
+                        Icon(
+                            imageVector = Icons.Filled.Repeat,
+                            contentDescription = stringResource(R.string.recurringTasksTitle),
+                        )
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -206,14 +252,15 @@ fun TaskListScreen(
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                if (tasks.isEmpty()) {
+                val filteredRecurringCount = filteredRecurring.values.sumOf { it.size }
+                if (tasks.isEmpty() && actionableRecurring.values.all { it.isEmpty() }) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             stringResource(R.string.taskListEmpty),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                } else if (processedTasks.isEmpty()) {
+                } else if (processedTasks.isEmpty() && filteredRecurringCount == 0) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             stringResource(R.string.taskListFilterNoMatch),
@@ -243,16 +290,20 @@ fun TaskListScreen(
                         }
                     }
 
+                    val recurringOverdue = filteredRecurring[RecurringStatus.OVERDUE].orEmpty()
+                    val recurringToday = filteredRecurring[RecurringStatus.DUE_TODAY].orEmpty()
+                    val recurringUpcoming = filteredRecurring[RecurringStatus.UPCOMING].orEmpty()
+
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
                         // ExpansionSection doesn't accept a list directly, so each section is guarded
                         // against being empty before it's rendered.
-                        if (overdue.isNotEmpty()) {
+                        if (overdue.isNotEmpty() || recurringOverdue.isNotEmpty()) {
                             item {
                                 ExpansionSection(
-                                    title = "${stringResource(R.string.taskListSectionOverdue)} (${overdue.size})",
+                                    title = "${stringResource(R.string.taskListSectionOverdue)} (${overdue.size + recurringOverdue.size})",
                                     color = ErrorColor,
                                     initiallyExpanded = true
                                 ) {
@@ -260,15 +311,19 @@ fun TaskListScreen(
                                         overdue,
                                         isOverdue = true,
                                         viewModel = viewModel,
-                                        onNavigateToTaskDetail = onNavigateToTaskDetail
+                                        onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                        recurringTasks = recurringOverdue,
+                                        recurringStatus = RecurringStatus.OVERDUE,
+                                        onCompleteRecurring = completeRecurring,
+                                        onNavigateToRecurringDetail = onNavigateToRecurringDetail,
                                     )
                                 }
                             }
                         }
-                        if (dueToday.isNotEmpty()) {
+                        if (dueToday.isNotEmpty() || recurringToday.isNotEmpty()) {
                             item {
                                 ExpansionSection(
-                                    title = "${stringResource(R.string.taskListSectionToday)} (${dueToday.size})",
+                                    title = "${stringResource(R.string.taskListSectionToday)} (${dueToday.size + recurringToday.size})",
                                     color = WarningColor,
                                     initiallyExpanded = true
                                 ) {
@@ -276,15 +331,19 @@ fun TaskListScreen(
                                         dueToday,
                                         isOverdue = false,
                                         viewModel = viewModel,
-                                        onNavigateToTaskDetail = onNavigateToTaskDetail
+                                        onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                        recurringTasks = recurringToday,
+                                        recurringStatus = RecurringStatus.DUE_TODAY,
+                                        onCompleteRecurring = completeRecurring,
+                                        onNavigateToRecurringDetail = onNavigateToRecurringDetail,
                                     )
                                 }
                             }
                         }
-                        if (todo.isNotEmpty()) {
+                        if (todo.isNotEmpty() || recurringUpcoming.isNotEmpty()) {
                             item {
                                 ExpansionSection(
-                                    title = "${stringResource(R.string.taskListSectionUpcoming)} (${todo.size})",
+                                    title = "${stringResource(R.string.taskListSectionUpcoming)} (${todo.size + recurringUpcoming.size})",
                                     color = TaskColor,
                                     initiallyExpanded = true
                                 ) {
@@ -292,7 +351,11 @@ fun TaskListScreen(
                                         todo,
                                         isOverdue = false,
                                         viewModel = viewModel,
-                                        onNavigateToTaskDetail = onNavigateToTaskDetail
+                                        onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                        recurringTasks = recurringUpcoming,
+                                        recurringStatus = RecurringStatus.UPCOMING,
+                                        onCompleteRecurring = completeRecurring,
+                                        onNavigateToRecurringDetail = onNavigateToRecurringDetail,
                                     )
                                 }
                             }
@@ -334,7 +397,11 @@ private fun TaskSectionContent(
     tasks: List<TaskWithSubtasks>,
     isOverdue: Boolean,
     viewModel: TaskViewModel,
-    onNavigateToTaskDetail: (String?) -> Unit
+    onNavigateToTaskDetail: (String?) -> Unit,
+    recurringTasks: List<RecurringTaskEntity> = emptyList(),
+    recurringStatus: RecurringStatus = RecurringStatus.SCHEDULED,
+    onCompleteRecurring: (RecurringTaskEntity) -> Unit = {},
+    onNavigateToRecurringDetail: (String) -> Unit = {},
 ) {
     Column {
         tasks.forEach { taskWithSubtasks ->
@@ -350,6 +417,14 @@ private fun TaskSectionContent(
                 onToggleCompleted = { viewModel.toggleTaskCompletion(taskEntity) },
                 onTap = { onNavigateToTaskDetail(taskEntity.id) },
                 onDelete = { viewModel.deleteTask(taskEntity) }
+            )
+        }
+        recurringTasks.forEach { recurringTask ->
+            RecurringTaskListTile(
+                task = recurringTask,
+                status = recurringStatus,
+                onComplete = { onCompleteRecurring(recurringTask) },
+                onTap = { onNavigateToRecurringDetail(recurringTask.id) },
             )
         }
     }

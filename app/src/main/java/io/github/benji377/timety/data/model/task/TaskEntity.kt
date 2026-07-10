@@ -76,7 +76,7 @@ data class TaskEntity(
     val isCompleted: Boolean = false,
     val completedAt: Instant? = null,
     val createdAt: Instant,
-    val reminders: List<Instant> = emptyList()
+    val reminders: List<Instant> = emptyList(),
 )
 
 /** A task paired with its subtasks, for a Room `@Relation` query. */

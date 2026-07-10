@@ -81,6 +81,9 @@ interface TaskDao {
     @Query("SELECT * FROM subtasks WHERE taskId = :taskId")
     fun getSubtasksForTask(taskId: String): Flow<List<SubtaskEntity>>
 
+    @Query("SELECT * FROM subtasks WHERE taskId = :taskId")
+    fun getSubtasksForTaskOnce(taskId: String): List<SubtaskEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertSubtask(subtask: SubtaskEntity)
 

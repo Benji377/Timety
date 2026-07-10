@@ -43,11 +43,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.FrostColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.stats.StreakCalculator
 import java.time.LocalDate
 import java.time.format.TextStyle as JavaTextStyle
 
@@ -68,19 +70,20 @@ fun UserStreakTimelineCard(
     modifier: Modifier = Modifier,
 ) {
     val today = remember { LocalDate.now() }
-    val currentStreakKeys = remember(activityDates) { buildCurrentStreakDayKeys(activityDates) }
+    val streak = remember(activityDates) { StreakCalculator.currentStreak(activityDates) }
     val taskKeys = remember(taskDates) { taskDates.map { AppDateUtils.dayKey(it) }.toSet() }
     val focusKeys = remember(focusDates) { focusDates.map { AppDateUtils.dayKey(it) }.toSet() }
     val habitKeys = remember(habitDates) { habitDates.map { AppDateUtils.dayKey(it) }.toSet() }
 
-    val days = remember(today, currentStreakKeys, taskKeys, focusKeys, habitKeys) {
+    val days = remember(today, streak, taskKeys, focusKeys, habitKeys) {
         (0..6).map { index ->
             val day = today.minusDays((6 - index).toLong())
             val key = AppDateUtils.dayKey(day)
             StreakDayInfo(
                 date = day,
                 isToday = AppDateUtils.isSameDay(day, today),
-                inCurrentStreak = currentStreakKeys.contains(key),
+                inCurrentStreak = streak.streakDayKeys.contains(key),
+                isBend = streak.bridgedDayKeys.contains(key),
                 hasTask = taskKeys.contains(key),
                 hasFocus = focusKeys.contains(key),
                 hasHabit = habitKeys.contains(key),
@@ -88,7 +91,7 @@ fun UserStreakTimelineCard(
         }
     }
 
-    val statusText = streakStatusText(activityDates, currentStreak)
+    val statusText = streakStatusText(activityDates, currentStreak, streak.atRisk)
 
     val listState = rememberLazyListState()
     LaunchedEffect(days.size) {
@@ -182,6 +185,10 @@ fun UserStreakTimelineCard(
                 TimelineLegendDot(HabitColor, stringResource(R.string.globalLabelHabit))
                 TimelineLegendDot(FocusColor, stringResource(R.string.focusTitle))
                 TimelineLegendDot(WarningColor, stringResource(R.string.streakLegendStreakDay))
+                TimelineLegendDot(
+                    FrostColor.copy(alpha = 0.6f),
+                    stringResource(R.string.streakLegendBend),
+                )
             }
         }
     }
@@ -191,40 +198,23 @@ private data class StreakDayInfo(
     val date: LocalDate,
     val isToday: Boolean,
     val inCurrentStreak: Boolean,
+    val isBend: Boolean,
     val hasTask: Boolean,
     val hasFocus: Boolean,
     val hasHabit: Boolean,
 )
 
 
-/**
- * Walks backward from today (or yesterday, if today has no activity yet) through consecutive
- * active days, returning the day keys that make up the still-unbroken current streak.
- */
-private fun buildCurrentStreakDayKeys(dates: List<LocalDate>): Set<String> {
-    val dayKeys = dates.map { AppDateUtils.dayKey(it) }.toSet()
-    if (dayKeys.isEmpty()) return emptySet()
-
-    var checkDate = LocalDate.now()
-    if (!dayKeys.contains(AppDateUtils.dayKey(checkDate))) {
-        val yesterday = checkDate.minusDays(1)
-        if (!dayKeys.contains(AppDateUtils.dayKey(yesterday))) return emptySet()
-        checkDate = yesterday
-    }
-
-    val streakKeys = mutableSetOf<String>()
-    while (dayKeys.contains(AppDateUtils.dayKey(checkDate))) {
-        streakKeys.add(AppDateUtils.dayKey(checkDate))
-        checkDate = checkDate.minusDays(1)
-    }
-    return streakKeys
-}
-
-
-/** Picks a status message: active today, frozen (active yesterday, not yet today), building, or none. */
+/** Picks a status message: at risk, active today, frozen, building, or none. */
 @Composable
-private fun streakStatusText(activityDates: List<LocalDate>, currentStreak: Int): String {
+private fun streakStatusText(
+    activityDates: List<LocalDate>,
+    currentStreak: Int,
+    atRisk: Boolean,
+): String {
     if (activityDates.isEmpty()) return stringResource(R.string.streakStatusNone)
+    // The "won or lost" day: yesterday was missed but the streak survives — one more miss ends it.
+    if (atRisk) return stringResource(R.string.streakDontMissTwice)
 
     val today = LocalDate.now()
     val todayKey = AppDateUtils.dayKey(today)
@@ -245,12 +235,15 @@ private fun DayTile(info: StreakDayInfo, modifier: Modifier = Modifier) {
     val backgroundColor = when {
         info.isToday -> TaskColor.copy(alpha = 0.12f)
         info.inCurrentStreak -> WarningColor.copy(alpha = 0.14f)
+        // A bend is a missed day the streak survived: hollow and icy, matching the frozen flame.
+        info.isBend -> FrostColor.copy(alpha = 0.05f)
         info.hasTask || info.hasHabit || info.hasFocus -> surfaceHighest.copy(alpha = 0.7f)
         else -> surfaceHighest.copy(alpha = 0.35f)
     }
     val borderColor = when {
         info.isToday -> TaskColor
         info.inCurrentStreak -> WarningColor
+        info.isBend -> FrostColor.copy(alpha = 0.45f)
         else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
     }
 
