@@ -23,6 +23,7 @@
     <string name="commonLabelSave">Speichern</string>
     <string name="commonLabelShare">Teilen</string>
     <string name="commonLabelClose">Schließen</string>
+    <string name="commonLabelUndo">Undo</string>
     <string name="commonBack">Zurück</string>
     <string name="commonClear">Leeren</string>
     <string name="commonTimeDone">Erledigt</string>
@@ -509,6 +510,53 @@
     <string name="distractionSnack">Jause</string>
     <string name="distractionStretched">Gedehnt</string>
     <string name="targetSheetTitle">Fokus-Ziel wählen</string>
+    <string name="recurrenceLabel">Repeat</string>
+    <string name="recurrenceEveryLabel">Every</string>
+    <string name="recurrenceWeekly">Weekly</string>
+    <string name="recurrenceMonthly">Monthly</string>
+    <string name="recurrenceYearly">Yearly</string>
+    <string name="recurrenceOnDays">%1$s on %2$s</string>
+    <string name="recurrenceOnDayOfMonth">%1$s on day %2$d</string>
+    <string name="recurrenceOnNthWeekday">%1$s on the %2$s %3$s</string>
+    <string name="recurrenceOrdinalFirst">first</string>
+    <string name="recurrenceOrdinalSecond">second</string>
+    <string name="recurrenceOrdinalThird">third</string>
+    <string name="recurrenceOrdinalFourth">fourth</string>
+    <string name="recurrenceOrdinalLast">last</string>
+    <string name="recurringTasksTitle">Recurring Tasks</string>
+    <string name="recurringTasksEmpty">No recurring tasks yet. Tap + to create one.</string>
+    <string name="recurringTasksNextDue">Next: %1$s</string>
+    <plurals name="recurringTasksCompletedCount">
+        <item quantity="one">Completed %d time</item>
+        <item quantity="other">Completed %d times</item>
+    </plurals>
+    <string name="recurringTaskTitleNew">New Recurring Task</string>
+    <string name="recurringTaskTitleEdit">Edit Recurring Task</string>
+    <string name="recurringTaskTitleView">Recurring Task</string>
+    <string name="recurringTaskLabelNextDue">Next due</string>
+    <string name="recurringTaskSnackbarDueRequired">Set the next due date first</string>
+    <string name="recurringTaskMonthlyOnDay">On day %1$d</string>
+    <string name="recurringTaskMonthlyOnNth">On the %1$s %2$s</string>
+    <string name="recurringTaskReminderMinutesBefore">%1$d min before</string>
+    <string name="recurringTaskCompleteNow">Complete now</string>
+    <string name="recurringTaskHistoryTitle">History</string>
+    <string name="recurringTaskHistoryEmpty">No completions yet.</string>
+    <string name="recurringTaskHistoryAddPast">Add past</string>
+    <string name="recurringTaskDeleteTitle">Delete recurring task?</string>
+    <string name="recurringTaskDeleteContent">This also deletes its completion history. This action cannot be undone.</string>
+    <string name="recurringTaskCompletedSnackbar">Completed! Next: %1$s</string>
+    <plurals name="recurrenceEveryWeeks">
+        <item quantity="one">Every week</item>
+        <item quantity="other">Every %d weeks</item>
+    </plurals>
+    <plurals name="recurrenceEveryMonths">
+        <item quantity="one">Every month</item>
+        <item quantity="other">Every %d months</item>
+    </plurals>
+    <plurals name="recurrenceEveryYears">
+        <item quantity="one">Every year</item>
+        <item quantity="other">Every %d years</item>
+    </plurals>
     <string name="notificationChannelQuickHabitsName">Quick Habit Reminders</string>
     <string name="notificationChannelQuickHabitsDesc">Interval nudges like drinking water</string>
     <string name="quickHabitNotificationTitle">Quick Habit</string>
