@@ -131,4 +131,41 @@ class RecurrenceUtilsTest {
         val t = task(at(2026, 7, 9), RecurrenceUnit.YEAR)
         assertEquals(at(2027, 7, 9), RecurrenceUtils.nextDueDate(t, at(2026, 7, 9, 12), zone))
     }
+
+    @Test
+    fun statusOf_dueInPast_isOverdue() {
+        val t = task(at(2026, 7, 9), RecurrenceUnit.WEEK)
+        assertEquals(
+            RecurringStatus.OVERDUE,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 12), horizonDays = 7, zone = zone)
+        )
+    }
+
+    @Test
+    fun statusOf_dueLaterToday_isDueToday() {
+        val t = task(at(2026, 7, 9, 18), RecurrenceUnit.WEEK)
+        assertEquals(
+            RecurringStatus.DUE_TODAY,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 12), horizonDays = 7, zone = zone)
+        )
+    }
+
+    @Test
+    fun statusOf_withinHorizon_isUpcoming() {
+        // Due Jul 16, exactly the 7-day horizon boundary from Jul 9: still upcoming.
+        val t = task(at(2026, 7, 16), RecurrenceUnit.WEEK)
+        assertEquals(
+            RecurringStatus.UPCOMING,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 12), horizonDays = 7, zone = zone)
+        )
+    }
+
+    @Test
+    fun statusOf_beyondHorizon_isScheduled() {
+        val t = task(at(2026, 7, 17), RecurrenceUnit.WEEK)
+        assertEquals(
+            RecurringStatus.SCHEDULED,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 12), horizonDays = 7, zone = zone)
+        )
+    }
 }

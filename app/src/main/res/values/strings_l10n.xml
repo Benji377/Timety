@@ -23,6 +23,7 @@
     <string name="commonLabelSave">Save</string>
     <string name="commonLabelShare">Share</string>
     <string name="commonLabelClose">Close</string>
+    <string name="commonLabelUndo">Undo</string>
     <string name="commonBack">Back</string>
     <string name="commonClear">Clear</string>
     <string name="commonTimeDone">Done</string>
@@ -543,6 +544,7 @@
     <string name="recurringTaskHistoryAddPast">Add past</string>
     <string name="recurringTaskDeleteTitle">Delete recurring task?</string>
     <string name="recurringTaskDeleteContent">This also deletes its completion history. This action cannot be undone.</string>
+    <string name="recurringTaskCompletedSnackbar">Completed! Next: %1$s</string>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="one">Every week</item>
         <item quantity="other">Every %d weeks</item>

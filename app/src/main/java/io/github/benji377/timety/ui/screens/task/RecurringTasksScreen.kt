@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.screens.task
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,10 +22,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -35,6 +39,8 @@ import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.task.recurrenceCadenceLabel
+import io.github.benji377.timety.ui.components.task.recurringStatusColor
+import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -42,7 +48,11 @@ import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.task.RecurrenceUtils
+import io.github.benji377.timety.util.task.RecurringStatus
+import java.time.Instant
 
 /**
  * Lists all recurring tasks with their cadence, next due date, and completion count. Recurring
@@ -54,10 +64,15 @@ fun RecurringTasksScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDetail: (String?) -> Unit,
     viewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val recurringTasks by viewModel.allRecurringTasks.collectAsState()
+    val horizonDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val completeTask = rememberRecurringCompleter(viewModel, snackbarHostState)
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TimetyTopBar(
                 title = stringResource(R.string.recurringTasksTitle),
@@ -101,8 +116,9 @@ fun RecurringTasksScreen(
                 items(recurringTasks, key = { it.task.id }) { item ->
                     RecurringTaskCard(
                         item = item,
+                        status = RecurrenceUtils.statusOf(item.task, Instant.now(), horizonDays),
                         onClick = { onNavigateToDetail(item.task.id) },
-                        onComplete = { viewModel.completeOccurrence(item.task) },
+                        onComplete = { completeTask(item.task) },
                     )
                 }
             }
@@ -113,15 +129,18 @@ fun RecurringTasksScreen(
 @Composable
 private fun RecurringTaskCard(
     item: RecurringTaskWithOccurrences,
+    status: RecurringStatus,
     onClick: () -> Unit,
     onComplete: () -> Unit,
 ) {
     val dateFmt = LocalDateFormatSettings.current
+    val borderColor = recurringStatusColor(status)
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppTheme.spaceSmall, vertical = AppTheme.spaceXSmall)
             .clickable(onClick = onClick),
+        border = BorderStroke(AppTheme.listTileBorderWidth, borderColor),
     ) {
         Row(
             modifier = Modifier
@@ -167,12 +186,16 @@ private fun RecurringTaskCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            IconButton(onClick = onComplete) {
-                Icon(
-                    imageVector = Icons.Filled.Check,
-                    contentDescription = stringResource(R.string.recurringTaskCompleteNow),
-                    tint = SuccessColor,
-                )
+            // Quick-complete only makes sense for actionable occurrences; far-future ones are
+            // completed early through the detail page instead.
+            if (status != RecurringStatus.SCHEDULED) {
+                IconButton(onClick = onComplete) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = stringResource(R.string.recurringTaskCompleteNow),
+                        tint = SuccessColor,
+                    )
+                }
             }
         }
     }

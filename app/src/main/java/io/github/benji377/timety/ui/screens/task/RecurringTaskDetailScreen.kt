@@ -42,7 +42,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -66,7 +65,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -80,8 +78,11 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.task.CategoryPicker
+import io.github.benji377.timety.ui.components.task.readOnlyFieldColors
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
+import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
 import io.github.benji377.timety.ui.components.task.weekdayShortName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -90,6 +91,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
+import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.task.RecurrenceUtils
@@ -118,8 +120,10 @@ fun RecurringTaskDetailScreen(
     recurringTaskId: String? = null,
     onNavigateBack: () -> Unit,
     viewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val allRecurring by viewModel.allRecurringTasks.collectAsState()
+    val allCategories by taskViewModel.allCategories.collectAsState()
     val existing = recurringTaskId?.let { id -> allRecurring.find { it.task.id == id } }
     val existingTask = existing?.task
     val isNew = recurringTaskId == null
@@ -131,6 +135,9 @@ fun RecurringTaskDetailScreen(
     // Form state.
     var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
     var description by remember(existingTask) { mutableStateOf(existingTask?.description ?: "") }
+    var category by remember(existingTask) { mutableStateOf(existingTask?.category ?: "") }
+    var isAddingNewCategory by remember { mutableStateOf(false) }
+    var newCategoryText by remember { mutableStateOf("") }
     var dueDate by remember(existingTask) { mutableStateOf(existingTask?.dueDate) }
     var unit by remember(existingTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
     var interval by remember(existingTask) { mutableIntStateOf(existingTask?.interval ?: 1) }
@@ -194,6 +201,7 @@ fun RecurringTaskDetailScreen(
             id = recurringTaskId ?: UUID.randomUUID().toString(),
             title = trimmedTitle,
             description = description.trim(),
+            category = category,
             dueDate = due,
             unit = unit,
             interval = interval.coerceAtLeast(1),
@@ -285,6 +293,18 @@ fun RecurringTaskDetailScreen(
                     label = { Text(stringResource(R.string.taskDetailsLabelTitle) + " *") },
                     leadingIcon = { Icon(Icons.Filled.Title, null) },
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                Spacer(Modifier.height(AppTheme.spaceLarge))
+                CategoryPicker(
+                    category = category,
+                    onCategoryChange = { category = it },
+                    isEditing = isEditing,
+                    isAddingNewCategory = isAddingNewCategory,
+                    onIsAddingNewCategoryChange = { isAddingNewCategory = it },
+                    newCategoryText = newCategoryText,
+                    onNewCategoryTextChange = { newCategoryText = it },
+                    existingCategories = allCategories,
+                    onCreateCategory = { taskViewModel.createCategory(it) }
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
                 OutlinedTextField(
@@ -477,8 +497,9 @@ fun RecurringTaskDetailScreen(
             // Completion history: view mode only, like a habit's past-occurrence log.
             if (!isNew && !isEditing && existing != null) {
                 item {
+                    val completeTask = rememberRecurringCompleter(viewModel, snackbarHostState)
                     Button(
-                        onClick = { viewModel.completeOccurrence(existing.task) },
+                        onClick = { completeTask(existing.task) },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Icon(Icons.Filled.Check, contentDescription = null)
@@ -756,24 +777,4 @@ private fun offsetLabel(minutes: Int): String = when (minutes) {
     60 -> stringResource(R.string.taskDetailsReminderOptionHour)
     24 * 60 -> stringResource(R.string.taskDetailsReminderOptionDay)
     else -> stringResource(R.string.recurringTaskReminderMinutesBefore, minutes)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun readOnlyFieldColors(isEditing: Boolean) = if (isEditing) {
-    OutlinedTextFieldDefaults.colors(
-        disabledContainerColor = MaterialTheme.colorScheme.surface,
-        disabledTextColor = MaterialTheme.colorScheme.onSurface,
-        disabledBorderColor = MaterialTheme.colorScheme.outline,
-        disabledLeadingIconColor = MaterialTheme.colorScheme.primary,
-        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-} else {
-    OutlinedTextFieldDefaults.colors(
-        focusedContainerColor = MaterialTheme.colorScheme.surface,
-        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-        disabledContainerColor = Color.Transparent,
-        errorContainerColor = MaterialTheme.colorScheme.surface
-    )
 }

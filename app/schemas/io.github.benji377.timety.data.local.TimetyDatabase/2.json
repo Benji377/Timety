@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "61880c25d69c59c14804b00c2c9277bf",
+    "identityHash": "b7f3ec1bff3b923506d1060fe8eb81a7",
     "entities": [
       {
         "tableName": "tasks",
@@ -189,7 +189,7 @@
       },
       {
         "tableName": "recurring_tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `category` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -206,6 +206,12 @@
           {
             "fieldPath": "description",
             "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -855,7 +861,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '61880c25d69c59c14804b00c2c9277bf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b7f3ec1bff3b923506d1060fe8eb81a7')"
     ]
   }
 }
