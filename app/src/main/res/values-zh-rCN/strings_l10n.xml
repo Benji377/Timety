@@ -276,6 +276,14 @@
     <string name="statsLabelProductivity">Productivity Synergy</string>
     <string name="statsLabelSummary">Today\'s Summary</string>
     <string name="statsLabelSynergy">Focus Time vs. Task Completion (Last 7 Days)</string>
+    <string name="statsDayQualityTitle">Day Quality</string>
+    <string name="statsDayQualitySubtitle">How your rated days compare</string>
+    <string name="statsDayQualityEmpty">Rate your day from the evening checkup notification to see how your good days differ.</string>
+    <string name="statsDayQualityAverage">Average rating</string>
+    <string name="statsDayQualityRowStats">%1$d min focus · %2$d tasks per day</string>
+    <plurals name="statsDayQualityDays">
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="statsLabelTasksDone">Tasks Completed</string>
     <string name="statsTabFocus">Focus</string>
     <string name="statsTabHabits">Habits</string>
@@ -370,6 +378,9 @@
     <string name="backupShareFailure">Share failed: %1$s</string>
     <string name="notificationChannelEveningDesc">End of day reminders to log habits</string>
     <string name="notificationChannelEveningName">Evening Checkup</string>
+    <string name="dayRatingBad">Bad</string>
+    <string name="dayRatingOk">OK</string>
+    <string name="dayRatingGreat">Great</string>
     <string name="notificationChannelFocusDesc">Persistent notification for active focus sessions</string>
     <string name="notificationChannelFocusName">Active Focus Timer</string>
     <string name="notificationChannelHabitsDesc">Specific time reminders for your habits</string>
