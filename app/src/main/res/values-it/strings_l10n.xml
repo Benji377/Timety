@@ -277,6 +277,15 @@
     <string name="statsLabelProductivity">Sinergia di produttività</string>
     <string name="statsLabelSummary">Riepilogo di oggi</string>
     <string name="statsLabelSynergy">Tempo di focus vs Completamento attività (Ultimi 7 giorni)</string>
+    <string name="statsDayQualityTitle">Day Quality</string>
+    <string name="statsDayQualitySubtitle">How your rated days compare</string>
+    <string name="statsDayQualityEmpty">Rate your day from the evening checkup notification to see how your good days differ.</string>
+    <string name="statsDayQualityAverage">Average rating</string>
+    <string name="statsDayQualityRowStats">%1$d min focus · %2$d tasks per day</string>
+    <plurals name="statsDayQualityDays">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="statsLabelTasksDone">Attività completate</string>
     <string name="statsTabFocus">Focus</string>
     <string name="statsTabHabits">Abitudini</string>
@@ -371,6 +380,9 @@
     <string name="backupShareFailure">Condivisione fallita: %1$s</string>
     <string name="notificationChannelEveningDesc">Promemoria di fine giornata per registrare le abitudini</string>
     <string name="notificationChannelEveningName">Controllo serale</string>
+    <string name="dayRatingBad">Bad</string>
+    <string name="dayRatingOk">OK</string>
+    <string name="dayRatingGreat">Great</string>
     <string name="notificationChannelFocusDesc">Notifica persistente per sessioni di focus attive</string>
     <string name="notificationChannelFocusName">Timer di focus attivo</string>
     <string name="notificationChannelHabitsDesc">Promemoria con orari specifici per le tue abitudini</string>
