@@ -281,6 +281,19 @@
     <string name="statsLabelProductivity">Sinergia de produtività</string>
     <string name="statsLabelSummary">Soma de ncuei</string>
     <string name="statsLabelSynergy">Tëmp de focus vs Fineda de ncëries (Ultimi 7 dis)</string>
+    <string name="statsDayQualityTitle">Day Quality</string>
+    <string name="statsDayQualitySubtitle">How your rated days compare</string>
+    <string name="statsDayQualityEmpty">Rate your day from the evening checkup notification to see how your good days differ.</string>
+    <string name="statsDayQualityAverage">Average rating</string>
+    <string name="statsDayQualityRowStats">%1$d min focus · %2$d tasks per day</string>
+    <plurals name="statsDayQualityDays">
+        <item quantity="zero">%d days</item>
+        <item quantity="one">%d day</item>
+        <item quantity="two">%d days</item>
+        <item quantity="few">%d days</item>
+        <item quantity="many">%d days</item>
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="statsLabelTasksDone">Ncëries finedes</string>
     <string name="statsTabFocus">Focus</string>
     <string name="statsTabHabits">Abitudins</string>
@@ -375,6 +388,9 @@
     <string name="backupShareFailure">Scipartida faleda: %1$s</string>
     <string name="notificationChannelEveningDesc">Lezic de fin di per registré la abitudins</string>
     <string name="notificationChannelEveningName">Cuntrol dla Sëira</string>
+    <string name="dayRatingBad">Bad</string>
+    <string name="dayRatingOk">OK</string>
+    <string name="dayRatingGreat">Great</string>
     <string name="notificationChannelFocusDesc">Notificazion per sescions de focus atives</string>
     <string name="notificationChannelFocusName">Timer Focus Atif</string>
     <string name="notificationChannelHabitsDesc">Lezic spezifics per ti abitudins</string>
