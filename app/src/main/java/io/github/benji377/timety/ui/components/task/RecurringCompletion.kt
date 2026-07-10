@@ -6,7 +6,6 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
@@ -26,10 +25,12 @@ fun rememberRecurringCompleter(
     snackbarHostState: SnackbarHostState,
 ): (RecurringTaskEntity) -> Unit {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val dateFmt = LocalDateFormatSettings.current
     val undoLabel = stringResource(R.string.commonLabelUndo)
-    return remember(viewModel, snackbarHostState, dateFmt, undoLabel) {
+    // Resolved at composition (not Context.getString in the callback) so the template
+    // tracks configuration changes; the date is formatted into it when the snackbar shows.
+    val completedTemplate = stringResource(R.string.recurringTaskCompletedSnackbar)
+    return remember(viewModel, snackbarHostState, dateFmt, undoLabel, completedTemplate) {
         { task ->
             viewModel.completeOccurrence(task) { undo ->
                 scope.launch {
@@ -37,7 +38,7 @@ fun rememberRecurringCompleter(
                         undo.advancedTask.dueDate, dateFmt.dateFormatCode
                     )
                     val result = snackbarHostState.showSnackbar(
-                        message = context.getString(R.string.recurringTaskCompletedSnackbar, nextDue),
+                        message = completedTemplate.format(nextDue),
                         actionLabel = undoLabel,
                         duration = SnackbarDuration.Short,
                     )
