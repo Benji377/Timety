@@ -57,6 +57,11 @@ class TaskRepository(
         taskDao.deleteCategoryAndClearTasks(category)
     }
 
+    suspend fun getSubtasksForTask(taskId: String): List<SubtaskEntity> =
+        withContext(Dispatchers.IO) {
+            taskDao.getSubtasksForTaskOnce(taskId)
+        }
+
     suspend fun insertSubtask(subtask: SubtaskEntity) = withContext(Dispatchers.IO) {
         taskDao.insertSubtask(subtask)
     }

@@ -8,7 +8,9 @@ enum class AppRoute(val route: String) {
     SETTINGS("settings"),
     TASK_CATEGORIES("task_categories"),
     QUICK_HABITS("quick_habits"),
+    RECURRING_TASKS("recurring_tasks"),
     TASK_DETAIL("task_detail"),
+    RECURRING_TASK_DETAIL("recurring_task_detail"),
     HABIT_DETAIL("habit_detail");
 
     companion object {
@@ -18,12 +20,20 @@ enum class AppRoute(val route: String) {
         /** Route pattern for [TASK_DETAIL] with a required task ID argument. */
         val TASK_DETAIL_WITH_ID = "${TASK_DETAIL.route}/{$ARG_TASK_ID}"
 
+        /** Route pattern for [RECURRING_TASK_DETAIL] with a required recurring task ID argument. */
+        val RECURRING_TASK_DETAIL_WITH_ID = "${RECURRING_TASK_DETAIL.route}/{$ARG_TASK_ID}"
+
         /** Route pattern for [HABIT_DETAIL] with a required habit ID argument. */
         val HABIT_DETAIL_WITH_ID = "${HABIT_DETAIL.route}/{$ARG_HABIT_ID}"
 
         /** Builds the task detail route, omitting the ID segment to navigate to a blank/new task. */
         fun taskDetail(taskId: String?): String =
             if (taskId == null) TASK_DETAIL.route else "${TASK_DETAIL.route}/$taskId"
+
+        /** Builds the recurring task detail route; a null ID navigates to a blank/new one. */
+        fun recurringTaskDetail(taskId: String?): String =
+            if (taskId == null) RECURRING_TASK_DETAIL.route
+            else "${RECURRING_TASK_DETAIL.route}/$taskId"
 
         /** Builds the habit detail route, omitting the ID segment to navigate to a blank/new habit. */
         fun habitDetail(habitId: String?): String =

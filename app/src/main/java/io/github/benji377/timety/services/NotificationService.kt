@@ -420,6 +420,13 @@ class NotificationService(private val context: Context) {
          */
         fun quickHabitId(id: String): Int = id.hashCode() xor QUICK_HABIT_ID_MASK
 
+        /**
+         * Deterministic base ID for a recurring task's reminder slots (`base + 0..10`). XOR-masked
+         * so it can never collide with the plain-task or quick-habit namespaces for equal ids.
+         */
+        fun recurringTaskReminderBaseId(id: String): Int = id.hashCode() xor RECURRING_TASK_ID_MASK
+
         private const val QUICK_HABIT_ID_MASK = 0x5175_4842 // "QuHB"
+        private const val RECURRING_TASK_ID_MASK = 0x5265_5461 // "ReTa"
     }
 }

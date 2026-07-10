@@ -37,21 +37,28 @@ import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitListTile
+import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
+import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.task.RecurrenceUtils
+import io.github.benji377.timety.util.task.RecurringStatus
 import java.time.LocalDate
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -69,9 +76,11 @@ fun HomeScreen(
     userViewModel: UserViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onNavigateToFocus: () -> Unit,
     onNavigateToTaskDetail: (String?) -> Unit,
     onNavigateToHabitDetail: (String?) -> Unit,
+    onNavigateToRecurringDetail: (String) -> Unit = {},
     onNavigateToCalendar: () -> Unit = {},
     onNavigateToStatistics: () -> Unit = {}
 ) {
@@ -81,6 +90,9 @@ fun HomeScreen(
     val sessions by focusViewModel.allSessions.collectAsState()
     val dailyTarget by settingsViewModel.dailyGoalMins.collectAsState()
     val upcomingWindowDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
+    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
+    val completeRecurring =
+        rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
 
     val userName = userProfile?.name ?: "User"
 
@@ -137,6 +149,19 @@ fun HomeScreen(
     val todaysHabits = remember(habitsWithCompletions, todayLocalDate) {
         habitsWithCompletions.filter { HabitUtils.isHabitDueToday(it) }
     }
+
+    // Recurring tasks join the due/upcoming accordions while actionable, keyed by status so each
+    // tile gets its overdue/today border color.
+    val recurringByStatus = remember(recurringItems, todayLocalDate, upcomingWindowDays) {
+        val now = Instant.now()
+        recurringItems.map { it.task }
+            .sortedBy { it.dueDate }
+            .groupBy { RecurrenceUtils.statusOf(it, now, upcomingWindowDays) }
+    }
+    val recurringOverdue = recurringByStatus[RecurringStatus.OVERDUE].orEmpty()
+    val recurringDueToday = recurringByStatus[RecurringStatus.DUE_TODAY].orEmpty()
+    val recurringUpcoming = recurringByStatus[RecurringStatus.UPCOMING].orEmpty()
+    val recurringDueCount = recurringOverdue.size + recurringDueToday.size
 
     Scaffold(
         topBar = {
@@ -217,7 +242,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
-                if (urgentTasks.isEmpty() && todaysHabits.isEmpty()) {
+                if (urgentTasks.isEmpty() && todaysHabits.isEmpty() && recurringDueCount == 0) {
                     Text(
                         text = stringResource(R.string.homeDailyGoalDone),
                         modifier = Modifier.align(Alignment.Center)
@@ -228,12 +253,12 @@ fun HomeScreen(
                         contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
                     ) {
                         // Due tasks accordion.
-                        if (urgentTasks.isNotEmpty()) {
+                        if (urgentTasks.isNotEmpty() || recurringDueCount > 0) {
                             item {
                                 StyledExpansionTile(
                                     title = stringResource(
                                         R.string.homeSectionTasksDue,
-                                        urgentTasks.size
+                                        urgentTasks.size + recurringDueCount
                                     ),
                                     titleColor = WarningColor,
                                     initiallyExpanded = true
@@ -254,6 +279,16 @@ fun HomeScreen(
                                                 )
                                             },
                                             onTap = { onNavigateToTaskDetail(task.task.id) }
+                                        )
+                                    }
+                                    (recurringOverdue + recurringDueToday).forEach { recurringTask ->
+                                        RecurringTaskListTile(
+                                            task = recurringTask,
+                                            status = if (recurringTask in recurringOverdue) {
+                                                RecurringStatus.OVERDUE
+                                            } else RecurringStatus.DUE_TODAY,
+                                            onComplete = { completeRecurring(recurringTask) },
+                                            onTap = { onNavigateToRecurringDetail(recurringTask.id) },
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
@@ -304,12 +339,12 @@ fun HomeScreen(
                         }
 
                         // Upcoming tasks accordion.
-                        if (upcomingTasks.isNotEmpty()) {
+                        if (upcomingTasks.isNotEmpty() || recurringUpcoming.isNotEmpty()) {
                             item {
                                 StyledExpansionTile(
                                     title = stringResource(
                                         R.string.homeSectionTasksUpcoming,
-                                        upcomingTasks.size
+                                        upcomingTasks.size + recurringUpcoming.size
                                     ),
                                     titleColor = TaskColor,
                                     initiallyExpanded = false
@@ -327,6 +362,14 @@ fun HomeScreen(
                                                 )
                                             },
                                             onTap = { onNavigateToTaskDetail(task.task.id) }
+                                        )
+                                    }
+                                    recurringUpcoming.forEach { recurringTask ->
+                                        RecurringTaskListTile(
+                                            task = recurringTask,
+                                            status = RecurringStatus.UPCOMING,
+                                            onComplete = { completeRecurring(recurringTask) },
+                                            onTap = { onNavigateToRecurringDetail(recurringTask.id) },
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
