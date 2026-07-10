@@ -23,6 +23,7 @@
     <string name="commonLabelSave">Salva</string>
     <string name="commonLabelShare">Condividi</string>
     <string name="commonLabelClose">Chiudi</string>
+    <string name="commonLabelUndo">Undo</string>
     <string name="commonBack">Indietro</string>
     <string name="commonClear">Cancella</string>
     <string name="commonTimeDone">Completato</string>
@@ -446,6 +447,8 @@
     <string name="locationPickerTitle">Cerca luogo</string>
     <string name="locationPickerUnknown">Luogo sconosciuto</string>
     <string name="streakDayToday">Oggi</string>
+    <string name="streakDontMissTwice">Don\'t miss twice!</string>
+    <string name="streakLegendBend">Saved</string>
     <string name="streakLegendStreakDay">Giorno serie</string>
     <string name="streakStatusActive">Oggi è attivo e prolunga la tua serie.</string>
     <string name="streakStatusBuilding">Oggi conta, ma la serie non è ancora completamente connessa.</string>
@@ -507,4 +510,81 @@
     <string name="distractionSnack">Spuntino</string>
     <string name="distractionStretched">Stretching</string>
     <string name="targetSheetTitle">Seleziona target del focus</string>
+    <string name="recurrenceLabel">Repeat</string>
+    <string name="recurrenceEveryLabel">Every</string>
+    <string name="recurrenceWeekly">Weekly</string>
+    <string name="recurrenceMonthly">Monthly</string>
+    <string name="recurrenceYearly">Yearly</string>
+    <string name="recurrenceOnDays">%1$s on %2$s</string>
+    <string name="recurrenceOnDayOfMonth">%1$s on day %2$d</string>
+    <string name="recurrenceOnNthWeekday">%1$s on the %2$s %3$s</string>
+    <string name="recurrenceOrdinalFirst">first</string>
+    <string name="recurrenceOrdinalSecond">second</string>
+    <string name="recurrenceOrdinalThird">third</string>
+    <string name="recurrenceOrdinalFourth">fourth</string>
+    <string name="recurrenceOrdinalLast">last</string>
+    <string name="recurringTasksTitle">Recurring Tasks</string>
+    <string name="recurringTasksEmpty">No recurring tasks yet. Tap + to create one.</string>
+    <string name="recurringTasksNextDue">Next: %1$s</string>
+    <plurals name="recurringTasksCompletedCount">
+        <item quantity="one">Completed %d time</item>
+        <item quantity="other">Completed %d times</item>
+    </plurals>
+    <string name="recurringTaskTitleNew">New Recurring Task</string>
+    <string name="recurringTaskTitleEdit">Edit Recurring Task</string>
+    <string name="recurringTaskTitleView">Recurring Task</string>
+    <string name="recurringTaskLabelNextDue">Next due</string>
+    <string name="recurringTaskSnackbarDueRequired">Set the next due date first</string>
+    <string name="recurringTaskMonthlyOnDay">On day %1$d</string>
+    <string name="recurringTaskMonthlyOnNth">On the %1$s %2$s</string>
+    <string name="recurringTaskReminderMinutesBefore">%1$d min before</string>
+    <string name="recurringTaskCompleteNow">Complete now</string>
+    <string name="recurringTaskHistoryTitle">History</string>
+    <string name="recurringTaskHistoryEmpty">No completions yet.</string>
+    <string name="recurringTaskHistoryAddPast">Add past</string>
+    <string name="recurringTaskDeleteTitle">Delete recurring task?</string>
+    <string name="recurringTaskDeleteContent">This also deletes its completion history. This action cannot be undone.</string>
+    <string name="recurringTaskCompletedSnackbar">Completed! Next: %1$s</string>
+    <plurals name="recurrenceEveryWeeks">
+        <item quantity="one">Every week</item>
+        <item quantity="other">Every %d weeks</item>
+    </plurals>
+    <plurals name="recurrenceEveryMonths">
+        <item quantity="one">Every month</item>
+        <item quantity="other">Every %d months</item>
+    </plurals>
+    <plurals name="recurrenceEveryYears">
+        <item quantity="one">Every year</item>
+        <item quantity="other">Every %d years</item>
+    </plurals>
+    <string name="notificationChannelQuickHabitsName">Quick Habit Reminders</string>
+    <string name="notificationChannelQuickHabitsDesc">Interval nudges like drinking water</string>
+    <string name="quickHabitNotificationTitle">Quick Habit</string>
+    <string name="quickHabitsTitle">Quick Habits</string>
+    <string name="quickHabitsScreenEmpty">No quick habits yet! Tap Add to set an interval reminder</string>
+    <string name="quickHabitAddLabel">Add Quick Habit</string>
+    <string name="quickHabitEditTitle">Edit Quick Habit</string>
+    <string name="quickHabitNameLabel">Name</string>
+    <string name="quickHabitNameHint">e.g. Drink water</string>
+    <string name="quickHabitIntervalLabel">Repeat every</string>
+    <string name="quickHabitUnitMinutes">Minutes</string>
+    <string name="quickHabitUnitHours">Hours</string>
+    <string name="quickHabitAllDayLabel">All day</string>
+    <string name="quickHabitDaysLabel">Days</string>
+    <string name="quickHabitEveryDay">Every day</string>
+    <string name="quickHabitSpecificDays">Specific days</string>
+    <string name="quickHabitStartLabel">From</string>
+    <string name="quickHabitEndLabel">To</string>
+    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
+    <string name="quickHabitWindowFormat">%1$s–%2$s</string>
+    <string name="quickHabitDeleteTitle">Delete Quick Habit</string>
+    <string name="quickHabitDeleteContent">Are you sure you want to delete \"%1$s\"?</string>
+    <plurals name="quickHabitEveryHours">
+        <item quantity="one">Every %d hour</item>
+        <item quantity="other">Every %d hours</item>
+    </plurals>
+    <plurals name="quickHabitEveryMinutes">
+        <item quantity="one">Every %d minute</item>
+        <item quantity="other">Every %d minutes</item>
+    </plurals>
 </resources>
