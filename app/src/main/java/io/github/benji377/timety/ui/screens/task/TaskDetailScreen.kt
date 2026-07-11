@@ -43,11 +43,8 @@ import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -64,15 +61,10 @@ import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -99,11 +91,11 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.data.model.task.SubtaskEntity
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
+import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.readOnlyFieldColors
@@ -196,16 +188,8 @@ fun TaskDetailScreen(
     val reminderNoDueMsg = stringResource(R.string.taskDetailsSnackbarReminderNoDue)
     val reminderTooEarlyMsg = stringResource(R.string.taskDetailsLabelReminderTooEarly)
 
-    // Date and time picker flow: a date is picked first, then a time.
+    // Date-then-time picker flow; a non-null target keeps the dialog open.
     var pickerTarget by remember { mutableStateOf<PickerTarget?>(null) }
-    var pickerStep by remember { mutableIntStateOf(0) } // 0 = none, 1 = date, 2 = time
-    var pickedLocalDate by remember { mutableStateOf<LocalDate?>(null) }
-
-    fun closePicker() {
-        pickerTarget = null
-        pickerStep = 0
-        pickedLocalDate = null
-    }
 
     fun addComputedReminder(reminderTime: Instant?) {
         if (reminderTime == null) return
@@ -216,10 +200,7 @@ fun TaskDetailScreen(
 
     fun onAddReminderClicked() {
         when (selectedReminderOption) {
-            ReminderOption.CUSTOM -> {
-                pickerTarget = PickerTarget.CUSTOM_REMINDER
-                pickerStep = 1
-            }
+            ReminderOption.CUSTOM -> pickerTarget = PickerTarget.CUSTOM_REMINDER
 
             else -> {
                 val due = dueDate
@@ -414,10 +395,7 @@ fun TaskDetailScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(enabled = isEditing) {
-                            pickerTarget = PickerTarget.DUE_DATE
-                            pickerStep = 1
-                        }
+                        .clickable(enabled = isEditing) { pickerTarget = PickerTarget.DUE_DATE }
                 ) {
                     OutlinedTextField(
                         value = dueDate?.let {
@@ -687,88 +665,45 @@ fun TaskDetailScreen(
         onDismiss = { showDeleteConfirm = false }
     )
 
-    // Date and time picker dialogs.
-    if (pickerStep == 1) {
+    // Date and time picker dialog.
+    pickerTarget?.let { target ->
         // Due dates can't be before today; a custom reminder can't be after the task's due date.
         val zone = ZoneId.systemDefault()
         val todayUtcMillis =
             LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         val dueUtcMillis = dueDate?.atZone(zone)?.toLocalDate()
             ?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
-        val selectableDates = remember(pickerTarget, dueUtcMillis, todayUtcMillis) {
+        val selectableDates = remember(target, dueUtcMillis, todayUtcMillis) {
             object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean = when (pickerTarget) {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean = when (target) {
                     PickerTarget.DUE_DATE -> utcTimeMillis >= todayUtcMillis
                     PickerTarget.CUSTOM_REMINDER -> dueUtcMillis == null || utcTimeMillis <= dueUtcMillis
-                    else -> true
                 }
             }
         }
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = (if (pickerTarget == PickerTarget.DUE_DATE) dueDate else null)
+        TimetyDateTimePickerDialog(
+            initialDateMillis = (if (target == PickerTarget.DUE_DATE) dueDate else null)
                 ?.toEpochMilli() ?: System.currentTimeMillis(),
-            selectableDates = selectableDates
-        )
-        DatePickerDialog(
-            onDismissRequest = { closePicker() },
-            confirmButton = {
-                TextButton(onClick = {
-                    val millis = datePickerState.selectedDateMillis
-                    if (millis != null) {
-                        pickedLocalDate =
-                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-                        pickerStep = 2
-                    } else {
-                        closePicker()
-                    }
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { closePicker() }) { Text(stringResource(R.string.commonLabelCancel)) }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-
-    if (pickerStep == 2 && pickedLocalDate != null) {
-        val timePickerState = rememberTimePickerState(
             initialHour = 12,
             initialMinute = 0,
-            is24Hour = dateFmt.use24HourFormat
-        )
-        AlertDialog(
-            onDismissRequest = { closePicker() },
-            title = { Text(stringResource(R.string.taskDetailsLabelDueDateSet)) },
-            text = {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TimePicker(state = timePickerState)
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    val date = pickedLocalDate!!
-                    val instant = date.atTime(timePickerState.hour, timePickerState.minute)
-                        .atZone(ZoneId.systemDefault()).toInstant()
-                    when (pickerTarget) {
-                        PickerTarget.DUE_DATE -> dueDate = instant
-                        PickerTarget.CUSTOM_REMINDER -> {
-                            val due = dueDate
-                            if (due != null && instant.isAfter(due)) {
-                                scope.launch { snackbarHostState.showSnackbar(reminderTooEarlyMsg) }
-                            } else {
-                                addComputedReminder(instant)
-                            }
+            timeTitle = stringResource(R.string.taskDetailsLabelDueDateSet),
+            selectableDates = selectableDates,
+            onConfirm = { date, hour, minute ->
+                val instant = date.atTime(hour, minute).atZone(zone).toInstant()
+                when (target) {
+                    PickerTarget.DUE_DATE -> dueDate = instant
+                    PickerTarget.CUSTOM_REMINDER -> {
+                        val due = dueDate
+                        if (due != null && instant.isAfter(due)) {
+                            scope.launch { snackbarHostState.showSnackbar(reminderTooEarlyMsg) }
+                        } else {
+                            addComputedReminder(instant)
                         }
-
-                        null -> {}
                     }
-                    closePicker()
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
+                }
+                pickerTarget = null
             },
-            dismissButton = {
-                TextButton(onClick = { closePicker() }) { Text(stringResource(R.string.commonLabelCancel)) }
-            }
+            onDismiss = { pickerTarget = null },
         )
     }
 }

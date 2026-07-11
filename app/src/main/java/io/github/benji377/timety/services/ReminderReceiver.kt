@@ -8,11 +8,7 @@ import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.LocaleHelper
 import io.github.benji377.timety.util.habit.HabitUtils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 
 /** Handles a fired reminder alarm by showing its notification and re-arming it if it repeats. */
@@ -30,38 +26,23 @@ class ReminderReceiver : BroadcastReceiver() {
         val notificationService = NotificationService(appContext)
 
         if (channelId == NotificationService.CHANNEL_MOTIVATION) {
-            val pendingResult = goAsync()
-            CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-                try {
-                    val finalBody = motivationBody(appContext, fallback = body)
-                    notificationService.showNotification(
-                        notificationId,
-                        channelId,
-                        title,
-                        finalBody
-                    )
-                    notificationService.rescheduleIfRepeating(intent)
-                } finally {
-                    pendingResult.finish()
-                }
+            launchAsync {
+                val finalBody = motivationBody(appContext, fallback = body)
+                notificationService.showNotification(notificationId, channelId, title, finalBody)
+                notificationService.rescheduleIfRepeating(intent)
             }
             return
         }
 
         if (channelId == NotificationService.CHANNEL_EVENING) {
-            val pendingResult = goAsync()
-            CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-                try {
-                    notificationService.showEndOfDayNotification(
-                        notificationId,
-                        title,
-                        body,
-                        localized = localizedContext(appContext),
-                    )
-                    notificationService.rescheduleIfRepeating(intent)
-                } finally {
-                    pendingResult.finish()
-                }
+            launchAsync {
+                notificationService.showEndOfDayNotification(
+                    notificationId,
+                    title,
+                    body,
+                    localized = localizedContext(appContext),
+                )
+                notificationService.rescheduleIfRepeating(intent)
             }
             return
         }

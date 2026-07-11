@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TrackChanges
@@ -69,6 +68,8 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.stats.LegendDot
+import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.screens.focus.FocusStatsScreen
 import io.github.benji377.timety.ui.screens.habit.HabitStatsScreen
@@ -91,7 +92,6 @@ import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.DayQualityCalculator
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.Locale
 import kotlin.math.roundToInt
 import java.time.format.TextStyle as JavaTextStyle
 
@@ -260,11 +260,7 @@ private fun OverviewStatsScreen(
         contentPadding = PaddingValues(16.dp)
     ) {
         item {
-            Text(
-                text = stringResource(R.string.statsLabelSummary),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+            SectionHeader(stringResource(R.string.statsLabelSummary))
             Spacer(Modifier.height(16.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -295,16 +291,9 @@ private fun OverviewStatsScreen(
 
             Spacer(Modifier.height(40.dp))
 
-            Text(
-                text = stringResource(R.string.statsLabelProductivity),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.statsLabelSynergy),
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            SectionHeader(
+                stringResource(R.string.statsLabelProductivity),
+                stringResource(R.string.statsLabelSynergy)
             )
             Spacer(Modifier.height(16.dp))
 
@@ -363,16 +352,9 @@ private fun DayQualityCard(
     focusMinutesByDay: Map<String, Int>,
     tasksCompletedByDay: Map<String, Int>,
 ) {
-    Text(
-        text = stringResource(R.string.statsDayQualityTitle),
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold
-    )
-    Spacer(Modifier.height(4.dp))
-    Text(
-        text = stringResource(R.string.statsDayQualitySubtitle),
-        fontSize = 12.sp,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+    SectionHeader(
+        stringResource(R.string.statsDayQualityTitle),
+        stringResource(R.string.statsDayQualitySubtitle)
     )
     Spacer(Modifier.height(16.dp))
 
@@ -456,19 +438,6 @@ private fun dayRatingColor(rating: DayRating): Color = when (rating) {
     DayRating.GREAT -> SuccessColor
 }
 
-@Composable
-private fun LegendDot(color: Color) {
-    Icon(
-        imageVector = Icons.Filled.Circle,
-        contentDescription = null,
-        tint = color,
-        modifier = Modifier
-            .height(12.dp)
-            .width(12.dp)
-    )
-}
-
-
 // Draws the 7-day focus-minutes vs. tasks-completed trend as two smoothed lines with a
 // drag-to-inspect tooltip.
 @Composable
@@ -479,6 +448,7 @@ private fun SynergyChart(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
+    val locale = LocalLocale.current.platformLocale
     val textMeasurer = rememberTextMeasurer()
     var canvasSize by remember { mutableStateOf(IntSize.Zero) }
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
@@ -560,7 +530,7 @@ private fun SynergyChart(
             // X-axis weekday labels; today is bold + primary-colored.
             last7Days.forEachIndexed { index, day ->
                 val isToday = index == 6
-                val label = day.dayOfWeek.getDisplayName(JavaTextStyle.SHORT, Locale.getDefault())
+                val label = day.dayOfWeek.getDisplayName(JavaTextStyle.SHORT, locale)
                 val layout = textMeasurer.measure(
                     text = label,
                     style = TextStyle(

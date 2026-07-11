@@ -68,8 +68,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -93,6 +91,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
@@ -101,7 +100,6 @@ import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
@@ -1043,33 +1041,19 @@ private data class TimeDialogSpec(
     val onSave: (String) -> Unit
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerDialogRow(spec: TimeDialogSpec, onDismiss: () -> Unit) {
     val (initialHour, initialMinute) = AppDateFormatUtils.parseHHmm(spec.current)
-    val is24Hour = LocalDateFormatSettings.current.use24HourFormat
-    val timePickerState = rememberTimePickerState(
+    TimetyTimePickerDialog(
         initialHour = initialHour,
         initialMinute = initialMinute,
-        is24Hour = is24Hour
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text(spec.title) },
-        text = {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                TimePicker(state = timePickerState)
-            }
+        confirmLabel = stringResource(R.string.commonLabelSave),
+        onConfirm = { hour, minute ->
+            spec.onSave("%02d:%02d".format(hour, minute))
+            onDismiss()
         },
-        confirmButton = {
-            TextButton(onClick = {
-                spec.onSave("%02d:%02d".format(timePickerState.hour, timePickerState.minute))
-                onDismiss()
-            }) { Text(stringResource(R.string.commonLabelSave)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-        }
+        onDismiss = onDismiss,
     )
 }
 

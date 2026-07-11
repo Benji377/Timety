@@ -52,8 +52,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,7 +70,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.ui.components.common.ColorSwatchGrid
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -624,34 +624,18 @@ fun HabitDetailScreen(
                 onDismissRequest = { showColorPicker = false },
                 title = { Text(stringResource(R.string.habitDetailLabelColorPicker)) },
                 text = {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(4),
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
+                    ColorSwatchGrid(
+                        colors = HABIT_DETAIL_COLORS,
+                        selectedColor = selectedColor,
+                        onSelect = {
+                            selectedColor = it
+                            showColorPicker = false
+                        },
                         modifier = Modifier.height(220.dp),
-                    ) {
-                        items(HABIT_DETAIL_COLORS.size) { index ->
-                            val optionColor = HABIT_DETAIL_COLORS[index]
-                            val isSelected = optionColor == selectedColor
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(optionColor, CircleShape)
-                                    .then(
-                                        if (isSelected) Modifier.border(
-                                            3.dp,
-                                            MaterialTheme.colorScheme.onSurface,
-                                            CircleShape
-                                        )
-                                        else Modifier
-                                    )
-                                    .clickable {
-                                        selectedColor = optionColor
-                                        showColorPicker = false
-                                    }
-                            )
-                        }
-                    }
+                        columns = 4,
+                        swatchSize = 40.dp,
+                        spacing = AppTheme.spaceLarge,
+                    )
                 },
                 confirmButton = {
                     TextButton(onClick = {
@@ -664,26 +648,15 @@ fun HabitDetailScreen(
         // Time picker dialog.
         if (showTimePicker) {
             val initial = targetTimeMinutes
-            val timePickerState = rememberTimePickerState(
+            TimetyTimePickerDialog(
                 initialHour = initial?.let { it / 60 } ?: 8,
                 initialMinute = initial?.let { it % 60 } ?: 0,
-                is24Hour = LocalDateFormatSettings.current.use24HourFormat,
-            )
-            AlertDialog(
-                onDismissRequest = { showTimePicker = false },
                 title = { Text(stringResource(R.string.habitDetailLabelReminder)) },
-                text = { TimePicker(state = timePickerState) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        targetTimeMinutes = timePickerState.hour * 60 + timePickerState.minute
-                        showTimePicker = false
-                    }) { Text(stringResource(R.string.commonLabelConfirm)) }
+                onConfirm = { hour, minute ->
+                    targetTimeMinutes = hour * 60 + minute
+                    showTimePicker = false
                 },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showTimePicker = false
-                    }) { Text(stringResource(R.string.commonLabelCancel)) }
-                },
+                onDismiss = { showTimePicker = false },
             )
         }
     }

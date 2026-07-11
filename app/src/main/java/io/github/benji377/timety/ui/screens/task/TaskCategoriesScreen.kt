@@ -1,9 +1,6 @@
 package io.github.benji377.timety.ui.screens.task
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,10 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -53,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
+import io.github.benji377.timety.ui.components.common.ColorSwatchGrid
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -62,7 +57,6 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
-import androidx.compose.foundation.lazy.grid.items as gridItems
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
@@ -249,33 +243,14 @@ private fun CategoryEditDialog(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 Text(stringResource(R.string.categoryColorLabel))
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(6),
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
-                    verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
+                ColorSwatchGrid(
+                    colors = CATEGORY_COLORS,
+                    selectedColor = selectedColor,
+                    onSelect = { selectedColor = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(140.dp),
-                ) {
-                    gridItems(CATEGORY_COLORS) { optionColor ->
-                        val isSelected = optionColor == selectedColor
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(optionColor)
-                                .then(
-                                    if (isSelected) Modifier.border(
-                                        3.dp,
-                                        MaterialTheme.colorScheme.onSurface,
-                                        CircleShape
-                                    )
-                                    else Modifier,
-                                )
-                                .clickable { selectedColor = optionColor },
-                        )
-                    }
-                }
+                )
             }
         },
         dismissButton = {

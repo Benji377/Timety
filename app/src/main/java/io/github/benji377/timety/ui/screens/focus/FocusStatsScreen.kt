@@ -62,6 +62,7 @@ import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.ui.components.common.WeekNavigator
+import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
@@ -296,19 +297,6 @@ fun FocusStatsScreen(
             TargetBreakdownSection(sessions)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
         }
-    }
-}
-
-@Composable
-private fun SectionHeader(title: String, subtitle: String) {
-    Column {
-        Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-        Text(
-            subtitle,
-            fontSize = AppTheme.fsBodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 

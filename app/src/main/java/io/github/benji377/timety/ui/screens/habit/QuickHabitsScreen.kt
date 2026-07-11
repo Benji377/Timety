@@ -1,8 +1,6 @@
 package io.github.benji377.timety.ui.screens.habit
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -41,8 +39,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -60,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -422,14 +419,17 @@ private fun QuickHabitEditDialog(
     )
 
     editingWindowStart?.let { isStart ->
-        WindowTimePickerDialog(
-            initialMinuteOfDay = if (isStart) startMinute else endMinute,
-            use24Hour = use24Hour,
-            onDismiss = { editingWindowStart = null },
-            onConfirm = { minuteOfDay ->
+        val initialMinuteOfDay = if (isStart) startMinute else endMinute
+        TimetyTimePickerDialog(
+            initialHour = initialMinuteOfDay / 60,
+            initialMinute = initialMinuteOfDay % 60,
+            confirmLabel = stringResource(R.string.commonLabelSave),
+            onConfirm = { hour, minute ->
+                val minuteOfDay = hour * 60 + minute
                 if (isStart) startMinute = minuteOfDay else endMinute = minuteOfDay
                 editingWindowStart = null
             },
+            onDismiss = { editingWindowStart = null },
         )
     }
 }
@@ -472,37 +472,6 @@ private fun WindowTimeButton(
             Text(formatMinuteOfDay(minuteOfDay, use24Hour, locale))
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun WindowTimePickerDialog(
-    initialMinuteOfDay: Int,
-    use24Hour: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit,
-) {
-    val state = rememberTimePickerState(
-        initialHour = initialMinuteOfDay / 60,
-        initialMinute = initialMinuteOfDay % 60,
-        is24Hour = use24Hour,
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        text = {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                TimePicker(state = state)
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(state.hour * 60 + state.minute) }) {
-                Text(stringResource(R.string.commonLabelSave))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-        },
-    )
 }
 
 /** "Every 2 hours" / "Every 30 minutes", using hours when the interval divides evenly. */

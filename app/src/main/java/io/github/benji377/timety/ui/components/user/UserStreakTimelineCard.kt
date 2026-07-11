@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -261,7 +262,7 @@ private fun DayTile(info: StreakDayInfo, modifier: Modifier = Modifier) {
             text = if (info.isToday) stringResource(R.string.streakDayToday)
             else info.date.dayOfWeek.getDisplayName(
                 JavaTextStyle.SHORT,
-                androidx.compose.ui.text.intl.Locale.current.platformLocale
+                LocalLocale.current.platformLocale
             ),
             textAlign = TextAlign.Center,
             maxLines = 1,

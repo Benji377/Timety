@@ -13,8 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -25,30 +23,25 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
+import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
@@ -79,12 +72,10 @@ fun TimeMachineDialog(
 
     // Date+time picker flow shared by both start/end fields: pick a date, then a time.
     var pickerTarget by remember { mutableStateOf<TimeMachineTarget?>(null) }
-    var pickerStep by remember { mutableIntStateOf(0) } // 0 = none, 1 = date, 2 = time
-    var pickedLocalDate by remember { mutableStateOf<LocalDate?>(null) }
 
     val endBeforeStartError = stringResource(R.string.dialogTimeMachineErrorEndBeforeStart)
     val zone = ZoneId.systemDefault()
-    val locale = androidx.compose.ui.text.intl.Locale.current.platformLocale
+    val locale = LocalLocale.current.platformLocale
     val dateTimeFormatter = remember(locale) {
         DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
             .withLocale(locale).withZone(zone)
@@ -159,21 +150,13 @@ fun TimeMachineDialog(
                 TimeRow(
                     label = stringResource(R.string.dialogTimeMachineStartTime),
                     value = dateTimeFormatter.format(startDateTime),
-                    onClick = {
-                        pickerTarget = TimeMachineTarget.START
-                        pickedLocalDate = startDateTime.atZone(zone).toLocalDate()
-                        pickerStep = 1
-                    },
+                    onClick = { pickerTarget = TimeMachineTarget.START },
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
                 TimeRow(
                     label = stringResource(R.string.dialogTimeMachineEndTime),
                     value = dateTimeFormatter.format(endDateTime),
-                    onClick = {
-                        pickerTarget = TimeMachineTarget.END
-                        pickedLocalDate = endDateTime.atZone(zone).toLocalDate()
-                        pickerStep = 1
-                    },
+                    onClick = { pickerTarget = TimeMachineTarget.END },
                 )
 
                 errorText?.let {
@@ -197,76 +180,21 @@ fun TimeMachineDialog(
         },
     )
 
-    if (pickerStep == 1) {
-        val target = pickerTarget
-        val initialInstant = if (target == TimeMachineTarget.START) startDateTime else endDateTime
-        val datePickerState =
-            rememberDatePickerState(initialSelectedDateMillis = initialInstant.toEpochMilli())
-        DatePickerDialog(
-            onDismissRequest = { pickerStep = 0; pickerTarget = null },
-            confirmButton = {
-                TextButton(onClick = {
-                    val millis = datePickerState.selectedDateMillis
-                    if (millis != null) {
-                        pickedLocalDate =
-                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-                        pickerStep = 2
-                    } else {
-                        pickerStep = 0
-                        pickerTarget = null
-                    }
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { pickerStep = 0; pickerTarget = null }) {
-                    Text(
-                        stringResource(
-                            R.string.commonLabelCancel
-                        )
-                    )
-                }
-            },
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-
-    if (pickerStep == 2 && pickedLocalDate != null) {
-        val context = LocalContext.current
-        val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
-        val referenceInstant =
-            if (pickerTarget == TimeMachineTarget.START) startDateTime else endDateTime
+    pickerTarget?.let { target ->
+        val referenceInstant = if (target == TimeMachineTarget.START) startDateTime else endDateTime
         val referenceTime = referenceInstant.atZone(zone)
-        val timePickerState = rememberTimePickerState(
+        TimetyDateTimePickerDialog(
+            initialDateMillis = referenceInstant.toEpochMilli(),
             initialHour = referenceTime.hour,
             initialMinute = referenceTime.minute,
-            is24Hour = is24Hour,
-        )
-        AlertDialog(
-            onDismissRequest = { pickerStep = 0; pickerTarget = null },
-            text = { TimePicker(state = timePickerState) },
-            confirmButton = {
-                TextButton(onClick = {
-                    val date = pickedLocalDate!!
-                    val instant =
-                        date.atTime(timePickerState.hour, timePickerState.minute).atZone(zone)
-                            .toInstant()
-                    if (pickerTarget == TimeMachineTarget.START) startDateTime =
-                        instant else endDateTime = instant
-                    errorText = null
-                    pickerStep = 0
-                    pickerTarget = null
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
+            onConfirm = { date, hour, minute ->
+                val instant = date.atTime(hour, minute).atZone(zone).toInstant()
+                if (target == TimeMachineTarget.START) startDateTime = instant
+                else endDateTime = instant
+                errorText = null
+                pickerTarget = null
             },
-            dismissButton = {
-                TextButton(onClick = { pickerStep = 0; pickerTarget = null }) {
-                    Text(
-                        stringResource(
-                            R.string.commonLabelCancel
-                        )
-                    )
-                }
-            },
+            onDismiss = { pickerTarget = null },
         )
     }
 }

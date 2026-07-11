@@ -20,6 +20,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.WeekNavigator
+import io.github.benji377.timety.ui.components.stats.LegendDot
+import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.ChartDeepOrange
 import io.github.benji377.timety.ui.theme.ChartTeal
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -88,18 +90,10 @@ fun TaskStatsScreen(
 
             // Task velocity chart.
             item {
-                Text(
-                    stringResource(R.string.taskStatsVelocity),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                SectionHeader(stringResource(R.string.taskStatsVelocity))
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(WarningColor, CircleShape)
-                    )
+                    LegendDot(WarningColor)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         stringResource(R.string.taskStatsCreated),
@@ -107,11 +101,7 @@ fun TaskStatsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(SuccessColor, CircleShape)
-                    )
+                    LegendDot(SuccessColor)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         stringResource(R.string.taskStatsCompleted),
@@ -136,16 +126,9 @@ fun TaskStatsScreen(
 
             // Productivity bar chart.
             item {
-                Text(
+                SectionHeader(
                     stringResource(R.string.taskStatsProductivity),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    stringResource(R.string.taskStatsCompletedDaily),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    stringResource(R.string.taskStatsCompletedDaily)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(modifier = Modifier.height(200.dp)) {
@@ -357,16 +340,9 @@ private fun CategoryBreakdownCard(
     )
 
     Column {
-        Text(
+        SectionHeader(
             stringResource(R.string.taskStatsDistribution),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            stringResource(R.string.taskStatsDistributionSubtitle),
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            stringResource(R.string.taskStatsDistributionSubtitle)
         )
         Spacer(modifier = Modifier.height(18.dp))
 

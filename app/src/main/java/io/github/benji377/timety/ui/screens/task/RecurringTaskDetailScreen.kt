@@ -3,7 +3,6 @@ package io.github.benji377.timety.ui.screens.task
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -27,9 +26,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -52,9 +48,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -77,6 +70,7 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.readOnlyFieldColors
@@ -159,9 +153,8 @@ fun RecurringTaskDetailScreen(
     var selectedReminderOption by remember { mutableStateOf(ReminderOption.MINUTES_30_BEFORE) }
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    // Date-then-time picker flow; a non-null target keeps the dialog open.
     var pickerTarget by remember { mutableStateOf<RecurringPickerTarget?>(null) }
-    var pickerStep by remember { mutableIntStateOf(0) } // 0 = none, 1 = date, 2 = time
-    var pickedLocalDate by remember { mutableStateOf<LocalDate?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -173,12 +166,6 @@ fun RecurringTaskDetailScreen(
     // is offered as "last" instead.
     val nthOrdinal = dueLocalDate?.let { RecurrenceUtils.ordinalInMonth(it) }?.takeIf { it <= 4 }
     val lastAvailable = dueLocalDate?.let { RecurrenceUtils.isLastWeekdayOfMonth(it) } ?: false
-
-    fun closePicker() {
-        pickerTarget = null
-        pickerStep = 0
-        pickedLocalDate = null
-    }
 
     fun save() {
         val trimmedTitle = title.trim()
@@ -327,7 +314,6 @@ fun RecurringTaskDetailScreen(
                         .fillMaxWidth()
                         .clickable(enabled = isEditing) {
                             pickerTarget = RecurringPickerTarget.DUE_DATE
-                            pickerStep = 1
                         }
                 ) {
                     OutlinedTextField(
@@ -521,7 +507,6 @@ fun RecurringTaskDetailScreen(
                         )
                         TextButton(onClick = {
                             pickerTarget = RecurringPickerTarget.PAST_OCCURRENCE
-                            pickerStep = 1
                         }) {
                             Icon(
                                 Icons.Filled.Add,
@@ -569,88 +554,41 @@ fun RecurringTaskDetailScreen(
         onDismiss = { showDeleteConfirm = false }
     )
 
-    // Date and time picker dialogs (date first, then time).
-    if (pickerStep == 1) {
+    // Date and time picker dialog (date first, then time).
+    pickerTarget?.let { target ->
         // Due dates can't be in the past; backfilled occurrences can't be in the future.
         val todayUtcMillis =
             LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-        val selectableDates = remember(pickerTarget, todayUtcMillis) {
+        val selectableDates = remember(target, todayUtcMillis) {
             object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                    when (pickerTarget) {
+                    when (target) {
                         RecurringPickerTarget.DUE_DATE -> utcTimeMillis >= todayUtcMillis
                         RecurringPickerTarget.PAST_OCCURRENCE -> utcTimeMillis <= todayUtcMillis
-                        else -> true
                     }
             }
         }
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = (if (pickerTarget == RecurringPickerTarget.DUE_DATE) dueDate else null)
-                ?.toEpochMilli() ?: System.currentTimeMillis(),
-            selectableDates = selectableDates
-        )
-        DatePickerDialog(
-            onDismissRequest = { closePicker() },
-            confirmButton = {
-                TextButton(onClick = {
-                    val millis = datePickerState.selectedDateMillis
-                    if (millis != null) {
-                        pickedLocalDate =
-                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-                        pickerStep = 2
-                    } else {
-                        closePicker()
-                    }
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { closePicker() }) { Text(stringResource(R.string.commonLabelCancel)) }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-
-    if (pickerStep == 2 && pickedLocalDate != null) {
         val initialTime = dueDate?.atZone(zone)
-        val timePickerState = rememberTimePickerState(
+        TimetyDateTimePickerDialog(
+            initialDateMillis = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null)
+                ?.toEpochMilli() ?: System.currentTimeMillis(),
             initialHour = initialTime?.hour ?: 12,
             initialMinute = initialTime?.minute ?: 0,
-            is24Hour = dateFmt.use24HourFormat
-        )
-        AlertDialog(
-            onDismissRequest = { closePicker() },
-            title = {
-                Text(
-                    stringResource(
-                        if (pickerTarget == RecurringPickerTarget.DUE_DATE) R.string.recurringTaskLabelNextDue
-                        else R.string.recurringTaskHistoryAddPast
-                    )
-                )
-            },
-            text = {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TimePicker(state = timePickerState)
+            timeTitle = stringResource(
+                if (target == RecurringPickerTarget.DUE_DATE) R.string.recurringTaskLabelNextDue
+                else R.string.recurringTaskHistoryAddPast
+            ),
+            selectableDates = selectableDates,
+            onConfirm = { date, hour, minute ->
+                val instant = date.atTime(hour, minute).atZone(zone).toInstant()
+                when (target) {
+                    RecurringPickerTarget.DUE_DATE -> dueDate = instant
+                    RecurringPickerTarget.PAST_OCCURRENCE ->
+                        recurringTaskId?.let { viewModel.addPastOccurrence(it, instant) }
                 }
+                pickerTarget = null
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    val instant = pickedLocalDate!!
-                        .atTime(timePickerState.hour, timePickerState.minute)
-                        .atZone(zone).toInstant()
-                    when (pickerTarget) {
-                        RecurringPickerTarget.DUE_DATE -> dueDate = instant
-                        RecurringPickerTarget.PAST_OCCURRENCE ->
-                            recurringTaskId?.let { viewModel.addPastOccurrence(it, instant) }
-
-                        null -> {}
-                    }
-                    closePicker()
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { closePicker() }) { Text(stringResource(R.string.commonLabelCancel)) }
-            }
+            onDismiss = { pickerTarget = null },
         )
     }
 }
