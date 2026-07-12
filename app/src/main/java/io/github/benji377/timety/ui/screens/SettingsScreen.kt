@@ -1,7 +1,9 @@
 package io.github.benji377.timety.ui.screens
 
+import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -32,8 +34,10 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.DoNotDisturbOn
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LinearScale
 import androidx.compose.material.icons.filled.NightlightRound
@@ -49,6 +53,7 @@ import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.UploadFile
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -179,6 +184,9 @@ fun SettingsScreen(
     val dailyMotivationTime by settingsViewModel.dailyMotivationTime.collectAsState()
     val endOfDayCheckupTime by settingsViewModel.endOfDayCheckupTime.collectAsState()
     val locationApiEndpoint by settingsViewModel.locationApiEndpoint.collectAsState()
+    val keepScreenOnDuringFocus by settingsViewModel.keepScreenOnDuringFocus.collectAsState()
+    val autoDndEnabled by settingsViewModel.autoDndEnabled.collectAsState()
+    val autoDndLiftDuringBreaks by settingsViewModel.autoDndLiftDuringBreaks.collectAsState()
 
     val focusTags by focusViewModel.allTags.collectAsState()
     val categories by taskViewModel.allCategories.collectAsState()
@@ -193,6 +201,22 @@ fun SettingsScreen(
     // Dialog state.
 
     var showLocationDialog by remember { mutableStateOf(false) }
+    var showDndPermissionDialog by remember { mutableStateOf(false) }
+    val systemNotificationManager = remember {
+        context.getSystemService(NotificationManager::class.java)
+    }
+
+    // Enabling Auto-DND needs the Notification policy access special permission, which has no
+    // runtime prompt - only a system settings toggle. Route through a rationale dialog first,
+    // matching the c) wiring rules: the setting itself always saves, syncing/degrading silently
+    // is FocusDndController's job once a session actually starts.
+    fun requestAutoDndEnabled(enabled: Boolean) {
+        if (enabled && systemNotificationManager?.isNotificationPolicyAccessGranted != true) {
+            showDndPermissionDialog = true
+        } else {
+            settingsViewModel.setAutoDndEnabled(enabled)
+        }
+    }
     var pendingLocationUrl by remember { mutableStateOf(locationApiEndpoint) }
     var locationError by remember { mutableStateOf<String?>(null) }
     var isCheckingLocation by remember { mutableStateOf(false) }
@@ -498,6 +522,46 @@ fun SettingsScreen(
                             title = upcomingTaskTitle,
                             current = upcomingTasksHorizon, min = 1, max = 60, unit = daysUnit,
                             onSave = { settingsViewModel.setUpcomingTasksHorizon(it) }
+                        )
+                    }
+                )
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelKeepScreenOn)) },
+                    supportingContent = { Text(stringResource(R.string.settingsLabelKeepScreenOnSubtitle)) },
+                    leadingContent = { Icon(Icons.Outlined.Visibility, null, tint = FocusColor) },
+                    trailingContent = {
+                        Switch(
+                            checked = keepScreenOnDuringFocus,
+                            onCheckedChange = { settingsViewModel.setKeepScreenOnDuringFocus(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
+                        )
+                    }
+                )
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelAutoDnd)) },
+                    supportingContent = { Text(stringResource(R.string.settingsLabelAutoDndSubtitle)) },
+                    leadingContent = { Icon(Icons.Filled.DoNotDisturbOn, null, tint = WarningAccent) },
+                    trailingContent = {
+                        Switch(
+                            checked = autoDndEnabled,
+                            onCheckedChange = { requestAutoDndEnabled(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
+                        )
+                    }
+                )
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelAutoDndLiftBreaks)) },
+                    supportingContent = { Text(stringResource(R.string.settingsLabelAutoDndLiftBreaksSubtitle)) },
+                    leadingContent = { Icon(Icons.Filled.FreeBreakfast, null, tint = WarningAccent) },
+                    trailingContent = {
+                        Switch(
+                            checked = autoDndLiftDuringBreaks,
+                            enabled = autoDndEnabled,
+                            onCheckedChange = { settingsViewModel.setAutoDndLiftDuringBreaks(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
                         )
                     }
                 )
@@ -809,6 +873,21 @@ fun SettingsScreen(
             }
         }
     }
+
+    // Notification policy access has no runtime prompt, only a system settings toggle - explain
+    // why before sending the user there.
+    ConfirmationDialog(
+        visible = showDndPermissionDialog,
+        title = stringResource(R.string.settingsDndPermissionDialogTitle),
+        content = stringResource(R.string.settingsDndPermissionDialogContent),
+        confirmLabel = stringResource(R.string.commonLabelOpenSettings),
+        onConfirm = {
+            settingsViewModel.setAutoDndEnabled(true)
+            showDndPermissionDialog = false
+            context.startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+        },
+        onDismiss = { showDndPermissionDialog = false }
+    )
 
     // Import confirmation dialog warning that restoring a backup overwrites existing data.
     ConfirmationDialog(

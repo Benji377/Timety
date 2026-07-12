@@ -73,6 +73,21 @@ class SettingsViewModel(
         SharingStarted.WhileSubscribed(5000),
         "system"
     )
+    val keepScreenOnDuringFocus = repository.keepScreenOnDuringFocusFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        false
+    )
+    val autoDndEnabled = repository.autoDndEnabledFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        false
+    )
+    val autoDndLiftDuringBreaks = repository.autoDndLiftDuringBreaksFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        false
+    )
 
     fun setThemePref(theme: ThemeMode) =
         viewModelScope.launch { repository.saveThemePref(theme) }
@@ -113,6 +128,15 @@ class SettingsViewModel(
         repository.saveAppLocaleCode(code)
         resyncNotifications()
     }
+
+    fun setKeepScreenOnDuringFocus(keepOn: Boolean) =
+        viewModelScope.launch { repository.saveKeepScreenOnDuringFocus(keepOn) }
+
+    fun setAutoDndEnabled(enabled: Boolean) =
+        viewModelScope.launch { repository.saveAutoDndEnabled(enabled) }
+
+    fun setAutoDndLiftDuringBreaks(lift: Boolean) =
+        viewModelScope.launch { repository.saveAutoDndLiftDuringBreaks(lift) }
 
 
     private suspend fun resyncNotifications() {

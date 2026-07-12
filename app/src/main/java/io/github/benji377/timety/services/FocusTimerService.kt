@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.R
+import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.WarningColor
@@ -35,6 +36,9 @@ class FocusTimerService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val notificationManager by lazy { NotificationManagerCompat.from(this) }
     private val alarmManager by lazy { getSystemService(ALARM_SERVICE) as AlarmManager }
+    private val dndController by lazy {
+        FocusDndController(applicationContext, (application as TimetyApplication).container.settingsRepository)
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -53,7 +57,9 @@ class FocusTimerService : Service() {
                         old.totalPhaseSeconds == new.totalPhaseSeconds
             }
             .onEach { state ->
-                if (state.isRunning || state.isPaused || state.isAwaitingContinue) {
+                val sessionActive = state.isRunning || state.isPaused || state.isAwaitingContinue
+                dndController.syncForSessionState(sessionActive, state.isRestPhase)
+                if (sessionActive) {
                     updateNotification(state)
                 } else {
                     stopForeground(STOP_FOREGROUND_REMOVE)
@@ -84,10 +90,16 @@ class FocusTimerService : Service() {
             }
 
             ACTION_STOP, ACTION_DISCARD -> {
-                FocusTimerManager.stopTimer(discard = action == ACTION_DISCARD)
-                stopForeground(STOP_FOREGROUND_REMOVE)
                 cancelAlarm()
-                stopSelf()
+                // stopForeground/stopSelf are NOT called synchronously here: FocusTimerManager
+                // .stopTimer() below only updates the StateFlow, and the timerState collector in
+                // onCreate resumes on a separate, later dispatch of serviceScope. Calling stopSelf()
+                // synchronously in this call stack would race that resumption - onDestroy can cancel
+                // serviceScope before the collector's suspending DND restore (a DataStore read/write)
+                // completes, leaving Do Not Disturb stuck on. The collector's else-branch performs
+                // the actual stopForeground/stopSelf once the restore has finished, sequenced in the
+                // same coroutine body.
+                FocusTimerManager.stopTimer(discard = action == ACTION_DISCARD)
             }
         }
         return START_STICKY

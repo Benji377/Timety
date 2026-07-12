@@ -45,6 +45,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -60,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -163,6 +165,16 @@ fun FocusScreen(
     val tasks by taskViewModel.allTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
+    val keepScreenOnDuringFocus by settingsViewModel.keepScreenOnDuringFocus.collectAsState()
+
+    // Only holds the screen awake while this screen is on the foreground - no wakelock, no
+    // permission needed. The lock-screen/background case is covered separately by the foreground
+    // service's chronometer notification.
+    val view = LocalView.current
+    DisposableEffect(keepScreenOnDuringFocus, isRunning) {
+        view.keepScreenOn = keepScreenOnDuringFocus && isRunning
+        onDispose { view.keepScreenOn = false }
+    }
 
     var flexibleMinutes by remember { mutableIntStateOf(25) }
 
