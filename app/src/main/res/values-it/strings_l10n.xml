@@ -412,6 +412,8 @@
     <string name="settingsSectionOrganization">Organizzazione</string>
     <string name="settingsSectionSupport">Supporto e Feedback</string>
     <string name="settingsTitle">Impostazioni</string>
+    <string name="shortcutNewTask">New Task</string>
+    <string name="shortcutStartFocus">Start Focus</string>
     <string name="userEditNameHint">Inserisci il tuo nome</string>
     <string name="userEditNameTitle">Modifica nome</string>
     <string name="userErrorGenerateImage">Errore durante la generazione dell\'immagine di riepilogo.</string>
