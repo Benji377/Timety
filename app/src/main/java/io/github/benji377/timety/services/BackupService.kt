@@ -14,6 +14,8 @@ import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.data.model.goal.GoalEntity
+import io.github.benji377.timety.data.model.goal.GoalEntryEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
@@ -52,6 +54,7 @@ class BackupService(
     private val recurringTaskDao get() = database.recurringTaskDao()
     private val habitDao get() = database.habitDao()
     private val quickHabitDao get() = database.quickHabitDao()
+    private val goalDao get() = database.goalDao()
     private val focusDao get() = database.focusDao()
     private val userDao get() = database.userDao()
     private val dayRatingDao get() = database.dayRatingDao()
@@ -130,6 +133,7 @@ class BackupService(
             put("recurringTasks", recurringTasksToJson())
             put("habits", habitsToJson())
             put("quickHabits", quickHabitsToJson())
+            put("goals", goalsToJson())
             put("dayRatings", dayRatingsToJson())
             put("focus", focusToJson())
         }
@@ -269,6 +273,37 @@ class BackupService(
         return array
     }
 
+    private suspend fun goalsToJson(): JSONArray {
+        val array = JSONArray()
+        for (goalWithEntries in goalDao.getAllGoalsWithEntries().first()) {
+            val goal = goalWithEntries.goal
+            array.put(
+                JSONObject().apply {
+                    put("id", goal.id)
+                    put("name", goal.name)
+                    put("description", goal.description)
+                    put("colorValue", goal.colorValue)
+                    put("iconCodePoint", goal.iconCodePoint ?: JSONObject.NULL)
+                    put("targetValue", goal.targetValue)
+                    put("unitLabel", goal.unitLabel)
+                    put("targetDate", goal.targetDate.toString())
+                    put("createdAt", goal.createdAt.toString())
+                    put("completedAt", goal.completedAt?.toString() ?: JSONObject.NULL)
+                    put(
+                        "entries",
+                        JSONArray(goalWithEntries.entries.map { entry ->
+                            JSONObject().apply {
+                                put("value", entry.value)
+                                put("timestamp", entry.timestamp.toString())
+                            }
+                        })
+                    )
+                }
+            )
+        }
+        return array
+    }
+
     private suspend fun dayRatingsToJson(): JSONArray {
         val array = JSONArray()
         for (rating in dayRatingDao.getAll().first()) {
@@ -381,6 +416,8 @@ class BackupService(
         restoreRecurringTasks(json.optJSONArray("recurringTasks") ?: JSONArray())
         restoreHabits(json.optJSONArray("habits") ?: JSONArray())
         restoreQuickHabits(json.optJSONArray("quickHabits") ?: JSONArray())
+        // Optional key: backups from before the goals feature simply carry none.
+        restoreGoals(json.optJSONArray("goals") ?: JSONArray())
         restoreDayRatings(json.optJSONArray("dayRatings") ?: JSONArray())
         json.optJSONObject("focus")?.let { restoreFocus(it) }
     }
@@ -576,6 +613,41 @@ class BackupService(
                     createdAt = readInstant(json, "createdAt") ?: Instant.now(),
                 )
             )
+        }
+    }
+
+
+    private fun restoreGoals(goalsJson: JSONArray) {
+        goalDao.clearAll()
+        for (i in 0 until goalsJson.length()) {
+            val goalJson = goalsJson.getJSONObject(i)
+            val goalId = readString(goalJson, "id") ?: Instant.now().toEpochMilli().toString()
+            goalDao.insertGoal(
+                GoalEntity(
+                    id = goalId,
+                    name = readString(goalJson, "name") ?: "",
+                    description = readString(goalJson, "description") ?: "",
+                    colorValue = goalJson.optInt("colorValue", 0),
+                    iconCodePoint = readOptInt(goalJson, "iconCodePoint"),
+                    targetValue = goalJson.optInt("targetValue", 1).coerceAtLeast(1),
+                    unitLabel = readString(goalJson, "unitLabel") ?: "",
+                    targetDate = readInstant(goalJson, "targetDate") ?: Instant.now(),
+                    createdAt = readInstant(goalJson, "createdAt") ?: Instant.now(),
+                    completedAt = readInstant(goalJson, "completedAt"),
+                )
+            )
+            val entriesJson = goalJson.optJSONArray("entries") ?: JSONArray()
+            for (j in 0 until entriesJson.length()) {
+                val entryJson = entriesJson.getJSONObject(j)
+                val timestamp = readInstant(entryJson, "timestamp") ?: continue
+                goalDao.insertEntry(
+                    GoalEntryEntity(
+                        goalId = goalId,
+                        value = entryJson.optInt("value", 1).coerceAtLeast(1),
+                        timestamp = timestamp,
+                    )
+                )
+            }
         }
     }
 

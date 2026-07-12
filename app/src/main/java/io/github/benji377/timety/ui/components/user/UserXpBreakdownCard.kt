@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.util.stats.ExperienceEngine
@@ -95,6 +97,13 @@ fun UserXpBreakdownCard(
                 descriptionRes = R.string.xpSourceFocusDesc,
                 value = ExperienceEngine.XP_PER_FOCUS_MINS,
                 color = FocusColor,
+            ),
+            XpSourceRowData(
+                icon = Icons.Outlined.Flag,
+                labelRes = R.string.globalLabelGoals,
+                descriptionRes = R.string.xpSourceGoalDesc,
+                value = ExperienceEngine.XP_PER_GOAL,
+                color = GoalColor,
             ),
         )
     }

@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import io.github.benji377.timety.data.local.dao.DayRatingDao
 import io.github.benji377.timety.data.local.dao.FocusDao
+import io.github.benji377.timety.data.local.dao.GoalDao
 import io.github.benji377.timety.data.local.dao.HabitDao
 import io.github.benji377.timety.data.local.dao.QuickHabitDao
 import io.github.benji377.timety.data.local.dao.RecurringTaskDao
@@ -15,6 +16,8 @@ import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.data.model.goal.GoalEntity
+import io.github.benji377.timety.data.model.goal.GoalEntryEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
@@ -41,6 +44,8 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
         HabitEntity::class,
         HabitCompletionEntity::class,
         QuickHabitEntity::class,
+        GoalEntity::class,
+        GoalEntryEntity::class,
         UserProfileEntity::class,
         DayRatingEntity::class
     ],
@@ -54,6 +59,7 @@ abstract class TimetyDatabase : RoomDatabase() {
     abstract fun recurringTaskDao(): RecurringTaskDao
     abstract fun habitDao(): HabitDao
     abstract fun quickHabitDao(): QuickHabitDao
+    abstract fun goalDao(): GoalDao
     abstract fun focusDao(): FocusDao
     abstract fun userDao(): UserDao
     abstract fun dayRatingDao(): DayRatingDao

@@ -45,8 +45,11 @@ class MigrationTest {
             cursor.moveToFirst()
             assertEquals("Read", cursor.getString(0))
         }
-        // The new quick_habits, recurring-task and day-rating tables exist and are queryable.
-        listOf("quick_habits", "recurring_tasks", "recurring_occurrences", "day_ratings").forEach { table ->
+        // The new quick-habit, recurring-task, day-rating and goal tables exist and are queryable.
+        listOf(
+            "quick_habits", "recurring_tasks", "recurring_occurrences", "day_ratings",
+            "goals", "goal_entries",
+        ).forEach { table ->
             db.query("SELECT COUNT(*) FROM $table").use { cursor ->
                 cursor.moveToFirst()
                 assertEquals(0, cursor.getInt(0))

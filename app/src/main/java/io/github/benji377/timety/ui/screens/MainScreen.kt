@@ -32,6 +32,8 @@ import io.github.benji377.timety.ui.navigation.BottomNavItem
 import io.github.benji377.timety.ui.navigation.BottomNavItems
 import io.github.benji377.timety.ui.screens.focus.FocusModesScreen
 import io.github.benji377.timety.ui.screens.focus.FocusScreen
+import io.github.benji377.timety.ui.screens.goal.GoalDetailScreen
+import io.github.benji377.timety.ui.screens.goal.GoalsScreen
 import io.github.benji377.timety.ui.screens.habit.HabitDetailScreen
 import io.github.benji377.timety.ui.screens.habit.HabitListScreen
 import io.github.benji377.timety.ui.screens.habit.QuickHabitsScreen
@@ -167,7 +169,8 @@ fun MainScreen() {
                     onNavigateToHabitDetail = { habitId ->
                         navController.navigate(AppRoute.habitDetail(habitId))
                     },
-                    onNavigateToQuickHabits = { navController.navigate(AppRoute.QUICK_HABITS.route) }
+                    onNavigateToQuickHabits = { navController.navigate(AppRoute.QUICK_HABITS.route) },
+                    onNavigateToGoals = { navController.navigate(AppRoute.GOALS.route) }
                 )
             }
             composable(BottomNavItem.Profile.route) {
@@ -215,6 +218,32 @@ fun MainScreen() {
             }
             composable(AppRoute.QUICK_HABITS.route) {
                 QuickHabitsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(AppRoute.GOALS.route) {
+                GoalsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToGoalDetail = { goalId ->
+                        navController.navigate(AppRoute.goalDetail(goalId))
+                    }
+                )
+            }
+            composable(AppRoute.GOAL_DETAIL.route) {
+                GoalDetailScreen(
+                    goalId = null,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(
+                route = AppRoute.GOAL_DETAIL_WITH_ID,
+                arguments = listOf(androidx.navigation.navArgument(AppRoute.ARG_GOAL_ID) {
+                    type = androidx.navigation.NavType.StringType
+                })
+            ) { backStackEntry ->
+                val goalId = backStackEntry.arguments?.getString(AppRoute.ARG_GOAL_ID)
+                GoalDetailScreen(
+                    goalId = goalId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

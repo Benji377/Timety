@@ -6,6 +6,7 @@ import io.github.benji377.timety.data.local.ALL_MIGRATIONS
 import io.github.benji377.timety.data.local.TimetyDatabase
 import io.github.benji377.timety.data.repository.DayRatingRepository
 import io.github.benji377.timety.data.repository.FocusRepository
+import io.github.benji377.timety.data.repository.GoalRepository
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.QuickHabitRepository
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
@@ -24,6 +25,7 @@ interface AppContainer {
     val recurringTaskRepository: RecurringTaskRepository
     val habitRepository: HabitRepository
     val quickHabitRepository: QuickHabitRepository
+    val goalRepository: GoalRepository
     val focusRepository: FocusRepository
     val userRepository: UserRepository
     val dayRatingRepository: DayRatingRepository
@@ -55,6 +57,10 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val quickHabitRepository: QuickHabitRepository by lazy {
         QuickHabitRepository(database.quickHabitDao())
+    }
+
+    override val goalRepository: GoalRepository by lazy {
+        GoalRepository(database.goalDao())
     }
 
     override val focusRepository: FocusRepository by lazy {
