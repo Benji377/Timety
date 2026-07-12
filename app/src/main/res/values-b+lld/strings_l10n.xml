@@ -428,6 +428,8 @@
     <string name="settingsSectionOrganization">Urganisazion</string>
     <string name="settingsSectionSupport">Sustëni y Feedback</string>
     <string name="settingsTitle">Mpustazions</string>
+    <string name="shortcutNewTask">New Task</string>
+    <string name="shortcutStartFocus">Start Focus</string>
     <string name="userEditNameHint">Nserësc ti inuem</string>
     <string name="userEditNameTitle">Mudé Inuem</string>
     <string name="userErrorGenerateImage">Feter de generé l cheder di resultac.</string>
