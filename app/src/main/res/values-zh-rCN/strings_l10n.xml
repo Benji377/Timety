@@ -408,6 +408,8 @@
     <string name="settingsSectionOrganization">Organization</string>
     <string name="settingsSectionSupport">Support &amp; Feedback</string>
     <string name="settingsTitle">Settings</string>
+    <string name="shortcutNewTask">New Task</string>
+    <string name="shortcutStartFocus">Start Focus</string>
     <string name="userEditNameHint">Enter your name</string>
     <string name="userEditNameTitle">Edit Name</string>
     <string name="userErrorGenerateImage">Failed to generate wrap-up image.</string>
