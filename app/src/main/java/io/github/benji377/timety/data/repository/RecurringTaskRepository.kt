@@ -15,6 +15,10 @@ class RecurringTaskRepository(
     val allRecurringTasks: Flow<List<RecurringTaskWithOccurrences>> =
         recurringTaskDao.getAllWithOccurrences()
 
+    suspend fun getTaskById(id: String): RecurringTaskEntity? = withContext(Dispatchers.IO) {
+        recurringTaskDao.getById(id)
+    }
+
     suspend fun insertTask(task: RecurringTaskEntity) = withContext(Dispatchers.IO) {
         recurringTaskDao.insert(task)
     }

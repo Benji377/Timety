@@ -1,6 +1,7 @@
 package io.github.benji377.timety
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,6 +25,7 @@ import io.github.benji377.timety.ui.theme.TimetyTheme
 import io.github.benji377.timety.ui.utils.DateFormatSettings
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.LocaleHelper
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -34,6 +36,15 @@ class MainActivity : ComponentActivity() {
     // Locale code applied when this Activity's base context was attached. Used to
     // detect a language change and recreate the Activity so resources reload.
     private var appliedLocaleCode: String = "system"
+
+    // One-shot navigation request carried by the launching intent (app shortcut or widget tap):
+    // a nav route string that MainScreen consumes once and then clears.
+    private val navTarget = MutableStateFlow<String?>(null)
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        navTarget.value = intent.getStringExtra(EXTRA_NAV_TARGET)
+    }
 
     override fun attachBaseContext(newBase: Context) {
         val settings = SettingsRepository(newBase.dataStore)
@@ -48,6 +59,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val settings = SettingsRepository(dataStore)
+        navTarget.value = intent?.getStringExtra(EXTRA_NAV_TARGET)
 
         // Recreate the Activity when the selected language changes.
         lifecycleScope.launch {
@@ -81,10 +93,23 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        MainScreen()
+                        val pendingNavTarget by navTarget.collectAsState()
+                        MainScreen(
+                            navTarget = pendingNavTarget,
+                            onNavTargetConsumed = { navTarget.value = null }
+                        )
                     }
                 }
             }
         }
+    }
+
+    companion object {
+        /**
+         * Intent extra naming a navigation route (an [AppRoute][io.github.benji377.timety.ui.navigation.AppRoute]
+         * or bottom-tab route string) to open once the UI is up. Set by the static app shortcuts
+         * in `res/xml/shortcuts.xml` and by widget tap intents.
+         */
+        const val EXTRA_NAV_TARGET = "navTarget"
     }
 }

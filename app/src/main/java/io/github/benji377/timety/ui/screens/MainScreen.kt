@@ -46,9 +46,15 @@ import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 
 /**
  * Root screen hosting the navigation graph and bottom navigation bar for the app's main sections.
+ *
+ * [navTarget] is a one-shot navigation request (a route string) from an app shortcut or widget
+ * tap; it is navigated to once and acknowledged via [onNavTargetConsumed].
  */
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    navTarget: String? = null,
+    onNavTargetConsumed: () -> Unit = {},
+) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val permissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
@@ -63,6 +69,26 @@ fun MainScreen() {
     val currentRoute = navBackStackEntry?.destination?.route
 
     val showBottomNav = currentRoute in BottomNavItems.map { it.route }
+
+    LaunchedEffect(navTarget) {
+        if (navTarget != null) {
+            // Tab targets keep the bottom-nav back-stack semantics; detail targets stack on top.
+            // A malformed route (stale widget after an app update) is dropped rather than crashing.
+            try {
+                if (BottomNavItems.any { it.route == navTarget }) {
+                    navController.navigate(navTarget) {
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                } else {
+                    navController.navigate(navTarget) { launchSingleTop = true }
+                }
+            } catch (_: IllegalArgumentException) {
+            }
+            onNavTargetConsumed()
+        }
+    }
 
     val snackbarHostState = LocalSnackbarHostState.current
     Scaffold(
