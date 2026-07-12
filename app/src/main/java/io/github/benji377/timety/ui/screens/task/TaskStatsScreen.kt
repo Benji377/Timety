@@ -17,7 +17,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WarningAmber
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.stats.LegendDot
@@ -28,12 +31,20 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.WarningAccent
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.stats.CalibrationBucket
+import io.github.benji377.timety.util.stats.CalibrationInsight
+import io.github.benji377.timety.util.stats.EstimationCalibrator
 import io.github.benji377.timety.util.stats.StatsUtils
 import java.time.Instant
 import java.time.LocalDate
@@ -49,9 +60,11 @@ import kotlin.math.roundToInt
 fun TaskStatsScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
+    val sessions by focusViewModel.allSessions.collectAsState()
     var focusedDate by remember { mutableStateOf(LocalDate.now()) }
 
     // Recurring tasks feed the charts too: templates count as created once, each logged
@@ -146,6 +159,10 @@ fun TaskStatsScreen(
 
             // Category breakdown, all time.
             item { CategoryBreakdownCard(tasks, recurringItems.map { it.task.category }) }
+            item { Spacer(modifier = Modifier.height(40.dp)) }
+
+            // Estimation calibration, all time.
+            item { EstimationCalibrationCard(tasks, sessions) }
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
     }
@@ -407,4 +424,116 @@ private fun CategoryBreakdownCard(
             }
         }
     }
+}
+
+@Composable
+private fun EstimationCalibrationCard(
+    tasks: List<TaskWithSubtasks>,
+    sessions: List<FocusSessionEntity>,
+) {
+    val buckets = remember(tasks, sessions) {
+        EstimationCalibrator.buckets(
+            tasks.filter { it.task.isCompleted }.map { it.task },
+            sessions
+        )
+    }
+
+    Column {
+        SectionHeader(
+            stringResource(R.string.taskStatsCalibrationTitle),
+            stringResource(R.string.taskStatsCalibrationSubtitle)
+        )
+        Spacer(modifier = Modifier.height(18.dp))
+
+        if (buckets.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(stringResource(R.string.taskStatsCalibrationEmpty))
+            }
+            return
+        }
+
+        buckets.forEach { bucket ->
+            CalibrationBucketRow(bucket)
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        val insight = remember(buckets) { EstimationCalibrator.insight(buckets) }
+        if (insight != null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(
+                    Icons.Filled.WarningAmber,
+                    contentDescription = null,
+                    tint = WarningAccent,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    calibrationInsightText(insight),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = WarningAccent,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalibrationBucketRow(bucket: CalibrationBucket) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(TaskColor.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                AppUtils.getSizeEmoji(bucket.size),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = TaskColor,
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            "~${AppDateFormatUtils.formatMinutesCompact(bucket.avgMinutes)}",
+            modifier = Modifier.weight(1f),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            quantityString(
+                R.plurals.nTasksCount,
+                bucket.sampleCount,
+                zeroRes = R.string.nTasksCountZero,
+                bucket.sampleCount
+            ),
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun calibrationInsightText(insight: CalibrationInsight): String = when (insight) {
+    is CalibrationInsight.OrderingViolation -> stringResource(
+        R.string.taskStatsCalibrationOrderingViolation,
+        insight.largerSize.name.replace("_", ""),
+        insight.smallerSize.name.replace("_", ""),
+    )
+
+    is CalibrationInsight.HighSpread -> stringResource(
+        R.string.taskStatsCalibrationHighSpread,
+        insight.size.name.replace("_", ""),
+    )
 }
