@@ -42,6 +42,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -264,8 +265,8 @@ private fun QuickHabitEditDialog(
     var allDay by remember {
         mutableStateOf(initial?.startMinuteOfDay == null || initial.endMinuteOfDay == null)
     }
-    var startMinute by remember { mutableStateOf(initial?.startMinuteOfDay ?: (8 * 60)) }
-    var endMinute by remember { mutableStateOf(initial?.endMinuteOfDay ?: (20 * 60)) }
+    var startMinute by remember { mutableIntStateOf(initial?.startMinuteOfDay ?: (8 * 60)) }
+    var endMinute by remember { mutableIntStateOf(initial?.endMinuteOfDay ?: (20 * 60)) }
     var editingWindowStart by remember { mutableStateOf<Boolean?>(null) }
 
     val canSave = name.isNotBlank() &&
