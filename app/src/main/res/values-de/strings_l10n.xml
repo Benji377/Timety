@@ -24,6 +24,7 @@
     <string name="commonLabelShare">Teilen</string>
     <string name="commonLabelClose">Schließen</string>
     <string name="commonLabelUndo">Undo</string>
+    <string name="commonLabelOpenSettings">Open Settings</string>
     <string name="commonBack">Zurück</string>
     <string name="commonClear">Leeren</string>
     <string name="commonTimeDone">Erledigt</string>
@@ -277,6 +278,15 @@
     <string name="statsLabelProductivity">Produktivitäts-Synergie</string>
     <string name="statsLabelSummary">Heutige Zusammenfassung</string>
     <string name="statsLabelSynergy">Fokus-Zeit vs. Aufgabenerledigung (Letzte 7 Tage)</string>
+    <string name="statsDayQualityTitle">Day Quality</string>
+    <string name="statsDayQualitySubtitle">How your rated days compare</string>
+    <string name="statsDayQualityEmpty">Rate your day from the evening checkup notification to see how your good days differ.</string>
+    <string name="statsDayQualityAverage">Average rating</string>
+    <string name="statsDayQualityRowStats">%1$d min focus · %2$d tasks per day</string>
+    <plurals name="statsDayQualityDays">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="statsLabelTasksDone">Aufgaben erledigt</string>
     <string name="statsTabFocus">Fokus</string>
     <string name="statsTabHabits">Gewohnheiten</string>
@@ -288,6 +298,12 @@
     <string name="settingsLabelBuiltBy">Entwickelt von Benji377</string>
     <string name="settingsLabelCategories">Aufgaben-Kategorien</string>
     <string name="settingsLabelCategoriesSubtitle">%1$d Kategorien</string>
+    <string name="settingsDndPermissionDialogContent">Timety needs Do Not Disturb access to silence notifications during focus sessions. You\'ll be taken to system settings to grant it.</string>
+    <string name="settingsDndPermissionDialogTitle">Allow Do Not Disturb Access</string>
+    <string name="settingsLabelAutoDnd">Auto Do Not Disturb</string>
+    <string name="settingsLabelAutoDndLiftBreaks">Lift During Breaks</string>
+    <string name="settingsLabelAutoDndLiftBreaksSubtitle">Restore notifications while resting between phases</string>
+    <string name="settingsLabelAutoDndSubtitle">Silences notifications automatically during focus sessions</string>
     <string name="settingsLabelCommunity">Community &amp; Hilfe</string>
     <string name="settingsLabelCommunitySubtitle">Stelle Fragen und teile Tipps auf GitHub</string>
     <string name="settingsLabelDailyMotivation">Zeit für tägliche Motivation</string>
@@ -313,6 +329,8 @@
     <string name="settingsLabelFocusStopwatchSubtitle">Verhindert, dass der Timer versehentlich an bleibt</string>
     <string name="settingsLabelImportData">JSON-Daten importieren</string>
     <string name="settingsLabelImportDataSubtitle">Stelle Daten aus einer JSON-Exportdatei wieder her</string>
+    <string name="settingsLabelKeepScreenOn">Keep Screen On</string>
+    <string name="settingsLabelKeepScreenOnSubtitle">Prevents the screen from sleeping during an active session</string>
     <string name="settingsLabelLanguage">Sprache</string>
     <string name="settingsLabelLanguageSystem">Systemstandard</string>
     <string name="settingsLabelLocationApi">Ortssuche-API</string>
@@ -371,6 +389,9 @@
     <string name="backupShareFailure">Teilen fehlgeschlagen: %1$s</string>
     <string name="notificationChannelEveningDesc">Erinnerungen am Tagesende, um Gewohnheiten einzutragen</string>
     <string name="notificationChannelEveningName">Abendlicher Check-in</string>
+    <string name="dayRatingBad">Bad</string>
+    <string name="dayRatingOk">OK</string>
+    <string name="dayRatingGreat">Great</string>
     <string name="notificationChannelFocusDesc">Dauerhafte Benachrichtigung für aktive Fokus-Sitzungen</string>
     <string name="notificationChannelFocusName">Aktiver Fokus-Timer</string>
     <string name="notificationChannelHabitsDesc">Bestimmte Zeit-Erinnerungen für deine Gewohnheiten</string>
