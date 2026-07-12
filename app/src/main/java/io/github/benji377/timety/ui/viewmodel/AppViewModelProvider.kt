@@ -65,6 +65,13 @@ object AppViewModelProvider {
                     )
                 }
 
+                modelClass.isAssignableFrom(GoalViewModel::class.java) -> {
+                    GoalViewModel(
+                        container.goalRepository,
+                        container.userRepository
+                    )
+                }
+
                 modelClass.isAssignableFrom(FocusViewModel::class.java) -> {
                     FocusViewModel(
                         application,

@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 val TaskColor = Color(0xFF2563EB)
 val FocusColor = Color(0xFF16A34A)
 val HabitColor = Color(0xFF7C3AED)
+val GoalColor = Color(0xFFEA580C)
 val UserColor = Color(0xFFDC2626)
 val WarningAccent = Color(0xFFF59E0B)
 

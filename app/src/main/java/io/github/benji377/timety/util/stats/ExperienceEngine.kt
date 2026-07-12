@@ -34,6 +34,9 @@ object ExperienceEngine {
     /** XP granted per minute of completed focus-timer time. */
     const val XP_PER_FOCUS_MINS = 1
 
+    /** XP granted once when a goal reaches its target; generous because goals are rare and long-lived. */
+    const val XP_PER_GOAL = 100
+
 
     /** Derives the current level from total XP by inverting the [getXpForLevel] curve. */
     fun calculateLevel(totalXp: Int): Int {

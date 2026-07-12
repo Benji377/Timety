@@ -10,8 +10,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
  * 2.1.0 schema additions: the `quick_habits` table (interval reminders), the `recurring_tasks`
- * / `recurring_occurrences` tables (recurring tasks with their completion log), and the
- * `day_ratings` table (end-of-day quality ratings).
+ * / `recurring_occurrences` tables (recurring tasks with their completion log), the
+ * `day_ratings` table (end-of-day quality ratings), and the `goals` / `goal_entries` tables
+ * (quantified deadline goals with their progress log).
  */
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -46,6 +47,24 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
             "CREATE TABLE IF NOT EXISTS `day_ratings` (" +
                 "`dayKey` TEXT NOT NULL, `rating` INTEGER NOT NULL, " +
                 "`createdAt` INTEGER NOT NULL, PRIMARY KEY(`dayKey`))"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `goals` (" +
+                "`id` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, " +
+                "`colorValue` INTEGER NOT NULL, `iconCodePoint` INTEGER, " +
+                "`targetValue` INTEGER NOT NULL, `unitLabel` TEXT NOT NULL, " +
+                "`targetDate` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, " +
+                "`completedAt` INTEGER, PRIMARY KEY(`id`))"
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `goal_entries` (" +
+                "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`goalId` TEXT NOT NULL, `value` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, " +
+                "FOREIGN KEY(`goalId`) REFERENCES `goals`(`id`) " +
+                "ON UPDATE NO ACTION ON DELETE CASCADE)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_goal_entries_goalId` ON `goal_entries` (`goalId`)"
         )
     }
 }
