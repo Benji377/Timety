@@ -412,6 +412,8 @@
     <string name="settingsSectionOrganization">Organisation</string>
     <string name="settingsSectionSupport">Support &amp; Feedback</string>
     <string name="settingsTitle">Einstellungen</string>
+    <string name="shortcutNewTask">New Task</string>
+    <string name="shortcutStartFocus">Start Focus</string>
     <string name="userEditNameHint">Gib deinen Namen ein</string>
     <string name="userEditNameTitle">Name bearbeiten</string>
     <string name="userErrorGenerateImage">Fehler beim Generieren des Wrap-up-Bildes.</string>
