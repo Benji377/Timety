@@ -107,6 +107,10 @@
     <string name="focusStatsSectionDistractionsEmpty">No distractions logged for this day</string>
     <string name="focusStatsSectionDistractionsSubtitle">Selected day, newest distractions first</string>
     <string name="focusStatsSectionDistractionsTitle">Distractions</string>
+    <string name="focusStatsHeatmapLess">Less</string>
+    <string name="focusStatsHeatmapMore">More</string>
+    <string name="focusStatsSectionHeatmapSubtitle">Daily focus minutes over the last year</string>
+    <string name="focusStatsSectionHeatmapTitle">Focus Contribution</string>
     <string name="focusStatsSectionSessionsEmpty">No focus sessions for this day</string>
     <string name="focusStatsSectionSessionsSubtitle">Selected day, each session shows the exact target and focus mode</string>
     <string name="focusStatsSectionSessionsTitle">Focus Sessions</string>
@@ -243,6 +247,11 @@
     <string name="taskReminderPrefixNow">Now: </string>
     <string name="taskReminderTitle">Reminder: %1$s</string>
     <string name="taskSheetEmpty">No tasks available</string>
+    <string name="taskStatsCalibrationEmpty">No sized tasks with focus time yet</string>
+    <string name="taskStatsCalibrationHighSpread">Your %1$s tasks vary a lot in actual time</string>
+    <string name="taskStatsCalibrationOrderingViolation">Your %1$s tasks take less time than %2$s ones</string>
+    <string name="taskStatsCalibrationSubtitle">Average focus time by task size, counting only tasks used as a focus target</string>
+    <string name="taskStatsCalibrationTitle">Estimation Calibration</string>
     <string name="taskStatsCategoryUncategorized">Uncategorized</string>
     <string name="taskStatsCategoryUnused">No categories used</string>
     <string name="taskStatsCompleted">Completed</string>
