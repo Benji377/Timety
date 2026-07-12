@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate,UnusedResources">
     <string name="appTitle">Timety</string>
+    <string name="globalLabelGoals">Goals</string>
     <string name="globalLabelHabit">Gewohnheit</string>
     <string name="globalLabelHabits">Gewohnheiten</string>
     <string name="globalLabelTags">Tags</string>
@@ -133,6 +134,51 @@
     <string name="focusTargetEmpty">Kein Ziel</string>
     <string name="focusTargetUntagged">Ohne Tag</string>
     <string name="focusTitle">Fokus</string>
+    <string name="goalCompletedOn">Completed %1$s</string>
+    <plurals name="goalDaysLeft">
+        <item quantity="one">1 day left</item>
+        <item quantity="other">%d days left</item>
+    </plurals>
+    <plurals name="goalDaysOverdue">
+        <item quantity="one">1 day overdue</item>
+        <item quantity="other">%d days overdue</item>
+    </plurals>
+    <string name="goalDeleteContent">Are you sure you want to delete this goal and its progress log?</string>
+    <string name="goalDeleteTitle">Delete Goal</string>
+    <string name="goalDetailEntriesEmpty">No progress logged yet</string>
+    <string name="goalDetailEntriesTitle">Progress Log</string>
+    <string name="goalDetailLabelColor">Color</string>
+    <string name="goalDetailLabelColorPicker">Choose a Color</string>
+    <string name="goalDetailLabelDeadline">Deadline</string>
+    <string name="goalDetailLabelDescription">Description</string>
+    <string name="goalDetailLabelDescriptionHint">Why does this goal matter?</string>
+    <string name="goalDetailLabelIcon">Select an Icon</string>
+    <string name="goalDetailLabelName">Goal Name</string>
+    <string name="goalDetailLabelNameHint">e.g., Ride 500 km, Read 12 books…</string>
+    <string name="goalDetailLabelNameRequest">Please enter a name</string>
+    <string name="goalDetailLabelTarget">Target</string>
+    <string name="goalDetailLabelTargetRequest">Please enter a target of at least 1</string>
+    <string name="goalDetailLabelUnit">Unit</string>
+    <string name="goalDetailLabelUnitHint">km, books, hours…</string>
+    <string name="goalDetailLabelUnitRequest">Please enter a unit</string>
+    <string name="goalDetailTitleEdit">Edit Goal</string>
+    <string name="goalDetailTitleNew">New Goal</string>
+    <string name="goalDetailTitleView">Goal Details</string>
+    <string name="goalDueToday">Due today</string>
+    <string name="goalEntryDeleteContent">Remove this progress entry?</string>
+    <string name="goalEntryDeleteTitle">Remove Entry</string>
+    <string name="goalEntryDialogLabelDate">Logged at</string>
+    <string name="goalEntryDialogLabelValue">Amount</string>
+    <string name="goalEntryDialogTitle">Log Progress</string>
+    <string name="goalPaceAhead">Ahead by %1$d %2$s</string>
+    <string name="goalPaceBehind">Behind by %1$d %2$s</string>
+    <string name="goalPaceOnTrack">On track</string>
+    <string name="goalProgressLabel">%1$d / %2$d %3$s</string>
+    <string name="goalsEmpty">No goals yet! Set a target and start logging progress</string>
+    <string name="goalsLabelAdd">Add New Goal</string>
+    <string name="goalsLabelLogProgress">Log progress</string>
+    <string name="goalsSectionCompleted">Completed</string>
+    <string name="goalsTitle">Goals</string>
     <string name="habitDeleteContent">Bist du sicher, dass du diese Gewohnheit löschen möchtest?</string>
     <string name="habitDeleteTitle">Gewohnheit löschen</string>
     <string name="habitDetailLabelFrequency">Häufigkeit</string>
@@ -496,6 +542,7 @@
     <string name="xpBreakdownLevel">Level %1$d | %2$s</string>
     <string name="xpBreakdownProgress">%1$d XP gesamt | %2$d XP bis zum nächsten Level</string>
     <string name="xpSourceFocusDesc">Jede Fokus-Minute bringt</string>
+    <string name="xpSourceGoalDesc">Each completed goal adds</string>
     <string name="xpSourceHabitDesc">Jede erledigte Gewohnheit bringt</string>
     <string name="xpSourceTaskDesc">Jede erledigte Aufgabe bringt</string>
     <string name="xpSourceValue">+%1$d XP</string>
