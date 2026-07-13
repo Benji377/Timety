@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.ui.graphics.vector.ImageVector
+import io.github.benji377.timety.util.habit.HabitIcons.defaultIcon
 import androidx.compose.material.icons.outlined.Brush as BrushOutlined
 
 

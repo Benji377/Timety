@@ -6,17 +6,22 @@ on:
       version:
         description: 'Release Version (e.g., 1.0.0)'
         required: true
-        default: '1.0.0'
+        default: '2.1.0'
 
 jobs:
   build_release:
     name: Build Android Release Artifacts
     runs-on: ubuntu-latest
-    permissions: write-all
+    # Build only needs to read the repo; artifacts are uploaded via the artifact API.
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -55,7 +60,11 @@ jobs:
   upload_to_release:
     name: Upload to GitHub Release
     runs-on: ubuntu-latest
-    permissions: write-all
+    # contents to create the release, id-token + attestations for build provenance.
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     needs: [build_release]
     steps:
       - uses: actions/download-artifact@v8

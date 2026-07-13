@@ -1,7 +1,9 @@
 package io.github.benji377.timety.ui.screens
 
+import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -22,7 +24,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.AccessTime
@@ -32,8 +33,10 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.DoNotDisturbOn
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LinearScale
 import androidx.compose.material.icons.filled.NightlightRound
@@ -49,6 +52,7 @@ import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.UploadFile
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -58,7 +62,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -68,8 +71,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -89,10 +90,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
@@ -101,7 +104,6 @@ import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
@@ -181,6 +183,9 @@ fun SettingsScreen(
     val dailyMotivationTime by settingsViewModel.dailyMotivationTime.collectAsState()
     val endOfDayCheckupTime by settingsViewModel.endOfDayCheckupTime.collectAsState()
     val locationApiEndpoint by settingsViewModel.locationApiEndpoint.collectAsState()
+    val keepScreenOnDuringFocus by settingsViewModel.keepScreenOnDuringFocus.collectAsState()
+    val autoDndEnabled by settingsViewModel.autoDndEnabled.collectAsState()
+    val autoDndLiftDuringBreaks by settingsViewModel.autoDndLiftDuringBreaks.collectAsState()
 
     val focusTags by focusViewModel.allTags.collectAsState()
     val categories by taskViewModel.allCategories.collectAsState()
@@ -195,6 +200,23 @@ fun SettingsScreen(
     // Dialog state.
 
     var showLocationDialog by remember { mutableStateOf(false) }
+    var showDndPermissionDialog by remember { mutableStateOf(false) }
+    val systemNotificationManager = remember {
+        context.getSystemService(NotificationManager::class.java)
+    }
+
+    // Enabling Auto-DND needs the Notification policy access special permission, which has no
+    // runtime prompt - only a system settings toggle. Route through a rationale dialog first,
+    // matching the c) wiring rules: the setting itself always saves, syncing/degrading silently
+    // is FocusDndController's job once a session actually starts.
+    fun requestAutoDndEnabled(enabled: Boolean) {
+        if (enabled && systemNotificationManager?.isNotificationPolicyAccessGranted != true) {
+            showDndPermissionDialog = true
+        } else {
+            settingsViewModel.setAutoDndEnabled(enabled)
+        }
+    }
+
     var pendingLocationUrl by remember { mutableStateOf(locationApiEndpoint) }
     var locationError by remember { mutableStateOf<String?>(null) }
     var isCheckingLocation by remember { mutableStateOf(false) }
@@ -333,9 +355,7 @@ fun SettingsScreen(
             TimetyTopBar(
                 title = stringResource(R.string.settingsTitle),
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
+                    BackNavigationIcon(onClick = onNavigateBack)
                 }
             )
         }
@@ -500,6 +520,58 @@ fun SettingsScreen(
                             title = upcomingTaskTitle,
                             current = upcomingTasksHorizon, min = 1, max = 60, unit = daysUnit,
                             onSave = { settingsViewModel.setUpcomingTasksHorizon(it) }
+                        )
+                    }
+                )
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelKeepScreenOn)) },
+                    supportingContent = { Text(stringResource(R.string.settingsLabelKeepScreenOnSubtitle)) },
+                    leadingContent = { Icon(Icons.Outlined.Visibility, null, tint = FocusColor) },
+                    trailingContent = {
+                        Switch(
+                            checked = keepScreenOnDuringFocus,
+                            onCheckedChange = { settingsViewModel.setKeepScreenOnDuringFocus(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
+                        )
+                    }
+                )
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelAutoDnd)) },
+                    supportingContent = { Text(stringResource(R.string.settingsLabelAutoDndSubtitle)) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Filled.DoNotDisturbOn,
+                            null,
+                            tint = WarningAccent
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = autoDndEnabled,
+                            onCheckedChange = { requestAutoDndEnabled(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
+                        )
+                    }
+                )
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelAutoDndLiftBreaks)) },
+                    supportingContent = { Text(stringResource(R.string.settingsLabelAutoDndLiftBreaksSubtitle)) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Filled.FreeBreakfast,
+                            null,
+                            tint = WarningAccent
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = autoDndLiftDuringBreaks,
+                            enabled = autoDndEnabled,
+                            onCheckedChange = { settingsViewModel.setAutoDndLiftDuringBreaks(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
                         )
                     }
                 )
@@ -812,6 +884,21 @@ fun SettingsScreen(
         }
     }
 
+    // Notification policy access has no runtime prompt, only a system settings toggle - explain
+    // why before sending the user there.
+    ConfirmationDialog(
+        visible = showDndPermissionDialog,
+        title = stringResource(R.string.settingsDndPermissionDialogTitle),
+        content = stringResource(R.string.settingsDndPermissionDialogContent),
+        confirmLabel = stringResource(R.string.commonLabelOpenSettings),
+        onConfirm = {
+            settingsViewModel.setAutoDndEnabled(true)
+            showDndPermissionDialog = false
+            context.startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+        },
+        onDismiss = { showDndPermissionDialog = false }
+    )
+
     // Import confirmation dialog warning that restoring a backup overwrites existing data.
     ConfirmationDialog(
         visible = pendingImportUri != null,
@@ -1043,33 +1130,19 @@ private data class TimeDialogSpec(
     val onSave: (String) -> Unit
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerDialogRow(spec: TimeDialogSpec, onDismiss: () -> Unit) {
     val (initialHour, initialMinute) = AppDateFormatUtils.parseHHmm(spec.current)
-    val is24Hour = LocalDateFormatSettings.current.use24HourFormat
-    val timePickerState = rememberTimePickerState(
+    TimetyTimePickerDialog(
         initialHour = initialHour,
         initialMinute = initialMinute,
-        is24Hour = is24Hour
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
         title = { Text(spec.title) },
-        text = {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                TimePicker(state = timePickerState)
-            }
+        confirmLabel = stringResource(R.string.commonLabelSave),
+        onConfirm = { hour, minute ->
+            spec.onSave("%02d:%02d".format(hour, minute))
+            onDismiss()
         },
-        confirmButton = {
-            TextButton(onClick = {
-                spec.onSave("%02d:%02d".format(timePickerState.hour, timePickerState.minute))
-                onDismiss()
-            }) { Text(stringResource(R.string.commonLabelSave)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-        }
+        onDismiss = onDismiss,
     )
 }
 

@@ -1,5 +1,7 @@
 package io.github.benji377.timety.services
 
+import io.github.benji377.timety.services.FocusTimerManager.startTimer
+import io.github.benji377.timety.services.FocusTimerManager.stopEvent
 import io.github.benji377.timety.services.FocusTimerManager.timerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -1,0 +1,49 @@
+# Overrides on top of detekt's defaults: Compose tweaks
+# (https://detekt.dev/docs/introduction/compose) plus rules that don't fit this codebase,
+# disabled with a short reason each. Everything else runs at full strength — no baseline.
+
+# Size gates mostly flag the app's naturally large seams (BackupService, DAOs, screens).
+complexity:
+  active: false
+
+exceptions:
+  # Broad catches in receivers/services are deliberate last-resort guards.
+  TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: false
+  PrintStackTrace:
+    active: false
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    # Compose convention: top-level composition locals and palettes are PascalCase vals.
+    constantPattern: '[A-Z][A-Za-z0-9]*|[A-Z][_A-Z0-9]*'
+  MatchingDeclarationName:
+    # Component files may lead with a small helper type.
+    active: false
+
+performance:
+  # Both fire on tiny fixed-size collections where the optimization is irrelevant.
+  ForEachOnRange:
+    active: false
+  SpreadOperator:
+    active: false
+
+style:
+  MagicNumber:
+    # Time math, palette hexes, and layout literals are the app's vocabulary.
+    active: false
+  MaxLineLength:
+    # Compose one-liners regularly exceed any sane limit.
+    active: false
+  ReturnCount:
+    # Early returns are the house style for guard clauses.
+    active: false
+  LoopWithTooManyJumpStatements:
+    # Same guard-clause style inside loops.
+    active: false
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']

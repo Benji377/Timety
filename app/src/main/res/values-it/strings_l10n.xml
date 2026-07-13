@@ -191,6 +191,7 @@
     <string name="habitDetailLabelGoalZero">Obiettivo: Giornaliero</string>
     <plurals name="habitDetailLabelGoal">
         <item quantity="one">Obiettivo: 1 giorno a settimana</item>
+        <item quantity="many">Obiettivo: %d giorni a settimana</item>
         <item quantity="other">Obiettivo: %d giorni a settimana</item>
     </plurals>
     <string name="habitDetailLabelIcon">Seleziona un\'icona</string>
@@ -489,15 +490,18 @@
     <string name="categoryTaskCountZero">Nessuna attività</string>
     <plurals name="categoryTaskCount">
         <item quantity="one">1 attività</item>
+        <item quantity="many">%d attività</item>
         <item quantity="other">%d attività</item>
     </plurals>
     <string name="categoryTitle">Categorie</string>
     <plurals name="settingsTagsCount">
         <item quantity="one">%d tag</item>
+        <item quantity="many">%d tags</item>
         <item quantity="other">%d tags</item>
     </plurals>
     <plurals name="settingsCategoriesCount">
         <item quantity="one">%d categoria</item>
+        <item quantity="many">%d categorie</item>
         <item quantity="other">%d categorie</item>
     </plurals>
     <string name="dialogTimeMachineEndTime">Orario di fine</string>
@@ -539,6 +543,7 @@
     <string name="streakTimelineCurrent">Serie attuale</string>
     <plurals name="streakTimelineDays">
         <item quantity="one">1 giorno</item>
+        <item quantity="many">%d giorni</item>
         <item quantity="other">%d giorni</item>
     </plurals>
     <string name="streakTimelineSubtitle">Mostra gli ultimi 7 giorni</string>
@@ -559,29 +564,35 @@
     <string name="widgetMoreTasks">+%1$d di più</string>
     <plurals name="nTaskReminderPrefixDays">
         <item quantity="one">Domani</item>
+        <item quantity="many">Tra %d giorni</item>
         <item quantity="other">Tra %d giorni</item>
     </plurals>
     <plurals name="nTaskReminderPrefixHours">
         <item quantity="one">Tra 1 ora</item>
+        <item quantity="many">Tra %d ore</item>
         <item quantity="other">Tra %d ore</item>
     </plurals>
     <plurals name="nTaskReminderPrefixMinutes">
         <item quantity="one">Tra 1 minuto</item>
+        <item quantity="many">Tra %d minuti</item>
         <item quantity="other">Tra %d minuti</item>
     </plurals>
     <string name="nTasksCountZero">Nessuna attività</string>
     <plurals name="nTasksCount">
         <item quantity="one">1 attività</item>
+        <item quantity="many">%d attività</item>
         <item quantity="other">%d attività</item>
     </plurals>
     <string name="nHabitsCountZero">Nessun completamento</string>
     <plurals name="nHabitsCount">
         <item quantity="one">1 completamento</item>
+        <item quantity="many">%d completamenti</item>
         <item quantity="other">%d completamenti</item>
     </plurals>
     <string name="nMinutesCountZero">Nessun minuto</string>
     <plurals name="nMinutesCount">
         <item quantity="one">1 minuto</item>
+        <item quantity="many">%d minuti</item>
         <item quantity="other">%d minuti</item>
     </plurals>
     <string name="distractionDistracted">Distratto/a</string>
@@ -610,6 +621,7 @@
     <string name="recurringTasksNextDue">Next: %1$s</string>
     <plurals name="recurringTasksCompletedCount">
         <item quantity="one">Completed %d time</item>
+        <item quantity="many">Completed %d times</item>
         <item quantity="other">Completed %d times</item>
     </plurals>
     <string name="recurringTaskTitleNew">New Recurring Task</string>
@@ -629,14 +641,17 @@
     <string name="recurringTaskCompletedSnackbar">Completed! Next: %1$s</string>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="one">Every week</item>
+        <item quantity="many">Every %d weeks</item>
         <item quantity="other">Every %d weeks</item>
     </plurals>
     <plurals name="recurrenceEveryMonths">
         <item quantity="one">Every month</item>
+        <item quantity="many">Every %d months</item>
         <item quantity="other">Every %d months</item>
     </plurals>
     <plurals name="recurrenceEveryYears">
         <item quantity="one">Every year</item>
+        <item quantity="many">Every %d years</item>
         <item quantity="other">Every %d years</item>
     </plurals>
     <string name="notificationChannelQuickHabitsName">Quick Habit Reminders</string>
@@ -663,10 +678,12 @@
     <string name="quickHabitDeleteContent">Are you sure you want to delete \"%1$s\"?</string>
     <plurals name="quickHabitEveryHours">
         <item quantity="one">Every %d hour</item>
+        <item quantity="many">Every %d hours</item>
         <item quantity="other">Every %d hours</item>
     </plurals>
     <plurals name="quickHabitEveryMinutes">
         <item quantity="one">Every %d minute</item>
+        <item quantity="many">Every %d minutes</item>
         <item quantity="other">Every %d minutes</item>
     </plurals>
 </resources>

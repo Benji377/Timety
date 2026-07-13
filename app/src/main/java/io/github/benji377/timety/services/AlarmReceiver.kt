@@ -4,10 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import io.github.benji377.timety.TimetyApplication
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 
 
 /**
@@ -19,15 +15,11 @@ class AlarmReceiver : BroadcastReceiver() {
         if (intent.action !in REARM_ACTIONS) return
 
         val app = context.applicationContext as? TimetyApplication ?: return
-        val pendingResult = goAsync()
-
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+        launchAsync {
             try {
                 rescheduleRecurring(app)
             } catch (e: Exception) {
                 e.printStackTrace()
-            } finally {
-                pendingResult.finish()
             }
         }
     }

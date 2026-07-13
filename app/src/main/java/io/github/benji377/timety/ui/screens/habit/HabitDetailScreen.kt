@@ -2,7 +2,6 @@ package io.github.benji377.timety.ui.screens.habit
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,31 +16,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Stars
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -51,9 +41,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,10 +56,19 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.detailFieldColors
+import io.github.benji377.timety.ui.components.common.detailFilterChipColors
+import io.github.benji377.timety.ui.components.common.detailSegmentedButtonColors
+import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.IconPickerDialog
+import io.github.benji377.timety.ui.components.common.PickerField
+import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -217,27 +213,15 @@ fun HabitDetailScreen(
             TimetyTopBar(
                 title = appBarTitle,
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
+                    BackNavigationIcon(onClick = onNavigateBack)
                 },
                 actions = {
-                    if (!isEditing && !isNewHabit) {
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                Icons.Filled.DeleteOutline,
-                                stringResource(R.string.commonLabelDelete),
-                                tint = ErrorColor
-                            )
-                        }
-                        IconButton(onClick = { isEditing = true }) {
-                            Icon(Icons.Filled.Edit, "Edit")
-                        }
-                    } else {
-                        IconButton(onClick = { saveHabit() }) {
-                            Icon(Icons.Filled.Check, stringResource(R.string.commonLabelSave))
-                        }
-                    }
+                    DetailTopBarActions(
+                        isViewing = !isEditing && !isNewHabit,
+                        onDelete = { showDeleteDialog = true },
+                        onEdit = { isEditing = true },
+                        onSave = { saveHabit() },
+                    )
                 }
             )
         },
@@ -416,14 +400,7 @@ fun HabitDetailScreen(
                     fontWeight = AppTheme.fwBold
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                val segmentedColors = SegmentedButtonDefaults.colors(
-                    disabledActiveContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    disabledActiveContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    disabledInactiveContainerColor = Color.Transparent,
-                    disabledInactiveContentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledActiveBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                    disabledInactiveBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                )
+                val segmentedColors = detailSegmentedButtonColors()
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     SegmentedButton(
                         selected = frequency == HabitFrequency.DAILY,
@@ -485,6 +462,10 @@ fun HabitDetailScreen(
                                 colors = SliderDefaults.colors(
                                     thumbColor = selectedColor,
                                     activeTrackColor = selectedColor,
+                                    // The slider position IS the value: keep it readable in view
+                                    // mode; the muted card chrome already signals inactive.
+                                    disabledThumbColor = selectedColor,
+                                    disabledActiveTrackColor = selectedColor,
                                 ),
                             )
                         }
@@ -527,9 +508,7 @@ fun HabitDetailScreen(
                                             if (isSelected) selectedWeekdays - day else selectedWeekdays + day
                                     },
                                     label = { Text(label) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = selectedColor.copy(alpha = 0.3f),
-                                    ),
+                                    colors = detailFilterChipColors(selectedColor),
                                 )
                             }
                         }
@@ -562,128 +541,51 @@ fun HabitDetailScreen(
                         leadingIcon = { Icon(Icons.Filled.NotificationsActive, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledContainerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
-                            disabledTextColor = if (isEditing) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                            disabledBorderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
-                            disabledLeadingIconColor = if (isEditing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outlineVariant,
-                        ),
+                        colors = detailFieldColors(isEditing),
                     )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
             }
         }
 
-        // Icon picker dialog.
         if (showIconPicker) {
-            AlertDialog(
-                onDismissRequest = { showIconPicker = false },
-                title = { Text(stringResource(R.string.habitDetailLabelIcon)) },
-                text = {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(5),
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
-                        modifier = Modifier.height(300.dp),
-                    ) {
-                        items(HabitIcons.availableIcons.size) { index ->
-                            val isSelected = index == selectedIconIndex
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        color = if (isSelected) selectedColor.copy(alpha = 0.2f) else Color.Transparent,
-                                        shape = CircleShape,
-                                    )
-                                    .clickable {
-                                        selectedIconIndex = index
-                                        showIconPicker = false
-                                    },
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = HabitIcons.availableIcons[index],
-                                    contentDescription = null,
-                                    tint = if (isSelected) selectedColor else MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
-                        }
-                    }
+            IconPickerDialog(
+                title = stringResource(R.string.habitDetailLabelIcon),
+                selectedIconIndex = selectedIconIndex,
+                accentColor = selectedColor,
+                onSelect = {
+                    selectedIconIndex = it
+                    showIconPicker = false
                 },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showIconPicker = false
-                    }) { Text(stringResource(R.string.commonLabelCancel)) }
-                },
+                onDismiss = { showIconPicker = false },
             )
         }
 
-        // Color picker dialog.
         if (showColorPicker) {
-            AlertDialog(
-                onDismissRequest = { showColorPicker = false },
-                title = { Text(stringResource(R.string.habitDetailLabelColorPicker)) },
-                text = {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(4),
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
-                        modifier = Modifier.height(220.dp),
-                    ) {
-                        items(HABIT_DETAIL_COLORS.size) { index ->
-                            val optionColor = HABIT_DETAIL_COLORS[index]
-                            val isSelected = optionColor == selectedColor
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(optionColor, CircleShape)
-                                    .then(
-                                        if (isSelected) Modifier.border(
-                                            3.dp,
-                                            MaterialTheme.colorScheme.onSurface,
-                                            CircleShape
-                                        )
-                                        else Modifier
-                                    )
-                                    .clickable {
-                                        selectedColor = optionColor
-                                        showColorPicker = false
-                                    }
-                            )
-                        }
-                    }
+            ColorPickerDialog(
+                title = stringResource(R.string.habitDetailLabelColorPicker),
+                colors = HABIT_DETAIL_COLORS,
+                selectedColor = selectedColor,
+                onSelect = {
+                    selectedColor = it
+                    showColorPicker = false
                 },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showColorPicker = false
-                    }) { Text(stringResource(R.string.commonLabelCancel)) }
-                },
+                onDismiss = { showColorPicker = false },
             )
         }
 
         // Time picker dialog.
         if (showTimePicker) {
             val initial = targetTimeMinutes
-            val timePickerState = rememberTimePickerState(
+            TimetyTimePickerDialog(
                 initialHour = initial?.let { it / 60 } ?: 8,
                 initialMinute = initial?.let { it % 60 } ?: 0,
-                is24Hour = LocalDateFormatSettings.current.use24HourFormat,
-            )
-            AlertDialog(
-                onDismissRequest = { showTimePicker = false },
                 title = { Text(stringResource(R.string.habitDetailLabelReminder)) },
-                text = { TimePicker(state = timePickerState) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        targetTimeMinutes = timePickerState.hour * 60 + timePickerState.minute
-                        showTimePicker = false
-                    }) { Text(stringResource(R.string.commonLabelConfirm)) }
+                onConfirm = { hour, minute ->
+                    targetTimeMinutes = hour * 60 + minute
+                    showTimePicker = false
                 },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showTimePicker = false
-                    }) { Text(stringResource(R.string.commonLabelCancel)) }
-                },
+                onDismiss = { showTimePicker = false },
             )
         }
     }
@@ -691,32 +593,3 @@ fun HabitDetailScreen(
 
 
 private val HABIT_DETAIL_COLORS = listOf(HabitColor) + PickerPalette
-
-
-@Composable
-private fun PickerField(
-    label: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Box(modifier = modifier) {
-        // The field itself follows [enabled] so it picks up the normal enabled/disabled
-        // styling (surface vs. transparent background); the overlay box catches taps.
-        OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            readOnly = true,
-            enabled = enabled,
-            label = { Text(label) },
-            leadingIcon = { Box(contentAlignment = Alignment.Center) { content() } },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable(enabled = enabled) { onClick() },
-        )
-    }
-}

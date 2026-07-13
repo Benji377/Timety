@@ -43,13 +43,18 @@ class UserRepository(
     suspend fun addXp(amount: Int) = withContext(Dispatchers.IO) {
         val current = userDao.getUserProfileSynchronous()
         if (current != null) {
-            userDao.updateUserProfile(current.copy(totalXp = current.totalXp + amount))
+            // Clamped at zero: reverting a completion that never awarded XP in this install
+            // (e.g. items restored as already-completed from a backup) must not push the total
+            // negative, or the level math (sqrt of XP) breaks.
+            userDao.updateUserProfile(
+                current.copy(totalXp = (current.totalXp + amount).coerceAtLeast(0))
+            )
         } else {
             userDao.insertUserProfile(
                 UserProfileEntity(
                     name = "Bobert",
                     accountCreated = Instant.now(),
-                    totalXp = amount
+                    totalXp = amount.coerceAtLeast(0)
                 )
             )
         }

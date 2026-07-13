@@ -1,12 +1,32 @@
 package io.github.benji377.timety.ui.screens.task
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,20 +38,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.WeekNavigator
+import io.github.benji377.timety.ui.components.stats.LegendDot
+import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.ChartDeepOrange
 import io.github.benji377.timety.ui.theme.ChartTeal
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.WarningAccent
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.stats.CalibrationBucket
+import io.github.benji377.timety.util.stats.CalibrationInsight
+import io.github.benji377.timety.util.stats.EstimationCalibrator
 import io.github.benji377.timety.util.stats.StatsUtils
 import java.time.Instant
 import java.time.LocalDate
@@ -47,9 +78,11 @@ import kotlin.math.roundToInt
 fun TaskStatsScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
+    val sessions by focusViewModel.allSessions.collectAsState()
     var focusedDate by remember { mutableStateOf(LocalDate.now()) }
 
     // Recurring tasks feed the charts too: templates count as created once, each logged
@@ -88,18 +121,10 @@ fun TaskStatsScreen(
 
             // Task velocity chart.
             item {
-                Text(
-                    stringResource(R.string.taskStatsVelocity),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                SectionHeader(stringResource(R.string.taskStatsVelocity))
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(WarningColor, CircleShape)
-                    )
+                    LegendDot(WarningColor)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         stringResource(R.string.taskStatsCreated),
@@ -107,11 +132,7 @@ fun TaskStatsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(SuccessColor, CircleShape)
-                    )
+                    LegendDot(SuccessColor)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         stringResource(R.string.taskStatsCompleted),
@@ -136,16 +157,9 @@ fun TaskStatsScreen(
 
             // Productivity bar chart.
             item {
-                Text(
+                SectionHeader(
                     stringResource(R.string.taskStatsProductivity),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    stringResource(R.string.taskStatsCompletedDaily),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    stringResource(R.string.taskStatsCompletedDaily)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(modifier = Modifier.height(200.dp)) {
@@ -163,6 +177,10 @@ fun TaskStatsScreen(
 
             // Category breakdown, all time.
             item { CategoryBreakdownCard(tasks, recurringItems.map { it.task.category }) }
+            item { Spacer(modifier = Modifier.height(40.dp)) }
+
+            // Estimation calibration, all time.
+            item { EstimationCalibrationCard(tasks, sessions) }
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
     }
@@ -219,7 +237,7 @@ private fun ProductivityChart(
 ) {
     val dailyCompleted = IntArray(7)
     val completions = tasks.mapNotNull { if (it.task.isCompleted) it.task.completedAt else null } +
-        recurringCompleted
+            recurringCompleted
 
     completions.forEach { completedAt ->
         if (!completedAt.isBefore(startOfWeek) && completedAt.isBefore(endOfWeek)) {
@@ -357,16 +375,9 @@ private fun CategoryBreakdownCard(
     )
 
     Column {
-        Text(
+        SectionHeader(
             stringResource(R.string.taskStatsDistribution),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            stringResource(R.string.taskStatsDistributionSubtitle),
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            stringResource(R.string.taskStatsDistributionSubtitle)
         )
         Spacer(modifier = Modifier.height(18.dp))
 
@@ -431,4 +442,116 @@ private fun CategoryBreakdownCard(
             }
         }
     }
+}
+
+@Composable
+private fun EstimationCalibrationCard(
+    tasks: List<TaskWithSubtasks>,
+    sessions: List<FocusSessionEntity>,
+) {
+    val buckets = remember(tasks, sessions) {
+        EstimationCalibrator.buckets(
+            tasks.filter { it.task.isCompleted }.map { it.task },
+            sessions
+        )
+    }
+
+    Column {
+        SectionHeader(
+            stringResource(R.string.taskStatsCalibrationTitle),
+            stringResource(R.string.taskStatsCalibrationSubtitle)
+        )
+        Spacer(modifier = Modifier.height(18.dp))
+
+        if (buckets.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(stringResource(R.string.taskStatsCalibrationEmpty))
+            }
+            return
+        }
+
+        buckets.forEach { bucket ->
+            CalibrationBucketRow(bucket)
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        val insight = remember(buckets) { EstimationCalibrator.insight(buckets) }
+        if (insight != null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(
+                    Icons.Filled.WarningAmber,
+                    contentDescription = null,
+                    tint = WarningAccent,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    calibrationInsightText(insight),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = WarningAccent,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalibrationBucketRow(bucket: CalibrationBucket) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(TaskColor.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                AppUtils.getSizeEmoji(bucket.size),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = TaskColor,
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            "~${AppDateFormatUtils.formatMinutesCompact(bucket.avgMinutes)}",
+            modifier = Modifier.weight(1f),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            quantityString(
+                R.plurals.nTasksCount,
+                bucket.sampleCount,
+                zeroRes = R.string.nTasksCountZero,
+                bucket.sampleCount
+            ),
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun calibrationInsightText(insight: CalibrationInsight): String = when (insight) {
+    is CalibrationInsight.OrderingViolation -> stringResource(
+        R.string.taskStatsCalibrationOrderingViolation,
+        insight.largerSize.name.replace("_", ""),
+        insight.smallerSize.name.replace("_", ""),
+    )
+
+    is CalibrationInsight.HighSpread -> stringResource(
+        R.string.taskStatsCalibrationHighSpread,
+        insight.size.name.replace("_", ""),
+    )
 }

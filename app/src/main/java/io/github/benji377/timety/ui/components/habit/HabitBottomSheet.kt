@@ -25,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -34,10 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +51,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -350,13 +347,9 @@ private fun UnifiedCalendarSheetContent(
     val addDate = dateForAdd
     if (addDate != null) {
         val now = LocalTime.now()
-        val timePickerState = rememberTimePickerState(
+        TimetyTimePickerDialog(
             initialHour = now.hour,
             initialMinute = now.minute,
-            is24Hour = LocalDateFormatSettings.current.use24HourFormat,
-        )
-        AlertDialog(
-            onDismissRequest = { dateForAdd = null },
             title = {
                 Text(
                     stringResource(R.string.habitHistoryTimePrompt),
@@ -364,24 +357,11 @@ private fun UnifiedCalendarSheetContent(
                     style = MaterialTheme.typography.bodyLarge
                 )
             },
-            text = { TimePicker(state = timePickerState) },
-            confirmButton = {
-                TextButton(onClick = {
-                    val instant = addDate
-                        .atTime(timePickerState.hour, timePickerState.minute)
-                        .atZone(zone)
-                        .toInstant()
-                    onDateSelected(instant)
-                    dateForAdd = null
-                }) {
-                    Text(stringResource(R.string.commonLabelConfirm))
-                }
+            onConfirm = { hour, minute ->
+                onDateSelected(addDate.atTime(hour, minute).atZone(zone).toInstant())
+                dateForAdd = null
             },
-            dismissButton = {
-                TextButton(onClick = { dateForAdd = null }) {
-                    Text(stringResource(R.string.commonLabelCancel))
-                }
-            },
+            onDismiss = { dateForAdd = null },
         )
     }
 }

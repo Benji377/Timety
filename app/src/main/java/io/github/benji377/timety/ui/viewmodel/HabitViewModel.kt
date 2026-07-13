@@ -12,12 +12,14 @@ import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 
@@ -94,24 +96,34 @@ class HabitViewModel(
     }
 
 
+    // Serializes the read-check-write completion updates below: two quick taps otherwise both
+    // read "not completed" and insert a duplicate completion plus double XP.
+    private val completionMutex = Mutex()
+
+    /** Fresh-from-DB completions for [habitId]; [habitsWithCompletions] may not have emitted yet. */
+    private suspend fun completionsOf(habitId: String): List<HabitCompletionEntity>? {
+        habitRepository.getHabitById(habitId) ?: return null
+        return habitRepository.getCompletionsForHabit(habitId).first()
+    }
+
     /** Toggles today's completion for [habitId] and awards/reverts XP accordingly. */
     fun toggleCompletionToday(habitId: String) {
         viewModelScope.launch {
-            val habitWithCompletions =
-                habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
-            val today = LocalDate.now()
-            val todayCompletion = habitWithCompletions.completions.find {
-                LocalDateTime.ofInstant(it.completionDate, ZoneId.systemDefault())
-                    .toLocalDate() == today
-            }
-            if (todayCompletion != null) {
-                habitRepository.deleteCompletion(todayCompletion)
-                userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
-            } else {
-                habitRepository.insertCompletion(
-                    HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
-                )
-                userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
+            completionMutex.withLock {
+                val completions = completionsOf(habitId) ?: return@launch
+                val today = LocalDate.now()
+                val todayCompletion = completions.find {
+                    it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == today
+                }
+                if (todayCompletion != null) {
+                    habitRepository.deleteCompletion(todayCompletion)
+                    userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
+                } else {
+                    habitRepository.insertCompletion(
+                        HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
+                    )
+                    userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
+                }
             }
             updateWidgets()
         }
@@ -121,19 +133,19 @@ class HabitViewModel(
     /** Marks [habitId] complete on [date] and awards XP, unless it is already marked complete that day. */
     fun markCompletionOnDate(habitId: String, date: Instant) {
         viewModelScope.launch {
-            val habitWithCompletions =
-                habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
-            val targetDay = date.atZone(ZoneId.systemDefault()).toLocalDate()
-            val alreadyCompleted = habitWithCompletions.completions.any {
-                it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == targetDay
-            }
-            if (!alreadyCompleted) {
+            completionMutex.withLock {
+                val completions = completionsOf(habitId) ?: return@launch
+                val targetDay = date.atZone(ZoneId.systemDefault()).toLocalDate()
+                val alreadyCompleted = completions.any {
+                    it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == targetDay
+                }
+                if (alreadyCompleted) return@launch
                 habitRepository.insertCompletion(
                     HabitCompletionEntity(habitId = habitId, completionDate = date)
                 )
                 userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
-                updateWidgets()
             }
+            updateWidgets()
         }
     }
 
@@ -141,16 +153,15 @@ class HabitViewModel(
     /** Removes [habitId]'s completion on [date], if any, and reverts the XP it had granted. */
     fun unmarkCompletionOnDate(habitId: String, date: LocalDate) {
         viewModelScope.launch {
-            val habitWithCompletions =
-                habitsWithCompletions.value.find { it.habit.id == habitId } ?: return@launch
-            val completion = habitWithCompletions.completions.find {
-                it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date
-            }
-            if (completion != null) {
+            completionMutex.withLock {
+                val completions = completionsOf(habitId) ?: return@launch
+                val completion = completions.find {
+                    it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date
+                } ?: return@launch
                 habitRepository.deleteCompletion(completion)
                 userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
-                updateWidgets()
             }
+            updateWidgets()
         }
     }
 }

@@ -1,8 +1,6 @@
 package io.github.benji377.timety.ui.screens.habit
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -20,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -41,11 +38,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,9 +53,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -100,9 +98,7 @@ fun QuickHabitsScreen(
             TimetyTopBar(
                 title = stringResource(R.string.quickHabitsTitle),
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
+                    BackNavigationIcon(onClick = onNavigateBack)
                 }
             )
         }
@@ -207,7 +203,11 @@ private fun QuickHabitCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = AppTheme.spaceMedium, top = AppTheme.spaceSmall, bottom = AppTheme.spaceSmall),
+                .padding(
+                    start = AppTheme.spaceMedium,
+                    top = AppTheme.spaceSmall,
+                    bottom = AppTheme.spaceSmall
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -225,7 +225,10 @@ private fun QuickHabitCard(
                 colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor),
             )
             IconButton(onClick = onEdit) {
-                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.quickHabitEditTitle))
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = stringResource(R.string.quickHabitEditTitle)
+                )
             }
             IconButton(onClick = onDelete) {
                 Icon(
@@ -267,13 +270,13 @@ private fun QuickHabitEditDialog(
     var allDay by remember {
         mutableStateOf(initial?.startMinuteOfDay == null || initial.endMinuteOfDay == null)
     }
-    var startMinute by remember { mutableStateOf(initial?.startMinuteOfDay ?: (8 * 60)) }
-    var endMinute by remember { mutableStateOf(initial?.endMinuteOfDay ?: (20 * 60)) }
+    var startMinute by remember { mutableIntStateOf(initial?.startMinuteOfDay ?: (8 * 60)) }
+    var endMinute by remember { mutableIntStateOf(initial?.endMinuteOfDay ?: (20 * 60)) }
     var editingWindowStart by remember { mutableStateOf<Boolean?>(null) }
 
     val canSave = name.isNotBlank() &&
-        intervalValue != null && intervalValue >= 1 &&
-        (!specificDays || selectedWeekdays.isNotEmpty())
+            intervalValue != null && intervalValue >= 1 &&
+            (!specificDays || selectedWeekdays.isNotEmpty())
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -356,7 +359,10 @@ private fun QuickHabitEditDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(stringResource(R.string.quickHabitAllDayLabel), modifier = Modifier.weight(1f))
+                    Text(
+                        stringResource(R.string.quickHabitAllDayLabel),
+                        modifier = Modifier.weight(1f)
+                    )
                     Switch(
                         checked = allDay,
                         onCheckedChange = { allDay = it },
@@ -422,14 +428,17 @@ private fun QuickHabitEditDialog(
     )
 
     editingWindowStart?.let { isStart ->
-        WindowTimePickerDialog(
-            initialMinuteOfDay = if (isStart) startMinute else endMinute,
-            use24Hour = use24Hour,
-            onDismiss = { editingWindowStart = null },
-            onConfirm = { minuteOfDay ->
+        val initialMinuteOfDay = if (isStart) startMinute else endMinute
+        TimetyTimePickerDialog(
+            initialHour = initialMinuteOfDay / 60,
+            initialMinute = initialMinuteOfDay % 60,
+            confirmLabel = stringResource(R.string.commonLabelSave),
+            onConfirm = { hour, minute ->
+                val minuteOfDay = hour * 60 + minute
                 if (isStart) startMinute = minuteOfDay else endMinute = minuteOfDay
                 editingWindowStart = null
             },
+            onDismiss = { editingWindowStart = null },
         )
     }
 }
@@ -472,37 +481,6 @@ private fun WindowTimeButton(
             Text(formatMinuteOfDay(minuteOfDay, use24Hour, locale))
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun WindowTimePickerDialog(
-    initialMinuteOfDay: Int,
-    use24Hour: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit,
-) {
-    val state = rememberTimePickerState(
-        initialHour = initialMinuteOfDay / 60,
-        initialMinute = initialMinuteOfDay % 60,
-        is24Hour = use24Hour,
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        text = {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                TimePicker(state = state)
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(state.hour * 60 + state.minute) }) {
-                Text(stringResource(R.string.commonLabelSave))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-        },
-    )
 }
 
 /** "Every 2 hours" / "Every 30 minutes", using hours when the interval divides evenly. */

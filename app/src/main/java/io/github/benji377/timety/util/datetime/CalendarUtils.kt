@@ -21,11 +21,12 @@ object CalendarUtils {
 
         val weeks = mutableListOf<List<LocalDate>>()
 
-        // Keep adding weeks until we've passed the end of the month and landed back on a Monday,
-        // so the last week is always complete.
-        while (currentDay.isBefore(lastDayOfMonth) || currentDay.dayOfWeek != DayOfWeek.MONDAY) {
+        // currentDay is always a Monday here; keep adding full weeks until that week start has
+        // passed the end of the month. Inclusive comparison: a month ending on a Monday still
+        // needs the week starting on that Monday, or its last day would be missing.
+        while (!currentDay.isAfter(lastDayOfMonth)) {
             val week = mutableListOf<LocalDate>()
-            for (i in 0 until 7) {
+            repeat(7) {
                 week.add(currentDay)
                 currentDay = currentDay.plusDays(1)
             }

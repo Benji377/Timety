@@ -1,7 +1,6 @@
 package io.github.benji377.timety.widget
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -9,8 +8,11 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.ImageProvider
+import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.CheckBox
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.itemsIndexed
@@ -31,11 +33,12 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.ui.navigation.AppRoute
+import io.github.benji377.timety.ui.navigation.BottomNavItem
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.util.datetime.AppDateUtils
@@ -49,6 +52,7 @@ import java.util.Locale
 private sealed interface HabitWidgetRow {
     data class StackHeader(val name: String, val completed: Int, val total: Int) : HabitWidgetRow
     data class Habit(
+        val id: String,
         val name: String,
         val subtitle: String,
         val isDone: Boolean,
@@ -108,6 +112,7 @@ class HabitWidget : GlanceAppWidget() {
                         if (i == 0) true else completionStatus[stackHabits[i - 1].habit.id] ?: false
                     add(
                         HabitWidgetRow.Habit(
+                            id = hwc.habit.id,
                             name = hwc.habit.name,
                             subtitle = frequencySubtitle(context, hwc),
                             isDone = isDone,
@@ -121,6 +126,7 @@ class HabitWidget : GlanceAppWidget() {
             standalone.forEach { hwc ->
                 add(
                     HabitWidgetRow.Habit(
+                        id = hwc.habit.id,
                         name = hwc.habit.name,
                         subtitle = frequencySubtitle(context, hwc),
                         isDone = completionStatus[hwc.habit.id] ?: false,
@@ -133,13 +139,15 @@ class HabitWidget : GlanceAppWidget() {
 
         provideContent {
             GlanceTheme {
-                val openApp = actionStartActivity(Intent(context, MainActivity::class.java))
+                val openHabitsTab = actionStartActivity(
+                    widgetNavIntent(context, BottomNavItem.Habits.route)
+                )
                 Column(
                     modifier = GlanceModifier
                         .fillMaxSize()
                         .background(ImageProvider(R.drawable.widget_background))
                         .padding(12.dp)
-                        .clickable(openApp),
+                        .clickable(openHabitsTab),
                 ) {
                     // Header
                     Row(
@@ -178,7 +186,7 @@ class HabitWidget : GlanceAppWidget() {
                         }
                     } else {
                         LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                            itemsIndexed(rows) { _, row -> RenderRow(row, openApp) }
+                            itemsIndexed(rows) { _, row -> RenderRow(context, row, openHabitsTab) }
                         }
                     }
                 }
@@ -188,13 +196,17 @@ class HabitWidget : GlanceAppWidget() {
 
     @Composable
     @android.annotation.SuppressLint("NonObservableLocale")
-    private fun RenderRow(row: HabitWidgetRow, openApp: androidx.glance.action.Action) {
+    private fun RenderRow(
+        context: Context,
+        row: HabitWidgetRow,
+        openHabitsTab: androidx.glance.action.Action,
+    ) {
         when (row) {
             is HabitWidgetRow.StackHeader -> Row(
                 modifier = GlanceModifier.fillMaxWidth()
                     .background(ImageProvider(R.drawable.widget_habit_stack_header_bg))
                     .padding(8.dp)
-                    .clickable(openApp),
+                    .clickable(openHabitsTab),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -222,11 +234,10 @@ class HabitWidget : GlanceAppWidget() {
                 Row(
                     modifier = GlanceModifier.fillMaxWidth()
                         .background(ImageProvider(R.drawable.widget_habit_stack_item_bg))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .clickable(openApp),
+                        .padding(horizontal = 8.dp, vertical = 0.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    HabitRowContent(row)
+                    HabitRowContent(context, row)
                 }
             } else {
                 Column(modifier = GlanceModifier.fillMaxWidth()) {
@@ -238,11 +249,10 @@ class HabitWidget : GlanceAppWidget() {
                                     else R.drawable.widget_habit_standalone_pending_bg
                                 )
                             )
-                            .padding(8.dp)
-                            .clickable(openApp),
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        HabitRowContent(row)
+                        HabitRowContent(context, row)
                     }
                     Spacer(modifier = GlanceModifier.height(6.dp))
                 }
@@ -259,27 +269,50 @@ class HabitWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun androidx.glance.layout.RowScope.HabitRowContent(row: HabitWidgetRow.Habit) {
-        Text(
-            text = row.name,
-            maxLines = 1,
-            style = TextStyle(
-                color = if (row.isLocked) GlanceTheme.colors.onSurfaceVariant else GlanceTheme.colors.onSurface,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                textDecoration = if (row.isDone) TextDecoration.LineThrough else TextDecoration.None
+    private fun androidx.glance.layout.RowScope.HabitRowContent(
+        context: Context,
+        row: HabitWidgetRow.Habit,
+    ) {
+        // Locked stacked habits can't be completed until their predecessor is, so their
+        // checkbox carries no action; the text always deep-links into the habit's detail.
+        CheckBox(
+            checked = row.isDone,
+            onCheckedChange = if (row.isLocked) null else actionRunCallback<ToggleHabitCompletionAction>(
+                actionParametersOf(HabitIdKey to row.id)
             ),
-            modifier = GlanceModifier.defaultWeight()
         )
-        Spacer(modifier = GlanceModifier.width(4.dp))
-        Text(
-            text = row.subtitle,
-            maxLines = 1,
-            style = TextStyle(
-                color = GlanceTheme.colors.onSurfaceVariant,
-                fontSize = 12.sp
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = GlanceModifier
+                .defaultWeight()
+                .padding(vertical = 8.dp)
+                .clickable(
+                    actionStartActivity(
+                        widgetNavIntent(context, AppRoute.habitDetail(row.id))
+                    )
+                ),
+        ) {
+            Text(
+                text = row.name,
+                maxLines = 1,
+                style = TextStyle(
+                    color = if (row.isLocked) GlanceTheme.colors.onSurfaceVariant else GlanceTheme.colors.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    textDecoration = if (row.isDone) TextDecoration.LineThrough else TextDecoration.None
+                ),
+                modifier = GlanceModifier.defaultWeight()
             )
-        )
+            Spacer(modifier = GlanceModifier.width(4.dp))
+            Text(
+                text = row.subtitle,
+                maxLines = 1,
+                style = TextStyle(
+                    color = GlanceTheme.colors.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
+            )
+        }
     }
 
 

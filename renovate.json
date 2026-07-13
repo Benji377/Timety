@@ -4,13 +4,10 @@
         "config:recommended"
     ],
     "enabledManagers": [
-        "pub",
+        "gradle",
+        "gradle-wrapper",
         "github-actions"
     ],
-    "lockFileMaintenance": {
-        "enabled": true,
-        "automerge": true
-    },
     "packageRules": [
         {
             "matchUpdateTypes": [
@@ -18,12 +15,6 @@
                 "patch"
             ],
             "matchCurrentVersion": ">= 1.0.0",
-            "automerge": true
-        },
-        {
-            "matchDepTypes": [
-                "devDependencies"
-            ],
             "automerge": true
         }
     ]

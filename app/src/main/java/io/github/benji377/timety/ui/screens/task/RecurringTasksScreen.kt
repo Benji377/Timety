@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.Card
@@ -34,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.ui.components.common.TimetyFab
@@ -77,9 +77,7 @@ fun RecurringTasksScreen(
             TimetyTopBar(
                 title = stringResource(R.string.recurringTasksTitle),
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
+                    BackNavigationIcon(onClick = onNavigateBack)
                 }
             )
         },
@@ -169,8 +167,16 @@ private fun RecurringTaskCard(
                 Text(
                     text = stringResource(
                         R.string.recurringTasksNextDue,
-                        "${AppDateFormatUtils.formatDate(item.task.dueDate, dateFmt.dateFormatCode)} " +
-                            AppDateFormatUtils.formatTime(item.task.dueDate, dateFmt.use24HourFormat)
+                        "${
+                            AppDateFormatUtils.formatDate(
+                                item.task.dueDate,
+                                dateFmt.dateFormatCode
+                            )
+                        } " +
+                                AppDateFormatUtils.formatTime(
+                                    item.task.dueDate,
+                                    dateFmt.use24HourFormat
+                                )
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

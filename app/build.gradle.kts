@@ -1,7 +1,8 @@
 plugins {
-    id("com.android.application")
-    id("com.google.devtools.ksp")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -12,10 +13,9 @@ android {
         applicationId = "io.github.benji377.timety"
         minSdk = 26
         targetSdk = 37
-        // F-Droid clients installed the Flutter app at versionCode 233 (1.5.1 arm64 split);
-        // the Kotlin rewrite ships a single universal APK, so this must stay above that.
-        versionCode = 240
-        versionName = "2.0.0"
+        // Must stay above 233, the last Flutter-era versionCode on F-Droid.
+        versionCode = 241
+        versionName = "2.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -27,21 +27,15 @@ android {
         localeFilters += setOf("en", "de", "it", "b+lld")
     }
 
-    // Room writes a JSON snapshot of every schema version here (committed to git);
-    // these are what MigrationTestHelper replays to test future migrations.
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
-
-    // Expose the committed schema JSONs to MigrationTestHelper as instrumentation-test assets.
+    // Committed Room schemas as test assets for MigrationTestHelper.
     sourceSets {
         getByName("androidTest") {
-            assets.srcDirs(files("$projectDir/schemas"))
+            assets.directories.add("$projectDir/schemas")
         }
     }
 
     signingConfigs {
-        // Used by the release CI workflow; falls back to an unsigned build locally.
+        // Set by the release CI workflow; local builds stay unsigned.
         val keystorePath = System.getenv("KEYSTORE_PATH")
         if (keystorePath != null) {
             create("release") {
@@ -54,16 +48,14 @@ android {
     }
 
     dependenciesInfo {
-        // Google Play's encrypted dependency block makes the APK/AAB differ from what anyone
-        // else can build from source; F-Droid requires it off for reproducible builds.
+        // Play's encrypted dependency block breaks F-Droid reproducible builds.
         includeInApk = false
         includeInBundle = false
     }
     buildTypes {
         release {
             vcsInfo {
-                // AGP embeds META-INF/version-control-info.textproto by default; any difference
-                // in git state between CI and the F-Droid builder breaks reproducible builds.
+                // Embedded git state breaks F-Droid reproducible builds.
                 include = false
             }
             isMinifyEnabled = true
@@ -84,15 +76,24 @@ android {
     }
     bundle {
         language {
-            // The app switches language at runtime (LocaleHelper); keep all locales in every
-            // install instead of relying on Play's on-demand language downloads.
+            // Runtime language switching needs every locale in the install.
             enableSplit = false
         }
     }
     lint {
-        // Translations are managed on Crowdin and land asynchronously; a key missing from one
-        // locale falls back to English at runtime and must not fail the build.
+        // Crowdin translations land asynchronously; missing keys fall back to English.
         warning += "MissingTranslation"
+        // Renovate owns dependency updates.
+        disable += listOf("GradleDependency", "NewerVersionAvailable")
+        // compose-lints rules meant for published libraries, not app-internal screens.
+        disable += listOf(
+            "ComposeModifierMissing",
+            "ComposeParameterOrder",
+            "ComposeViewModelForwarding",
+            "ComposeMultipleContentEmitters",
+            "SlotReused",
+            "ComposeCompositionLocalUsage",
+        )
         // SARIF is uploaded to GitHub code scanning by the lint workflow.
         sarifReport = true
     }
@@ -103,61 +104,81 @@ android {
     }
 }
 
-// room-testing 2.8.4 parses the schema JSONs with kotlinx-serialization 1.8.x, but
-// navigation-compose pins the whole group to 1.7.3 (strictly), which crashes MigrationTestHelper
-// with an AbstractMethodError. Force the newer, backward-compatible version for the test classpath.
+// Room schema snapshots (committed), replayed by MigrationTestHelper.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// navigation-compose strictly pins kotlinx-serialization 1.7.3, which crashes
+// room-testing's schema parser; force the newer version on the test classpath.
 configurations.matching { it.name.contains("AndroidTest") }.configureEach {
     resolutionStrategy.force(
-        "org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1",
-        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.8.1",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.11.0",
         "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1",
         "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.1",
     )
 }
 
+detekt {
+    // Default rules; per-rule opt-outs and Compose tweaks live in the config file.
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        // Uploaded to GitHub code scanning by CI.
+        sarif.required.set(true)
+    }
+}
+
 dependencies {
     // Core
-    implementation("androidx.core:core-ktx:1.19.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
-    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
 
     // Compose
-    val composeBom = platform("androidx.compose:compose-bom:2025.06.01")
-    implementation(composeBom)
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
 
     // Glance
-    implementation("androidx.glance:glance-appwidget:1.1.1")
-    implementation("androidx.glance:glance-material3:1.1.1")
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation(libs.androidx.navigation.compose)
 
     // Room
-    val roomVersion = "2.8.4"
-    implementation("androidx.room:room-runtime:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
-    androidTestImplementation("androidx.room:room-testing:$roomVersion")
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    androidTestImplementation(libs.room.testing)
 
     // DataStore
-    implementation("androidx.datastore:datastore-preferences:1.2.1")
+    implementation(libs.androidx.datastore.preferences)
 
     // Coil for SVG
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("io.coil-kt:coil-svg:2.7.0")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+
+    // Slack's Compose rules for the lint task.
+    lintChecks(libs.compose.lint.checks)
 
     // Testing
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.test:rules:1.7.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
-    androidTestImplementation(composeBom)
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
+    // Leak detection in debug builds only.
+    debugImplementation(libs.leakcanary.android)
 }

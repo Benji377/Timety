@@ -3,7 +3,6 @@ package io.github.benji377.timety.ui.screens.task
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -27,22 +25,15 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -52,9 +43,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -70,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.MonthlyMode
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
@@ -77,9 +66,14 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
-import io.github.benji377.timety.ui.components.task.readOnlyFieldColors
+import io.github.benji377.timety.ui.components.task.ReminderOptionInput
+import io.github.benji377.timety.ui.components.common.detailFieldColors
+import io.github.benji377.timety.ui.components.common.detailFilterChipColors
+import io.github.benji377.timety.ui.components.common.detailSegmentedButtonColors
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -159,9 +153,8 @@ fun RecurringTaskDetailScreen(
     var selectedReminderOption by remember { mutableStateOf(ReminderOption.MINUTES_30_BEFORE) }
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    // Date-then-time picker flow; a non-null target keeps the dialog open.
     var pickerTarget by remember { mutableStateOf<RecurringPickerTarget?>(null) }
-    var pickerStep by remember { mutableIntStateOf(0) } // 0 = none, 1 = date, 2 = time
-    var pickedLocalDate by remember { mutableStateOf<LocalDate?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -173,12 +166,6 @@ fun RecurringTaskDetailScreen(
     // is offered as "last" instead.
     val nthOrdinal = dueLocalDate?.let { RecurrenceUtils.ordinalInMonth(it) }?.takeIf { it <= 4 }
     val lastAvailable = dueLocalDate?.let { RecurrenceUtils.isLastWeekdayOfMonth(it) } ?: false
-
-    fun closePicker() {
-        pickerTarget = null
-        pickerStep = 0
-        pickedLocalDate = null
-    }
 
     fun save() {
         val trimmedTitle = title.trim()
@@ -249,30 +236,15 @@ fun RecurringTaskDetailScreen(
             TimetyTopBar(
                 title = appBarTitle,
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
+                    BackNavigationIcon(onClick = onNavigateBack)
                 },
                 actions = {
-                    if (!isEditing && !isNew) {
-                        IconButton(onClick = { showDeleteConfirm = true }) {
-                            Icon(
-                                Icons.Filled.DeleteOutline,
-                                contentDescription = stringResource(R.string.commonLabelDelete),
-                                tint = ErrorColor
-                            )
-                        }
-                        IconButton(onClick = { isEditing = true }) {
-                            Icon(Icons.Filled.Edit, contentDescription = null)
-                        }
-                    } else {
-                        IconButton(onClick = { save() }) {
-                            Icon(
-                                Icons.Filled.Check,
-                                contentDescription = stringResource(R.string.commonLabelSave)
-                            )
-                        }
-                    }
+                    DetailTopBarActions(
+                        isViewing = !isEditing && !isNew,
+                        onDelete = { showDeleteConfirm = true },
+                        onEdit = { isEditing = true },
+                        onSave = { save() },
+                    )
                 }
             )
         }
@@ -327,13 +299,12 @@ fun RecurringTaskDetailScreen(
                         .fillMaxWidth()
                         .clickable(enabled = isEditing) {
                             pickerTarget = RecurringPickerTarget.DUE_DATE
-                            pickerStep = 1
                         }
                 ) {
                     OutlinedTextField(
                         value = dueDate?.let {
                             "${AppDateFormatUtils.formatDate(it, dateFmt.dateFormatCode)} " +
-                                AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
+                                    AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
                         } ?: "",
                         onValueChange = {},
                         enabled = false,
@@ -341,7 +312,7 @@ fun RecurringTaskDetailScreen(
                         label = { Text(stringResource(R.string.recurringTaskLabelNextDue) + " *") },
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
-                        colors = readOnlyFieldColors(isEditing)
+                        colors = detailFieldColors(isEditing)
                     )
                 }
                 Spacer(Modifier.height(AppTheme.spaceLarge))
@@ -361,6 +332,7 @@ fun RecurringTaskDetailScreen(
                                 count = RecurrenceUnit.entries.size
                             ),
                             enabled = isEditing,
+                            colors = detailSegmentedButtonColors(),
                         ) { Text(recurrenceUnitName(option)) }
                     }
                 }
@@ -398,9 +370,7 @@ fun RecurringTaskDetailScreen(
                                         else selectedWeekdays + day
                                 },
                                 label = { Text(weekdayShortName(day)) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = TaskColor.copy(alpha = 0.3f),
-                                ),
+                                colors = detailFilterChipColors(TaskColor),
                             )
                         }
                     }
@@ -414,8 +384,8 @@ fun RecurringTaskDetailScreen(
                             dueLocalDate.dayOfMonth
                         ),
                         selected = monthlyChoice == MonthlyChoice.DAY_OF_MONTH ||
-                            (monthlyChoice == MonthlyChoice.NTH_WEEKDAY && nthOrdinal == null) ||
-                            (monthlyChoice == MonthlyChoice.LAST_WEEKDAY && !lastAvailable),
+                                (monthlyChoice == MonthlyChoice.NTH_WEEKDAY && nthOrdinal == null) ||
+                                (monthlyChoice == MonthlyChoice.LAST_WEEKDAY && !lastAvailable),
                         enabled = isEditing,
                         onSelect = { monthlyChoice = MonthlyChoice.DAY_OF_MONTH },
                     )
@@ -457,7 +427,7 @@ fun RecurringTaskDetailScreen(
                     Spacer(Modifier.height(AppTheme.spaceSmall))
                 }
                 if (isEditing) {
-                    ReminderOffsetInput(
+                    ReminderOptionInput(
                         selected = selectedReminderOption,
                         onSelectedChange = { selectedReminderOption = it },
                         onAdd = {
@@ -466,6 +436,8 @@ fun RecurringTaskDetailScreen(
                                 reminderOffsets = (reminderOffsets + minutes).sorted()
                             }
                         },
+                        // Offsets are always relative to the due date; CUSTOM has no offset.
+                        includeCustom = false,
                     )
                     Spacer(Modifier.height(AppTheme.spaceSmall))
                 }
@@ -521,7 +493,6 @@ fun RecurringTaskDetailScreen(
                         )
                         TextButton(onClick = {
                             pickerTarget = RecurringPickerTarget.PAST_OCCURRENCE
-                            pickerStep = 1
                         }) {
                             Icon(
                                 Icons.Filled.Add,
@@ -569,88 +540,41 @@ fun RecurringTaskDetailScreen(
         onDismiss = { showDeleteConfirm = false }
     )
 
-    // Date and time picker dialogs (date first, then time).
-    if (pickerStep == 1) {
+    // Date and time picker dialog (date first, then time).
+    pickerTarget?.let { target ->
         // Due dates can't be in the past; backfilled occurrences can't be in the future.
         val todayUtcMillis =
             LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-        val selectableDates = remember(pickerTarget, todayUtcMillis) {
+        val selectableDates = remember(target, todayUtcMillis) {
             object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                    when (pickerTarget) {
+                    when (target) {
                         RecurringPickerTarget.DUE_DATE -> utcTimeMillis >= todayUtcMillis
                         RecurringPickerTarget.PAST_OCCURRENCE -> utcTimeMillis <= todayUtcMillis
-                        else -> true
                     }
             }
         }
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = (if (pickerTarget == RecurringPickerTarget.DUE_DATE) dueDate else null)
-                ?.toEpochMilli() ?: System.currentTimeMillis(),
-            selectableDates = selectableDates
-        )
-        DatePickerDialog(
-            onDismissRequest = { closePicker() },
-            confirmButton = {
-                TextButton(onClick = {
-                    val millis = datePickerState.selectedDateMillis
-                    if (millis != null) {
-                        pickedLocalDate =
-                            Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-                        pickerStep = 2
-                    } else {
-                        closePicker()
-                    }
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { closePicker() }) { Text(stringResource(R.string.commonLabelCancel)) }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
-
-    if (pickerStep == 2 && pickedLocalDate != null) {
         val initialTime = dueDate?.atZone(zone)
-        val timePickerState = rememberTimePickerState(
+        TimetyDateTimePickerDialog(
+            initialDateMillis = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null)
+                ?.toEpochMilli() ?: System.currentTimeMillis(),
             initialHour = initialTime?.hour ?: 12,
             initialMinute = initialTime?.minute ?: 0,
-            is24Hour = dateFmt.use24HourFormat
-        )
-        AlertDialog(
-            onDismissRequest = { closePicker() },
-            title = {
-                Text(
-                    stringResource(
-                        if (pickerTarget == RecurringPickerTarget.DUE_DATE) R.string.recurringTaskLabelNextDue
-                        else R.string.recurringTaskHistoryAddPast
-                    )
-                )
-            },
-            text = {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TimePicker(state = timePickerState)
+            timeTitle = stringResource(
+                if (target == RecurringPickerTarget.DUE_DATE) R.string.recurringTaskLabelNextDue
+                else R.string.recurringTaskHistoryAddPast
+            ),
+            selectableDates = selectableDates,
+            onConfirm = { date, hour, minute ->
+                val instant = date.atTime(hour, minute).atZone(zone).toInstant()
+                when (target) {
+                    RecurringPickerTarget.DUE_DATE -> dueDate = instant
+                    RecurringPickerTarget.PAST_OCCURRENCE ->
+                        recurringTaskId?.let { viewModel.addPastOccurrence(it, instant) }
                 }
+                pickerTarget = null
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    val instant = pickedLocalDate!!
-                        .atTime(timePickerState.hour, timePickerState.minute)
-                        .atZone(zone).toInstant()
-                    when (pickerTarget) {
-                        RecurringPickerTarget.DUE_DATE -> dueDate = instant
-                        RecurringPickerTarget.PAST_OCCURRENCE ->
-                            recurringTaskId?.let { viewModel.addPastOccurrence(it, instant) }
-
-                        null -> {}
-                    }
-                    closePicker()
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { closePicker() }) { Text(stringResource(R.string.commonLabelCancel)) }
-            }
+            onDismiss = { pickerTarget = null },
         )
     }
 }
@@ -668,7 +592,17 @@ private fun MonthlyChoiceOption(
             .clickable(enabled = enabled, onClick = onSelect),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RadioButton(selected = selected, onClick = onSelect, enabled = enabled)
+        RadioButton(
+            selected = selected,
+            onClick = onSelect,
+            enabled = enabled,
+            // The selection is the value: keep it readable in view mode instead of the 38%
+            // Material disabled fade; the label text next to it never fades either.
+            colors = RadioButtonDefaults.colors(
+                disabledSelectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledUnselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        )
         Text(label)
     }
 }
@@ -709,48 +643,6 @@ private fun OccurrenceRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReminderOffsetInput(
-    selected: ReminderOption,
-    onSelectedChange: (ReminderOption) -> Unit,
-    onAdd: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = it },
-            modifier = Modifier.weight(1f)
-        ) {
-            OutlinedTextField(
-                value = reminderOffsetOptionLabel(selected),
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(stringResource(R.string.taskDetailsLabelReminderSet)) },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    .fillMaxWidth()
-            )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                // CUSTOM picks an absolute time on plain tasks; offsets are always relative here.
-                ReminderOption.entries.filter { it != ReminderOption.CUSTOM }.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(reminderOffsetOptionLabel(option)) },
-                        onClick = {
-                            onSelectedChange(option)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.width(AppTheme.spaceSmall))
-        Button(onClick = onAdd) { Text(stringResource(R.string.commonLabelAdd)) }
-    }
-}
-
 /** The relative offset in minutes an option stands for; null for [ReminderOption.CUSTOM]. */
 private fun reminderOptionOffsetMinutes(option: ReminderOption): Int? = when (option) {
     ReminderOption.ON_TIME -> 0
@@ -758,15 +650,6 @@ private fun reminderOptionOffsetMinutes(option: ReminderOption): Int? = when (op
     ReminderOption.HOUR_1_BEFORE -> 60
     ReminderOption.DAY_1_BEFORE -> 24 * 60
     ReminderOption.CUSTOM -> null
-}
-
-@Composable
-private fun reminderOffsetOptionLabel(option: ReminderOption): String = when (option) {
-    ReminderOption.ON_TIME -> stringResource(R.string.taskDetailsReminderOptionOnce)
-    ReminderOption.MINUTES_30_BEFORE -> stringResource(R.string.taskDetailsReminderOptionHalfHour)
-    ReminderOption.HOUR_1_BEFORE -> stringResource(R.string.taskDetailsReminderOptionHour)
-    ReminderOption.DAY_1_BEFORE -> stringResource(R.string.taskDetailsReminderOptionDay)
-    ReminderOption.CUSTOM -> stringResource(R.string.taskDetailsReminderOptionCustom)
 }
 
 /** The chip label for a stored offset; known values reuse the option labels. */

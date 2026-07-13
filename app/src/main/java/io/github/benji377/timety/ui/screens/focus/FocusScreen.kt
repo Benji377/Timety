@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
@@ -45,8 +44,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -78,6 +78,7 @@ import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.services.FocusTimerService
+import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
@@ -164,6 +165,16 @@ fun FocusScreen(
     val tasks by taskViewModel.allTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
+    val keepScreenOnDuringFocus by settingsViewModel.keepScreenOnDuringFocus.collectAsState()
+
+    // Only holds the screen awake while this screen is on the foreground - no wakelock, no
+    // permission needed. The lock-screen/background case is covered separately by the foreground
+    // service's chronometer notification.
+    val view = LocalView.current
+    DisposableEffect(keepScreenOnDuringFocus, isRunning) {
+        view.keepScreenOn = keepScreenOnDuringFocus && isRunning
+        onDispose { view.keepScreenOn = false }
+    }
 
     var flexibleMinutes by remember { mutableIntStateOf(25) }
 
@@ -612,49 +623,35 @@ fun FocusScreen(
         onDismiss = { showCreateTagDialog = false },
     )
 
-    if (showStopConfirmation) {
-        val cancelStop = {
+    ConfirmationDialog(
+        visible = showStopConfirmation,
+        title = stringResource(R.string.focusDialogSessionStopTitle),
+        content = stringResource(R.string.focusDialogSessionStopContent),
+        onConfirm = {
+            // Partial-phase banking + session logging happen via
+            // FocusTimerManager.stopEvent, shared with the notification's Stop action.
+            sendAction(FocusTimerService.ACTION_STOP)
+            showStopConfirmation = false
+        },
+        onDismiss = {
             if (stopWasRunning) sendAction(FocusTimerService.ACTION_START)
             showStopConfirmation = false
-        }
-        AlertDialog(
-            onDismissRequest = cancelStop,
-            title = { Text(stringResource(R.string.focusDialogSessionStopTitle)) },
-            text = { Text(stringResource(R.string.focusDialogSessionStopContent)) },
-            confirmButton = {
-                Button(onClick = {
-                    // Partial-phase banking + session logging happen via
-                    // FocusTimerManager.stopEvent, shared with the notification's Stop action.
-                    sendAction(FocusTimerService.ACTION_STOP)
-                    showStopConfirmation = false
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = cancelStop) { Text(stringResource(R.string.commonLabelCancel)) }
-            },
-        )
-    }
+        },
+    )
 
-    if (showResetConfirmation) {
-        val cancelReset = {
+    ConfirmationDialog(
+        visible = showResetConfirmation,
+        title = stringResource(R.string.focusDialogSessionResetTitle),
+        content = stringResource(R.string.focusDialogSessionResetContent),
+        onConfirm = {
+            sendAction(FocusTimerService.ACTION_DISCARD)
+            showResetConfirmation = false
+        },
+        onDismiss = {
             if (resetWasRunning) sendAction(FocusTimerService.ACTION_START)
             showResetConfirmation = false
-        }
-        AlertDialog(
-            onDismissRequest = cancelReset,
-            title = { Text(stringResource(R.string.focusDialogSessionResetTitle)) },
-            text = { Text(stringResource(R.string.focusDialogSessionResetContent)) },
-            confirmButton = {
-                Button(onClick = {
-                    sendAction(FocusTimerService.ACTION_DISCARD)
-                    showResetConfirmation = false
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = cancelReset) { Text(stringResource(R.string.commonLabelCancel)) }
-            },
-        )
-    }
+        },
+    )
 }
 
 /**

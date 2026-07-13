@@ -8,6 +8,7 @@ import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.habit.HabitUtils.parseWeekdays
 import java.time.LocalDate
 import java.time.ZoneId
 

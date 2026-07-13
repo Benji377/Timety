@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import io.github.benji377.timety.data.model.task.RecurringTaskEntity.Companion.LAST_ORDINAL
 import java.time.Instant
 
 /**

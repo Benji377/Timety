@@ -59,6 +59,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.components.stats.StatCardStyle
@@ -82,7 +83,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 /**
  * Displays the user's profile: avatar, name, XP progress, streak timeline, and all-time stats,
@@ -112,7 +112,7 @@ fun ProfileScreen(
 
     // Each logged recurring occurrence counts as a completed task.
     val totalTasksDone = tasks.count { it.task.isCompleted } +
-        recurringItems.sumOf { it.occurrences.size }
+            recurringItems.sumOf { it.occurrences.size }
     val totalHabitsMet = habitsWithCompletions.sumOf { it.completions.size }
     val totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60
     val totalSessions = sessions.size
@@ -244,33 +244,17 @@ fun ProfileScreen(
         )
     }
 
-    if (showEditNameDialog) {
-        AlertDialog(
-            onDismissRequest = { showEditNameDialog = false },
-            title = { Text(stringResource(R.string.userEditNameTitle)) },
-            text = {
-                OutlinedTextField(
-                    value = tempName,
-                    onValueChange = { tempName = it },
-                    placeholder = { Text(stringResource(R.string.userEditNameHint)) },
-                    singleLine = true
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    userViewModel.updateName(tempName)
-                    showEditNameDialog = false
-                }) {
-                    Text(stringResource(R.string.commonLabelSave))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showEditNameDialog = false }) {
-                    Text(stringResource(R.string.commonLabelCancel))
-                }
-            }
-        )
-    }
+    TextInputDialog(
+        visible = showEditNameDialog,
+        title = stringResource(R.string.userEditNameTitle),
+        labelText = stringResource(R.string.userEditNameHint),
+        initialValue = tempName,
+        onConfirm = { newName ->
+            userViewModel.updateName(newName)
+            showEditNameDialog = false
+        },
+        onDismiss = { showEditNameDialog = false },
+    )
 
     Scaffold(
         topBar = {

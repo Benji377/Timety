@@ -1,6 +1,7 @@
 package io.github.benji377.timety.util.stats
 
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.stats.StreakCalculator.currentStreak
 import java.time.LocalDate
 
 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Static long-press-icon shortcuts. Each launches MainActivity with a navTarget extra that
+     MainScreen consumes once (see MainActivity.EXTRA_NAV_TARGET); the values are nav route
+     strings ("task_detail" = blank new-task editor, "focus" = the Focus tab). -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_new_task"
+        android:shortcutId="new_task"
+        android:shortcutShortLabel="@string/shortcutNewTask">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="io.github.benji377.timety.MainActivity"
+            android:targetPackage="io.github.benji377.timety">
+            <extra
+                android:name="navTarget"
+                android:value="task_detail" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_focus"
+        android:shortcutId="start_focus"
+        android:shortcutShortLabel="@string/shortcutStartFocus">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="io.github.benji377.timety.MainActivity"
+            android:targetPackage="io.github.benji377.timety">
+            <extra
+                android:name="navTarget"
+                android:value="focus" />
+        </intent>
+    </shortcut>
+</shortcuts>

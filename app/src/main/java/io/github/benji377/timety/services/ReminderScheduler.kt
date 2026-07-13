@@ -41,7 +41,12 @@ class ReminderScheduler private constructor(private val context: Context) {
                 notificationService.scheduleTaskReminder(
                     notificationId = baseId + slot,
                     title = context.getString(R.string.taskReminderTitle, task.title),
-                    body = buildReminderBody(task.title, task.description, reminder, dueDate = task.dueDate),
+                    body = buildReminderBody(
+                        task.title,
+                        task.description,
+                        reminder,
+                        dueDate = task.dueDate
+                    ),
                     scheduledTime = reminder,
                 )
                 slot++
@@ -52,7 +57,12 @@ class ReminderScheduler private constructor(private val context: Context) {
             notificationService.scheduleTaskReminder(
                 notificationId = baseId,
                 title = context.getString(R.string.taskReminderTitle, task.title),
-                body = buildReminderBody(task.title, task.description, task.dueDate, exactDueDate = true),
+                body = buildReminderBody(
+                    task.title,
+                    task.description,
+                    task.dueDate,
+                    exactDueDate = true
+                ),
                 scheduledTime = task.dueDate,
             )
         }
@@ -113,7 +123,9 @@ class ReminderScheduler private constructor(private val context: Context) {
         exactDueDate: Boolean = false,
     ): String {
         if (exactDueDate) {
-            return context.getString(R.string.taskReminderBodyExact, title) + descriptionHint(description)
+            return context.getString(R.string.taskReminderBodyExact, title) + descriptionHint(
+                description
+            )
         }
 
         val reference = dueDate ?: reminderTime
@@ -136,7 +148,9 @@ class ReminderScheduler private constructor(private val context: Context) {
                 res.getQuantityString(R.plurals.nTaskReminderPrefixDays, d, d)
             }
         }
-        return context.getString(R.string.taskReminderBody, prefix, title) + descriptionHint(description)
+        return context.getString(R.string.taskReminderBody, prefix, title) + descriptionHint(
+            description
+        )
     }
 
     /** The description's first non-empty line, appended on its own line so `BigTextStyle` surfaces the "why". */

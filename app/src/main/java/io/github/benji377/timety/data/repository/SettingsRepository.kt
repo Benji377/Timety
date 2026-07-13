@@ -45,6 +45,14 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val END_OF_DAY_CHECKUP_TIME = stringPreferencesKey("endOfDayCheckupTime")
         val LOCATION_API_ENDPOINT = stringPreferencesKey("locationApiEndpoint")
         val APP_LOCALE_CODE = stringPreferencesKey("appLocaleCode")
+        val KEEP_SCREEN_ON_DURING_FOCUS = booleanPreferencesKey("keepScreenOnDuringFocus")
+        val AUTO_DND_ENABLED = booleanPreferencesKey("autoDndEnabled")
+        val AUTO_DND_LIFT_DURING_BREAKS = booleanPreferencesKey("autoDndLiftDuringBreaks")
+
+        // Not a user-facing setting: the interruption filter FocusDndController owned before it
+        // applied Auto-DND, kept here (rather than in-memory) so a killed process can still
+        // restore it on next start. Absent means Auto-DND currently owns nothing to restore.
+        val STORED_INTERRUPTION_FILTER = intPreferencesKey("storedInterruptionFilter")
     }
 
     val themePrefFlow: Flow<ThemeMode> =
@@ -66,6 +74,16 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     // Per-app locale: "system" (follow OS) or one of "en"/"de"/"it"/"lld".
     val appLocaleCodeFlow: Flow<String> = dataStore.data.map { it[APP_LOCALE_CODE] ?: "system" }
+
+    val keepScreenOnDuringFocusFlow: Flow<Boolean> =
+        dataStore.data.map { it[KEEP_SCREEN_ON_DURING_FOCUS] ?: false }
+    val autoDndEnabledFlow: Flow<Boolean> = dataStore.data.map { it[AUTO_DND_ENABLED] ?: false }
+    val autoDndLiftDuringBreaksFlow: Flow<Boolean> =
+        dataStore.data.map { it[AUTO_DND_LIFT_DURING_BREAKS] ?: false }
+
+    /** Null means Auto-DND currently owns no filter to restore. */
+    val storedInterruptionFilterFlow: Flow<Int?> =
+        dataStore.data.map { it[STORED_INTERRUPTION_FILTER] }
 
     suspend fun saveThemePref(theme: ThemeMode) {
         dataStore.edit { it[THEME_PREF] = theme.storageValue }
@@ -115,9 +133,33 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[APP_LOCALE_CODE] = code }
     }
 
+    suspend fun saveKeepScreenOnDuringFocus(keepOn: Boolean) {
+        dataStore.edit { it[KEEP_SCREEN_ON_DURING_FOCUS] = keepOn }
+    }
+
+    suspend fun saveAutoDndEnabled(enabled: Boolean) {
+        dataStore.edit { it[AUTO_DND_ENABLED] = enabled }
+    }
+
+    suspend fun saveAutoDndLiftDuringBreaks(lift: Boolean) {
+        dataStore.edit { it[AUTO_DND_LIFT_DURING_BREAKS] = lift }
+    }
+
+    suspend fun saveStoredInterruptionFilter(filter: Int) {
+        dataStore.edit { it[STORED_INTERRUPTION_FILTER] = filter }
+    }
+
+    suspend fun clearStoredInterruptionFilter() {
+        dataStore.edit { it.remove(STORED_INTERRUPTION_FILTER) }
+    }
+
     suspend fun exportAll(): Map<String, Any?> {
         val prefs = dataStore.data.first()
-        return prefs.asMap().mapKeys { it.key.name }
+        // STORED_INTERRUPTION_FILTER is transient runtime state, not a user setting - excluded
+        // so restoring a backup can't leave a stale filter that nothing will ever restore.
+        return prefs.asMap()
+            .filterKeys { it.name != STORED_INTERRUPTION_FILTER.name }
+            .mapKeys { it.key.name }
     }
 
     suspend fun restoreAll(map: Map<String, Any?>) {

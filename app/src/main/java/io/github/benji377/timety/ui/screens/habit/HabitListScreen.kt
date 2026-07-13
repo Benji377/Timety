@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,6 +59,7 @@ fun HabitListScreen(
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onNavigateToHabitDetail: (String?) -> Unit,
     onNavigateToQuickHabits: () -> Unit = {},
+    onNavigateToGoals: () -> Unit = {},
 ) {
     val habitsWithCompletions by viewModel.habitsWithCompletions.collectAsState()
     val use24HourFormat by settingsViewModel.use24HourFormat.collectAsState()
@@ -68,6 +70,12 @@ fun HabitListScreen(
             TimetyTopBar(
                 title = stringResource(R.string.habitsListTitle),
                 actions = {
+                    IconButton(onClick = onNavigateToGoals) {
+                        Icon(
+                            imageVector = Icons.Outlined.Flag,
+                            contentDescription = stringResource(R.string.goalsTitle),
+                        )
+                    }
                     IconButton(onClick = onNavigateToQuickHabits) {
                         Icon(
                             imageVector = Icons.Outlined.Alarm,

@@ -52,7 +52,9 @@ class NotificationService(private val context: Context) {
                 CHANNEL_QUICK_HABITS,
                 context.getString(R.string.notificationChannelQuickHabitsName),
                 NotificationManager.IMPORTANCE_HIGH
-            ).apply { description = context.getString(R.string.notificationChannelQuickHabitsDesc) },
+            ).apply {
+                description = context.getString(R.string.notificationChannelQuickHabitsDesc)
+            },
             NotificationChannel(
                 CHANNEL_MOTIVATION,
                 context.getString(R.string.notificationChannelMotivationName),
@@ -417,9 +419,13 @@ class NotificationService(private val context: Context) {
             now.plusDays(daysUntil.toLong()).withHour(hour).withMinute(minute).withSecond(0)
                 .withNano(0)
         }
-        // Roll over to the next occurrence if the computed time has already passed, or if the
-        // caller (an already-fired repeating alarm) forces it.
-        if (forceRollover || scheduled.isBefore(now) || !scheduled.isAfter(now)) {
+        // Roll over to the next occurrence if the computed time has already passed. A just-fired
+        // repeating alarm ([forceRollover]) also rolls over when the recomputed time is within the
+        // next minute, so minor clock skew can't re-arm the same occurrence — but a genuinely
+        // future occurrence (the alarm fired late, e.g. after doze) is kept instead of skipped,
+        // otherwise a weekly reminder firing a day late would silently drop a whole week.
+        val rolloverThreshold = if (forceRollover) now.plusMinutes(1) else now
+        if (!scheduled.isAfter(rolloverThreshold)) {
             scheduled = if (weekday == null) scheduled.plusDays(1) else scheduled.plusDays(7)
         }
         return scheduled.toInstant().toEpochMilli()
