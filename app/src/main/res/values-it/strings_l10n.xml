@@ -100,7 +100,6 @@
     <string name="focusStateReady">Pronto a continuare</string>
     <string name="focusStatePaused">In pausa</string>
     <string name="focusStatsEmpty">Completa alcune sessioni di focus per vedere i dati!</string>
-    <string name="focusStatsSectionClockSessions">%1$d sessioni</string>
     <string name="focusStatsSectionClockSubtitle">Tocca un giorno per ispezionare le sue sessioni</string>
     <string name="focusStatsSectionClockTitle">Ritmo di focus giornaliero</string>
     <string name="focusStatsSectionDistractionsEmpty">Nessuna distrazione registrata per questo giorno</string>

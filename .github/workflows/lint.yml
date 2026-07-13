@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# A new push to the same PR/branch supersedes the running lint; cancel it.
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Android Lint
@@ -19,6 +24,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v5
 
       - name: Setup Java
         uses: actions/setup-java@v5

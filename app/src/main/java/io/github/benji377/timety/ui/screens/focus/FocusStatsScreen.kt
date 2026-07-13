@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -76,6 +77,7 @@ import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
@@ -214,9 +216,10 @@ fun FocusStatsScreen(
                             fontWeight = FontWeight.Black
                         )
                         Text(
-                            stringResource(
-                                R.string.focusStatsSectionClockSessions,
-                                clockSessions.size
+                            quantityString(
+                                R.plurals.focusStatsSectionClockSessions,
+                                clockSessions.size,
+                                formatArgs = arrayOf(clockSessions.size),
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -854,7 +857,11 @@ private fun FocusHeatmap(sessions: List<FocusSessionEntity>) {
                 }
             }
             Row(
-                modifier = Modifier.horizontalScroll(scrollState),
+                // horizontalScroll doesn't clip: without this, cells scrolled past the left
+                // edge draw their rounded borders on top of the weekday gutter.
+                modifier = Modifier
+                    .clipToBounds()
+                    .horizontalScroll(scrollState),
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 grid.weeks.forEachIndexed { index, week ->

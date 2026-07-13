@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# A new push to the same PR/branch supersedes the running tests; cancel them.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Unit Tests
@@ -17,6 +22,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v5
 
       - name: Setup Java
         uses: actions/setup-java@v5

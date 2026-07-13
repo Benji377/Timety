@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
@@ -50,6 +51,20 @@ fun TimetyTopBar(
         navigationIcon = navigationIcon,
         actions = actions,
     )
+}
+
+/**
+ * The standard back arrow for [TimetyTopBar]'s navigationIcon slot, with a localized
+ * content description so TalkBack announces it.
+ */
+@Composable
+fun BackNavigationIcon(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(
+            Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = stringResource(R.string.commonBack),
+        )
+    }
 }
 
 /**

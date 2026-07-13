@@ -12,11 +12,26 @@ jobs:
   build_release:
     name: Build Android Release Artifacts
     runs-on: ubuntu-latest
-    permissions: write-all
+    # Build only needs to read the repo; artifacts are uploaded via the artifact API.
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v5
+
+      # Catch launching a release whose version doesn't match the code: an APK built from a
+      # versionName that differs from the tag confuses users and breaks F-Droid matching.
+      - name: Check version matches build.gradle.kts
+        run: |
+          declared=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          if [ "$declared" != "${{ github.event.inputs.version }}" ]; then
+            echo "::error::Input version '${{ github.event.inputs.version }}' does not match versionName '$declared' in app/build.gradle.kts"
+            exit 1
+          fi
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -55,7 +70,11 @@ jobs:
   upload_to_release:
     name: Upload to GitHub Release
     runs-on: ubuntu-latest
-    permissions: write-all
+    # contents to create the release, id-token + attestations for build provenance.
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     needs: [build_release]
     steps:
       - uses: actions/download-artifact@v8

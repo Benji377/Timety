@@ -100,7 +100,6 @@
     <string name="focusStateReady">Bereit</string>
     <string name="focusStatePaused">Pausiert</string>
     <string name="focusStatsEmpty">Schließe einige Fokus-Sitzungen ab, um Daten zu sehen!</string>
-    <string name="focusStatsSectionClockSessions">%1$d Sitzungen</string>
     <string name="focusStatsSectionClockSubtitle">Tippe auf einen Tag, um seine Sitzungen zu prüfen</string>
     <string name="focusStatsSectionClockTitle">Täglicher Fokus-Rhythmus</string>
     <string name="focusStatsSectionDistractionsEmpty">Keine Ablenkungen für diesen Tag protokolliert</string>

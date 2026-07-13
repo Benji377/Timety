@@ -100,7 +100,6 @@
     <string name="focusStateReady">Pronto</string>
     <string name="focusStatePaused">Pausà</string>
     <string name="focusStatsEmpty">Fina n valguna sescions per udëi i dac!</string>
-    <string name="focusStatsSectionClockSessions">%1$d sescions</string>
     <string name="focusStatsSectionClockSubtitle">Clica n di per cialé si sescions</string>
     <string name="focusStatsSectionClockTitle">Ritm de focus al di</string>
     <string name="focusStatsSectionDistractionsEmpty">Deguna distrazions registredes per chësc di</string>
