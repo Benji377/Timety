@@ -102,7 +102,9 @@
     <string name="focusStateReady">Ready to continue</string>
     <string name="focusStatePaused">Paused</string>
     <string name="focusStatsEmpty">Complete some focus sessions to see data!</string>
-    <string name="focusStatsSectionClockSessions">%1$d sessions</string>
+    <plurals name="focusStatsSectionClockSessions">
+        <item quantity="other">%1$d sessions</item>
+    </plurals>
     <string name="focusStatsSectionClockSubtitle">Tap a day to inspect its sessions</string>
     <string name="focusStatsSectionClockTitle">Daily Focus Rhythm</string>
     <string name="focusStatsSectionDistractionsEmpty">No distractions logged for this day</string>
