@@ -1,13 +1,13 @@
 [versions]
 agp = "9.2.1"
 kotlin = "2.4.0"
-ksp = "2.3.2"
+ksp = "2.3.10"
 detekt = "1.23.8"
 
 coreKtx = "1.19.0"
 lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
-composeBom = "2025.06.01"
+composeBom = "2025.12.01"
 materialIconsExtended = "1.7.8"
 glance = "1.1.1"
 navigationCompose = "2.9.8"
