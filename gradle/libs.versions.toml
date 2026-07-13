@@ -25,7 +25,7 @@ espresso = "3.7.0"
 # room-testing 2.8.4 parses the schema JSONs with kotlinx-serialization 1.8.x, but
 # navigation-compose pins the whole group to 1.7.3 (strictly), which crashes
 # MigrationTestHelper; forced onto the androidTest classpath in app/build.gradle.kts.
-kotlinxSerializationForRoomTesting = "1.8.1"
+kotlinxSerializationForRoomTesting = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
