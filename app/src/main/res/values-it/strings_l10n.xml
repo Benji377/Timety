@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate,UnusedResources">
     <string name="appTitle">Timety</string>
+    <string name="globalLabelGoals">Goals</string>
     <string name="globalLabelHabit">Abitudine</string>
     <string name="globalLabelHabits">Abitudini</string>
     <string name="globalLabelTags">Etichette</string>
@@ -24,6 +25,7 @@
     <string name="commonLabelShare">Condividi</string>
     <string name="commonLabelClose">Chiudi</string>
     <string name="commonLabelUndo">Undo</string>
+    <string name="commonLabelOpenSettings">Open Settings</string>
     <string name="commonBack">Indietro</string>
     <string name="commonClear">Cancella</string>
     <string name="commonTimeDone">Completato</string>
@@ -100,11 +102,19 @@
     <string name="focusStateReady">Pronto a continuare</string>
     <string name="focusStatePaused">In pausa</string>
     <string name="focusStatsEmpty">Completa alcune sessioni di focus per vedere i dati!</string>
+    <plurals name="focusStatsSectionClockSessions">
+        <item quantity="one">%1$d session</item>
+        <item quantity="other">%1$d sessions</item>
+    </plurals>
     <string name="focusStatsSectionClockSubtitle">Tocca un giorno per ispezionare le sue sessioni</string>
     <string name="focusStatsSectionClockTitle">Ritmo di focus giornaliero</string>
     <string name="focusStatsSectionDistractionsEmpty">Nessuna distrazione registrata per questo giorno</string>
     <string name="focusStatsSectionDistractionsSubtitle">Giorno selezionato, distrazioni più recenti per prime</string>
     <string name="focusStatsSectionDistractionsTitle">Distrazioni</string>
+    <string name="focusStatsHeatmapLess">Less</string>
+    <string name="focusStatsHeatmapMore">More</string>
+    <string name="focusStatsSectionHeatmapSubtitle">Daily focus minutes over the last year</string>
+    <string name="focusStatsSectionHeatmapTitle">Focus Contribution</string>
     <string name="focusStatsSectionSessionsEmpty">Nessuna sessione di focus per questo giorno</string>
     <string name="focusStatsSectionSessionsSubtitle">Ogni sessione mostra il target esatto e la modalità di focus</string>
     <string name="focusStatsSectionSessionsTitle">Sessioni di focus</string>
@@ -127,6 +137,51 @@
     <string name="focusTargetEmpty">Nessun target</string>
     <string name="focusTargetUntagged">Senza etichetta</string>
     <string name="focusTitle">Focus</string>
+    <string name="goalCompletedOn">Completed %1$s</string>
+    <plurals name="goalDaysLeft">
+        <item quantity="one">1 day left</item>
+        <item quantity="other">%d days left</item>
+    </plurals>
+    <plurals name="goalDaysOverdue">
+        <item quantity="one">1 day overdue</item>
+        <item quantity="other">%d days overdue</item>
+    </plurals>
+    <string name="goalDeleteContent">Are you sure you want to delete this goal and its progress log?</string>
+    <string name="goalDeleteTitle">Delete Goal</string>
+    <string name="goalDetailEntriesEmpty">No progress logged yet</string>
+    <string name="goalDetailEntriesTitle">Progress Log</string>
+    <string name="goalDetailLabelColor">Color</string>
+    <string name="goalDetailLabelColorPicker">Choose a Color</string>
+    <string name="goalDetailLabelDeadline">Deadline</string>
+    <string name="goalDetailLabelDescription">Description</string>
+    <string name="goalDetailLabelDescriptionHint">Why does this goal matter?</string>
+    <string name="goalDetailLabelIcon">Select an Icon</string>
+    <string name="goalDetailLabelName">Goal Name</string>
+    <string name="goalDetailLabelNameHint">e.g., Ride 500 km, Read 12 books…</string>
+    <string name="goalDetailLabelNameRequest">Please enter a name</string>
+    <string name="goalDetailLabelTarget">Target</string>
+    <string name="goalDetailLabelTargetRequest">Please enter a target of at least 1</string>
+    <string name="goalDetailLabelUnit">Unit</string>
+    <string name="goalDetailLabelUnitHint">km, books, hours…</string>
+    <string name="goalDetailLabelUnitRequest">Please enter a unit</string>
+    <string name="goalDetailTitleEdit">Edit Goal</string>
+    <string name="goalDetailTitleNew">New Goal</string>
+    <string name="goalDetailTitleView">Goal Details</string>
+    <string name="goalDueToday">Due today</string>
+    <string name="goalEntryDeleteContent">Remove this progress entry?</string>
+    <string name="goalEntryDeleteTitle">Remove Entry</string>
+    <string name="goalEntryDialogLabelDate">Logged at</string>
+    <string name="goalEntryDialogLabelValue">Amount</string>
+    <string name="goalEntryDialogTitle">Log Progress</string>
+    <string name="goalPaceAhead">Ahead by %1$d %2$s</string>
+    <string name="goalPaceBehind">Behind by %1$d %2$s</string>
+    <string name="goalPaceOnTrack">On track</string>
+    <string name="goalProgressLabel">%1$d / %2$d %3$s</string>
+    <string name="goalsEmpty">No goals yet! Set a target and start logging progress</string>
+    <string name="goalsLabelAdd">Add New Goal</string>
+    <string name="goalsLabelLogProgress">Log progress</string>
+    <string name="goalsSectionCompleted">Completed</string>
+    <string name="goalsTitle">Goals</string>
     <string name="habitDeleteContent">Sei sicuro di voler eliminare questa abitudine?</string>
     <string name="habitDeleteTitle">Elimina abitudine</string>
     <string name="habitDetailLabelFrequency">Frequenza</string>
@@ -243,6 +298,11 @@
     <string name="taskReminderPrefixNow">Ora: </string>
     <string name="taskReminderTitle">Promemoria: %1$s</string>
     <string name="taskSheetEmpty">Nessuna attività disponibile</string>
+    <string name="taskStatsCalibrationEmpty">No sized tasks with focus time yet</string>
+    <string name="taskStatsCalibrationHighSpread">Your %1$s tasks vary a lot in actual time</string>
+    <string name="taskStatsCalibrationOrderingViolation">Your %1$s tasks take less time than %2$s ones</string>
+    <string name="taskStatsCalibrationSubtitle">Average focus time by task size, counting only tasks used as a focus target</string>
+    <string name="taskStatsCalibrationTitle">Estimation Calibration</string>
     <string name="taskStatsCategoryUncategorized">Senza categoria</string>
     <string name="taskStatsCategoryUnused">Nessuna categoria usata</string>
     <string name="taskStatsCompleted">Completato</string>
@@ -277,6 +337,15 @@
     <string name="statsLabelProductivity">Sinergia di produttività</string>
     <string name="statsLabelSummary">Riepilogo di oggi</string>
     <string name="statsLabelSynergy">Tempo di focus vs Completamento attività (Ultimi 7 giorni)</string>
+    <string name="statsDayQualityTitle">Day Quality</string>
+    <string name="statsDayQualitySubtitle">How your rated days compare</string>
+    <string name="statsDayQualityEmpty">Rate your day from the evening checkup notification to see how your good days differ.</string>
+    <string name="statsDayQualityAverage">Average rating</string>
+    <string name="statsDayQualityRowStats">%1$d min focus · %2$d tasks per day</string>
+    <plurals name="statsDayQualityDays">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="statsLabelTasksDone">Attività completate</string>
     <string name="statsTabFocus">Focus</string>
     <string name="statsTabHabits">Abitudini</string>
@@ -288,6 +357,12 @@
     <string name="settingsLabelBuiltBy">Creato da Benji377</string>
     <string name="settingsLabelCategories">Categorie attività</string>
     <string name="settingsLabelCategoriesSubtitle">%1$d categorie</string>
+    <string name="settingsDndPermissionDialogContent">Timety needs Do Not Disturb access to silence notifications during focus sessions. You\'ll be taken to system settings to grant it.</string>
+    <string name="settingsDndPermissionDialogTitle">Allow Do Not Disturb Access</string>
+    <string name="settingsLabelAutoDnd">Auto Do Not Disturb</string>
+    <string name="settingsLabelAutoDndLiftBreaks">Lift During Breaks</string>
+    <string name="settingsLabelAutoDndLiftBreaksSubtitle">Restore notifications while resting between phases</string>
+    <string name="settingsLabelAutoDndSubtitle">Silences notifications automatically during focus sessions</string>
     <string name="settingsLabelCommunity">Community e Aiuto</string>
     <string name="settingsLabelCommunitySubtitle">Fai domande e condividi consigli su GitHub</string>
     <string name="settingsLabelDailyMotivation">Orario per motivazione giornaliera</string>
@@ -313,6 +388,8 @@
     <string name="settingsLabelFocusStopwatchSubtitle">Evita di lasciare accidentalmente il timer acceso</string>
     <string name="settingsLabelImportData">Importa dati JSON</string>
     <string name="settingsLabelImportDataSubtitle">Ripristina i dati da un file di esportazione JSON</string>
+    <string name="settingsLabelKeepScreenOn">Keep Screen On</string>
+    <string name="settingsLabelKeepScreenOnSubtitle">Prevents the screen from sleeping during an active session</string>
     <string name="settingsLabelLanguage">Lingua</string>
     <string name="settingsLabelLanguageSystem">Predefinita di sistema</string>
     <string name="settingsLabelLocationApi">API di ricerca luoghi</string>
@@ -339,6 +416,8 @@
     <string name="settingsSectionOrganization">Organizzazione</string>
     <string name="settingsSectionSupport">Supporto e Feedback</string>
     <string name="settingsTitle">Impostazioni</string>
+    <string name="shortcutNewTask">New Task</string>
+    <string name="shortcutStartFocus">Start Focus</string>
     <string name="userEditNameHint">Inserisci il tuo nome</string>
     <string name="userEditNameTitle">Modifica nome</string>
     <string name="userErrorGenerateImage">Errore durante la generazione dell\'immagine di riepilogo.</string>
@@ -371,6 +450,9 @@
     <string name="backupShareFailure">Condivisione fallita: %1$s</string>
     <string name="notificationChannelEveningDesc">Promemoria di fine giornata per registrare le abitudini</string>
     <string name="notificationChannelEveningName">Controllo serale</string>
+    <string name="dayRatingBad">Bad</string>
+    <string name="dayRatingOk">OK</string>
+    <string name="dayRatingGreat">Great</string>
     <string name="notificationChannelFocusDesc">Notifica persistente per sessioni di focus attive</string>
     <string name="notificationChannelFocusName">Timer di focus attivo</string>
     <string name="notificationChannelHabitsDesc">Promemoria con orari specifici per le tue abitudini</string>
@@ -470,6 +552,7 @@
     <string name="xpBreakdownLevel">Livello %1$d | %2$s</string>
     <string name="xpBreakdownProgress">%1$d XP totali | %2$d XP al prossimo livello</string>
     <string name="xpSourceFocusDesc">Ogni minuto di focus aggiunge</string>
+    <string name="xpSourceGoalDesc">Each completed goal adds</string>
     <string name="xpSourceHabitDesc">Ogni abitudine completata aggiunge</string>
     <string name="xpSourceTaskDesc">Ogni attività completata aggiunge</string>
     <string name="xpSourceValue">+%1$d XP</string>
