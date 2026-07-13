@@ -359,7 +359,7 @@ class ScreenshotTest {
         )
 
         // --- User profile ---
-        // Same formula as the Flutter test: XP as if the seeded activity was done in-app.
+        // XP as if the seeded activity had been done in-app.
         val completedTasks = 1
         val habitCompletions = 4
         val focusMinutes = 45 + 40 + 30

@@ -2,7 +2,6 @@ package io.github.benji377.timety.ui.screens.goal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,20 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,8 +49,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
-import io.github.benji377.timety.ui.components.common.ColorSwatchGrid
+import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.IconPickerDialog
+import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -97,7 +95,11 @@ fun GoalDetailScreen(
     // Form state.
     var name by remember(existingGoal?.id) { mutableStateOf(existingGoal?.name ?: "") }
     var nameError by remember { mutableStateOf(false) }
-    var description by remember(existingGoal?.id) { mutableStateOf(existingGoal?.description ?: "") }
+    var description by remember(existingGoal?.id) {
+        mutableStateOf(
+            existingGoal?.description ?: ""
+        )
+    }
     var targetValueText by remember(existingGoal?.id) {
         mutableStateOf(existingGoal?.targetValue?.toString() ?: "")
     }
@@ -172,22 +174,12 @@ fun GoalDetailScreen(
                     }
                 },
                 actions = {
-                    if (!isEditing && !isNewGoal) {
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                Icons.Filled.DeleteOutline,
-                                stringResource(R.string.commonLabelDelete),
-                                tint = ErrorColor
-                            )
-                        }
-                        IconButton(onClick = { isEditing = true }) {
-                            Icon(Icons.Filled.Edit, "Edit")
-                        }
-                    } else {
-                        IconButton(onClick = { saveGoal() }) {
-                            Icon(Icons.Filled.Check, stringResource(R.string.commonLabelSave))
-                        }
-                    }
+                    DetailTopBarActions(
+                        isViewing = !isEditing && !isNewGoal,
+                        onDelete = { showDeleteDialog = true },
+                        onEdit = { isEditing = true },
+                        onSave = { saveGoal() },
+                    )
                 }
             )
         },
@@ -375,7 +367,8 @@ fun GoalDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
                 }
-                val sortedEntries = existingGoalWithEntries.entries.sortedByDescending { it.timestamp }
+                val sortedEntries =
+                    existingGoalWithEntries.entries.sortedByDescending { it.timestamp }
                 if (sortedEntries.isEmpty()) {
                     item {
                         Text(
@@ -397,81 +390,37 @@ fun GoalDetailScreen(
             }
         }
 
-        // Icon picker dialog.
         if (showIconPicker) {
-            AlertDialog(
-                onDismissRequest = { showIconPicker = false },
-                title = { Text(stringResource(R.string.goalDetailLabelIcon)) },
-                text = {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(5),
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
-                        modifier = Modifier.height(300.dp),
-                    ) {
-                        items(HabitIcons.availableIcons.size) { index ->
-                            val isSelected = index == selectedIconIndex
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        color = if (isSelected) selectedColor.copy(alpha = 0.2f) else Color.Transparent,
-                                        shape = CircleShape,
-                                    )
-                                    .clickable {
-                                        selectedIconIndex = index
-                                        showIconPicker = false
-                                    },
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    imageVector = HabitIcons.availableIcons[index],
-                                    contentDescription = null,
-                                    tint = if (isSelected) selectedColor else MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
-                        }
-                    }
+            IconPickerDialog(
+                title = stringResource(R.string.goalDetailLabelIcon),
+                selectedIconIndex = selectedIconIndex,
+                accentColor = selectedColor,
+                onSelect = {
+                    selectedIconIndex = it
+                    showIconPicker = false
                 },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showIconPicker = false
-                    }) { Text(stringResource(R.string.commonLabelCancel)) }
-                },
+                onDismiss = { showIconPicker = false },
             )
         }
 
-        // Color picker dialog.
         if (showColorPicker) {
-            AlertDialog(
-                onDismissRequest = { showColorPicker = false },
-                title = { Text(stringResource(R.string.goalDetailLabelColorPicker)) },
-                text = {
-                    ColorSwatchGrid(
-                        colors = GOAL_DETAIL_COLORS,
-                        selectedColor = selectedColor,
-                        onSelect = {
-                            selectedColor = it
-                            showColorPicker = false
-                        },
-                        modifier = Modifier.height(220.dp),
-                        columns = 4,
-                        swatchSize = 40.dp,
-                        spacing = AppTheme.spaceLarge,
-                    )
+            ColorPickerDialog(
+                title = stringResource(R.string.goalDetailLabelColorPicker),
+                colors = GOAL_DETAIL_COLORS,
+                selectedColor = selectedColor,
+                onSelect = {
+                    selectedColor = it
+                    showColorPicker = false
                 },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showColorPicker = false
-                    }) { Text(stringResource(R.string.commonLabelCancel)) }
-                },
+                onDismiss = { showColorPicker = false },
             )
         }
 
         // Deadline picker dialog. The deadline is a whole day, stored as its end so pacing and
         // days-left treat the chosen date as still "in time".
         if (showDatePicker) {
-            val state = rememberDatePickerState(initialSelectedDateMillis = targetDate.toEpochMilli())
+            val state =
+                rememberDatePickerState(initialSelectedDateMillis = targetDate.toEpochMilli())
             DatePickerDialog(
                 onDismissRequest = { showDatePicker = false },
                 confirmButton = {
@@ -542,34 +491,5 @@ private fun EntryRow(
                 modifier = Modifier.size(20.dp),
             )
         }
-    }
-}
-
-
-@Composable
-private fun PickerField(
-    label: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Box(modifier = modifier) {
-        // The field itself follows [enabled] so it picks up the normal enabled/disabled
-        // styling (surface vs. transparent background); the overlay box catches taps.
-        OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            readOnly = true,
-            enabled = enabled,
-            label = { Text(label) },
-            leadingIcon = { Box(contentAlignment = Alignment.Center) { content() } },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable(enabled = enabled) { onClick() },
-        )
     }
 }

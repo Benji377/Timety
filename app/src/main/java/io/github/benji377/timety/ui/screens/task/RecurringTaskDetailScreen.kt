@@ -26,10 +26,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -37,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -70,9 +66,11 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
+import io.github.benji377.timety.ui.components.task.ReminderOptionInput
 import io.github.benji377.timety.ui.components.task.readOnlyFieldColors
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
@@ -241,25 +239,12 @@ fun RecurringTaskDetailScreen(
                     }
                 },
                 actions = {
-                    if (!isEditing && !isNew) {
-                        IconButton(onClick = { showDeleteConfirm = true }) {
-                            Icon(
-                                Icons.Filled.DeleteOutline,
-                                contentDescription = stringResource(R.string.commonLabelDelete),
-                                tint = ErrorColor
-                            )
-                        }
-                        IconButton(onClick = { isEditing = true }) {
-                            Icon(Icons.Filled.Edit, contentDescription = null)
-                        }
-                    } else {
-                        IconButton(onClick = { save() }) {
-                            Icon(
-                                Icons.Filled.Check,
-                                contentDescription = stringResource(R.string.commonLabelSave)
-                            )
-                        }
-                    }
+                    DetailTopBarActions(
+                        isViewing = !isEditing && !isNew,
+                        onDelete = { showDeleteConfirm = true },
+                        onEdit = { isEditing = true },
+                        onSave = { save() },
+                    )
                 }
             )
         }
@@ -319,7 +304,7 @@ fun RecurringTaskDetailScreen(
                     OutlinedTextField(
                         value = dueDate?.let {
                             "${AppDateFormatUtils.formatDate(it, dateFmt.dateFormatCode)} " +
-                                AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
+                                    AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
                         } ?: "",
                         onValueChange = {},
                         enabled = false,
@@ -400,8 +385,8 @@ fun RecurringTaskDetailScreen(
                             dueLocalDate.dayOfMonth
                         ),
                         selected = monthlyChoice == MonthlyChoice.DAY_OF_MONTH ||
-                            (monthlyChoice == MonthlyChoice.NTH_WEEKDAY && nthOrdinal == null) ||
-                            (monthlyChoice == MonthlyChoice.LAST_WEEKDAY && !lastAvailable),
+                                (monthlyChoice == MonthlyChoice.NTH_WEEKDAY && nthOrdinal == null) ||
+                                (monthlyChoice == MonthlyChoice.LAST_WEEKDAY && !lastAvailable),
                         enabled = isEditing,
                         onSelect = { monthlyChoice = MonthlyChoice.DAY_OF_MONTH },
                     )
@@ -443,7 +428,7 @@ fun RecurringTaskDetailScreen(
                     Spacer(Modifier.height(AppTheme.spaceSmall))
                 }
                 if (isEditing) {
-                    ReminderOffsetInput(
+                    ReminderOptionInput(
                         selected = selectedReminderOption,
                         onSelectedChange = { selectedReminderOption = it },
                         onAdd = {
@@ -452,6 +437,8 @@ fun RecurringTaskDetailScreen(
                                 reminderOffsets = (reminderOffsets + minutes).sorted()
                             }
                         },
+                        // Offsets are always relative to the due date; CUSTOM has no offset.
+                        includeCustom = false,
                     )
                     Spacer(Modifier.height(AppTheme.spaceSmall))
                 }
@@ -647,48 +634,6 @@ private fun OccurrenceRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReminderOffsetInput(
-    selected: ReminderOption,
-    onSelectedChange: (ReminderOption) -> Unit,
-    onAdd: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = it },
-            modifier = Modifier.weight(1f)
-        ) {
-            OutlinedTextField(
-                value = reminderOffsetOptionLabel(selected),
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(stringResource(R.string.taskDetailsLabelReminderSet)) },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    .fillMaxWidth()
-            )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                // CUSTOM picks an absolute time on plain tasks; offsets are always relative here.
-                ReminderOption.entries.filter { it != ReminderOption.CUSTOM }.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(reminderOffsetOptionLabel(option)) },
-                        onClick = {
-                            onSelectedChange(option)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.width(AppTheme.spaceSmall))
-        Button(onClick = onAdd) { Text(stringResource(R.string.commonLabelAdd)) }
-    }
-}
-
 /** The relative offset in minutes an option stands for; null for [ReminderOption.CUSTOM]. */
 private fun reminderOptionOffsetMinutes(option: ReminderOption): Int? = when (option) {
     ReminderOption.ON_TIME -> 0
@@ -696,15 +641,6 @@ private fun reminderOptionOffsetMinutes(option: ReminderOption): Int? = when (op
     ReminderOption.HOUR_1_BEFORE -> 60
     ReminderOption.DAY_1_BEFORE -> 24 * 60
     ReminderOption.CUSTOM -> null
-}
-
-@Composable
-private fun reminderOffsetOptionLabel(option: ReminderOption): String = when (option) {
-    ReminderOption.ON_TIME -> stringResource(R.string.taskDetailsReminderOptionOnce)
-    ReminderOption.MINUTES_30_BEFORE -> stringResource(R.string.taskDetailsReminderOptionHalfHour)
-    ReminderOption.HOUR_1_BEFORE -> stringResource(R.string.taskDetailsReminderOptionHour)
-    ReminderOption.DAY_1_BEFORE -> stringResource(R.string.taskDetailsReminderOptionDay)
-    ReminderOption.CUSTOM -> stringResource(R.string.taskDetailsReminderOptionCustom)
 }
 
 /** The chip label for a stored offset; known values reuse the option labels. */

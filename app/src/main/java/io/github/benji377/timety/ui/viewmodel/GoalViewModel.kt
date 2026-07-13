@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 
 /** Exposes goals with their progress entries, and owns the completion/XP transitions for them. */
@@ -65,12 +67,16 @@ class GoalViewModel(
         }
     }
 
+    // Serializes the read-check-write below: two overlapping syncs could otherwise both see
+    // "target newly reached" and award the goal XP twice.
+    private val syncMutex = Mutex()
+
     /**
      * Single owner of both completion transitions - reaching the target sets [GoalEntity.completedAt]
      * and awards the XP, dropping back below clears it and reverts the XP - so the two can't diverge.
      */
-    private suspend fun syncCompletionState(goalId: String) {
-        val goalWithEntries = goalRepository.getGoalWithEntriesById(goalId) ?: return
+    private suspend fun syncCompletionState(goalId: String) = syncMutex.withLock {
+        val goalWithEntries = goalRepository.getGoalWithEntriesById(goalId) ?: return@withLock
         val goal = goalWithEntries.goal
         val targetReached = goalWithEntries.progress >= goal.targetValue
         when {

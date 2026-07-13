@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,15 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
-import io.github.benji377.timety.ui.components.common.ColorSwatchGrid
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.NamedColorEditDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -58,7 +54,6 @@ import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.components.common.TimetyButton as Button
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -177,23 +172,35 @@ fun TaskCategoriesScreen(
     }
 
     if (showAddDialog) {
-        CategoryEditDialog(
-            initialCategory = null,
-            onDismiss = { showAddDialog = false },
+        NamedColorEditDialog(
+            title = stringResource(R.string.categoryAddLabel),
+            nameLabel = stringResource(R.string.categoryNameLabel),
+            colorLabel = stringResource(R.string.categoryColorLabel),
+            confirmLabel = stringResource(R.string.categoryAddLabel),
+            initialName = "",
+            initialColor = TaskColor,
+            colors = CATEGORY_COLORS,
             onConfirm = { name, colorValue ->
                 taskViewModel.createCategory(name, colorValue)
                 showAddDialog = false
             },
+            onDismiss = { showAddDialog = false },
         )
     }
     categoryDialogTarget?.let { category ->
-        CategoryEditDialog(
-            initialCategory = category,
-            onDismiss = { categoryDialogTarget = null },
+        NamedColorEditDialog(
+            title = stringResource(R.string.categoryEditTitle),
+            nameLabel = stringResource(R.string.categoryNameLabel),
+            colorLabel = stringResource(R.string.categoryColorLabel),
+            confirmLabel = stringResource(R.string.commonLabelSave),
+            initialName = category.name,
+            initialColor = Color(category.colorValue),
+            colors = CATEGORY_COLORS,
             onConfirm = { name, colorValue ->
                 taskViewModel.updateCategory(category, name, colorValue)
                 categoryDialogTarget = null
             },
+            onDismiss = { categoryDialogTarget = null },
         )
     }
 
@@ -209,66 +216,6 @@ fun TaskCategoriesScreen(
             categoryPendingDelete = null
         },
         onDismiss = { categoryPendingDelete = null }
-    )
-}
-
-@Composable
-private fun CategoryEditDialog(
-    initialCategory: TaskCategoryEntity?,
-    onDismiss: () -> Unit,
-    onConfirm: (name: String, colorValue: Int) -> Unit,
-) {
-    val isEditing = initialCategory != null
-    var name by remember { mutableStateOf(initialCategory?.name ?: "") }
-    var selectedColor by remember {
-        mutableStateOf(initialCategory?.let { Color(it.colorValue) } ?: TaskColor)
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                if (isEditing) stringResource(R.string.categoryEditTitle)
-                else stringResource(R.string.categoryAddLabel)
-            )
-        },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.categoryNameLabel)) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                Text(stringResource(R.string.categoryColorLabel))
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                ColorSwatchGrid(
-                    colors = CATEGORY_COLORS,
-                    selectedColor = selectedColor,
-                    onSelect = { selectedColor = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp),
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-        },
-        confirmButton = {
-            Button(onClick = {
-                val trimmed = name.trim()
-                if (trimmed.isNotEmpty()) {
-                    onConfirm(trimmed, selectedColor.toArgb())
-                }
-            }) {
-                Text(
-                    if (isEditing) stringResource(R.string.commonLabelSave)
-                    else stringResource(R.string.categoryAddLabel)
-                )
-            }
-        },
     )
 }
 

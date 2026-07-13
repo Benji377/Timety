@@ -70,8 +70,8 @@ class FocusViewModel(
 
 
     // A single live query over the distractions table joined in memory with the sessions list.
-    // The previous flatMapLatest+combine version opened one Room flow PER session, which meant
-    // hundreds of concurrent live queries once real usage history accumulated.
+    // Joining per session instead would open one Room flow PER session — hundreds of concurrent
+    // live queries once real usage history accumulates.
     val allDistractions: StateFlow<List<DistractionWithSession>> = combine(
         focusRepository.allSessions,
         focusRepository.allDistractions
@@ -170,6 +170,7 @@ class FocusViewModel(
                     val durationMinutes = durationSeconds / 60
                     if (durationMinutes > 0) {
                         userRepository.addXp(durationMinutes * ExperienceEngine.XP_PER_FOCUS_MINS)
+                        sessionXpAwardedMinutes += durationMinutes
                     }
                     sessionAccumulatedFocusSeconds += durationSeconds
 
@@ -260,6 +261,10 @@ class FocusViewModel(
     }
 
     private var sessionAccumulatedFocusSeconds: Int = 0
+
+    // Focus minutes already converted to XP by completed phases, so the remainder (stopwatch
+    // time, a phase stopped midway) can be awarded at log time without double-paying.
+    private var sessionXpAwardedMinutes: Int = 0
     private var sessionStartTime: Instant? = null
     private val pendingDistractions = mutableListOf<DistractionEntity>()
 
@@ -302,14 +307,22 @@ class FocusViewModel(
                 targetLabel = target?.label,
             )
             val distractionsToLog = pendingDistractions.toList()
+            // Stopwatch time and a phase stopped midway never pass through phaseCompleteEvent,
+            // so their focus minutes would otherwise earn none of the advertised per-minute XP.
+            val unawardedMinutes =
+                sessionAccumulatedFocusSeconds / 60 - sessionXpAwardedMinutes
 
             viewModelScope.launch {
                 focusRepository.insertSession(sessionToLog)
                 distractionsToLog.forEach { focusRepository.insertDistraction(it) }
+                if (unawardedMinutes > 0) {
+                    userRepository.addXp(unawardedMinutes * ExperienceEngine.XP_PER_FOCUS_MINS)
+                }
             }
         }
         pendingDistractions.clear()
         sessionAccumulatedFocusSeconds = 0
+        sessionXpAwardedMinutes = 0
         sessionStartTime = null
         activeSessionModeId = null
         resetCurrentSession()
@@ -319,6 +332,7 @@ class FocusViewModel(
     fun discardSession() {
         pendingDistractions.clear()
         sessionAccumulatedFocusSeconds = 0
+        sessionXpAwardedMinutes = 0
         sessionStartTime = null
         activeSessionModeId = null
         resetCurrentSession()

@@ -100,6 +100,15 @@ class BackupService(
     /** Restores an already-parsed backup payload; also used when importing legacy backups. */
     suspend fun importFromJson(json: JSONObject): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
+            // Restoring clears every table before inserting, so an arbitrary JSON file that
+            // merely parses must be rejected up front or it would wipe all data and "succeed".
+            // Legacy backups carry no payloadType, so any recognized data key also passes.
+            val declaredType = json.optString("payloadType", "")
+            val looksLikeBackup = declaredType == PAYLOAD_TYPE ||
+                    (declaredType.isEmpty() && KNOWN_DATA_KEYS.any { json.has(it) })
+            if (!looksLikeBackup) {
+                error("Not a Timety backup file.")
+            }
             val schemaVersion = json.optInt("schemaVersion", SCHEMA_VERSION)
             if (schemaVersion > SCHEMA_VERSION) {
                 error("This backup was created by a newer version of Timety and cannot be imported.")
@@ -805,5 +814,11 @@ class BackupService(
     companion object {
         private const val SCHEMA_VERSION = 1
         private const val PAYLOAD_TYPE = "user_data"
+
+        /** Top-level keys that identify a payload (including legacy ones) as a Timety backup. */
+        private val KNOWN_DATA_KEYS = listOf(
+            "tasks", "taskCategories", "recurringTasks", "habits", "quickHabits",
+            "goals", "dayRatings", "focus", "userProfile", "preferences",
+        )
     }
 }
