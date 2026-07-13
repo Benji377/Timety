@@ -28,13 +28,13 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -71,7 +71,9 @@ import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
-import io.github.benji377.timety.ui.components.task.readOnlyFieldColors
+import io.github.benji377.timety.ui.components.common.detailFieldColors
+import io.github.benji377.timety.ui.components.common.detailFilterChipColors
+import io.github.benji377.timety.ui.components.common.detailSegmentedButtonColors
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -312,7 +314,7 @@ fun RecurringTaskDetailScreen(
                         label = { Text(stringResource(R.string.recurringTaskLabelNextDue) + " *") },
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
-                        colors = readOnlyFieldColors(isEditing)
+                        colors = detailFieldColors(isEditing)
                     )
                 }
                 Spacer(Modifier.height(AppTheme.spaceLarge))
@@ -332,6 +334,7 @@ fun RecurringTaskDetailScreen(
                                 count = RecurrenceUnit.entries.size
                             ),
                             enabled = isEditing,
+                            colors = detailSegmentedButtonColors(),
                         ) { Text(recurrenceUnitName(option)) }
                     }
                 }
@@ -369,9 +372,7 @@ fun RecurringTaskDetailScreen(
                                         else selectedWeekdays + day
                                 },
                                 label = { Text(weekdayShortName(day)) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = TaskColor.copy(alpha = 0.3f),
-                                ),
+                                colors = detailFilterChipColors(TaskColor),
                             )
                         }
                     }
@@ -593,7 +594,17 @@ private fun MonthlyChoiceOption(
             .clickable(enabled = enabled, onClick = onSelect),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RadioButton(selected = selected, onClick = onSelect, enabled = enabled)
+        RadioButton(
+            selected = selected,
+            onClick = onSelect,
+            enabled = enabled,
+            // The selection is the value: keep it readable in view mode instead of the 38%
+            // Material disabled fade; the label text next to it never fades either.
+            colors = RadioButtonDefaults.colors(
+                disabledSelectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledUnselectedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        )
         Text(label)
     }
 }

@@ -27,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,6 +50,7 @@ import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.PickerField
@@ -295,13 +295,7 @@ fun GoalDetailScreen(
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledContainerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
-                            disabledTextColor = if (isEditing) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                            disabledBorderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
-                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            disabledLeadingIconColor = if (isEditing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outlineVariant,
-                        ),
+                        colors = detailFieldColors(isEditing),
                     )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))

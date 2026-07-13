@@ -30,12 +30,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -65,6 +63,9 @@ import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.detailFieldColors
+import io.github.benji377.timety.ui.components.common.detailFilterChipColors
+import io.github.benji377.timety.ui.components.common.detailSegmentedButtonColors
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.PickerField
@@ -402,14 +403,7 @@ fun HabitDetailScreen(
                     fontWeight = AppTheme.fwBold
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                val segmentedColors = SegmentedButtonDefaults.colors(
-                    disabledActiveContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    disabledActiveContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    disabledInactiveContainerColor = Color.Transparent,
-                    disabledInactiveContentColor = MaterialTheme.colorScheme.onSurface,
-                    disabledActiveBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                    disabledInactiveBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                )
+                val segmentedColors = detailSegmentedButtonColors()
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     SegmentedButton(
                         selected = frequency == HabitFrequency.DAILY,
@@ -471,6 +465,10 @@ fun HabitDetailScreen(
                                 colors = SliderDefaults.colors(
                                     thumbColor = selectedColor,
                                     activeTrackColor = selectedColor,
+                                    // The slider position IS the value: keep it readable in view
+                                    // mode; the muted card chrome already signals inactive.
+                                    disabledThumbColor = selectedColor,
+                                    disabledActiveTrackColor = selectedColor,
                                 ),
                             )
                         }
@@ -513,9 +511,7 @@ fun HabitDetailScreen(
                                             if (isSelected) selectedWeekdays - day else selectedWeekdays + day
                                     },
                                     label = { Text(label) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = selectedColor.copy(alpha = 0.3f),
-                                    ),
+                                    colors = detailFilterChipColors(selectedColor),
                                 )
                             }
                         }
@@ -548,12 +544,7 @@ fun HabitDetailScreen(
                         leadingIcon = { Icon(Icons.Filled.NotificationsActive, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledContainerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
-                            disabledTextColor = if (isEditing) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                            disabledBorderColor = if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant,
-                            disabledLeadingIconColor = if (isEditing) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.outlineVariant,
-                        ),
+                        colors = detailFieldColors(isEditing),
                     )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))

@@ -94,7 +94,7 @@ import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
-import io.github.benji377.timety.ui.components.task.readOnlyFieldColors
+import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.screens.LocationPickerScreen
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -393,7 +393,7 @@ fun TaskDetailScreen(
                         label = { Text(stringResource(R.string.taskDetailsLabelDueDateSet)) },
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
-                        colors = readOnlyFieldColors(isEditing)
+                        colors = detailFieldColors(isEditing)
                     )
                 }
 
@@ -721,7 +721,8 @@ private fun SectionHeader(title: String, icon: ImageVector) {
 
 /**
  * Segmented selector where the selected segment expands to show its label; the rest stay
- * icon-only. Disabled (non-editing) segments render dimmed and ignore taps.
+ * icon-only. In view mode (non-editing) the selection stays readable but the container and
+ * border render muted, and taps are ignored.
  */
 @Composable
 private fun <T> AccordionSelector(
@@ -786,9 +787,9 @@ private fun <T> AccordionSelector(
                         text = labelBuilder(value),
                         modifier = Modifier.padding(start = 8.dp),
                         fontWeight = FontWeight.Bold,
-                        color = if (isEditing) activeTextColor else MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.38f
-                        ),
+                        // View mode keeps the label readable; the muted container and
+                        // border already signal that the selector is inactive.
+                        color = if (isEditing) activeTextColor else MaterialTheme.colorScheme.onSurface,
                         fontSize = 11.sp,
                         letterSpacing = 0.5.sp
                     )

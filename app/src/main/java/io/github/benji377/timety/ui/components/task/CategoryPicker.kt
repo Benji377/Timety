@@ -18,9 +18,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
@@ -39,29 +36,6 @@ import io.github.benji377.timety.ui.theme.InfoColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
-
-/**
- * Outlined-text-field colors for values that are shown but not typed into: readable "disabled"
- * styling while editing, and plain transparent fields in view mode.
- */
-@Composable
-fun readOnlyFieldColors(isEditing: Boolean) = if (isEditing) {
-    OutlinedTextFieldDefaults.colors(
-        disabledContainerColor = MaterialTheme.colorScheme.surface,
-        disabledTextColor = MaterialTheme.colorScheme.onSurface,
-        disabledBorderColor = MaterialTheme.colorScheme.outline,
-        disabledLeadingIconColor = MaterialTheme.colorScheme.primary,
-        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-} else {
-    OutlinedTextFieldDefaults.colors(
-        focusedContainerColor = MaterialTheme.colorScheme.surface,
-        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-        disabledContainerColor = Color.Transparent,
-        errorContainerColor = MaterialTheme.colorScheme.surface
-    )
-}
 
 /**
  * Category selector shared by the task and recurring-task detail screens: a dropdown over
@@ -95,7 +69,6 @@ fun CategoryPicker(
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.taskDetailsLabelCategory)) },
             leadingIcon = categoryLeadingIcon,
-            colors = readOnlyFieldColors(isEditing = false)
         )
         return
     }
