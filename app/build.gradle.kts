@@ -1,7 +1,8 @@
 plugins {
-    id("com.android.application")
-    id("com.google.devtools.ksp")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -93,6 +94,13 @@ android {
         // Translations are managed on Crowdin and land asynchronously; a key missing from one
         // locale falls back to English at runtime and must not fail the build.
         warning += "MissingTranslation"
+        // Renovate owns dependency updates; lint re-reporting newer versions is just noise
+        // that accumulates until the next Renovate merge.
+        disable += listOf("GradleDependency", "NewerVersionAvailable")
+        // Pre-existing findings (mostly compose-lints style rules on code that predates them)
+        // are frozen here; lint only fails on issues introduced afterwards. Regenerate with:
+        // rm app/lint-baseline.xml && ./gradlew :app:lintDebug
+        baseline = file("lint-baseline.xml")
         // SARIF is uploaded to GitHub code scanning by the lint workflow.
         sarifReport = true
     }
@@ -107,57 +115,77 @@ android {
 // navigation-compose pins the whole group to 1.7.3 (strictly), which crashes MigrationTestHelper
 // with an AbstractMethodError. Force the newer, backward-compatible version for the test classpath.
 configurations.matching { it.name.contains("AndroidTest") }.configureEach {
+    val serializationVersion = libs.versions.kotlinxSerializationForRoomTesting.get()
     resolutionStrategy.force(
-        "org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1",
-        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.8.1",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.1",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$serializationVersion",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:$serializationVersion",
     )
+}
+
+detekt {
+    // Existing findings live in the baseline; detekt only fails on issues introduced after it.
+    // Regenerate with: ./gradlew :app:detektBaseline
+    baseline = file("detekt-baseline.xml")
+    // Default rules plus the Compose adjustments in config/detekt/detekt.yml.
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        // Uploaded to GitHub code scanning by the CI workflow, alongside Android Lint's.
+        sarif.required.set(true)
+    }
 }
 
 dependencies {
     // Core
-    implementation("androidx.core:core-ktx:1.19.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
-    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
 
     // Compose
-    val composeBom = platform("androidx.compose:compose-bom:2025.06.01")
-    implementation(composeBom)
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
 
     // Glance
-    implementation("androidx.glance:glance-appwidget:1.1.1")
-    implementation("androidx.glance:glance-material3:1.1.1")
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation(libs.androidx.navigation.compose)
 
     // Room
-    val roomVersion = "2.8.4"
-    implementation("androidx.room:room-runtime:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
-    androidTestImplementation("androidx.room:room-testing:$roomVersion")
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    androidTestImplementation(libs.room.testing)
 
     // DataStore
-    implementation("androidx.datastore:datastore-preferences:1.2.1")
+    implementation(libs.androidx.datastore.preferences)
 
     // Coil for SVG
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("io.coil-kt:coil-svg:2.7.0")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+
+    // Slack's Compose best-practice rules, picked up by the normal lint task.
+    lintChecks(libs.compose.lint.checks)
 
     // Testing
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.test:rules:1.7.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
-    androidTestImplementation(composeBom)
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
+    // Automatic Activity/Service leak detection in debug builds; ships nothing in release.
+    debugImplementation(libs.leakcanary.android)
 }

@@ -1,0 +1,30 @@
+name: Dependency Submission
+
+# Uploads the resolved Gradle dependency graph to GitHub so Dependabot alerts
+# fire for vulnerable (including transitive) dependencies — GitHub cannot parse
+# Gradle builds on its own.
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  dependency-submission:
+    name: Submit dependency graph
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v5

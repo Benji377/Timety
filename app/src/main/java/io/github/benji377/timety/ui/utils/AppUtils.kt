@@ -38,9 +38,9 @@ object AppUtils {
 
     /** Small color swatch identifying a task category (filter pills, category picker). */
     @Composable
-    fun CategoryDot(colorValue: Int, size: Dp = 10.dp) {
+    fun CategoryDot(colorValue: Int, modifier: Modifier = Modifier, size: Dp = 10.dp) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .size(size)
                 .clip(CircleShape)
                 .background(Color(colorValue))

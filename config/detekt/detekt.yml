@@ -1,0 +1,32 @@
+# Overrides on top of detekt's default config (buildUponDefaultConfig = true).
+# These are detekt's own recommended adjustments for Jetpack Compose codebases
+# (https://detekt.dev/docs/introduction/compose) — without them every composable
+# trips FunctionNaming/MagicNumber and the reports drown in false positives.
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    # Compose convention: top-level composition locals and palettes are PascalCase vals.
+    constantPattern: '[A-Z][A-Za-z0-9]*|[A-Z][_A-Z0-9]*'
+
+complexity:
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    ignoreAnnotatedFunctions: ['Preview']
+  CyclomaticComplexMethod:
+    ignoreAnnotated: ['Composable']
+
+style:
+  MagicNumber:
+    # dp/sp/weight/alpha literals are the vocabulary of Compose layout code.
+    ignoreAnnotated: ['Composable']
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']
+  MaxLineLength:
+    maxLineLength: 140
