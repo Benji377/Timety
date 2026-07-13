@@ -13,8 +13,7 @@ android {
         applicationId = "io.github.benji377.timety"
         minSdk = 26
         targetSdk = 37
-        // F-Droid clients installed the Flutter app at versionCode 233 (1.5.1 arm64 split);
-        // the Kotlin rewrite ships a single universal APK, so this must stay above that.
+        // Must stay above 233, the last Flutter-era versionCode on F-Droid.
         versionCode = 240
         versionName = "2.0.0"
 
@@ -28,21 +27,15 @@ android {
         localeFilters += setOf("en", "de", "it", "b+lld")
     }
 
-    // Room writes a JSON snapshot of every schema version here (committed to git);
-    // these are what MigrationTestHelper replays to test future migrations.
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
-
-    // Expose the committed schema JSONs to MigrationTestHelper as instrumentation-test assets.
+    // Committed Room schemas as test assets for MigrationTestHelper.
     sourceSets {
         getByName("androidTest") {
-            assets.srcDirs(files("$projectDir/schemas"))
+            assets.directories.add("$projectDir/schemas")
         }
     }
 
     signingConfigs {
-        // Used by the release CI workflow; falls back to an unsigned build locally.
+        // Set by the release CI workflow; local builds stay unsigned.
         val keystorePath = System.getenv("KEYSTORE_PATH")
         if (keystorePath != null) {
             create("release") {
@@ -55,16 +48,14 @@ android {
     }
 
     dependenciesInfo {
-        // Google Play's encrypted dependency block makes the APK/AAB differ from what anyone
-        // else can build from source; F-Droid requires it off for reproducible builds.
+        // Play's encrypted dependency block breaks F-Droid reproducible builds.
         includeInApk = false
         includeInBundle = false
     }
     buildTypes {
         release {
             vcsInfo {
-                // AGP embeds META-INF/version-control-info.textproto by default; any difference
-                // in git state between CI and the F-Droid builder breaks reproducible builds.
+                // Embedded git state breaks F-Droid reproducible builds.
                 include = false
             }
             isMinifyEnabled = true
@@ -85,22 +76,24 @@ android {
     }
     bundle {
         language {
-            // The app switches language at runtime (LocaleHelper); keep all locales in every
-            // install instead of relying on Play's on-demand language downloads.
+            // Runtime language switching needs every locale in the install.
             enableSplit = false
         }
     }
     lint {
-        // Translations are managed on Crowdin and land asynchronously; a key missing from one
-        // locale falls back to English at runtime and must not fail the build.
+        // Crowdin translations land asynchronously; missing keys fall back to English.
         warning += "MissingTranslation"
-        // Renovate owns dependency updates; lint re-reporting newer versions is just noise
-        // that accumulates until the next Renovate merge.
+        // Renovate owns dependency updates.
         disable += listOf("GradleDependency", "NewerVersionAvailable")
-        // Pre-existing findings (mostly compose-lints style rules on code that predates them)
-        // are frozen here; lint only fails on issues introduced afterwards. Regenerate with:
-        // rm app/lint-baseline.xml && ./gradlew :app:lintDebug
-        baseline = file("lint-baseline.xml")
+        // compose-lints rules meant for published libraries, not app-internal screens.
+        disable += listOf(
+            "ComposeModifierMissing",
+            "ComposeParameterOrder",
+            "ComposeViewModelForwarding",
+            "ComposeMultipleContentEmitters",
+            "SlotReused",
+            "ComposeCompositionLocalUsage",
+        )
         // SARIF is uploaded to GitHub code scanning by the lint workflow.
         sarifReport = true
     }
@@ -111,31 +104,31 @@ android {
     }
 }
 
-// room-testing 2.8.4 parses the schema JSONs with kotlinx-serialization 1.8.x, but
-// navigation-compose pins the whole group to 1.7.3 (strictly), which crashes MigrationTestHelper
-// with an AbstractMethodError. Force the newer, backward-compatible version for the test classpath.
+// Room schema snapshots (committed), replayed by MigrationTestHelper.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// navigation-compose strictly pins kotlinx-serialization 1.7.3, which crashes
+// room-testing's schema parser; force the newer version on the test classpath.
 configurations.matching { it.name.contains("AndroidTest") }.configureEach {
-    val serializationVersion = libs.versions.kotlinxSerializationForRoomTesting.get()
     resolutionStrategy.force(
-        "org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion",
-        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$serializationVersion",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:$serializationVersion",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.1",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.8.1",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.1",
     )
 }
 
 detekt {
-    // Existing findings live in the baseline; detekt only fails on issues introduced after it.
-    // Regenerate with: ./gradlew :app:detektBaseline
-    baseline = file("detekt-baseline.xml")
-    // Default rules plus the Compose adjustments in config/detekt/detekt.yml.
+    // Default rules; per-rule opt-outs and Compose tweaks live in the config file.
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {
-        // Uploaded to GitHub code scanning by the CI workflow, alongside Android Lint's.
+        // Uploaded to GitHub code scanning by CI.
         sarif.required.set(true)
     }
 }
@@ -174,7 +167,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
 
-    // Slack's Compose best-practice rules, picked up by the normal lint task.
+    // Slack's Compose rules for the lint task.
     lintChecks(libs.compose.lint.checks)
 
     // Testing
@@ -186,6 +179,6 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
-    // Automatic Activity/Service leak detection in debug builds; ships nothing in release.
+    // Leak detection in debug builds only.
     debugImplementation(libs.leakcanary.android)
 }

@@ -26,7 +26,7 @@ object CalendarUtils {
         // needs the week starting on that Monday, or its last day would be missing.
         while (!currentDay.isAfter(lastDayOfMonth)) {
             val week = mutableListOf<LocalDate>()
-            for (i in 0 until 7) {
+            repeat(7) {
                 week.add(currentDay)
                 currentDay = currentDay.plusDays(1)
             }
