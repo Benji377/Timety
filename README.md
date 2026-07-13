@@ -3,11 +3,11 @@
 <p align="center">
   <img src="assets/banner_small.png" alt="Timety banner">
   <p align="center">
-    <a href="https://github.com/Benji377/Timety/actions/workflows/lint.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/lint.yml?label=Lint&logo=kotlin&style=for-the-badge&labelColor=555555" alt="lint">
+    <a href="https://github.com/Benji377/Timety/actions/workflows/ci.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/ci.yml?label=Lint&logo=kotlin&style=for-the-badge&labelColor=555555" alt="lint">
     </a>
-    <a href="https://github.com/Benji377/Timety/actions/workflows/test.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/test.yml?label=Tests&logo=githubactions&style=for-the-badge&labelColor=555555" alt="test">
+    <a href="https://github.com/Benji377/Timety/actions/workflows/dependency-submission.yml">
+      <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/dependency-submission.yml?label=Dependencies&logo=githubactions&style=for-the-badge&labelColor=555555" alt="test">
     </a>
     <a href="https://github.com/Benji377/Timety/releases">
       <img src="https://img.shields.io/github/downloads/Benji377/Timety/total?label=Downloads&logo=github&style=for-the-badge&labelColor=555555" alt="downloads">
