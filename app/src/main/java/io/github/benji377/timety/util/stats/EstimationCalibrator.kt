@@ -43,7 +43,10 @@ object EstimationCalibrator {
      * in size order (S, M, L, XL). Sizes with no such tasks are omitted rather than shown as
      * zero, since zero would misread as "instant tasks" rather than "no data".
      */
-    fun buckets(tasks: List<TaskEntity>, sessions: List<FocusSessionEntity>): List<CalibrationBucket> {
+    fun buckets(
+        tasks: List<TaskEntity>,
+        sessions: List<FocusSessionEntity>
+    ): List<CalibrationBucket> {
         val secondsByTaskId = sessions
             .filter { it.targetType == FocusTargetType.TASK && it.targetId != null }
             .groupBy { it.targetId!! }
@@ -83,8 +86,8 @@ object EstimationCalibrator {
         orderingViolation(buckets)?.let { return it }
         val spread = buckets.firstOrNull {
             it.sampleCount >= MIN_SAMPLES_FOR_SPREAD &&
-                it.avgMinutes > 0 &&
-                it.stdDevMinutes.toDouble() / it.avgMinutes > SPREAD_RATIO_THRESHOLD
+                    it.avgMinutes > 0 &&
+                    it.stdDevMinutes.toDouble() / it.avgMinutes > SPREAD_RATIO_THRESHOLD
         }
         return spread?.let { CalibrationInsight.HighSpread(it.size) }
     }

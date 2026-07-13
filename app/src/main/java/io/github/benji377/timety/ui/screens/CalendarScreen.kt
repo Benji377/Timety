@@ -401,12 +401,13 @@ private fun CalendarGrid(
                     val d = instant.atZone(zone).toLocalDate()
                     return !d.isBefore(weekStart) && !d.isAfter(weekEnd)
                 }
+
                 val taskCount = tasks.count { t ->
                     t.task.dueDate != null && inWeek(t.task.dueDate)
                 } + recurringItems.count { inWeek(it.task.dueDate) } +
-                    recurringItems.sumOf { item ->
-                        item.occurrences.count { inWeek(it.completedAt) }
-                    }
+                        recurringItems.sumOf { item ->
+                            item.occurrences.count { inWeek(it.completedAt) }
+                        }
                 val habitCount = habitsWithCompletions.sumOf { h ->
                     h.completions.count { c ->
                         val d = c.completionDate.atZone(zone).toLocalDate()

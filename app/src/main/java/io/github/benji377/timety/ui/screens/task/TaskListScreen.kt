@@ -51,12 +51,12 @@ import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
 import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
-import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
@@ -116,9 +116,9 @@ fun TaskListScreen(
         actionableRecurring.mapValues { (_, grouped) ->
             grouped.filter { task ->
                 (selectedCategoryFilter.isNullOrEmpty() || task.category == selectedCategoryFilter) &&
-                    (searchQuery.isEmpty() ||
-                        task.title.lowercase().contains(searchQuery.lowercase()) ||
-                        task.description.lowercase().contains(searchQuery.lowercase()))
+                        (searchQuery.isEmpty() ||
+                                task.title.lowercase().contains(searchQuery.lowercase()) ||
+                                task.description.lowercase().contains(searchQuery.lowercase()))
             }
         }
     }

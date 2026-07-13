@@ -217,6 +217,7 @@ fun SettingsScreen(
             settingsViewModel.setAutoDndEnabled(enabled)
         }
     }
+
     var pendingLocationUrl by remember { mutableStateOf(locationApiEndpoint) }
     var locationError by remember { mutableStateOf<String?>(null) }
     var isCheckingLocation by remember { mutableStateOf(false) }
@@ -542,7 +543,13 @@ fun SettingsScreen(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelAutoDnd)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelAutoDndSubtitle)) },
-                    leadingContent = { Icon(Icons.Filled.DoNotDisturbOn, null, tint = WarningAccent) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Filled.DoNotDisturbOn,
+                            null,
+                            tint = WarningAccent
+                        )
+                    },
                     trailingContent = {
                         Switch(
                             checked = autoDndEnabled,
@@ -555,7 +562,13 @@ fun SettingsScreen(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelAutoDndLiftBreaks)) },
                     supportingContent = { Text(stringResource(R.string.settingsLabelAutoDndLiftBreaksSubtitle)) },
-                    leadingContent = { Icon(Icons.Filled.FreeBreakfast, null, tint = WarningAccent) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Filled.FreeBreakfast,
+                            null,
+                            tint = WarningAccent
+                        )
+                    },
                     trailingContent = {
                         Switch(
                             checked = autoDndLiftDuringBreaks,

@@ -12,6 +12,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.util.stats.ExperienceEngine.calculateLevel
+import io.github.benji377.timety.util.stats.ExperienceEngine.getTitle
+import io.github.benji377.timety.util.stats.ExperienceEngine.getXpForLevel
 import kotlin.math.floor
 import kotlin.math.sqrt
 

@@ -205,7 +205,11 @@ private fun QuickHabitCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = AppTheme.spaceMedium, top = AppTheme.spaceSmall, bottom = AppTheme.spaceSmall),
+                .padding(
+                    start = AppTheme.spaceMedium,
+                    top = AppTheme.spaceSmall,
+                    bottom = AppTheme.spaceSmall
+                ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -223,7 +227,10 @@ private fun QuickHabitCard(
                 colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor),
             )
             IconButton(onClick = onEdit) {
-                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.quickHabitEditTitle))
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = stringResource(R.string.quickHabitEditTitle)
+                )
             }
             IconButton(onClick = onDelete) {
                 Icon(
@@ -270,8 +277,8 @@ private fun QuickHabitEditDialog(
     var editingWindowStart by remember { mutableStateOf<Boolean?>(null) }
 
     val canSave = name.isNotBlank() &&
-        intervalValue != null && intervalValue >= 1 &&
-        (!specificDays || selectedWeekdays.isNotEmpty())
+            intervalValue != null && intervalValue >= 1 &&
+            (!specificDays || selectedWeekdays.isNotEmpty())
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -354,7 +361,10 @@ private fun QuickHabitEditDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(stringResource(R.string.quickHabitAllDayLabel), modifier = Modifier.weight(1f))
+                    Text(
+                        stringResource(R.string.quickHabitAllDayLabel),
+                        modifier = Modifier.weight(1f)
+                    )
                     Switch(
                         checked = allDay,
                         onCheckedChange = { allDay = it },

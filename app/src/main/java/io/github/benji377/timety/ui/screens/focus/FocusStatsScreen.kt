@@ -67,8 +67,8 @@ import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.ui.components.common.WeekNavigator
-import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
+import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -840,12 +840,16 @@ private fun FocusHeatmap(sessions: List<FocusSessionEntity>) {
             // instead of being vertically clipped or - worse - widening the row and desyncing it
             // from the grid.
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Spacer(modifier = Modifier.width(28.dp).height(16.dp))
+                Spacer(modifier = Modifier
+                    .width(28.dp)
+                    .height(16.dp))
                 for (row in 0..6) {
                     HeatmapAxisLabel(
                         text = weekdayLabels[row] ?: "",
                         fontSize = 10.sp,
-                        modifier = Modifier.width(28.dp).height(11.dp),
+                        modifier = Modifier
+                            .width(28.dp)
+                            .height(11.dp),
                     )
                 }
             }
@@ -858,15 +862,22 @@ private fun FocusHeatmap(sessions: List<FocusSessionEntity>) {
                         HeatmapAxisLabel(
                             text = monthLabels[index] ?: "",
                             fontSize = 10.sp,
-                            modifier = Modifier.width(11.dp).height(16.dp),
+                            modifier = Modifier
+                                .width(11.dp)
+                                .height(16.dp),
                         )
                         week.days.forEach { day ->
                             HeatmapCell(
                                 day = day,
                                 level = grid.intensityLevel(day.minutes),
                                 onTap = {
-                                    val dateStr = AppDateFormatUtils.formatDate(day.date, dateFormatCode, locale)
-                                    val minutesStr = AppDateFormatUtils.formatMinutesCompact(day.minutes)
+                                    val dateStr = AppDateFormatUtils.formatDate(
+                                        day.date,
+                                        dateFormatCode,
+                                        locale
+                                    )
+                                    val minutesStr =
+                                        AppDateFormatUtils.formatMinutesCompact(day.minutes)
                                     scope.launch { snackbarHostState.showSnackbar("$dateStr: $minutesStr") }
                                 },
                             )
@@ -894,7 +905,10 @@ private fun HeatmapAxisLabel(text: String, fontSize: TextUnit, modifier: Modifie
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 softWrap = false,
-                modifier = Modifier.wrapContentSize(unbounded = true, align = Alignment.CenterStart),
+                modifier = Modifier.wrapContentSize(
+                    unbounded = true,
+                    align = Alignment.CenterStart
+                ),
             )
         }
     }
@@ -946,7 +960,11 @@ private fun HeatmapSwatch(level: Int, showBorder: Boolean, modifier: Modifier = 
             .clip(shape)
             .background(if (level > 0) FocusColor.copy(alpha = 0.2f + level * 0.2f) else Color.Transparent)
             .then(
-                if (showBorder) Modifier.border(1.dp, outlineColor.copy(alpha = 0.4f), shape) else Modifier
+                if (showBorder) Modifier.border(
+                    1.dp,
+                    outlineColor.copy(alpha = 0.4f),
+                    shape
+                ) else Modifier
             )
     )
 }

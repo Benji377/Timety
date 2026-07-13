@@ -169,8 +169,16 @@ private fun RecurringTaskCard(
                 Text(
                     text = stringResource(
                         R.string.recurringTasksNextDue,
-                        "${AppDateFormatUtils.formatDate(item.task.dueDate, dateFmt.dateFormatCode)} " +
-                            AppDateFormatUtils.formatTime(item.task.dueDate, dateFmt.use24HourFormat)
+                        "${
+                            AppDateFormatUtils.formatDate(
+                                item.task.dueDate,
+                                dateFmt.dateFormatCode
+                            )
+                        } " +
+                                AppDateFormatUtils.formatTime(
+                                    item.task.dueDate,
+                                    dateFmt.use24HourFormat
+                                )
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -112,7 +112,7 @@ fun ProfileScreen(
 
     // Each logged recurring occurrence counts as a completed task.
     val totalTasksDone = tasks.count { it.task.isCompleted } +
-        recurringItems.sumOf { it.occurrences.size }
+            recurringItems.sumOf { it.occurrences.size }
     val totalHabitsMet = habitsWithCompletions.sumOf { it.completions.size }
     val totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60
     val totalSessions = sessions.size

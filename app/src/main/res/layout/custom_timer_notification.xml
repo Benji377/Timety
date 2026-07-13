@@ -23,8 +23,8 @@
             android:layout_height="wrap_content"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="18sp"
-            tools:text="Focus"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="Focus" />
 
         <TextView
             android:id="@+id/notification_body"
@@ -33,8 +33,8 @@
             android:layout_marginTop="2dp"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
-            tools:text="Pomodoro"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="Pomodoro" />
     </LinearLayout>
 
     <!-- Right side: Chronometer or Paused text -->

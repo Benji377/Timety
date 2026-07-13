@@ -1,6 +1,7 @@
 package io.github.benji377.timety.util.goal
 
 import io.github.benji377.timety.data.model.goal.GoalEntity
+import io.github.benji377.timety.util.goal.GoalUtils.expectedProgress
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

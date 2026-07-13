@@ -37,7 +37,10 @@ class FocusTimerService : Service() {
     private val notificationManager by lazy { NotificationManagerCompat.from(this) }
     private val alarmManager by lazy { getSystemService(ALARM_SERVICE) as AlarmManager }
     private val dndController by lazy {
-        FocusDndController(applicationContext, (application as TimetyApplication).container.settingsRepository)
+        FocusDndController(
+            applicationContext,
+            (application as TimetyApplication).container.settingsRepository
+        )
     }
 
     override fun onCreate() {
