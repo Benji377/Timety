@@ -33,6 +33,7 @@ import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
+import io.github.benji377.timety.util.ProfileImageStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -447,7 +448,9 @@ class BackupService(
         }
         return UserProfileEntity(
             name = readString(json, "name") ?: "Bobert",
-            profileImagePath = readString(json, "profileImagePath"),
+            // Backups store only the path, not the image bytes, so a restored path is stale
+            // unless the file happens to exist on this device (same-device restore).
+            profileImagePath = ProfileImageStore.validOrNull(readString(json, "profileImagePath")),
             accountCreated = readInstant(json, "accountCreated") ?: Instant.now(),
             unlockedAchievements = readStringList(json, "unlockedAchievements"),
             totalXp = json.optInt("totalXp", 0),

@@ -78,6 +78,7 @@ import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
+import io.github.benji377.timety.util.ProfileImageStore
 import io.github.benji377.timety.util.stats.StreakCalculator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -152,14 +153,18 @@ fun ProfileScreen(
     var tempName by remember { mutableStateOf("") }
     var showShareWrapupDialog by remember { mutableStateOf(false) }
 
+    val coroutineScope = rememberCoroutineScope()
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let {
-            userViewModel.updateProfileImage(it.toString())
+            coroutineScope.launch(Dispatchers.IO) {
+                ProfileImageStore.persist(context, it)?.let { path ->
+                    userViewModel.updateProfileImage(path)
+                }
+            }
         }
     }
-    val coroutineScope = rememberCoroutineScope()
 
     if (showShareWrapupDialog) {
         AlertDialog(
@@ -296,9 +301,14 @@ fun ProfileScreen(
                             .background(UserColor.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (userProfile?.profileImagePath != null) {
+                        // validOrNull drops stale entries (pre-2.1.0 content:// URIs whose read
+                        // grant expired) so they fall back to the placeholder icon.
+                        val avatarPath = remember(userProfile?.profileImagePath) {
+                            ProfileImageStore.validOrNull(userProfile?.profileImagePath)
+                        }
+                        if (avatarPath != null) {
                             AsyncImage(
-                                model = userProfile?.profileImagePath,
+                                model = avatarPath,
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
