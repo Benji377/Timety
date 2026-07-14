@@ -56,10 +56,7 @@ fun RecurringTaskListTile(
     onComplete: () -> Unit,
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
-    margin: PaddingValues = PaddingValues(
-        horizontal = AppTheme.spaceLarge,
-        vertical = AppTheme.spaceXSmall
-    ),
+    margin: PaddingValues = AppTheme.listTileScreenMargin,
 ) {
     val dateFmt = LocalDateFormatSettings.current
     val borderColor = recurringStatusColor(status)

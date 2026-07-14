@@ -256,7 +256,6 @@ private fun HabitTileWrapper(
     } else null
 
     HabitListTile(
-        modifier = Modifier.padding(vertical = 4.dp),
         habit = habit,
         isCompleted = isDone,
         isStacked = isStacked,

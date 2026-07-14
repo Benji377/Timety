@@ -74,11 +74,7 @@ fun TaskListTile(
     subtasksTotal: Int = 0,
     use24HourFormat: Boolean = LocalDateFormatSettings.current.use24HourFormat,
     dateFormatCode: String = LocalDateFormatSettings.current.dateFormatCode,
-    // Screen margin, mirrors AppTheme.listTileScreenMargin (spaceLarge horizontal, spaceXSmall vertical).
-    margin: PaddingValues = PaddingValues(
-        horizontal = AppTheme.spaceLarge,
-        vertical = AppTheme.spaceXSmall
-    ),
+    margin: PaddingValues = AppTheme.listTileScreenMargin,
 ) {
     val borderColor = getBorderColor(task, isOverdue)
     val hasSubtasks = subtasksTotal > 0

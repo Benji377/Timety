@@ -43,6 +43,11 @@ object AppTheme {
     val paddingScreenHorizontal =
         PaddingValues(horizontal = spaceLarge)
 
+    // Outer margin shared by all list tiles (tasks, recurring tasks, habits) so lists have
+    // identical card spacing on every screen.
+    val listTileScreenMargin =
+        PaddingValues(horizontal = spaceLarge, vertical = spaceXSmall)
+
     val radiusMedium = 8.dp
     val radiusNeo = 14.dp
 

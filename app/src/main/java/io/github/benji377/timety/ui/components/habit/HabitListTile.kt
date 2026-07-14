@@ -69,7 +69,7 @@ fun HabitListTile(
     onDelete: (() -> Unit)? = null,
     onMarkPastCompletion: (() -> Unit)? = null,
     enableDismissible: Boolean = true,
-    margin: PaddingValues = AppTheme.paddingScreenHorizontal,
+    margin: PaddingValues = AppTheme.listTileScreenMargin,
 ) {
     val color = Color(habit.colorValue)
     val lockedMessage = stringResource(R.string.focusSnackbarHabitLocked)
