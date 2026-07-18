@@ -81,8 +81,9 @@ android {
         }
     }
     lint {
-        // Crowdin translations land asynchronously; missing keys fall back to English.
-        warning += "MissingTranslation"
+        // Crowdin translations land asynchronously; missing keys and plural
+        // quantities fall back to English, so they are Crowdin's concern, not CI's.
+        disable += listOf("MissingTranslation", "MissingQuantity")
         // Renovate owns dependency updates.
         disable += listOf("GradleDependency", "NewerVersionAvailable")
         // compose-lints rules meant for published libraries, not app-internal screens.
