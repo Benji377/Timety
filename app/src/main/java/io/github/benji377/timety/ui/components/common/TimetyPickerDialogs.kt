@@ -9,6 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -58,6 +59,48 @@ fun TimetyTimePickerDialog(
             TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
                 Text(confirmLabel ?: stringResource(R.string.commonLabelConfirm))
             }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+        },
+    )
+}
+
+
+/**
+ * Alert dialog wrapping a Material [TimeInput] used as an hours-and-minutes duration field,
+ * confirming with the total minutes coerced into [minMinutes]..[maxMinutes]. Always 24-hour so
+ * no AM/PM toggle appears - a duration is not a time of day.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimetyDurationPickerDialog(
+    initialMinutes: Int,
+    minMinutes: Int,
+    maxMinutes: Int,
+    onConfirm: (minutes: Int) -> Unit,
+    onDismiss: () -> Unit,
+    title: (@Composable () -> Unit)? = null,
+    confirmLabel: String? = null,
+) {
+    val initial = initialMinutes.coerceIn(minMinutes, maxMinutes)
+    val state = rememberTimePickerState(
+        initialHour = initial / 60,
+        initialMinute = initial % 60,
+        is24Hour = true,
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = title,
+        text = {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                TimeInput(state = state)
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirm((state.hour * 60 + state.minute).coerceIn(minMinutes, maxMinutes))
+            }) { Text(confirmLabel ?: stringResource(R.string.commonLabelConfirm)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }

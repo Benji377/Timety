@@ -352,7 +352,6 @@
     <string name="statsTabTasks">Attività</string>
     <string name="statsTitle">Approfondimenti e statistiche</string>
     <string name="settingsDialogUnitDays">giorni</string>
-    <string name="settingsDialogUnitMinutes">minuti</string>
     <string name="settingsLabelBuiltBy">Creato da Benji377</string>
     <string name="settingsLabelCategories">Categorie attività</string>
     <string name="settingsLabelCategoriesSubtitle">%1$d categorie</string>

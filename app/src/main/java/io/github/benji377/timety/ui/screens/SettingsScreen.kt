@@ -95,6 +95,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.TimetyDurationPickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -221,6 +222,7 @@ fun SettingsScreen(
     var locationError by remember { mutableStateOf<String?>(null) }
     var isCheckingLocation by remember { mutableStateOf(false) }
     var numberDialogSpec by remember { mutableStateOf<NumberDialogSpec?>(null) }
+    var durationDialogSpec by remember { mutableStateOf<DurationDialogSpec?>(null) }
     var timeDialogSpec by remember { mutableStateOf<TimeDialogSpec?>(null) }
 
     // Option label maps: each pair is (display label, stored value) for a settings dropdown.
@@ -252,7 +254,6 @@ fun SettingsScreen(
     val currentDateFormatLabel = dateFormatOptions.firstOrNull { it.second == dateFormat }?.first
         ?: stringResource(R.string.settingsLabelDateFormatSystem)
 
-    val minutesUnit = stringResource(R.string.settingsDialogUnitMinutes)
     val daysUnit = stringResource(R.string.settingsDialogUnitDays)
 
     // Dialogs.
@@ -341,6 +342,20 @@ fun SettingsScreen(
         NumberPickerDialog(
             spec = spec,
             onDismiss = { numberDialogSpec = null }
+        )
+    }
+    durationDialogSpec?.let { spec ->
+        TimetyDurationPickerDialog(
+            initialMinutes = spec.current,
+            minMinutes = spec.min,
+            maxMinutes = spec.max,
+            title = { Text(spec.title) },
+            confirmLabel = stringResource(R.string.commonLabelSave),
+            onConfirm = {
+                spec.onSave(it)
+                durationDialogSpec = null
+            },
+            onDismiss = { durationDialogSpec = null }
         )
     }
     timeDialogSpec?.let { spec ->
@@ -442,21 +457,14 @@ fun SettingsScreen(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusGoal)) },
                     supportingContent = {
-                        Text(
-                            quantityString(
-                                R.plurals.nMinutesCount,
-                                dailyGoalMins,
-                                R.string.nMinutesCountZero,
-                                dailyGoalMins
-                            )
-                        )
+                        Text(AppDateFormatUtils.formatMinutesCompact(dailyGoalMins))
                     },
                     leadingContent = { Icon(Icons.Filled.TrackChanges, null, tint = FocusColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
-                        numberDialogSpec = NumberDialogSpec(
+                        durationDialogSpec = DurationDialogSpec(
                             title = focusGoalTitle,
-                            current = dailyGoalMins, min = 10, max = 480, unit = minutesUnit,
+                            current = dailyGoalMins, min = 10, max = 480,
                             onSave = { settingsViewModel.setDailyGoalMins(it) }
                         )
                     }
@@ -481,9 +489,9 @@ fun SettingsScreen(
                     leadingContent = { Icon(Icons.Outlined.Timer, null, tint = WarningAccent) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
-                        numberDialogSpec = NumberDialogSpec(
+                        durationDialogSpec = DurationDialogSpec(
                             title = focusStopwatchTitle,
-                            current = maxStopwatchMins, min = 30, max = 480, unit = minutesUnit,
+                            current = maxStopwatchMins, min = 30, max = 480,
                             onSave = { settingsViewModel.setMaxStopwatchMins(it) }
                         )
                     }
@@ -495,9 +503,9 @@ fun SettingsScreen(
                     leadingContent = { Icon(Icons.Filled.LinearScale, null, tint = TaskColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
-                        numberDialogSpec = NumberDialogSpec(
+                        durationDialogSpec = DurationDialogSpec(
                             title = focusNodeTimeTitle,
-                            current = maxNodeMins, min = 10, max = 480, unit = minutesUnit,
+                            current = maxNodeMins, min = 10, max = 480,
                             onSave = { settingsViewModel.setMaxNodeMins(it) }
                         )
                     }
@@ -1087,6 +1095,14 @@ private data class NumberDialogSpec(
     val min: Int,
     val max: Int,
     val unit: String,
+    val onSave: (Int) -> Unit
+)
+
+private data class DurationDialogSpec(
+    val title: String,
+    val current: Int,
+    val min: Int,
+    val max: Int,
     val onSave: (Int) -> Unit
 )
 

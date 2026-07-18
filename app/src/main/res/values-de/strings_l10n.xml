@@ -352,7 +352,6 @@
     <string name="statsTabTasks">Aufgaben</string>
     <string name="statsTitle">Einblicke &amp; Statistiken</string>
     <string name="settingsDialogUnitDays">Tage</string>
-    <string name="settingsDialogUnitMinutes">Minuten</string>
     <string name="settingsLabelBuiltBy">Entwickelt von Benji377</string>
     <string name="settingsLabelCategories">Aufgaben-Kategorien</string>
     <string name="settingsLabelCategoriesSubtitle">%1$d Kategorien</string>
