@@ -30,7 +30,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.common.TimetyProgressBar
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -161,15 +161,13 @@ fun UserXpBreakdownCard(
 
             Spacer(Modifier.height(18.dp))
 
-            LinearProgressIndicator(
+            TimetyProgressBar(
                 progress = { levelProgress.toFloat().coerceIn(0f, 1f) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(12.dp)
-                    .clip(RoundedCornerShape(999.dp)),
+                    .height(12.dp),
                 color = TaskColor,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                drawStopIndicator = {},
             )
 
             Spacer(Modifier.height(18.dp))

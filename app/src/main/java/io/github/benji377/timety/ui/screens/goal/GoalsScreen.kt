@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -55,6 +54,7 @@ import io.github.benji377.timety.data.model.goal.GoalWithEntries
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.TimetyProgressBar
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.GoalColor
@@ -337,17 +337,15 @@ private fun PacedProgressBar(
     color: Color,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        LinearProgressIndicator(
+        TimetyProgressBar(
             progress = { progressFraction.coerceIn(0f, 1f) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(10.dp)
-                .clip(RoundedCornerShape(999.dp)),
+                .height(10.dp),
             color = color,
             // A tinted track: the theme's surfaceVariant is nearly the card color, which would
             // leave the unfilled part of the bar invisible.
             trackColor = color.copy(alpha = 0.2f),
-            drawStopIndicator = {},
         )
         if (expectedFraction != null && expectedFraction > 0f) {
             // Right-aligned inside a box that spans exactly the expected fraction of the width,

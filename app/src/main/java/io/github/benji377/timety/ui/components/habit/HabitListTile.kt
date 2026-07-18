@@ -26,7 +26,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
+import io.github.benji377.timety.ui.components.common.TimetyProgressBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -251,12 +251,11 @@ private fun HabitTileContent(
 
             if (progressValue != null && !isCompleted) {
                 Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-                LinearProgressIndicator(
+                TimetyProgressBar(
                     progress = { progressValue.coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth(),
                     color = color,
                     trackColor = color.copy(alpha = AppTheme.OPACITY_VERY_LIGHT),
-                    drawStopIndicator = {}
                 )
             }
         }

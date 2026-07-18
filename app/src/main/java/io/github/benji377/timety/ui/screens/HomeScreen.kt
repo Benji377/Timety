@@ -1,19 +1,26 @@
 package io.github.benji377.timety.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,6 +34,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,7 +45,6 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
-import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitListTile
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
@@ -62,11 +72,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import kotlin.math.roundToInt
 
 
 /**
- * Home screen: greeting, the daily focus-goal gauge, and accordion lists of due tasks, today's
- * habits, and upcoming tasks.
+ * Home screen: greeting, a compact daily focus-goal progress card, and accordion lists of due
+ * tasks, today's habits, and upcoming tasks.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,12 +114,6 @@ fun HomeScreen(
                 .toLocalDate() == todayLocalDate
         }.sumOf { it.totalSecondsFocused } / 60
     }
-    val focusProgress =
-        if (dailyTarget > 0) (focusMinsToday.toFloat() / dailyTarget.toFloat()).coerceIn(
-            0f,
-            1f
-        ) else 0f
-
     val currentHour = LocalTime.now().hour
     val greeting = when (currentHour) {
         in 0..4 -> stringResource(R.string.greetingDeepNight, userName)
@@ -212,25 +217,15 @@ fun HomeScreen(
                 )
             }
 
-            // Daily focus-goal gauge.
-            Box(
+            // Daily focus-goal progress card.
+            DailyGoalCard(
+                focusMinsToday = focusMinsToday,
+                dailyTarget = dailyTarget,
+                onClick = onNavigateToFocus,
                 modifier = Modifier
-                    .weight(5f)
                     .fillMaxWidth()
-                    .clickable { onNavigateToFocus() },
-                contentAlignment = Alignment.Center
-            ) {
-                InteractiveGauge(
-                    progress = focusProgress,
-                    isInteractive = false,
-                    label = stringResource(R.string.homeDailyGoal).uppercase(),
-                    centerText = "${(focusProgress * 100).toInt()}%",
-                    centerTextColor = FocusColor,
-                    color = FocusColor,
-                    bottomText = "$focusMinsToday / $dailyTarget m",
-                    bottomTextColor = FocusColor
-                )
-            }
+                    .padding(horizontal = AppTheme.spaceXLarge)
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
@@ -238,7 +233,7 @@ fun HomeScreen(
             // Tasks and habits list.
             Box(
                 modifier = Modifier
-                    .weight(6f)
+                    .weight(1f)
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
@@ -377,6 +372,94 @@ fun HomeScreen(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * Compact daily focus-goal card: label, minutes focused vs target, and a chunky progress bar
+ * with the percentage beside it. Tapping navigates to the Focus screen.
+ */
+@Composable
+private fun DailyGoalCard(
+    focusMinsToday: Int,
+    dailyTarget: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val progress = if (dailyTarget > 0) focusMinsToday.toFloat() / dailyTarget else 0f
+    Card(
+        onClick = onClick,
+        modifier = modifier,
+        shape = AppTheme.brNeo,
+        border = BorderStroke(AppTheme.neoBorderWidth, FocusColor),
+        colors = CardDefaults.cardColors(containerColor = FocusColor.copy(alpha = 0.08f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.homeDailyGoal).uppercase(),
+                    fontSize = AppTheme.fsLabel,
+                    fontWeight = AppTheme.fwBold,
+                    letterSpacing = AppTheme.lsWide,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "$focusMinsToday / $dailyTarget m",
+                    fontWeight = AppTheme.fwBold,
+                    color = FocusColor
+                )
+            }
+            Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                DailyGoalBar(progress = progress, modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
+                Text(
+                    text = "${(progress * 100).roundToInt()}%",
+                    fontWeight = AppTheme.fwExtraBold,
+                    color = FocusColor
+                )
+            }
+        }
+    }
+}
+
+
+/**
+ * Bordered progress bar for the daily goal. The first lap fills solid; past 100% a second lap
+ * of darker diagonal stripes paints over the fill to showcase over-achievement.
+ */
+@Composable
+private fun DailyGoalBar(progress: Float, modifier: Modifier = Modifier) {
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    Canvas(
+        modifier = modifier
+            .height(16.dp)
+            .border(AppTheme.listTileBorderWidth, FocusColor)
+    ) {
+        drawRect(trackColor)
+        drawRect(FocusColor, size = Size(size.width * progress.coerceIn(0f, 1f), size.height))
+        val overflow = (progress - 1f).coerceIn(0f, 1f)
+        if (overflow > 0f) {
+            clipRect(right = size.width * overflow) {
+                val step = size.height
+                var x = -size.height
+                while (x < size.width) {
+                    drawLine(
+                        color = Color.Black.copy(alpha = 0.35f),
+                        start = Offset(x, size.height),
+                        end = Offset(x + size.height, 0f),
+                        strokeWidth = step / 2f
+                    )
+                    x += step * 1.5f
                 }
             }
         }

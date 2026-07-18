@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Checklist
@@ -22,13 +21,11 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
@@ -38,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
+import io.github.benji377.timety.ui.components.common.TimetyProgressBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -145,15 +143,13 @@ fun TaskListTile(
                                 fontWeight = AppTheme.fwMedium,
                             )
                             Spacer(Modifier.width(8.dp))
-                            LinearProgressIndicator(
+                            TimetyProgressBar(
                                 progress = { progress },
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
+                                    .height(4.dp),
                                 color = if (task.isCompleted) SuccessColor else borderColor,
                                 trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                drawStopIndicator = {}
                             )
                         }
                     }
