@@ -110,7 +110,6 @@ fun HabitDetailScreen(
     var nameError by remember { mutableStateOf(false) }
     var notes by remember(existingHabit) { mutableStateOf(existingHabit?.notes ?: "") }
     var stackName by remember(existingHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
-    var stackOrder by remember(existingHabit) { mutableStateOf(existingHabit?.stackOrder) }
 
     var frequency by remember(existingHabit) {
         mutableStateOf(
@@ -150,9 +149,6 @@ fun HabitDetailScreen(
         else existingStacks.filter { it.contains(stackName, ignoreCase = true) }
     }
 
-    var stackOrderExpanded by remember { mutableStateOf(false) }
-    val orderOptions: List<Int?> = remember { listOf(null) + (1..10).toList() }
-
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val snackbarSaveNoDayMessage = stringResource(R.string.habitDetailSnackbarSaveNoDay)
@@ -176,6 +172,25 @@ fun HabitDetailScreen(
             return
         }
 
+        // Stack/standalone order is only auto-appended when a habit newly joins a stack or
+        // newly goes standalone; an unrelated edit shouldn't bump an existing habit to the end.
+        // Manual repositioning happens by dragging in the list afterward.
+        val trimmedStackName = stackName.trim().ifEmpty { null }
+        val stayedInSameStack = existingHabit?.stackName?.trim() == trimmedStackName
+        val computedStackOrder = when {
+            trimmedStackName == null -> null
+            stayedInSameStack -> existingHabit?.stackOrder
+            else -> (allHabits.filter { it.stackName?.trim() == trimmedStackName }
+                .maxOfOrNull { it.stackOrder ?: -1 } ?: -1) + 1
+        }
+        val wasStandalone = existingHabit != null && existingHabit.stackName.isNullOrBlank()
+        val computedSortOrder = when {
+            trimmedStackName != null -> existingHabit?.sortOrder ?: 0
+            wasStandalone -> existingHabit.sortOrder
+            else -> (allHabits.filter { it.stackName.isNullOrBlank() }
+                .maxOfOrNull { it.sortOrder } ?: -1) + 1
+        }
+
         val habitToSave = HabitEntity(
             id = habitId ?: UUID.randomUUID().toString(),
             name = trimmedName,
@@ -189,8 +204,9 @@ fun HabitDetailScreen(
             colorValue = selectedColor.toArgb(),
             notes = notes.trim().ifEmpty { null },
             iconCodePoint = selectedIconIndex,
-            stackName = stackName.trim().ifEmpty { null },
-            stackOrder = stackOrder,
+            stackName = trimmedStackName,
+            stackOrder = computedStackOrder,
+            sortOrder = computedSortOrder,
         )
 
         if (isNewHabit) {
@@ -267,72 +283,40 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // Habit stacking: name autocomplete and order.
+            // Habit stacking: name autocomplete. Position within the stack is set by dragging
+            // in the habit list, not entered here.
             item {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    ExposedDropdownMenuBox(
-                        expanded = stackNameExpanded && isEditing && filteredStacks.isNotEmpty(),
-                        onExpandedChange = { if (isEditing) stackNameExpanded = it },
-                        modifier = Modifier.weight(2f),
-                    ) {
-                        OutlinedTextField(
-                            value = if (isEditing) stackName else stackName.ifBlank { "-" },
-                            onValueChange = {
-                                stackName = it
-                                stackNameExpanded = true
-                            },
-                            enabled = isEditing,
-                            singleLine = true,
-                            label = { Text(stringResource(R.string.habitDetailLabelStack)) },
-                            placeholder = { Text(stringResource(R.string.habitDetailLabelStackHint)) },
-                            leadingIcon = { Icon(Icons.Filled.Layers, null) },
-                            modifier = Modifier
-                                .menuAnchor(MenuAnchorType.PrimaryEditable)
-                                .fillMaxWidth(),
-                        )
-                        if (filteredStacks.isNotEmpty()) {
-                            ExposedDropdownMenu(
-                                expanded = stackNameExpanded && isEditing,
-                                onDismissRequest = { stackNameExpanded = false },
-                            ) {
-                                filteredStacks.forEach { option ->
-                                    DropdownMenuItem(
-                                        text = { Text(option) },
-                                        onClick = {
-                                            stackName = option
-                                            stackNameExpanded = false
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
-                    ExposedDropdownMenuBox(
-                        expanded = stackOrderExpanded && isEditing,
-                        onExpandedChange = { if (isEditing) stackOrderExpanded = it },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        OutlinedTextField(
-                            value = stackOrder?.toString() ?: "-",
-                            onValueChange = {},
-                            readOnly = true,
-                            enabled = isEditing,
-                            label = { Text(stringResource(R.string.habitDetailLabelStackOrder)) },
-                            modifier = Modifier
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                                .fillMaxWidth(),
-                        )
+                ExposedDropdownMenuBox(
+                    expanded = stackNameExpanded && isEditing && filteredStacks.isNotEmpty(),
+                    onExpandedChange = { if (isEditing) stackNameExpanded = it },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    OutlinedTextField(
+                        value = if (isEditing) stackName else stackName.ifBlank { "-" },
+                        onValueChange = {
+                            stackName = it
+                            stackNameExpanded = true
+                        },
+                        enabled = isEditing,
+                        singleLine = true,
+                        label = { Text(stringResource(R.string.habitDetailLabelStack)) },
+                        placeholder = { Text(stringResource(R.string.habitDetailLabelStackHint)) },
+                        leadingIcon = { Icon(Icons.Filled.Layers, null) },
+                        modifier = Modifier
+                            .menuAnchor(MenuAnchorType.PrimaryEditable)
+                            .fillMaxWidth(),
+                    )
+                    if (filteredStacks.isNotEmpty()) {
                         ExposedDropdownMenu(
-                            expanded = stackOrderExpanded && isEditing,
-                            onDismissRequest = { stackOrderExpanded = false },
+                            expanded = stackNameExpanded && isEditing,
+                            onDismissRequest = { stackNameExpanded = false },
                         ) {
-                            orderOptions.forEach { option ->
+                            filteredStacks.forEach { option ->
                                 DropdownMenuItem(
-                                    text = { Text(option?.toString() ?: "-") },
+                                    text = { Text(option) },
                                     onClick = {
-                                        stackOrder = option
-                                        stackOrderExpanded = false
+                                        stackName = option
+                                        stackNameExpanded = false
                                     },
                                 )
                             }

@@ -31,6 +31,10 @@ class HabitRepository(
         habitDao.updateHabit(habit)
     }
 
+    suspend fun updateHabits(habits: List<HabitEntity>) = withContext(Dispatchers.IO) {
+        habitDao.updateHabits(habits)
+    }
+
     suspend fun deleteHabit(habit: HabitEntity) = withContext(Dispatchers.IO) {
         habitDao.deleteHabit(habit)
     }

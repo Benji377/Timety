@@ -57,4 +57,37 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate2To3_addsSortOrderAndBackfillsFromCreatedAt() {
+        val dbName = "migration-test-2-3"
+
+        // Seed three habits with distinct createdAt values on a v2 database (no sortOrder column
+        // yet); the migration must backfill sortOrder from the current createdAt DESC order.
+        helper.createDatabase(dbName, 2).apply {
+            execSQL(
+                "INSERT INTO habits (id, name, frequency, createdAt, colorValue) " +
+                    "VALUES ('oldest', 'Oldest', 0, 100, 111)"
+            )
+            execSQL(
+                "INSERT INTO habits (id, name, frequency, createdAt, colorValue) " +
+                    "VALUES ('middle', 'Middle', 0, 200, 222)"
+            )
+            execSQL(
+                "INSERT INTO habits (id, name, frequency, createdAt, colorValue) " +
+                    "VALUES ('newest', 'Newest', 0, 300, 333)"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 3, true, MIGRATION_2_3)
+
+        db.query("SELECT id, sortOrder FROM habits ORDER BY sortOrder ASC").use { cursor ->
+            assertEquals(3, cursor.count)
+            val orderedIds = generateSequence { if (cursor.moveToNext()) cursor.getString(0) else null }
+                .toList()
+            assertEquals(listOf("newest", "middle", "oldest"), orderedIds)
+        }
+        db.close()
+    }
 }

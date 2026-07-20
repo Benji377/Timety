@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 /** Data access object for habits and their completion records. */
 @Dao
 interface HabitDao {
-    @Query("SELECT * FROM habits ORDER BY createdAt DESC")
+    @Query("SELECT * FROM habits ORDER BY sortOrder ASC, createdAt DESC")
     fun getAllHabits(): Flow<List<HabitEntity>>
 
     @Query("SELECT * FROM habit_completions")
@@ -31,6 +31,9 @@ interface HabitDao {
 
     @Update
     fun updateHabit(habit: HabitEntity)
+
+    @Update
+    fun updateHabits(habits: List<HabitEntity>)
 
     @Delete
     fun deleteHabit(habit: HabitEntity)

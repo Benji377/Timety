@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Lock
@@ -53,6 +54,10 @@ import kotlinx.coroutines.launch
  * bar. Renders as a bordered card standalone, or as a slimmer row with a leading color bar when
  * [isStacked]. When [isLocked], the completion toggle is disabled and taps show a snackbar
  * instead. Swipe-to-delete is enabled by default when [onDelete] is provided.
+ *
+ * When [isReorderMode] is true, swipe-to-delete and tap/toggle are all suppressed and a drag
+ * handle is shown instead, so the tile is purely a draggable row (dragging itself is handled by
+ * the caller wrapping this tile, e.g. [DraggableReorderColumn]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +69,7 @@ fun HabitListTile(
     progressValue: Float? = null,
     isStacked: Boolean = false,
     isLocked: Boolean = false,
+    isReorderMode: Boolean = false,
     onToggleCompleted: () -> Unit,
     onTap: () -> Unit,
     onDelete: (() -> Unit)? = null,
@@ -97,6 +103,7 @@ fun HabitListTile(
                         color = color,
                         isCompleted = isCompleted,
                         isLocked = isLocked,
+                        isReorderMode = isReorderMode,
                         subtitleText = subtitleText,
                         progressValue = progressValue,
                         onToggleCompleted = onToggleCompleted,
@@ -126,6 +133,7 @@ fun HabitListTile(
                     color = color,
                     isCompleted = isCompleted,
                     isLocked = isLocked,
+                    isReorderMode = isReorderMode,
                     subtitleText = subtitleText,
                     progressValue = progressValue,
                     onToggleCompleted = onToggleCompleted,
@@ -141,7 +149,7 @@ fun HabitListTile(
         }
     }
 
-    if (!enableDismissible || onDelete == null) {
+    if (isReorderMode || !enableDismissible || onDelete == null) {
         Box(modifier = modifier) { tile() }
         return
     }
@@ -164,6 +172,7 @@ private fun HabitTileContent(
     color: Color,
     isCompleted: Boolean,
     isLocked: Boolean,
+    isReorderMode: Boolean,
     subtitleText: String,
     progressValue: Float?,
     onToggleCompleted: () -> Unit,
@@ -176,7 +185,7 @@ private fun HabitTileContent(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onTap() }
+            .clickable(enabled = !isReorderMode) { onTap() }
             .padding(AppTheme.spaceMedium),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -193,7 +202,7 @@ private fun HabitTileContent(
                     color = if (isCompleted) color else (if (isLocked) MaterialTheme.colorScheme.onSurfaceVariant else HabitColor),
                     shape = CircleShape,
                 )
-                .clickable { if (isLocked) onLockedTap() else onToggleCompleted() },
+                .clickable(enabled = !isReorderMode) { if (isLocked) onLockedTap() else onToggleCompleted() },
             contentAlignment = Alignment.Center,
         ) {
             if (isCompleted) {
@@ -260,7 +269,13 @@ private fun HabitTileContent(
             }
         }
 
-        if (onMarkPastCompletion != null) {
+        if (isReorderMode) {
+            Icon(
+                imageVector = Icons.Filled.DragHandle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else if (onMarkPastCompletion != null) {
             IconButton(onClick = onMarkPastCompletion) {
                 Icon(
                     imageVector = Icons.Filled.Schedule,
