@@ -1,10 +1,12 @@
 package io.github.benji377.timety.ui.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.services.ReminderScheduler
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -137,6 +139,22 @@ class SettingsViewModel(
 
     fun setAutoDndLiftDuringBreaks(lift: Boolean) =
         viewModelScope.launch { repository.saveAutoDndLiftDuringBreaks(lift) }
+
+    // Memoized per key: a plain function calling stateIn() on every call would spin up a new hot
+    // flow each recomposition, so the same StateFlow instance is reused across calls for a key.
+    private val accordionExpandedFlows = mutableMapOf<AccordionKey, StateFlow<Boolean>>()
+
+    fun accordionExpanded(key: AccordionKey): StateFlow<Boolean> =
+        accordionExpandedFlows.getOrPut(key) {
+            repository.accordionExpandedFlow(key).stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                key.defaultExpanded
+            )
+        }
+
+    fun setAccordionExpanded(key: AccordionKey, expanded: Boolean) =
+        viewModelScope.launch { repository.saveAccordionExpanded(key, expanded) }
 
 
     private suspend fun resyncNotifications() {

@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
@@ -72,6 +73,12 @@ fun HabitListScreen(
 ) {
     val habitsWithCompletions by viewModel.habitsWithCompletions.collectAsState()
     val use24HourFormat by settingsViewModel.use24HourFormat.collectAsState()
+    val isDueTodayExpanded by settingsViewModel.accordionExpanded(AccordionKey.HABITS_DUE_TODAY)
+        .collectAsState()
+    val isUpcomingExpanded by settingsViewModel.accordionExpanded(AccordionKey.HABITS_UPCOMING)
+        .collectAsState()
+    val isDoneExpanded by settingsViewModel.accordionExpanded(AccordionKey.HABITS_DONE)
+        .collectAsState()
     var historySheetFor by remember { mutableStateOf<HabitWithCompletions?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var reorderMode by remember { mutableStateOf(false) }
@@ -195,7 +202,12 @@ fun HabitListScreen(
                         ExpansionSection(
                             title = "${stringResource(R.string.commonTimeDueToday)} (${dueToday.size})",
                             color = WarningColor,
-                            initiallyExpanded = true,
+                            expanded = isDueTodayExpanded,
+                            onExpandedChange = {
+                                settingsViewModel.setAccordionExpanded(
+                                    AccordionKey.HABITS_DUE_TODAY, it
+                                )
+                            },
                         ) {
                             GroupedHabitsSection(
                                 habits = dueToday,
@@ -229,7 +241,12 @@ fun HabitListScreen(
                         ExpansionSection(
                             title = "${stringResource(R.string.commonTimeUpcoming)} (${upcoming.size})",
                             color = InfoColor,
-                            initiallyExpanded = false,
+                            expanded = isUpcomingExpanded,
+                            onExpandedChange = {
+                                settingsViewModel.setAccordionExpanded(
+                                    AccordionKey.HABITS_UPCOMING, it
+                                )
+                            },
                         ) {
                             GroupedHabitsSection(
                                 habits = upcoming,
@@ -263,7 +280,12 @@ fun HabitListScreen(
                         ExpansionSection(
                             title = "${stringResource(R.string.commonTimeDone)} (${done.size})",
                             color = SuccessColor,
-                            initiallyExpanded = false,
+                            expanded = isDoneExpanded,
+                            onExpandedChange = {
+                                settingsViewModel.setAccordionExpanded(
+                                    AccordionKey.HABITS_DONE, it
+                                )
+                            },
                         ) {
                             GroupedHabitsSection(
                                 habits = done,

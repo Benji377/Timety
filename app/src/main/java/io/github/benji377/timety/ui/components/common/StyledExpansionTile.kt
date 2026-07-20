@@ -24,21 +24,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-/** Collapsible tile with a plain-text title; tapping the header toggles [content]'s visibility. */
+/**
+ * Collapsible tile with a plain-text title; tapping the header toggles [content]'s visibility.
+ * Expanded state is internal (starting at [initiallyExpanded]) unless the caller passes
+ * [expanded]/[onExpandedChange] to hoist and persist it externally.
+ */
 @Composable
 fun StyledExpansionTile(
     title: String,
     titleColor: Color,
     initiallyExpanded: Boolean = false,
+    expanded: Boolean? = null,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    var isExpanded by remember { mutableStateOf(initiallyExpanded) }
+    var internalExpanded by remember { mutableStateOf(initiallyExpanded) }
+    val isExpanded = expanded ?: internalExpanded
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { isExpanded = !isExpanded }
+                .clickable {
+                    val next = !isExpanded
+                    onExpandedChange?.invoke(next) ?: run { internalExpanded = next }
+                }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -71,9 +81,12 @@ fun StyledExpansionTile(
     title: @Composable () -> Unit,
     iconColor: Color,
     initiallyExpanded: Boolean = false,
+    expanded: Boolean? = null,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    var isExpanded by remember { mutableStateOf(initiallyExpanded) }
+    var internalExpanded by remember { mutableStateOf(initiallyExpanded) }
+    val isExpanded = expanded ?: internalExpanded
 
     Column(
         modifier = Modifier
@@ -83,7 +96,10 @@ fun StyledExpansionTile(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { isExpanded = !isExpanded }
+                .clickable {
+                    val next = !isExpanded
+                    onExpandedChange?.invoke(next) ?: run { internalExpanded = next }
+                }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

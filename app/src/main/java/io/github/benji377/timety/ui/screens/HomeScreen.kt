@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
@@ -104,6 +105,13 @@ fun HomeScreen(
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val completeRecurring =
         rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
+
+    val isTasksDueExpanded by settingsViewModel.accordionExpanded(AccordionKey.HOME_TASKS_DUE)
+        .collectAsState()
+    val isHabitsDueExpanded by settingsViewModel.accordionExpanded(AccordionKey.HOME_HABITS_DUE)
+        .collectAsState()
+    val isTasksUpcomingExpanded by settingsViewModel.accordionExpanded(AccordionKey.HOME_TASKS_UPCOMING)
+        .collectAsState()
 
     val userName = userProfile?.name ?: "User"
 
@@ -256,7 +264,12 @@ fun HomeScreen(
                                         urgentTasks.size + recurringDueCount
                                     ),
                                     titleColor = WarningColor,
-                                    initiallyExpanded = true
+                                    expanded = isTasksDueExpanded,
+                                    onExpandedChange = {
+                                        settingsViewModel.setAccordionExpanded(
+                                            AccordionKey.HOME_TASKS_DUE, it
+                                        )
+                                    },
                                 ) {
                                     urgentTasks.forEach { task ->
                                         TaskListTile(
@@ -300,7 +313,12 @@ fun HomeScreen(
                                         todaysHabits.size
                                     ),
                                     titleColor = HabitColor,
-                                    initiallyExpanded = false
+                                    expanded = isHabitsDueExpanded,
+                                    onExpandedChange = {
+                                        settingsViewModel.setAccordionExpanded(
+                                            AccordionKey.HOME_HABITS_DUE, it
+                                        )
+                                    },
                                 ) {
                                     GroupedHabitsSection(
                                         habits = todaysHabits,
@@ -342,7 +360,12 @@ fun HomeScreen(
                                         upcomingTasks.size + recurringUpcoming.size
                                     ),
                                     titleColor = TaskColor,
-                                    initiallyExpanded = false
+                                    expanded = isTasksUpcomingExpanded,
+                                    onExpandedChange = {
+                                        settingsViewModel.setAccordionExpanded(
+                                            AccordionKey.HOME_TASKS_UPCOMING, it
+                                        )
+                                    },
                                 ) {
                                     upcomingTasks.forEach { task ->
                                         TaskListTile(
