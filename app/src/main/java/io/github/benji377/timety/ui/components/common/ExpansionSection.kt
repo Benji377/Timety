@@ -17,6 +17,8 @@ fun ExpansionSection(
     color: Color,
     initiallyExpanded: Boolean = true,
     icon: ImageVector = Icons.Filled.Circle,
+    expanded: Boolean? = null,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     StyledExpansionTile(
@@ -31,6 +33,8 @@ fun ExpansionSection(
         },
         iconColor = color,
         initiallyExpanded = initiallyExpanded,
+        expanded = expanded,
+        onExpandedChange = onExpandedChange,
         content = content,
     )
 }

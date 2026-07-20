@@ -1,11 +1,18 @@
 package io.github.benji377.timety.ui.screens.habit
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,12 +36,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitBottomSheet
 import io.github.benji377.timety.ui.components.habit.HabitListTile
+import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.InfoColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -47,6 +56,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -63,7 +73,24 @@ fun HabitListScreen(
 ) {
     val habitsWithCompletions by viewModel.habitsWithCompletions.collectAsState()
     val use24HourFormat by settingsViewModel.use24HourFormat.collectAsState()
+    val isDueTodayExpanded by settingsViewModel.accordionExpanded(AccordionKey.HABITS_DUE_TODAY)
+        .collectAsState()
+    val isUpcomingExpanded by settingsViewModel.accordionExpanded(AccordionKey.HABITS_UPCOMING)
+        .collectAsState()
+    val isDoneExpanded by settingsViewModel.accordionExpanded(AccordionKey.HABITS_DONE)
+        .collectAsState()
     var historySheetFor by remember { mutableStateOf<HabitWithCompletions?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var reorderMode by remember { mutableStateOf(false) }
+
+    // Habits have no description field (unlike tasks), so search matches name and notes.
+    val filteredHabits = remember(habitsWithCompletions, searchQuery) {
+        if (searchQuery.isBlank()) habitsWithCompletions
+        else habitsWithCompletions.filter { hwc ->
+            hwc.habit.name.lowercase().contains(searchQuery.lowercase()) ||
+                hwc.habit.notes?.lowercase()?.contains(searchQuery.lowercase()) == true
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -105,46 +132,101 @@ fun HabitListScreen(
                 )
             }
         } else {
-            val today = LocalDate.now()
-            val dueToday = mutableListOf<HabitWithCompletions>()
-            val upcoming = mutableListOf<HabitWithCompletions>()
-            val done = mutableListOf<HabitWithCompletions>()
-
-            habitsWithCompletions.forEach { hwc ->
-                when {
-                    HabitUtils.isCompletedOn(
-                        hwc,
-                        today
-                    ) || HabitUtils.isWeeklyGoalMet(hwc) -> done.add(hwc)
-
-                    HabitUtils.isHabitDueToday(hwc) -> dueToday.add(hwc)
-                    else -> upcoming.add(hwc)
-                }
-            }
-
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(bottom = 80.dp)
+                    .padding(paddingValues)
             ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, top = 8.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it; if (it.isNotEmpty()) reorderMode = false },
+                        modifier = Modifier.weight(1f),
+                        placeholder = { Text(stringResource(R.string.habitListSearchHint)) },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                        singleLine = true,
+                        shape = AppTheme.brNeo
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            reorderMode = !reorderMode
+                            if (reorderMode) searchQuery = ""
+                        }
+                    ) {
+                        Icon(
+                            Icons.Filled.DragHandle,
+                            contentDescription = stringResource(R.string.habitListReorderToggleTooltip),
+                            tint = if (reorderMode) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                if (filteredHabits.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            stringResource(R.string.habitListFilterNoMatch),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    val today = LocalDate.now()
+                    val dueToday = mutableListOf<HabitWithCompletions>()
+                    val upcoming = mutableListOf<HabitWithCompletions>()
+                    val done = mutableListOf<HabitWithCompletions>()
+
+                    filteredHabits.forEach { hwc ->
+                        when {
+                            HabitUtils.isCompletedOn(
+                                hwc,
+                                today
+                            ) || HabitUtils.isWeeklyGoalMet(hwc) -> done.add(hwc)
+
+                            HabitUtils.isHabitDueToday(hwc) -> dueToday.add(hwc)
+                            else -> upcoming.add(hwc)
+                        }
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
                 if (dueToday.isNotEmpty()) {
                     item {
                         ExpansionSection(
                             title = "${stringResource(R.string.commonTimeDueToday)} (${dueToday.size})",
                             color = WarningColor,
-                            initiallyExpanded = true,
+                            expanded = isDueTodayExpanded,
+                            onExpandedChange = {
+                                settingsViewModel.setAccordionExpanded(
+                                    AccordionKey.HABITS_DUE_TODAY, it
+                                )
+                            },
                         ) {
                             GroupedHabitsSection(
                                 habits = dueToday,
                                 allHabitsForStacks = habitsWithCompletions,
                                 targetDate = today,
-                            ) { habit, isDone, isStacked, isLocked ->
+                                isReorderMode = reorderMode,
+                                onStandaloneReordered = { newOrder ->
+                                    viewModel.commitStandaloneReorder(newOrder.map { it.habit })
+                                },
+                                onStackReordered = { stackName, newOrder ->
+                                    viewModel.commitStackReorder(stackName, newOrder.map { it.habit })
+                                },
+                            ) { habit, isDone, isStacked, isLocked, isReorderMode ->
                                 HabitTileWrapper(
                                     hwc = habit,
                                     isDone = isDone,
                                     isStacked = isStacked,
                                     isLocked = isLocked,
+                                    isReorderMode = isReorderMode,
                                     viewModel = viewModel,
                                     use24HourFormat = use24HourFormat,
                                     onNavigateToHabitDetail = onNavigateToHabitDetail,
@@ -159,18 +241,31 @@ fun HabitListScreen(
                         ExpansionSection(
                             title = "${stringResource(R.string.commonTimeUpcoming)} (${upcoming.size})",
                             color = InfoColor,
-                            initiallyExpanded = false,
+                            expanded = isUpcomingExpanded,
+                            onExpandedChange = {
+                                settingsViewModel.setAccordionExpanded(
+                                    AccordionKey.HABITS_UPCOMING, it
+                                )
+                            },
                         ) {
                             GroupedHabitsSection(
                                 habits = upcoming,
                                 allHabitsForStacks = habitsWithCompletions,
                                 targetDate = today,
-                            ) { habit, isDone, isStacked, isLocked ->
+                                isReorderMode = reorderMode,
+                                onStandaloneReordered = { newOrder ->
+                                    viewModel.commitStandaloneReorder(newOrder.map { it.habit })
+                                },
+                                onStackReordered = { stackName, newOrder ->
+                                    viewModel.commitStackReorder(stackName, newOrder.map { it.habit })
+                                },
+                            ) { habit, isDone, isStacked, isLocked, isReorderMode ->
                                 HabitTileWrapper(
                                     hwc = habit,
                                     isDone = isDone,
                                     isStacked = isStacked,
                                     isLocked = isLocked,
+                                    isReorderMode = isReorderMode,
                                     viewModel = viewModel,
                                     use24HourFormat = use24HourFormat,
                                     onNavigateToHabitDetail = onNavigateToHabitDetail,
@@ -185,18 +280,31 @@ fun HabitListScreen(
                         ExpansionSection(
                             title = "${stringResource(R.string.commonTimeDone)} (${done.size})",
                             color = SuccessColor,
-                            initiallyExpanded = false,
+                            expanded = isDoneExpanded,
+                            onExpandedChange = {
+                                settingsViewModel.setAccordionExpanded(
+                                    AccordionKey.HABITS_DONE, it
+                                )
+                            },
                         ) {
                             GroupedHabitsSection(
                                 habits = done,
                                 allHabitsForStacks = habitsWithCompletions,
                                 targetDate = today,
-                            ) { habit, isDone, isStacked, isLocked ->
+                                isReorderMode = reorderMode,
+                                onStandaloneReordered = { newOrder ->
+                                    viewModel.commitStandaloneReorder(newOrder.map { it.habit })
+                                },
+                                onStackReordered = { stackName, newOrder ->
+                                    viewModel.commitStackReorder(stackName, newOrder.map { it.habit })
+                                },
+                            ) { habit, isDone, isStacked, isLocked, isReorderMode ->
                                 HabitTileWrapper(
                                     hwc = habit,
                                     isDone = isDone,
                                     isStacked = isStacked,
                                     isLocked = isLocked,
+                                    isReorderMode = isReorderMode,
                                     viewModel = viewModel,
                                     use24HourFormat = use24HourFormat,
                                     onNavigateToHabitDetail = onNavigateToHabitDetail,
@@ -205,6 +313,8 @@ fun HabitListScreen(
                             }
                         }
                     }
+                }
+                }
                 }
             }
         }
@@ -233,6 +343,7 @@ private fun HabitTileWrapper(
     isDone: Boolean,
     isStacked: Boolean,
     isLocked: Boolean,
+    isReorderMode: Boolean,
     viewModel: HabitViewModel,
     use24HourFormat: Boolean,
     onNavigateToHabitDetail: (String?) -> Unit,
@@ -260,6 +371,7 @@ private fun HabitTileWrapper(
         isCompleted = isDone,
         isStacked = isStacked,
         isLocked = isLocked,
+        isReorderMode = isReorderMode,
         subtitleText = subtitleText,
         progressValue = progressValue,
         onToggleCompleted = { viewModel.toggleCompletionToday(habit.id) },

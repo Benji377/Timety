@@ -96,6 +96,41 @@ class HabitViewModel(
     }
 
 
+    /**
+     * Commits a drag-reorder of the standalone habits visible in one list section.
+     * [newSectionOrder] is only that section's post-drag order; habits outside it (in other
+     * sections, or stacked) keep their exact relative position untouched.
+     */
+    fun commitStandaloneReorder(newSectionOrder: List<HabitEntity>) {
+        viewModelScope.launch {
+            val allStandalone = habitsWithCompletions.value.map { it.habit }
+                .filter { it.stackName.isNullOrBlank() }
+                .sortedBy { it.sortOrder }
+            val renumbered = spliceOrder(allStandalone, HabitEntity::id, newSectionOrder)
+                .mapIndexed { index, habit -> habit.copy(sortOrder = index) }
+            habitRepository.updateHabits(renumbered)
+            updateWidgets()
+        }
+    }
+
+    /**
+     * Commits a drag-reorder of [stackName]'s habits visible in one list section. A stack's
+     * members can be split across sections (e.g. one already done today), so this splices the
+     * new order into the full stack, not just the visible subset.
+     */
+    fun commitStackReorder(stackName: String, newSectionOrder: List<HabitEntity>) {
+        viewModelScope.launch {
+            val fullStack = habitsWithCompletions.value.map { it.habit }
+                .filter { it.stackName?.trim() == stackName }
+                .sortedBy { it.stackOrder ?: Int.MAX_VALUE }
+            val renumbered = spliceOrder(fullStack, HabitEntity::id, newSectionOrder)
+                .mapIndexed { index, habit -> habit.copy(stackOrder = index) }
+            habitRepository.updateHabits(renumbered)
+            updateWidgets()
+        }
+    }
+
+
     // Serializes the read-check-write completion updates below: two quick taps otherwise both
     // read "not completed" and insert a duplicate completion plus double XP.
     private val completionMutex = Mutex()
@@ -164,4 +199,16 @@ class HabitViewModel(
             updateWidgets()
         }
     }
+}
+
+
+/**
+ * Replaces the subsequence of [fullOrdered] identified by [key] matching an item in
+ * [newVisibleOrder] with [newVisibleOrder]'s order, leaving every other item's position
+ * untouched. Used to commit a drag-reorder of a visible subset back into its full domain list.
+ */
+private fun <T> spliceOrder(fullOrdered: List<T>, key: (T) -> String, newVisibleOrder: List<T>): List<T> {
+    val visibleIds = newVisibleOrder.map(key).toSet()
+    val iterator = newVisibleOrder.iterator()
+    return fullOrdered.map { if (key(it) in visibleIds) iterator.next() else it }
 }

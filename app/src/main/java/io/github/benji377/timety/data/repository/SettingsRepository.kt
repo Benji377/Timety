@@ -27,6 +27,24 @@ enum class ThemeMode(val storageValue: String) {
     }
 }
 
+/**
+ * Identifies a collapsible accordion section whose expanded/collapsed state is persisted, with
+ * [defaultExpanded] matching that section's original hardcoded default so existing installs see
+ * no change until they actually toggle it.
+ */
+enum class AccordionKey(val storageKey: String, val defaultExpanded: Boolean) {
+    HOME_TASKS_DUE("home_tasks_due", true),
+    HOME_HABITS_DUE("home_habits_due", false),
+    HOME_TASKS_UPCOMING("home_tasks_upcoming", false),
+    TASKS_OVERDUE("tasks_overdue", true),
+    TASKS_DUE_TODAY("tasks_due_today", true),
+    TASKS_UPCOMING("tasks_upcoming", true),
+    TASKS_DONE("tasks_done", false),
+    HABITS_DUE_TODAY("habits_due_today", true),
+    HABITS_UPCOMING("habits_upcoming", false),
+    HABITS_DONE("habits_done", false),
+}
+
 /** Repository for user preferences backed by DataStore, covering theme, formatting, and reminder-timing settings. */
 class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
@@ -84,6 +102,13 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     /** Null means Auto-DND currently owns no filter to restore. */
     val storedInterruptionFilterFlow: Flow<Int?> =
         dataStore.data.map { it[STORED_INTERRUPTION_FILTER] }
+
+    fun accordionExpandedFlow(key: AccordionKey): Flow<Boolean> =
+        dataStore.data.map { it[booleanPreferencesKey(key.storageKey)] ?: key.defaultExpanded }
+
+    suspend fun saveAccordionExpanded(key: AccordionKey, expanded: Boolean) {
+        dataStore.edit { it[booleanPreferencesKey(key.storageKey)] = expanded }
+    }
 
     suspend fun saveThemePref(theme: ThemeMode) {
         dataStore.edit { it[THEME_PREF] = theme.storageValue }

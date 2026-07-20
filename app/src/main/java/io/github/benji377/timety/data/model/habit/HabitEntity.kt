@@ -28,7 +28,8 @@ data class HabitEntity(
     val notes: String? = null,
     val iconCodePoint: Int? = null,
     val stackName: String? = null,
-    val stackOrder: Int? = null
+    val stackOrder: Int? = null,
+    val sortOrder: Int = 0
 )
 
 /** A habit paired with all of its completion records, for a Room `@Relation` query. */

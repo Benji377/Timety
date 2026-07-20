@@ -44,6 +44,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.TaskSortOption
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.TimetyFab
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
@@ -88,6 +89,15 @@ fun TaskListScreen(
     val horizonDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val completeRecurring =
         rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
+
+    val isOverdueExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_OVERDUE)
+        .collectAsState()
+    val isDueTodayExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_DUE_TODAY)
+        .collectAsState()
+    val isUpcomingExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_UPCOMING)
+        .collectAsState()
+    val isDoneExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_DONE)
+        .collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategoryFilter by remember { mutableStateOf<String?>(null) }
@@ -305,7 +315,12 @@ fun TaskListScreen(
                                 ExpansionSection(
                                     title = "${stringResource(R.string.taskListSectionOverdue)} (${overdue.size + recurringOverdue.size})",
                                     color = ErrorColor,
-                                    initiallyExpanded = true
+                                    expanded = isOverdueExpanded,
+                                    onExpandedChange = {
+                                        settingsViewModel.setAccordionExpanded(
+                                            AccordionKey.TASKS_OVERDUE, it
+                                        )
+                                    },
                                 ) {
                                     TaskSectionContent(
                                         overdue,
@@ -325,7 +340,12 @@ fun TaskListScreen(
                                 ExpansionSection(
                                     title = "${stringResource(R.string.taskListSectionToday)} (${dueToday.size + recurringToday.size})",
                                     color = WarningColor,
-                                    initiallyExpanded = true
+                                    expanded = isDueTodayExpanded,
+                                    onExpandedChange = {
+                                        settingsViewModel.setAccordionExpanded(
+                                            AccordionKey.TASKS_DUE_TODAY, it
+                                        )
+                                    },
                                 ) {
                                     TaskSectionContent(
                                         dueToday,
@@ -345,7 +365,12 @@ fun TaskListScreen(
                                 ExpansionSection(
                                     title = "${stringResource(R.string.taskListSectionUpcoming)} (${todo.size + recurringUpcoming.size})",
                                     color = TaskColor,
-                                    initiallyExpanded = true
+                                    expanded = isUpcomingExpanded,
+                                    onExpandedChange = {
+                                        settingsViewModel.setAccordionExpanded(
+                                            AccordionKey.TASKS_UPCOMING, it
+                                        )
+                                    },
                                 ) {
                                     TaskSectionContent(
                                         todo,
@@ -365,7 +390,12 @@ fun TaskListScreen(
                                 ExpansionSection(
                                     title = "${stringResource(R.string.taskListSectionDone)} (${done.size})",
                                     color = SuccessColor,
-                                    initiallyExpanded = false
+                                    expanded = isDoneExpanded,
+                                    onExpandedChange = {
+                                        settingsViewModel.setAccordionExpanded(
+                                            AccordionKey.TASKS_DONE, it
+                                        )
+                                    },
                                 ) {
                                     TaskSectionContent(
                                         done,

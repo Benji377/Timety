@@ -69,5 +69,27 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
     }
 }
 
+/**
+ * 2.2.0: adds `sortOrder` to `habits`, backing the new manual drag-to-reorder feature for
+ * standalone habits. Backfilled from the current `createdAt DESC` ordering (rather than left
+ * at the column default for every row) so the update doesn't visibly reshuffle existing habits.
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `habits` ADD COLUMN `sortOrder` INTEGER NOT NULL DEFAULT 0")
+        db.query("SELECT `id` FROM `habits` ORDER BY `createdAt` DESC").use { cursor ->
+            val idIndex = cursor.getColumnIndexOrThrow("id")
+            var order = 0
+            while (cursor.moveToNext()) {
+                db.execSQL(
+                    "UPDATE `habits` SET `sortOrder` = ? WHERE `id` = ?",
+                    arrayOf(order, cursor.getString(idIndex))
+                )
+                order++
+            }
+        }
+    }
+}
+
 /** All migrations, in order, to register on the Room builder. */
-val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2)
+val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)

@@ -41,14 +41,20 @@ import java.time.LocalDate
  * Renders [habits] for [targetDate], grouping any that share a stack name into a collapsible card
  * with a completion count, and rendering the rest standalone. Each habit is rendered via
  * [habitBuilder], which also receives whether the habit is locked (a stacked habit becomes
- * unlockable only once the previous one in the stack is completed).
+ * unlockable only once the previous one in the stack is completed) and whether reorder mode is
+ * active. While [isReorderMode] is true, both standalone habits and each stack's members become
+ * drag-reorderable (via [DraggableReorderColumn]); [onStandaloneReordered]/[onStackReordered]
+ * commit the result.
  */
 @Composable
 fun GroupedHabitsSection(
     habits: List<HabitWithCompletions>,
     allHabitsForStacks: List<HabitWithCompletions>,
     targetDate: LocalDate,
-    habitBuilder: @Composable (habit: HabitWithCompletions, isDone: Boolean, isStacked: Boolean, isLocked: Boolean) -> Unit,
+    isReorderMode: Boolean = false,
+    onStandaloneReordered: (List<HabitWithCompletions>) -> Unit = {},
+    onStackReordered: (stackName: String, newOrder: List<HabitWithCompletions>) -> Unit = { _, _ -> },
+    habitBuilder: @Composable (habit: HabitWithCompletions, isDone: Boolean, isStacked: Boolean, isLocked: Boolean, isReorderMode: Boolean) -> Unit,
 ) {
     val grouped = habits.filter { !it.habit.stackName.isNullOrBlank() }
         .groupBy { it.habit.stackName!!.trim() }
@@ -118,26 +124,41 @@ fun GroupedHabitsSection(
 
                     AnimatedVisibility(visible = isExpanded) {
                         Column {
-                            sortedStackHabits.forEachIndexed { index, hwc ->
-                                val isDone = HabitUtils.isCompletedOn(hwc, targetDate)
-                                var isLocked = false
-                                if (index > 0) {
-                                    val prevHwc = sortedStackHabits[index - 1]
-                                    val isPrevDone = HabitUtils.isCompletedOn(prevHwc, targetDate)
-                                    isLocked = HabitUtils.isHabitLocked(
-                                        index = index,
-                                        isCurrentHabitDone = isDone,
-                                        isPreviousHabitDone = isPrevDone,
-                                    )
+                            if (isReorderMode) {
+                                // Reorder mode temporarily suspends the completion-lock semantics
+                                // for editing, so there's no lock/divider bookkeeping to keep live
+                                // during a drag.
+                                DraggableReorderColumn(
+                                    items = sortedStackHabits,
+                                    key = { it.habit.id },
+                                    isReorderEnabled = true,
+                                    onOrderChanged = { onStackReordered(stackName, it) },
+                                ) { hwc, _ ->
+                                    val isDone = HabitUtils.isCompletedOn(hwc, targetDate)
+                                    habitBuilder(hwc, isDone, true, false, true)
                                 }
+                            } else {
+                                sortedStackHabits.forEachIndexed { index, hwc ->
+                                    val isDone = HabitUtils.isCompletedOn(hwc, targetDate)
+                                    var isLocked = false
+                                    if (index > 0) {
+                                        val prevHwc = sortedStackHabits[index - 1]
+                                        val isPrevDone = HabitUtils.isCompletedOn(prevHwc, targetDate)
+                                        isLocked = HabitUtils.isHabitLocked(
+                                            index = index,
+                                            isCurrentHabitDone = isDone,
+                                            isPreviousHabitDone = isPrevDone,
+                                        )
+                                    }
 
-                                if (index > 0) {
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = AppTheme.spaceLarge),
-                                    )
+                                    if (index > 0) {
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(horizontal = AppTheme.spaceLarge),
+                                        )
+                                    }
+
+                                    habitBuilder(hwc, isDone, true, isLocked, false)
                                 }
-
-                                habitBuilder(hwc, isDone, true, isLocked)
                             }
                         }
                     }
@@ -145,9 +166,14 @@ fun GroupedHabitsSection(
             }
         }
 
-        standalone.forEach { hwc ->
+        DraggableReorderColumn(
+            items = standalone.sortedBy { it.habit.sortOrder },
+            key = { it.habit.id },
+            isReorderEnabled = isReorderMode,
+            onOrderChanged = onStandaloneReordered,
+        ) { hwc, _ ->
             val isDone = HabitUtils.isCompletedOn(hwc, targetDate)
-            habitBuilder(hwc, isDone, false, false)
+            habitBuilder(hwc, isDone, false, false, isReorderMode)
         }
     }
 }
