@@ -205,8 +205,10 @@
     <string name="habitDetailLabelColorPicker">Wähle eine Farbe</string>
     <string name="habitDetailLabelStack">Gewohnheits-Stapel</string>
     <string name="habitDetailLabelStackHint">z.B. Morgenroutine</string>
-    <string name="habitDetailLabelStackOrder">Stapel-Reihenfolge</string>
     <string name="habitDetailSnackbarSaveNoDay">Bitte wähle mindestens einen Tag</string>
+    <string name="habitListFilterNoMatch">No habits match your search</string>
+    <string name="habitListReorderToggleTooltip">Reorder habits</string>
+    <string name="habitListSearchHint">Search name or notes…</string>
     <string name="habitDetailTitleEdit">Gewohnheit bearbeiten</string>
     <string name="habitDetailTitleView">Gewohnheitsdetails</string>
     <string name="habitDetailTitleNew">Neue Gewohnheit</string>
