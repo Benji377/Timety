@@ -6,6 +6,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.TimetyProgressBar
+import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -110,9 +112,10 @@ fun UserXpBreakdownCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = AppTheme.brNeo,
+        border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        elevation = AppTheme.neoCardElevation,
     ) {
         Column(
             modifier = Modifier

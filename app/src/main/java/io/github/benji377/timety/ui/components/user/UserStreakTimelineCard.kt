@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.components.user
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.FrostColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -101,9 +103,10 @@ fun UserStreakTimelineCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = AppTheme.brNeo,
+        border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        elevation = AppTheme.neoCardElevation,
     ) {
         Column(
             modifier = Modifier
