@@ -197,7 +197,7 @@ fun InteractiveGauge(
                         color = discBorderColor,
                         radius = innerRadius,
                         center = center,
-                        style = Stroke(width = 2.dp.toPx()),
+                        style = Stroke(width = AppTheme.listTileBorderWidth.toPx()),
                     )
                 }
 
@@ -210,7 +210,7 @@ fun InteractiveGauge(
                     drawPath(
                         path = squareGeometry.innerPath,
                         color = discBorderColor,
-                        style = Stroke(width = 2.dp.toPx()),
+                        style = Stroke(width = AppTheme.listTileBorderWidth.toPx()),
                     )
                 }
             }
@@ -285,7 +285,7 @@ fun InteractiveGauge(
                     color = gaugeColor,
                     radius = 14.dp.toPx(),
                     center = thumbCenter,
-                    style = Stroke(width = 4.dp.toPx())
+                    style = Stroke(width = AppTheme.borderThick.toPx())
                 )
             }
         }
@@ -346,7 +346,7 @@ fun InteractiveGauge(
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(if (isDark) GaugeBgDark else GaugeBgLight, CircleShape)
-                    .border(1.dp, if (isDark) GaugeBorderDark else GaugeBorderLight, CircleShape)
+                    .border(AppTheme.borderThin, if (isDark) GaugeBorderDark else GaugeBorderLight, CircleShape)
                     .clickable(enabled = onBottomTextTapped != null) { onBottomTextTapped?.invoke() }
                     .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceMedium),
             ) {

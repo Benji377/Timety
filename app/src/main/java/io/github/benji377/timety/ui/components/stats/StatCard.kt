@@ -52,7 +52,7 @@ fun StatCard(
         shape = AppTheme.brNeo,
         border = BorderStroke(AppTheme.neoBorderWidth, color),
         colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        elevation = AppTheme.neoCardElevation,
     ) {
         when (style) {
             StatCardStyle.KPI -> KpiContent(title, value, icon, color)

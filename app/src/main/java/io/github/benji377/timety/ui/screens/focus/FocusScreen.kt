@@ -345,7 +345,7 @@ fun FocusScreen(
                     Icon(
                         Icons.Filled.ArrowBackIosNew,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(AppTheme.iconSizeMedium),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -370,7 +370,7 @@ fun FocusScreen(
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowForwardIos,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(AppTheme.iconSizeMedium),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -482,7 +482,7 @@ fun FocusScreen(
                     Icon(
                         Icons.Filled.RestartAlt,
                         contentDescription = null,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(AppTheme.iconSizeXLarge),
                         tint = if (secondaryEnabled) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent,
                     )
                 }
@@ -539,7 +539,7 @@ fun FocusScreen(
                     Icon(
                         if (awaitingContinue) Icons.Filled.Stop else if (isPaused) Icons.Filled.PlayCircleFilled else Icons.Filled.Pause,
                         contentDescription = null,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(AppTheme.iconSizeXLarge),
                         tint = if (secondaryEnabled) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent,
                     )
                 }
