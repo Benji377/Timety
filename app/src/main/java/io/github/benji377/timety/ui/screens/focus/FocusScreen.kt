@@ -82,6 +82,7 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.TimetyTopBar
 import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
+import io.github.benji377.timety.ui.components.focus.GaugeShape
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.focus.ModeTimeline
 import io.github.benji377.timety.ui.components.focus.TargetSelectorBottomSheet
@@ -734,6 +735,7 @@ private fun TimerGauge(
 
     InteractiveGauge(
         progress = gaugeProgress,
+        gaugeShape = GaugeShape.Square,
         isStopwatch = isStopwatchAnim,
         color = gaugeColor,
         labelColor = gaugeColor,

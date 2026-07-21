@@ -57,6 +57,14 @@ object AppTheme {
     // Dimensions.
     val gaugeSize = 300.dp
     val gaugeStrokeWidth = 16.dp
+
+    // A circle inscribed in `gaugeSize` curves away from the corners of its own bounding box, so
+    // the surrounding layout's corner buttons sit in the gap that leaves; a square's flat edge
+    // doesn't curve away, so the square variant needs a smaller half-side than the circle's
+    // radius (142dp) to keep clear of those same corner buttons, which sit only ~8dp inside the
+    // gauge box's own left/right edges (measured via uiautomator: 16-64dp from the screen edge,
+    // gauge box starts ~56dp from the screen edge) - so 120dp leaves a comfortable ~20dp margin.
+    val gaugeSquareHalfSide = 120.dp
     val iconSizeSmall = 18.dp
     val listSectionIconSize = 12.dp
     val listTileBorderWidth = 2.dp
