@@ -43,14 +43,14 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NamedColorEditDialog
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
+import io.github.benji377.timety.ui.components.common.NeoButton as Button
 
 
 /** Screen listing focus tags, with actions to create, edit, and delete them. */
@@ -67,7 +67,7 @@ fun FocusTagsWidget(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.focusTagsTitle),
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)

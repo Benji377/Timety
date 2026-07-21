@@ -25,7 +25,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,8 +56,9 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
-import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoFilterChip
+import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -72,8 +72,8 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoButton as Button
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 /**
  * Lists the user's quick habits (interval reminders) and lets them add, edit, pause, or delete
@@ -95,7 +95,7 @@ fun QuickHabitsScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.quickHabitsTitle),
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -331,15 +331,15 @@ private fun QuickHabitEditDialog(
                 Text(stringResource(R.string.quickHabitDaysLabel))
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
                 Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
-                    FilterChip(
+                    NeoFilterChip(
                         selected = !specificDays,
                         onClick = { specificDays = false },
-                        label = { Text(stringResource(R.string.quickHabitEveryDay)) },
+                        label = stringResource(R.string.quickHabitEveryDay),
                     )
-                    FilterChip(
+                    NeoFilterChip(
                         selected = specificDays,
                         onClick = { specificDays = true },
-                        label = { Text(stringResource(R.string.quickHabitSpecificDays)) },
+                        label = stringResource(R.string.quickHabitSpecificDays),
                     )
                 }
                 if (specificDays) {
@@ -429,7 +429,7 @@ private fun QuickHabitEditDialog(
 
     editingWindowStart?.let { isStart ->
         val initialMinuteOfDay = if (isStart) startMinute else endMinute
-        TimetyTimePickerDialog(
+        NeoTimePickerDialog(
             initialHour = initialMinuteOfDay / 60,
             initialMinute = initialMinuteOfDay % 60,
             confirmLabel = stringResource(R.string.commonLabelSave),
@@ -457,10 +457,10 @@ private fun WeekdayChips(selected: Set<Int>, onToggle: (Int) -> Unit) {
     )
     FlowRow(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
         dayLabels.forEach { (day, label) ->
-            FilterChip(
+            NeoFilterChip(
                 selected = day in selected,
                 onClick = { onToggle(day) },
-                label = { Text(label) },
+                label = label,
             )
         }
     }

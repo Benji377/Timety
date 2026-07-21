@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.stats
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,8 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.theme.AppTheme
 
 
@@ -47,12 +45,10 @@ fun StatCard(
         StatCardStyle.KPI -> modifier
     }
 
-    Card(
+    NeoCard(
         modifier = sized,
-        shape = AppTheme.brNeo,
-        border = BorderStroke(AppTheme.neoBorderWidth, color),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f)),
-        elevation = AppTheme.neoCardElevation,
+        borderColor = color,
+        containerColor = color.copy(alpha = 0.08f),
     ) {
         when (style) {
             StatCardStyle.KPI -> KpiContent(title, value, icon, color)

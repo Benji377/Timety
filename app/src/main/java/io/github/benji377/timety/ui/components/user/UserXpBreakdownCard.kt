@@ -51,7 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
-import io.github.benji377.timety.ui.components.common.TimetyProgressBar
+import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.GoalColor
@@ -164,7 +164,7 @@ fun UserXpBreakdownCard(
 
             Spacer(Modifier.height(18.dp))
 
-            TimetyProgressBar(
+            NeoProgressBar(
                 progress = { levelProgress.toFloat().coerceIn(0f, 1f) },
                 modifier = Modifier
                     .fillMaxWidth()

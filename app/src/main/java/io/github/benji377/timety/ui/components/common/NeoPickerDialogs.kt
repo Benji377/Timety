@@ -34,7 +34,7 @@ import java.time.ZoneOffset
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimetyTimePickerDialog(
+fun NeoTimePickerDialog(
     initialHour: Int,
     initialMinute: Int,
     onConfirm: (hour: Int, minute: Int) -> Unit,
@@ -74,7 +74,7 @@ fun TimetyTimePickerDialog(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimetyDurationPickerDialog(
+fun NeoDurationPickerDialog(
     initialMinutes: Int,
     minMinutes: Int,
     maxMinutes: Int,
@@ -110,14 +110,14 @@ fun TimetyDurationPickerDialog(
 
 
 /**
- * Two-step date-then-time picker: a [DatePickerDialog] followed by a [TimetyTimePickerDialog],
+ * Two-step date-then-time picker: a [DatePickerDialog] followed by a [NeoTimePickerDialog],
  * confirming with the picked date, hour, and minute. The date is derived from the picker's UTC
  * millis; callers combine the parts into an Instant in their own zone. Cancelling either step
  * calls [onDismiss].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimetyDateTimePickerDialog(
+fun NeoDateTimePickerDialog(
     initialDateMillis: Long,
     initialHour: Int,
     initialMinute: Int,
@@ -158,7 +158,7 @@ fun TimetyDateTimePickerDialog(
             DatePicker(state = state)
         }
     } else {
-        TimetyTimePickerDialog(
+        NeoTimePickerDialog(
             initialHour = initialHour,
             initialMinute = initialMinute,
             onConfirm = { hour, minute -> onConfirm(date, hour, minute) },

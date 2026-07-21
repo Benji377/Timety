@@ -90,8 +90,8 @@ import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
-import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
 import io.github.benji377.timety.ui.components.common.detailFieldColors
@@ -119,7 +119,7 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -224,7 +224,7 @@ fun TaskDetailScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = appBarTitle,
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -661,7 +661,7 @@ fun TaskDetailScreen(
                 }
             }
         }
-        TimetyDateTimePickerDialog(
+        NeoDateTimePickerDialog(
             initialDateMillis = (if (target == PickerTarget.DUE_DATE) dueDate else null)
                 ?.toEpochMilli() ?: System.currentTimeMillis(),
             initialHour = 12,

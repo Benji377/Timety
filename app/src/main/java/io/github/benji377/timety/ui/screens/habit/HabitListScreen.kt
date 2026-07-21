@@ -38,8 +38,8 @@ import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
-import io.github.benji377.timety.ui.components.common.TimetyFab
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoFab
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitBottomSheet
 import io.github.benji377.timety.ui.components.habit.HabitListTile
@@ -56,7 +56,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -94,7 +94,7 @@ fun HabitListScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.habitsListTitle),
                 actions = {
                     IconButton(onClick = onNavigateToGoals) {
@@ -113,7 +113,7 @@ fun HabitListScreen(
             )
         },
         floatingActionButton = {
-            TimetyFab(
+            NeoFab(
                 onClick = { onNavigateToHabitDetail(null) },
                 containerColor = HabitColor
             )

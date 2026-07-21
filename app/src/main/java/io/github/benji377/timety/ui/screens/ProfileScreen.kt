@@ -60,7 +60,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.TextInputDialog
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.components.stats.StatCardStyle
 import io.github.benji377.timety.ui.components.user.StreakStatusBadge
@@ -263,7 +263,7 @@ fun ProfileScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.userProfileTitle),
                 actions = {
                     IconButton(onClick = { showShareWrapupDialog = true }) {

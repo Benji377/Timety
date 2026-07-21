@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,8 +23,6 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Today
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
@@ -64,7 +62,7 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -162,7 +160,7 @@ fun CalendarScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.calendarTitle),
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -557,18 +555,14 @@ private fun HabitsAccordion(
         } else {
             habits.forEach { hwc ->
                 val isCompleted = HabitUtils.isCompletedOn(hwc, selectedDate)
-                Card(
+                NeoListTile(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                         .clickable { onHabitClick(hwc) },
-                    shape = AppTheme.brMedium,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                    border = BorderStroke(
-                        1.dp,
-                        if (isCompleted) HabitColor.copy(alpha = 0.3f) else HabitColor
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    containerColor = MaterialTheme.colorScheme.background,
+                    borderColor = if (isCompleted) HabitColor.copy(alpha = 0.3f) else HabitColor,
+                    borderWidth = AppTheme.borderThin,
                 ) {
                     Row(
                         modifier = Modifier
@@ -664,18 +658,14 @@ private fun DayTaskRow(
     onClick: () -> Unit,
     trailing: @Composable () -> Unit,
 ) {
-    Card(
+    NeoListTile(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .clickable { onClick() },
-        shape = AppTheme.brMedium,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-        border = BorderStroke(
-            1.dp,
-            if (isCompleted) SuccessColor else TaskColor
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        containerColor = MaterialTheme.colorScheme.background,
+        borderColor = if (isCompleted) SuccessColor else TaskColor,
+        borderWidth = AppTheme.borderThin,
     ) {
         Row(
             modifier = Modifier
@@ -761,14 +751,13 @@ private fun FocusSessionsAccordion(
 
                 val focusMins = session.totalSecondsFocused / 60
 
-                Card(
+                NeoListTile(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 4.dp),
-                    shape = AppTheme.brMedium,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    containerColor = MaterialTheme.colorScheme.background,
+                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    borderWidth = AppTheme.borderThin,
                 ) {
                     Row(
                         modifier = Modifier

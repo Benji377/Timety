@@ -53,9 +53,9 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.goal.GoalWithEntries
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.ExpansionSection
-import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
-import io.github.benji377.timety.ui.components.common.TimetyProgressBar
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoProgressBar
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -67,8 +67,8 @@ import io.github.benji377.timety.util.goal.GoalUtils
 import io.github.benji377.timety.util.habit.HabitIcons
 import java.time.Instant
 import java.time.ZoneId
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoButton as Button
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -88,7 +88,7 @@ fun GoalsScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.goalsTitle),
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -337,7 +337,7 @@ private fun PacedProgressBar(
     color: Color,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        TimetyProgressBar(
+        NeoProgressBar(
             progress = { progressFraction.coerceIn(0f, 1f) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -432,7 +432,7 @@ private fun GoalEntryDialog(
 
     if (showDateTimePicker) {
         val zoned = timestamp.atZone(ZoneId.systemDefault())
-        TimetyDateTimePickerDialog(
+        NeoDateTimePickerDialog(
             initialDateMillis = timestamp.toEpochMilli(),
             initialHour = zoned.hour,
             initialMinute = zoned.minute,

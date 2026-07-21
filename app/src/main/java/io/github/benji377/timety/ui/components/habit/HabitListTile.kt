@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.habit
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,8 +21,6 @@ import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,8 +36,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
-import io.github.benji377.timety.ui.components.common.TimetyProgressBar
+import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -119,14 +117,11 @@ fun HabitListTile(
             }
         } else {
             val borderColor = if (isCompleted) color.copy(alpha = AppTheme.OPACITY_LIGHT) else color
-            Card(
+            NeoListTile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(margin),
-                shape = AppTheme.brMedium,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(AppTheme.listTileBorderWidth, borderColor),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                borderColor = borderColor,
             ) {
                 HabitTileContent(
                     habit = habit,
@@ -260,7 +255,7 @@ private fun HabitTileContent(
 
             if (progressValue != null && !isCompleted) {
                 Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-                TimetyProgressBar(
+                NeoProgressBar(
                     progress = { progressValue.coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth(),
                     color = color,

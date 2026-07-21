@@ -95,9 +95,9 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
-import io.github.benji377.timety.ui.components.common.TimetyDurationPickerDialog
-import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
+import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -114,7 +114,7 @@ import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -345,7 +345,7 @@ fun SettingsScreen(
         )
     }
     durationDialogSpec?.let { spec ->
-        TimetyDurationPickerDialog(
+        NeoDurationPickerDialog(
             initialMinutes = spec.current,
             minMinutes = spec.min,
             maxMinutes = spec.max,
@@ -367,7 +367,7 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.settingsTitle),
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -1150,7 +1150,7 @@ private data class TimeDialogSpec(
 @Composable
 private fun TimePickerDialogRow(spec: TimeDialogSpec, onDismiss: () -> Unit) {
     val (initialHour, initialMinute) = AppDateFormatUtils.parseHHmm(spec.current)
-    TimetyTimePickerDialog(
+    NeoTimePickerDialog(
         initialHour = initialHour,
         initialMinute = initialMinute,
         title = { Text(spec.title) },

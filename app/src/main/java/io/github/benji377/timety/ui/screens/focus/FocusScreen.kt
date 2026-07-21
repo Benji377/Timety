@@ -80,7 +80,7 @@ import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.services.FocusTimerService
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.TextInputDialog
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
 import io.github.benji377.timety.ui.components.focus.GaugeShape
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
@@ -105,7 +105,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.roundToInt
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
+import io.github.benji377.timety.ui.components.common.NeoButton as Button
 
 
 // durationMinutes encodes special cases: 0 means a stopwatch phase with no fixed length, and -1
@@ -314,7 +314,7 @@ fun FocusScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.focusTitle),
                 actions = {
                     IconButton(onClick = onNavigateToModes) {

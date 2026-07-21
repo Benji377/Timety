@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
  * no indicator/track gap or stop dot. Size (including height) is the caller's via [modifier].
  */
 @Composable
-fun TimetyProgressBar(
+fun NeoProgressBar(
     progress: () -> Float,
     color: Color,
     trackColor: Color,

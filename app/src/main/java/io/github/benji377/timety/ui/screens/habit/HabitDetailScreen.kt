@@ -28,7 +28,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
@@ -63,13 +62,13 @@ import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.detailFieldColors
-import io.github.benji377.timety.ui.components.common.detailFilterChipColors
 import io.github.benji377.timety.ui.components.common.detailSegmentedButtonColors
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
+import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.PickerField
-import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -85,7 +84,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -226,7 +225,7 @@ fun HabitDetailScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = appBarTitle,
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -484,15 +483,15 @@ fun HabitDetailScreen(
                         ) {
                             dayLabels.forEach { (day, label) ->
                                 val isSelected = selectedWeekdays.contains(day)
-                                FilterChip(
+                                NeoFilterChip(
                                     selected = isSelected,
                                     enabled = isEditing,
                                     onClick = {
                                         selectedWeekdays =
                                             if (isSelected) selectedWeekdays - day else selectedWeekdays + day
                                     },
-                                    label = { Text(label) },
-                                    colors = detailFilterChipColors(selectedColor),
+                                    label = label,
+                                    selectedColor = selectedColor,
                                 )
                             }
                         }
@@ -561,7 +560,7 @@ fun HabitDetailScreen(
         // Time picker dialog.
         if (showTimePicker) {
             val initial = targetTimeMinutes
-            TimetyTimePickerDialog(
+            NeoTimePickerDialog(
                 initialHour = initial?.let { it / 60 } ?: 8,
                 initialMinute = initial?.let { it % 60 } ?: 0,
                 title = { Text(stringResource(R.string.habitDetailLabelReminder)) },

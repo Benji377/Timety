@@ -36,8 +36,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
-import io.github.benji377.timety.ui.components.common.TimetyFab
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoFab
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.recurrenceCadenceLabel
 import io.github.benji377.timety.ui.components.task.recurringStatusColor
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -74,7 +74,7 @@ fun RecurringTasksScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.recurringTasksTitle),
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -82,7 +82,7 @@ fun RecurringTasksScreen(
             )
         },
         floatingActionButton = {
-            TimetyFab(onClick = { onNavigateToDetail(null) }, containerColor = TaskColor)
+            NeoFab(onClick = { onNavigateToDetail(null) }, containerColor = TaskColor)
         }
     ) { paddingValues ->
         if (recurringTasks.isEmpty()) {

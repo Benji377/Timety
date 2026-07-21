@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.task
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -28,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -61,15 +59,12 @@ fun RecurringTaskListTile(
     val dateFmt = LocalDateFormatSettings.current
     val borderColor = recurringStatusColor(status)
 
-    Card(
+    NeoListTile(
         modifier = modifier
             .fillMaxWidth()
             .padding(margin)
             .clickable { onTap() },
-        shape = AppTheme.brMedium,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(AppTheme.listTileBorderWidth, borderColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        borderColor = borderColor,
     ) {
         Row(
             modifier = Modifier
