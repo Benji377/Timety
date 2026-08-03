@@ -78,6 +78,13 @@ Choose your preferred way to stay productive.
 3. Download the `.apk` file (the universal APK works on all devices).
    *(Note: The `.aab` file is for app stores and bundle installers; most users should download the `.apk`)*
 
+> [!NOTE]
+> **APK Verification (SHA-256)**
+> To ensure the authenticity of the APK downloaded from GitHub, you can verify its signing certificate fingerprint matches the following: \
+> `a12e4cf83cbbdf2c4a33edf58c4866ba3763d7d4e83a40f35126e5bea41a5526`
+> 
+> *For independent verification, this same hash is also publicly recorded at the bottom of the official [F-Droid build manifest](https://gitlab.com/fdroid/fdroiddata/tree/master/metadata/io.github.benji377.timety.yml).*
+
 #### **How to install:**
 1. Download the `.apk` file.
 2. Open the file on your Android device.
