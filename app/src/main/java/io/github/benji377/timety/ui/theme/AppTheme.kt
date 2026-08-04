@@ -2,6 +2,9 @@ package io.github.benji377.timety.ui.theme
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,12 +60,39 @@ object AppTheme {
     // Dimensions.
     val gaugeSize = 300.dp
     val gaugeStrokeWidth = 16.dp
-    val iconSizeSmall = 18.dp
-    val listSectionIconSize = 12.dp
+
+    // A circle inscribed in `gaugeSize` curves away from the corners of its own bounding box, so
+    // the surrounding layout's corner buttons sit in the gap that leaves; a square's flat edge
+    // doesn't curve away, so the square variant needs a smaller half-side than the circle's
+    // radius (142dp) to keep clear of those same corner buttons, which sit only ~8dp inside the
+    // gauge box's own left/right edges (measured via uiautomator: 16-64dp from the screen edge,
+    // gauge box starts ~56dp from the screen edge) - so 120dp leaves a comfortable ~20dp margin.
+    val gaugeSquareHalfSide = 120.dp
+
+    // Border / stroke widths (dp), a 1..4 scale. listTileBorderWidth (2) and neoBorderWidth (3)
+    // keep their semantic names for list tiles and neo cards; borderThin/borderThick fill the ends.
+    val borderThin = 1.dp
     val listTileBorderWidth = 2.dp
     val neoBorderWidth = 3.dp
+    val borderThick = 4.dp
+
+    // Icon sizes (dp). iconSizeSmall (18) is kept for its existing call sites; iconSizeMedium/
+    // iconSizeXLarge cover the other common sizes. NOTE: raw 16.dp icons are still widespread and
+    // want normalizing to one of these in a later pass.
+    val iconSizeXSmall = 12.dp
+    val iconSizeSmall = 18.dp
+    val iconSizeMedium = 20.dp
+    val iconSizeLarge = 24.dp
+    val iconSizeXLarge = 32.dp
+    val listSectionIconSize = iconSizeXSmall
+    val listTileSwipeIconSize = iconSizeLarge
+
     val listTileTrailingSpacing = 8.dp
-    val listTileSwipeIconSize = 24.dp
+
+    // Neo cards are flat: no shadow/tonal elevation. Named once so every card expresses the rule
+    // instead of repeating `CardDefaults.cardElevation(defaultElevation = 0.dp)`.
+    val neoCardElevation: CardElevation
+        @Composable get() = CardDefaults.cardElevation(defaultElevation = 0.dp)
 
     const val PULSE_DURATION_MS = 2000
 

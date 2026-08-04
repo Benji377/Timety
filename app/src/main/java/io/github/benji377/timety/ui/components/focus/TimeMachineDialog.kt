@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
-import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -44,8 +44,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoButton as Button
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -183,7 +183,7 @@ fun TimeMachineDialog(
     pickerTarget?.let { target ->
         val referenceInstant = if (target == TimeMachineTarget.START) startDateTime else endDateTime
         val referenceTime = referenceInstant.atZone(zone)
-        TimetyDateTimePickerDialog(
+        NeoDateTimePickerDialog(
             initialDateMillis = referenceInstant.toEpochMilli(),
             initialHour = referenceTime.hour,
             initialMinute = referenceTime.minute,

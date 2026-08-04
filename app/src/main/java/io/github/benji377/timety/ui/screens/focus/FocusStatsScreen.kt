@@ -29,8 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.outlined.LocalOffer
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +65,7 @@ import io.github.benji377.timety.data.model.focus.DistractionUIType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.stats.SectionHeader
@@ -343,20 +342,17 @@ private fun TagFilterRow(
         modifier = Modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
     ) {
-        FilterChip(
+        NeoFilterChip(
             selected = selectedTagId == null,
             onClick = { onSelect(null) },
-            label = { Text(stringResource(R.string.focusTagsLabelAll)) },
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = FocusColor,
-                selectedLabelColor = Color.White
-            ),
+            label = stringResource(R.string.focusTagsLabelAll),
+            selectedColor = FocusColor,
         )
         usedTags.forEach { tag ->
-            FilterChip(
+            NeoFilterChip(
                 selected = selectedTagId == tag.id,
                 onClick = { onSelect(if (selectedTagId == tag.id) null else tag.id) },
-                label = { Text("${tag.name} (${counts[tag.id] ?: 0})") },
+                label = "${tag.name} (${counts[tag.id] ?: 0})",
                 leadingIcon = {
                     Box(
                         modifier = Modifier
@@ -365,9 +361,7 @@ private fun TagFilterRow(
                             .background(Color(tag.colorValue))
                     )
                 },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = Color(tag.colorValue).copy(alpha = 0.25f),
-                ),
+                selectedColor = Color(tag.colorValue),
             )
         }
     }

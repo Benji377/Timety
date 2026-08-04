@@ -1,7 +1,6 @@
 package io.github.benji377.timety.ui.components.habit
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.util.habit.HabitUtils
@@ -72,22 +70,15 @@ fun GroupedHabitsSection(
 
             var isExpanded by rememberSaveable(stackName) { mutableStateOf(false) }
 
-            Card(
+            NeoListTile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(AppTheme.paddingScreenHorizontal)
                     .padding(vertical = AppTheme.spaceSmall),
-                shape = AppTheme.brMedium,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                        alpha = if (isExpanded) 0.1f else 0.4f,
-                    ),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+                    alpha = if (isExpanded) 0.1f else 0.4f,
                 ),
-                border = BorderStroke(
-                    AppTheme.listTileBorderWidth,
-                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             ) {
                 Column {
                     Row(

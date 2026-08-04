@@ -28,7 +28,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimetyOutlinedTextField(
+fun NeoOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,

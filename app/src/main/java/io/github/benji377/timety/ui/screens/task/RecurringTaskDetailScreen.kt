@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,12 +66,12 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
-import io.github.benji377.timety.ui.components.common.TimetyDateTimePickerDialog
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoFilterChip
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
 import io.github.benji377.timety.ui.components.common.detailFieldColors
-import io.github.benji377.timety.ui.components.common.detailFilterChipColors
 import io.github.benji377.timety.ui.components.common.detailSegmentedButtonColors
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
@@ -95,8 +94,8 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoButton as Button
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 /** Which monthly anchoring the user picked; mapped to [MonthlyMode] plus ordinal on save. */
 private enum class MonthlyChoice { DAY_OF_MONTH, NTH_WEEKDAY, LAST_WEEKDAY }
@@ -233,7 +232,7 @@ fun RecurringTaskDetailScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = appBarTitle,
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -361,7 +360,7 @@ fun RecurringTaskDetailScreen(
                     ) {
                         (1..7).forEach { day ->
                             val isSelected = selectedWeekdays.contains(day)
-                            FilterChip(
+                            NeoFilterChip(
                                 selected = isSelected,
                                 enabled = isEditing,
                                 onClick = {
@@ -369,8 +368,8 @@ fun RecurringTaskDetailScreen(
                                         if (isSelected) selectedWeekdays - day
                                         else selectedWeekdays + day
                                 },
-                                label = { Text(weekdayShortName(day)) },
-                                colors = detailFilterChipColors(TaskColor),
+                                label = weekdayShortName(day),
+                                selectedColor = TaskColor,
                             )
                         }
                     }
@@ -555,7 +554,7 @@ fun RecurringTaskDetailScreen(
             }
         }
         val initialTime = dueDate?.atZone(zone)
-        TimetyDateTimePickerDialog(
+        NeoDateTimePickerDialog(
             initialDateMillis = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null)
                 ?.toEpochMilli() ?: System.currentTimeMillis(),
             initialHour = initialTime?.hour ?: 12,

@@ -25,9 +25,6 @@ import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -59,13 +55,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.data.model.user.DayRatingEntity
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoTabRow
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.stats.LegendDot
 import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.components.stats.StatCard
@@ -120,7 +116,7 @@ fun StatisticsScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.statsTitle),
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
@@ -133,49 +129,13 @@ fun StatisticsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            ) {
-                TabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    containerColor = Color.Transparent,
-                    divider = {},
-                    indicator = { tabPositions ->
-                        Box(
-                            modifier = Modifier
-                                .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                                .fillMaxSize()
-                                // TabRow places the indicator above the tabs; without this the
-                                // opaque pill covers the selected tab's label.
-                                .zIndex(-1f)
-                                .padding(4.dp)
-                                .shadow(4.dp, RoundedCornerShape(25.dp))
-                                .clip(RoundedCornerShape(25.dp))
-                                .background(activeColor)
-                        )
-                    }
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            text = {
-                                Text(
-                                    text = title,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (selectedTabIndex == index) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        )
-                    }
-                }
-            }
+            NeoTabRow(
+                tabs = tabs,
+                selectedIndex = selectedTabIndex,
+                onTabSelected = { selectedTabIndex = it },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                activeColor = activeColor
+            )
 
             Box(modifier = Modifier.fillMaxSize()) {
                 when (selectedTabIndex) {

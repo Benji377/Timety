@@ -1,14 +1,15 @@
 package io.github.benji377.timety.ui.components.common
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,8 +23,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.components.common.TimetyButton as Button
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoButton as Button
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /** Alert dialog with cancel/confirm actions; renders nothing while [visible] is false. */
@@ -38,12 +39,12 @@ fun ConfirmationDialog(
     confirmColor: Color? = null,
 ) {
     if (!visible) return
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = { Text(content) },
+        title = title,
+        text = content,
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss, text = stringResource(R.string.commonLabelCancel))
         },
         confirmButton = {
             Button(
@@ -76,31 +77,31 @@ fun TextInputDialog(
 ) {
     if (!visible) return
     var text by remember(visible) { mutableStateOf(initialValue) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text(labelText) },
-                placeholder = hintText?.let { { Text(it) } },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+    NeoDialog(onDismissRequest = onDismiss) {
+        Text(title, fontSize = AppTheme.fsHeadingSmall, fontWeight = AppTheme.fwBold)
+        Spacer(modifier = Modifier.height(AppTheme.spaceMedium))
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text(labelText) },
+            placeholder = hintText?.let { { Text(it) } },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            NeoTextButton(onClick = onDismiss, text = stringResource(R.string.commonLabelCancel))
+            Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+            NeoTextButton(
+                onClick = {
+                    val trimmed = text.trim()
+                    if (trimmed.isNotEmpty()) onConfirm(trimmed)
+                },
+                text = confirmLabel ?: stringResource(R.string.commonLabelSave),
             )
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                val trimmed = text.trim()
-                if (trimmed.isNotEmpty()) onConfirm(trimmed)
-            }) {
-                Text(confirmLabel ?: stringResource(R.string.commonLabelSave))
-            }
-        },
-    )
+        }
+    }
 }
 
 
@@ -123,34 +124,32 @@ fun NamedColorEditDialog(
     var name by remember { mutableStateOf(initialName) }
     var selectedColor by remember { mutableStateOf(initialColor) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(nameLabel) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                Text(colorLabel)
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                ColorSwatchGrid(
-                    colors = colors,
-                    selectedColor = selectedColor,
-                    onSelect = { selectedColor = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp),
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-        },
-        confirmButton = {
+    NeoDialog(onDismissRequest = onDismiss) {
+        Text(title, fontSize = AppTheme.fsHeadingSmall, fontWeight = AppTheme.fwBold)
+        Spacer(modifier = Modifier.height(AppTheme.spaceMedium))
+        Column {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(nameLabel) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+            Text(colorLabel)
+            Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
+            ColorSwatchGrid(
+                colors = colors,
+                selectedColor = selectedColor,
+                onSelect = { selectedColor = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            NeoTextButton(onClick = onDismiss, text = stringResource(R.string.commonLabelCancel))
+            Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
             Button(onClick = {
                 val trimmed = name.trim()
                 if (trimmed.isNotEmpty()) {
@@ -159,6 +158,6 @@ fun NamedColorEditDialog(
             }) {
                 Text(confirmLabel)
             }
-        },
-    )
+        }
+    }
 }

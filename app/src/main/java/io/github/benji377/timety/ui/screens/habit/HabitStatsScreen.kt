@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.screens.habit
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +31,6 @@ import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.WbSunny
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.components.stats.StatCardStyle
@@ -201,13 +199,11 @@ fun HabitStatsScreen(
                     val currentStreak = StreakCalculator.calculateCurrentStreak(dates)
                     val bestStreak = StreakCalculator.calculateBestStreak(dates)
 
-                    Card(
+                    NeoCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = AppTheme.spaceSmall),
-                        shape = AppTheme.brNeo,
-                        border = BorderStroke(AppTheme.neoBorderWidth, HabitColor),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        borderColor = HabitColor,
                     ) {
                         Row(
                             modifier = Modifier.padding(AppTheme.spaceLarge),

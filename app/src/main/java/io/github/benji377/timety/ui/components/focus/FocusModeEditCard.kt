@@ -57,8 +57,8 @@ import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
-import io.github.benji377.timety.ui.components.common.TimetyElevatedButton as ElevatedButton
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoElevatedButton as ElevatedButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /**

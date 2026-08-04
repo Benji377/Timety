@@ -43,7 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.util.location.LocationApi
@@ -53,7 +53,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import kotlin.time.Duration.Companion.milliseconds
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 /**
  * Screen for searching a location by name and picking one of the results, debouncing requests
@@ -111,7 +111,7 @@ fun LocationPickerScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.locationPickerTitle),
                 navigationIcon = {
                     IconButton(onClick = onBack) {

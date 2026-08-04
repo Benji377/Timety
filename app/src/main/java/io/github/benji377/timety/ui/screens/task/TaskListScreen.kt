@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,8 +45,9 @@ import io.github.benji377.timety.data.model.task.TaskSortOption
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
-import io.github.benji377.timety.ui.components.common.TimetyFab
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoFab
+import io.github.benji377.timety.ui.components.common.NeoFilterChip
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -67,7 +67,7 @@ import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.TaskFilterEngine
 import java.time.Instant
 import java.time.ZoneId
-import io.github.benji377.timety.ui.components.common.TimetyOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
 /**
@@ -150,7 +150,7 @@ fun TaskListScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.taskListTitle),
                 actions = {
                     IconButton(onClick = onNavigateToRecurring) {
@@ -163,7 +163,7 @@ fun TaskListScreen(
             )
         },
         floatingActionButton = {
-            TimetyFab(onClick = { onNavigateToTaskDetail(null) }, containerColor = TaskColor)
+            NeoFab(onClick = { onNavigateToTaskDetail(null) }, containerColor = TaskColor)
         }
     ) { paddingValues ->
         Column(
@@ -234,20 +234,20 @@ fun TaskListScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     item {
-                        FilterChip(
+                        NeoFilterChip(
                             selected = selectedCategoryFilter == null,
                             onClick = { selectedCategoryFilter = null },
-                            label = { Text(stringResource(R.string.taskListFilterAll)) }
+                            label = stringResource(R.string.taskListFilterAll)
                         )
                     }
                     items(allCategories, key = { it }) { category ->
                         val isSelected = selectedCategoryFilter == category
-                        FilterChip(
+                        NeoFilterChip(
                             selected = isSelected,
                             onClick = {
                                 selectedCategoryFilter = if (isSelected) null else category
                             },
-                            label = { Text(category) },
+                            label = category,
                             leadingIcon = {
                                 categoryColors[category]?.let { AppUtils.CategoryDot(it) }
                             }

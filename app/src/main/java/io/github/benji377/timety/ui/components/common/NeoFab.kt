@@ -3,10 +3,12 @@ package io.github.benji377.timety.ui.components.common
 import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,7 +23,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
  * owning section's accent color.
  */
 @Composable
-fun TimetyFab(
+fun NeoFab(
     onClick: () -> Unit,
     containerColor: Color,
     icon: ImageVector = Icons.Filled.Add,
@@ -41,4 +43,31 @@ fun TimetyFab(
     ) {
         Icon(icon, contentDescription)
     }
+}
+
+/**
+ * Neobrutalist extended (icon + label) FAB: same flat, outlined treatment as [NeoFab] for
+ * actions that need a text label.
+ */
+@Composable
+fun NeoExtendedFab(
+    onClick: () -> Unit,
+    text: String,
+    containerColor: Color,
+    icon: ImageVector = Icons.Filled.Add,
+) {
+    ExtendedFloatingActionButton(
+        onClick = onClick,
+        modifier = Modifier.border(
+            AppTheme.neoBorderWidth,
+            MaterialTheme.colorScheme.outline,
+            AppTheme.brNeo
+        ),
+        shape = AppTheme.brNeo,
+        elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+        containerColor = containerColor,
+        contentColor = Color.White,
+        icon = { Icon(icon, contentDescription = null) },
+        text = { Text(text) },
+    )
 }

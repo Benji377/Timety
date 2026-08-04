@@ -51,7 +51,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
-import io.github.benji377.timety.ui.components.common.TimetyTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -347,7 +347,7 @@ private fun UnifiedCalendarSheetContent(
     val addDate = dateForAdd
     if (addDate != null) {
         val now = LocalTime.now()
-        TimetyTimePickerDialog(
+        NeoTimePickerDialog(
             initialHour = now.hour,
             initialMinute = now.minute,
             title = {

@@ -28,8 +28,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -54,6 +52,7 @@ import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.ui.components.common.NeoTabRow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -144,20 +143,15 @@ fun TargetSelectorBottomSheet(
                         bottom = AppTheme.spaceMedium
                     ),
                 )
-                TabRow(selectedTabIndex = tabIndex) {
-                    Tab(
-                        selected = tabIndex == 0,
-                        onClick = { tabIndex = 0 },
-                        text = { Text(stringResource(R.string.globalLabelTags)) })
-                    Tab(
-                        selected = tabIndex == 1,
-                        onClick = { tabIndex = 1 },
-                        text = { Text(stringResource(R.string.globalLabelTasks)) })
-                    Tab(
-                        selected = tabIndex == 2,
-                        onClick = { tabIndex = 2 },
-                        text = { Text(stringResource(R.string.globalLabelHabits)) })
-                }
+                NeoTabRow(
+                    tabs = listOf(
+                        stringResource(R.string.globalLabelTags),
+                        stringResource(R.string.globalLabelTasks),
+                        stringResource(R.string.globalLabelHabits)
+                    ),
+                    selectedIndex = tabIndex,
+                    onTabSelected = { tabIndex = it }
+                )
                 Box(modifier = Modifier.fillMaxSize()) {
                     when (tabIndex) {
                         0 -> TagTab(

@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.task
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,8 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskEntity
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
-import io.github.benji377.timety.ui.components.common.TimetyProgressBar
+import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -79,15 +77,12 @@ fun TaskListTile(
     val progress = if (hasSubtasks) subtasksCompleted.toFloat() / subtasksTotal.toFloat() else 0f
 
     val card = @Composable {
-        Card(
+        NeoListTile(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(margin)
                 .clickable { onTap() },
-            shape = AppTheme.brMedium,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            border = BorderStroke(AppTheme.listTileBorderWidth, borderColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            borderColor = borderColor,
         ) {
             // Custom row instead of ListItem: M3 ListItem top-aligns leading/trailing
             // content on three-line items, whereas the custom ListTile keeps them
@@ -143,7 +138,7 @@ fun TaskListTile(
                                 fontWeight = AppTheme.fwMedium,
                             )
                             Spacer(Modifier.width(8.dp))
-                            TimetyProgressBar(
+                            NeoProgressBar(
                                 progress = { progress },
                                 modifier = Modifier
                                     .weight(1f)

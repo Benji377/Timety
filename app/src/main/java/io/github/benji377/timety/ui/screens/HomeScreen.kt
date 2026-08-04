@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,8 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,8 +41,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
-import io.github.benji377.timety.ui.components.common.TimetyFab
-import io.github.benji377.timety.ui.components.common.TimetyTopBar
+import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.common.NeoFab
+import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitListTile
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
@@ -178,7 +176,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TimetyTopBar(
+            NeoTopBar(
                 title = stringResource(R.string.appTitle),
                 actions = {
                     IconButton(onClick = onNavigateToStatistics) {
@@ -197,7 +195,7 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            TimetyFab(onClick = { onNavigateToTaskDetail(null) }, containerColor = TaskColor)
+            NeoFab(onClick = { onNavigateToTaskDetail(null) }, containerColor = TaskColor)
         }
     ) { paddingValues ->
         Column(
@@ -414,13 +412,11 @@ private fun DailyGoalCard(
     modifier: Modifier = Modifier
 ) {
     val progress = if (dailyTarget > 0) focusMinsToday.toFloat() / dailyTarget else 0f
-    Card(
+    NeoCard(
         onClick = onClick,
         modifier = modifier,
-        shape = AppTheme.brNeo,
-        border = BorderStroke(AppTheme.neoBorderWidth, FocusColor),
-        colors = CardDefaults.cardColors(containerColor = FocusColor.copy(alpha = 0.08f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        borderColor = FocusColor,
+        containerColor = FocusColor.copy(alpha = 0.08f),
     ) {
         Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
             Row(
