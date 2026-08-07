@@ -108,6 +108,12 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Tap a day to inspect its sessions</string>
     <string name="focusStatsSectionClockTitle">Daily Focus Rhythm</string>
+    <string name="focusSessionDeleteContent">This removes the session for good and takes back the XP it earned.</string>
+    <string name="focusSessionDeleteTitle">Delete Session?</string>
+    <string name="focusSessionDeletedSnackbar">Session deleted</string>
+    <string name="focusSessionEditTitle">Edit Session</string>
+    <string name="focusSessionEditorTarget">Attributed to</string>
+    <string name="focusSessionUpdatedSnackbar">Session updated</string>
     <string name="focusStatsSectionDistractionsEmpty">No distractions logged for this day</string>
     <string name="focusStatsSectionDistractionsSubtitle">Selected day, newest distractions first</string>
     <string name="focusStatsSectionDistractionsTitle">Distractions</string>
@@ -243,6 +249,8 @@
     <string name="habitsSheetEmpty">No habits available</string>
     <string name="taskDeleteContent">Are you sure you want to delete this task?</string>
     <string name="taskDeleteTitle">Delete Task</string>
+    <string name="taskFocusLogSnackbar">Focus session attached</string>
+    <string name="taskFocusLogTitle">Log Focus Time</string>
     <string name="taskDetailsLabelCategory">Category</string>
     <string name="taskDetailsLabelCategoryAddNew">Add New Category</string>
     <string name="taskDetailsLabelCategoryEmpty">None</string>
@@ -381,6 +389,8 @@
     <string name="settingsLabelFeedbackSubtitle">Report bugs or request new features</string>
     <string name="settingsLabelFocusAutocomplete">Auto-complete linked task or habit</string>
     <string name="settingsLabelFocusAutocompleteSubtitle">Marks the selected task or habit as complete when a focus timer finishes</string>
+    <string name="settingsLabelFocusAskOnTaskComplete">Ask to log focus time</string>
+    <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Offers to attach a focus session when you check off a task</string>
     <string name="settingsLabelFocusGoal">Daily Focus Goal</string>
     <string name="settingsLabelFocusNodeTime">Max Phase Node Time</string>
     <string name="settingsLabelFocusNodeTimeSubtitle">Maximum length for a single focus block</string>

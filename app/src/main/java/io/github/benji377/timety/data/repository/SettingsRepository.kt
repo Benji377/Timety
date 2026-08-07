@@ -55,6 +55,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val USE_24_HOUR_FORMAT = booleanPreferencesKey("use24HourFormat")
         val DATE_FORMAT = stringPreferencesKey("dateFormat")
         val AUTO_COMPLETE_FOCUS = booleanPreferencesKey("autoCompleteFocus")
+        val ASK_FOCUS_ON_TASK_COMPLETE = booleanPreferencesKey("askFocusOnTaskComplete")
         val DAILY_GOAL_MINS = intPreferencesKey("dailyGoalMins")
         val MAX_STOPWATCH_MINS = intPreferencesKey("maxStopwatchMins")
         val MAX_NODE_MINS = intPreferencesKey("maxNodeMins")
@@ -79,6 +80,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val dateFormatFlow: Flow<String> = dataStore.data.map { it[DATE_FORMAT] ?: "System" }
     val autoCompleteFocusFlow: Flow<Boolean> =
         dataStore.data.map { it[AUTO_COMPLETE_FOCUS] ?: false }
+    val askFocusOnTaskCompleteFlow: Flow<Boolean> =
+        dataStore.data.map { it[ASK_FOCUS_ON_TASK_COMPLETE] ?: true }
     val dailyGoalMinsFlow: Flow<Int> = dataStore.data.map { it[DAILY_GOAL_MINS] ?: 90 }
     val maxStopwatchMinsFlow: Flow<Int> = dataStore.data.map { it[MAX_STOPWATCH_MINS] ?: 120 }
     val maxNodeMinsFlow: Flow<Int> = dataStore.data.map { it[MAX_NODE_MINS] ?: 240 }
@@ -124,6 +127,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun saveAutoCompleteFocus(autoComplete: Boolean) {
         dataStore.edit { it[AUTO_COMPLETE_FOCUS] = autoComplete }
+    }
+
+    suspend fun saveAskFocusOnTaskComplete(ask: Boolean) {
+        dataStore.edit { it[ASK_FOCUS_ON_TASK_COMPLETE] = ask }
     }
 
     suspend fun saveDailyGoalMins(mins: Int) {

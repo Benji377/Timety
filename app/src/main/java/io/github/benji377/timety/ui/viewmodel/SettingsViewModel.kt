@@ -35,6 +35,11 @@ class SettingsViewModel(
         SharingStarted.WhileSubscribed(5000),
         false
     )
+    val askFocusOnTaskComplete = repository.askFocusOnTaskCompleteFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        true
+    )
     val dailyGoalMins = repository.dailyGoalMinsFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -102,6 +107,9 @@ class SettingsViewModel(
     fun setDateFormat(format: String) = viewModelScope.launch { repository.saveDateFormat(format) }
     fun setAutoCompleteFocus(autoComplete: Boolean) =
         viewModelScope.launch { repository.saveAutoCompleteFocus(autoComplete) }
+
+    fun setAskFocusOnTaskComplete(ask: Boolean) =
+        viewModelScope.launch { repository.saveAskFocusOnTaskComplete(ask) }
 
     fun setDailyGoalMins(mins: Int) = viewModelScope.launch { repository.saveDailyGoalMins(mins) }
     fun setMaxStopwatchMins(mins: Int) =

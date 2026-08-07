@@ -41,6 +41,14 @@ class FocusRepository(
         focusDao.insertSession(session)
     }
 
+    suspend fun updateSession(session: FocusSessionEntity) = withContext(Dispatchers.IO) {
+        focusDao.updateSession(session)
+    }
+
+    suspend fun deleteSession(session: FocusSessionEntity) = withContext(Dispatchers.IO) {
+        focusDao.deleteSession(session)
+    }
+
     suspend fun insertDistraction(distraction: DistractionEntity) = withContext(Dispatchers.IO) {
         focusDao.insertDistraction(distraction)
     }

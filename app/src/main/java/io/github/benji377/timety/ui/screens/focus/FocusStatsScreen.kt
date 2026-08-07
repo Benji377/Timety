@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material3.HorizontalDivider
@@ -67,6 +68,7 @@ import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.WeekNavigator
+import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -110,6 +112,7 @@ fun FocusStatsScreen(
     var focusedWeek by remember { mutableStateOf(LocalDate.now()) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
     var selectedTagFilterId by remember { mutableStateOf<String?>(null) }
+    var editingSession by remember { mutableStateOf<FocusSessionEntity?>(null) }
 
     if (sessions.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -259,7 +262,8 @@ fun FocusStatsScreen(
                             session.modeId.let { id ->
                                 modeById[id]?.let { localizedFocusModeName(it) } ?: defaultModeLabel
                             },
-                            tagById
+                            tagById,
+                            onEdit = { editingSession = session },
                         )
                         if (index != sortedSessions.lastIndex) HorizontalDivider(
                             modifier = Modifier.padding(
@@ -313,6 +317,14 @@ fun FocusStatsScreen(
             TargetBreakdownSection(sessions)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
         }
+    }
+
+    editingSession?.let { session ->
+        EditSessionDialog(
+            session = session,
+            focusViewModel = focusViewModel,
+            onDismiss = { editingSession = null },
+        )
     }
 }
 
@@ -495,6 +507,7 @@ private fun SessionRow(
     targetName: String,
     modeName: String,
     tagById: Map<String, FocusTagEntity>,
+    onEdit: () -> Unit,
 ) {
     val (icon: ImageVector, color: Color) = when (session.targetType) {
         FocusTargetType.TASK -> Icons.Filled.TaskAlt to TaskColor
@@ -518,7 +531,12 @@ private fun SessionRow(
     )
     val mins = session.totalSecondsFocused / 60
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onEdit),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -529,7 +547,7 @@ private fun SessionRow(
             Icon(icon, contentDescription = null, tint = color)
         }
         Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(targetName, fontWeight = FontWeight.SemiBold, color = color)
             Text(
                 "$dateStr | $timeStr | ${AppDateFormatUtils.formatMinutesCompact(mins)} | $modeName",
@@ -537,6 +555,12 @@ private fun SessionRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        Icon(
+            Icons.Filled.Edit,
+            contentDescription = stringResource(R.string.focusSessionEditTitle),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(AppTheme.iconSizeSmall),
+        )
     }
 }
 

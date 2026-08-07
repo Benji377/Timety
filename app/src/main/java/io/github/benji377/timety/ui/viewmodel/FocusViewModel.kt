@@ -518,6 +518,48 @@ class FocusViewModel(
         endTime: Instant,
         tag: FocusTagEntity?
     ) {
+        logBackfilledSession(
+            mode = mode,
+            startTime = startTime,
+            endTime = endTime,
+            tagId = tag?.id,
+            targetType = FocusTargetType.TAG,
+            targetId = tag?.id,
+            targetLabel = tag?.name,
+        )
+    }
+
+    /**
+     * Logs a backfilled session attributed to the given task, used when the user attaches the time
+     * they spent while checking the task off.
+     */
+    fun logSessionForTask(
+        mode: FocusModeEntity,
+        startTime: Instant,
+        endTime: Instant,
+        taskId: String,
+        taskTitle: String
+    ) {
+        logBackfilledSession(
+            mode = mode,
+            startTime = startTime,
+            endTime = endTime,
+            tagId = null,
+            targetType = FocusTargetType.TASK,
+            targetId = taskId,
+            targetLabel = taskTitle,
+        )
+    }
+
+    private fun logBackfilledSession(
+        mode: FocusModeEntity,
+        startTime: Instant,
+        endTime: Instant,
+        tagId: String?,
+        targetType: FocusTargetType,
+        targetId: String?,
+        targetLabel: String?
+    ) {
         val totalSeconds = endTime.epochSecond - startTime.epochSecond
         if (totalSeconds <= 0) return
 
@@ -530,16 +572,62 @@ class FocusViewModel(
                     endTime = endTime,
                     totalSecondsFocused = totalSeconds.toInt(),
                     isCompleted = true,
-                    tagId = tag?.id,
-                    targetType = FocusTargetType.TAG,
-                    targetId = tag?.id,
-                    targetLabel = tag?.name,
+                    tagId = tagId,
+                    targetType = targetType,
+                    targetId = targetId,
+                    targetLabel = targetLabel,
                 )
             )
-            val focusMinutes = (totalSeconds / 60).toInt()
-            if (focusMinutes > 0) {
-                userRepository.addXp(focusMinutes * ExperienceEngine.XP_PER_FOCUS_MINS)
-            }
+            awardFocusXp((totalSeconds / 60).toInt())
+        }
+    }
+
+    /**
+     * Applies an edit to an already logged session: its focused time is re-derived from the new
+     * range and the XP it earned is corrected by the difference. [tag] only re-tags tag-targeted
+     * sessions; a session logged against a task or habit keeps its target.
+     */
+    fun updateSession(
+        session: FocusSessionEntity,
+        mode: FocusModeEntity,
+        startTime: Instant,
+        endTime: Instant,
+        tag: FocusTagEntity?
+    ) {
+        val totalSeconds = (endTime.epochSecond - startTime.epochSecond).toInt()
+        if (totalSeconds <= 0) return
+
+        val retimed = session.copy(
+            modeId = mode.id,
+            startTime = startTime,
+            endTime = endTime,
+            totalSecondsFocused = totalSeconds,
+        )
+        val updated = if (session.targetType == FocusTargetType.TAG) {
+            retimed.copy(tagId = tag?.id, targetId = tag?.id, targetLabel = tag?.name)
+        } else {
+            retimed
+        }
+
+        viewModelScope.launch {
+            focusRepository.updateSession(updated)
+            awardFocusXp(totalSeconds / 60 - session.totalSecondsFocused / 60)
+        }
+    }
+
+    /** Deletes a logged session (and its distractions, by cascade) and takes back the XP it earned. */
+    fun deleteSession(session: FocusSessionEntity) {
+        viewModelScope.launch {
+            focusRepository.deleteSession(session)
+            awardFocusXp(-(session.totalSecondsFocused / 60))
+        }
+    }
+
+    // Focus XP is paid per whole minute, so a session's XP can be handed out and taken back
+    // symmetrically: editing or deleting one reverses exactly what logging it awarded.
+    private suspend fun awardFocusXp(minutes: Int) {
+        if (minutes != 0) {
+            userRepository.addXp(minutes * ExperienceEngine.XP_PER_FOCUS_MINS)
         }
     }
 }

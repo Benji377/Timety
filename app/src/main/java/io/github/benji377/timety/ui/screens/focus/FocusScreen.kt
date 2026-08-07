@@ -85,8 +85,8 @@ import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
 import io.github.benji377.timety.ui.components.focus.GaugeShape
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.focus.ModeTimeline
+import io.github.benji377.timety.ui.components.focus.SessionEditorDialog
 import io.github.benji377.timety.ui.components.focus.TargetSelectorBottomSheet
-import io.github.benji377.timety.ui.components.focus.TimeMachineDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -593,12 +593,13 @@ fun FocusScreen(
     }
 
     if (showTimeMachine) {
-        TimeMachineDialog(
+        SessionEditorDialog(
+            title = stringResource(R.string.dialogTimeMachineTitle),
             modes = allModes,
             tags = allTags,
             initialSelectedTagId = selectedTarget?.takeIf { it.type == FocusTargetType.TAG }?.id,
             onDismiss = { showTimeMachine = false },
-            onLog = { mode, start, end, tagId ->
+            onSave = { mode, start, end, tagId ->
                 focusViewModel.logPastSession(
                     mode,
                     start,

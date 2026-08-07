@@ -63,8 +63,10 @@ import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
+import io.github.benji377.timety.ui.components.task.rememberTaskCompletionToggle
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -109,6 +111,7 @@ fun CalendarScreen(
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val completeRecurring =
         rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
+    val toggleTaskCompletion = rememberTaskCompletionToggle(taskViewModel, focusViewModel)
     val zone = ZoneId.systemDefault()
 
     var focusedMonth by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
@@ -255,7 +258,7 @@ fun CalendarScreen(
                                 tasks = selectedDayTasks,
                                 recurringDue = selectedDayRecurringDue,
                                 recurringDone = selectedDayRecurringDone,
-                                onToggle = { task -> taskViewModel.toggleTaskCompletion(task.task) },
+                                onToggle = { task -> toggleTaskCompletion(task.task) },
                                 onTaskClick = { task -> onNavigateToTask(task.task.id) },
                                 onCompleteRecurring = completeRecurring,
                                 onUncheckRecurring = { occurrence ->
@@ -714,6 +717,7 @@ private fun FocusSessionsAccordion(
         LocalDateFormatSettings.current.use24HourFormat
     val ongoingLabel = stringResource(R.string.calendarLabelFocusOngoing)
     val untaggedLabel = stringResource(R.string.focusTargetUntagged)
+    var editingSession by remember { mutableStateOf<FocusSessionEntity?>(null) }
 
     StyledExpansionTile(
         title = stringResource(R.string.calendarSectionFocus, sessions.size),
@@ -754,7 +758,8 @@ private fun FocusSessionsAccordion(
                 NeoListTile(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .clickable { editingSession = session },
                     containerColor = MaterialTheme.colorScheme.background,
                     borderColor = MaterialTheme.colorScheme.outlineVariant,
                     borderWidth = AppTheme.borderThin,
@@ -773,7 +778,12 @@ private fun FocusSessionsAccordion(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = tag?.name ?: untaggedLabel, fontWeight = FontWeight.Bold)
+                            // Task- and habit-linked sessions carry no tag, so name them by the
+                            // target they were logged against rather than calling them untagged.
+                            val title = tag?.name
+                                ?: session.targetLabel?.trim()?.takeIf { it.isNotEmpty() }
+                                ?: untaggedLabel
+                            Text(text = title, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(4.dp))
                             if (mode != null) {
                                 Text(text = localizedFocusModeName(mode), fontSize = 13.sp)
@@ -796,5 +806,13 @@ private fun FocusSessionsAccordion(
             }
             Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
         }
+    }
+
+    editingSession?.let { session ->
+        EditSessionDialog(
+            session = session,
+            focusViewModel = focusViewModel,
+            onDismiss = { editingSession = null },
+        )
     }
 }

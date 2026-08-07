@@ -49,6 +49,7 @@ import io.github.benji377.timety.ui.components.habit.HabitListTile
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
+import io.github.benji377.timety.ui.components.task.rememberTaskCompletionToggle
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -103,6 +104,7 @@ fun HomeScreen(
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val completeRecurring =
         rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
+    val toggleTaskCompletion = rememberTaskCompletionToggle(taskViewModel, focusViewModel)
 
     val isTasksDueExpanded by settingsViewModel.accordionExpanded(AccordionKey.HOME_TASKS_DUE)
         .collectAsState()
@@ -280,9 +282,7 @@ fun HomeScreen(
                                             subtasksCompleted = task.subtasks.count { it.isCompleted },
                                             subtasksTotal = task.subtasks.size,
                                             onToggleCompleted = {
-                                                taskViewModel.toggleTaskCompletion(
-                                                    task.task
-                                                )
+                                                toggleTaskCompletion(task.task)
                                             },
                                             onTap = { onNavigateToTaskDetail(task.task.id) }
                                         )
@@ -373,9 +373,7 @@ fun HomeScreen(
                                             subtasksCompleted = task.subtasks.count { it.isCompleted },
                                             subtasksTotal = task.subtasks.size,
                                             onToggleCompleted = {
-                                                taskViewModel.toggleTaskCompletion(
-                                                    task.task
-                                                )
+                                                toggleTaskCompletion(task.task)
                                             },
                                             onTap = { onNavigateToTaskDetail(task.task.id) }
                                         )

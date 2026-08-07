@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
+import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSortOption
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.data.repository.AccordionKey
@@ -51,6 +52,7 @@ import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
+import io.github.benji377.timety.ui.components.task.rememberTaskCompletionToggle
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -89,6 +91,7 @@ fun TaskListScreen(
     val horizonDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val completeRecurring =
         rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
+    val toggleTaskCompletion = rememberTaskCompletionToggle(viewModel)
 
     val isOverdueExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_OVERDUE)
         .collectAsState()
@@ -326,6 +329,7 @@ fun TaskListScreen(
                                         overdue,
                                         isOverdue = true,
                                         viewModel = viewModel,
+                                        onToggleCompleted = toggleTaskCompletion,
                                         onNavigateToTaskDetail = onNavigateToTaskDetail,
                                         recurringTasks = recurringOverdue,
                                         recurringStatus = RecurringStatus.OVERDUE,
@@ -351,6 +355,7 @@ fun TaskListScreen(
                                         dueToday,
                                         isOverdue = false,
                                         viewModel = viewModel,
+                                        onToggleCompleted = toggleTaskCompletion,
                                         onNavigateToTaskDetail = onNavigateToTaskDetail,
                                         recurringTasks = recurringToday,
                                         recurringStatus = RecurringStatus.DUE_TODAY,
@@ -376,6 +381,7 @@ fun TaskListScreen(
                                         todo,
                                         isOverdue = false,
                                         viewModel = viewModel,
+                                        onToggleCompleted = toggleTaskCompletion,
                                         onNavigateToTaskDetail = onNavigateToTaskDetail,
                                         recurringTasks = recurringUpcoming,
                                         recurringStatus = RecurringStatus.UPCOMING,
@@ -401,6 +407,7 @@ fun TaskListScreen(
                                         done,
                                         isOverdue = false,
                                         viewModel = viewModel,
+                                        onToggleCompleted = toggleTaskCompletion,
                                         onNavigateToTaskDetail = onNavigateToTaskDetail
                                     )
                                 }
@@ -427,6 +434,7 @@ private fun TaskSectionContent(
     tasks: List<TaskWithSubtasks>,
     isOverdue: Boolean,
     viewModel: TaskViewModel,
+    onToggleCompleted: (TaskEntity) -> Unit,
     onNavigateToTaskDetail: (String?) -> Unit,
     recurringTasks: List<RecurringTaskEntity> = emptyList(),
     recurringStatus: RecurringStatus = RecurringStatus.SCHEDULED,
@@ -444,7 +452,7 @@ private fun TaskSectionContent(
                 isOverdue = isOverdue,
                 subtasksCompleted = subtasksCompleted,
                 subtasksTotal = subtasksTotal,
-                onToggleCompleted = { viewModel.toggleTaskCompletion(taskEntity) },
+                onToggleCompleted = { onToggleCompleted(taskEntity) },
                 onTap = { onNavigateToTaskDetail(taskEntity.id) },
                 onDelete = { viewModel.deleteTask(taskEntity) }
             )

@@ -177,6 +177,7 @@ fun SettingsScreen(
     val use24HourFormat by settingsViewModel.use24HourFormat.collectAsState()
     val dateFormat by settingsViewModel.dateFormat.collectAsState()
     val autoCompleteFocus by settingsViewModel.autoCompleteFocus.collectAsState()
+    val askFocusOnTaskComplete by settingsViewModel.askFocusOnTaskComplete.collectAsState()
     val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
     val maxStopwatchMins by settingsViewModel.maxStopwatchMins.collectAsState()
     val maxNodeMins by settingsViewModel.maxNodeMins.collectAsState()
@@ -478,6 +479,19 @@ fun SettingsScreen(
                         Switch(
                             checked = autoCompleteFocus,
                             onCheckedChange = { settingsViewModel.setAutoCompleteFocus(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
+                        )
+                    }
+                )
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelFocusAskOnTaskComplete)) },
+                    supportingContent = { Text(stringResource(R.string.settingsLabelFocusAskOnTaskCompleteSubtitle)) },
+                    leadingContent = { Icon(Icons.Outlined.Timer, null, tint = FocusColor) },
+                    trailingContent = {
+                        Switch(
+                            checked = askFocusOnTaskComplete,
+                            onCheckedChange = { settingsViewModel.setAskFocusOnTaskComplete(it) },
                             colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
                         )
                     }
