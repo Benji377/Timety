@@ -803,9 +803,9 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .padding(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                    elevation = AppTheme.neoCardElevation,
+                    elevation = AppTheme.flatCardElevation,
                     shape = AppTheme.brNeo,
-                    border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
+                    border = BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

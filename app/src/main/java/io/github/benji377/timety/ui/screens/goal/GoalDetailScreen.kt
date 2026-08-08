@@ -294,7 +294,6 @@ fun GoalDetailScreen(
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = detailFieldColors(isEditing),
-                        active = isEditing,
                     )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))

@@ -220,7 +220,7 @@ private fun GoalCard(
                     // toggle circle in HabitListTile.
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                     .border(
-                        BorderStroke(AppTheme.listTileBorderWidth, goalColor),
+                        BorderStroke(AppTheme.borderHairline, goalColor),
                         AppTheme.brNeo,
                     ),
                 contentAlignment = Alignment.Center,
@@ -416,7 +416,6 @@ private fun GoalEntryDialog(
                         trailingIcon = { Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = detailFieldColors(isEditing = true),
-                        active = true,
                     )
                 }
             }

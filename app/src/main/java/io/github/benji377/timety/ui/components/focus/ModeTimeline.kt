@@ -23,7 +23,6 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
-import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.BorderDark
 import io.github.benji377.timety.ui.theme.BorderLight
@@ -102,22 +101,17 @@ fun ModeTimeline(
 @Composable
 private fun PhaseDot(color: Color, active: Boolean) {
     val size = if (active) 18.dp else 12.dp
-    // Inactive dots stay a minimal flat fill (per the guide, fine to leave borderless/unshadowed
-    // here). The active dot gets a bordered+shadowed treatment, with the border in the app's
-    // standard outline color rather than colorScheme.primary (TaskColor blue) - the previous
-    // hardcoded primary border broke the screen's green focus-accent consistency.
-    val shadowModifier = if (active) {
-        Modifier.neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
-    } else {
-        Modifier
-    }
+    // Inactive dots stay a minimal borderless fill; the active dot is told apart by its larger
+    // size plus an outline ring, in the app's standard outline color rather than
+    // colorScheme.primary (TaskColor blue) - a hardcoded primary border would break the screen's
+    // green focus-accent consistency.
     Box(
-        modifier = shadowModifier
+        modifier = Modifier
             .size(size)
             .background(color, CircleShape)
             .then(
                 if (active) {
-                    Modifier.border(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                    Modifier.border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
                 } else {
                     Modifier
                 }
@@ -134,14 +128,9 @@ private fun CompletionNode(
     val size = if (active) 22.dp else 16.dp
     Box(
         modifier = Modifier
-            .neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
             .size(size)
             .background(fillColor, CircleShape)
-            .border(
-                if (active) AppTheme.neoBorderWidth else AppTheme.listTileBorderWidth,
-                borderColor,
-                CircleShape
-            )
+            .border(AppTheme.borderHairline, borderColor, CircleShape)
     )
 }
 

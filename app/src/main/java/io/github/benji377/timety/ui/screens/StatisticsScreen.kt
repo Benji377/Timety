@@ -492,8 +492,8 @@ private fun SynergyChart(
                     text = label,
                     style = TextStyle(
                         fontSize = 12.sp,
-                        // Bold on every label, not just today's - the reference sheet forbids
-                        // light/thin type weight anywhere; today is distinguished by color alone.
+                        // Bold on every label, not just today's - no light/thin type weight
+                        // anywhere; today is distinguished by color alone.
                         color = if (isToday) todayColor else axisTextColor,
                         fontWeight = FontWeight.Bold
                     )
@@ -577,7 +577,7 @@ private fun SynergyChart(
                         // every other tooltip/badge in the app instead of a translucent scrim.
                         .background(MaterialTheme.colorScheme.surface)
                         .border(
-                            BorderStroke(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline),
+                            BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
                             AppTheme.brMedium,
                         )
                         .padding(8.dp)
@@ -622,7 +622,7 @@ private fun TooltipRow(markerColor: Color, text: String) {
             modifier = Modifier
                 .size(AppTheme.spaceSmall)
                 .background(markerColor, CircleShape)
-                .border(AppTheme.borderThin, MaterialTheme.colorScheme.outline, CircleShape)
+                .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
         )
         Spacer(modifier = Modifier.width(AppTheme.spaceXSmall))
         Text(

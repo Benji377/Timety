@@ -315,7 +315,7 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
                     // fill standing in for a boolean emphasis, not an encoded data value, so it's
                     // gone. Today still needs a solid affordance beyond the label (bold text alone
                     // is too weak a signal at this bar size), so today's bar gets a solid outline
-                    // border instead - a neobrutalist-correct differentiator, not restored alpha.
+                    // border instead - a solid differentiator, not restored alpha.
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -327,7 +327,7 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
                             .then(
                                 if (isToday) {
                                     Modifier.border(
-                                        AppTheme.listTileBorderWidth,
+                                        AppTheme.borderHairline,
                                         MaterialTheme.colorScheme.outline,
                                         RoundedCornerShape(4.dp),
                                     )
@@ -469,7 +469,7 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
             buckets.forEach { bucket ->
                 val percent =
                     if (total == 0) 0 else ((bucket.count.toFloat() / total) * 100).roundToInt()
-                // Reuses NeoCard (solid border + hard shadow, accent-colored per bucket) instead
+                // Reuses NeoCard (solid fill, accent-colored border per bucket) instead
                 // of the alpha-tinted fill/border this used to have - same treatment as StatCard's
                 // accent-bordered summary cards, and drops the one-off 18dp radius in favor of the
                 // app-wide brNeo scale.
@@ -477,7 +477,6 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
                     modifier = Modifier.fillMaxWidth(0.47f),
                     borderColor = bucket.color,
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    shadowColor = bucket.color,
                 ) {
                     Row(
                         modifier = Modifier.padding(AppTheme.spaceMedium),
@@ -490,7 +489,7 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
                                 .size(36.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .border(AppTheme.listTileBorderWidth, bucket.color, CircleShape),
+                                .border(AppTheme.borderHairline, bucket.color, CircleShape),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(

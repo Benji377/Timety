@@ -50,8 +50,6 @@ import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoIconButton
-import io.github.benji377.timety.ui.components.common.neoPressShadow
-import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
@@ -91,9 +89,6 @@ fun FocusModeEditCard(
         if (!isEditing) tempPhases = phases
     }
 
-    // NeoCard's hard offset shadow replaces the previous Material elevation (which only
-    // differed between resting/editing states via a soft blurred shadow - exactly the kind of
-    // drift the reference sheet's flat, hard-shadow-only rule forbids).
     NeoCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -213,16 +208,15 @@ private fun OverviewView(
         }
         if (mode.isSystem) {
             // Small bordered circle badge instead of a bare glyph, so the lock reads as an
-            // intentional indicator rather than a stray icon against the bold card underneath -
+            // intentional indicator rather than a stray icon against the card underneath -
             // matches the bordered-circle badge language used for swatches elsewhere in the app.
             Box(
                 modifier = Modifier
                     .padding(AppTheme.spaceSmall)
                     .size(AppTheme.iconSizeXLarge)
-                    .neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface, CircleShape)
-                    .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape),
+                    .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -233,8 +227,7 @@ private fun OverviewView(
                 )
             }
         } else {
-            // Bordered, hard-shadowed tap targets (NeoIconButton) instead of bare floating
-            // icons, per the reference sheet's icon-only-button rule.
+            // Bordered tap targets (NeoIconButton) instead of bare floating icons.
             Row {
                 NeoIconButton(
                     onClick = onEdit,
@@ -325,19 +318,11 @@ private fun EditorView(
         Box(
             modifier = Modifier
                 .size(56.dp)
-                // Bold outline border + hard shadow instead of the previous thin outlineVariant
-                // border (a soft-tan-in-light-theme color the reference sheet flags as the
-                // app's "disabled/soft-UI" tell), matching the PhaseChip circles beside it.
-                // neoPressShadow (not the static neoShadow) so this clickable circle shifts
-                // toward its shadow on press like every other tappable element in the app.
-                .neoPressShadow(
-                    interactionSource = addPhaseInteractionSource,
-                    shape = CircleShape,
-                    offset = AppTheme.neoShadowOffsetSmall,
-                )
+                // A recessed surfaceVariant fill inside an outline ring, matching the PhaseChip
+                // circles beside it - the "add" slot reads as an empty version of the same chip.
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
                 .clickable(
                     interactionSource = addPhaseInteractionSource,
                     indication = ripple(),
@@ -373,18 +358,11 @@ private fun PhaseChip(phase: SessionPhaseEntity, flexLabel: String, onClick: () 
     Box(
         modifier = Modifier
             .size(56.dp)
-            // Bordered + hard-shadowed, matching the phase-dot treatment used by ModeTimeline's
-            // active node - a colored, tappable chip is exactly the "button" tier the reference
-            // sheet requires a border and shadow on. neoPressShadow (not the static neoShadow) so
-            // it shifts toward its shadow on press, like every other tappable element.
-            .neoPressShadow(
-                interactionSource = interactionSource,
-                shape = CircleShape,
-                offset = AppTheme.neoShadowOffsetSmall,
-            )
+            // Solid accent fill inside an outline ring, matching the phase-dot treatment used by
+            // ModeTimeline's active node.
             .clip(CircleShape)
             .background(if (isFocus) FocusColor else WarningColor, CircleShape)
-            .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
             .clickable(interactionSource = interactionSource, indication = ripple(), onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

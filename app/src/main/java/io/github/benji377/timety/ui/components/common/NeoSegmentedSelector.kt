@@ -25,10 +25,10 @@ import io.github.benji377.timety.ui.theme.AppTheme
  * (e.g. habit frequency: Daily / Flexible / Specific). This is the text-label sibling of Task
  * Detail's `AccordionSelector`: values like frequency don't have a natural per-option icon to
  * collapse to when unselected, so every segment keeps its label at a fixed equal width instead of
- * expanding on select - but the visual language is identical: a bold outer border and hard shadow
- * on the whole track, and the selected segment gets its own solid fill + border rather than a flat
- * tint with only a checkmark. Full contrast is kept in both edit and view mode; only tap-gating and
- * the track's background respond to [isEditing].
+ * expanding on select - but the visual language is identical: a hairline outer border on the whole
+ * track, and the selected segment gets its own solid fill + border rather than a flat tint with
+ * only a checkmark. Full contrast is kept in both edit and view mode; only tap-gating and the
+ * track's background respond to [isEditing].
  */
 @Composable
 fun <T> NeoSegmentedSelector(
@@ -46,14 +46,9 @@ fun <T> NeoSegmentedSelector(
         modifier = modifier
             .fillMaxWidth()
             .height(AppTheme.segmentedControlHeight)
-            // Lifted only while editable, matching the text fields beside it, so a read-only form
-            // is uniformly flat instead of mixing raised and recessed controls.
-            .then(
-                if (isEditing) Modifier.neoShadow(shape = AppTheme.brPill) else Modifier
-            )
             .clip(AppTheme.brPill)
-            // Opaque in both modes: the hard shadow is painted behind the whole control, so a
-            // transparent view-mode fill would show that shadow through the unselected segments.
+            // The editable/read-only distinction is carried entirely by this fill: an editable
+            // control sits on the brighter `surface`, a read-only one recedes to `surfaceVariant`.
             .background(
                 if (isEditing) {
                     MaterialTheme.colorScheme.surface
@@ -61,7 +56,7 @@ fun <T> NeoSegmentedSelector(
                     MaterialTheme.colorScheme.surfaceVariant
                 }
             )
-            .border(AppTheme.neoBorderWidth, borderColor, AppTheme.brPill)
+            .border(AppTheme.borderHairline, borderColor, AppTheme.brPill)
     ) {
         values.forEachIndexed { index, value ->
             val isSelected = value == selectedValue
@@ -81,19 +76,19 @@ fun <T> NeoSegmentedSelector(
                                     color = borderColor,
                                     start = Offset(size.width, 0f),
                                     end = Offset(size.width, size.height),
-                                    strokeWidth = AppTheme.listTileBorderWidth.toPx()
+                                    strokeWidth = AppTheme.borderHairline.toPx()
                                 )
                             }
                         } else m
                     }
                     .clickable(enabled = isEditing) { onSelected(value) }
-                    .padding(AppTheme.neoShadowOffsetSmall)
+                    .padding(AppTheme.segmentedSelectorInset)
                     .then(
                         if (isSelected) {
                             Modifier
                                 .clip(AppTheme.brMedium)
                                 .background(activeBgColor, AppTheme.brMedium)
-                                .border(AppTheme.listTileBorderWidth, borderColor, AppTheme.brMedium)
+                                .border(AppTheme.borderHairline, borderColor, AppTheme.brMedium)
                         } else Modifier
                     ),
                 horizontalArrangement = Arrangement.Center,

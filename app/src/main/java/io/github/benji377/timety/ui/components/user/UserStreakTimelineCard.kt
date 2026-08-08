@@ -96,8 +96,8 @@ fun UserStreakTimelineCard(
         if (days.isNotEmpty()) listState.scrollToItem(days.size - 1)
     }
 
-    // Reuses NeoCard (solid border + hard shadow) instead of a bare Card with a gradient/alpha
-    // background - see the matching comment on UserXpBreakdownCard for why.
+    // Reuses NeoCard instead of a bare Card with a gradient/alpha background - see the matching
+    // comment on UserXpBreakdownCard for why.
     NeoCard(
         modifier = modifier.fillMaxWidth(),
         containerColor = MaterialTheme.colorScheme.surface,
@@ -214,12 +214,10 @@ private fun streakStatusText(
 }
 
 /**
- * A single day cell in the streak strip. Reference sheet §6's "selected state: solid fill +
- * border, unselected: outline only" idiom drives the split here: today is the one solid-filled
- * "selected" cell, every other day shares one flat neutral background and is told apart purely by
- * its border's color and weight - a thin, solid neutral border rather than the alpha-faded one
- * this used to have, so non-today cells still read as bordered instead of a different, container-
- * less component sitting next to today's.
+ * A single day cell in the streak strip. Today is the one solid-filled "selected" cell; every
+ * other day shares one flat neutral background and is told apart purely by its border's *color* -
+ * every cell carries the same hairline stroke, so streak / bend / plain must be readable from hue
+ * alone.
  */
 @Composable
 private fun DayTile(info: StreakDayInfo, modifier: Modifier = Modifier) {
@@ -231,12 +229,10 @@ private fun DayTile(info: StreakDayInfo, modifier: Modifier = Modifier) {
         // A bend is a missed day the streak survived: told apart from a plain day by color alone,
         // matching the frozen flame.
         info.isBend -> FrostColor
-        // `outline`, not `outlineVariant` - this cell has its own background/border like a card,
-        // and `outlineVariant` is the soft tan/gray border color the general fixes ban, not a
-        // legitimate flat stand-in for it.
+        // `outline`, not `outlineVariant` - this cell has its own background and border like a
+        // card, and `outlineVariant` is reserved for dividers *inside* a container.
         else -> MaterialTheme.colorScheme.outline
     }
-    val borderWidth = if (info.isToday) AppTheme.listTileBorderWidth else AppTheme.borderThin
     val contentColor = if (info.isToday) Color.White else MaterialTheme.colorScheme.onSurface
     val labelColor = if (info.isToday) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -244,7 +240,7 @@ private fun DayTile(info: StreakDayInfo, modifier: Modifier = Modifier) {
         modifier = modifier
             .clip(shape)
             .background(backgroundColor)
-            .border(borderWidth, borderColor, shape)
+            .border(AppTheme.borderHairline, borderColor, shape)
             .padding(horizontal = 6.dp, vertical = 7.dp)
             .height(84.dp - 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -84,7 +84,7 @@ fun StreakStatusBadge(
                     .size(32.dp)
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape)
                     .border(
-                        AppTheme.listTileBorderWidth,
+                        AppTheme.borderHairline,
                         if (atRisk) FrostColor else WarningColor,
                         CircleShape,
                     ),

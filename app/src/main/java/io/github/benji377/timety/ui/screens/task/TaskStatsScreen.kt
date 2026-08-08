@@ -305,7 +305,7 @@ private fun SimpleBarChart(
                 // Habit tabs mark today the same way - a solid border, never an opacity change.
                 val todayBorder = if (isToday) {
                     Modifier.border(
-                        AppTheme.listTileBorderWidth,
+                        AppTheme.borderHairline,
                         MaterialTheme.colorScheme.outline,
                         barShape
                     )
@@ -527,13 +527,13 @@ private fun CalibrationBucketRow(bucket: CalibrationBucket) {
     ) {
         // Solid neutral fill + solid accent-colored border, matching the icon-badge idiom used
         // for the XP breakdown and session rows elsewhere - an alpha-tinted fill reads as a soft
-        // UI badge rather than a bordered neobrutalist one.
+        // UI badge rather than a bordered one.
         Box(
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .border(AppTheme.listTileBorderWidth, TaskColor, CircleShape),
+                .border(AppTheme.borderHairline, TaskColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(

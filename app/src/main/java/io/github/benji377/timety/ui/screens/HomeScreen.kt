@@ -189,7 +189,7 @@ fun HomeScreen(
                         onClick = onNavigateToCalendar,
                         icon = Icons.Filled.CalendarToday,
                         contentDescription = stringResource(R.string.commonTooltipCalendar),
-                        modifier = Modifier.padding(end = AppTheme.spaceSmall + AppTheme.neoShadowOffset),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall),
                     )
                 }
             )
@@ -237,8 +237,8 @@ fun HomeScreen(
             HorizontalDivider()
 
             // Tasks and habits list. Kept on the screen's own flat background (no tinted overlay)
-            // per the reference sheet's "single flat neutral background" and "no alpha-blended
-            // fills" rules - the divider above already separates this section visually.
+            // - the app uses one flat neutral background and no alpha-blended fills, and the
+            // divider above already separates this section visually.
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -414,11 +414,10 @@ private fun DailyGoalCard(
         modifier = modifier,
         borderColor = FocusColor,
         // Flat, solid fill (no alpha) so the card still reads as "filled" and distinct from the
-        // plain-white cards elsewhere on the screen, per the reference sheet's "flat saturated
-        // color... keep backgrounds neutral, let accent colors do all the work" (a solid accent
+        // plain-white cards elsewhere on the screen. Backgrounds stay neutral and let the accent
+        // colors do the work (a solid accent
         // fill behind body text would fight the FocusColor border/value text for contrast).
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        shadowColor = FocusColor,
     ) {
         Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
             Row(
@@ -464,7 +463,7 @@ private fun DailyGoalBar(progress: Float, modifier: Modifier = Modifier) {
     Canvas(
         modifier = modifier
             .height(16.dp)
-            .border(AppTheme.listTileBorderWidth, FocusColor)
+            .border(AppTheme.borderHairline, FocusColor)
     ) {
         drawRect(trackColor)
         drawRect(FocusColor, size = Size(size.width * progress.coerceIn(0f, 1f), size.height))

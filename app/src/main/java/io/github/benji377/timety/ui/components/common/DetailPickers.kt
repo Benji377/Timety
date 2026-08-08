@@ -96,16 +96,9 @@ fun IconPickerDialog(
                     Box(
                         modifier = Modifier
                             .size(AppTheme.neoIconButtonSize)
-                            // neoPressShadow (not the static neoShadow), so a tapped icon shifts
-                            // toward its shadow like every other clickable element.
-                            .neoPressShadow(
-                                interactionSource = interactionSource,
-                                shape = CircleShape,
-                                offset = AppTheme.neoShadowOffsetSmall,
-                            )
                             .clip(CircleShape)
                             .background(if (isSelected) accentColor else Color.Transparent)
-                            .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
                             .clickable(interactionSource = interactionSource, indication = ripple()) {
                                 onSelect(index)
                             },

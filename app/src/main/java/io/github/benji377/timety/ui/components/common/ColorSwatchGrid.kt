@@ -49,21 +49,20 @@ fun ColorSwatchGrid(
             Box(
                 modifier = Modifier
                     .size(swatchSize)
-                    // neoPressShadow (not the static neoShadow), so a tapped swatch shifts
-                    // toward its shadow like every other clickable element.
-                    .neoPressShadow(
-                        interactionSource = interactionSource,
-                        shape = CircleShape,
-                        offset = AppTheme.neoShadowOffsetSmall,
-                    )
                     .clip(CircleShape)
                     .background(optionColor)
-                    // Every swatch gets a bold border so it reads as a deliberate component, not
-                    // just a floating disc of color; the selected one steps up to the thicker neo
-                    // border width to stay clearly distinguishable, matching IconPickerDialog.
+                    // Every swatch gets a border so it reads as a deliberate component, not just a
+                    // floating disc of color. Selection is carried by that border's *color*, not
+                    // its width: at the flat design's single hairline weight a thicker ring is no
+                    // longer available as a state cue, so the selected swatch takes the full-
+                    // contrast `onSurface` ink while the rest keep the muted `outline`.
                     .border(
-                        width = if (isSelected) AppTheme.neoBorderWidth else AppTheme.listTileBorderWidth,
-                        color = MaterialTheme.colorScheme.outline,
+                        width = AppTheme.borderHairline,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.outline
+                        },
                         shape = CircleShape,
                     )
                     .clickable(interactionSource = interactionSource, indication = ripple()) {

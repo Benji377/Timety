@@ -50,8 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.benji377.timety.ui.components.common.neoPressShadow
-import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.GaugeBgDark
 import io.github.benji377.timety.ui.theme.GaugeBgLight
@@ -65,10 +63,9 @@ import kotlin.math.sin
 
 /**
  * Progress gauge used for focus sessions, with a label, a large center value, and a bottom pill.
- * The track/progress ring is drawn as a circle, with a bold border and a hard offset shadow
- * framing the dial. When [isInteractive] is true, the progress can be changed by dragging or
- * tapping the ring. When [isStopwatch] is true, the ring pulses instead of showing a fixed
- * progress amount.
+ * The track/progress ring is drawn as a circle inside a hairline frame. When [isInteractive] is
+ * true, the progress can be changed by dragging or tapping the ring. When [isStopwatch] is true,
+ * the ring pulses instead of showing a fixed progress amount.
  */
 @Composable
 fun InteractiveGauge(
@@ -92,7 +89,7 @@ fun InteractiveGauge(
 
     val isDark = LocalIsDarkTheme.current
     val gaugeColor = color ?: MaterialTheme.colorScheme.primary
-    // One bold outline around the whole dial, exactly like every other bordered element in the app.
+    // One outline around the whole dial, exactly like every other bordered element in the app.
     // The dial used to carry two competing rings - a thick colored band and a neutral gray donut -
     // which read as a heavy frame rather than as a progress indicator.
     val frameColor = MaterialTheme.colorScheme.outline
@@ -124,9 +121,6 @@ fun InteractiveGauge(
     Box(
         modifier = modifier
             .size(AppTheme.gaugeSize)
-            // The dial is a hero element (reference sheet §1): a bold hard offset shadow behind
-            // the whole circular frame, matching the play button's treatment.
-            .neoShadow(shape = CircleShape)
             .pointerInput(isInteractive) {
                 if (!isInteractive) return@pointerInput
                 detectDragGestures { change, _ -> handlePointer(change.position, size) }
@@ -141,13 +135,13 @@ fun InteractiveGauge(
             val center = Offset(size.width / 2f, size.height / 2f)
             val radius = minOf(size.width, size.height) / 2f
             val strokeWidth = AppTheme.gaugeStrokeWidth.toPx()
-            val frameWidth = AppTheme.borderThick.toPx()
+            val frameWidth = AppTheme.borderHairline.toPx()
 
             val faceFillColor = if (isDark) GaugeBgDark else GaugeWhite
 
-            // The dial is one solid card that happens to be round: a flat face, a single bold
-            // outline, and the hard shadow behind it - the same three ingredients as every card in
-            // the app, so it reads as part of the set rather than as a piece of instrumentation.
+            // The dial is one solid card that happens to be round: a flat face inside a single
+            // hairline outline, the same two ingredients as every card in the app, so it reads as
+            // part of the set rather than as a piece of instrumentation.
             drawCircle(color = faceFillColor, radius = radius, center = center)
             drawCircle(
                 color = frameColor,
@@ -241,18 +235,9 @@ fun InteractiveGauge(
             val bottomTextInteractionSource = remember { MutableInteractionSource() }
             Box(
                 modifier = Modifier
-                    // neoPressShadow (not the static neoShadow) must sit outside the clip below,
-                    // or the clip would cut off the shadow's protruding right/bottom edge; it also
-                    // makes this tappable pill shift toward its shadow on press like other
-                    // clickable elements.
-                    .neoPressShadow(
-                        interactionSource = bottomTextInteractionSource,
-                        shape = CircleShape,
-                        offset = AppTheme.neoShadowOffsetSmall,
-                    )
                     .clip(CircleShape)
                     .background(if (isDark) GaugeBgDark else GaugeBgLight, CircleShape)
-                    .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                    .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
                     .clickable(
                         enabled = onBottomTextTapped != null,
                         interactionSource = bottomTextInteractionSource,

@@ -13,8 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Fixed neobrutalist color schemes for light and dark mode. No Material You / dynamic color —
-// the palette is always the same regardless of device wallpaper.
+// Fixed color schemes for light and dark mode. No Material You / dynamic color — the palette is
+// always the same regardless of device wallpaper.
 
 private val DarkColorScheme = darkColorScheme(
     primary = TaskColor,
@@ -35,7 +35,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceContainerHigh = SurfaceAltDark,
     surfaceContainer = PaperAltDark,
     outline = BorderDark,
-    outlineVariant = Color(0xFF4A4A4A),
+    outlineVariant = Color(0xFF343434),
 )
 
 private val LightColorScheme = lightColorScheme(

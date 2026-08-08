@@ -94,7 +94,6 @@ import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
 import io.github.benji377.timety.ui.components.common.detailFieldColors
-import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.screens.LocationPickerScreen
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -393,7 +392,6 @@ fun TaskDetailScreen(
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         colors = detailFieldColors(isEditing),
-                        active = isEditing,
                     )
                 }
 
@@ -413,18 +411,12 @@ fun TaskDetailScreen(
                     Spacer(Modifier.height(AppTheme.spaceSmall))
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
-                        // Chips now cast a shadow (neoShadow); a vertical gap keeps a wrapped
-                        // row's chips from having their bottom shadow overdrawn by the next row.
                         verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
                     ) {
                         reminders.forEach { reminder ->
                             InputChip(
                                 selected = false,
                                 onClick = { if (isEditing) reminders = reminders - reminder },
-                                modifier = Modifier.neoShadow(
-                                    shape = AppTheme.brMedium,
-                                    offset = AppTheme.neoShadowOffsetSmall
-                                ),
                                 shape = AppTheme.brMedium,
                                 colors = InputChipDefaults.inputChipColors(
                                     containerColor = MaterialTheme.colorScheme.surface,
@@ -433,7 +425,7 @@ fun TaskDetailScreen(
                                     enabled = true,
                                     selected = false,
                                     borderColor = MaterialTheme.colorScheme.outline,
-                                    borderWidth = AppTheme.listTileBorderWidth,
+                                    borderWidth = AppTheme.borderHairline,
                                 ),
                                 label = {
                                     Text(
@@ -481,9 +473,9 @@ fun TaskDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.taskDetailsLabelLocation)) },
                     leadingIcon = { Icon(Icons.Outlined.Map, null) },
-                    // Left as a bare IconButton: it's a trailingIcon inside the field's own
-                    // already-bordered-and-shadowed NeoOutlinedTextField, so a second border here
-                    // would nest inside the first one instead of reading as a distinct control.
+                    // Left as a bare IconButton: it's a trailingIcon inside the already-bordered
+                    // NeoOutlinedTextField, so a second border here would nest inside the first
+                    // one instead of reading as a distinct control.
                     trailingIcon = {
                         if (isEditing) {
                             IconButton(onClick = { showLocationPicker = true }) {
@@ -575,7 +567,7 @@ fun TaskDetailScreen(
                     )
                     if (isEditing) {
                         // A genuine standalone row action (not nested in a field), so it gets
-                        // the same bordered+shadowed treatment as other icon buttons.
+                        // the same bordered container as other icon buttons.
                         NeoIconButton(
                             onClick = {
                                 subtasks = subtasks.filter { it.id != subtask.id }
@@ -745,10 +737,9 @@ private fun SectionHeader(title: String, icon: ImageVector) {
 
 /**
  * Segmented selector where the selected segment expands to show its label; the rest stay
- * icon-only. The outer track's bold border and hard shadow, and the selected segment's own solid
- * fill + border, stay at full contrast in both edit and view mode - per the reference sheet,
- * read-only is not a reason to soften a border; only the track's background and tap-gating change
- * with [isEditing].
+ * icon-only. The outer track's hairline border, and the selected segment's own solid fill +
+ * border, stay at full contrast in both edit and view mode - read-only is not a reason to soften a
+ * border; only the track's background and tap-gating change with [isEditing].
  */
 @Composable
 private fun <T> AccordionSelector(
@@ -766,12 +757,9 @@ private fun <T> AccordionSelector(
         modifier = Modifier
             .fillMaxWidth()
             .height(AppTheme.segmentedControlHeight)
-            // Lifted only while editable, matching the text fields beside it, so a read-only form
-            // is uniformly flat instead of mixing raised and recessed controls.
-            .then(if (isEditing) Modifier.neoShadow(shape = AppTheme.brPill) else Modifier)
             .clip(AppTheme.brPill)
-            // Opaque in both modes: the hard shadow is painted behind the whole control, so a
-            // transparent view-mode fill would show that shadow through the unselected segments.
+            // The editable/read-only distinction is carried entirely by this fill: an editable
+            // control sits on the brighter `surface`, a read-only one recedes to `surfaceVariant`.
             .background(
                 if (isEditing) {
                     MaterialTheme.colorScheme.surface
@@ -779,7 +767,7 @@ private fun <T> AccordionSelector(
                     MaterialTheme.colorScheme.surfaceVariant
                 }
             )
-            .border(AppTheme.neoBorderWidth, borderColor, AppTheme.brPill)
+            .border(AppTheme.borderHairline, borderColor, AppTheme.brPill)
     ) {
         values.forEachIndexed { index, value ->
             val isSelected = value == selectedValue
@@ -803,19 +791,19 @@ private fun <T> AccordionSelector(
                                     color = borderColor,
                                     start = Offset(size.width, 0f),
                                     end = Offset(size.width, size.height),
-                                    strokeWidth = AppTheme.listTileBorderWidth.toPx()
+                                    strokeWidth = AppTheme.borderHairline.toPx()
                                 )
                             }
                         } else m
                     }
                     .clickable(enabled = isEditing) { onSelected(value) }
-                    .padding(AppTheme.neoShadowOffsetSmall)
+                    .padding(AppTheme.segmentedSelectorInset)
                     .then(
                         if (isSelected) {
                             Modifier
                                 .clip(AppTheme.brMedium)
                                 .background(activeBgColor, AppTheme.brMedium)
-                                .border(AppTheme.listTileBorderWidth, borderColor, AppTheme.brMedium)
+                                .border(AppTheme.borderHairline, borderColor, AppTheme.brMedium)
                         } else Modifier
                     ),
                 horizontalArrangement = Arrangement.Center,

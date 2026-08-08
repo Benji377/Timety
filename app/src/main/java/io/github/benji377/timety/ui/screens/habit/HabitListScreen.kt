@@ -107,7 +107,7 @@ fun HabitListScreen(
                         onClick = onNavigateToQuickHabits,
                         icon = Icons.Outlined.Alarm,
                         contentDescription = stringResource(R.string.quickHabitsTitle),
-                        modifier = Modifier.padding(end = AppTheme.spaceSmall + AppTheme.neoShadowOffset),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall),
                     )
                 }
             )

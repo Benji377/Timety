@@ -57,9 +57,9 @@ fun NeoTopBar(
             navigationIcon = navigationIcon,
             actions = actions,
         )
-        // Bold bottom edge so every header reads as a distinct neobrutalist band.
+        // Bottom edge so every header reads as a distinct band above the content.
         HorizontalDivider(
-            thickness = AppTheme.neoBorderWidth,
+            thickness = AppTheme.borderHairline,
             color = MaterialTheme.colorScheme.outline,
         )
     }
@@ -87,7 +87,7 @@ fun BackNavigationIcon(onClick: () -> Unit) {
 /**
  * Top bar actions for the detail screens' view/edit modes: delete and edit buttons while
  * viewing an existing item, a save button while editing or creating. Bordered via [NeoIconButton]
- * instead of bare glyphs, per the reference sheet's "icon-only buttons get a container" rule.
+ * instead of bare glyphs, so every icon in a header carries a container of its own.
  */
 @Composable
 fun DetailTopBarActions(

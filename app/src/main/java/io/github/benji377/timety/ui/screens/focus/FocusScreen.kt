@@ -376,9 +376,7 @@ fun FocusScreen(
                 modifier = Modifier.padding(bottom = AppTheme.spaceMedium),
                 shape = AppTheme.brPill,
                 borderColor = FocusColor,
-                borderWidth = AppTheme.listTileBorderWidth,
-                shadowOffset = AppTheme.neoShadowOffsetSmall,
-                shadowColor = FocusColor,
+                borderWidth = AppTheme.borderHairline,
                 onClick = onNavigateToSettings,
             ) {
                 Row(
@@ -496,12 +494,10 @@ fun FocusScreen(
                         containerColor = if (isRunning) ErrorColor else FocusColor,
                         contentColor = Color.White
                     ),
-                    // Bold border: the play button is this screen's primary action and reference
-                    // treatment (reference sheet §6), so it holds a heavier border than the
-                    // neoBorderWidth used by the gauge frame and other cards. No elevation override
-                    // here - NeoButton's own neoPressShadow supplies the hard offset shadow, and a
-                    // Material elevation on top of it would reintroduce a blurred shadow.
-                    border = BorderStroke(AppTheme.borderThick, MaterialTheme.colorScheme.outline),
+                    // The play button is this screen's primary action, but its prominence comes
+                    // from its size and saturated fill, not from a heavier stroke - it takes the
+                    // same hairline border as everything else.
+                    border = BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
                     contentPadding = PaddingValues(0.dp),
                 ) {
                     Icon(

@@ -49,11 +49,10 @@ fun StatCard(
         modifier = sized,
         borderColor = color,
         // Flat, solid fill (no alpha) - keeps these summary cards visually distinct from plain
-        // white cards elsewhere, per the reference sheet's "flat saturated color... keep
-        // backgrounds neutral" rule (a solid accent fill would fight the accent-colored icon/value
+        // white cards elsewhere. Backgrounds stay neutral and let the accent colors do the work
+        // (a solid accent fill would fight the accent-colored icon/value
         // text for contrast).
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        shadowColor = color,
     ) {
         when (style) {
             StatCardStyle.KPI -> KpiContent(title, value, icon, color)

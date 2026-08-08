@@ -24,9 +24,10 @@ import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Bold-bordered modal surface with a hard [neoShadow]: the neo-styled replacement for Material3's
+ * Flat, hairline-bordered modal surface: the app's replacement for Material3's
  * [androidx.compose.material3.AlertDialog], whose default shape/elevation don't have a border
- * param to override.
+ * param to override. The dialog is separated from the scrim behind it by its own surface fill, so
+ * it needs no elevation of its own.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,10 +38,9 @@ fun NeoDialog(
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest, modifier = modifier) {
         Surface(
-            modifier = Modifier.neoShadow(shape = AppTheme.brNeo),
             shape = AppTheme.brNeo,
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
+            border = BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
             tonalElevation = 0.dp,
         ) {
             Column(modifier = Modifier.padding(AppTheme.spaceXLarge), content = content)

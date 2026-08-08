@@ -106,9 +106,8 @@ fun UserXpBreakdownCard(
         )
     }
 
-    // Reuses NeoCard (solid border + hard shadow) instead of a bare Card with a gradient/alpha
-    // background - both a gradient and an alpha-blended fill are exactly the soft-UI drift the
-    // reference sheet forbids; a flat solid container is the neobrutalist substitute.
+    // Reuses NeoCard instead of a bare Card with a gradient/alpha background: fills in this app
+    // are always flat and solid, so the container carries no gradient and no translucency.
     NeoCard(
         modifier = modifier.fillMaxWidth(),
         containerColor = MaterialTheme.colorScheme.surface,
@@ -122,7 +121,7 @@ fun UserXpBreakdownCard(
                         .size(44.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                        .border(AppTheme.listTileBorderWidth, titleColor, CircleShape),
+                        .border(AppTheme.borderHairline, titleColor, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -203,7 +202,7 @@ fun UserXpBreakdownCard(
                         if (index < sources.size - 1) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 16.dp),
-                                thickness = AppTheme.borderThin,
+                                thickness = AppTheme.borderHairline,
                                 color = MaterialTheme.colorScheme.outlineVariant,
                             )
                         }
@@ -235,7 +234,7 @@ private fun XpSourceRow(data: XpSourceRowData) {
                 .size(38.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .border(AppTheme.listTileBorderWidth, data.color, CircleShape),
+                .border(AppTheme.borderHairline, data.color, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -264,7 +263,7 @@ private fun XpSourceRow(data: XpSourceRowData) {
             modifier = Modifier
                 .clip(AppTheme.brPill)
                 .background(MaterialTheme.colorScheme.surface)
-                .border(AppTheme.borderThin, data.color, AppTheme.brPill)
+                .border(AppTheme.borderHairline, data.color, AppTheme.brPill)
                 .padding(horizontal = 10.dp, vertical = 6.dp),
         ) {
             Text(

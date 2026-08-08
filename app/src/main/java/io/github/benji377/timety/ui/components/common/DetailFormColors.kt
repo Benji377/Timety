@@ -19,8 +19,7 @@ import androidx.compose.ui.graphics.Color
  * - View mode ([isEditing] = false, the default): full-contrast value text (onSurface) so the
  *   screen stays readable, muted label/icons (onSurfaceVariant), and a recessed surfaceVariant
  *   container instead of the white one an editable field gets. The border stays solid rather than
- *   fading — per the reference sheet, "read-only does not mean soft-UI" — so the inactive state is
- *   carried by the fill and the missing shadow, not by a washed-out outline.
+ *   fading, so the inactive state is carried entirely by the fill, not by a washed-out outline.
  * - Edit mode ([isEditing] = true): for fields that stay `enabled = false` while editing because
  *   they open a picker on tap (due dates, reminder times) — styled to look like a normal active
  *   field: surface container, outline border, full-contrast text.
@@ -44,15 +43,14 @@ fun detailFieldColors(isEditing: Boolean = false): TextFieldColors = if (isEditi
         focusedContainerColor = MaterialTheme.colorScheme.surface,
         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
         errorContainerColor = MaterialTheme.colorScheme.surface,
-        // Bold outline border in both states - no thin/gray unfocused border, and no color shift
-        // on focus - matching the reference sheet's "border is always bold, never soft" rule.
+        // Same hairline outline in both states - no color shift on focus, so the field's fill is
+        // the only thing that changes between resting and focused.
         focusedBorderColor = MaterialTheme.colorScheme.outline,
         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
         errorBorderColor = MaterialTheme.colorScheme.error,
         // A recessed paper-alt fill rather than the white of an editable field, so a read-only form
-        // is legible as read-only at a glance. It must stay opaque either way: the field's hard
-        // shadow is painted behind it, and a transparent container would show that shadow through
-        // and turn the field into a solid black block.
+        // is legible as read-only at a glance. It must stay opaque: with the borders reduced to
+        // hairlines, this fill is the whole of the read-only cue.
         disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
         disabledTextColor = MaterialTheme.colorScheme.onSurface,
         disabledBorderColor = MaterialTheme.colorScheme.outline,

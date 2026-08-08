@@ -17,10 +17,10 @@ import androidx.compose.ui.text.style.TextAlign
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Bold-bordered, hard-shadowed segmented tab selector - the neobrutalist replacement for
- * Material's `TabRow`. Instead of an animated indicator sliding under a soft-shadowed pill, the
- * selected segment is simply filled solid with [activeColor] and gets its own thin inner border,
- * so it isn't the only unbordered element in the group.
+ * Flat segmented tab selector - the app's replacement for Material's `TabRow`. Instead of an
+ * animated indicator sliding under a soft-shadowed pill, the selected segment is simply filled
+ * solid with [activeColor] and gets its own hairline inner border, so it isn't the only unbordered
+ * element in the group.
  *
  * @param tabs labels shown left to right.
  * @param selectedIndex index into [tabs] of the currently active segment.
@@ -38,12 +38,11 @@ fun NeoTabRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .neoShadow(shape = AppTheme.brNeo)
             .clip(AppTheme.brNeo)
-            // Opaque fill is required, not cosmetic: the hard shadow is painted behind the whole
-            // row, so an unfilled row would show the shadow through its unselected segments.
+            // Opaque fill so the unselected segments read as part of one control rather than as
+            // gaps showing the page through.
             .background(MaterialTheme.colorScheme.surface)
-            .border(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
+            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
     ) {
         tabs.forEachIndexed { index, title ->
             val isSelected = index == selectedIndex
@@ -57,7 +56,7 @@ fun NeoTabRow(
                     .then(
                         if (isSelected) {
                             Modifier.border(
-                                AppTheme.listTileBorderWidth,
+                                AppTheme.borderHairline,
                                 MaterialTheme.colorScheme.outline
                             )
                         } else {

@@ -485,7 +485,7 @@ private fun FocusClockChart(
             val sweepAngleDeg = (sweepHours / 24.0) * 360.0
 
             // Data viz, not chrome: a Canvas-drawn arc segment on the 24-hour clock face, not a
-            // container fill - the reference sheet's chart-interior exemption applies.
+            // container fill, so the app's flat-fill rule doesn't apply to it.
             drawArc(
                 color = color.copy(alpha = 0.8f),
                 startAngle = startAngleDeg.toFloat(),
@@ -545,7 +545,7 @@ private fun SessionRow(
                 .size(40.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .border(AppTheme.listTileBorderWidth, color, CircleShape),
+                .border(AppTheme.borderHairline, color, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(icon, contentDescription = null, tint = color)
@@ -591,7 +591,7 @@ private fun DistractionRow(
                 .size(40.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .border(AppTheme.listTileBorderWidth, type.color, CircleShape),
+                .border(AppTheme.borderHairline, type.color, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(type.icon, contentDescription = null, tint = type.color)
@@ -666,7 +666,7 @@ private fun VolumeBarChart(
                     // fill standing in for a boolean emphasis, not an encoded data value, so it's
                     // gone. Today still needs a solid affordance beyond the label (bold text alone
                     // is too weak a signal at this bar size), so today's bar gets a solid outline
-                    // border instead - a neobrutalist-correct differentiator, not restored alpha.
+                    // border instead - a solid differentiator, not restored alpha.
                     Box(
                         modifier = Modifier
                             .fillMaxHeight(h)
@@ -676,7 +676,7 @@ private fun VolumeBarChart(
                             .then(
                                 if (isToday) {
                                     Modifier.border(
-                                        AppTheme.listTileBorderWidth,
+                                        AppTheme.borderHairline,
                                         MaterialTheme.colorScheme.outline,
                                         RoundedCornerShape(4.dp),
                                     )
@@ -1003,12 +1003,12 @@ private fun HeatmapSwatch(level: Int, showBorder: Boolean, modifier: Modifier = 
             .size(11.dp)
             .clip(shape)
             // Data viz, not chrome: this GitHub-style contribution cell's alpha step *is* the
-            // encoded value (0..4 intensity level), the same idiom the reference sheet exempts
-            // ("gradient stops... that encode data are fine to keep"). Only the zero-level
+            // encoded value (0..4 intensity level), so the no-alpha-fills rule doesn't apply -
+            // an alpha step that encodes data is data, not chrome. Only the zero-level
             // cell's outline is chrome, so that border stays solid rather than alpha-faded below.
             .background(if (level > 0) FocusColor.copy(alpha = 0.2f + level * 0.2f) else Color.Transparent)
             .then(
-                if (showBorder) Modifier.border(AppTheme.borderThin, outlineColor, shape) else Modifier
+                if (showBorder) Modifier.border(AppTheme.borderHairline, outlineColor, shape) else Modifier
             )
     )
 }

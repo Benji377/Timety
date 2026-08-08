@@ -23,10 +23,8 @@ import androidx.compose.ui.graphics.Shape
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Neobrutalist replacement for Material3's `FilterChip`: a pill-shaped, bold-bordered toggle chip
- * built from scratch (not a wrapper) so the selected/unselected look is fully controlled. Casts a
- * small [AppTheme.neoShadowOffsetSmall] [neoShadow] (see that function's KDoc for the spacing a
- * shadow needs to avoid being clipped by a neighboring chip).
+ * Flat replacement for Material3's `FilterChip`: a pill-shaped, hairline-bordered toggle chip
+ * built from scratch (not a wrapper) so the selected/unselected look is fully controlled.
  *
  * When [enabled] is false the chip becomes non-clickable, but a selected chip keeps its full-
  * contrast [selectedColor] fill instead of fading to Material's disabled alpha — matching the
@@ -44,26 +42,18 @@ fun NeoFilterChip(
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     val shape: Shape = RoundedCornerShape(percent = 50)
-    // An unselected chip is filled with the surface color rather than left transparent: the chip
-    // casts a hard shadow, which is painted behind it, so a transparent fill would show that shadow
-    // through the chip and render it as a solid black pill.
+    // An unselected chip is filled with the surface color rather than left transparent, so the
+    // fill - not a border weight - is what separates it from whatever it sits on.
     val containerColor = if (selected) selectedColor else MaterialTheme.colorScheme.surface
     val contentColor = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
     val interactionSource = remember { MutableInteractionSource() }
 
     Row(
         modifier = modifier
-            // neoPressShadow (not the static neoShadow), so the chip shifts toward its shadow on
-            // press like the other tappable elements in the app.
-            .neoPressShadow(
-                interactionSource = interactionSource,
-                shape = shape,
-                offset = AppTheme.neoShadowOffsetSmall,
-            )
             .clip(shape)
             .background(containerColor, shape)
             .border(
-                BorderStroke(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline),
+                BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
                 shape
             )
             .clickable(

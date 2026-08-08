@@ -65,7 +65,6 @@ import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -336,10 +335,9 @@ fun HabitDetailScreen(
                         Box(
                             modifier = Modifier
                                 .size(AppTheme.neoIconButtonSize)
-                                .neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape),
+                                .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
@@ -359,10 +357,9 @@ fun HabitDetailScreen(
                         Box(
                             modifier = Modifier
                                 .size(AppTheme.neoIconButtonSize)
-                                .neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
                                 .clip(CircleShape)
                                 .background(selectedColor)
-                                .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                                .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
                         )
                     }
                 }
@@ -511,7 +508,6 @@ fun HabitDetailScreen(
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = detailFieldColors(isEditing),
-                        active = isEditing,
                     )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))

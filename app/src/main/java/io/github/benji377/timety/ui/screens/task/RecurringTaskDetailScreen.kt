@@ -309,7 +309,6 @@ fun RecurringTaskDetailScreen(
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         colors = detailFieldColors(isEditing),
-                        active = isEditing,
                     )
                 }
                 Spacer(Modifier.height(AppTheme.spaceLarge))

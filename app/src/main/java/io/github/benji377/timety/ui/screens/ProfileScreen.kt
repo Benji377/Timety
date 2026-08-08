@@ -63,8 +63,6 @@ import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.neoPressShadow
-import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.components.stats.StatCardStyle
 import io.github.benji377.timety.ui.components.user.StreakStatusBadge
@@ -281,7 +279,7 @@ fun ProfileScreen(
                         onClick = onNavigateToSettings,
                         icon = Icons.Filled.Settings,
                         contentDescription = stringResource(R.string.settingsTitle),
-                        modifier = Modifier.padding(end = AppTheme.spaceSmall + AppTheme.neoShadowOffset),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall),
                     )
                 }
             )
@@ -302,10 +300,9 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(120.dp)
-                            .neoShadow(shape = CircleShape)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                            .border(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline, CircleShape),
+                            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         // validOrNull drops stale entries (pre-2.1.0 content:// URIs whose read
@@ -333,16 +330,9 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            // neoPressShadow (not the static neoShadow), so this clickable badge
-                            // shifts toward its shadow on press like other tappable elements.
-                            .neoPressShadow(
-                                interactionSource = avatarBadgeInteractionSource,
-                                shape = CircleShape,
-                                offset = AppTheme.neoShadowOffsetSmall,
-                            )
                             .clip(CircleShape)
                             .background(UserColor)
-                            .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
                             .clickable(
                                 interactionSource = avatarBadgeInteractionSource,
                                 indication = ripple(),

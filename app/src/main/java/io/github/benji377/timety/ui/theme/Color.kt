@@ -16,8 +16,12 @@ val PaperLight = Color(0xFFFFF8EF)
 val PaperAltLight = Color(0xFFF6EEDB)
 val PaperDark = Color(0xFF151515)
 val PaperAltDark = Color(0xFF202020)
-val BorderLight = Color(0xFF111111)
-val BorderDark = Color(0xFFF2E8D5)
+// Hairline border/divider colors. Muted rather than ink-black: at the flat design's single 1dp
+// stroke weight a full-contrast border reads as a hard outline around every element, which is the
+// look the flat pass is removing. These sit ~1.8:1 against their own mode's paper background -
+// enough to separate two surfaces, not enough to compete with content.
+val BorderLight = Color(0xFFC9BFAC)
+val BorderDark = Color(0xFF4A4A4A)
 
 // Semantic colors derived from the core palette.
 val SuccessColor = FocusColor
@@ -31,7 +35,7 @@ val GaugeWhite = Color.White
 val GaugeBgDark = PaperDark
 val GaugeLabelDark = Color(0xFFD4D4D4)
 
-// Surface helper colors used by the neobrutalist scheme
+// Surface helper colors used by the dark scheme
 val SurfaceAltDark = Color(0xFF2A2A2A)
 
 // Material accent choices offered by color pickers (habit color, focus tag color).

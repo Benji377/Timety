@@ -156,14 +156,13 @@ fun TaskListScreen(
             NeoTopBar(
                 title = stringResource(R.string.taskListTitle),
                 actions = {
-                    // Bordered, hard-shadowed tap target instead of a bare floating icon, per
-                    // the reference sheet's "icon-only buttons get the same border+shadow
-                    // treatment as text buttons" rule.
+                    // Bordered tap target instead of a bare floating icon, so it carries the
+                    // same container weight as a text button.
                     NeoIconButton(
                         onClick = onNavigateToRecurring,
                         icon = Icons.Filled.Repeat,
                         contentDescription = stringResource(R.string.recurringTasksTitle),
-                        modifier = Modifier.padding(end = AppTheme.spaceSmall + AppTheme.neoShadowOffset),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall),
                     )
                 }
             )
@@ -199,8 +198,8 @@ fun TaskListScreen(
                 )
                 Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
 
-                // Sort Dropdown. Bordered, hard-shadowed tap target (NeoIconButton) instead of a
-                // bare floating icon, per the reference sheet's icon-only-button rule.
+                // Sort Dropdown. Bordered tap target (NeoIconButton) instead of a bare floating
+                // icon.
                 Box {
                     NeoIconButton(
                         onClick = { sortMenuExpanded = true },

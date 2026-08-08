@@ -83,10 +83,9 @@ fun HabitListTile(
     val tile: @Composable () -> Unit = {
         if (isStacked) {
             // Completed rows dim to a flat neutral instead of an alpha-faded tint of the habit's
-            // accent - reference sheet §3 forbids alpha-blended fills, so "done" is a solid color
-            // swap, not a translucency effect. Uses `outline`, not `outlineVariant`: the latter is
-            // the soft tan/gray border color the general fixes explicitly ban, and this bar reads
-            // as a tile accent/border, not a divider.
+            // accent: fills in this app are never alpha-blended, so "done" is a solid color swap.
+            // Uses `outline`, not `outlineVariant` - this bar reads as a tile accent, not a
+            // divider inside a container.
             val barColor =
                 if (isCompleted) MaterialTheme.colorScheme.outline else color
             Row(
@@ -122,10 +121,8 @@ fun HabitListTile(
                 }
             }
         } else {
-            // Same "solid swap, not translucency" rule as the stacked bar above: an alpha-faded
-            // border is exactly the soft-UI drift the reference sheet forbids. Uses `outline`, not
-            // `outlineVariant` - this is a tile border, and `outlineVariant` is the banned soft
-            // tan/gray, not a legitimate flat replacement for it.
+            // Same "solid swap, not translucency" rule as the stacked bar above: completion dims
+            // the border by swapping its color outright, never by fading its alpha.
             val borderColor =
                 if (isCompleted) MaterialTheme.colorScheme.outline else color
             NeoListTile(
@@ -204,7 +201,7 @@ private fun HabitTileContent(
                     shape = CircleShape,
                 )
                 .border(
-                    width = AppTheme.listTileBorderWidth,
+                    width = AppTheme.borderHairline,
                     color = if (isCompleted) color else (if (isLocked) MaterialTheme.colorScheme.onSurfaceVariant else HabitColor),
                     shape = CircleShape,
                 )
@@ -268,8 +265,7 @@ private fun HabitTileContent(
                 Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
                 // Fill uses the habit's own accent (the same color as its border/icon above) so the
                 // bar reads as part of the same tile rather than a mismatched shade; the track is a
-                // flat neutral instead of an alpha-faded tint of the accent (reference sheet §3: no
-                // alpha-blended fills).
+                // flat neutral instead of an alpha-faded tint of the accent.
                 NeoProgressBar(
                     progress = { progressValue.coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth(),
@@ -286,8 +282,7 @@ private fun HabitTileContent(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else if (onMarkPastCompletion != null) {
-            // The "history icon" the reference sheet calls out by name: bordered + hard-shadowed
-            // instead of a bare glyph floating with no container weight.
+            // Bordered container rather than a bare glyph floating with no weight of its own.
             NeoIconButton(
                 onClick = onMarkPastCompletion,
                 icon = Icons.Filled.Schedule,

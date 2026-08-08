@@ -59,8 +59,8 @@ object AppTheme {
     val radiusMedium = 8.dp
     val radiusNeo = 14.dp
 
-    // Pill-shaped controls (reference sheet §5 permits full-round only for toggle controls like
-    // the accordion selector, badges, and chips - not for cards/inputs).
+    // Pill-shaped controls. Full-round is for toggle controls only - the accordion selector,
+    // badges, and chips - not for cards or inputs.
     val radiusPill = 24.dp
 
     val brMedium = RoundedCornerShape(radiusMedium)
@@ -74,22 +74,17 @@ object AppTheme {
     // Fixed height of a segmented/accordion selector row (e.g. Priority, Effort).
     val segmentedControlHeight = 48.dp
 
-    // Border / stroke widths (dp), a 1..4 scale. listTileBorderWidth (2) and neoBorderWidth (3)
-    // keep their semantic names for list tiles and neo cards; borderThin/borderThick fill the ends.
-    val borderThin = 1.dp
-    val listTileBorderWidth = 2.dp
-    val neoBorderWidth = 3.dp
-    val borderThick = 4.dp
+    // Inset between a segmented selector's outer track and its selected segment's own fill, so the
+    // two rounded shapes read as nested rather than as one shape with a stray edge.
+    val segmentedSelectorInset = 2.dp
 
-    // Hard-shadow offsets (dp) for Modifier.neoShadow / Modifier.neoPressShadow. neoShadowOffset
-    // is the default used by cards, buttons, and FABs; neoShadowOffsetSmall is for small chips and
-    // dense list rows, where a full 4dp offset would visually crowd neighboring elements. There is
-    // no separate "press offset" token: the press interaction travels the full resting offset (see
-    // neoPressShadow), so the shadow shrinks to zero exactly as far as the element moves.
-    val neoShadowOffset = 4.dp
-    val neoShadowOffsetSmall = 2.dp
+    // Border / stroke width (dp). The flat design uses one hairline weight for every border,
+    // divider, and frame in the app - there is no weight scale, because depth and hierarchy come
+    // from fill color and spacing rather than from stroke thickness. Paired with the muted
+    // `outline` color in Theme.kt, a 1dp stroke reads as a separator without drawing attention.
+    val borderHairline = 1.dp
 
-    // Neobrutalist icon-button container footprint (dp): NeoIconButton's square touch target.
+    // Icon-button container footprint (dp): NeoIconButton's square touch target.
     val neoIconButtonSize = 40.dp
 
     // Footprint (dp) shared by the focus screen's secondary transport controls (reset, pause) and
@@ -110,11 +105,11 @@ object AppTheme {
 
     val listTileTrailingSpacing = 8.dp
 
-    // Neo cards keep Material *elevation* at 0 (no blurred/tonal shadow) - their depth instead
-    // comes from Modifier.neoShadow's flat, hard-offset shadow, drawn independently of this. Named
-    // once so every card expresses the elevation rule instead of repeating
+    // Cards carry no Material elevation: the flat design has no blurred or tonal shadows at all,
+    // so a card is separated from the page by its fill and hairline border alone. Named once so
+    // every card expresses the rule instead of repeating
     // `CardDefaults.cardElevation(defaultElevation = 0.dp)`.
-    val neoCardElevation: CardElevation
+    val flatCardElevation: CardElevation
         @Composable get() = CardDefaults.cardElevation(defaultElevation = 0.dp)
 
     const val PULSE_DURATION_MS = 2000
