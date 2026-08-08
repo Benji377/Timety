@@ -78,11 +78,19 @@ object AppTheme {
     // two rounded shapes read as nested rather than as one shape with a stray edge.
     val segmentedSelectorInset = 2.dp
 
-    // Border / stroke width (dp). The flat design uses one hairline weight for every border,
-    // divider, and frame in the app - there is no weight scale, because depth and hierarchy come
-    // from fill color and spacing rather than from stroke thickness. Paired with the muted
-    // `outline` color in Theme.kt, a 1dp stroke reads as a separator without drawing attention.
+    // Border / stroke widths (dp), a two-step scale. The design is flat - no shadows, no
+    // elevation - so a container's border is the only thing left to give it edges, and one weight
+    // for everything left cards looking like unframed rectangles. Borrowing neobrutalism's idea
+    // that a container's outline is structure rather than decoration, card-tier elements get a
+    // deliberately visible [borderCard] stroke while everything small and repeated stays at
+    // [borderHairline].
+    //
+    // borderHairline: dividers, text-field outlines, chips, icon buttons, badge circles, heatmap
+    // cells - anything that appears many times on one screen, where 2dp would read as clutter.
+    // borderCard: cards, list tiles, dialogs, and the tracks of segmented controls - the outer
+    // frame of a thing that holds other things.
     val borderHairline = 1.dp
+    val borderCard = 2.dp
 
     // Icon-button container footprint (dp): NeoIconButton's square touch target.
     val neoIconButtonSize = 40.dp

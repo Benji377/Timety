@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -53,7 +54,17 @@ fun PickerField(
             readOnly = true,
             enabled = enabled,
             label = { Text(label) },
-            leadingIcon = { Box(contentAlignment = Alignment.Center) { content() } },
+            // Trailing gap on the leading slot: [content] here is a 40dp swatch or icon circle,
+            // far wider than the 24dp glyph M3 sizes its own leading-icon spacing for, so without
+            // this the label sits flush against the swatch's edge. Kept at spaceSmall rather than
+            // anything wider because this padding also eats into the label's available width, and
+            // these fields are half-width - at spaceMedium "Select an Icon" wraps to two lines.
+            leadingIcon = {
+                Box(
+                    modifier = Modifier.padding(end = AppTheme.spaceSmall),
+                    contentAlignment = Alignment.Center,
+                ) { content() }
+            },
             modifier = Modifier.fillMaxWidth(),
         )
         Box(

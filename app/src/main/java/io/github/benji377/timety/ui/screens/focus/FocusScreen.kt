@@ -376,7 +376,6 @@ fun FocusScreen(
                 modifier = Modifier.padding(bottom = AppTheme.spaceMedium),
                 shape = AppTheme.brPill,
                 borderColor = FocusColor,
-                borderWidth = AppTheme.borderHairline,
                 onClick = onNavigateToSettings,
             ) {
                 Row(

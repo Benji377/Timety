@@ -805,7 +805,7 @@ fun SettingsScreen(
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                     elevation = AppTheme.flatCardElevation,
                     shape = AppTheme.brNeo,
-                    border = BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
+                    border = BorderStroke(AppTheme.borderCard, MaterialTheme.colorScheme.outline),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

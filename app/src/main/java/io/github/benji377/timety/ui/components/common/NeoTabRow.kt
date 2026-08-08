@@ -17,10 +17,10 @@ import androidx.compose.ui.text.style.TextAlign
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Flat segmented tab selector - the app's replacement for Material's `TabRow`. Instead of an
- * animated indicator sliding under a soft-shadowed pill, the selected segment is simply filled
- * solid with [activeColor] and gets its own hairline inner border, so it isn't the only unbordered
- * element in the group.
+ * Flat segmented tab selector - the app's replacement for Material's `TabRow`. The whole track is
+ * framed with an [AppTheme.borderCard] border; instead of an animated indicator sliding under a
+ * soft-shadowed pill, the selected segment is simply filled solid with [activeColor] and gets its
+ * own hairline inner border, so it isn't the only unbordered element in the group.
  *
  * @param tabs labels shown left to right.
  * @param selectedIndex index into [tabs] of the currently active segment.
@@ -42,7 +42,7 @@ fun NeoTabRow(
             // Opaque fill so the unselected segments read as part of one control rather than as
             // gaps showing the page through.
             .background(MaterialTheme.colorScheme.surface)
-            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
+            .border(AppTheme.borderCard, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
     ) {
         tabs.forEachIndexed { index, title ->
             val isSelected = index == selectedIndex

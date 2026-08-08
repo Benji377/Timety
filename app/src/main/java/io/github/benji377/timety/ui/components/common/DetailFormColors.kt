@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
  *   screen stays readable, muted label/icons (onSurfaceVariant), and a recessed surfaceVariant
  *   container instead of the white one an editable field gets. The border stays solid rather than
  *   fading, so the inactive state is carried entirely by the fill, not by a washed-out outline.
+ *   Fields keep the hairline weight in both states - only containers take [AppTheme.borderCard].
  * - Edit mode ([isEditing] = true): for fields that stay `enabled = false` while editing because
  *   they open a picker on tap (due dates, reminder times) — styled to look like a normal active
  *   field: surface container, outline border, full-contrast text.

@@ -89,9 +89,10 @@ fun InteractiveGauge(
 
     val isDark = LocalIsDarkTheme.current
     val gaugeColor = color ?: MaterialTheme.colorScheme.primary
-    // One outline around the whole dial, exactly like every other bordered element in the app.
-    // The dial used to carry two competing rings - a thick colored band and a neutral gray donut -
-    // which read as a heavy frame rather than as a progress indicator.
+    // One outline around the whole dial, at the same card weight as every other container in the
+    // app - the dial is a card that happens to be round. It used to carry two competing rings, a
+    // thick colored band and a neutral gray donut, which read as a heavy frame rather than as a
+    // progress indicator.
     val frameColor = MaterialTheme.colorScheme.outline
     // The un-progressed part of the ring, in the app's paper-alt tone rather than a gray that
     // appears nowhere else in the palette.
@@ -135,7 +136,7 @@ fun InteractiveGauge(
             val center = Offset(size.width / 2f, size.height / 2f)
             val radius = minOf(size.width, size.height) / 2f
             val strokeWidth = AppTheme.gaugeStrokeWidth.toPx()
-            val frameWidth = AppTheme.borderHairline.toPx()
+            val frameWidth = AppTheme.borderCard.toPx()
 
             val faceFillColor = if (isDark) GaugeBgDark else GaugeWhite
 

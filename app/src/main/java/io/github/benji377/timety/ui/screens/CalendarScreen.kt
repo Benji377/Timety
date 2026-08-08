@@ -198,7 +198,7 @@ fun CalendarScreen(
                     // squeezed the day cells down to a size that was awkward to tap.
                     .padding(horizontal = AppTheme.spaceSmall, vertical = AppTheme.spaceSmall)
                     .background(MaterialTheme.colorScheme.background, AppTheme.brNeo)
-                    .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
+                    .border(AppTheme.borderCard, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
                     .padding(AppTheme.spaceSmall)
             ) {
                 Column {
@@ -522,15 +522,16 @@ private fun CalendarGrid(
                     }
                 }
 
-                // Bordered chip instead of plain text so the weekly summary reads as its own
-                // component next to the day cells.
+                // Filled chip, deliberately borderless: these stack flush in a column of six, one
+                // per week row, and an outline on each turned the column into a visible ladder
+                // running down the side of the grid. The fill alone is enough to separate the
+                // summary from the day cells beside it.
                 Box(
                     modifier = Modifier
                         .weight(1.5f)
                         .height(53.dp)
                         .padding(horizontal = AppTheme.spaceXSmall)
-                        .background(MaterialTheme.colorScheme.surface, AppTheme.brMedium)
-                        .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, AppTheme.brMedium),
+                        .background(MaterialTheme.colorScheme.surface, AppTheme.brMedium),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -617,7 +618,6 @@ private fun HabitsAccordion(
                     // sheet forbids soft borders) - falling back to the neutral outline reads as
                     // "no longer the active accent" without inventing a new faded tone.
                     borderColor = if (isCompleted) MaterialTheme.colorScheme.outline else HabitColor,
-                    borderWidth = AppTheme.borderHairline,
                 ) {
                     Row(
                         modifier = Modifier
@@ -720,7 +720,6 @@ private fun DayTaskRow(
             .clickable { onClick() },
         containerColor = MaterialTheme.colorScheme.background,
         borderColor = if (isCompleted) SuccessColor else TaskColor,
-        borderWidth = AppTheme.borderHairline,
     ) {
         Row(
             modifier = Modifier
@@ -817,7 +816,6 @@ private fun FocusSessionsAccordion(
                     // above, using the color this screen already gives focus activity. The previous
                     // `outlineVariant` was the soft tan the general fixes ban outright.
                     borderColor = SuccessColor,
-                    borderWidth = AppTheme.borderHairline,
                 ) {
                     Row(
                         modifier = Modifier

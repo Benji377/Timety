@@ -25,9 +25,10 @@ import io.github.benji377.timety.ui.theme.AppTheme
  * (e.g. habit frequency: Daily / Flexible / Specific). This is the text-label sibling of Task
  * Detail's `AccordionSelector`: values like frequency don't have a natural per-option icon to
  * collapse to when unselected, so every segment keeps its label at a fixed equal width instead of
- * expanding on select - but the visual language is identical: a hairline outer border on the whole
- * track, and the selected segment gets its own solid fill + border rather than a flat tint with
- * only a checkmark. Full contrast is kept in both edit and view mode; only tap-gating and the
+ * expanding on select - but the visual language is identical: an [AppTheme.borderCard] border
+ * framing the whole track, and the selected segment gets its own solid fill plus a hairline border
+ * (lighter, so the nested shape doesn't compete with the frame) rather than a flat tint with only
+ * a checkmark. Full contrast is kept in both edit and view mode; only tap-gating and the
  * track's background respond to [isEditing].
  */
 @Composable
@@ -56,7 +57,7 @@ fun <T> NeoSegmentedSelector(
                     MaterialTheme.colorScheme.surfaceVariant
                 }
             )
-            .border(AppTheme.borderHairline, borderColor, AppTheme.brPill)
+            .border(AppTheme.borderCard, borderColor, AppTheme.brPill)
     ) {
         values.forEachIndexed { index, value ->
             val isSelected = value == selectedValue

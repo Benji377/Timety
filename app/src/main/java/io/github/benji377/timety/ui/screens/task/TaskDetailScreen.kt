@@ -737,9 +737,9 @@ private fun SectionHeader(title: String, icon: ImageVector) {
 
 /**
  * Segmented selector where the selected segment expands to show its label; the rest stay
- * icon-only. The outer track's hairline border, and the selected segment's own solid fill +
- * border, stay at full contrast in both edit and view mode - read-only is not a reason to soften a
- * border; only the track's background and tap-gating change with [isEditing].
+ * icon-only. The outer track's [AppTheme.borderCard] frame, and the selected segment's own solid
+ * fill plus hairline border, stay at full contrast in both edit and view mode - read-only is not a
+ * reason to soften a border; only the track's background and tap-gating change with [isEditing].
  */
 @Composable
 private fun <T> AccordionSelector(
@@ -767,7 +767,7 @@ private fun <T> AccordionSelector(
                     MaterialTheme.colorScheme.surfaceVariant
                 }
             )
-            .border(AppTheme.borderHairline, borderColor, AppTheme.brPill)
+            .border(AppTheme.borderCard, borderColor, AppTheme.brPill)
     ) {
         values.forEachIndexed { index, value ->
             val isSelected = value == selectedValue

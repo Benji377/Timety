@@ -22,9 +22,9 @@ import io.github.benji377.timety.ui.theme.AppTheme
  * settings gear, share icon, ...). Built on [OutlinedIconButton] so the border and content
  * clipping come from the same M3 machinery.
  *
- * Its container weight comes entirely from the [AppTheme.borderHairline] outline and the fill:
- * these are 40dp targets that appear several to a row in top bars, so anything heavier would make
- * the header outweigh the content underneath it.
+ * Its container weight comes entirely from the [AppTheme.borderHairline] outline and the fill -
+ * not the heavier [AppTheme.borderCard] used on cards: these are 40dp targets that appear several
+ * to a row in top bars, so a card-weight border would make the header outweigh the content.
  *
  * @param size the button's fixed square footprint.
  */

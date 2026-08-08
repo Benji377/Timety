@@ -15,12 +15,14 @@ import io.github.benji377.timety.ui.theme.AppTheme
 /**
  * Bordered [Card] used for the app's prominent "feature card" tier: standalone summary/config
  * cards such as the home screen's daily-goal card or a stat card, distinguished from the page by
- * their [containerColor] fill, hairline border, and the larger [AppTheme.brNeo] corner radius.
- * For the denser list-row tier (task/habit/recurring-task rows), use [NeoListTile] instead.
+ * their [containerColor] fill, an [AppTheme.borderCard] border, and the larger [AppTheme.brNeo]
+ * corner radius. For the denser list-row tier (task/habit/recurring-task rows), use [NeoListTile].
  *
- * The card is flat: no Material elevation and no offset shadow. Depth cues come from the fill and
- * border alone, so a card whose [containerColor] matches its background will not separate from it
- * - give such a card a distinct fill rather than expecting a shadow to do the work.
+ * The card is flat: no Material elevation and no offset shadow. With nothing lifting it off the
+ * page, the border is what gives the card edges, which is why it takes the heavier
+ * [AppTheme.borderCard] weight rather than the hairline used on smaller controls. A card whose
+ * [containerColor] matches its background leans entirely on that border, so give it a distinct
+ * fill too rather than expecting the outline to carry the separation alone.
  *
  * When [onClick] is non-null the card renders with Material3's clickable `Card(onClick = ...)`
  * overload, whose ripple supplies the tap feedback; otherwise it is a plain, non-interactive card.
@@ -30,7 +32,7 @@ fun NeoCard(
     modifier: Modifier = Modifier,
     shape: Shape = AppTheme.brNeo,
     borderColor: Color = MaterialTheme.colorScheme.outline,
-    borderWidth: Dp = AppTheme.borderHairline,
+    borderWidth: Dp = AppTheme.borderCard,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -69,7 +71,7 @@ fun NeoListTile(
     modifier: Modifier = Modifier,
     shape: Shape = AppTheme.brMedium,
     borderColor: Color = MaterialTheme.colorScheme.outline,
-    borderWidth: Dp = AppTheme.borderHairline,
+    borderWidth: Dp = AppTheme.borderCard,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
