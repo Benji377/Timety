@@ -1,6 +1,8 @@
 package io.github.benji377.timety.ui.screens.goal
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,19 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -53,7 +49,10 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.goal.GoalWithEntries
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.ExpansionSection
+import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -201,12 +200,9 @@ private fun GoalCard(
     val isCompleted = goal.completedAt != null
     val dateFmt = LocalDateFormatSettings.current
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onTap() },
-        shape = AppTheme.brNeo,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    NeoCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onTap,
     ) {
         Row(
             modifier = Modifier
@@ -217,8 +213,16 @@ private fun GoalCard(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(goalColor.copy(alpha = 0.15f)),
+                    .clip(AppTheme.brNeo)
+                    // Chrome badge: a flat neutral fill (not an alpha-faded tint of goalColor) plus
+                    // a solid goalColor border, so the goalColor-tinted icon on top keeps full
+                    // contrast against the background - same bordered-badge language as the habit
+                    // toggle circle in HabitListTile.
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    .border(
+                        BorderStroke(AppTheme.listTileBorderWidth, goalColor),
+                        AppTheme.brNeo,
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -269,18 +273,15 @@ private fun GoalCard(
             }
             if (onLogProgress != null) {
                 Spacer(Modifier.width(AppTheme.spaceMedium))
-                FilledTonalIconButton(
+                // Solid fill + border instead of a tonal alpha container, matching the icon badge
+                // above: a flat neutral background keeps the goalColor icon readable.
+                NeoIconButton(
                     onClick = onLogProgress,
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = goalColor.copy(alpha = 0.15f),
-                        contentColor = goalColor,
-                    ),
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = stringResource(R.string.goalsLabelLogProgress),
-                    )
-                }
+                    icon = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.goalsLabelLogProgress),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    contentColor = goalColor,
+                )
             }
         }
     }
@@ -385,7 +386,7 @@ private fun GoalEntryDialog(
     val dateFmt = LocalDateFormatSettings.current
     val value = valueText.toIntOrNull() ?: 0
 
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.goalEntryDialogTitle)) },
         text = {
@@ -415,6 +416,7 @@ private fun GoalEntryDialog(
                         trailingIcon = { Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = detailFieldColors(isEditing = true),
+                        active = true,
                     )
                 }
             }

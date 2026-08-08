@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
@@ -24,6 +23,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.BorderDark
 import io.github.benji377.timety.ui.theme.BorderLight
@@ -31,7 +31,6 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 import io.github.benji377.timety.ui.theme.PaperAltLight
 import io.github.benji377.timety.ui.theme.PaperLight
-import io.github.benji377.timety.ui.theme.ShadowColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
 
@@ -51,7 +50,6 @@ fun ModeTimeline(
     val completionFill = if (isDark) PaperLight else PaperAltLight
     val isRunningOrAwaiting = isRunning || awaitingContinue
     val outline = MaterialTheme.colorScheme.outline
-    val shadowColor = ShadowColor.copy(alpha = 0.12f)
     val lineColor = if (isDark) BorderDark else BorderLight
 
     Row(
@@ -65,7 +63,6 @@ fun ModeTimeline(
             active = isRunningOrAwaiting && currentPhaseIndex == 0 && !isCompleted,
             fillColor = completionFill,
             borderColor = outline,
-            shadowColor = shadowColor,
         )
 
         for (i in phases.indices) {
@@ -73,12 +70,16 @@ fun ModeTimeline(
                 isPast = currentPhaseIndex > i,
                 isRunningOrAwaiting = isRunningOrAwaiting,
                 lineColor = lineColor,
+                idleColor = completionFill,
             )
 
             val isActive = isRunningOrAwaiting && currentPhaseIndex == i && !isCompleted
             var dotColor = if (phases[i].type == PhaseType.FOCUS) FocusColor else WarningColor
             if (isRunningOrAwaiting && currentPhaseIndex < i) {
-                dotColor = dotColor.copy(alpha = AppTheme.OPACITY_LIGHT)
+                // A dot is chrome (a small marker/badge), not chart data, so an upcoming phase gets
+                // a solid color swap - the same flat neutral CompletionNode already uses for its own
+                // idle state - instead of an alpha-faded tint of the phase color.
+                dotColor = completionFill
             }
             PhaseDot(color = dotColor, active = isActive)
         }
@@ -87,13 +88,13 @@ fun ModeTimeline(
         ConnectorLine(
             isPast = isCompleted,
             isRunningOrAwaiting = isRunningOrAwaiting,
-            lineColor = lineColor
+            lineColor = lineColor,
+            idleColor = completionFill,
         )
         CompletionNode(
             active = isRunningOrAwaiting && isCompleted,
             fillColor = completionFill,
             borderColor = outline,
-            shadowColor = shadowColor,
         )
     }
 }
@@ -101,15 +102,27 @@ fun ModeTimeline(
 @Composable
 private fun PhaseDot(color: Color, active: Boolean) {
     val size = if (active) 18.dp else 12.dp
-    var mod = Modifier
-        .size(size)
-        .background(color, CircleShape)
-    if (active) {
-        mod = mod
-            .shadow(elevation = 8.dp, shape = CircleShape, ambientColor = color, spotColor = color)
-            .border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
+    // Inactive dots stay a minimal flat fill (per the guide, fine to leave borderless/unshadowed
+    // here). The active dot gets a bordered+shadowed treatment, with the border in the app's
+    // standard outline color rather than colorScheme.primary (TaskColor blue) - the previous
+    // hardcoded primary border broke the screen's green focus-accent consistency.
+    val shadowModifier = if (active) {
+        Modifier.neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
+    } else {
+        Modifier
     }
-    Box(modifier = mod)
+    Box(
+        modifier = shadowModifier
+            .size(size)
+            .background(color, CircleShape)
+            .then(
+                if (active) {
+                    Modifier.border(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                } else {
+                    Modifier
+                }
+            )
+    )
 }
 
 @Composable
@@ -117,31 +130,37 @@ private fun CompletionNode(
     active: Boolean,
     fillColor: Color,
     borderColor: Color,
-    shadowColor: Color
 ) {
     val size = if (active) 22.dp else 16.dp
     Box(
         modifier = Modifier
-            .shadow(
-                elevation = 6.dp,
-                shape = CircleShape,
-                ambientColor = shadowColor,
-                spotColor = shadowColor
-            )
+            .neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
             .size(size)
             .background(fillColor, CircleShape)
-            .border(if (active) 3.dp else 2.dp, borderColor, CircleShape)
+            .border(
+                if (active) AppTheme.neoBorderWidth else AppTheme.listTileBorderWidth,
+                borderColor,
+                CircleShape
+            )
     )
 }
 
 @Composable
-private fun ConnectorLine(isPast: Boolean, isRunningOrAwaiting: Boolean, lineColor: Color) {
-    val alpha = if (isRunningOrAwaiting && isPast) 0.6f else 0.2f
+private fun ConnectorLine(
+    isPast: Boolean,
+    isRunningOrAwaiting: Boolean,
+    lineColor: Color,
+    idleColor: Color,
+) {
+    // Solid color swap instead of an alpha-faded line: a "crossed" segment gets the full ink
+    // color, an untouched one gets the same flat neutral fill used by CompletionNode/PhaseDot's
+    // own idle state, so the timeline reads as one consistent solid-fill language.
+    val color = if (isRunningOrAwaiting && isPast) lineColor else idleColor
     Box(
         modifier = Modifier
             .width(24.dp)
             .height(3.dp)
-            .background(lineColor.copy(alpha = alpha), RectangleShape)
+            .background(color, RectangleShape)
     )
 }
 

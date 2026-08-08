@@ -1,7 +1,9 @@
 package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,14 +12,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -73,7 +77,7 @@ fun IconPickerDialog(
     onSelect: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
@@ -85,20 +89,32 @@ fun IconPickerDialog(
             ) {
                 items(HabitIcons.availableIcons.size) { index ->
                     val isSelected = index == selectedIconIndex
+                    val interactionSource = remember { MutableInteractionSource() }
+                    // Selected state is a solid fill + border, not an alpha-blended tint - the
+                    // same selected/unselected fill switch used by NeoFilterChip, so the picker
+                    // reads consistently with the rest of the app's selector controls.
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                color = if (isSelected) accentColor.copy(alpha = 0.2f) else Color.Transparent,
+                            .size(AppTheme.neoIconButtonSize)
+                            // neoPressShadow (not the static neoShadow), so a tapped icon shifts
+                            // toward its shadow like every other clickable element.
+                            .neoPressShadow(
+                                interactionSource = interactionSource,
                                 shape = CircleShape,
+                                offset = AppTheme.neoShadowOffsetSmall,
                             )
-                            .clickable { onSelect(index) },
+                            .clip(CircleShape)
+                            .background(if (isSelected) accentColor else Color.Transparent)
+                            .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                            .clickable(interactionSource = interactionSource, indication = ripple()) {
+                                onSelect(index)
+                            },
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             imageVector = HabitIcons.availableIcons[index],
                             contentDescription = null,
-                            tint = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurface,
+                            tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
@@ -120,7 +136,7 @@ fun ColorPickerDialog(
     onSelect: (Color) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

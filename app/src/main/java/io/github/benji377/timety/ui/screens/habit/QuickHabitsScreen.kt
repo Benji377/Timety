@@ -21,12 +21,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -56,7 +53,10 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
+import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -195,7 +195,7 @@ private fun QuickHabitCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    Card(
+    NeoListTile(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppTheme.spaceSmall, vertical = AppTheme.spaceXSmall),
@@ -224,19 +224,19 @@ private fun QuickHabitCard(
                 onCheckedChange = onToggleEnabled,
                 colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor),
             )
-            IconButton(onClick = onEdit) {
-                Icon(
-                    Icons.Filled.Edit,
-                    contentDescription = stringResource(R.string.quickHabitEditTitle)
-                )
-            }
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Filled.Delete,
-                    contentDescription = stringResource(R.string.commonLabelDelete),
-                    tint = ErrorColor,
-                )
-            }
+            Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+            NeoIconButton(
+                onClick = onEdit,
+                icon = Icons.Filled.Edit,
+                contentDescription = stringResource(R.string.quickHabitEditTitle),
+            )
+            Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+            NeoIconButton(
+                onClick = onDelete,
+                icon = Icons.Filled.Delete,
+                contentDescription = stringResource(R.string.commonLabelDelete),
+                contentColor = ErrorColor,
+            )
         }
     }
 }
@@ -278,7 +278,7 @@ private fun QuickHabitEditDialog(
             intervalValue != null && intervalValue >= 1 &&
             (!specificDays || selectedWeekdays.isNotEmpty())
 
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(

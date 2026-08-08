@@ -53,7 +53,6 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -95,6 +94,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -260,7 +260,7 @@ fun SettingsScreen(
     // Dialogs.
 
     if (showLocationDialog) {
-        AlertDialog(
+        NeoAlertDialog(
             onDismissRequest = {
                 showLocationDialog = false
                 locationError = null
@@ -946,7 +946,7 @@ fun SettingsScreen(
 
     // Export options dialog: save the backup to device storage or share it elsewhere.
     if (showExportOptions) {
-        AlertDialog(
+        NeoAlertDialog(
             onDismissRequest = { showExportOptions = false },
             title = { Text(stringResource(R.string.backupExportTitle)) },
             text = {
@@ -1020,7 +1020,7 @@ fun SettingsScreen(
 
     // Prompts the user to restart the app after a successful backup restore.
     if (showRestartDialog) {
-        AlertDialog(
+        NeoAlertDialog(
             onDismissRequest = { showRestartDialog = false },
             title = { Text(stringResource(R.string.backupRestoreSuccessTitle)) },
             text = { Text(stringResource(R.string.backupRestoreSuccessBody)) },
@@ -1124,7 +1124,7 @@ private data class DurationDialogSpec(
 @Composable
 private fun NumberPickerDialog(spec: NumberDialogSpec, onDismiss: () -> Unit) {
     var value by remember(spec) { mutableFloatStateOf(spec.current.toFloat()) }
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(spec.title) },
         text = {

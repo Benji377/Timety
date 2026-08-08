@@ -25,6 +25,11 @@ import io.github.benji377.timety.ui.theme.AppTheme
 /**
  * Outlined text field built on [BasicTextField] with M3's [OutlinedTextFieldDefaults] decoration,
  * so the app's custom [shape] and border widths can be applied without fighting M3's own OutlinedTextField.
+ *
+ * Both the focused and unfocused border use the same bold [AppTheme.neoBorderWidth] thickness -
+ * per the reference sheet, a thin/gray unfocused border is the app's single worst neobrutalism
+ * offender, so there is no "resting" thin state here. The field also casts a hard [neoShadow]
+ * matching [shape]; see that function's KDoc for the trailing/bottom spacing it needs.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +56,8 @@ fun NeoOutlinedTextField(
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = AppTheme.brNeo,
-    colors: TextFieldColors = detailFieldColors()
+    colors: TextFieldColors = detailFieldColors(),
+    active: Boolean = enabled,
 ) {
     val mergedTextStyle = textStyle.merge(TextStyle(color = MaterialTheme.colorScheme.onSurface))
 
@@ -104,10 +110,17 @@ fun NeoOutlinedTextField(
                         enabled = enabled,
                         isError = isError,
                         interactionSource = interactionSource,
+                        // Only an active field is lifted off the page; a read-only one sits flat,
+                        // which together with its recessed fill is what makes view mode read as
+                        // view mode. The shadow hangs off the container rather than off the whole
+                        // field, because the field's bounds also cover the floating label above it
+                        // and any supporting text below - a shadow spanning those would paint the
+                        // empty strips around the container solid black.
+                        modifier = if (active) Modifier.neoShadow(shape = shape) else Modifier,
                         colors = colors,
                         shape = shape,
                         focusedBorderThickness = AppTheme.neoBorderWidth,
-                        unfocusedBorderThickness = 2.dp
+                        unfocusedBorderThickness = AppTheme.neoBorderWidth
                     )
                 }
             )

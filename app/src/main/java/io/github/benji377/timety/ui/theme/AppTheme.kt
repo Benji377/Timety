@@ -24,6 +24,10 @@ object AppTheme {
     val fsGaugeLabel = 20.sp
     val fsLabel = 12.sp
 
+    // Label inside an AccordionSelector's expanded segment - smaller than fsLabel so it fits
+    // next to the segment's icon within the control's fixed height.
+    val fsSegmentLabel = 11.sp
+
     // Font weights
     val fwLight = FontWeight.W300
     val fwNormal = FontWeight.Normal
@@ -31,6 +35,7 @@ object AppTheme {
     val fwBold = FontWeight.Bold
     val fwExtraBold = FontWeight.W900
 
+    val lsNarrow = 0.5.sp
     val lsWide = 1.2.sp
     val lsExtraWide = 1.5.sp
 
@@ -54,20 +59,20 @@ object AppTheme {
     val radiusMedium = 8.dp
     val radiusNeo = 14.dp
 
+    // Pill-shaped controls (reference sheet §5 permits full-round only for toggle controls like
+    // the accordion selector, badges, and chips - not for cards/inputs).
+    val radiusPill = 24.dp
+
     val brMedium = RoundedCornerShape(radiusMedium)
     val brNeo = RoundedCornerShape(radiusNeo)
+    val brPill = RoundedCornerShape(radiusPill)
 
     // Dimensions.
     val gaugeSize = 300.dp
     val gaugeStrokeWidth = 16.dp
 
-    // A circle inscribed in `gaugeSize` curves away from the corners of its own bounding box, so
-    // the surrounding layout's corner buttons sit in the gap that leaves; a square's flat edge
-    // doesn't curve away, so the square variant needs a smaller half-side than the circle's
-    // radius (142dp) to keep clear of those same corner buttons, which sit only ~8dp inside the
-    // gauge box's own left/right edges (measured via uiautomator: 16-64dp from the screen edge,
-    // gauge box starts ~56dp from the screen edge) - so 120dp leaves a comfortable ~20dp margin.
-    val gaugeSquareHalfSide = 120.dp
+    // Fixed height of a segmented/accordion selector row (e.g. Priority, Effort).
+    val segmentedControlHeight = 48.dp
 
     // Border / stroke widths (dp), a 1..4 scale. listTileBorderWidth (2) and neoBorderWidth (3)
     // keep their semantic names for list tiles and neo cards; borderThin/borderThick fill the ends.
@@ -75,6 +80,22 @@ object AppTheme {
     val listTileBorderWidth = 2.dp
     val neoBorderWidth = 3.dp
     val borderThick = 4.dp
+
+    // Hard-shadow offsets (dp) for Modifier.neoShadow / Modifier.neoPressShadow. neoShadowOffset
+    // is the default used by cards, buttons, and FABs; neoShadowOffsetSmall is for small chips and
+    // dense list rows, where a full 4dp offset would visually crowd neighboring elements. There is
+    // no separate "press offset" token: the press interaction travels the full resting offset (see
+    // neoPressShadow), so the shadow shrinks to zero exactly as far as the element moves.
+    val neoShadowOffset = 4.dp
+    val neoShadowOffsetSmall = 2.dp
+
+    // Neobrutalist icon-button container footprint (dp): NeoIconButton's square touch target.
+    val neoIconButtonSize = 40.dp
+
+    // Footprint (dp) shared by the focus screen's secondary transport controls (reset, pause) and
+    // the Spacer that reserves their place while hidden pre-session - named so the button and its
+    // placeholder can never drift out of sync.
+    val focusTransportButtonSize = 64.dp
 
     // Icon sizes (dp). iconSizeSmall (18) is kept for its existing call sites; iconSizeMedium/
     // iconSizeXLarge cover the other common sizes. NOTE: raw 16.dp icons are still widespread and
@@ -89,8 +110,10 @@ object AppTheme {
 
     val listTileTrailingSpacing = 8.dp
 
-    // Neo cards are flat: no shadow/tonal elevation. Named once so every card expresses the rule
-    // instead of repeating `CardDefaults.cardElevation(defaultElevation = 0.dp)`.
+    // Neo cards keep Material *elevation* at 0 (no blurred/tonal shadow) - their depth instead
+    // comes from Modifier.neoShadow's flat, hard-offset shadow, drawn independently of this. Named
+    // once so every card expresses the elevation rule instead of repeating
+    // `CardDefaults.cardElevation(defaultElevation = 0.dp)`.
     val neoCardElevation: CardElevation
         @Composable get() = CardDefaults.cardElevation(defaultElevation = 0.dp)
 

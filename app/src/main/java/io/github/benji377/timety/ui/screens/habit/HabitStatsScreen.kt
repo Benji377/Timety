@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -302,19 +303,37 @@ private fun HabitVelocityChart(habits: List<HabitWithCompletions>, focusedDate: 
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(0.5f)
+                        // Solid neutral track (was an alpha-tinted onSurfaceVariant) - the bar
+                        // chart's gutter is chrome around the data, not itself a data mark.
                         .background(
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
+                            MaterialTheme.colorScheme.surfaceVariant,
                             RoundedCornerShape(4.dp)
                         ),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
+                    // Flat, solid bar for every day - fading the non-today bars was a soft alpha
+                    // fill standing in for a boolean emphasis, not an encoded data value, so it's
+                    // gone. Today still needs a solid affordance beyond the label (bold text alone
+                    // is too weak a signal at this bar size), so today's bar gets a solid outline
+                    // border instead - a neobrutalist-correct differentiator, not restored alpha.
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(fraction)
                             .background(
-                                color = if (isToday) HabitColor else HabitColor.copy(alpha = AppTheme.OPACITY_MEDIUM),
+                                color = HabitColor,
                                 shape = RoundedCornerShape(4.dp),
+                            )
+                            .then(
+                                if (isToday) {
+                                    Modifier.border(
+                                        AppTheme.listTileBorderWidth,
+                                        MaterialTheme.colorScheme.outline,
+                                        RoundedCornerShape(4.dp),
+                                    )
+                                } else {
+                                    Modifier
+                                }
                             ),
                     )
                 }
@@ -422,26 +441,21 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp)
+                // Solid neutral track. When total is 0 the forEach below draws nothing and this
+                // flat fill alone reads as the "no data yet" state - no need for a second,
+                // alpha-tinted fill layered on top of an already-solid background.
                 .background(
                     MaterialTheme.colorScheme.surfaceContainerHighest,
                     RoundedCornerShape(999.dp)
                 ),
         ) {
-            if (total == 0) {
+            buckets.filter { it.count > 0 }.forEach { bucket ->
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f)),
+                        .weight(bucket.count.toFloat())
+                        .fillMaxHeight()
+                        .background(bucket.color),
                 )
-            } else {
-                buckets.filter { it.count > 0 }.forEach { bucket ->
-                    Box(
-                        modifier = Modifier
-                            .weight(bucket.count.toFloat())
-                            .fillMaxHeight()
-                            .background(bucket.color),
-                    )
-                }
             }
         }
 
@@ -455,48 +469,59 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
             buckets.forEach { bucket ->
                 val percent =
                     if (total == 0) 0 else ((bucket.count.toFloat() / total) * 100).roundToInt()
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(0.47f)
-                        .background(bucket.color.copy(alpha = 0.08f), RoundedCornerShape(18.dp))
-                        .border(1.dp, bucket.color.copy(alpha = 0.22f), RoundedCornerShape(18.dp))
-                        .padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                // Reuses NeoCard (solid border + hard shadow, accent-colored per bucket) instead
+                // of the alpha-tinted fill/border this used to have - same treatment as StatCard's
+                // accent-bordered summary cards, and drops the one-off 18dp radius in favor of the
+                // app-wide brNeo scale.
+                NeoCard(
+                    modifier = Modifier.fillMaxWidth(0.47f),
+                    borderColor = bucket.color,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    shadowColor = bucket.color,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .background(bucket.color.copy(alpha = 0.14f), CircleShape),
-                        contentAlignment = Alignment.Center,
+                    Row(
+                        modifier = Modifier.padding(AppTheme.spaceMedium),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(
-                            bucket.icon,
-                            contentDescription = null,
-                            tint = bucket.color,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = bucket.label, fontSize = 14.sp, fontWeight = AppTheme.fwBold)
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = bucket.subtitle,
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = bucket.count.toString(),
-                            fontSize = 16.sp,
-                            fontWeight = AppTheme.fwExtraBold
-                        )
-                        Text(
-                            text = "$percent%",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        // Solid neutral fill + solid accent border, matching the icon-badge idiom
+                        // used across the app (e.g. UserXpBreakdownCard) rather than an alpha fill.
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .border(AppTheme.listTileBorderWidth, bucket.color, CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                bucket.icon,
+                                contentDescription = null,
+                                tint = bucket.color,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = bucket.label, fontSize = 14.sp, fontWeight = AppTheme.fwBold)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = bucket.subtitle,
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = bucket.count.toString(),
+                                fontSize = 16.sp,
+                                fontWeight = AppTheme.fwExtraBold
+                            )
+                            Text(
+                                text = "$percent%",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

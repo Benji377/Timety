@@ -1,6 +1,7 @@
 package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Button
@@ -10,12 +11,17 @@ import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
-/** Filled [Button] restyled with the app's neobrutalist border and no elevation by default. */
+/**
+ * Filled [Button] restyled with the app's neobrutalist border, no Material elevation, and a hard
+ * [neoPressShadow] that pushes the button toward the page on tap.
+ */
 @Composable
 fun NeoButton(
     onClick: () -> Unit,
@@ -29,22 +35,32 @@ fun NeoButton(
         MaterialTheme.colorScheme.outline
     ),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    shadowColor: Color = NeoShadowDefaults.color,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.neoPressShadow(
+            interactionSource = interactionSource,
+            shape = shape,
+            color = shadowColor,
+        ),
         enabled = enabled,
         shape = shape,
         colors = colors,
         elevation = elevation,
         border = border,
         contentPadding = contentPadding,
+        interactionSource = interactionSource,
         content = content
     )
 }
 
-/** Elevated variant of [NeoButton], restyled with the app's neobrutalist border. */
+/**
+ * Elevated variant of [NeoButton], restyled with the app's neobrutalist border and the same hard
+ * [neoPressShadow] press interaction.
+ */
 @Composable
 fun NeoElevatedButton(
     onClick: () -> Unit,
@@ -64,17 +80,24 @@ fun NeoElevatedButton(
         MaterialTheme.colorScheme.outline
     ),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    shadowColor: Color = NeoShadowDefaults.color,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit
 ) {
     ElevatedButton(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.neoPressShadow(
+            interactionSource = interactionSource,
+            shape = shape,
+            color = shadowColor,
+        ),
         enabled = enabled,
         shape = shape,
         colors = colors,
         elevation = elevation,
         border = border,
         contentPadding = contentPadding,
+        interactionSource = interactionSource,
         content = content
     )
 }

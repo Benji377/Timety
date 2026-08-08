@@ -76,7 +76,6 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TaskColor
-import io.github.benji377.timety.ui.theme.WarningAccent
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
@@ -485,6 +484,8 @@ private fun FocusClockChart(
             val startAngleDeg = (startHour / 24.0) * 360.0 - 90.0
             val sweepAngleDeg = (sweepHours / 24.0) * 360.0
 
+            // Data viz, not chrome: a Canvas-drawn arc segment on the 24-hour clock face, not a
+            // container fill - the reference sheet's chart-interior exemption applies.
             drawArc(
                 color = color.copy(alpha = 0.8f),
                 startAngle = startAngleDeg.toFloat(),
@@ -537,11 +538,14 @@ private fun SessionRow(
             .clickable(onClick = onEdit),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Solid neutral fill + solid accent border, matching the icon-badge idiom used across the
+        // app (e.g. UserXpBreakdownCard) - an alpha-tinted fill is a borderless soft-UI badge.
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(color.copy(alpha = 0.12f)),
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                .border(AppTheme.listTileBorderWidth, color, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(icon, contentDescription = null, tint = color)
@@ -579,11 +583,15 @@ private fun DistractionRow(
         modifier = Modifier.padding(vertical = AppTheme.spaceSmall),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Border uses the distraction type's own color (matching the icon tint) rather than the
+        // fixed WarningAccent the alpha fill used - see the SessionRow badge above for the same
+        // solid-fill-plus-accent-border idiom.
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(WarningAccent.copy(alpha = 0.12f)),
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                .border(AppTheme.listTileBorderWidth, type.color, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(type.icon, contentDescription = null, tint = type.color)
@@ -654,12 +662,28 @@ private fun VolumeBarChart(
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     val h = (dailyMins[i] / denom).coerceIn(0f, 1f)
+                    // Flat, solid bar for every day - fading the non-today bars was a soft alpha
+                    // fill standing in for a boolean emphasis, not an encoded data value, so it's
+                    // gone. Today still needs a solid affordance beyond the label (bold text alone
+                    // is too weak a signal at this bar size), so today's bar gets a solid outline
+                    // border instead - a neobrutalist-correct differentiator, not restored alpha.
                     Box(
                         modifier = Modifier
                             .fillMaxHeight(h)
                             .width(16.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(if (isToday) FocusColor else FocusColor.copy(alpha = 0.25f)),
+                            .background(FocusColor)
+                            .then(
+                                if (isToday) {
+                                    Modifier.border(
+                                        AppTheme.listTileBorderWidth,
+                                        MaterialTheme.colorScheme.outline,
+                                        RoundedCornerShape(4.dp),
+                                    )
+                                } else {
+                                    Modifier
+                                }
+                            ),
                     )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
@@ -742,23 +766,18 @@ private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
                 .fillMaxWidth()
                 .height(16.dp)
                 .clip(RoundedCornerShape(999.dp))
+                // Solid neutral track. When totalMinutes is 0 the forEach below draws nothing and
+                // this flat surfaceVariant fill alone reads as the "no data yet" state - no need
+                // for a second, alpha-tinted fill layered on top of an already-solid background.
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
-            if (totalMinutes == 0) {
+            stats.filter { it.minutes > 0 }.forEach { stat ->
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
+                        .weight(stat.minutes.toFloat())
+                        .fillMaxHeight()
+                        .background(stat.color)
                 )
-            } else {
-                stats.filter { it.minutes > 0 }.forEach { stat ->
-                    Box(
-                        modifier = Modifier
-                            .weight(stat.minutes.toFloat())
-                            .fillMaxHeight()
-                            .background(stat.color)
-                    )
-                }
             }
         }
         Spacer(modifier = Modifier.height(18.dp))
@@ -983,13 +1002,13 @@ private fun HeatmapSwatch(level: Int, showBorder: Boolean, modifier: Modifier = 
         modifier = modifier
             .size(11.dp)
             .clip(shape)
+            // Data viz, not chrome: this GitHub-style contribution cell's alpha step *is* the
+            // encoded value (0..4 intensity level), the same idiom the reference sheet exempts
+            // ("gradient stops... that encode data are fine to keep"). Only the zero-level
+            // cell's outline is chrome, so that border stays solid rather than alpha-faded below.
             .background(if (level > 0) FocusColor.copy(alpha = 0.2f + level * 0.2f) else Color.Transparent)
             .then(
-                if (showBorder) Modifier.border(
-                    1.dp,
-                    outlineColor.copy(alpha = 0.4f),
-                    shape
-                ) else Modifier
+                if (showBorder) Modifier.border(AppTheme.borderThin, outlineColor, shape) else Modifier
             )
     )
 }

@@ -1,7 +1,7 @@
 package io.github.benji377.timety.ui.screens.habit
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +23,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Stars
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -32,9 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
@@ -50,10 +45,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
@@ -62,13 +57,15 @@ import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.detailFieldColors
-import io.github.benji377.timety.ui.components.common.detailSegmentedButtonColors
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
+import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
+import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -334,11 +331,23 @@ fun HabitDetailScreen(
                         onClick = { showIconPicker = true },
                         modifier = Modifier.weight(1f),
                     ) {
-                        Icon(
-                            imageVector = HabitIcons.iconAt(selectedIconIndex),
-                            contentDescription = null,
-                            tint = selectedColor,
-                        )
+                        // Bordered-circle treatment matching the habit icon on the Habits list
+                        // tile's completion toggle, instead of a plain floating glyph.
+                        Box(
+                            modifier = Modifier
+                                .size(AppTheme.neoIconButtonSize)
+                                .neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = HabitIcons.iconAt(selectedIconIndex),
+                                contentDescription = null,
+                                tint = selectedColor,
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
                     PickerField(
@@ -349,11 +358,11 @@ fun HabitDetailScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
-                                .background(
-                                    color = selectedColor,
-                                    shape = CircleShape,
-                                )
+                                .size(AppTheme.neoIconButtonSize)
+                                .neoShadow(shape = CircleShape, offset = AppTheme.neoShadowOffsetSmall)
+                                .clip(CircleShape)
+                                .background(selectedColor)
+                                .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
                         )
                     }
                 }
@@ -383,43 +392,28 @@ fun HabitDetailScreen(
                     fontWeight = AppTheme.fwBold
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                val segmentedColors = detailSegmentedButtonColors()
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    SegmentedButton(
-                        selected = frequency == HabitFrequency.DAILY,
-                        onClick = { if (isEditing) frequency = HabitFrequency.DAILY },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
-                        enabled = isEditing,
-                        colors = segmentedColors
-                    ) { Text(stringResource(R.string.habitDetailLabelFrequencyDaily)) }
-                    SegmentedButton(
-                        selected = frequency == HabitFrequency.WEEKLY_FLEXIBLE,
-                        onClick = { if (isEditing) frequency = HabitFrequency.WEEKLY_FLEXIBLE },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
-                        enabled = isEditing,
-                        colors = segmentedColors
-                    ) { Text(stringResource(R.string.habitDetailLabelFrequencyFlexible)) }
-                    SegmentedButton(
-                        selected = frequency == HabitFrequency.WEEKLY_EXACT,
-                        onClick = { if (isEditing) frequency = HabitFrequency.WEEKLY_EXACT },
-                        shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
-                        enabled = isEditing,
-                        colors = segmentedColors
-                    ) { Text(stringResource(R.string.habitDetailLabelFrequencyExact)) }
-                }
+                val frequencyLabels = mapOf(
+                    HabitFrequency.DAILY to stringResource(R.string.habitDetailLabelFrequencyDaily),
+                    HabitFrequency.WEEKLY_FLEXIBLE to stringResource(R.string.habitDetailLabelFrequencyFlexible),
+                    HabitFrequency.WEEKLY_EXACT to stringResource(R.string.habitDetailLabelFrequencyExact),
+                )
+                NeoSegmentedSelector(
+                    values = listOf(
+                        HabitFrequency.DAILY,
+                        HabitFrequency.WEEKLY_FLEXIBLE,
+                        HabitFrequency.WEEKLY_EXACT,
+                    ),
+                    selectedValue = frequency,
+                    isEditing = isEditing,
+                    onSelected = { frequency = it },
+                    labelBuilder = { frequencyLabels.getValue(it) },
+                    activeBgColor = selectedColor,
+                )
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
                 if (frequency == HabitFrequency.WEEKLY_FLEXIBLE) {
-                    Card(
-                        shape = AppTheme.brNeo,
-                        border = BorderStroke(
-                            AppTheme.neoBorderWidth,
-                            if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.12f
-                            )
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 6.dp else 0.dp),
-                        colors = CardDefaults.cardColors(containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent)
+                    NeoCard(
+                        containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
                     ) {
                         Column(
                             modifier = Modifier
@@ -454,16 +448,8 @@ fun HabitDetailScreen(
                         }
                     }
                 } else if (frequency == HabitFrequency.WEEKLY_EXACT) {
-                    Card(
-                        shape = AppTheme.brNeo,
-                        border = BorderStroke(
-                            AppTheme.neoBorderWidth,
-                            if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.12f
-                            )
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 6.dp else 0.dp),
-                        colors = CardDefaults.cardColors(containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent)
+                    NeoCard(
+                        containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
                     ) {
                         val dayLabels = listOf(
                             1 to stringResource(R.string.calendarHeaderMon),
@@ -525,6 +511,7 @@ fun HabitDetailScreen(
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = detailFieldColors(isEditing),
+                        active = isEditing,
                     )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))

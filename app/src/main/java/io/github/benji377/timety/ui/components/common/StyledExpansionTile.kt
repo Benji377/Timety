@@ -1,6 +1,8 @@
 package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,11 +25,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
  * Collapsible tile with a plain-text title; tapping the header toggles [content]'s visibility.
  * Expanded state is internal (starting at [initiallyExpanded]) unless the caller passes
  * [expanded]/[onExpandedChange] to hoist and persist it externally.
+ *
+ * Deliberately flat in both states - no container border or shadow. A collapsible section is a
+ * structural divider between groups of content rather than a card in its own right, and giving it
+ * card weight made every screen that stacks several of them read as nested boxes.
  */
 @Composable
 fun StyledExpansionTile(

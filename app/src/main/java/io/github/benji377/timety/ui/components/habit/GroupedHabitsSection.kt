@@ -70,15 +70,17 @@ fun GroupedHabitsSection(
 
             var isExpanded by rememberSaveable(stackName) { mutableStateOf(false) }
 
+            // Give the stack header the same solid black-border + hard-shadow card treatment as
+            // every other bordered element, rather than the flat, alpha-faded gray pill it used to
+            // be - a translucent border/fill is exactly the soft-UI drift the reference sheet
+            // forbids. Collapsed vs. expanded is still legible via a flat container-color swap.
             NeoListTile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(AppTheme.paddingScreenHorizontal)
                     .padding(vertical = AppTheme.spaceSmall),
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                    alpha = if (isExpanded) 0.1f else 0.4f,
-                ),
-                borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                containerColor = if (isExpanded) MaterialTheme.colorScheme.surface
+                else MaterialTheme.colorScheme.surfaceContainerHighest,
             ) {
                 Column {
                     Row(

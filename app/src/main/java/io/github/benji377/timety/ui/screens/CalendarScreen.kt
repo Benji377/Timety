@@ -3,6 +3,7 @@ package io.github.benji377.timety.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,12 +27,11 @@ import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,7 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
+import io.github.benji377.timety.ui.components.common.neoPressShadow
+import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
@@ -169,15 +172,14 @@ fun CalendarScreen(
                     BackNavigationIcon(onClick = onNavigateBack)
                 },
                 actions = {
-                    IconButton(onClick = {
-                        focusedMonth = LocalDate.now().withDayOfMonth(1)
-                        selectedDate = LocalDate.now()
-                    }) {
-                        Icon(
-                            Icons.Filled.Today,
-                            contentDescription = stringResource(R.string.calendarTooltipToday)
-                        )
-                    }
+                    NeoIconButton(
+                        onClick = {
+                            focusedMonth = LocalDate.now().withDayOfMonth(1)
+                            selectedDate = LocalDate.now()
+                        },
+                        icon = Icons.Filled.Today,
+                        contentDescription = stringResource(R.string.calendarTooltipToday)
+                    )
                 }
             )
         }
@@ -187,12 +189,21 @@ fun CalendarScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Top half: the month calendar grid.
+            // Top half: the month calendar grid. Cream background (matches the app-wide surface,
+            // not a pure-white Material `surface`), bold border, and a hard shadow so the grid
+            // reads as a distinct component instead of floating edge-to-edge.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(16.dp)
+                    // Both the outer margin and the inner padding are kept tight: a seven-column
+                    // grid has to fit inside whatever is left, and stacking two generous paddings
+                    // squeezed the day cells down to a size that was awkward to tap. The outer
+                    // margin still clears the shadow's offset.
+                    .padding(horizontal = AppTheme.spaceSmall, vertical = AppTheme.spaceSmall)
+                    .neoShadow(shape = AppTheme.brNeo, offset = AppTheme.neoShadowOffset)
+                    .background(MaterialTheme.colorScheme.background, AppTheme.brNeo)
+                    .border(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
+                    .padding(AppTheme.spaceSmall)
             ) {
                 Column {
                     MonthNavigator(
@@ -213,14 +224,19 @@ fun CalendarScreen(
                 }
             }
 
-            HorizontalDivider(thickness = 1.dp)
-
-            // Bottom half: accordion lists for the selected day.
+            // Bottom half: accordion lists for the selected day. Solid theme color instead of an
+            // alpha-blended tint (reference sheet §3 forbids soft alpha fills) - the top border
+            // replaces the old standalone HorizontalDivider, giving the same seam as a real edge
+            // rather than a soft color transition.
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(
+                        width = AppTheme.borderThin,
+                        color = MaterialTheme.colorScheme.outline
+                    )
             ) {
                 if (selectedDate == null) {
                     Text(
@@ -297,9 +313,11 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onPrevious) {
-            Icon(Icons.Filled.ChevronLeft, contentDescription = null)
-        }
+        NeoIconButton(
+            onClick = onPrevious,
+            icon = Icons.Filled.ChevronLeft,
+            contentDescription = null,
+        )
         Text(
             text = AppDateFormatUtils.formatMonthYear(
                 focusedMonth
@@ -307,9 +325,11 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
-        IconButton(onClick = onNext) {
-            Icon(Icons.Filled.ChevronRight, contentDescription = null)
-        }
+        NeoIconButton(
+            onClick = onNext,
+            icon = Icons.Filled.ChevronRight,
+            contentDescription = null,
+        )
     }
 }
 
@@ -432,43 +452,91 @@ private fun CalendarGrid(
                     val hasFocus = sessionDateKeys.contains(dateKey)
                     val hasHabits = habitDateKeys.contains(dateKey)
 
+                    // Only the selected day and today get a border - the punch list calls the
+                    // selected-day treatment "already good, keep it" and doesn't ask for plain
+                    // cells to gain one. A full 2-4dp border on all ~35-42 cells would read as
+                    // cluttered (reference sheet §7's "don't cram content"), and a thin
+                    // `outlineVariant` compromise would reintroduce the soft tan/gray border the
+                    // general fixes explicitly ban - so plain cells stay borderless, as before.
+                    val cellBorderWidth = when {
+                        isSelected -> AppTheme.neoBorderWidth
+                        isToday -> AppTheme.listTileBorderWidth
+                        else -> 0.dp
+                    }
+                    val cellBorderColor = when {
+                        // The selected cell carries a solid TaskColor fill, so its border switches
+                        // to the neutral outline - a TaskColor border on a TaskColor fill would be
+                        // invisible, and the black edge is what makes the fill read as a block.
+                        isSelected -> MaterialTheme.colorScheme.outline
+                        isToday -> TaskColor
+                        else -> Color.Transparent
+                    }
                     // Padding sits outside the fixed height so the selection outline keeps clear of the dots.
+                    val dayInteractionSource = remember { MutableInteractionSource() }
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .padding(4.dp)
                             .height(45.dp)
+                            // Only the selected cell casts a shadow, and the modifier is applied
+                            // conditionally rather than with a 0dp offset: the shadow is painted
+                            // behind the cell, and an unselected cell is deliberately unfilled, so
+                            // any shadow at all would show straight through it as a black block.
+                            .then(
+                                if (isSelected) {
+                                    Modifier.neoPressShadow(
+                                        interactionSource = dayInteractionSource,
+                                        shape = AppTheme.brMedium,
+                                        offset = AppTheme.neoShadowOffsetSmall,
+                                    )
+                                } else {
+                                    Modifier
+                                }
+                            )
                             .background(
-                                color = if (isSelected) TaskColor.copy(alpha = 0.2f) else Color.Transparent,
+                                // Selection is a solid saturated fill, matching how NeoFilterChip
+                                // renders its selected state - a border-only selected cell would be
+                                // the one place in the app where selection reads as an outline.
+                                color = if (isSelected) TaskColor else Color.Transparent,
                                 shape = AppTheme.brMedium
                             )
                             .border(
-                                width = if (isToday) 2.dp else 0.dp,
-                                color = if (isToday) TaskColor else Color.Transparent,
+                                width = cellBorderWidth,
+                                color = cellBorderColor,
                                 shape = AppTheme.brMedium
                             )
-                            .clickable { onDaySelected(day) },
+                            .clickable(
+                                interactionSource = dayInteractionSource,
+                                indication = ripple(),
+                            ) { onDaySelected(day) },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = day.dayOfMonth.toString(),
                                 fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isCurrentMonth) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                    alpha = 0.5f
-                                )
+                                color = when {
+                                    isSelected -> Color.White
+                                    isCurrentMonth -> MaterialTheme.colorScheme.onSurface
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                }
                             )
                             Spacer(modifier = Modifier.height(2.dp))
+                            // On the selected day the dots go white rather than keeping their
+                            // per-category colors: the task dot is TaskColor and would disappear
+                            // into the selected cell's fill. Losing the category breakdown costs
+                            // nothing here, because the accordions below the grid list that day's
+                            // habits, tasks and focus sessions explicitly.
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (hasTasks) Dot(TaskColor)
+                                if (hasTasks) Dot(if (isSelected) Color.White else TaskColor)
                                 if (hasTasks && (hasFocus || hasHabits)) Spacer(
                                     modifier = Modifier.width(
                                         2.dp
                                     )
                                 )
-                                if (hasFocus) Dot(SuccessColor)
+                                if (hasFocus) Dot(if (isSelected) Color.White else SuccessColor)
                                 if (hasFocus && hasHabits) Spacer(modifier = Modifier.width(2.dp))
-                                if (hasHabits) Dot(HabitColor)
+                                if (hasHabits) Dot(if (isSelected) Color.White else HabitColor)
                                 if (!hasTasks && !hasFocus && !hasHabits) Spacer(
                                     modifier = Modifier.height(
                                         5.dp
@@ -479,10 +547,18 @@ private fun CalendarGrid(
                     }
                 }
 
+                // Bordered chip instead of plain text so the weekly summary reads as its own
+                // component next to the day cells (reference sheet §1). No neoShadow here: week
+                // rows sit flush against each other with no vertical gap, so a shadow would be
+                // clipped by the row underneath rather than clearing it (see NeoShadow.kt's layout
+                // note) - the border alone is enough to read as a distinct element at this density.
                 Box(
                     modifier = Modifier
                         .weight(1.5f)
-                        .height(53.dp),
+                        .height(53.dp)
+                        .padding(horizontal = AppTheme.spaceXSmall)
+                        .background(MaterialTheme.colorScheme.surface, AppTheme.brMedium)
+                        .border(AppTheme.borderThin, MaterialTheme.colorScheme.outline, AppTheme.brMedium),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -561,16 +637,20 @@ private fun HabitsAccordion(
                 NeoListTile(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(AppTheme.listTileScreenMargin)
                         .clickable { onHabitClick(hwc) },
                     containerColor = MaterialTheme.colorScheme.background,
-                    borderColor = if (isCompleted) HabitColor.copy(alpha = 0.3f) else HabitColor,
+                    // Completion is already conveyed by the strikethrough + dimmed text below;
+                    // the border stays a solid color rather than an alpha-faded one (reference
+                    // sheet forbids soft borders) - falling back to the neutral outline reads as
+                    // "no longer the active accent" without inventing a new faded tone.
+                    borderColor = if (isCompleted) MaterialTheme.colorScheme.outline else HabitColor,
                     borderWidth = AppTheme.borderThin,
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                            .padding(AppTheme.spaceMedium),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
@@ -664,7 +744,7 @@ private fun DayTaskRow(
     NeoListTile(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(AppTheme.listTileScreenMargin)
             .clickable { onClick() },
         containerColor = MaterialTheme.colorScheme.background,
         borderColor = if (isCompleted) SuccessColor else TaskColor,
@@ -673,7 +753,7 @@ private fun DayTaskRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(AppTheme.spaceMedium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
@@ -758,23 +838,29 @@ private fun FocusSessionsAccordion(
                 NeoListTile(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(AppTheme.listTileScreenMargin)
                         .clickable { editingSession = session },
                     containerColor = MaterialTheme.colorScheme.background,
-                    borderColor = MaterialTheme.colorScheme.outlineVariant,
+                    // Focus rows take the same accent-border treatment as the habit and task rows
+                    // above, using the color this screen already gives focus activity. The previous
+                    // `outlineVariant` was the soft tan the general fixes ban outright.
+                    borderColor = SuccessColor,
                     borderWidth = AppTheme.borderThin,
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(AppTheme.spaceLarge),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Circle,
                             contentDescription = null,
+                            // Solid fallback instead of an alpha-faded tint (reference sheet §3) -
+                            // untagged sessions get the same neutral solid used for muted text
+                            // elsewhere on this screen.
                             tint = tag?.let { Color(it.colorValue) }
-                                ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                ?: MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {

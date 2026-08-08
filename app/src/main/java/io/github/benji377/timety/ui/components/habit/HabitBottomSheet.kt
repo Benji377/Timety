@@ -236,18 +236,19 @@ private fun UnifiedCalendarSheetContent(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .fillMaxHeight()
+                                        // Solid fill, not an alpha tint - matches the CalendarScreen
+                                        // day-cell precedent: a flat neutral surface for a
+                                        // clickable/past cell, transparent for a disabled future one.
                                         .background(
                                             color = if (isFuture) Color.Transparent
-                                            else MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                                                alpha = 0.5f
-                                            ),
-                                            shape = RoundedCornerShape(12.dp),
+                                            else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                            shape = AppTheme.brNeo,
                                         )
                                         .then(
                                             if (isToday) Modifier.border(
                                                 2.dp,
                                                 HabitColor,
-                                                RoundedCornerShape(12.dp)
+                                                AppTheme.brNeo
                                             )
                                             else Modifier
                                         )
@@ -260,6 +261,9 @@ private fun UnifiedCalendarSheetContent(
                                     Text(
                                         text = date.dayOfMonth.toString(),
                                         fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                                        // A dimmed text tint (not a container fill) for the disabled
+                                        // future state - the data-vs-chrome exemption for inactive
+                                        // text/icon tints applies here, so this alpha stays.
                                         color = if (isFuture) MaterialTheme.colorScheme.onSurface.copy(
                                             alpha = 0.3f
                                         )
@@ -411,12 +415,17 @@ private fun TimelineItem(
             contentAlignment = Alignment.TopCenter,
         ) {
             if (!isLast) {
+                // Solid, not alpha-faded: the connector is chrome (a decorative timeline line), not
+                // chart-interior data, so it follows the same "no alpha-blended fills" rule as every
+                // other container/line in the app. Uses the outline ink color (as ModeTimeline's
+                // connector line does) rather than HabitColor, so the line reads as structure and
+                // the accent color stays reserved for the dots.
                 Box(
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .width(2.dp)
                         .fillMaxHeight()
-                        .background(HabitColor.copy(alpha = AppTheme.OPACITY_LIGHT)),
+                        .background(MaterialTheme.colorScheme.outline),
                 )
             }
             Box(

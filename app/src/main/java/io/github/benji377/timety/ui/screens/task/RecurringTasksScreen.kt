@@ -1,7 +1,5 @@
 package io.github.benji377.timety.ui.screens.task
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,10 +13,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -37,6 +33,8 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.ui.components.common.NeoFab
+import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.recurrenceCadenceLabel
 import io.github.benji377.timety.ui.components.task.recurringStatusColor
@@ -133,12 +131,16 @@ private fun RecurringTaskCard(
 ) {
     val dateFmt = LocalDateFormatSettings.current
     val borderColor = recurringStatusColor(status)
-    Card(
+    // A hand-rolled card rather than the RecurringTaskListTile used elsewhere: this card also
+    // shows a completed-occurrences count and only offers quick-complete for actionable statuses,
+    // neither of which RecurringTaskListTile exposes, so swapping in that composable would drop
+    // displayed information and change when the complete action is available.
+    NeoListTile(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = AppTheme.spaceSmall, vertical = AppTheme.spaceXSmall)
-            .clickable(onClick = onClick),
-        border = BorderStroke(AppTheme.listTileBorderWidth, borderColor),
+            .padding(horizontal = AppTheme.spaceSmall, vertical = AppTheme.spaceXSmall),
+        borderColor = borderColor,
+        onClick = onClick,
     ) {
         Row(
             modifier = Modifier
@@ -195,13 +197,12 @@ private fun RecurringTaskCard(
             // Quick-complete only makes sense for actionable occurrences; far-future ones are
             // completed early through the detail page instead.
             if (status != RecurringStatus.SCHEDULED) {
-                IconButton(onClick = onComplete) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = stringResource(R.string.recurringTaskCompleteNow),
-                        tint = SuccessColor,
-                    )
-                }
+                NeoIconButton(
+                    onClick = onComplete,
+                    icon = Icons.Filled.Check,
+                    contentDescription = stringResource(R.string.recurringTaskCompleteNow),
+                    contentColor = SuccessColor,
+                )
             }
         }
     }

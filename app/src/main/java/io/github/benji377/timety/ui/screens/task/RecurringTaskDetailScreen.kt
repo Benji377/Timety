@@ -28,16 +28,12 @@ import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -68,11 +64,12 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
+import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
 import io.github.benji377.timety.ui.components.common.detailFieldColors
-import io.github.benji377.timety.ui.components.common.detailSegmentedButtonColors
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -311,7 +308,8 @@ fun RecurringTaskDetailScreen(
                         label = { Text(stringResource(R.string.recurringTaskLabelNextDue) + " *") },
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
-                        colors = detailFieldColors(isEditing)
+                        colors = detailFieldColors(isEditing),
+                        active = isEditing,
                     )
                 }
                 Spacer(Modifier.height(AppTheme.spaceLarge))
@@ -321,20 +319,16 @@ fun RecurringTaskDetailScreen(
             item {
                 Text(stringResource(R.string.recurrenceLabel), fontWeight = AppTheme.fwBold)
                 Spacer(Modifier.height(AppTheme.spaceSmall))
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    RecurrenceUnit.entries.forEachIndexed { index, option ->
-                        SegmentedButton(
-                            selected = unit == option,
-                            onClick = { if (isEditing) unit = option },
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = index,
-                                count = RecurrenceUnit.entries.size
-                            ),
-                            enabled = isEditing,
-                            colors = detailSegmentedButtonColors(),
-                        ) { Text(recurrenceUnitName(option)) }
-                    }
-                }
+                // labelBuilder isn't @Composable, so resolve the localized labels up front.
+                val recurrenceUnitLabels = RecurrenceUnit.entries.associateWith { recurrenceUnitName(it) }
+                NeoSegmentedSelector(
+                    values = RecurrenceUnit.entries,
+                    selectedValue = unit,
+                    isEditing = isEditing,
+                    onSelected = { unit = it },
+                    labelBuilder = { recurrenceUnitLabels.getValue(it) },
+                    activeBgColor = TaskColor,
+                )
                 Spacer(Modifier.height(AppTheme.spaceMedium))
                 OutlinedTextField(
                     value = interval.toString(),
@@ -631,14 +625,12 @@ private fun OccurrenceRow(
             }",
             modifier = Modifier.weight(1f),
         )
-        IconButton(onClick = onDelete) {
-            Icon(
-                imageVector = Icons.Filled.DeleteOutline,
-                contentDescription = stringResource(R.string.commonLabelRemove),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp),
-            )
-        }
+        NeoIconButton(
+            onClick = onDelete,
+            icon = Icons.Filled.DeleteOutline,
+            contentDescription = stringResource(R.string.commonLabelRemove),
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

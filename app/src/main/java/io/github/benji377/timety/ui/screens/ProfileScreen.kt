@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,11 +32,10 @@ import androidx.compose.material.icons.outlined.Coffee
 import androidx.compose.material.icons.outlined.MilitaryTech
 import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material.icons.outlined.Timer
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ripple
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -59,13 +59,18 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.neoPressShadow
+import io.github.benji377.timety.ui.components.common.neoShadow
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.components.stats.StatCardStyle
 import io.github.benji377.timety.ui.components.user.StreakStatusBadge
 import io.github.benji377.timety.ui.components.user.UserStreakTimelineCard
 import io.github.benji377.timety.ui.components.user.UserXpBreakdownCard
+import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -167,7 +172,7 @@ fun ProfileScreen(
     }
 
     if (showShareWrapupDialog) {
-        AlertDialog(
+        NeoAlertDialog(
             onDismissRequest = { showShareWrapupDialog = false },
             title = { Text(stringResource(R.string.userTooltipShareWrapUp)) },
             text = {
@@ -266,18 +271,18 @@ fun ProfileScreen(
             NeoTopBar(
                 title = stringResource(R.string.userProfileTitle),
                 actions = {
-                    IconButton(onClick = { showShareWrapupDialog = true }) {
-                        Icon(
-                            Icons.Filled.Share,
-                            contentDescription = stringResource(R.string.userTooltipShareWrapUp)
-                        )
-                    }
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            Icons.Filled.Settings,
-                            contentDescription = stringResource(R.string.settingsTitle)
-                        )
-                    }
+                    NeoIconButton(
+                        onClick = { showShareWrapupDialog = true },
+                        icon = Icons.Filled.Share,
+                        contentDescription = stringResource(R.string.userTooltipShareWrapUp),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall),
+                    )
+                    NeoIconButton(
+                        onClick = onNavigateToSettings,
+                        icon = Icons.Filled.Settings,
+                        contentDescription = stringResource(R.string.settingsTitle),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall + AppTheme.neoShadowOffset),
+                    )
                 }
             )
         }
@@ -297,8 +302,10 @@ fun ProfileScreen(
                     Box(
                         modifier = Modifier
                             .size(120.dp)
+                            .neoShadow(shape = CircleShape)
                             .clip(CircleShape)
-                            .background(UserColor.copy(alpha = 0.15f)),
+                            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                            .border(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         // validOrNull drops stale entries (pre-2.1.0 content:// URIs whose read
@@ -322,13 +329,24 @@ fun ProfileScreen(
                             )
                         }
                     }
+                    val avatarBadgeInteractionSource = remember { MutableInteractionSource() }
                     Box(
                         modifier = Modifier
                             .size(36.dp)
+                            // neoPressShadow (not the static neoShadow), so this clickable badge
+                            // shifts toward its shadow on press like other tappable elements.
+                            .neoPressShadow(
+                                interactionSource = avatarBadgeInteractionSource,
+                                shape = CircleShape,
+                                offset = AppTheme.neoShadowOffsetSmall,
+                            )
                             .clip(CircleShape)
                             .background(UserColor)
-                            .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape)
-                            .clickable {
+                            .border(AppTheme.listTileBorderWidth, MaterialTheme.colorScheme.outline, CircleShape)
+                            .clickable(
+                                interactionSource = avatarBadgeInteractionSource,
+                                indication = ripple(),
+                            ) {
                                 photoPickerLauncher.launch(
                                     PickVisualMediaRequest(
                                         ActivityResultContracts.PickVisualMedia.ImageOnly
@@ -363,17 +381,16 @@ fun ProfileScreen(
                             fontWeight = FontWeight.Bold
                         )
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = {
-                        tempName = userName
-                        showEditNameDialog = true
-                    }) {
-                        Icon(
-                            Icons.Filled.Edit,
-                            stringResource(R.string.userEditNameTitle),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                    NeoIconButton(
+                        onClick = {
+                            tempName = userName
+                            showEditNameDialog = true
+                        },
+                        icon = Icons.Filled.Edit,
+                        contentDescription = stringResource(R.string.userEditNameTitle),
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 

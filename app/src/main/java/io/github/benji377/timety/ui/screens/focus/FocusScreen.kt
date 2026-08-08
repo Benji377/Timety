@@ -1,8 +1,7 @@
 package io.github.benji377.timety.ui.screens.focus
 
 import android.content.Intent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Alarm
@@ -35,10 +33,7 @@ import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -79,10 +74,11 @@ import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.services.FocusTimerService
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
-import io.github.benji377.timety.ui.components.focus.GaugeShape
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.focus.ModeTimeline
 import io.github.benji377.timety.ui.components.focus.SessionEditorDialog
@@ -317,12 +313,11 @@ fun FocusScreen(
             NeoTopBar(
                 title = stringResource(R.string.focusTitle),
                 actions = {
-                    IconButton(onClick = onNavigateToModes) {
-                        Icon(
-                            Icons.Filled.DashboardCustomize,
-                            contentDescription = stringResource(R.string.focusModesTitle)
-                        )
-                    }
+                    NeoIconButton(
+                        onClick = onNavigateToModes,
+                        icon = Icons.Filled.DashboardCustomize,
+                        contentDescription = stringResource(R.string.focusModesTitle),
+                    )
                     Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                 }
             )
@@ -341,14 +336,13 @@ fun FocusScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(onClick = { cycleMode(-1) }, enabled = !modeSelectionLocked) {
-                    Icon(
-                        Icons.Filled.ArrowBackIosNew,
-                        contentDescription = null,
-                        modifier = Modifier.size(AppTheme.iconSizeMedium),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                NeoIconButton(
+                    onClick = { cycleMode(-1) },
+                    icon = Icons.Filled.ArrowBackIosNew,
+                    contentDescription = null,
+                    enabled = !modeSelectionLocked,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Box(
                     modifier = Modifier
                         .width(180.dp)
@@ -366,29 +360,34 @@ fun FocusScreen(
                         modifier = Modifier.padding(vertical = 8.dp),
                     )
                 }
-                IconButton(onClick = { cycleMode(1) }, enabled = !modeSelectionLocked) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        modifier = Modifier.size(AppTheme.iconSizeMedium),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                NeoIconButton(
+                    onClick = { cycleMode(1) },
+                    icon = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = null,
+                    enabled = !modeSelectionLocked,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
             // Daily goal badge.
-            Box(
-                modifier = Modifier
-                    .padding(bottom = AppTheme.spaceMedium)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(FocusColor.copy(alpha = 0.12f))
-                    .border(1.dp, FocusColor.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-                    .clickable(onClick = onNavigateToSettings)
-                    .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall),
+            NeoCard(
+                modifier = Modifier.padding(bottom = AppTheme.spaceMedium),
+                shape = AppTheme.brPill,
+                borderColor = FocusColor,
+                borderWidth = AppTheme.listTileBorderWidth,
+                shadowOffset = AppTheme.neoShadowOffsetSmall,
+                shadowColor = FocusColor,
+                onClick = onNavigateToSettings,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(
+                        horizontal = AppTheme.spaceLarge,
+                        vertical = AppTheme.spaceSmall
+                    ),
+                ) {
                     Icon(
                         Icons.Filled.TrackChanges,
                         contentDescription = null,
@@ -421,41 +420,27 @@ fun FocusScreen(
                     onTargetTapped = { showTargetSelection = true },
                 )
 
-                FilledTonalIconButton(
+                NeoIconButton(
                     onClick = { showTimeMachine = true },
+                    icon = Icons.Filled.History,
+                    contentDescription = stringResource(R.string.commonTooltipTimeMachine),
                     enabled = !isRunning && !isPaused,
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = FocusColor.copy(alpha = 0.2f),
-                        contentColor = FocusColor
-                    ),
+                    contentColor = FocusColor,
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.TopStart),
-                ) {
-                    Icon(
-                        Icons.Filled.History,
-                        contentDescription = stringResource(R.string.commonTooltipTimeMachine),
-                        modifier = Modifier.size(28.dp),
-                    )
-                }
+                )
 
-                FilledTonalIconButton(
+                NeoIconButton(
                     onClick = { showDistraction = true },
+                    icon = Icons.Filled.WarningAmber,
+                    contentDescription = stringResource(R.string.commonTooltipDistractions),
                     enabled = isRunning || isPaused,
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = WarningColor.copy(alpha = 0.2f),
-                        contentColor = WarningColor
-                    ),
+                    contentColor = WarningColor,
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.TopEnd),
-                ) {
-                    Icon(
-                        Icons.Filled.WarningAmber,
-                        contentDescription = stringResource(R.string.commonTooltipDistractions),
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+                )
             }
 
             // Phase timeline.
@@ -474,17 +459,19 @@ fun FocusScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 val secondaryEnabled = isRunning || isPaused || awaitingContinue
-                IconButton(
-                    onClick = { requestReset() },
-                    modifier = Modifier.size(64.dp),
-                    enabled = secondaryEnabled
-                ) {
-                    Icon(
-                        Icons.Filled.RestartAlt,
+                // Reset/pause are hidden (not merely disabled) until a session is active, so an
+                // unbordered Spacer reserves their footprint instead of a bordered NeoIconButton -
+                // giving them a border+shadow even while "invisible" would show a ghost circle.
+                if (secondaryEnabled) {
+                    NeoIconButton(
+                        onClick = { requestReset() },
+                        icon = Icons.Filled.RestartAlt,
                         contentDescription = null,
-                        modifier = Modifier.size(AppTheme.iconSizeXLarge),
-                        tint = if (secondaryEnabled) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = AppTheme.focusTransportButtonSize,
                     )
+                } else {
+                    Spacer(modifier = Modifier.size(AppTheme.focusTransportButtonSize))
                 }
 
                 Spacer(modifier = Modifier.width(32.dp))
@@ -509,8 +496,13 @@ fun FocusScreen(
                         containerColor = if (isRunning) ErrorColor else FocusColor,
                         contentColor = Color.White
                     ),
+                    // Bold border: the play button is this screen's primary action and reference
+                    // treatment (reference sheet §6), so it holds a heavier border than the
+                    // neoBorderWidth used by the gauge frame and other cards. No elevation override
+                    // here - NeoButton's own neoPressShadow supplies the hard offset shadow, and a
+                    // Material elevation on top of it would reintroduce a blurred shadow.
+                    border = BorderStroke(AppTheme.borderThick, MaterialTheme.colorScheme.outline),
                     contentPadding = PaddingValues(0.dp),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
                 ) {
                     Icon(
                         when {
@@ -525,23 +517,28 @@ fun FocusScreen(
 
                 Spacer(modifier = Modifier.width(32.dp))
 
-                IconButton(
-                    onClick = {
-                        when {
-                            awaitingContinue -> requestStop()
-                            isPaused -> startFromScratch()
-                            else -> sendAction(FocusTimerService.ACTION_PAUSE)
-                        }
-                    },
-                    modifier = Modifier.size(64.dp),
-                    enabled = secondaryEnabled,
-                ) {
-                    Icon(
-                        if (awaitingContinue) Icons.Filled.Stop else if (isPaused) Icons.Filled.PlayCircleFilled else Icons.Filled.Pause,
+                if (secondaryEnabled) {
+                    NeoIconButton(
+                        onClick = {
+                            when {
+                                awaitingContinue -> requestStop()
+                                isPaused -> startFromScratch()
+                                else -> sendAction(FocusTimerService.ACTION_PAUSE)
+                            }
+                        },
+                        icon = if (awaitingContinue) {
+                            Icons.Filled.Stop
+                        } else if (isPaused) {
+                            Icons.Filled.PlayCircleFilled
+                        } else {
+                            Icons.Filled.Pause
+                        },
                         contentDescription = null,
-                        modifier = Modifier.size(AppTheme.iconSizeXLarge),
-                        tint = if (secondaryEnabled) MaterialTheme.colorScheme.onSurfaceVariant else Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = AppTheme.focusTransportButtonSize,
                     )
+                } else {
+                    Spacer(modifier = Modifier.size(AppTheme.focusTransportButtonSize))
                 }
             }
 
@@ -736,7 +733,6 @@ private fun TimerGauge(
 
     InteractiveGauge(
         progress = gaugeProgress,
-        gaugeShape = GaugeShape.Square,
         isStopwatch = isStopwatchAnim,
         color = gaugeColor,
         labelColor = gaugeColor,

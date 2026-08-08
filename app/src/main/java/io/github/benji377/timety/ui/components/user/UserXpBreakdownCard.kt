@@ -6,8 +6,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -20,15 +20,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Flag
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,8 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -51,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
@@ -110,33 +106,23 @@ fun UserXpBreakdownCard(
         )
     }
 
-    Card(
+    // Reuses NeoCard (solid border + hard shadow) instead of a bare Card with a gradient/alpha
+    // background - both a gradient and an alpha-blended fill are exactly the soft-UI drift the
+    // reference sheet forbids; a flat solid container is the neobrutalist substitute.
+    NeoCard(
         modifier = modifier.fillMaxWidth(),
-        shape = AppTheme.brNeo,
-        border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = AppTheme.neoCardElevation,
+        containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
-            modifier = Modifier
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-                            MaterialTheme.colorScheme.surface,
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY),
-                    )
-                )
-                .padding(20.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
-                        .background(titleColor.copy(alpha = 0.12f)),
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                        .border(AppTheme.listTileBorderWidth, titleColor, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -181,7 +167,7 @@ fun UserXpBreakdownCard(
             )
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(AppTheme.brNeo)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -217,8 +203,8 @@ fun UserXpBreakdownCard(
                         if (index < sources.size - 1) {
                             HorizontalDivider(
                                 modifier = Modifier.padding(horizontal = 16.dp),
-                                thickness = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                                thickness = AppTheme.borderThin,
+                                color = MaterialTheme.colorScheme.outlineVariant,
                             )
                         }
                     }
@@ -248,7 +234,8 @@ private fun XpSourceRow(data: XpSourceRowData) {
             modifier = Modifier
                 .size(38.dp)
                 .clip(CircleShape)
-                .background(data.color.copy(alpha = 0.12f)),
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                .border(AppTheme.listTileBorderWidth, data.color, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -275,8 +262,9 @@ private fun XpSourceRow(data: XpSourceRowData) {
         Spacer(Modifier.width(12.dp))
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(999.dp))
-                .background(data.color.copy(alpha = 0.1f))
+                .clip(AppTheme.brPill)
+                .background(MaterialTheme.colorScheme.surface)
+                .border(AppTheme.borderThin, data.color, AppTheme.brPill)
                 .padding(horizontal = 10.dp, vertical = 6.dp),
         ) {
             Text(

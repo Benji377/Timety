@@ -13,16 +13,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,6 +42,8 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NamedColorEditDialog
+import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -115,7 +114,7 @@ fun TaskCategoriesScreen(
             } else {
                 items(categories, key = { it.id }) { category ->
                     val taskCount = tasks.count { it.task.category == category.name }
-                    Card(
+                    NeoListTile(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
@@ -132,7 +131,7 @@ fun TaskCategoriesScreen(
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(AppTheme.brMedium)
                                     .background(Color(category.colorValue)),
                             )
                             Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
@@ -149,19 +148,18 @@ fun TaskCategoriesScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-                            IconButton(onClick = { categoryDialogTarget = category }) {
-                                Icon(
-                                    Icons.Filled.Edit,
-                                    contentDescription = stringResource(R.string.categoryEditTitle)
-                                )
-                            }
-                            IconButton(onClick = { categoryPendingDelete = category }) {
-                                Icon(
-                                    Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.commonLabelDelete),
-                                    tint = ErrorColor
-                                )
-                            }
+                            NeoIconButton(
+                                onClick = { categoryDialogTarget = category },
+                                icon = Icons.Filled.Edit,
+                                contentDescription = stringResource(R.string.categoryEditTitle),
+                            )
+                            Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                            NeoIconButton(
+                                onClick = { categoryPendingDelete = category },
+                                icon = Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.commonLabelDelete),
+                                contentColor = ErrorColor,
+                            )
                         }
                     }
                 }

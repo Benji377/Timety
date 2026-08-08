@@ -17,7 +17,6 @@ import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,6 +38,7 @@ import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoFab
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitBottomSheet
@@ -97,18 +97,18 @@ fun HabitListScreen(
             NeoTopBar(
                 title = stringResource(R.string.habitsListTitle),
                 actions = {
-                    IconButton(onClick = onNavigateToGoals) {
-                        Icon(
-                            imageVector = Icons.Outlined.Flag,
-                            contentDescription = stringResource(R.string.goalsTitle),
-                        )
-                    }
-                    IconButton(onClick = onNavigateToQuickHabits) {
-                        Icon(
-                            imageVector = Icons.Outlined.Alarm,
-                            contentDescription = stringResource(R.string.quickHabitsTitle),
-                        )
-                    }
+                    NeoIconButton(
+                        onClick = onNavigateToGoals,
+                        icon = Icons.Outlined.Flag,
+                        contentDescription = stringResource(R.string.goalsTitle),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall),
+                    )
+                    NeoIconButton(
+                        onClick = onNavigateToQuickHabits,
+                        icon = Icons.Outlined.Alarm,
+                        contentDescription = stringResource(R.string.quickHabitsTitle),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall + AppTheme.neoShadowOffset),
+                    )
                 }
             )
         },
@@ -152,20 +152,17 @@ fun HabitListScreen(
                         singleLine = true,
                         shape = AppTheme.brNeo
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(
+                    Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                    NeoIconButton(
                         onClick = {
                             reorderMode = !reorderMode
                             if (reorderMode) searchQuery = ""
-                        }
-                    ) {
-                        Icon(
-                            Icons.Filled.DragHandle,
-                            contentDescription = stringResource(R.string.habitListReorderToggleTooltip),
-                            tint = if (reorderMode) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                        },
+                        icon = Icons.Filled.DragHandle,
+                        contentDescription = stringResource(R.string.habitListReorderToggleTooltip),
+                        contentColor = if (reorderMode) HabitColor
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
 
                 if (filteredHabits.isEmpty()) {

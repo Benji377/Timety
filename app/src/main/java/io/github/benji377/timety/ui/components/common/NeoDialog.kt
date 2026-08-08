@@ -13,17 +13,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Bold-bordered, flat modal surface: the neo-styled replacement for Material3's [androidx.compose.material3.AlertDialog],
- * whose default shape/elevation don't have a border param to override.
+ * Bold-bordered modal surface with a hard [neoShadow]: the neo-styled replacement for Material3's
+ * [androidx.compose.material3.AlertDialog], whose default shape/elevation don't have a border
+ * param to override.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +37,7 @@ fun NeoDialog(
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest, modifier = modifier) {
         Surface(
+            modifier = Modifier.neoShadow(shape = AppTheme.brNeo),
             shape = AppTheme.brNeo,
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
@@ -66,6 +70,57 @@ fun NeoAlertDialog(
                 fontSize = AppTheme.fsBodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+        Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            dismissButton?.invoke()
+            if (dismissButton != null) {
+                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+            }
+            confirmButton()
+        }
+    }
+}
+
+/**
+ * Composable-slot overload of [NeoAlertDialog], shaped to match Material3's `AlertDialog` almost
+ * exactly (`title`/`text` as optional composable slots rather than plain strings) so a raw
+ * `AlertDialog(...)` call site can migrate to the neo-styled dialog container by swapping the
+ * function name alone. [title] and [text], when present, inherit this dialog's standard heading
+ * and body text styles via [ProvideTextStyle] so callers don't have to restate
+ * font size/weight/color on every `Text(...)` inside them - only an explicit style on a caller's
+ * own `Text` overrides it.
+ */
+@Composable
+fun NeoAlertDialog(
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    dismissButton: (@Composable () -> Unit)? = null,
+    title: (@Composable () -> Unit)? = null,
+    text: (@Composable () -> Unit)? = null,
+) {
+    NeoDialog(onDismissRequest = onDismissRequest, modifier = modifier) {
+        if (title != null) {
+            ProvideTextStyle(TextStyle(fontSize = AppTheme.fsHeadingSmall, fontWeight = FontWeight.Bold)) {
+                title()
+            }
+        }
+        if (title != null && text != null) {
+            Spacer(modifier = Modifier.height(AppTheme.spaceMedium))
+        }
+        if (text != null) {
+            ProvideTextStyle(
+                TextStyle(
+                    fontSize = AppTheme.fsBodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+            ) {
+                text()
+            }
         }
         Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
         Row(

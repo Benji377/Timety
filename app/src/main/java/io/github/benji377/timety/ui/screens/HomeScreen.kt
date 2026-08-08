@@ -1,7 +1,6 @@
 package io.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +19,6 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -43,6 +40,7 @@ import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoFab
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitListTile
@@ -181,18 +179,18 @@ fun HomeScreen(
             NeoTopBar(
                 title = stringResource(R.string.appTitle),
                 actions = {
-                    IconButton(onClick = onNavigateToStatistics) {
-                        Icon(
-                            Icons.Filled.BarChart,
-                            contentDescription = stringResource(R.string.commonTooltipStats)
-                        )
-                    }
-                    IconButton(onClick = onNavigateToCalendar) {
-                        Icon(
-                            Icons.Filled.CalendarToday,
-                            contentDescription = stringResource(R.string.commonTooltipCalendar)
-                        )
-                    }
+                    NeoIconButton(
+                        onClick = onNavigateToStatistics,
+                        icon = Icons.Filled.BarChart,
+                        contentDescription = stringResource(R.string.commonTooltipStats),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall),
+                    )
+                    NeoIconButton(
+                        onClick = onNavigateToCalendar,
+                        icon = Icons.Filled.CalendarToday,
+                        contentDescription = stringResource(R.string.commonTooltipCalendar),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall + AppTheme.neoShadowOffset),
+                    )
                 }
             )
         },
@@ -238,12 +236,13 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
 
-            // Tasks and habits list.
+            // Tasks and habits list. Kept on the screen's own flat background (no tinted overlay)
+            // per the reference sheet's "single flat neutral background" and "no alpha-blended
+            // fills" rules - the divider above already separates this section visually.
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
                 if (urgentTasks.isEmpty() && todaysHabits.isEmpty() && recurringDueCount == 0) {
                     Text(
@@ -414,7 +413,12 @@ private fun DailyGoalCard(
         onClick = onClick,
         modifier = modifier,
         borderColor = FocusColor,
-        containerColor = FocusColor.copy(alpha = 0.08f),
+        // Flat, solid fill (no alpha) so the card still reads as "filled" and distinct from the
+        // plain-white cards elsewhere on the screen, per the reference sheet's "flat saturated
+        // color... keep backgrounds neutral, let accent colors do all the work" (a solid accent
+        // fill behind body text would fight the FocusColor border/value text for contrast).
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        shadowColor = FocusColor,
     ) {
         Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
             Row(

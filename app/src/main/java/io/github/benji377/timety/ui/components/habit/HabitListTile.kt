@@ -23,7 +23,6 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
@@ -82,7 +82,13 @@ fun HabitListTile(
 
     val tile: @Composable () -> Unit = {
         if (isStacked) {
-            val barColor = if (isCompleted) color.copy(alpha = AppTheme.OPACITY_LIGHT) else color
+            // Completed rows dim to a flat neutral instead of an alpha-faded tint of the habit's
+            // accent - reference sheet §3 forbids alpha-blended fills, so "done" is a solid color
+            // swap, not a translucency effect. Uses `outline`, not `outlineVariant`: the latter is
+            // the soft tan/gray border color the general fixes explicitly ban, and this bar reads
+            // as a tile accent/border, not a divider.
+            val barColor =
+                if (isCompleted) MaterialTheme.colorScheme.outline else color
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,7 +122,12 @@ fun HabitListTile(
                 }
             }
         } else {
-            val borderColor = if (isCompleted) color.copy(alpha = AppTheme.OPACITY_LIGHT) else color
+            // Same "solid swap, not translucency" rule as the stacked bar above: an alpha-faded
+            // border is exactly the soft-UI drift the reference sheet forbids. Uses `outline`, not
+            // `outlineVariant` - this is a tile border, and `outlineVariant` is the banned soft
+            // tan/gray, not a legitimate flat replacement for it.
+            val borderColor =
+                if (isCompleted) MaterialTheme.colorScheme.outline else color
             NeoListTile(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -193,7 +204,7 @@ private fun HabitTileContent(
                     shape = CircleShape,
                 )
                 .border(
-                    width = 2.dp,
+                    width = AppTheme.listTileBorderWidth,
                     color = if (isCompleted) color else (if (isLocked) MaterialTheme.colorScheme.onSurfaceVariant else HabitColor),
                     shape = CircleShape,
                 )
@@ -255,11 +266,15 @@ private fun HabitTileContent(
 
             if (progressValue != null && !isCompleted) {
                 Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                // Fill uses the habit's own accent (the same color as its border/icon above) so the
+                // bar reads as part of the same tile rather than a mismatched shade; the track is a
+                // flat neutral instead of an alpha-faded tint of the accent (reference sheet §3: no
+                // alpha-blended fills).
                 NeoProgressBar(
                     progress = { progressValue.coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth(),
                     color = color,
-                    trackColor = color.copy(alpha = AppTheme.OPACITY_VERY_LIGHT),
+                    trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 )
             }
         }
@@ -271,12 +286,13 @@ private fun HabitTileContent(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else if (onMarkPastCompletion != null) {
-            IconButton(onClick = onMarkPastCompletion) {
-                Icon(
-                    imageVector = Icons.Filled.Schedule,
-                    contentDescription = stringResource(R.string.habitMarkPastCompletionTooltip),
-                )
-            }
+            // The "history icon" the reference sheet calls out by name: bordered + hard-shadowed
+            // instead of a bare glyph floating with no container weight.
+            NeoIconButton(
+                onClick = onMarkPastCompletion,
+                icon = Icons.Filled.Schedule,
+                contentDescription = stringResource(R.string.habitMarkPastCompletionTooltip),
+            )
         }
     }
 }
