@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,12 +26,13 @@ import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import kotlinx.coroutines.launch
 
 
 /**
  * Wraps a list tile in end-to-start swipe-to-delete: the swipe reveals a red delete
- * background and opens a [ConfirmationDialog] instead of dismissing directly, so the tile
- * always springs back and only [onDelete] removes it.
+ * background and opens a [ConfirmationDialog] rather than deleting outright, so the tile
+ * springs back unless the user confirms and only [onDelete] removes it.
  */
 @Composable
 fun SwipeToDeleteBox(
@@ -43,14 +45,16 @@ fun SwipeToDeleteBox(
     content: @Composable () -> Unit,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart) {
-                showDeleteDialog = true
-            }
-            false
-        },
-    )
+    val dismissState = rememberSwipeToDismissBoxState()
+    val scope = rememberCoroutineScope()
+
+    // The box stays parked in the dismissed position while the dialog is up, so both
+    // outcomes have to swipe it back: confirming only removes it once the caller's data
+    // changes, and cancelling has to undo the swipe.
+    fun closeDialog() {
+        showDeleteDialog = false
+        scope.launch { dismissState.reset() }
+    }
 
     ConfirmationDialog(
         visible = showDeleteDialog,
@@ -59,15 +63,16 @@ fun SwipeToDeleteBox(
         confirmLabel = confirmLabel,
         confirmColor = ErrorColor,
         onConfirm = {
-            showDeleteDialog = false
+            closeDialog()
             onDelete()
         },
-        onDismiss = { showDeleteDialog = false },
+        onDismiss = { closeDialog() },
     )
 
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = false,
+        onDismiss = { showDeleteDialog = true },
         modifier = modifier,
         backgroundContent = {
             // Only visible mid-swipe: at rest the red would bleed through rounded corners

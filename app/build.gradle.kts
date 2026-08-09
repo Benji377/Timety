@@ -95,8 +95,8 @@ android {
             "SlotReused",
             "ComposeCompositionLocalUsage",
         )
-        // SARIF is uploaded to GitHub code scanning by the lint workflow.
-        sarifReport = true
+        // AGP always writes every report format now; the lint workflow picks the
+        // SARIF one out of build/reports and uploads it to GitHub code scanning.
     }
     packaging {
         jniLibs {
