@@ -3,6 +3,8 @@
 <b>Funzionalità</b>
 <ul>
   <li><b>Gestione intelligente delle attività:</b> Organizza singole attività con scadenze, livelli di priorità e stime di impegno.</li>
+  <li><b>Attività ricorrenti:</b> Crea attività che tornano secondo la loro pianificazione, senza doverle ricreare ogni volta.</li>
+  <li><b>Obiettivi:</b> Definisci obiettivi a lungo termine con una scadenza e monitora i tuoi progressi.</li>
   <li><b>Motore di Focus:</b> Un robusto sistema di cronometro e timer progettato per il deep work. Include il supporto per tag, modalità personalizzate e fasi di pausa brevi/lunghe.</li>
   <li><b>Monitoraggio delle abitudini:</b> Costruisci routine durature con frequenze flessibili (giornaliere, giorni specifici della settimana o obiettivi settimanali flessibili).</li>
   <li><b>Analisi dettagliate:</b> Visualizza la tua produttività con grafici interattivi, metriche di velocità settimanali e analisi delle abitudini in base all'ora del giorno.</li>
