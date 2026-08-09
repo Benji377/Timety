@@ -44,10 +44,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.goal.GoalWithEntries
-import io.github.benji377.timety.ui.components.common.detailFieldColors
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
@@ -55,6 +54,7 @@ import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.SuccessColor

@@ -142,7 +142,8 @@ fun GroupedHabitsSection(
                                     var isLocked = false
                                     if (index > 0) {
                                         val prevHwc = sortedStackHabits[index - 1]
-                                        val isPrevDone = HabitUtils.isCompletedOn(prevHwc, targetDate)
+                                        val isPrevDone =
+                                            HabitUtils.isCompletedOn(prevHwc, targetDate)
                                         isLocked = HabitUtils.isHabitLocked(
                                             index = index,
                                             isCurrentHabitDone = isDone,

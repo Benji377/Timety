@@ -78,22 +78,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
-import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.StyledExpansionTile
+import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
-import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.screens.LocationPickerScreen
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -340,7 +340,10 @@ fun TaskDetailScreen(
                         // Selection is signaled by the segment's own fill and border (see
                         // AccordionSelector), not by fading the icon - so the icon only needs an
                         // override when it would otherwise clash with a selected segment's fill.
-                        AppUtils.PriorityIcon(priority = p, tint = if (isSelected) Color.White else null)
+                        AppUtils.PriorityIcon(
+                            priority = p,
+                            tint = if (isSelected) Color.White else null
+                        )
                     },
                     labelBuilder = { p -> p.name.replace("_", "") }
                 )

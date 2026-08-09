@@ -35,9 +35,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NamedColorEditDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton

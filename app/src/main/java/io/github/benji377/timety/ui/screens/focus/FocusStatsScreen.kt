@@ -863,9 +863,11 @@ private fun FocusHeatmap(sessions: List<FocusSessionEntity>) {
             // instead of being vertically clipped or - worse - widening the row and desyncing it
             // from the grid.
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Spacer(modifier = Modifier
-                    .width(28.dp)
-                    .height(16.dp))
+                Spacer(
+                    modifier = Modifier
+                        .width(28.dp)
+                        .height(16.dp)
+                )
                 for (row in 0..6) {
                     HeatmapAxisLabel(
                         text = weekdayLabels[row] ?: "",
@@ -991,7 +993,11 @@ private fun HeatmapSwatch(level: Int, showBorder: Boolean, modifier: Modifier = 
             // cell's outline is chrome, so that border stays solid rather than alpha-faded below.
             .background(if (level > 0) FocusColor.copy(alpha = 0.2f + level * 0.2f) else Color.Transparent)
             .then(
-                if (showBorder) Modifier.border(AppTheme.borderHairline, outlineColor, shape) else Modifier
+                if (showBorder) Modifier.border(
+                    AppTheme.borderHairline,
+                    outlineColor,
+                    shape
+                ) else Modifier
             )
     )
 }

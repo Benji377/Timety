@@ -34,10 +34,10 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ripple
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -60,8 +60,8 @@ import coil.compose.AsyncImage
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
-import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.components.stats.StatCardStyle
 import io.github.benji377.timety.ui.components.user.StreakStatusBadge

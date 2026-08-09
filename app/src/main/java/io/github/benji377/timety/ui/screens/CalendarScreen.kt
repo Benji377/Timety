@@ -51,9 +51,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
-import io.github.benji377.timety.ui.components.common.NeoIconButton
-import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
@@ -62,8 +59,11 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
-import io.github.benji377.timety.ui.components.common.StyledExpansionTile
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
+import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter

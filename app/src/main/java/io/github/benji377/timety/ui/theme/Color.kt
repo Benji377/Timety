@@ -16,6 +16,7 @@ val PaperLight = Color(0xFFFFF8EF)
 val PaperAltLight = Color(0xFFF6EEDB)
 val PaperDark = Color(0xFF151515)
 val PaperAltDark = Color(0xFF202020)
+
 // Hairline border/divider colors. Muted rather than ink-black: at the flat design's single 1dp
 // stroke weight a full-contrast border reads as a hard outline around every element, which is the
 // look the flat pass is removing. These sit ~1.8:1 against their own mode's paper background -

@@ -105,7 +105,12 @@ fun NeoAlertDialog(
 ) {
     NeoDialog(onDismissRequest = onDismissRequest, modifier = modifier) {
         if (title != null) {
-            ProvideTextStyle(TextStyle(fontSize = AppTheme.fsHeadingSmall, fontWeight = FontWeight.Bold)) {
+            ProvideTextStyle(
+                TextStyle(
+                    fontSize = AppTheme.fsHeadingSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            ) {
                 title()
             }
         }

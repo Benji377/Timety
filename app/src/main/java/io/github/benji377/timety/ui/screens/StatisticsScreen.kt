@@ -58,10 +58,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.data.model.user.DayRatingEntity
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoTabRow
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.stats.LegendDot

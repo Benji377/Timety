@@ -491,7 +491,11 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
                         }
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = bucket.label, fontSize = 14.sp, fontWeight = AppTheme.fwBold)
+                            Text(
+                                text = bucket.label,
+                                fontSize = 14.sp,
+                                fontWeight = AppTheme.fwBold
+                            )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = bucket.subtitle,

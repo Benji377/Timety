@@ -75,8 +75,8 @@ import io.github.benji377.timety.services.FocusTimerService
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoIconButton
-import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.focus.ModeTimeline

@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.ui.components.common.NeoListTile
-import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
+import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor

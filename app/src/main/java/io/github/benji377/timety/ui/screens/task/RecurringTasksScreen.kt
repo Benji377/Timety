@@ -29,9 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile

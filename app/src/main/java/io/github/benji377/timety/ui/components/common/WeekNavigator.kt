@@ -44,7 +44,7 @@ fun WeekNavigator(
     // Both ends in the user's date format; mixing styles ("Jul 13 - 7/19/26") reads as a typo.
     val weekRangeLabel =
         "${AppDateFormatUtils.formatDate(startOfWeek, dfs.dateFormatCode)} \u2013 " +
-            AppDateFormatUtils.formatDate(endOfWeek, dfs.dateFormatCode)
+                AppDateFormatUtils.formatDate(endOfWeek, dfs.dateFormatCode)
 
     Row(
         modifier = modifier.fillMaxWidth(),

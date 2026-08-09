@@ -63,7 +63,10 @@ fun <T> DraggableReorderColumn(
                         .onGloballyPositioned { itemHeights[itemKey] = it.size.height }
                         .zIndex(if (itemKey == draggingKey) 1f else 0f)
                         .offset {
-                            IntOffset(0, if (itemKey == draggingKey) dragOffsetPx.roundToInt() else 0)
+                            IntOffset(
+                                0,
+                                if (itemKey == draggingKey) dragOffsetPx.roundToInt() else 0
+                            )
                         }
                         .pointerInput(itemKey) {
                             detectDragGestures(
@@ -79,7 +82,8 @@ fun <T> DraggableReorderColumn(
                                     if (idx == -1) return@detectDragGestures
 
                                     while (dragOffsetPx > 0 && idx < localOrder.lastIndex) {
-                                        val belowHeight = itemHeights[key(localOrder[idx + 1])] ?: break
+                                        val belowHeight =
+                                            itemHeights[key(localOrder[idx + 1])] ?: break
                                         if (dragOffsetPx <= belowHeight / 2f) break
                                         localOrder = localOrder.toMutableList().apply {
                                             add(idx, removeAt(idx + 1))
@@ -88,7 +92,8 @@ fun <T> DraggableReorderColumn(
                                         idx++
                                     }
                                     while (dragOffsetPx < 0 && idx > 0) {
-                                        val aboveHeight = itemHeights[key(localOrder[idx - 1])] ?: break
+                                        val aboveHeight =
+                                            itemHeights[key(localOrder[idx - 1])] ?: break
                                         if (dragOffsetPx >= -aboveHeight / 2f) break
                                         localOrder = localOrder.toMutableList().apply {
                                             add(idx, removeAt(idx - 1))

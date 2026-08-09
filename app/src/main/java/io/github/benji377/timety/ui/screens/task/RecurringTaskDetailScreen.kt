@@ -53,13 +53,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.MonthlyMode
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.ReminderOption
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
@@ -67,9 +67,9 @@ import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
-import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -319,7 +319,8 @@ fun RecurringTaskDetailScreen(
                 Text(stringResource(R.string.recurrenceLabel), fontWeight = AppTheme.fwBold)
                 Spacer(Modifier.height(AppTheme.spaceSmall))
                 // labelBuilder isn't @Composable, so resolve the localized labels up front.
-                val recurrenceUnitLabels = RecurrenceUnit.entries.associateWith { recurrenceUnitName(it) }
+                val recurrenceUnitLabels =
+                    RecurrenceUnit.entries.associateWith { recurrenceUnitName(it) }
                 NeoSegmentedSelector(
                     values = RecurrenceUnit.entries,
                     selectedValue = unit,

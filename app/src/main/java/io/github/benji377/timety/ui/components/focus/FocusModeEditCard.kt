@@ -1,7 +1,6 @@
 package io.github.benji377.timety.ui.components.focus
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -364,7 +363,11 @@ private fun PhaseChip(phase: SessionPhaseEntity, flexLabel: String, onClick: () 
             .clip(CircleShape)
             .background(if (isFocus) FocusColor else WarningColor, CircleShape)
             .hairlineBorder()
-            .clickable(interactionSource = interactionSource, indication = ripple(), onClick = onClick),
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(),
+                onClick = onClick
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Text(
