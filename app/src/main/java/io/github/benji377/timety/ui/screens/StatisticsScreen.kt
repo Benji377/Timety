@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +16,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
@@ -56,10 +58,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.data.model.user.DayRatingEntity
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoTabRow
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.stats.LegendDot
@@ -68,12 +70,14 @@ import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.screens.focus.FocusStatsScreen
 import io.github.benji377.timety.ui.screens.habit.HabitStatsScreen
 import io.github.benji377.timety.ui.screens.task.TaskStatsScreen
+import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.DayRatingViewModel
@@ -488,8 +492,10 @@ private fun SynergyChart(
                     text = label,
                     style = TextStyle(
                         fontSize = 12.sp,
+                        // Bold on every label, not just today's - no light/thin type weight
+                        // anywhere; today is distinguished by color alone.
                         color = if (isToday) todayColor else axisTextColor,
-                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
+                        fontWeight = FontWeight.Bold
                     )
                 )
                 val x = leftReservedPx + (index / 6f) * plotWidth
@@ -566,34 +572,64 @@ private fun SynergyChart(
                     modifier = Modifier
                         .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
                         .width(120.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color.Black.copy(alpha = 0.75f))
+                        .clip(AppTheme.brMedium)
+                        // Chrome, not chart data: a solid surface fill + outline border, matching
+                        // every other tooltip/badge in the app instead of a translucent scrim.
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(
+                            AppTheme.hairlineStroke,
+                            AppTheme.brMedium,
+                        )
                         .padding(8.dp)
                 ) {
-                    Text(
+                    // Which series a row belongs to is carried by a bordered color dot rather than
+                    // by tinting the text: against the solid surface fill the saturated series
+                    // colors drop below a readable contrast ratio, and TaskColor blue in dark mode
+                    // is the worst of them. The dot keeps the series encoding at full saturation
+                    // while the numbers themselves stay on onSurface.
+                    TooltipRow(
+                        markerColor = FocusColor,
                         text = quantityString(
                             R.plurals.nMinutesCount,
                             dailyFocus[idx],
                             zeroRes = R.string.nMinutesCountZero,
                             dailyFocus[idx]
                         ),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = FocusColor
                     )
-                    Text(
+                    TooltipRow(
+                        markerColor = TaskColor,
                         text = quantityString(
                             R.plurals.nTasksCount,
                             dailyTasks[idx],
                             zeroRes = R.string.nTasksCountZero,
                             dailyTasks[idx]
                         ),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TaskColor
                     )
                 }
             }
         }
+    }
+}
+
+/**
+ * One line of the [SynergyChart] scrub tooltip: a bordered [markerColor] dot identifying the series,
+ * followed by [text] in the neutral on-surface color.
+ */
+@Composable
+private fun TooltipRow(markerColor: Color, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(AppTheme.spaceSmall)
+                .background(markerColor, CircleShape)
+                .hairlineBorder()
+        )
+        Spacer(modifier = Modifier.width(AppTheme.spaceXSmall))
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }

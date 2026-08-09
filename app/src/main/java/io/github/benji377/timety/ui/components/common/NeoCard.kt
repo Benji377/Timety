@@ -13,60 +13,59 @@ import androidx.compose.ui.unit.Dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Bordered, flat (no shadow) [Card] used for the app's prominent "feature card" tier: standalone
- * summary/config cards such as the home screen's daily-goal card or a stat card, where the bold
- * [AppTheme.neoBorderWidth] border and [AppTheme.brNeo] corner radius are meant to draw the eye.
- * For the denser list-row tier (task/habit/recurring-task rows), use [NeoListTile] instead.
+ * Bordered [Card] for the prominent "feature card" tier: standalone summary/config cards such as
+ * the home screen's daily-goal card. For dense list rows use [NeoListTile].
  *
- * When [onClick] is non-null, the card is rendered with Material3's clickable `Card(onClick = ...)`
- * overload; otherwise it renders as a plain, non-interactive card.
+ * The card is flat, so its [AppTheme.borderCard] border and [containerColor] fill are the only
+ * things separating it from the page - give it a fill distinct from its background.
+ * A non-null [onClick] selects Material3's clickable `Card` overload, whose ripple supplies tap
+ * feedback.
  */
 @Composable
 fun NeoCard(
     modifier: Modifier = Modifier,
     shape: Shape = AppTheme.brNeo,
     borderColor: Color = MaterialTheme.colorScheme.outline,
-    borderWidth: Dp = AppTheme.neoBorderWidth,
+    borderWidth: Dp = AppTheme.borderCard,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val border = BorderStroke(borderWidth, borderColor)
+    val colors = CardDefaults.cardColors(containerColor = containerColor)
+    val elevation = AppTheme.flatCardElevation
     if (onClick != null) {
         Card(
             onClick = onClick,
             modifier = modifier,
             shape = shape,
-            border = BorderStroke(borderWidth, borderColor),
-            colors = CardDefaults.cardColors(containerColor = containerColor),
-            elevation = AppTheme.neoCardElevation,
+            border = border,
+            colors = colors,
+            elevation = elevation,
             content = content,
         )
     } else {
         Card(
             modifier = modifier,
             shape = shape,
-            border = BorderStroke(borderWidth, borderColor),
-            colors = CardDefaults.cardColors(containerColor = containerColor),
-            elevation = AppTheme.neoCardElevation,
+            border = border,
+            colors = colors,
+            elevation = elevation,
             content = content,
         )
     }
 }
 
 /**
- * Bordered, flat (no shadow) [Card] used for the app's dense "list row" tier: task, recurring-task,
- * and habit rows, where the thinner [AppTheme.listTileBorderWidth] border and [AppTheme.brMedium]
- * corner radius keep repeated rows visually quiet. For standalone feature/summary cards, use
- * [NeoCard] instead.
- *
- * Delegates to [NeoCard] with list-tile defaults so both tiers share one implementation.
+ * Bordered [Card] for the dense "list row" tier (task, recurring-task, and habit rows), where the
+ * tighter [AppTheme.brMedium] radius keeps repeated rows visually quiet. Delegates to [NeoCard].
  */
 @Composable
 fun NeoListTile(
     modifier: Modifier = Modifier,
     shape: Shape = AppTheme.brMedium,
     borderColor: Color = MaterialTheme.colorScheme.outline,
-    borderWidth: Dp = AppTheme.listTileBorderWidth,
+    borderWidth: Dp = AppTheme.borderCard,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,

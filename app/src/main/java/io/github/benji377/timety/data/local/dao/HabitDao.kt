@@ -50,7 +50,4 @@ interface HabitDao {
 
     @Delete
     fun deleteCompletion(completion: HabitCompletionEntity)
-
-    @Query("DELETE FROM habit_completions WHERE habitId = :habitId AND completionDate = :date")
-    fun deleteCompletionByDate(habitId: String, date: Long): Int
 }

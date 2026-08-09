@@ -11,11 +11,14 @@ import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.util.Log
 import io.github.benji377.timety.R
 
 /** Plays the focus-timer phase-end chime and a haptic pulse when its alarm fires. */
 class TimerSoundReceiver : BroadcastReceiver() {
     companion object {
+        private const val TAG = "TimerSoundReceiver"
+
         private val activePools = mutableSetOf<SoundPool>()
         private var lastPlayTimeMs: Long = 0
 
@@ -73,7 +76,7 @@ class TimerSoundReceiver : BroadcastReceiver() {
             }
             soundPool.load(context, R.raw.ding, 1)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to play phase-end chime", e)
             pendingResult.finish()
         }
     }

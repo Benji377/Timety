@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -29,6 +30,7 @@ import io.github.benji377.timety.ui.components.focus.FocusTagsWidget
 import io.github.benji377.timety.ui.navigation.AppRoute
 import io.github.benji377.timety.ui.navigation.BottomNavItem
 import io.github.benji377.timety.ui.navigation.BottomNavItems
+import io.github.benji377.timety.ui.navigation.BottomNavRoutes
 import io.github.benji377.timety.ui.screens.focus.FocusModesScreen
 import io.github.benji377.timety.ui.screens.focus.FocusScreen
 import io.github.benji377.timety.ui.screens.goal.GoalDetailScreen
@@ -67,14 +69,14 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showBottomNav = currentRoute in BottomNavItems.map { it.route }
+    val showBottomNav = currentRoute in BottomNavRoutes
 
     LaunchedEffect(navTarget) {
         if (navTarget != null) {
             // Tab targets keep the bottom-nav back-stack semantics; detail targets stack on top.
             // A malformed route (stale widget after an app update) is dropped rather than crashing.
             try {
-                if (BottomNavItems.any { it.route == navTarget }) {
+                if (navTarget in BottomNavRoutes) {
                     navController.navigate(navTarget) {
                         popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                         launchSingleTop = true
@@ -112,7 +114,11 @@ fun MainScreen(
                                 Icon(
                                     imageVector = if (isSelected) item.iconFilled else item.iconOutlined,
                                     contentDescription = stringResource(item.titleRes),
-                                    tint = if (isSelected) item.activeColor else MaterialTheme.colorScheme.onSurfaceVariant
+                                    // White, not item.activeColor: the icon now sits on a solid
+                                    // item.activeColor indicator pill (see colors below), so it
+                                    // needs to contrast against that fill rather than match it -
+                                    // same selected-content-color rule as NeoFilterChip.
+                                    tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
                             label = {
@@ -123,7 +129,9 @@ fun MainScreen(
                                 )
                             },
                             colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = item.activeColor.copy(alpha = 0.15f)
+                                // Solid fill, not an alpha tint: the selected-state precedent set by
+                                // NeoFilterChip is a solid saturated background with white content.
+                                indicatorColor = item.activeColor
                             )
                         )
                     }

@@ -25,6 +25,10 @@ import io.github.benji377.timety.ui.theme.AppTheme
 /**
  * Outlined text field built on [BasicTextField] with M3's [OutlinedTextFieldDefaults] decoration,
  * so the app's custom [shape] and border widths can be applied without fighting M3's own OutlinedTextField.
+ *
+ * Focused and unfocused borders share the same [AppTheme.borderHairline] thickness; focus is
+ * signalled by the border *color* from [colors], not by the stroke growing. An editable field is
+ * likewise told apart from a read-only one purely by its container fill (see [detailFieldColors]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +55,7 @@ fun NeoOutlinedTextField(
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = AppTheme.brNeo,
-    colors: TextFieldColors = detailFieldColors()
+    colors: TextFieldColors = detailFieldColors(),
 ) {
     val mergedTextStyle = textStyle.merge(TextStyle(color = MaterialTheme.colorScheme.onSurface))
 
@@ -106,8 +110,8 @@ fun NeoOutlinedTextField(
                         interactionSource = interactionSource,
                         colors = colors,
                         shape = shape,
-                        focusedBorderThickness = AppTheme.neoBorderWidth,
-                        unfocusedBorderThickness = 2.dp
+                        focusedBorderThickness = AppTheme.borderHairline,
+                        unfocusedBorderThickness = AppTheme.borderHairline
                     )
                 }
             )

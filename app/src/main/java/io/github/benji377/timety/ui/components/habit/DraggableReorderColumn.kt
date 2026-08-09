@@ -23,14 +23,12 @@ import kotlin.math.roundToInt
 
 
 /**
- * Renders [items] in a plain [Column]; while [isReorderEnabled] is true, each item can be
- * dragged (immediately, no long-press) to swap it past its neighbors, and [onOrderChanged] is
- * called with the new order once the drag ends. While disabled, this is a pure passthrough with
- * no gesture handling attached at all, so callers get zero behavior change when reorder mode
- * is off.
+ * Renders [items] in a plain [Column]. While [isReorderEnabled], each item drags immediately (no
+ * long-press) to swap past its neighbors, and [onOrderChanged] fires with the new order on drag
+ * end. While disabled it is a pure passthrough with no gesture handling attached.
  *
- * Item heights aren't uniform (notes, progress bars, etc. vary tile height), so each item's
- * height is tracked live via [onGloballyPositioned] rather than assumed.
+ * Tile heights vary (notes, progress bars), so each is tracked live via [onGloballyPositioned]
+ * rather than assumed uniform.
  */
 @Composable
 fun <T> DraggableReorderColumn(
@@ -65,7 +63,10 @@ fun <T> DraggableReorderColumn(
                         .onGloballyPositioned { itemHeights[itemKey] = it.size.height }
                         .zIndex(if (itemKey == draggingKey) 1f else 0f)
                         .offset {
-                            IntOffset(0, if (itemKey == draggingKey) dragOffsetPx.roundToInt() else 0)
+                            IntOffset(
+                                0,
+                                if (itemKey == draggingKey) dragOffsetPx.roundToInt() else 0
+                            )
                         }
                         .pointerInput(itemKey) {
                             detectDragGestures(
@@ -81,7 +82,8 @@ fun <T> DraggableReorderColumn(
                                     if (idx == -1) return@detectDragGestures
 
                                     while (dragOffsetPx > 0 && idx < localOrder.lastIndex) {
-                                        val belowHeight = itemHeights[key(localOrder[idx + 1])] ?: break
+                                        val belowHeight =
+                                            itemHeights[key(localOrder[idx + 1])] ?: break
                                         if (dragOffsetPx <= belowHeight / 2f) break
                                         localOrder = localOrder.toMutableList().apply {
                                             add(idx, removeAt(idx + 1))
@@ -90,7 +92,8 @@ fun <T> DraggableReorderColumn(
                                         idx++
                                     }
                                     while (dragOffsetPx < 0 && idx > 0) {
-                                        val aboveHeight = itemHeights[key(localOrder[idx - 1])] ?: break
+                                        val aboveHeight =
+                                            itemHeights[key(localOrder[idx - 1])] ?: break
                                         if (dragOffsetPx >= -aboveHeight / 2f) break
                                         localOrder = localOrder.toMutableList().apply {
                                             add(idx, removeAt(idx - 1))

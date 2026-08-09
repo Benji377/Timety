@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 
 
 /**
- * Determinate progress bar in the app's neobrutalist style: sharp corners, flat butt caps, and
+ * Determinate progress bar in the app's flat style: sharp corners, flat butt caps, and
  * no indicator/track gap or stop dot. Size (including height) is the caller's via [modifier].
  */
 @Composable

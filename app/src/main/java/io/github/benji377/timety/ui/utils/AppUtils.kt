@@ -47,15 +47,19 @@ object AppUtils {
         )
     }
 
-    /** Icon indicating a task's priority level, colored by severity. */
+    /**
+     * Icon indicating a task's priority level, colored by severity by default. Pass [tint] to
+     * override that color - e.g. a selected segment on a solid severity-colored fill needs a
+     * single readable content color instead of clashing with its own background.
+     */
     @Composable
-    fun PriorityIcon(priority: Priority) {
-        val (icon, color) = when (priority) {
+    fun PriorityIcon(priority: Priority, tint: Color? = null) {
+        val (icon, severityColor) = when (priority) {
             Priority.LOW -> Icons.Filled.KeyboardArrowDown to TaskColor
             Priority.MEDIUM -> Icons.Filled.DragHandle to WarningColor
             Priority.HIGH -> Icons.Filled.KeyboardArrowUp to ErrorColor
             Priority.VERY_HIGH -> Icons.Filled.KeyboardDoubleArrowUp to ErrorColor
         }
-        Icon(imageVector = icon, contentDescription = null, tint = color)
+        Icon(imageVector = icon, contentDescription = null, tint = tint ?: severityColor)
     }
 }

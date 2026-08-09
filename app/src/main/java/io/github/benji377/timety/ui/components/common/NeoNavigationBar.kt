@@ -11,15 +11,15 @@ import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
  * Standard bottom navigation bar: a bold top edge and a flat, non-elevated background,
- * so the bar reads as a distinct neobrutalist band separated from screen content
+ * so the bar reads as a distinct band separated from screen content
  * (mirroring [NeoTopBar]'s bottom border).
  */
 @Composable
 fun NeoNavigationBar(content: @Composable RowScope.() -> Unit) {
     Column {
-        // Bold top edge so the bar reads as a distinct neobrutalist band.
+        // Top edge so the bar reads as a distinct band below the content.
         HorizontalDivider(
-            thickness = AppTheme.neoBorderWidth,
+            thickness = AppTheme.borderHairline,
             color = MaterialTheme.colorScheme.outline,
         )
         NavigationBar(

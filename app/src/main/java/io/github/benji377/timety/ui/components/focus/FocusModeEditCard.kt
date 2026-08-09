@@ -1,10 +1,9 @@
 package io.github.benji377.timety.ui.components.focus
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,13 +23,11 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,13 +47,15 @@ import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.components.common.NeoElevatedButton as ElevatedButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
@@ -90,16 +89,10 @@ fun FocusModeEditCard(
         if (!isEditing) tempPhases = phases
     }
 
-    Card(
+    NeoCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isEditing) 4.dp else 1.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(
-            AppTheme.neoBorderWidth,
-            if (LocalIsDarkTheme.current) Color.White else Color.Black
-        )
     ) {
         Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
             if (isEditing) {
@@ -214,29 +207,41 @@ private fun OverviewView(
             )
         }
         if (mode.isSystem) {
-            Box(modifier = Modifier.padding(AppTheme.spaceSmall)) {
+            // Small bordered circle badge instead of a bare glyph, so the lock reads as an
+            // intentional indicator rather than a stray icon against the card underneath -
+            // matches the bordered-circle badge language used for swatches elsewhere in the app.
+            Box(
+                modifier = Modifier
+                    .padding(AppTheme.spaceSmall)
+                    .size(AppTheme.iconSizeXLarge)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface, CircleShape)
+                    .hairlineBorder(),
+                contentAlignment = Alignment.Center,
+            ) {
                 Icon(
                     Icons.Outlined.Lock,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(AppTheme.iconSizeSmall),
                 )
             }
         } else {
+            // Bordered tap targets (NeoIconButton) instead of bare floating icons.
             Row {
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        Icons.Filled.Edit,
-                        contentDescription = stringResource(R.string.focusModeLabelEdit),
-                        tint = TaskColor
-                    )
-                }
-                IconButton(onClick = onDeleteRequested) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = stringResource(R.string.commonLabelDelete),
-                        tint = ErrorColor
-                    )
-                }
+                NeoIconButton(
+                    onClick = onEdit,
+                    icon = Icons.Filled.Edit,
+                    contentDescription = stringResource(R.string.focusModeLabelEdit),
+                    contentColor = TaskColor,
+                )
+                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                NeoIconButton(
+                    onClick = onDeleteRequested,
+                    icon = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.commonLabelDelete),
+                    contentColor = ErrorColor,
+                )
             }
         }
     }
@@ -265,12 +270,11 @@ private fun EditorView(
             fontSize = AppTheme.fsBodyLarge,
             color = TaskColor,
         )
-        IconButton(onClick = onCancel) {
-            Icon(
-                Icons.Filled.Close,
-                contentDescription = stringResource(R.string.commonLabelCancel)
-            )
-        }
+        NeoIconButton(
+            onClick = onCancel,
+            icon = Icons.Filled.Close,
+            contentDescription = stringResource(R.string.commonLabelCancel),
+        )
     }
     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
@@ -303,17 +307,27 @@ private fun EditorView(
                     modifier = Modifier
                         .width(24.dp)
                         .height(2.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant)
+                        // Bold outline color, not outlineVariant (the soft tan/gray the reference
+                        // sheet forbids) - matches the border color now used on the phase circles
+                        // this connector line sits between.
+                        .background(MaterialTheme.colorScheme.outline)
                 )
             }
         }
+        val addPhaseInteractionSource = remember { MutableInteractionSource() }
         Box(
             modifier = Modifier
                 .size(56.dp)
+                // A recessed surfaceVariant fill inside an outline ring, matching the PhaseChip
+                // circles beside it - the "add" slot reads as an empty version of the same chip.
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                .border(2.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                .clickable(onClick = onAddPhaseTapped),
+                .hairlineBorder()
+                .clickable(
+                    interactionSource = addPhaseInteractionSource,
+                    indication = ripple(),
+                    onClick = onAddPhaseTapped,
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(Icons.Filled.Add, contentDescription = null, tint = WifiOffColor)
@@ -340,12 +354,20 @@ private fun EditorView(
 @Composable
 private fun PhaseChip(phase: SessionPhaseEntity, flexLabel: String, onClick: () -> Unit) {
     val isFocus = phase.type == PhaseType.FOCUS
+    val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .size(56.dp)
+            // Solid accent fill inside an outline ring, matching the phase-dot treatment used by
+            // ModeTimeline's active node.
             .clip(CircleShape)
             .background(if (isFocus) FocusColor else WarningColor, CircleShape)
-            .clickable(onClick = onClick),
+            .hairlineBorder()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(),
+                onClick = onClick
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Text(

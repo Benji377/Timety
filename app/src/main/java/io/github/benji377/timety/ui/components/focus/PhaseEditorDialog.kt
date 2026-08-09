@@ -8,7 +8,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.Coffee
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.components.common.NeoButton as Button
@@ -51,7 +51,7 @@ fun PhaseEditorDialog(
     var selectedType by remember { mutableStateOf(initialPhase?.type ?: PhaseType.FOCUS) }
     var timeText by remember { mutableStateOf(initialPhase?.durationMinutes?.toString() ?: "25") }
 
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (isNew) stringResource(R.string.focusPhasesTitleAdd) else stringResource(R.string.focusPhasesTitleEdit)) },
         text = {

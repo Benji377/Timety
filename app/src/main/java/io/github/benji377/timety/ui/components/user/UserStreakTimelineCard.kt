@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.user
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -19,11 +18,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,8 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
@@ -44,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.FrostColor
@@ -101,26 +96,14 @@ fun UserStreakTimelineCard(
         if (days.isNotEmpty()) listState.scrollToItem(days.size - 1)
     }
 
-    Card(
+    // Reuses NeoCard instead of a bare Card with a gradient/alpha background - see the matching
+    // comment on UserXpBreakdownCard for why.
+    NeoCard(
         modifier = modifier.fillMaxWidth(),
-        shape = AppTheme.brNeo,
-        border = BorderStroke(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = AppTheme.neoCardElevation,
+        containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
-            modifier = Modifier
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
-                            MaterialTheme.colorScheme.surface,
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY),
-                    )
-                )
-                .padding(20.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -189,10 +172,7 @@ fun UserStreakTimelineCard(
                 TimelineLegendDot(HabitColor, stringResource(R.string.globalLabelHabit))
                 TimelineLegendDot(FocusColor, stringResource(R.string.focusTitle))
                 TimelineLegendDot(WarningColor, stringResource(R.string.streakLegendStreakDay))
-                TimelineLegendDot(
-                    FrostColor.copy(alpha = 0.6f),
-                    stringResource(R.string.streakLegendBend),
-                )
+                TimelineLegendDot(FrostColor, stringResource(R.string.streakLegendBend))
             }
         }
     }
@@ -223,39 +203,45 @@ private fun streakStatusText(
     val today = LocalDate.now()
     val todayKey = AppDateUtils.dayKey(today)
     val yesterdayKey = AppDateUtils.dayKey(today.minusDays(1))
-    val dayKeys = activityDates.map { AppDateUtils.dayKey(it) }.toSet()
+    val hasToday = activityDates.any { AppDateUtils.dayKey(it) == todayKey }
+    val hasYesterday = activityDates.any { AppDateUtils.dayKey(it) == yesterdayKey }
 
     return when {
-        dayKeys.contains(todayKey) && currentStreak > 0 -> stringResource(R.string.streakStatusActive)
-        dayKeys.contains(yesterdayKey) && currentStreak > 0 -> stringResource(R.string.streakStatusFrozen)
-        dayKeys.contains(todayKey) -> stringResource(R.string.streakStatusBuilding)
+        hasToday && currentStreak > 0 -> stringResource(R.string.streakStatusActive)
+        hasYesterday && currentStreak > 0 -> stringResource(R.string.streakStatusFrozen)
+        hasToday -> stringResource(R.string.streakStatusBuilding)
         else -> stringResource(R.string.streakStatusStart)
     }
 }
 
+/**
+ * A single day cell in the streak strip. Today is the one solid-filled "selected" cell; every
+ * other day shares one flat neutral background and is told apart purely by its border's *color* -
+ * every cell carries the same hairline stroke, so streak / bend / plain must be readable from hue
+ * alone.
+ */
 @Composable
 private fun DayTile(info: StreakDayInfo, modifier: Modifier = Modifier) {
-    val surfaceHighest = MaterialTheme.colorScheme.surfaceVariant
-    val backgroundColor = when {
-        info.isToday -> TaskColor.copy(alpha = 0.12f)
-        info.inCurrentStreak -> WarningColor.copy(alpha = 0.14f)
-        // A bend is a missed day the streak survived: hollow and icy, matching the frozen flame.
-        info.isBend -> FrostColor.copy(alpha = 0.05f)
-        info.hasTask || info.hasHabit || info.hasFocus -> surfaceHighest.copy(alpha = 0.7f)
-        else -> surfaceHighest.copy(alpha = 0.35f)
-    }
+    val shape = AppTheme.brNeo
+    val backgroundColor = if (info.isToday) TaskColor else MaterialTheme.colorScheme.surface
     val borderColor = when {
         info.isToday -> TaskColor
         info.inCurrentStreak -> WarningColor
-        info.isBend -> FrostColor.copy(alpha = 0.45f)
-        else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+        // A bend is a missed day the streak survived: told apart from a plain day by color alone,
+        // matching the frozen flame.
+        info.isBend -> FrostColor
+        // `outline`, not `outlineVariant` - this cell has its own background and border like a
+        // card, and `outlineVariant` is reserved for dividers *inside* a container.
+        else -> MaterialTheme.colorScheme.outline
     }
+    val contentColor = if (info.isToday) Color.White else MaterialTheme.colorScheme.onSurface
+    val labelColor = if (info.isToday) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
 
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(shape)
             .background(backgroundColor)
-            .border(if (info.isToday) 1.8.dp else 1.dp, borderColor, RoundedCornerShape(16.dp))
+            .border(AppTheme.borderHairline, borderColor, shape)
             .padding(horizontal = 6.dp, vertical = 7.dp)
             .height(84.dp - 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -272,12 +258,13 @@ private fun DayTile(info: StreakDayInfo, modifier: Modifier = Modifier) {
             overflow = TextOverflow.Ellipsis,
             fontSize = 9.sp,
             fontWeight = FontWeight.Bold,
-            color = if (info.isToday) TaskColor else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = labelColor,
         )
         Text(
             text = "${info.date.dayOfMonth}",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
+            color = contentColor,
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             DayDot(info.hasTask, TaskColor)
@@ -295,7 +282,7 @@ private fun DayDot(active: Boolean, color: Color) {
         modifier = Modifier
             .size(7.dp)
             .clip(CircleShape)
-            .background(if (active) color else color.copy(alpha = 0.12f))
+            .background(if (active) color else MaterialTheme.colorScheme.surfaceContainerHighest)
     )
 }
 

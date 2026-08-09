@@ -2,27 +2,32 @@ package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
@@ -49,7 +54,17 @@ fun PickerField(
             readOnly = true,
             enabled = enabled,
             label = { Text(label) },
-            leadingIcon = { Box(contentAlignment = Alignment.Center) { content() } },
+            // Trailing gap on the leading slot: [content] here is a 40dp swatch or icon circle,
+            // far wider than the 24dp glyph M3 sizes its own leading-icon spacing for, so without
+            // this the label sits flush against the swatch's edge. Kept at spaceSmall rather than
+            // anything wider because this padding also eats into the label's available width, and
+            // these fields are half-width - at spaceMedium "Select an Icon" wraps to two lines.
+            leadingIcon = {
+                Box(
+                    modifier = Modifier.padding(end = AppTheme.spaceSmall),
+                    contentAlignment = Alignment.Center,
+                ) { content() }
+            },
             modifier = Modifier.fillMaxWidth(),
         )
         Box(
@@ -73,7 +88,7 @@ fun IconPickerDialog(
     onSelect: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
@@ -85,20 +100,28 @@ fun IconPickerDialog(
             ) {
                 items(HabitIcons.availableIcons.size) { index ->
                     val isSelected = index == selectedIconIndex
+                    val interactionSource = remember { MutableInteractionSource() }
+                    // Selected state is a solid fill + border, not an alpha-blended tint - the
+                    // same selected/unselected fill switch used by NeoFilterChip, so the picker
+                    // reads consistently with the rest of the app's selector controls.
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                color = if (isSelected) accentColor.copy(alpha = 0.2f) else Color.Transparent,
-                                shape = CircleShape,
-                            )
-                            .clickable { onSelect(index) },
+                            .size(AppTheme.neoIconButtonSize)
+                            .clip(CircleShape)
+                            .background(if (isSelected) accentColor else Color.Transparent)
+                            .hairlineBorder()
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = ripple()
+                            ) {
+                                onSelect(index)
+                            },
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             imageVector = HabitIcons.availableIcons[index],
                             contentDescription = null,
-                            tint = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurface,
+                            tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
@@ -120,7 +143,7 @@ fun ColorPickerDialog(
     onSelect: (Color) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

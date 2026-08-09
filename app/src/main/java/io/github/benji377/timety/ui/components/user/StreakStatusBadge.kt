@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -70,11 +71,21 @@ fun StreakStatusBadge(
 
     Box(modifier = modifier.size(32.dp), contentAlignment = Alignment.Center) {
         if (isActive) {
+            // Badge container fill: chrome, so it must be a solid color rather than the alpha-faded
+            // glow this used to be. A flat neutral surface (not a solid FrostColor/WarningColor
+            // disc) keeps the badge from fighting the equally-saturated flame icon drawn on top.
+            // The surface itself sits directly on the screen background (no card underneath it in
+            // ProfileScreen), and surfaceContainerHighest is only a few percent off that background
+            // in light mode, so an accent-colored border - matching the flame's own tint, same idiom
+            // as the SessionRow/DistractionRow/GoalCard badges - is needed for the disc to read as
+            // its own shape rather than disappearing into the page.
             Box(
                 modifier = Modifier
                     .size(32.dp)
-                    .background(
-                        if (atRisk) FrostColor.copy(alpha = 0.22f) else WarningColor.copy(alpha = 0.18f),
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape)
+                    .border(
+                        AppTheme.borderHairline,
+                        if (atRisk) FrostColor else WarningColor,
                         CircleShape,
                     ),
             )
@@ -89,6 +100,10 @@ fun StreakStatusBadge(
                     translationY = with(density) { (-0.5f * flameRise).dp.toPx() }
                 }
                 .scale(flicker),
+            // Icon tint, not a container fill - the data-vs-chrome exemption for a decorative glow
+            // (isActive) and a dimmed icon tint (inactive) applies, so these alphas stay: they
+            // soften the flame's body so the small, fully-opaque inner-glow icon below reads as the
+            // brighter highlight, and dim the icon itself when the streak is inactive.
             tint = when {
                 atRisk -> FrostColor
                 isActive -> WarningColor.copy(alpha = 0.6f)
@@ -101,7 +116,7 @@ fun StreakStatusBadge(
                 imageVector = Icons.Filled.LocalFireDepartment,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(AppTheme.iconSizeMedium)
                     .align(Alignment.BottomCenter)
                     .graphicsLayer {
                         translationY = with(density) { (-1.0f * flameRise).dp.toPx() }

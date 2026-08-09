@@ -12,16 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,11 +35,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NamedColorEditDialog
+import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -107,7 +106,7 @@ fun FocusTagsWidget(
                 }
             } else {
                 items(tags, key = { it.id }) { tag ->
-                    Card(
+                    NeoListTile(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
@@ -124,25 +123,24 @@ fun FocusTagsWidget(
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(AppTheme.brMedium)
                                     .background(Color(tag.colorValue)),
                             )
                             Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
                             Text(tag.name, modifier = Modifier.weight(1f))
-                            IconButton(onClick = { tagDialogTarget = tag }) {
-                                Icon(
-                                    Icons.Filled.Edit,
-                                    contentDescription = stringResource(R.string.focusTagsLabelEdit)
-                                )
-                            }
+                            NeoIconButton(
+                                onClick = { tagDialogTarget = tag },
+                                icon = Icons.Filled.Edit,
+                                contentDescription = stringResource(R.string.focusTagsLabelEdit),
+                            )
                             if (!tag.id.startsWith("default_tag")) {
-                                IconButton(onClick = { tagPendingDelete = tag }) {
-                                    Icon(
-                                        Icons.Filled.Delete,
-                                        contentDescription = stringResource(R.string.commonLabelDelete),
-                                        tint = ErrorColor
-                                    )
-                                }
+                                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                                NeoIconButton(
+                                    onClick = { tagPendingDelete = tag },
+                                    icon = Icons.Filled.Delete,
+                                    contentDescription = stringResource(R.string.commonLabelDelete),
+                                    contentColor = ErrorColor,
+                                )
                             }
                         }
                     }

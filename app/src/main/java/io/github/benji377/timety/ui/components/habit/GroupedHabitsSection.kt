@@ -54,9 +54,15 @@ fun GroupedHabitsSection(
     onStackReordered: (stackName: String, newOrder: List<HabitWithCompletions>) -> Unit = { _, _ -> },
     habitBuilder: @Composable (habit: HabitWithCompletions, isDone: Boolean, isStacked: Boolean, isLocked: Boolean, isReorderMode: Boolean) -> Unit,
 ) {
-    val grouped = habits.filter { !it.habit.stackName.isNullOrBlank() }
-        .groupBy { it.habit.stackName!!.trim() }
-    val standalone = habits.filter { it.habit.stackName.isNullOrBlank() }
+    val grouped = remember(habits) {
+        habits.filter { !it.habit.stackName.isNullOrBlank() }
+            .groupBy { it.habit.stackName!!.trim() }
+    }
+    val standalone = remember(habits) { habits.filter { it.habit.stackName.isNullOrBlank() } }
+    // Indexed once so each stack is a lookup rather than a scan of every habit.
+    val globalStacks = remember(allHabitsForStacks) {
+        allHabitsForStacks.groupBy { it.habit.stackName?.trim() }
+    }
 
     Column {
         grouped.forEach { (stackName, stackHabitsList) ->
@@ -64,21 +70,23 @@ fun GroupedHabitsSection(
                 stackHabitsList.sortedBy { it.habit.stackOrder ?: 99 }
             }
 
-            val globalStack = allHabitsForStacks.filter { it.habit.stackName?.trim() == stackName }
+            val globalStack = globalStacks[stackName].orEmpty()
             val completedCount = HabitUtils.getStackCompletionCount(globalStack, targetDate)
             val allDone = HabitUtils.isStackFullyCompleted(globalStack, targetDate)
 
             var isExpanded by rememberSaveable(stackName) { mutableStateOf(false) }
 
+            // Give the stack header the same solid-fill, hairline-bordered card treatment as every
+            // other tile, rather than the alpha-faded gray pill it used to be: fills in this app
+            // are always solid, never translucent. Collapsed vs. expanded stays legible via a
+            // container-color swap.
             NeoListTile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(AppTheme.paddingScreenHorizontal)
                     .padding(vertical = AppTheme.spaceSmall),
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest.copy(
-                    alpha = if (isExpanded) 0.1f else 0.4f,
-                ),
-                borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                containerColor = if (isExpanded) MaterialTheme.colorScheme.surface
+                else MaterialTheme.colorScheme.surfaceContainerHighest,
             ) {
                 Column {
                     Row(
@@ -134,7 +142,8 @@ fun GroupedHabitsSection(
                                     var isLocked = false
                                     if (index > 0) {
                                         val prevHwc = sortedStackHabits[index - 1]
-                                        val isPrevDone = HabitUtils.isCompletedOn(prevHwc, targetDate)
+                                        val isPrevDone =
+                                            HabitUtils.isCompletedOn(prevHwc, targetDate)
                                         isLocked = HabitUtils.isHabitLocked(
                                             index = index,
                                             isCurrentHabitDone = isDone,

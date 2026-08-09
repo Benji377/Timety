@@ -1,6 +1,7 @@
 package io.github.benji377.timety
 
 import android.app.Application
+import android.util.Log
 import io.github.benji377.timety.di.AppContainer
 import io.github.benji377.timety.di.DefaultAppContainer
 import io.github.benji377.timety.services.FocusDndController
@@ -30,7 +31,7 @@ class TimetyApplication : Application() {
             try {
                 ReminderScheduler.resyncAll(this@TimetyApplication)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Failed to resync reminder alarms on start", e)
             }
         }
 
@@ -42,8 +43,12 @@ class TimetyApplication : Application() {
                 FocusDndController(this@TimetyApplication, container.settingsRepository)
                     .restoreIfOwned()
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Failed to restore orphaned DND filter", e)
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "TimetyApplication"
     }
 }

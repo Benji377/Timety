@@ -24,7 +24,6 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,17 +43,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
-import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
-import io.github.benji377.timety.ui.components.common.PickerField
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.PickerField
+import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.GoalColor
@@ -475,13 +475,11 @@ private fun EntryRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
-        IconButton(onClick = onDelete) {
-            Icon(
-                imageVector = Icons.Filled.DeleteOutline,
-                contentDescription = stringResource(R.string.commonLabelRemove),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp),
-            )
-        }
+        NeoIconButton(
+            onClick = onDelete,
+            icon = Icons.Filled.DeleteOutline,
+            contentDescription = stringResource(R.string.commonLabelRemove),
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

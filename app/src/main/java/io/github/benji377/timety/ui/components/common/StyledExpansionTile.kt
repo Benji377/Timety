@@ -28,6 +28,10 @@ import androidx.compose.ui.unit.dp
  * Collapsible tile with a plain-text title; tapping the header toggles [content]'s visibility.
  * Expanded state is internal (starting at [initiallyExpanded]) unless the caller passes
  * [expanded]/[onExpandedChange] to hoist and persist it externally.
+ *
+ * Deliberately flat in both states - no container border or shadow. A collapsible section is a
+ * structural divider between groups of content rather than a card in its own right, and giving it
+ * card weight made every screen that stacks several of them read as nested boxes.
  */
 @Composable
 fun StyledExpansionTile(

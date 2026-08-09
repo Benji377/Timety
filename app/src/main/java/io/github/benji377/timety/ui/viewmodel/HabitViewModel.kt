@@ -207,7 +207,11 @@ class HabitViewModel(
  * [newVisibleOrder] with [newVisibleOrder]'s order, leaving every other item's position
  * untouched. Used to commit a drag-reorder of a visible subset back into its full domain list.
  */
-private fun <T> spliceOrder(fullOrdered: List<T>, key: (T) -> String, newVisibleOrder: List<T>): List<T> {
+private fun <T> spliceOrder(
+    fullOrdered: List<T>,
+    key: (T) -> String,
+    newVisibleOrder: List<T>
+): List<T> {
     val visibleIds = newVisibleOrder.map(key).toSet()
     val iterator = newVisibleOrder.iterator()
     return fullOrdered.map { if (key(it) in visibleIds) iterator.next() else it }

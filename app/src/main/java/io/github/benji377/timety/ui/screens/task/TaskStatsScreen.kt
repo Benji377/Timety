@@ -1,6 +1,7 @@
 package io.github.benji377.timety.ui.screens.task
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,9 +41,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.stats.LegendDot
 import io.github.benji377.timety.ui.components.stats.SectionHeader
+import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ChartDeepOrange
 import io.github.benji377.timety.ui.theme.ChartTeal
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -296,6 +299,20 @@ private fun SimpleBarChart(
                     .weight(1f)
                     .fillMaxHeight()
             ) {
+                val isToday = i == todayIndex
+                val barShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                // Today's bars carry a solid outline border. The bold weekday label alone is a weak
+                // signal against a full-height column, and the sibling charts on the Focus and
+                // Habit tabs mark today the same way - a solid border, never an opacity change.
+                val todayBorder = if (isToday) {
+                    Modifier.border(
+                        AppTheme.borderHairline,
+                        MaterialTheme.colorScheme.outline,
+                        barShape
+                    )
+                } else {
+                    Modifier
+                }
                 Row(
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.Center,
@@ -306,8 +323,9 @@ private fun SimpleBarChart(
                         modifier = Modifier
                             .fillMaxHeight(h1)
                             .width(12.dp)
-                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                            .clip(barShape)
                             .background(color1)
+                            .then(todayBorder)
                     )
 
                     if (data2 != null) {
@@ -317,13 +335,13 @@ private fun SimpleBarChart(
                             modifier = Modifier
                                 .fillMaxHeight(h2)
                                 .width(12.dp)
-                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                .clip(barShape)
                                 .background(color2)
+                                .then(todayBorder)
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                val isToday = i == todayIndex
                 Text(
                     text = days[i],
                     style = MaterialTheme.typography.bodySmall.copy(fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal),
@@ -508,13 +526,7 @@ private fun CalibrationBucketRow(bucket: CalibrationBucket) {
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(TaskColor.copy(alpha = 0.12f)),
-            contentAlignment = Alignment.Center
-        ) {
+        AccentBadge(color = TaskColor, size = 32.dp) {
             Text(
                 AppUtils.getSizeEmoji(bucket.size),
                 fontSize = 12.sp,

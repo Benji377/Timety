@@ -48,7 +48,11 @@ fun StatCard(
     NeoCard(
         modifier = sized,
         borderColor = color,
-        containerColor = color.copy(alpha = 0.08f),
+        // Flat, solid fill (no alpha) - keeps these summary cards visually distinct from plain
+        // white cards elsewhere. Backgrounds stay neutral and let the accent colors do the work
+        // (a solid accent fill would fight the accent-colored icon/value
+        // text for contrast).
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         when (style) {
             StatCardStyle.KPI -> KpiContent(title, value, icon, color)

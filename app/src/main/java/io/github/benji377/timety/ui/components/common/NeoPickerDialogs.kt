@@ -2,7 +2,6 @@ package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,7 +46,7 @@ fun NeoTimePickerDialog(
         initialMinute = initialMinute,
         is24Hour = LocalDateFormatSettings.current.use24HourFormat,
     )
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = title,
         text = {
@@ -89,7 +88,7 @@ fun NeoDurationPickerDialog(
         initialMinute = initial % 60,
         is24Hour = true,
     )
-    AlertDialog(
+    NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = title,
         text = {

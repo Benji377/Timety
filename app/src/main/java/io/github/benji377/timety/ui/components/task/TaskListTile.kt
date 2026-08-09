@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.ui.components.common.NeoListTile
-import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
+import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -176,6 +176,9 @@ fun TaskListTile(
                     Spacer(Modifier.width(AppTheme.spaceLarge))
                     Text(text = AppUtils.getSizeEmoji(task.size), fontSize = 18.sp)
                     Spacer(Modifier.width(AppTheme.listTileTrailingSpacing))
+                    // Bare glyph, matching the size label immediately to its left: the two are a
+                    // matched pair of at-a-glance task attributes, so giving only one of them a
+                    // bordered container made them read as different tiers of information.
                     AppUtils.PriorityIcon(priority = task.priority)
                 }
             }

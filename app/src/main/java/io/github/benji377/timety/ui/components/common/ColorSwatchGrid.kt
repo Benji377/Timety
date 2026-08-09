@@ -3,6 +3,7 @@ package io.github.benji377.timety.ui.components.common
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -11,7 +12,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -42,20 +45,29 @@ fun ColorSwatchGrid(
     ) {
         items(colors) { optionColor ->
             val isSelected = optionColor == selectedColor
+            val interactionSource = remember { MutableInteractionSource() }
             Box(
                 modifier = Modifier
                     .size(swatchSize)
                     .clip(CircleShape)
                     .background(optionColor)
-                    .then(
-                        if (isSelected) Modifier.border(
-                            3.dp,
-                            MaterialTheme.colorScheme.onSurface,
-                            CircleShape
-                        )
-                        else Modifier
+                    // Every swatch gets a border so it reads as a deliberate component, not just a
+                    // floating disc of color. Selection is carried by that border's *color*, not
+                    // its width: at the flat design's single hairline weight a thicker ring is no
+                    // longer available as a state cue, so the selected swatch takes the full-
+                    // contrast `onSurface` ink while the rest keep the muted `outline`.
+                    .border(
+                        width = AppTheme.borderHairline,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.outline
+                        },
+                        shape = CircleShape,
                     )
-                    .clickable { onSelect(optionColor) },
+                    .clickable(interactionSource = interactionSource, indication = ripple()) {
+                        onSelect(optionColor)
+                    },
             )
         }
     }

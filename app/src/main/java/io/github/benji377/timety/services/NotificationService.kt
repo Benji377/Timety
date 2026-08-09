@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -358,7 +359,7 @@ class NotificationService(private val context: Context) {
         } catch (e: IllegalStateException) {
             // AlarmManager hard-caps pending alarms per app (~500). With enough reminder-bearing
             // tasks/habits the cap is reachable; dropping this one reminder beats crashing.
-            e.printStackTrace()
+            Log.e(TAG, "Alarm limit reached; dropping reminder $requestCode", e)
         }
     }
 
@@ -440,6 +441,8 @@ class NotificationService(private val context: Context) {
     }
 
     companion object {
+        private const val TAG = "NotificationService"
+
         const val CHANNEL_TASKS = "task_reminders_channel"
         const val CHANNEL_HABITS = "habit_reminders_channel"
         const val CHANNEL_QUICK_HABITS = "quick_habit_reminders_channel"

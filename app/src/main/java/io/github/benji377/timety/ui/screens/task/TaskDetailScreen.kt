@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -47,6 +46,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -64,7 +64,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -76,25 +75,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
+import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
-import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.StyledExpansionTile
+import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderOptionInput
-import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.screens.LocationPickerScreen
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -338,9 +337,13 @@ fun TaskDetailScreen(
                     isEditing = isEditing,
                     onSelected = { priority = it },
                     iconBuilder = { p, isSelected ->
-                        Box(modifier = Modifier.alpha(if (isEditing && isSelected) 1f else 0.5f)) {
-                            AppUtils.PriorityIcon(priority = p)
-                        }
+                        // Selection is signaled by the segment's own fill and border (see
+                        // AccordionSelector), not by fading the icon - so the icon only needs an
+                        // override when it would otherwise clash with a selected segment's fill.
+                        AppUtils.PriorityIcon(
+                            priority = p,
+                            tint = if (isSelected) Color.White else null
+                        )
                     },
                     labelBuilder = { p -> p.name.replace("_", "") }
                 )
@@ -356,8 +359,8 @@ fun TaskDetailScreen(
                     iconBuilder = { s, isSelected ->
                         Text(
                             text = AppUtils.getSizeEmoji(s),
-                            fontSize = 16.sp,
-                            color = if (!isEditing || !isSelected) MaterialTheme.colorScheme.onSurfaceVariant else Color.Unspecified
+                            fontSize = AppTheme.fsBodyLarge,
+                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     labelBuilder = { s -> s.name.replace("_", "") }
@@ -391,7 +394,7 @@ fun TaskDetailScreen(
                         label = { Text(stringResource(R.string.taskDetailsLabelDueDateSet)) },
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
                         trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
-                        colors = detailFieldColors(isEditing)
+                        colors = detailFieldColors(isEditing),
                     )
                 }
 
@@ -410,12 +413,23 @@ fun TaskDetailScreen(
                     }
                     Spacer(Modifier.height(AppTheme.spaceSmall))
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
+                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
+                        verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
                     ) {
                         reminders.forEach { reminder ->
                             InputChip(
                                 selected = false,
                                 onClick = { if (isEditing) reminders = reminders - reminder },
+                                shape = AppTheme.brMedium,
+                                colors = InputChipDefaults.inputChipColors(
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                ),
+                                border = InputChipDefaults.inputChipBorder(
+                                    enabled = true,
+                                    selected = false,
+                                    borderColor = MaterialTheme.colorScheme.outline,
+                                    borderWidth = AppTheme.borderHairline,
+                                ),
                                 label = {
                                     Text(
                                         "${
@@ -462,6 +476,9 @@ fun TaskDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.taskDetailsLabelLocation)) },
                     leadingIcon = { Icon(Icons.Outlined.Map, null) },
+                    // Left as a bare IconButton: it's a trailingIcon inside the already-bordered
+                    // NeoOutlinedTextField, so a second border here would nest inside the first
+                    // one instead of reading as a distinct control.
                     trailingIcon = {
                         if (isEditing) {
                             IconButton(onClick = { showLocationPicker = true }) {
@@ -552,19 +569,20 @@ fun TaskDetailScreen(
                         color = if (subtask.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
                     )
                     if (isEditing) {
-                        IconButton(onClick = {
-                            subtasks = subtasks.filter { it.id != subtask.id }
-                            if (taskId != null) {
-                                taskViewModel.deleteSubtask(subtask)
-                            }
-                        }) {
-                            Icon(
-                                Icons.Filled.Close,
-                                contentDescription = null,
-                                tint = ErrorColor,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+                        // A genuine standalone row action (not nested in a field), so it gets
+                        // the same bordered container as other icon buttons.
+                        NeoIconButton(
+                            onClick = {
+                                subtasks = subtasks.filter { it.id != subtask.id }
+                                if (taskId != null) {
+                                    taskViewModel.deleteSubtask(subtask)
+                                }
+                            },
+                            icon = Icons.Filled.Close,
+                            contentDescription = stringResource(R.string.commonLabelRemove),
+                            contentColor = ErrorColor,
+                            size = AppTheme.iconSizeXLarge,
+                        )
                     }
                 }
             }
@@ -601,6 +619,9 @@ fun TaskDetailScreen(
                                     newSubtaskTitle = ""
                                 }
                             }),
+                            // Bare IconButton, same reasoning as the location field's search
+                            // icon: this is a trailingIcon inside its own bordered field, not a
+                            // standalone control.
                             trailingIcon = {
                                 IconButton(onClick = {
                                     val trimmed = newSubtaskTitle.trim()
@@ -709,7 +730,7 @@ private fun SectionHeader(title: String, icon: ImageVector) {
             fontSize = AppTheme.fsBodySmall,
             fontWeight = AppTheme.fwBold,
             letterSpacing = AppTheme.lsWide,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+            color = MaterialTheme.colorScheme.primary
         )
         Spacer(Modifier.width(AppTheme.spaceSmall))
         HorizontalDivider(modifier = Modifier.weight(1f))
@@ -719,8 +740,9 @@ private fun SectionHeader(title: String, icon: ImageVector) {
 
 /**
  * Segmented selector where the selected segment expands to show its label; the rest stay
- * icon-only. In view mode (non-editing) the selection stays readable but the container and
- * border render muted, and taps are ignored.
+ * icon-only. The outer track's [AppTheme.borderCard] frame, and the selected segment's own solid
+ * fill plus hairline border, stay at full contrast in both edit and view mode - read-only is not a
+ * reason to soften a border; only the track's background and tap-gating change with [isEditing].
  */
 @Composable
 private fun <T> AccordionSelector(
@@ -730,20 +752,25 @@ private fun <T> AccordionSelector(
     iconBuilder: @Composable (T, Boolean) -> Unit,
     labelBuilder: (T) -> String,
     onSelected: (T) -> Unit,
-    activeBgColor: Color = TaskColor.copy(alpha = 0.15f),
-    activeTextColor: Color = TaskColor,
+    activeBgColor: Color = TaskColor,
+    activeTextColor: Color = Color.White,
 ) {
-    val borderColor =
-        if (isEditing) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(
-            alpha = 0.3f
-        )
+    val borderColor = MaterialTheme.colorScheme.outline
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent)
-            .border(1.dp, borderColor, RoundedCornerShape(24.dp))
+            .height(AppTheme.segmentedControlHeight)
+            .clip(AppTheme.brPill)
+            // The editable/read-only distinction is carried entirely by this fill: an editable
+            // control sits on the brighter `surface`, a read-only one recedes to `surfaceVariant`.
+            .background(
+                if (isEditing) {
+                    MaterialTheme.colorScheme.surface
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                }
+            )
+            .border(AppTheme.borderCard, borderColor, AppTheme.brPill)
     ) {
         values.forEachIndexed { index, value ->
             val isSelected = value == selectedValue
@@ -752,30 +779,36 @@ private fun <T> AccordionSelector(
                 label = "accordionSegment"
             )
             val isLast = index == values.lastIndex
+            // A divider next to the selected segment would double up with that segment's own
+            // border, so only draw it between two unselected neighbors.
+            val nextIsSelected = !isLast && values[index + 1] == selectedValue
+            val drawsDivider = !isLast && !isSelected && !nextIsSelected
             Row(
                 modifier = Modifier
                     .weight(weight)
                     .fillMaxHeight()
                     .let { m ->
-                        if (!isLast) {
+                        if (drawsDivider) {
                             m.drawBehind {
                                 drawLine(
                                     color = borderColor,
                                     start = Offset(size.width, 0f),
                                     end = Offset(size.width, size.height),
-                                    strokeWidth = 1.dp.toPx()
+                                    strokeWidth = AppTheme.borderHairline.toPx()
                                 )
                             }
                         } else m
                     }
-                    .background(
+                    .clickable(enabled = isEditing) { onSelected(value) }
+                    .padding(AppTheme.segmentedSelectorInset)
+                    .then(
                         if (isSelected) {
-                            if (isEditing) activeBgColor else MaterialTheme.colorScheme.outline.copy(
-                                alpha = 0.2f
-                            )
-                        } else Color.Transparent
-                    )
-                    .clickable(enabled = isEditing) { onSelected(value) },
+                            Modifier
+                                .clip(AppTheme.brMedium)
+                                .background(activeBgColor, AppTheme.brMedium)
+                                .border(AppTheme.borderHairline, borderColor, AppTheme.brMedium)
+                        } else Modifier
+                    ),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -783,13 +816,11 @@ private fun <T> AccordionSelector(
                 AnimatedVisibility(visible = isSelected) {
                     Text(
                         text = labelBuilder(value),
-                        modifier = Modifier.padding(start = 8.dp),
+                        modifier = Modifier.padding(start = AppTheme.spaceSmall),
                         fontWeight = FontWeight.Bold,
-                        // View mode keeps the label readable; the muted container and
-                        // border already signal that the selector is inactive.
-                        color = if (isEditing) activeTextColor else MaterialTheme.colorScheme.onSurface,
-                        fontSize = 11.sp,
-                        letterSpacing = 0.5.sp
+                        color = activeTextColor,
+                        fontSize = AppTheme.fsSegmentLabel,
+                        letterSpacing = AppTheme.lsNarrow
                     )
                 }
             }
@@ -877,7 +908,7 @@ private fun PlaceDetailsSection(
                             Icons.Outlined.LocationOn,
                             contentDescription = null,
                             tint = TaskColor,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(AppTheme.iconSizeMedium)
                         )
                         Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                         Text(name, fontWeight = FontWeight.Bold)

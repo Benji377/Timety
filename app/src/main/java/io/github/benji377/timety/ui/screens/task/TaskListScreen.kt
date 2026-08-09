@@ -24,7 +24,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,6 +47,7 @@ import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
@@ -156,12 +156,14 @@ fun TaskListScreen(
             NeoTopBar(
                 title = stringResource(R.string.taskListTitle),
                 actions = {
-                    IconButton(onClick = onNavigateToRecurring) {
-                        Icon(
-                            imageVector = Icons.Filled.Repeat,
-                            contentDescription = stringResource(R.string.recurringTasksTitle),
-                        )
-                    }
+                    // Bordered tap target instead of a bare floating icon, so it carries the
+                    // same container weight as a text button.
+                    NeoIconButton(
+                        onClick = onNavigateToRecurring,
+                        icon = Icons.Filled.Repeat,
+                        contentDescription = stringResource(R.string.recurringTasksTitle),
+                        modifier = Modifier.padding(end = AppTheme.spaceSmall),
+                    )
                 }
             )
         },
@@ -178,7 +180,11 @@ fun TaskListScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp, top = 8.dp, end = 8.dp),
+                    .padding(
+                        start = AppTheme.spaceSmall,
+                        top = AppTheme.spaceSmall,
+                        end = AppTheme.spaceSmall,
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
@@ -190,16 +196,16 @@ fun TaskListScreen(
                     singleLine = true,
                     shape = AppTheme.brNeo
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
 
-                // Sort Dropdown
+                // Sort Dropdown. Bordered tap target (NeoIconButton) instead of a bare floating
+                // icon.
                 Box {
-                    IconButton(onClick = { sortMenuExpanded = true }) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.Sort,
-                            contentDescription = stringResource(R.string.taskListTooltipSort)
-                        )
-                    }
+                    NeoIconButton(
+                        onClick = { sortMenuExpanded = true },
+                        icon = Icons.AutoMirrored.Filled.Sort,
+                        contentDescription = stringResource(R.string.taskListTooltipSort),
+                    )
                     DropdownMenu(
                         expanded = sortMenuExpanded,
                         onDismissRequest = { sortMenuExpanded = false }
@@ -215,15 +221,15 @@ fun TaskListScreen(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
 
                 // Order Toggle (Asc/Desc)
-                IconButton(onClick = { isAscending = !isAscending }) {
-                    Icon(
-                        if (isAscending) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
-                        contentDescription = if (isAscending) stringResource(R.string.taskListSortAscending)
-                        else stringResource(R.string.taskListSortDescending)
-                    )
-                }
+                NeoIconButton(
+                    onClick = { isAscending = !isAscending },
+                    icon = if (isAscending) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+                    contentDescription = if (isAscending) stringResource(R.string.taskListSortAscending)
+                    else stringResource(R.string.taskListSortDescending),
+                )
             }
 
             // Category filter pills.
@@ -232,9 +238,9 @@ fun TaskListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
-                        .padding(vertical = 8.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(vertical = AppTheme.spaceSmall),
+                    contentPadding = PaddingValues(horizontal = AppTheme.spaceSmall),
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
                 ) {
                     item {
                         NeoFilterChip(

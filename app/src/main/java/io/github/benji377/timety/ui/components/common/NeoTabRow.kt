@@ -17,10 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Flat, bold-bordered segmented tab selector - the neobrutalist replacement for Material's
- * `TabRow`. Instead of an animated indicator sliding under a soft-shadowed pill, the selected
- * segment is simply filled solid with [activeColor]; there is no shadow and no elevation anywhere
- * in this component.
+ * Flat segmented tab selector replacing Material's `TabRow`. An [AppTheme.borderCard] border
+ * frames the track; rather than a sliding indicator, the selected segment is filled solid with
+ * [activeColor] and gets its own hairline inner border.
  *
  * @param tabs labels shown left to right.
  * @param selectedIndex index into [tabs] of the currently active segment.
@@ -39,7 +38,10 @@ fun NeoTabRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(AppTheme.brNeo)
-            .border(AppTheme.neoBorderWidth, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
+            // Opaque fill so the unselected segments read as part of one control rather than as
+            // gaps showing the page through.
+            .background(MaterialTheme.colorScheme.surface)
+            .border(AppTheme.borderCard, MaterialTheme.colorScheme.outline, AppTheme.brNeo)
     ) {
         tabs.forEachIndexed { index, title ->
             val isSelected = index == selectedIndex
@@ -50,6 +52,16 @@ fun NeoTabRow(
                     .weight(1f)
                     .clickable { onTabSelected(index) }
                     .background(if (isSelected) activeColor else Color.Transparent)
+                    .then(
+                        if (isSelected) {
+                            Modifier.border(
+                                AppTheme.borderHairline,
+                                MaterialTheme.colorScheme.outline
+                            )
+                        } else {
+                            Modifier
+                        }
+                    )
                     .padding(vertical = AppTheme.spaceMedium),
                 textAlign = TextAlign.Center,
                 maxLines = 1,

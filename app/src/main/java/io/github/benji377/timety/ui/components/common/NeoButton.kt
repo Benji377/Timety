@@ -1,6 +1,7 @@
 package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Button
@@ -8,14 +9,13 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
-/** Filled [Button] restyled with the app's neobrutalist border and no elevation by default. */
+/** Filled [Button] restyled flat: hairline border, no elevation. Tap feedback is Material's ripple. */
 @Composable
 fun NeoButton(
     onClick: () -> Unit,
@@ -23,12 +23,10 @@ fun NeoButton(
     enabled: Boolean = true,
     shape: Shape = AppTheme.brNeo,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
-    elevation: ButtonElevation? = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-    border: BorderStroke? = BorderStroke(
-        AppTheme.neoBorderWidth,
-        MaterialTheme.colorScheme.outline
-    ),
+    elevation: ButtonElevation? = AppTheme.flatButtonElevation,
+    border: BorderStroke? = AppTheme.hairlineStroke,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
@@ -40,11 +38,12 @@ fun NeoButton(
         elevation = elevation,
         border = border,
         contentPadding = contentPadding,
+        interactionSource = interactionSource,
         content = content
     )
 }
 
-/** Elevated variant of [NeoButton], restyled with the app's neobrutalist border. */
+/** Elevated variant of [NeoButton] with the same flat, hairline-bordered treatment. */
 @Composable
 fun NeoElevatedButton(
     onClick: () -> Unit,
@@ -52,18 +51,10 @@ fun NeoElevatedButton(
     enabled: Boolean = true,
     shape: Shape = AppTheme.brNeo,
     colors: ButtonColors = ButtonDefaults.elevatedButtonColors(),
-    elevation: ButtonElevation? = ButtonDefaults.elevatedButtonElevation(
-        0.dp,
-        0.dp,
-        0.dp,
-        0.dp,
-        0.dp
-    ),
-    border: BorderStroke? = BorderStroke(
-        AppTheme.neoBorderWidth,
-        MaterialTheme.colorScheme.outline
-    ),
+    elevation: ButtonElevation? = AppTheme.flatButtonElevation,
+    border: BorderStroke? = AppTheme.hairlineStroke,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit
 ) {
     ElevatedButton(
@@ -75,6 +66,7 @@ fun NeoElevatedButton(
         elevation = elevation,
         border = border,
         contentPadding = contentPadding,
+        interactionSource = interactionSource,
         content = content
     )
 }

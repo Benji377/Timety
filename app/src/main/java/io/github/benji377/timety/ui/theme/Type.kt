@@ -19,7 +19,7 @@ val TimetyTypography = Typography(
     )
 )
 
-// Neobrutalist default shapes (radiusNeo = 14 in AppTheme).
+// Default shapes (radiusNeo = 14 in AppTheme).
 val TimetyShapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small = RoundedCornerShape(8.dp),
