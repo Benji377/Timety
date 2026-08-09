@@ -1,7 +1,6 @@
 package io.github.benji377.timety.ui.screens.habit
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -69,6 +68,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.PickerPalette
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
@@ -298,7 +298,7 @@ fun HabitDetailScreen(
                         placeholder = { Text(stringResource(R.string.habitDetailLabelStackHint)) },
                         leadingIcon = { Icon(Icons.Filled.Layers, null) },
                         modifier = Modifier
-                            .menuAnchor(MenuAnchorType.PrimaryEditable)
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                             .fillMaxWidth(),
                     )
                     if (filteredStacks.isNotEmpty()) {
@@ -337,7 +337,7 @@ fun HabitDetailScreen(
                                 .size(AppTheme.neoIconButtonSize)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape),
+                                .hairlineBorder(),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
@@ -359,7 +359,7 @@ fun HabitDetailScreen(
                                 .size(AppTheme.neoIconButtonSize)
                                 .clip(CircleShape)
                                 .background(selectedColor)
-                                .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
+                                .hairlineBorder()
                         )
                     }
                 }

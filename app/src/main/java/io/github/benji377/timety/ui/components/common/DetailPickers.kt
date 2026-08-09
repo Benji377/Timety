@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
@@ -109,7 +110,7 @@ fun IconPickerDialog(
                             .size(AppTheme.neoIconButtonSize)
                             .clip(CircleShape)
                             .background(if (isSelected) accentColor else Color.Transparent)
-                            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
+                            .hairlineBorder()
                             .clickable(interactionSource = interactionSource, indication = ripple()) {
                                 onSelect(index)
                             },

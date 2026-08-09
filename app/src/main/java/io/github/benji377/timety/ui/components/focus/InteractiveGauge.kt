@@ -56,6 +56,7 @@ import io.github.benji377.timety.ui.theme.GaugeBgLight
 import io.github.benji377.timety.ui.theme.GaugeLabelDark
 import io.github.benji377.timety.ui.theme.GaugeWhite
 import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -238,7 +239,7 @@ fun InteractiveGauge(
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(if (isDark) GaugeBgDark else GaugeBgLight, CircleShape)
-                    .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
+                    .hairlineBorder()
                     .clickable(
                         enabled = onBottomTextTapped != null,
                         interactionSource = bottomTextInteractionSource,

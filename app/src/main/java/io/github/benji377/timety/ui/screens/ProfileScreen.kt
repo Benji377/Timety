@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -74,6 +73,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
@@ -302,7 +302,7 @@ fun ProfileScreen(
                             .size(120.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape),
+                            .hairlineBorder(),
                         contentAlignment = Alignment.Center
                     ) {
                         // validOrNull drops stale entries (pre-2.1.0 content:// URIs whose read
@@ -332,7 +332,7 @@ fun ProfileScreen(
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(UserColor)
-                            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
+                            .hairlineBorder()
                             .clickable(
                                 interactionSource = avatarBadgeInteractionSource,
                                 indication = ripple(),
@@ -349,7 +349,7 @@ fun ProfileScreen(
                             imageVector = Icons.Filled.CameraAlt,
                             contentDescription = stringResource(R.string.userTooltipEditAvatar),
                             tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(AppTheme.iconSizeMedium)
                         )
                     }
                 }

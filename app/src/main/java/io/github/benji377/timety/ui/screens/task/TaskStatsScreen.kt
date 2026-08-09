@@ -41,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.stats.LegendDot
 import io.github.benji377.timety.ui.components.stats.SectionHeader
@@ -525,17 +526,7 @@ private fun CalibrationBucketRow(bucket: CalibrationBucket) {
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Solid neutral fill + solid accent-colored border, matching the icon-badge idiom used
-        // for the XP breakdown and session rows elsewhere - an alpha-tinted fill reads as a soft
-        // UI badge rather than a bordered one.
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .border(AppTheme.borderHairline, TaskColor, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
+        AccentBadge(color = TaskColor, size = 32.dp) {
             Text(
                 AppUtils.getSizeEmoji(bucket.size),
                 fontSize = 12.sp,

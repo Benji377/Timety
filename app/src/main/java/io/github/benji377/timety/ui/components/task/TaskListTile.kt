@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.task
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

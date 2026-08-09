@@ -905,7 +905,7 @@ private fun PlaceDetailsSection(
                             Icons.Outlined.LocationOn,
                             contentDescription = null,
                             tint = TaskColor,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(AppTheme.iconSizeMedium)
                         )
                         Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                         Text(name, fontWeight = FontWeight.Bold)

@@ -66,6 +66,7 @@ import io.github.benji377.timety.data.model.focus.DistractionUIType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.focus.EditSessionDialog
@@ -538,16 +539,7 @@ private fun SessionRow(
             .clickable(onClick = onEdit),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Solid neutral fill + solid accent border, matching the icon-badge idiom used across the
-        // app (e.g. UserXpBreakdownCard) - an alpha-tinted fill is a borderless soft-UI badge.
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .border(AppTheme.borderHairline, color, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
+        AccentBadge(color = color, size = 40.dp) {
             Icon(icon, contentDescription = null, tint = color)
         }
         Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
@@ -583,17 +575,8 @@ private fun DistractionRow(
         modifier = Modifier.padding(vertical = AppTheme.spaceSmall),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Border uses the distraction type's own color (matching the icon tint) rather than the
-        // fixed WarningAccent the alpha fill used - see the SessionRow badge above for the same
-        // solid-fill-plus-accent-border idiom.
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .border(AppTheme.borderHairline, type.color, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
+        // Keyed to the distraction type's own color, matching the icon tint.
+        AccentBadge(color = type.color, size = 40.dp) {
             Icon(type.icon, contentDescription = null, tint = type.color)
         }
         Spacer(modifier = Modifier.width(AppTheme.spaceMedium))

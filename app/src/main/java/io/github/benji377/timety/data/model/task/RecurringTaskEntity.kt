@@ -33,7 +33,7 @@ enum class MonthlyMode {
  * with normal tasks and never becomes "completed". Completing it logs a
  * [RecurringOccurrenceEntity] and rolls [dueDate] forward to the next occurrence.
  *
- * The rule fields are a small structured subset of RFC 5545 RRULE semantics:
+ * The rule fields are a structured subset of RFC 5545 RRULE semantics:
  * - WEEK: every [interval] weeks on the [daysOfWeek] weekdays (week-aligned to the due date).
  * - MONTH + [MonthlyMode.DAY_OF_MONTH]: every [interval] months on day [monthlyDay].
  * - MONTH + [MonthlyMode.NTH_WEEKDAY]: every [interval] months on the [monthlyOrdinal]th

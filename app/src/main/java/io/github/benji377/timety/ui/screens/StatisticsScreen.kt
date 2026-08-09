@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -78,6 +77,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.DayRatingViewModel
@@ -577,7 +577,7 @@ private fun SynergyChart(
                         // every other tooltip/badge in the app instead of a translucent scrim.
                         .background(MaterialTheme.colorScheme.surface)
                         .border(
-                            BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
+                            AppTheme.hairlineStroke,
                             AppTheme.brMedium,
                         )
                         .padding(8.dp)
@@ -622,7 +622,7 @@ private fun TooltipRow(markerColor: Color, text: String) {
             modifier = Modifier
                 .size(AppTheme.spaceSmall)
                 .background(markerColor, CircleShape)
-                .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
+                .hairlineBorder()
         )
         Spacer(modifier = Modifier.width(AppTheme.spaceXSmall))
         Text(

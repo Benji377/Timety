@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.common
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -17,14 +16,11 @@ import androidx.compose.ui.unit.Dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Bordered icon-only button - the app's replacement for a bare Material `IconButton`, used
- * wherever an icon would otherwise float with no container of its own (history icon, warning icon,
- * settings gear, share icon, ...). Built on [OutlinedIconButton] so the border and content
- * clipping come from the same M3 machinery.
+ * Bordered icon-only button, replacing a bare Material `IconButton` wherever an icon would
+ * otherwise float with no container. Built on [OutlinedIconButton].
  *
- * Its container weight comes entirely from the [AppTheme.borderHairline] outline and the fill -
- * not the heavier [AppTheme.borderCard] used on cards: these are 40dp targets that appear several
- * to a row in top bars, so a card-weight border would make the header outweigh the content.
+ * Stays at [AppTheme.borderHairline] rather than the card weight: these appear several to a row in
+ * top bars, where a heavier border would make the header outweigh the content.
  *
  * @param size the button's fixed square footprint.
  */
@@ -52,7 +48,7 @@ fun NeoIconButton(
             disabledContainerColor = containerColor,
             disabledContentColor = contentColor.copy(alpha = AppTheme.OPACITY_MEDIUM),
         ),
-        border = BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
+        border = AppTheme.hairlineStroke,
         interactionSource = interactionSource,
     ) {
         Icon(icon, contentDescription = contentDescription)

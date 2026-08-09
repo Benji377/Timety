@@ -9,18 +9,13 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
-/**
- * Filled [Button] restyled flat: the app's hairline border, no Material elevation, and no offset
- * shadow. Tap feedback is Material's own ripple.
- */
+/** Filled [Button] restyled flat: hairline border, no elevation. Tap feedback is Material's ripple. */
 @Composable
 fun NeoButton(
     onClick: () -> Unit,
@@ -28,11 +23,8 @@ fun NeoButton(
     enabled: Boolean = true,
     shape: Shape = AppTheme.brNeo,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
-    elevation: ButtonElevation? = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-    border: BorderStroke? = BorderStroke(
-        AppTheme.borderHairline,
-        MaterialTheme.colorScheme.outline
-    ),
+    elevation: ButtonElevation? = AppTheme.flatButtonElevation,
+    border: BorderStroke? = AppTheme.hairlineStroke,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit
@@ -51,9 +43,7 @@ fun NeoButton(
     )
 }
 
-/**
- * Elevated variant of [NeoButton], restyled with the same flat, hairline-bordered treatment.
- */
+/** Elevated variant of [NeoButton] with the same flat, hairline-bordered treatment. */
 @Composable
 fun NeoElevatedButton(
     onClick: () -> Unit,
@@ -61,17 +51,8 @@ fun NeoElevatedButton(
     enabled: Boolean = true,
     shape: Shape = AppTheme.brNeo,
     colors: ButtonColors = ButtonDefaults.elevatedButtonColors(),
-    elevation: ButtonElevation? = ButtonDefaults.elevatedButtonElevation(
-        0.dp,
-        0.dp,
-        0.dp,
-        0.dp,
-        0.dp
-    ),
-    border: BorderStroke? = BorderStroke(
-        AppTheme.borderHairline,
-        MaterialTheme.colorScheme.outline
-    ),
+    elevation: ButtonElevation? = AppTheme.flatButtonElevation,
+    border: BorderStroke? = AppTheme.hairlineStroke,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable RowScope.() -> Unit

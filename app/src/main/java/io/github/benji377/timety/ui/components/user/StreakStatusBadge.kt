@@ -116,7 +116,7 @@ fun StreakStatusBadge(
                 imageVector = Icons.Filled.LocalFireDepartment,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(AppTheme.iconSizeMedium)
                     .align(Alignment.BottomCenter)
                     .graphicsLayer {
                         translationY = with(density) { (-1.0f * flameRise).dp.toPx() }

@@ -98,3 +98,6 @@ val BottomNavItems = listOf(
     BottomNavItem.Habits,
     BottomNavItem.Profile
 )
+
+/** Routes of [BottomNavItems], for membership checks on every navigation. */
+val BottomNavRoutes: Set<String> = BottomNavItems.mapTo(HashSet()) { it.route }

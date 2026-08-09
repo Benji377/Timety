@@ -30,6 +30,7 @@ import io.github.benji377.timety.ui.components.focus.FocusTagsWidget
 import io.github.benji377.timety.ui.navigation.AppRoute
 import io.github.benji377.timety.ui.navigation.BottomNavItem
 import io.github.benji377.timety.ui.navigation.BottomNavItems
+import io.github.benji377.timety.ui.navigation.BottomNavRoutes
 import io.github.benji377.timety.ui.screens.focus.FocusModesScreen
 import io.github.benji377.timety.ui.screens.focus.FocusScreen
 import io.github.benji377.timety.ui.screens.goal.GoalDetailScreen
@@ -68,14 +69,14 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showBottomNav = currentRoute in BottomNavItems.map { it.route }
+    val showBottomNav = currentRoute in BottomNavRoutes
 
     LaunchedEffect(navTarget) {
         if (navTarget != null) {
             // Tab targets keep the bottom-nav back-stack semantics; detail targets stack on top.
             // A malformed route (stale widget after an app update) is dropped rather than crashing.
             try {
-                if (BottomNavItems.any { it.route == navTarget }) {
+                if (navTarget in BottomNavRoutes) {
                     navController.navigate(navTarget) {
                         popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                         launchSingleTop = true

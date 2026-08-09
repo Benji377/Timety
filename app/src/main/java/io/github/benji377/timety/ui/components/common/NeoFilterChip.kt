@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.common
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,7 +52,7 @@ fun NeoFilterChip(
             .clip(shape)
             .background(containerColor, shape)
             .border(
-                BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
+                AppTheme.hairlineStroke,
                 shape
             )
             .clickable(

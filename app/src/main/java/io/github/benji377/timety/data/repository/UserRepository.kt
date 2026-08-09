@@ -13,10 +13,6 @@ class UserRepository(
 ) {
     val userProfile: Flow<UserProfileEntity?> = userDao.getUserProfile()
 
-    suspend fun getUserProfileSnapshot(): UserProfileEntity? = withContext(Dispatchers.IO) {
-        userDao.getUserProfileSynchronous()
-    }
-
     /** Creates a default user profile if one doesn't already exist. */
     suspend fun initializeIfNeeded() = withContext(Dispatchers.IO) {
         val current = userDao.getUserProfileSynchronous()

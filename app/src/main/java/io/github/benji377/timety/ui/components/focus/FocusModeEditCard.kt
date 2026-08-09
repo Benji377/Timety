@@ -56,6 +56,7 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
+import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.components.common.NeoElevatedButton as ElevatedButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
@@ -216,7 +217,7 @@ private fun OverviewView(
                     .size(AppTheme.iconSizeXLarge)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface, CircleShape)
-                    .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape),
+                    .hairlineBorder(),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -322,7 +323,7 @@ private fun EditorView(
                 // circles beside it - the "add" slot reads as an empty version of the same chip.
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
+                .hairlineBorder()
                 .clickable(
                     interactionSource = addPhaseInteractionSource,
                     indication = ripple(),
@@ -362,7 +363,7 @@ private fun PhaseChip(phase: SessionPhaseEntity, flexLabel: String, onClick: () 
             // ModeTimeline's active node.
             .clip(CircleShape)
             .background(if (isFocus) FocusColor else WarningColor, CircleShape)
-            .border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
+            .hairlineBorder()
             .clickable(interactionSource = interactionSource, indication = ripple(), onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

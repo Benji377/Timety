@@ -3,6 +3,7 @@ package io.github.benji377.timety.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import io.github.benji377.timety.TimetyApplication
 
 
@@ -19,7 +20,7 @@ class AlarmReceiver : BroadcastReceiver() {
             try {
                 rescheduleRecurring(app)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Failed to re-arm alarms after ${intent.action}", e)
             }
         }
     }
@@ -32,6 +33,8 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private companion object {
+        const val TAG = "AlarmReceiver"
+
         val REARM_ACTIONS = setOf(
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,

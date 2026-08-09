@@ -7,13 +7,12 @@ import kotlinx.coroutines.flow.first
 
 /**
  * Applies and restores Do Not Disturb around focus sessions, per Settings → Focus & Productivity
- * → Auto-DND. Gated by the *Notification policy access* special permission, which the user grants
- * via system settings rather than a runtime prompt; every mutating call degrades silently if that
- * access is missing or gets revoked mid-session.
+ * → Auto-DND. Gated by the *Notification policy access* special permission; every mutating call
+ * degrades silently if that access is missing or revoked mid-session.
  *
- * The pre-session filter is persisted in [SettingsRepository] rather than held in memory: if the
- * process is killed while DND is applied, [restoreIfOwned] run at the next app start still finds
- * it and restores the user's original filter instead of leaving DND stuck on.
+ * The pre-session filter is persisted in [SettingsRepository], not held in memory: if the process
+ * is killed while DND is applied, [restoreIfOwned] at the next app start still restores the user's
+ * original filter instead of leaving DND stuck on.
  */
 class FocusDndController(
     private val context: Context,

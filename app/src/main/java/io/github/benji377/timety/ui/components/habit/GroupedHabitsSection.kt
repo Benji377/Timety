@@ -54,9 +54,15 @@ fun GroupedHabitsSection(
     onStackReordered: (stackName: String, newOrder: List<HabitWithCompletions>) -> Unit = { _, _ -> },
     habitBuilder: @Composable (habit: HabitWithCompletions, isDone: Boolean, isStacked: Boolean, isLocked: Boolean, isReorderMode: Boolean) -> Unit,
 ) {
-    val grouped = habits.filter { !it.habit.stackName.isNullOrBlank() }
-        .groupBy { it.habit.stackName!!.trim() }
-    val standalone = habits.filter { it.habit.stackName.isNullOrBlank() }
+    val grouped = remember(habits) {
+        habits.filter { !it.habit.stackName.isNullOrBlank() }
+            .groupBy { it.habit.stackName!!.trim() }
+    }
+    val standalone = remember(habits) { habits.filter { it.habit.stackName.isNullOrBlank() } }
+    // Indexed once so each stack is a lookup rather than a scan of every habit.
+    val globalStacks = remember(allHabitsForStacks) {
+        allHabitsForStacks.groupBy { it.habit.stackName?.trim() }
+    }
 
     Column {
         grouped.forEach { (stackName, stackHabitsList) ->
@@ -64,7 +70,7 @@ fun GroupedHabitsSection(
                 stackHabitsList.sortedBy { it.habit.stackOrder ?: 99 }
             }
 
-            val globalStack = allHabitsForStacks.filter { it.habit.stackName?.trim() == stackName }
+            val globalStack = globalStacks[stackName].orEmpty()
             val completedCount = HabitUtils.getStackCompletionCount(globalStack, targetDate)
             val allDone = HabitUtils.isStackFullyCompleted(globalStack, targetDate)
 

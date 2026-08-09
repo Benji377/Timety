@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AllInclusive
@@ -44,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -54,6 +52,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.stats.StatCard
@@ -482,21 +481,12 @@ private fun TimeOfDayBreakdownCard(completions: List<HabitCompletionEntity>) {
                         modifier = Modifier.padding(AppTheme.spaceMedium),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        // Solid neutral fill + solid accent border, matching the icon-badge idiom
-                        // used across the app (e.g. UserXpBreakdownCard) rather than an alpha fill.
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .border(AppTheme.borderHairline, bucket.color, CircleShape),
-                            contentAlignment = Alignment.Center,
-                        ) {
+                        AccentBadge(color = bucket.color, size = 36.dp) {
                             Icon(
                                 bucket.icon,
                                 contentDescription = null,
                                 tint = bucket.color,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(AppTheme.iconSizeMedium)
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))

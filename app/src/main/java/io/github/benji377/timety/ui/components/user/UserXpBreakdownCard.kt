@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.TaskAlt
@@ -46,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -116,14 +116,7 @@ fun UserXpBreakdownCard(
             modifier = Modifier.padding(20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                        .border(AppTheme.borderHairline, titleColor, CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
+                AccentBadge(color = titleColor, size = 44.dp) {
                     Icon(
                         imageVector = ExperienceEngine.getTitleIcon(currentLevel),
                         contentDescription = null,
@@ -229,14 +222,7 @@ private fun XpSourceRow(data: XpSourceRowData) {
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .border(AppTheme.borderHairline, data.color, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
+        AccentBadge(color = data.color, size = 38.dp) {
             Icon(
                 imageVector = data.icon,
                 contentDescription = null,

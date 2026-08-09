@@ -23,14 +23,12 @@ import kotlin.math.roundToInt
 
 
 /**
- * Renders [items] in a plain [Column]; while [isReorderEnabled] is true, each item can be
- * dragged (immediately, no long-press) to swap it past its neighbors, and [onOrderChanged] is
- * called with the new order once the drag ends. While disabled, this is a pure passthrough with
- * no gesture handling attached at all, so callers get zero behavior change when reorder mode
- * is off.
+ * Renders [items] in a plain [Column]. While [isReorderEnabled], each item drags immediately (no
+ * long-press) to swap past its neighbors, and [onOrderChanged] fires with the new order on drag
+ * end. While disabled it is a pure passthrough with no gesture handling attached.
  *
- * Item heights aren't uniform (notes, progress bars, etc. vary tile height), so each item's
- * height is tracked live via [onGloballyPositioned] rather than assumed.
+ * Tile heights vary (notes, progress bars), so each is tracked live via [onGloballyPositioned]
+ * rather than assumed uniform.
  */
 @Composable
 fun <T> DraggableReorderColumn(

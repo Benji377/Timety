@@ -456,7 +456,7 @@ private fun TimelineItem(
                     imageVector = Icons.Filled.DeleteOutline,
                     contentDescription = stringResource(R.string.habitHistoryRemoveTooltip),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(AppTheme.iconSizeMedium),
                 )
             }
         }

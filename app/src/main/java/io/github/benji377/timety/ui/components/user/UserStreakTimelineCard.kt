@@ -203,12 +203,13 @@ private fun streakStatusText(
     val today = LocalDate.now()
     val todayKey = AppDateUtils.dayKey(today)
     val yesterdayKey = AppDateUtils.dayKey(today.minusDays(1))
-    val dayKeys = activityDates.map { AppDateUtils.dayKey(it) }.toSet()
+    val hasToday = activityDates.any { AppDateUtils.dayKey(it) == todayKey }
+    val hasYesterday = activityDates.any { AppDateUtils.dayKey(it) == yesterdayKey }
 
     return when {
-        dayKeys.contains(todayKey) && currentStreak > 0 -> stringResource(R.string.streakStatusActive)
-        dayKeys.contains(yesterdayKey) && currentStreak > 0 -> stringResource(R.string.streakStatusFrozen)
-        dayKeys.contains(todayKey) -> stringResource(R.string.streakStatusBuilding)
+        hasToday && currentStreak > 0 -> stringResource(R.string.streakStatusActive)
+        hasYesterday && currentStreak > 0 -> stringResource(R.string.streakStatusFrozen)
+        hasToday -> stringResource(R.string.streakStatusBuilding)
         else -> stringResource(R.string.streakStatusStart)
     }
 }

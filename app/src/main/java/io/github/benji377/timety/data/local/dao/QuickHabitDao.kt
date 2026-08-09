@@ -15,9 +15,6 @@ interface QuickHabitDao {
     @Query("SELECT * FROM quick_habits ORDER BY createdAt DESC")
     fun getAll(): Flow<List<QuickHabitEntity>>
 
-    @Query("SELECT * FROM quick_habits")
-    fun getAllSynchronous(): List<QuickHabitEntity>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(quickHabit: QuickHabitEntity)
 

@@ -1,7 +1,6 @@
 package io.github.benji377.timety.ui.screens.focus
 
 import android.content.Intent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -496,7 +495,7 @@ fun FocusScreen(
                     // The play button is this screen's primary action, but its prominence comes
                     // from its size and saturated fill, not from a heavier stroke - it takes the
                     // same hairline border as everything else.
-                    border = BorderStroke(AppTheme.borderHairline, MaterialTheme.colorScheme.outline),
+                    border = AppTheme.hairlineStroke,
                     contentPadding = PaddingValues(0.dp),
                 ) {
                     Icon(

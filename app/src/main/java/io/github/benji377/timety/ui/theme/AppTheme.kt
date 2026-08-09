@@ -1,14 +1,23 @@
 package io.github.benji377.timety.ui.theme
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonElevation
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 
 /** Design tokens (font sizes, weights, spacing, radii, and misc constants) shared across the UI. */
 object AppTheme {
@@ -24,8 +33,7 @@ object AppTheme {
     val fsGaugeLabel = 20.sp
     val fsLabel = 12.sp
 
-    // Label inside an AccordionSelector's expanded segment - smaller than fsLabel so it fits
-    // next to the segment's icon within the control's fixed height.
+    // Smaller than fsLabel so it fits beside the segment's icon.
     val fsSegmentLabel = 11.sp
 
     // Font weights
@@ -47,20 +55,15 @@ object AppTheme {
     val space2XLarge = 32.dp
     val space3XLarge = 40.dp
 
-    // Common padding configurations
-    val paddingScreenHorizontal =
-        PaddingValues(horizontal = spaceLarge)
+    val paddingScreenHorizontal = PaddingValues(horizontal = spaceLarge)
 
-    // Outer margin shared by all list tiles (tasks, recurring tasks, habits) so lists have
-    // identical card spacing on every screen.
-    val listTileScreenMargin =
-        PaddingValues(horizontal = spaceLarge, vertical = spaceXSmall)
+    // Outer margin shared by every list tile so lists space identically across screens.
+    val listTileScreenMargin = PaddingValues(horizontal = spaceLarge, vertical = spaceXSmall)
 
     val radiusMedium = 8.dp
     val radiusNeo = 14.dp
 
-    // Pill-shaped controls. Full-round is for toggle controls only - the accordion selector,
-    // badges, and chips - not for cards or inputs.
+    // Full-round: toggle controls, badges, and chips only - never cards or inputs.
     val radiusPill = 24.dp
 
     val brMedium = RoundedCornerShape(radiusMedium)
@@ -74,35 +77,22 @@ object AppTheme {
     // Fixed height of a segmented/accordion selector row (e.g. Priority, Effort).
     val segmentedControlHeight = 48.dp
 
-    // Inset between a segmented selector's outer track and its selected segment's own fill, so the
-    // two rounded shapes read as nested rather than as one shape with a stray edge.
+    // Inset so a selected segment reads as nested inside its track.
     val segmentedSelectorInset = 2.dp
 
-    // Border / stroke widths (dp), a two-step scale. The design is flat - no shadows, no
-    // elevation - so a container's border is the only thing left to give it edges, and one weight
-    // for everything left cards looking like unframed rectangles. Borrowing neobrutalism's idea
-    // that a container's outline is structure rather than decoration, card-tier elements get a
-    // deliberately visible [borderCard] stroke while everything small and repeated stays at
-    // [borderHairline].
-    //
-    // borderHairline: dividers, text-field outlines, chips, icon buttons, badge circles, heatmap
-    // cells - anything that appears many times on one screen, where 2dp would read as clutter.
-    // borderCard: cards, list tiles, dialogs, and the tracks of segmented controls - the outer
-    // frame of a thing that holds other things.
+    // The design is flat, so a border is all that gives a container edges. Two weights:
+    // borderHairline for small repeated elements (dividers, chips, icon buttons, badge circles),
+    // borderCard for containers that hold other things (cards, list tiles, dialogs).
     val borderHairline = 1.dp
     val borderCard = 2.dp
 
-    // Icon-button container footprint (dp): NeoIconButton's square touch target.
+    // NeoIconButton's square touch target.
     val neoIconButtonSize = 40.dp
 
-    // Footprint (dp) shared by the focus screen's secondary transport controls (reset, pause) and
-    // the Spacer that reserves their place while hidden pre-session - named so the button and its
-    // placeholder can never drift out of sync.
+    // Shared by the focus screen's secondary transport controls and the Spacer that reserves
+    // their place while hidden, so the two can never drift apart.
     val focusTransportButtonSize = 64.dp
 
-    // Icon sizes (dp). iconSizeSmall (18) is kept for its existing call sites; iconSizeMedium/
-    // iconSizeXLarge cover the other common sizes. NOTE: raw 16.dp icons are still widespread and
-    // want normalizing to one of these in a later pass.
     val iconSizeXSmall = 12.dp
     val iconSizeSmall = 18.dp
     val iconSizeMedium = 20.dp
@@ -113,21 +103,29 @@ object AppTheme {
 
     val listTileTrailingSpacing = 8.dp
 
-    // Cards carry no Material elevation: the flat design has no blurred or tonal shadows at all,
-    // so a card is separated from the page by its fill and hairline border alone. Named once so
-    // every card expresses the rule instead of repeating
-    // `CardDefaults.cardElevation(defaultElevation = 0.dp)`.
+    // Nothing carries Material elevation; fill and border alone separate a surface from the page.
     val flatCardElevation: CardElevation
         @Composable get() = CardDefaults.cardElevation(defaultElevation = 0.dp)
+
+    val flatButtonElevation: ButtonElevation
+        @Composable get() = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp)
+
+    val flatFabElevation: FloatingActionButtonElevation
+        @Composable get() = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp)
+
+    /** Hairline stroke in the theme outline color, shared by every small bordered control. */
+    val hairlineStroke: BorderStroke
+        @Composable get() = BorderStroke(borderHairline, MaterialTheme.colorScheme.outline)
 
     const val PULSE_DURATION_MS = 2000
 
     // Settings defaults.
     const val MAX_NODE_MINS = 240
 
-    // Opacity values.
     const val OPACITY_MEDIUM = 0.5f
-    const val OPACITY_LIGHT = 0.3f
-    const val OPACITY_VERY_LIGHT = 0.1f
-
 }
+
+/** Draws [AppTheme.hairlineStroke] around this element, circular by default. */
+@Composable
+fun Modifier.hairlineBorder(shape: Shape = CircleShape): Modifier =
+    border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, shape)

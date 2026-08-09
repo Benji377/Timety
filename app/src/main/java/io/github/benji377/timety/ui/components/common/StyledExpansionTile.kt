@@ -1,7 +1,6 @@
 package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -25,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
  * Collapsible tile with a plain-text title; tapping the header toggles [content]'s visibility.

@@ -31,6 +31,7 @@ import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
 import io.github.benji377.timety.ui.theme.PaperAltLight
 import io.github.benji377.timety.ui.theme.PaperLight
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.hairlineBorder
 
 
 /** Horizontal row of connected dots showing a focus mode's phases and the currently active one. */
@@ -111,7 +112,7 @@ private fun PhaseDot(color: Color, active: Boolean) {
             .background(color, CircleShape)
             .then(
                 if (active) {
-                    Modifier.border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, CircleShape)
+                    Modifier.hairlineBorder()
                 } else {
                     Modifier
                 }
