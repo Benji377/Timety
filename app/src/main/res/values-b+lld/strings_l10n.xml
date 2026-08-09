@@ -112,6 +112,12 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Clica n di per cialé si sescions</string>
     <string name="focusStatsSectionClockTitle">Ritm de focus al di</string>
+    <string name="focusSessionDeleteContent">This removes the session for good and takes back the XP it earned.</string>
+    <string name="focusSessionDeleteTitle">Delete Session?</string>
+    <string name="focusSessionDeletedSnackbar">Session deleted</string>
+    <string name="focusSessionEditTitle">Edit Session</string>
+    <string name="focusSessionEditorTarget">Attributed to</string>
+    <string name="focusSessionUpdatedSnackbar">Session updated</string>
     <string name="focusStatsSectionDistractionsEmpty">Deguna distrazions registredes per chësc di</string>
     <string name="focusStatsSectionDistractionsSubtitle">Di crì ora, distrazions plu nueves dant</string>
     <string name="focusStatsSectionDistractionsTitle">Distrazions</string>
@@ -259,6 +265,8 @@
     <string name="habitsSheetEmpty">Deguna abitudins de ndisposizion</string>
     <string name="taskDeleteContent">T\'es segur de ulëi scancelé chësta ncëria?</string>
     <string name="taskDeleteTitle">Scancelé ncëria</string>
+    <string name="taskFocusLogSnackbar">Focus session attached</string>
+    <string name="taskFocusLogTitle">Log Focus Time</string>
     <string name="taskDetailsLabelCategory">Categoria</string>
     <string name="taskDetailsLabelCategoryAddNew">Njunté nueva categoria</string>
     <string name="taskDetailsLabelCategoryEmpty">Deguna</string>
@@ -401,6 +409,8 @@
     <string name="settingsLabelFeedbackSubtitle">Ramuarda fai o damanda trueps nueves</string>
     <string name="settingsLabelFocusAutocomplete">Fina automaticamënter la ncëria liejeda</string>
     <string name="settingsLabelFocusAutocompleteSubtitle">Mërca la ncëria o l\'abitudin sciche finada canche l timer fina</string>
+    <string name="settingsLabelFocusAskOnTaskComplete">Ask to log focus time</string>
+    <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Offers to attach a focus session when you check off a task</string>
     <string name="settingsLabelFocusGoal">Travert de focus dl di</string>
     <string name="settingsLabelFocusNodeTime">Tëmp mascim dla fasa</string>
     <string name="settingsLabelFocusNodeTimeSubtitle">Lunghezza mascima per n blòch de focus</string>
