@@ -11,9 +11,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # JOB 1: Static Analysis (Lint & Detekt)
-  static-analysis:
-    name: Lint & Detekt
+  # Detekt runs source-only (no `classpath` is configured on the Detekt tasks), so it needs no
+  # compiled output and stays a cheap job on its own. Everything that does need a compile lives in
+  # the job below, so the app is only compiled once per run instead of once per job.
+  detekt:
+    name: Detekt
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,7 +29,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: 'zulu'
+          # Temurin is preinstalled on ubuntu-latest, so setup resolves it instead of downloading.
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Gradle
@@ -36,15 +39,8 @@ jobs:
           validate-wrappers: true
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Run Static Analysis
-        run: ./gradlew detekt lintDebug --build-cache --parallel
-
-      - name: Upload Android Lint SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: app/build/reports/lint-results-debug.sarif
-          category: android-lint
+      - name: Run Detekt
+        run: ./gradlew detekt
 
       - name: Upload Detekt SARIF
         if: always()
@@ -53,22 +49,16 @@ jobs:
           sarif_file: app/build/reports/detekt/detekt.sarif
           category: detekt
 
-      - name: Upload Lint HTML Report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: lint-reports
-          path: |
-            app/build/reports/lint-results-debug.html
-            app/build/reports/detekt/detekt.html
-
-  # JOB 2: Build & Test
-  build-and-test:
-    name: Build & Test
+  # Lint and the unit tests share this job's single Kotlin compile. assembleDebug is deliberately
+  # not run here: it added ~26s of dexing and packaging while lintDebug and testDebugUnitTest
+  # already force the compile that catches breakage. The release workflow builds the real artifact.
+  lint-and-test:
+    name: Lint & Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
+      security-events: write
       actions: read
 
     steps:
@@ -78,7 +68,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Gradle
@@ -87,8 +77,8 @@ jobs:
           validate-wrappers: true
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Run Tests & Assemble
-        run: ./gradlew testDebugUnitTest assembleDebug --build-cache --parallel
+      - name: Run Lint & Tests
+        run: ./gradlew lintDebug testDebugUnitTest
 
       - name: Publish test results
         if: always()
@@ -98,22 +88,19 @@ jobs:
           detailed_summary: true
           include_passed: true
 
-      - name: Add summary
+      - name: Upload Android Lint SARIF
         if: always()
-        run: |
-          echo "## APK size (debug)" >> "$GITHUB_STEP_SUMMARY"
-          if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
-            size=$(stat -c%s app/build/outputs/apk/debug/app-debug.apk)
-            echo "$(numfmt --to=iec-i --suffix=B "$size") ($size bytes)" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "No APK built." >> "$GITHUB_STEP_SUMMARY"
-          fi
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: app/build/reports/lint-results-debug.sarif
+          category: android-lint
 
-      - name: Upload Test Reports
+      - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports
+          name: lint-and-test-reports
           path: |
+            app/build/reports/lint-results-debug.html
             app/build/reports/tests/testDebugUnitTest/
             app/build/test-results/testDebugUnitTest/

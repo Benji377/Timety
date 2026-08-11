@@ -49,6 +49,20 @@ jobs:
           mv app/build/outputs/apk/release/app-release.apk timety-v${{ github.event.inputs.version }}.apk
           mv app/build/outputs/bundle/release/app-release.aab timety-v${{ github.event.inputs.version }}.aab
 
+      # Moved off the per-push CI, which no longer assembles an APK: the release size is the one
+      # worth reporting anyway, since it is minified and shrunk while the debug build is not.
+      - name: Add APK size summary
+        if: always()
+        run: |
+          apk="timety-v${{ github.event.inputs.version }}.apk"
+          echo "## APK size (release)" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "$apk" ]; then
+            size=$(stat -c%s "$apk")
+            echo "$(numfmt --to=iec-i --suffix=B "$size") ($size bytes)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No APK built." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
         with:

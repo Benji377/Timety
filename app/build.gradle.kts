@@ -81,6 +81,10 @@ android {
         }
     }
     lint {
+        // Test sources are never reported on (checkTestSources stays off), but lint still parses
+        // them for partial analysis unless told not to. Skipping them measured ~11s off a ~46s
+        // lint run, and keeps the instrumented workflow tests from slowing lint down as they grow.
+        ignoreTestSources = true
         // Crowdin translations land asynchronously; missing keys and plural
         // quantities fall back to English, so they are Crowdin's concern, not CI's.
         disable += listOf("MissingTranslation", "MissingQuantity")

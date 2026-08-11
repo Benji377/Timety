@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -114,6 +115,16 @@ private fun secondsForPhase(
     else -> phase.durationMinutes * 60
 }
 
+
+/**
+ * Test tags for the transport controls. Their icons swap with timer state and carry no content
+ * description, so there is nothing stable for a UI test to match on without these.
+ */
+object FocusScreenTags {
+    const val MAIN = "focusMainButton"
+    const val RESET = "focusResetButton"
+    const val PAUSE = "focusPauseButton"
+}
 
 /**
  * The main focus timer screen: mode selector, timer gauge, phase timeline, and session controls.
@@ -481,6 +492,7 @@ fun FocusScreen(
                         onClick = { requestReset() },
                         icon = Icons.Filled.RestartAlt,
                         contentDescription = null,
+                        modifier = Modifier.testTag(FocusScreenTags.RESET),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         size = AppTheme.focusTransportButtonSize,
                     )
@@ -504,7 +516,9 @@ fun FocusScreen(
                             else -> startFromScratch()
                         }
                     },
-                    modifier = Modifier.size(80.dp),
+                    modifier = Modifier
+                        .size(80.dp)
+                        .testTag(FocusScreenTags.MAIN),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isRunning) ErrorColor else FocusColor,
@@ -546,6 +560,7 @@ fun FocusScreen(
                             Icons.Filled.Pause
                         },
                         contentDescription = null,
+                        modifier = Modifier.testTag(FocusScreenTags.PAUSE),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         size = AppTheme.focusTransportButtonSize,
                     )
