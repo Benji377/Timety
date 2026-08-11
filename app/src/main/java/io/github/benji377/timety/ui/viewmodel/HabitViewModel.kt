@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 import java.time.LocalDate
@@ -131,10 +130,6 @@ class HabitViewModel(
     }
 
 
-    // Serializes the read-check-write completion updates below: two quick taps otherwise both
-    // read "not completed" and insert a duplicate completion plus double XP.
-    private val completionMutex = Mutex()
-
     /** Fresh-from-DB completions for [habitId]; [habitsWithCompletions] may not have emitted yet. */
     private suspend fun completionsOf(habitId: String): List<HabitCompletionEntity>? {
         habitRepository.getHabitById(habitId) ?: return null
@@ -144,7 +139,7 @@ class HabitViewModel(
     /** Toggles today's completion for [habitId] and awards/reverts XP accordingly. */
     fun toggleCompletionToday(habitId: String) {
         viewModelScope.launch {
-            completionMutex.withLock {
+            habitRepository.completionMutex.withLock {
                 val completions = completionsOf(habitId) ?: return@launch
                 val today = LocalDate.now()
                 val todayCompletion = completions.find {
@@ -168,7 +163,7 @@ class HabitViewModel(
     /** Marks [habitId] complete on [date] and awards XP, unless it is already marked complete that day. */
     fun markCompletionOnDate(habitId: String, date: Instant) {
         viewModelScope.launch {
-            completionMutex.withLock {
+            habitRepository.completionMutex.withLock {
                 val completions = completionsOf(habitId) ?: return@launch
                 val targetDay = date.atZone(ZoneId.systemDefault()).toLocalDate()
                 val alreadyCompleted = completions.any {
@@ -188,7 +183,7 @@ class HabitViewModel(
     /** Removes [habitId]'s completion on [date], if any, and reverts the XP it had granted. */
     fun unmarkCompletionOnDate(habitId: String, date: LocalDate) {
         viewModelScope.launch {
-            completionMutex.withLock {
+            habitRepository.completionMutex.withLock {
                 val completions = completionsOf(habitId) ?: return@launch
                 val completion = completions.find {
                     it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date

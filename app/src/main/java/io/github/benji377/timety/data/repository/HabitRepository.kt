@@ -5,6 +5,7 @@ import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 
 /** Repository for habits and their completions, wrapping [HabitDao] with IO dispatching. */
@@ -13,6 +14,13 @@ class HabitRepository(
 ) {
     val allHabits: Flow<List<HabitEntity>> = habitDao.getAllHabits()
     val allCompletions: Flow<List<HabitCompletionEntity>> = habitDao.getAllCompletions()
+
+    // Serializes the read-check-write completion toggles in HabitViewModel and
+    // ToggleHabitCompletionAction: this repository is a process-wide singleton (see
+    // AppContainer), so a shared lock here also covers the app-vs-widget race, not just
+    // concurrent taps within one entry point. Two unsynchronized toggles would otherwise both
+    // read "not completed" and insert a duplicate completion plus double XP.
+    val completionMutex = Mutex()
 
     suspend fun getHabitById(id: String): HabitEntity? = withContext(Dispatchers.IO) {
         habitDao.getHabitById(id)

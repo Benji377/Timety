@@ -15,6 +15,7 @@ import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -101,17 +102,23 @@ class ToggleHabitCompletionAction : ActionCallback {
         val container = (context.applicationContext as TimetyApplication).container
         val habitRepository = container.habitRepository
         if (habitRepository.getHabitById(habitId) == null) return
-        val today = LocalDate.now()
-        val todayCompletion = habitRepository.getCompletionsForHabit(habitId).first()
-            .find { it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == today }
-        if (todayCompletion != null) {
-            habitRepository.deleteCompletion(todayCompletion)
-            container.userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
-        } else {
-            habitRepository.insertCompletion(
-                HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
-            )
-            container.userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
+        // Shares HabitRepository's completionMutex with HabitViewModel's toggle path, since
+        // both entry points read-check-write the same completion row: unsynchronized, two
+        // quick taps (in-app or widget, or one of each) could both read "not completed" and
+        // insert a duplicate completion plus double XP.
+        habitRepository.completionMutex.withLock {
+            val today = LocalDate.now()
+            val todayCompletion = habitRepository.getCompletionsForHabit(habitId).first()
+                .find { it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == today }
+            if (todayCompletion != null) {
+                habitRepository.deleteCompletion(todayCompletion)
+                container.userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
+            } else {
+                habitRepository.insertCompletion(
+                    HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
+                )
+                container.userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
+            }
         }
         HabitWidget().updateAll(context)
     }

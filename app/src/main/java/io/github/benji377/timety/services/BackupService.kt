@@ -7,6 +7,7 @@ import androidx.core.content.pm.PackageInfoCompat
 import androidx.room.withTransaction
 import io.github.benji377.timety.data.local.TimetyDatabase
 import io.github.benji377.timety.data.model.focus.DistractionEntity
+import io.github.benji377.timety.data.model.focus.DistractionType
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
@@ -257,6 +258,7 @@ class BackupService(
                 put("iconCodePoint", habit.iconCodePoint ?: JSONObject.NULL)
                 put("stackName", habit.stackName ?: JSONObject.NULL)
                 put("stackOrder", habit.stackOrder ?: JSONObject.NULL)
+                put("sortOrder", habit.sortOrder)
                 put("completions", JSONArray(completions.map { it.completionDate.toString() }))
             }
             array.put(habitObj)
@@ -384,6 +386,7 @@ class BackupService(
                         JSONArray(distractions.map { distraction ->
                             JSONObject().apply {
                                 put("time", distraction.time.toString())
+                                put("type", distraction.type.name)
                                 put("note", distraction.note)
                             }
                         })
@@ -592,6 +595,7 @@ class BackupService(
                     stackOrder = if (habitJson.has("stackOrder") && !habitJson.isNull("stackOrder")) habitJson.optInt(
                         "stackOrder"
                     ) else null,
+                    sortOrder = habitJson.optInt("sortOrder", 0),
                 )
             )
             val completionsJson = habitJson.optJSONArray("completions") ?: JSONArray()
@@ -752,6 +756,10 @@ class BackupService(
                     DistractionEntity(
                         sessionId = sessionId,
                         time = readInstant(distractionJson, "time") ?: Instant.now(),
+                        type = enumOrDefault(
+                            readString(distractionJson, "type"),
+                            DistractionType.DISTRACTED
+                        ),
                         note = readString(distractionJson, "note") ?: "",
                     )
                 )
