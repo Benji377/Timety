@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -114,6 +115,16 @@ private fun secondsForPhase(
     else -> phase.durationMinutes * 60
 }
 
+
+/**
+ * Test tags for the transport controls. Their icons swap with timer state and carry no content
+ * description, so there is nothing stable for a UI test to match on without these.
+ */
+object FocusScreenTags {
+    const val MAIN = "focusMainButton"
+    const val RESET = "focusResetButton"
+    const val PAUSE = "focusPauseButton"
+}
 
 /**
  * The main focus timer screen: mode selector, timer gauge, phase timeline, and session controls.
@@ -180,8 +191,26 @@ fun FocusScreen(
     var showCreateTagDialog by remember { mutableStateOf(false) }
     var showStopConfirmation by remember { mutableStateOf(false) }
     var showResetConfirmation by remember { mutableStateOf(false) }
-    var stopWasRunning by remember { mutableStateOf(false) }
-    var resetWasRunning by remember { mutableStateOf(false) }
+
+    // Whether opening the dialog is what paused the timer, as opposed to it already being
+    // paused by the user beforehand. Resuming on cancel must require both this AND the timer
+    // still being paused right now: this flag alone can't tell a live pause from one that has
+    // since been ended by other means (e.g. the notification's Stop action), and isPaused alone
+    // can't tell a dialog-induced pause from a pause the user made deliberately before opening
+    // the dialog.
+    var pausedForStop by remember { mutableStateOf(false) }
+    var pausedForReset by remember { mutableStateOf(false) }
+
+    // If the session ends by some other means while a confirmation dialog is open (e.g. the
+    // user stops it from the notification shade), the dialog would otherwise linger on a dead
+    // session. Closing it here also means its onDismiss can safely key off the live isPaused
+    // state below without racing a dialog that refuses to go away.
+    LaunchedEffect(isRunning, isPaused, awaitingContinue) {
+        if (!isRunning && !isPaused && !awaitingContinue) {
+            showStopConfirmation = false
+            showResetConfirmation = false
+        }
+    }
 
     fun sendAction(action: String) {
         val intent = Intent(context, FocusTimerService::class.java).apply { this.action = action }
@@ -294,14 +323,14 @@ fun FocusScreen(
 
     fun requestStop() {
         if (!isRunning && !awaitingContinue) return
-        stopWasRunning = isRunning
+        pausedForStop = isRunning
         if (isRunning) sendAction(FocusTimerService.ACTION_PAUSE)
         showStopConfirmation = true
     }
 
     fun requestReset() {
         if (!isRunning && !isPaused && !awaitingContinue) return
-        resetWasRunning = isRunning
+        pausedForReset = isRunning
         if (isRunning) sendAction(FocusTimerService.ACTION_PAUSE)
         showResetConfirmation = true
     }
@@ -463,6 +492,7 @@ fun FocusScreen(
                         onClick = { requestReset() },
                         icon = Icons.Filled.RestartAlt,
                         contentDescription = null,
+                        modifier = Modifier.testTag(FocusScreenTags.RESET),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         size = AppTheme.focusTransportButtonSize,
                     )
@@ -486,7 +516,9 @@ fun FocusScreen(
                             else -> startFromScratch()
                         }
                     },
-                    modifier = Modifier.size(80.dp),
+                    modifier = Modifier
+                        .size(80.dp)
+                        .testTag(FocusScreenTags.MAIN),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isRunning) ErrorColor else FocusColor,
@@ -528,6 +560,7 @@ fun FocusScreen(
                             Icons.Filled.Pause
                         },
                         contentDescription = null,
+                        modifier = Modifier.testTag(FocusScreenTags.PAUSE),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         size = AppTheme.focusTransportButtonSize,
                     )
@@ -627,7 +660,12 @@ fun FocusScreen(
             showStopConfirmation = false
         },
         onDismiss = {
-            if (stopWasRunning) sendAction(FocusTimerService.ACTION_START)
+            // Resume only if opening this dialog is what paused the timer AND it is still
+            // actually paused right now. pausedForStop alone would resume a session that has
+            // since been stopped by other means (e.g. the notification's Stop action), starting
+            // a phantom new phase. isPaused alone would resume a timer the user had already
+            // paused themselves before requesting the stop.
+            if (pausedForStop && isPaused) sendAction(FocusTimerService.ACTION_START)
             showStopConfirmation = false
         },
     )
@@ -641,7 +679,11 @@ fun FocusScreen(
             showResetConfirmation = false
         },
         onDismiss = {
-            if (resetWasRunning) sendAction(FocusTimerService.ACTION_START)
+            // See the Stop dialog's onDismiss above: resume requires both that this dialog
+            // paused the timer and that it is still paused now. Reset is reachable while the
+            // timer is already paused by the user (pausedForReset = false in that case), so
+            // isPaused alone would wrongly resume a timer the user had deliberately paused.
+            if (pausedForReset && isPaused) sendAction(FocusTimerService.ACTION_START)
             showResetConfirmation = false
         },
     )

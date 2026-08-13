@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,6 +55,9 @@ import java.time.ZoneId
  * before deleting.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/** Test tag for a task's completion checkbox, which carries no content description of its own. */
+fun taskCheckboxTag(taskId: String): String = "taskCheckbox_$taskId"
+
 @Composable
 fun TaskListTile(
     task: TaskEntity,
@@ -96,6 +100,9 @@ fun TaskListTile(
                 Checkbox(
                     checked = task.isCompleted,
                     onCheckedChange = { onToggleCompleted() },
+                    // Material3's Checkbox takes no content description, so a UI test has no other
+                    // way to tell one task's toggle from another's.
+                    modifier = Modifier.testTag(taskCheckboxTag(task.id)),
                     colors = CheckboxDefaults.colors(
                         checkedColor = SuccessColor,
                         uncheckedColor = TaskColor,

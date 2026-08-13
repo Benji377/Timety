@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.viewmodel
 
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
@@ -9,6 +10,7 @@ import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.util.task.RecurrenceUtils
+import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -38,10 +40,17 @@ class RecurringTaskViewModel(
                 initialValue = emptyList()
             )
 
+    private fun updateWidgets() {
+        viewModelScope.launch {
+            TaskWidget().updateAll(application)
+        }
+    }
+
     fun addTask(task: RecurringTaskEntity) {
         viewModelScope.launch {
             recurringTaskRepository.insertTask(task)
             scheduleReminders(task)
+            updateWidgets()
         }
     }
 
@@ -49,6 +58,7 @@ class RecurringTaskViewModel(
         viewModelScope.launch {
             recurringTaskRepository.updateTask(task)
             scheduleReminders(task)
+            updateWidgets()
         }
     }
 
@@ -56,6 +66,7 @@ class RecurringTaskViewModel(
         viewModelScope.launch {
             recurringTaskRepository.deleteTask(task)
             ReminderScheduler.create(application).cancelRecurringTaskReminders(task.id)
+            updateWidgets()
         }
     }
 
@@ -77,6 +88,7 @@ class RecurringTaskViewModel(
             recurringTaskRepository.updateTask(advanced)
             scheduleReminders(advanced)
             userRepository.addXp(ExperienceEngine.XP_PER_TASK)
+            updateWidgets()
             onCompleted(RecurringCompletionUndo(occurrenceId, task.dueDate, advanced))
         }
     }
@@ -89,6 +101,7 @@ class RecurringTaskViewModel(
             recurringTaskRepository.updateTask(restored)
             scheduleReminders(restored)
             userRepository.addXp(-ExperienceEngine.XP_PER_TASK)
+            updateWidgets()
         }
     }
 

@@ -3,15 +3,147 @@ name: Build and Release Mobile Artifacts
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Release Version (e.g., 1.0.0)'
-        required: true
-        default: '2.2.0'
+      expected_version:
+        description: 'Optional guard: fail unless versionName in app/build.gradle.kts matches this'
+        required: false
+        default: ''
+      milestone:
+        description: 'Milestone whose closed issues fill the "What''s New" section'
+        required: false
+        default: 'Next Release'
+      prerelease:
+        description: 'Mark the draft as a pre-release'
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  PACKAGE_NAME: io.github.benji377.timety
 
 jobs:
+  # The version is read from the build file rather than typed into the dispatch form: a mismatch
+  # between the two used to be invisible until someone downloaded the APK. Bumping stays manual.
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      version_code: ${{ steps.resolve.outputs.version_code }}
+      previous_tag: ${{ steps.resolve.outputs.previous_tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          # Tags are needed to work out the previous release and its versionCode.
+          fetch-depth: 0
+
+      - name: Resolve and check the version
+        id: resolve
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected_version }}
+        run: |
+          set -euo pipefail
+          version=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts | head -1)
+          version_code=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' app/build.gradle.kts | head -1)
+          if [ -z "$version" ] || [ -z "$version_code" ]; then
+            echo "::error::could not read versionName/versionCode from app/build.gradle.kts"
+            exit 1
+          fi
+
+          if [ -n "$EXPECTED_VERSION" ] && [ "$EXPECTED_VERSION" != "$version" ]; then
+            echo "::error::app/build.gradle.kts declares $version but $EXPECTED_VERSION was requested"
+            exit 1
+          fi
+
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "::error::tag v$version already exists; bump the version before releasing"
+            exit 1
+          fi
+
+          previous_tag=$(git tag --list 'v*' --sort=-v:refname | grep -vFx "v$version" | head -1 || true)
+          if [ -n "$previous_tag" ]; then
+            previous_code=$(git show "$previous_tag:app/build.gradle.kts" \
+              | grep -oP 'versionCode\s*=\s*\K[0-9]+' | head -1)
+            if [ -n "$previous_code" ] && [ "$version_code" -le "$previous_code" ]; then
+              echo "::error::versionCode $version_code is not above $previous_code from $previous_tag"
+              exit 1
+            fi
+          fi
+
+          {
+            echo "version=$version"
+            echo "version_code=$version_code"
+            echo "previous_tag=$previous_tag"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Releasing v$version"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| versionName | $version |"
+            echo "| versionCode | $version_code |"
+            echo "| previous tag | ${previous_tag:-none} |"
+            echo "| commit | ${GITHUB_SHA::7} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # The per-push CI only ever checks the debug variant. R8 and the resource shrinker are release-only,
+  # and so are the lint checks that key off them, so the release build gets its own pass.
+  verify:
+    name: Lint & Test (release variant)
+    runs-on: ubuntu-latest
+    needs: [preflight]
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          validate-wrappers: true
+          cache-read-only: true
+
+      - name: Run Lint & Tests
+        run: ./gradlew lintRelease testReleaseUnitTest
+
+      - name: Publish test results
+        if: always()
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: 'app/build/test-results/testReleaseUnitTest/TEST-*.xml'
+          detailed_summary: true
+          include_passed: true
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-lint-and-test-reports
+          path: |
+            app/build/reports/lint-results-release.html
+            app/build/reports/tests/testReleaseUnitTest/
+            app/build/test-results/testReleaseUnitTest/
+
   build_release:
     name: Build Android Release Artifacts
     runs-on: ubuntu-latest
+    needs: [preflight, verify]
     # Build only needs to read the repo; artifacts are uploaded via the artifact API.
     permissions:
       contents: read
@@ -41,52 +173,178 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_PATH: release-keystore.jks
         run: |
-          ./gradlew assembleRelease
-          ./gradlew bundleRelease
+          ./gradlew assembleRelease bundleRelease
 
       - name: Rename Artifacts
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
         run: |
-          mv app/build/outputs/apk/release/app-release.apk timety-v${{ github.event.inputs.version }}.apk
-          mv app/build/outputs/bundle/release/app-release.aab timety-v${{ github.event.inputs.version }}.aab
+          set -euo pipefail
+          mv app/build/outputs/apk/release/app-release.apk "timety-v$VERSION.apk"
+          mv app/build/outputs/bundle/release/app-release.aab "timety-v$VERSION.aab"
+
+      # Confirms the artifact carries the version and the signing key it is supposed to
+      - name: Verify APK
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+          VERSION_CODE: ${{ needs.preflight.outputs.version_code }}
+          CERT_SHA256: ${{ vars.SIGNING_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+          ./scripts/verify-apk.sh "timety-v$VERSION.apk" \
+            --version "$VERSION" \
+            --version-code "$VERSION_CODE" \
+            --package "$PACKAGE_NAME" \
+            --cert-sha256 "$CERT_SHA256" | tee apk-verify.txt
+          {
+            echo "## APK verification"
+            echo '```'
+            cat apk-verify.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify AAB
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+        run: |
+          set -euo pipefail
+          aab="timety-v$VERSION.aab"
+          listing=$(unzip -l "$aab")
+          # A bundle missing its base module still zips up fine and only fails at upload time.
+          printf '%s' "$listing" | grep -q 'base/manifest/AndroidManifest.xml' \
+            || { echo "::error::$aab has no base module manifest"; exit 1; }
+          # Bundles carry the older JAR signature rather than an APK signing block.
+          printf '%s' "$listing" | grep -qE 'META-INF/.*\.(RSA|EC|DSA)' \
+            || echo "::warning::no signature block found in $aab"
+
+      - name: Checksums
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+        run: |
+          set -euo pipefail
+          sha256sum "timety-v$VERSION.apk" "timety-v$VERSION.aab" > SHA256SUMS.txt
+          {
+            echo "## Checksums"
+            echo '```'
+            cat SHA256SUMS.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: APK size summary
+        if: always()
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+          PREVIOUS_TAG: ${{ needs.preflight.outputs.previous_tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          apk="timety-v$VERSION.apk"
+          echo "## APK size (release)" >> "$GITHUB_STEP_SUMMARY"
+          if [ ! -f "$apk" ]; then
+            echo "No APK built." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          size=$(stat -c%s "$apk")
+          echo "$(numfmt --to=iec-i --suffix=B "$size") ($size bytes)" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -n "$PREVIOUS_TAG" ]; then
+            mkdir -p previous
+            if gh release download "$PREVIOUS_TAG" --pattern '*.apk' --dir previous 2>/dev/null; then
+              old=$(find previous -name '*.apk' | head -1)
+              old_size=$(stat -c%s "$old")
+              delta=$((size - old_size))
+              # numfmt has no signed format, so the direction is spelled out here.
+              [ "$delta" -lt 0 ] && sign="-" || sign="+"
+              printf 'Previous (%s): %s, delta %s%s\n' \
+                "$PREVIOUS_TAG" \
+                "$(numfmt --to=iec-i --suffix=B -- "$old_size")" \
+                "$sign" \
+                "$(numfmt --to=iec-i --suffix=B -- "${delta#-}")" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No APK asset on $PREVIOUS_TAG to compare against." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: timety-release-artifacts
           path: |
-            timety-v${{ github.event.inputs.version }}.apk
-            timety-v${{ github.event.inputs.version }}.aab
+            timety-v${{ needs.preflight.outputs.version }}.apk
+            timety-v${{ needs.preflight.outputs.version }}.aab
+            SHA256SUMS.txt
 
   upload_to_release:
     name: Upload to GitHub Release
     runs-on: ubuntu-latest
-    # contents to create the release, id-token + attestations for build provenance.
+    needs: [preflight, build_release]
+    # contents to create the release, issues to read the milestone, id-token + attestations for
+    # build provenance.
     permissions:
       contents: write
+      issues: read
       id-token: write
       attestations: write
-    needs: [build_release]
+
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
       - uses: actions/download-artifact@v8
         with:
           name: timety-release-artifacts
           path: artifacts
 
       - name: Create attestation for build
+        id: attest
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             artifacts/*.apk
             artifacts/*.aab
 
+      - name: Compose release notes
+        env:
+          VERSION: ${{ needs.preflight.outputs.version }}
+          PREVIOUS_TAG: ${{ needs.preflight.outputs.previous_tag }}
+          ATTESTATION_URL: ${{ steps.attest.outputs.attestation-url }}
+          MILESTONE: ${{ inputs.milestone }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ./scripts/release-notes.sh \
+            --version "$VERSION" \
+            --previous-tag "$PREVIOUS_TAG" \
+            --attestation-url "$ATTESTATION_URL" \
+            --milestone "$MILESTONE" \
+            --repo "$GITHUB_REPOSITORY" \
+            > release-notes.md 2> notes-warnings.txt || { cat notes-warnings.txt >&2; exit 1; }
+
+          if [ -s notes-warnings.txt ]; then
+            {
+              echo "## Release notes warnings"
+              echo '```'
+              cat notes-warnings.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          {
+            echo "## Draft release notes"
+            echo
+            cat release-notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Release to GitHub
         uses: softprops/action-gh-release@v3
         with:
           draft: true
-          generate_release_notes: true
+          prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: false
+          body_path: release-notes.md
           overwrite_files: false
-          name: Timety v${{ github.event.inputs.version }}
-          tag_name: v${{ github.event.inputs.version }}
+          name: Timety v${{ needs.preflight.outputs.version }}
+          tag_name: v${{ needs.preflight.outputs.version }}
           files: |
             artifacts/*.apk
             artifacts/*.aab
+            artifacts/SHA256SUMS.txt

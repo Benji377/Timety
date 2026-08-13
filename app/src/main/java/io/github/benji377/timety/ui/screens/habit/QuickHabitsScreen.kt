@@ -435,7 +435,21 @@ private fun QuickHabitEditDialog(
             confirmLabel = stringResource(R.string.commonLabelSave),
             onConfirm = { hour, minute ->
                 val minuteOfDay = hour * 60 + minute
-                if (isStart) startMinute = minuteOfDay else endMinute = minuteOfDay
+                // Keep the window valid: pushing one edge past the other drags the
+                // other edge along instead of letting end <= start ever get saved.
+                if (isStart) {
+                    startMinute = minuteOfDay
+                    if (endMinute <= startMinute) {
+                        endMinute = (startMinute + 1).coerceAtMost(23 * 60 + 59)
+                        if (endMinute <= startMinute) startMinute = endMinute - 1
+                    }
+                } else {
+                    endMinute = minuteOfDay
+                    if (endMinute <= startMinute) {
+                        startMinute = (endMinute - 1).coerceAtLeast(0)
+                        if (endMinute <= startMinute) endMinute = startMinute + 1
+                    }
+                }
                 editingWindowStart = null
             },
             onDismiss = { editingWindowStart = null },

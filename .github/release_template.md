@@ -1,7 +1,7 @@
 ## Release v{{version}}
 
 ### ✨ What’s New
-- List new features, improvements, or bug fixes here.
+{{whats_new}}
 
 ### ⚠️ Breaking Changes
 - Describe any breaking changes clearly.
@@ -11,5 +11,5 @@
 
 ---
 
-🔗 **Full Changelog:** [View Changelog](URL)
-✅ **Attestations:** [View Attestations](URL)
+🔗 **Full Changelog:** [View Changelog]({{changelog_url}})
+✅ **Attestations:** [View Attestations]({{attestation_url}})
