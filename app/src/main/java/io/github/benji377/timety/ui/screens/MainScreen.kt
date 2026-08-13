@@ -168,8 +168,8 @@ fun MainScreen(
                     onNavigateToRecurringDetail = { taskId ->
                         navController.navigate(AppRoute.recurringTaskDetail(taskId))
                     },
-                    onNavigateToCalendar = { navController.navigate(BottomNavItem.Calendar.route) },
-                    onNavigateToStatistics = { navController.navigate(BottomNavItem.Statistics.route) }
+                    onNavigateToCalendar = { navController.navigate(AppRoute.CALENDAR.route) },
+                    onNavigateToStatistics = { navController.navigate(AppRoute.STATISTICS.route) }
                 )
             }
             composable(BottomNavItem.Focus.route) {
@@ -208,7 +208,7 @@ fun MainScreen(
                     onNavigateToSettings = { navController.navigate(AppRoute.SETTINGS.route) }
                 )
             }
-            composable(BottomNavItem.Calendar.route) {
+            composable(AppRoute.CALENDAR.route) {
                 CalendarScreen(
                     onNavigateToTask = { taskId -> navController.navigate(AppRoute.taskDetail(taskId)) },
                     onNavigateToHabit = { habitId ->
@@ -224,7 +224,7 @@ fun MainScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-            composable(BottomNavItem.Statistics.route) {
+            composable(AppRoute.STATISTICS.route) {
                 StatisticsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
