@@ -153,10 +153,11 @@ jobs:
           aab="timety-v$VERSION.aab"
           listing=$(unzip -l "$aab")
           # A bundle missing its base module still zips up fine and only fails at upload time.
-          printf '%s' "$listing" | grep -q 'base/manifest/AndroidManifest.xml' \
+          # Here-strings (not pipes) avoid grep -q's early exit tripping pipefail via SIGPIPE.
+          grep -q 'base/manifest/AndroidManifest.xml' <<< "$listing" \
             || { echo "::error::$aab has no base module manifest"; exit 1; }
           # Bundles carry the older JAR signature rather than an APK signing block.
-          printf '%s' "$listing" | grep -qE 'META-INF/.*\.(RSA|EC|DSA)' \
+          grep -qE 'META-INF/.*\.(RSA|EC|DSA)' <<< "$listing" \
             || echo "::warning::no signature block found in $aab"
 
       - name: Checksums
