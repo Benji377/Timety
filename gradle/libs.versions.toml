@@ -15,7 +15,7 @@ room = "2.8.4"
 datastore = "1.2.1"
 coil = "2.7.0"
 leakcanary = "2.14"
-composeLintChecks = "1.5.5"
+composeLintChecks = "1.6.0"
 
 junit = "4.13.2"
 androidxJunit = "1.3.0"
