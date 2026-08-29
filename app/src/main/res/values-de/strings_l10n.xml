@@ -478,6 +478,13 @@
     <string name="notificationHabitListSuffix"> und mehr</string>
     <string name="notificationHabitReminder">\nVergiss nicht, heute %1$s zu erledigen!</string>
     <string name="notificationHabitTitle">Gewohnheits-Erinnerung</string>
+    <string name="missedReminderBodySingle">You missed your reminder for %1$s while your device was off. Tap to view it.</string>
+    <string name="missedRemindersBodyMultiple">You missed %1$d reminders while your device was off. Tap to view them.</string>
+    <string name="missedRemindersTitle">Missed Reminders</string>
+    <string name="exactAlarmPromptTitle">Enable reliable reminders</string>
+    <string name="exactAlarmPromptBody">Without \"Alarms &amp; reminders\" access, Android may delay quick habit and task reminders by several minutes, especially while your phone is idle. Enable it now for on-time reminders.</string>
+    <string name="exactAlarmPromptConfirm">Open Settings</string>
+    <string name="exactAlarmPromptDismiss">Not now</string>
     <string name="notificationQuote1">Erobere deinen Tag!</string>
     <string name="notificationQuote2">Kleine Schritte führen zu großen Ergebnissen. Mach weiter so!</string>
     <string name="notificationQuote3">Was steht heute auf der Agenda? Lass es uns anpacken.</string>
