@@ -1,6 +1,7 @@
 package io.github.benji377.timety.ui.components.task
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.MonthlyMode
@@ -11,6 +12,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 
 /** The cadence name shown on the recurrence unit selector. */
 @Composable
+@ReadOnlyComposable
 fun recurrenceUnitName(unit: RecurrenceUnit): String = when (unit) {
     RecurrenceUnit.WEEK -> stringResource(R.string.recurrenceWeekly)
     RecurrenceUnit.MONTH -> stringResource(R.string.recurrenceMonthly)
@@ -19,6 +21,7 @@ fun recurrenceUnitName(unit: RecurrenceUnit): String = when (unit) {
 
 /** Short localized weekday name ("Mon".."Sun") for an ISO weekday number (1 = Monday). */
 @Composable
+@ReadOnlyComposable
 fun weekdayShortName(isoWeekday: Int): String = when (isoWeekday) {
     1 -> stringResource(R.string.commonWeekdayMon)
     2 -> stringResource(R.string.commonWeekdayTue)
@@ -31,6 +34,7 @@ fun weekdayShortName(isoWeekday: Int): String = when (isoWeekday) {
 
 /** Ordinal word for a monthly nth-weekday rule: "first".."fourth", or "last". */
 @Composable
+@ReadOnlyComposable
 fun recurrenceOrdinalName(ordinal: Int): String = when (ordinal) {
     1 -> stringResource(R.string.recurrenceOrdinalFirst)
     2 -> stringResource(R.string.recurrenceOrdinalSecond)
@@ -44,6 +48,7 @@ fun recurrenceOrdinalName(ordinal: Int): String = when (ordinal) {
  * "Every month on day 3", or "Every 3 months on the second Fri".
  */
 @Composable
+@ReadOnlyComposable
 fun recurrenceCadenceLabel(task: RecurringTaskEntity): String {
     val n = task.interval.coerceAtLeast(1)
     val plural = when (task.unit) {

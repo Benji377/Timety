@@ -37,6 +37,7 @@ fun ConfirmationDialog(
     onDismiss: () -> Unit,
     confirmLabel: String? = null,
     confirmColor: Color? = null,
+    dismissLabel: String? = null,
 ) {
     if (!visible) return
     NeoAlertDialog(
@@ -44,7 +45,7 @@ fun ConfirmationDialog(
         title = title,
         text = content,
         dismissButton = {
-            NeoTextButton(onClick = onDismiss, text = stringResource(R.string.commonLabelCancel))
+            NeoTextButton(onClick = onDismiss, text = dismissLabel ?: stringResource(R.string.commonLabelCancel))
         },
         confirmButton = {
             Button(

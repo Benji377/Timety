@@ -35,6 +35,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -499,6 +500,7 @@ private fun WindowTimeButton(
 
 /** "Every 2 hours" / "Every 30 minutes", using hours when the interval divides evenly. */
 @Composable
+@ReadOnlyComposable
 private fun intervalLabel(minutes: Int): String = if (minutes % 60 == 0) {
     quantityString(R.plurals.quickHabitEveryHours, minutes / 60, 0, minutes / 60)
 } else {
@@ -506,6 +508,7 @@ private fun intervalLabel(minutes: Int): String = if (minutes % 60 == 0) {
 }
 
 @Composable
+@ReadOnlyComposable
 private fun quickHabitSubtitle(
     quickHabit: QuickHabitEntity,
     use24Hour: Boolean,
@@ -529,6 +532,7 @@ private fun quickHabitSubtitle(
 
 /** A compact weekday summary like "Mon, Wed, Fri" in Mon..Sun order. */
 @Composable
+@ReadOnlyComposable
 private fun weekdaysSummary(days: Set<Int>): String {
     val labels = listOf(
         stringResource(R.string.calendarHeaderMon), stringResource(R.string.calendarHeaderTue),

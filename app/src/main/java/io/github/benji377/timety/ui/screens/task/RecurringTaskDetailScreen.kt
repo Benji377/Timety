@@ -39,6 +39,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -645,6 +646,7 @@ private fun reminderOptionOffsetMinutes(option: ReminderOption): Int? = when (op
 
 /** The chip label for a stored offset; known values reuse the option labels. */
 @Composable
+@ReadOnlyComposable
 private fun offsetLabel(minutes: Int): String = when (minutes) {
     0 -> stringResource(R.string.taskDetailsReminderOptionOnce)
     30 -> stringResource(R.string.taskDetailsReminderOptionHalfHour)

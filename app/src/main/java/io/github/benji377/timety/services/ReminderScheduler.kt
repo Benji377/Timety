@@ -182,6 +182,17 @@ class ReminderScheduler private constructor(private val context: Context) {
 
     fun cancelHabitReminder(habitId: String) = notificationService.cancelHabitReminder(habitId)
 
+    /** Shows one grouped notification for task reminders that fired during [missedTitles]' downtime. */
+    private fun notifyMissed(missedTitles: List<String>) {
+        val title = context.getString(R.string.missedRemindersTitle)
+        val body = if (missedTitles.size == 1) {
+            context.getString(R.string.missedReminderBodySingle, missedTitles.first())
+        } else {
+            context.getString(R.string.missedRemindersBodyMultiple, missedTitles.size)
+        }
+        notificationService.showMissedReminders(title, body)
+    }
+
     // Quick habits (interval reminders).
 
 
@@ -263,6 +274,39 @@ class ReminderScheduler private constructor(private val context: Context) {
                 .forEach { scheduler.scheduleQuickHabit(it) }
             scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
             scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
+
+            // Baseline for notifyMissedReminders() to detect a downtime window against.
+            settings.saveLastAlarmResyncEpochMilli(Instant.now().toEpochMilli())
+        }
+
+        /** Bundles task reminders missed since the last resync (device off, etc.) into one notification. Call before [resyncAll], which advances the baseline. */
+        suspend fun notifyMissedReminders(context: Context) {
+            val app = context.applicationContext as? TimetyApplication ?: return
+            val settings = app.container.settingsRepository
+            val sinceMillis = settings.lastAlarmResyncEpochMilliFlow.first() ?: return
+            val since = Instant.ofEpochMilli(sinceMillis)
+            val now = Instant.now()
+            if (!since.isBefore(now)) return
+
+            fun fellInWindow(reminders: List<Instant>) =
+                reminders.any { it.isAfter(since) && !it.isAfter(now) }
+
+            val missedTitles = linkedSetOf<String>()
+            app.container.taskRepository.allTasks.first().forEach { tws ->
+                val task = tws.task
+                if (task.isCompleted) return@forEach
+                val reminders = task.reminders.ifEmpty { listOfNotNull(task.dueDate) }
+                if (fellInWindow(reminders)) missedTitles += task.title
+            }
+            app.container.recurringTaskRepository.allRecurringTasks.first().forEach { rtws ->
+                val task = rtws.task
+                val offsets = task.reminderOffsetsMinutes.ifEmpty { listOf(0) }
+                val reminders = offsets.map { task.dueDate.minus(it.toLong(), ChronoUnit.MINUTES) }
+                if (fellInWindow(reminders)) missedTitles += task.title
+            }
+            if (missedTitles.isEmpty()) return
+
+            create(app).notifyMissed(missedTitles.toList())
         }
     }
 }

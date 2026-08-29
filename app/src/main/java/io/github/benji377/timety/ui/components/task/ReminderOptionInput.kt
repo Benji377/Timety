@@ -11,6 +11,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,6 +83,7 @@ fun ReminderOptionInput(
 
 /** The user-facing label for a reminder option. */
 @Composable
+@ReadOnlyComposable
 fun reminderOptionLabel(option: ReminderOption): String = when (option) {
     ReminderOption.ON_TIME -> stringResource(R.string.taskDetailsReminderOptionOnce)
     ReminderOption.MINUTES_30_BEFORE -> stringResource(R.string.taskDetailsReminderOptionHalfHour)

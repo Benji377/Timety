@@ -43,18 +43,25 @@ class NotificationService(private val context: Context) {
                 CHANNEL_TASKS,
                 context.getString(R.string.notificationChannelTasksName),
                 NotificationManager.IMPORTANCE_HIGH
-            ).apply { description = context.getString(R.string.notificationChannelTasksDesc) },
+            ).apply {
+                description = context.getString(R.string.notificationChannelTasksDesc)
+                setBypassDnd(true)
+            },
             NotificationChannel(
                 CHANNEL_HABITS,
                 context.getString(R.string.notificationChannelHabitsName),
                 NotificationManager.IMPORTANCE_HIGH
-            ).apply { description = context.getString(R.string.notificationChannelHabitsDesc) },
+            ).apply {
+                description = context.getString(R.string.notificationChannelHabitsDesc)
+                setBypassDnd(true)
+            },
             NotificationChannel(
                 CHANNEL_QUICK_HABITS,
                 context.getString(R.string.notificationChannelQuickHabitsName),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.notificationChannelQuickHabitsDesc)
+                setBypassDnd(true)
             },
             NotificationChannel(
                 CHANNEL_MOTIVATION,
@@ -76,6 +83,9 @@ class NotificationService(private val context: Context) {
             },
         )
         channels.forEach { systemManager.createNotificationChannel(it) }
+
+        // Old channel IDs, superseded by bypass-DND versions below; drop the dead duplicates.
+        LEGACY_CHANNEL_IDS.forEach { systemManager.deleteNotificationChannel(it) }
     }
 
     // Tasks.
@@ -223,6 +233,14 @@ class NotificationService(private val context: Context) {
 
     internal fun showNotification(id: Int, channelId: String, title: String, body: String) {
         notifySafely(id, reminderNotification(id, channelId, title, body).build())
+    }
+
+    /** One grouped notification for task reminders that fired while the app couldn't run (device off, force-stopped, etc.). */
+    internal fun showMissedReminders(title: String, body: String) {
+        notifySafely(
+            MISSED_REMINDERS_ID,
+            reminderNotification(MISSED_REMINDERS_ID, CHANNEL_TASKS, title, body).build()
+        )
     }
 
     /**
@@ -443,16 +461,24 @@ class NotificationService(private val context: Context) {
     companion object {
         private const val TAG = "NotificationService"
 
-        const val CHANNEL_TASKS = "task_reminders_channel"
-        const val CHANNEL_HABITS = "habit_reminders_channel"
-        const val CHANNEL_QUICK_HABITS = "quick_habit_reminders_channel"
+        // "_v2": channel flags are immutable after creation, so bypass-DND needs a new channel ID.
+        const val CHANNEL_TASKS = "task_reminders_channel_v2"
+        const val CHANNEL_HABITS = "habit_reminders_channel_v2"
+        const val CHANNEL_QUICK_HABITS = "quick_habit_reminders_channel_v2"
         const val CHANNEL_MOTIVATION = "daily_motivation_channel"
         const val CHANNEL_EVENING = "evening_checkup_channel"
         const val CHANNEL_FOCUS = "focus_timer_channel"
 
+        private val LEGACY_CHANNEL_IDS = listOf(
+            "task_reminders_channel",
+            "habit_reminders_channel",
+            "quick_habit_reminders_channel",
+        )
+
         // Reserved IDs; kept stable to match legacy app versions so existing scheduled alarms still resolve.
         const val DAILY_MOTIVATION_ID = 9999
         const val END_OF_DAY_CHECKUP_ID = 9998
+        const val MISSED_REMINDERS_ID = 9997
 
         internal const val EXTRA_NOTIFICATION_ID = "notificationId"
         internal const val EXTRA_TITLE = "title"

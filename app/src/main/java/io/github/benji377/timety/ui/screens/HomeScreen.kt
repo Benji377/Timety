@@ -274,8 +274,7 @@ fun HomeScreen(
                                         TaskListTile(
                                             task = task.task,
                                             isOverdue = task.task.dueDate != null &&
-                                                    task.task.dueDate.atZone(ZoneId.systemDefault())
-                                                        .toLocalDate().isBefore(todayLocalDate),
+                                                    task.task.dueDate.isBefore(Instant.now()),
                                             enableDismissible = false,
                                             showDescription = false,
                                             subtasksCompleted = task.subtasks.count { it.isCompleted },

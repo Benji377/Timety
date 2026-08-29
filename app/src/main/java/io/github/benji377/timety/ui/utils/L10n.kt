@@ -3,6 +3,7 @@ package io.github.benji377.timety.ui.utils
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 
@@ -12,6 +13,7 @@ import androidx.compose.ui.res.stringResource
  * zero and a zero-specific string was provided.
  */
 @Composable
+@ReadOnlyComposable
 fun quantityString(
     @PluralsRes pluralRes: Int,
     count: Int,

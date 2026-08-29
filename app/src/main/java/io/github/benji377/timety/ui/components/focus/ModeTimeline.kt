@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -157,6 +158,7 @@ private fun ConnectorLine(
 
 /** Returns the localized display name for a system focus mode, or [mode]'s own name otherwise. */
 @Composable
+@ReadOnlyComposable
 fun localizedFocusModeName(mode: FocusModeEntity): String {
     if (!mode.isSystem) return mode.name
     return when (mode.id) {

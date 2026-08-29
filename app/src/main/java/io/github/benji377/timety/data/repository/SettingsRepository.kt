@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -67,11 +68,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val KEEP_SCREEN_ON_DURING_FOCUS = booleanPreferencesKey("keepScreenOnDuringFocus")
         val AUTO_DND_ENABLED = booleanPreferencesKey("autoDndEnabled")
         val AUTO_DND_LIFT_DURING_BREAKS = booleanPreferencesKey("autoDndLiftDuringBreaks")
+        val EXACT_ALARM_PROMPT_SHOWN = booleanPreferencesKey("exactAlarmPromptShown")
 
         // Not a user-facing setting: the interruption filter FocusDndController owned before it
         // applied Auto-DND, kept here (rather than in-memory) so a killed process can still
         // restore it on next start. Absent means Auto-DND currently owns nothing to restore.
         val STORED_INTERRUPTION_FILTER = intPreferencesKey("storedInterruptionFilter")
+
+        // Not a user-facing setting: baseline timestamp for detecting missed reminders on boot.
+        val LAST_ALARM_RESYNC_EPOCH_MILLI = longPreferencesKey("lastAlarmResyncEpochMilli")
     }
 
     val themePrefFlow: Flow<ThemeMode> =
@@ -101,10 +106,16 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val autoDndEnabledFlow: Flow<Boolean> = dataStore.data.map { it[AUTO_DND_ENABLED] ?: false }
     val autoDndLiftDuringBreaksFlow: Flow<Boolean> =
         dataStore.data.map { it[AUTO_DND_LIFT_DURING_BREAKS] ?: false }
+    val exactAlarmPromptShownFlow: Flow<Boolean> =
+        dataStore.data.map { it[EXACT_ALARM_PROMPT_SHOWN] ?: false }
 
     /** Null means Auto-DND currently owns no filter to restore. */
     val storedInterruptionFilterFlow: Flow<Int?> =
         dataStore.data.map { it[STORED_INTERRUPTION_FILTER] }
+
+    /** Null means alarms have never been (re)synced yet, e.g. a fresh install. */
+    val lastAlarmResyncEpochMilliFlow: Flow<Long?> =
+        dataStore.data.map { it[LAST_ALARM_RESYNC_EPOCH_MILLI] }
 
     fun accordionExpandedFlow(key: AccordionKey): Flow<Boolean> =
         dataStore.data.map { it[booleanPreferencesKey(key.storageKey)] ?: key.defaultExpanded }
@@ -177,6 +188,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[AUTO_DND_LIFT_DURING_BREAKS] = lift }
     }
 
+    suspend fun saveExactAlarmPromptShown(shown: Boolean) {
+        dataStore.edit { it[EXACT_ALARM_PROMPT_SHOWN] = shown }
+    }
+
     suspend fun saveStoredInterruptionFilter(filter: Int) {
         dataStore.edit { it[STORED_INTERRUPTION_FILTER] = filter }
     }
@@ -185,12 +200,16 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it.remove(STORED_INTERRUPTION_FILTER) }
     }
 
+    suspend fun saveLastAlarmResyncEpochMilli(epochMilli: Long) {
+        dataStore.edit { it[LAST_ALARM_RESYNC_EPOCH_MILLI] = epochMilli }
+    }
+
     suspend fun exportAll(): Map<String, Any?> {
         val prefs = dataStore.data.first()
-        // STORED_INTERRUPTION_FILTER is transient runtime state, not a user setting - excluded
-        // so restoring a backup can't leave a stale filter that nothing will ever restore.
+        // Transient runtime state, not user settings - excluded from backups.
+        val transientKeys = setOf(STORED_INTERRUPTION_FILTER.name, LAST_ALARM_RESYNC_EPOCH_MILLI.name)
         return prefs.asMap()
-            .filterKeys { it.name != STORED_INTERRUPTION_FILTER.name }
+            .filterKeys { it.name !in transientKeys }
             .mapKeys { it.key.name }
     }
 

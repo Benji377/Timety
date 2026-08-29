@@ -7,6 +7,7 @@ import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.services.ReminderScheduler
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -167,6 +168,13 @@ class SettingsViewModel(
 
     private suspend fun resyncNotifications() {
         ReminderScheduler.resyncAll(application)
+    }
+
+    /** True (once) the first time this is called; marks the exact-alarm prompt as shown regardless of the outcome. */
+    suspend fun consumeExactAlarmPromptDue(): Boolean {
+        val alreadyShown = repository.exactAlarmPromptShownFlow.first()
+        repository.saveExactAlarmPromptShown(true)
+        return !alreadyShown
     }
 
     /** Checks that [url] is a reachable Photon-compatible geocoding endpoint before it is saved. */
