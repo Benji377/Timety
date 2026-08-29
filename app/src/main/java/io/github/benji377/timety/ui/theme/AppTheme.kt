@@ -13,6 +13,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
@@ -115,7 +116,9 @@ object AppTheme {
 
     /** Hairline stroke in the theme outline color, shared by every small bordered control. */
     val hairlineStroke: BorderStroke
-        @Composable get() = BorderStroke(borderHairline, MaterialTheme.colorScheme.outline)
+        @Composable
+        @ReadOnlyComposable
+        get() = BorderStroke(borderHairline, MaterialTheme.colorScheme.outline)
 
     const val PULSE_DURATION_MS = 2000
 
@@ -127,5 +130,6 @@ object AppTheme {
 
 /** Draws [AppTheme.hairlineStroke] around this element, circular by default. */
 @Composable
+@ReadOnlyComposable
 fun Modifier.hairlineBorder(shape: Shape = CircleShape): Modifier =
     border(AppTheme.borderHairline, MaterialTheme.colorScheme.outline, shape)

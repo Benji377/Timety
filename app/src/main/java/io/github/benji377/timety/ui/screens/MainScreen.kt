@@ -68,6 +68,7 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 fun MainScreen(
     navTarget: String? = null,
     onNavTargetConsumed: () -> Unit = {},
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val permissionLauncher = rememberLauncherForActivityResult(
@@ -80,7 +81,6 @@ fun MainScreen(
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val context = LocalContext.current
-        val settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
         var showExactAlarmPrompt by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) {
             val alarmManager = context.getSystemService(AlarmManager::class.java)

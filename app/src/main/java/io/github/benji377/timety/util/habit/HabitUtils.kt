@@ -1,6 +1,7 @@
 package io.github.benji377.timety.util.habit
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
@@ -82,6 +83,7 @@ object HabitUtils {
 
     /** Localized subtitle describing a habit's schedule, e.g. "Daily" or "3/5 this week". */
     @Composable
+    @ReadOnlyComposable
     fun buildHabitSubtitle(habit: HabitEntity, completionsThisWeek: Int): String {
         return when (habit.frequency) {
             HabitFrequency.DAILY -> stringResource(R.string.habitFreqDaily)
