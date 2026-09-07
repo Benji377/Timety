@@ -6,6 +6,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -61,6 +62,7 @@ fun NeoCard(
  * tighter [AppTheme.brMedium] radius keeps repeated rows visually quiet. Delegates to [NeoCard].
  */
 @Composable
+@NonRestartableComposable
 fun NeoListTile(
     modifier: Modifier = Modifier,
     shape: Shape = AppTheme.brMedium,

@@ -10,6 +10,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -17,6 +18,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 
 /** Filled [Button] restyled flat: hairline border, no elevation. Tap feedback is Material's ripple. */
 @Composable
+@NonRestartableComposable
 fun NeoButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -45,6 +47,7 @@ fun NeoButton(
 
 /** Elevated variant of [NeoButton] with the same flat, hairline-bordered treatment. */
 @Composable
+@NonRestartableComposable
 fun NeoElevatedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
