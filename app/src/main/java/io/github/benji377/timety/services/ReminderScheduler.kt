@@ -249,6 +249,13 @@ class ReminderScheduler private constructor(private val context: Context) {
 
         private const val TASK_ID_SLOTS = 11
 
+        /**
+         * Reminders that fired within this window before a missed-reminder check aren't reported as
+         * missed: their notification is likely still showing, or the user just tapped one to open
+         * the app. The window is re-checked on the next run, so nothing is permanently skipped.
+         */
+        private val MISSED_REMINDER_GRACE: Duration = Duration.ofMinutes(10)
+
 
         /** Builds a scheduler whose string resources are resolved in the app's configured locale. */
         suspend fun create(context: Context): ReminderScheduler {
@@ -274,22 +281,29 @@ class ReminderScheduler private constructor(private val context: Context) {
                 .forEach { scheduler.scheduleQuickHabit(it) }
             scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
             scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
-
-            // Baseline for notifyMissedReminders() to detect a downtime window against.
-            settings.saveLastAlarmResyncEpochMilli(Instant.now().toEpochMilli())
         }
 
-        /** Bundles task reminders missed since the last resync (device off, etc.) into one notification. Call before [resyncAll], which advances the baseline. */
+        /**
+         * Bundles reminders that fired while the app couldn't run (device off, force-stopped by an
+         * OEM battery manager, etc.) into one notification, and advances the "already accounted for"
+         * baseline. Runs on boot and on every app launch: process-start [resyncAll] deliberately
+         * does *not* touch the baseline, so a non-reboot force-stop no longer swallows the window.
+         */
         suspend fun notifyMissedReminders(context: Context) {
             val app = context.applicationContext as? TimetyApplication ?: return
             val settings = app.container.settingsRepository
-            val sinceMillis = settings.lastAlarmResyncEpochMilliFlow.first() ?: return
-            val since = Instant.ofEpochMilli(sinceMillis)
             val now = Instant.now()
-            if (!since.isBefore(now)) return
+            val cutoff = now.minus(MISSED_REMINDER_GRACE)
+            val since = settings.lastAlarmResyncEpochMilliFlow.first()?.let(Instant::ofEpochMilli)
+
+            if (since == null) {
+                settings.saveLastAlarmResyncEpochMilli(cutoff.toEpochMilli())
+                return
+            }
+            if (!since.isBefore(cutoff)) return
 
             fun fellInWindow(reminders: List<Instant>) =
-                reminders.any { it.isAfter(since) && !it.isAfter(now) }
+                reminders.any { it.isAfter(since) && it.isBefore(cutoff) }
 
             val missedTitles = linkedSetOf<String>()
             app.container.taskRepository.allTasks.first().forEach { tws ->
@@ -304,9 +318,9 @@ class ReminderScheduler private constructor(private val context: Context) {
                 val reminders = offsets.map { task.dueDate.minus(it.toLong(), ChronoUnit.MINUTES) }
                 if (fellInWindow(reminders)) missedTitles += task.title
             }
-            if (missedTitles.isEmpty()) return
 
-            create(app).notifyMissed(missedTitles.toList())
+            settings.saveLastAlarmResyncEpochMilli(cutoff.toEpochMilli())
+            if (missedTitles.isNotEmpty()) create(app).notifyMissed(missedTitles.toList())
         }
     }
 }

@@ -14,8 +14,8 @@ android {
         minSdk = 26
         targetSdk = 37
         // Must stay above 233, the last Flutter-era versionCode on F-Droid.
-        versionCode = 242
-        versionName = "2.2.0"
+        versionCode = 243
+        versionName = "2.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -65,6 +65,9 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.findByName("release")
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
     compileOptions {
