@@ -371,6 +371,8 @@
     <string name="settingsLabelAutoDndLiftBreaks">Lift During Breaks</string>
     <string name="settingsLabelAutoDndLiftBreaksSubtitle">Restore notifications while resting between phases</string>
     <string name="settingsLabelAutoDndSubtitle">Silences notifications automatically during focus sessions</string>
+    <string name="settingsLabelBackgroundActivity">Background activity</string>
+    <string name="settingsLabelBackgroundActivitySubtitle">If reminders arrive late, allow Timety to run in the background</string>
     <string name="settingsLabelCommunity">Community &amp; Help</string>
     <string name="settingsLabelCommunitySubtitle">Ask questions and share tips on GitHub</string>
     <string name="settingsLabelDailyMotivation">Daily Motivation Time</string>
@@ -478,9 +480,6 @@
     <string name="notificationHabitListSuffix"> and more</string>
     <string name="notificationHabitReminder">\nDon\'t forget to do %1$s today!</string>
     <string name="notificationHabitTitle">Habit Reminder</string>
-    <string name="missedReminderBodySingle">You missed your reminder for %1$s while your device was off. Tap to view it.</string>
-    <string name="missedRemindersBodyMultiple">You missed %1$d reminders while your device was off. Tap to view them.</string>
-    <string name="missedRemindersTitle">Missed Reminders</string>
     <string name="exactAlarmPromptTitle">Enable reliable reminders</string>
     <string name="exactAlarmPromptBody">Without \"Alarms &amp; reminders\" access, Android may delay quick habit and task reminders by several minutes, especially while your phone is idle. Enable it now for on-time reminders.</string>
     <string name="exactAlarmPromptConfirm">Open Settings</string>

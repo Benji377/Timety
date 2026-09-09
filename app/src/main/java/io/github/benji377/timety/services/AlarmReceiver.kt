@@ -27,8 +27,6 @@ class AlarmReceiver : BroadcastReceiver() {
 
     private suspend fun rescheduleRecurring(app: TimetyApplication) {
         NotificationService(app).ensureChannels()
-        // Surface anything that fired while the device was off before re-arming.
-        ReminderScheduler.notifyMissedReminders(app)
         // Includes task reminders: one-shot exact alarms are wiped by a reboot or app
         // update just like the repeating ones.
         ReminderScheduler.resyncAll(app)

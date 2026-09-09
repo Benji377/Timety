@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Cloud
@@ -672,6 +673,29 @@ fun SettingsScreen(
 
             item { SettingsHeader(stringResource(R.string.settingsSectionNotifications)) }
             item {
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelBackgroundActivity)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.settingsLabelBackgroundActivitySubtitle))
+                    },
+                    leadingContent = {
+                        Icon(Icons.Filled.BatteryAlert, null, tint = WarningAccent)
+                    },
+                    trailingContent = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.OpenInNew,
+                            null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        context.startActivity(
+                            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                        )
+                    }
+                )
                 ListItem(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelDailyMotivation)) },

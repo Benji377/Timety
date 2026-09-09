@@ -3,7 +3,6 @@ package io.github.benji377.timety
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,7 +19,6 @@ import androidx.lifecycle.lifecycleScope
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.data.repository.dataStore
-import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.ui.screens.MainScreen
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TimetyTheme
@@ -67,14 +65,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             settings.appLocaleCodeFlow.collect { code ->
                 if (code != appliedLocaleCode) recreate()
-            }
-        }
-
-        lifecycleScope.launch {
-            try {
-                ReminderScheduler.notifyMissedReminders(applicationContext)
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Failed to check for missed reminders", e)
             }
         }
 

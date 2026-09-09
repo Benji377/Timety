@@ -235,14 +235,6 @@ class NotificationService(private val context: Context) {
         notifySafely(id, reminderNotification(id, channelId, title, body).build())
     }
 
-    /** One grouped notification for task reminders that fired while the app couldn't run (device off, force-stopped, etc.). */
-    internal fun showMissedReminders(title: String, body: String) {
-        notifySafely(
-            MISSED_REMINDERS_ID,
-            reminderNotification(MISSED_REMINDERS_ID, CHANNEL_TASKS, title, body).build()
-        )
-    }
-
     /**
      * Shows the end-of-day checkup with one-tap Bad/OK/Great rating actions handled by
      * [DayRatingReceiver]. The rated day is captured at post time, so a tap after midnight still
@@ -478,7 +470,6 @@ class NotificationService(private val context: Context) {
         // Reserved IDs; kept stable to match legacy app versions so existing scheduled alarms still resolve.
         const val DAILY_MOTIVATION_ID = 9999
         const val END_OF_DAY_CHECKUP_ID = 9998
-        const val MISSED_REMINDERS_ID = 9997
 
         internal const val EXTRA_NOTIFICATION_ID = "notificationId"
         internal const val EXTRA_TITLE = "title"
