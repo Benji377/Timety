@@ -371,6 +371,8 @@
     <string name="settingsLabelAutoDndLiftBreaks">Solleva durante le pause</string>
     <string name="settingsLabelAutoDndLiftBreaksSubtitle">Ripristina le notifiche mentre riposi</string>
     <string name="settingsLabelAutoDndSubtitle">Silenzia automaticamente le notifiche</string>
+    <string name="settingsLabelBackgroundActivity">Background activity</string>
+    <string name="settingsLabelBackgroundActivitySubtitle">If reminders arrive late, allow Timety to run in the background</string>
     <string name="settingsLabelCommunity">Community e Aiuto</string>
     <string name="settingsLabelCommunitySubtitle">Fai domande e condividi consigli su GitHub</string>
     <string name="settingsLabelDailyMotivation">Orario per motivazione giornaliera</string>

@@ -391,6 +391,8 @@
     <string name="settingsLabelAutoDndLiftBreaks">Tò demez ntan la poses</string>
     <string name="settingsLabelAutoDndLiftBreaksSubtitle">Mët inò la nutificazions ntan che te poses</string>
     <string name="settingsLabelAutoDndSubtitle">Silenzea automatich la nutificazions</string>
+    <string name="settingsLabelBackgroundActivity">Background activity</string>
+    <string name="settingsLabelBackgroundActivitySubtitle">If reminders arrive late, allow Timety to run in the background</string>
     <string name="settingsLabelCommunity">Cumunità y Aiut</string>
     <string name="settingsLabelCommunitySubtitle">Fà dumandes y cunsëies sun GitHub</string>
     <string name="settingsLabelDailyMotivation">Ora de mutivazion al di</string>
