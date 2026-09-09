@@ -241,7 +241,8 @@ fun SettingsScreen(
         "English" to "en",
         "Deutsch" to "de",
         "Italiano" to "it",
-        "Ladin" to "lld"
+        "Ladin" to "lld",
+        "Chinese" to "zh-CN"
     )
     val currentLanguageLabel = languageOptions.firstOrNull { it.second == appLocaleCode }?.first
         ?: stringResource(R.string.settingsLabelLanguageSystem)
@@ -410,6 +411,7 @@ fun SettingsScreen(
                             "de" -> "de"
                             "it" -> "it"
                             "lld" -> "lld"
+                            "zh-CN" -> "zh"
                             else -> null
                         }
                         if (flagName != null) {

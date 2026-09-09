@@ -24,7 +24,7 @@ android {
     }
 
     androidResources {
-        localeFilters += setOf("en", "de", "it", "b+lld")
+        localeFilters += setOf("en", "de", "it", "b+lld", "zh-rCN")
     }
 
     // Committed Room schemas as test assets for MigrationTestHelper.

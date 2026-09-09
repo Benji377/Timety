@@ -94,7 +94,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val locationApiEndpointFlow: Flow<String> =
         dataStore.data.map { it[LOCATION_API_ENDPOINT] ?: DEFAULT_LOCATION_API_ENDPOINT }
 
-    // Per-app locale: "system" (follow OS) or one of "en"/"de"/"it"/"lld".
+    // Per-app locale: "system" (follow OS) or one of "en"/"de"/"it"/"lld"/"zh-CN".
     val appLocaleCodeFlow: Flow<String> = dataStore.data.map { it[APP_LOCALE_CODE] ?: "system" }
 
     val keepScreenOnDuringFocusFlow: Flow<Boolean> =
