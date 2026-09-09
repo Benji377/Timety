@@ -59,6 +59,11 @@ Choose your preferred way to stay productive.
       alt="Get it on F-Droid"
       height="50">
   </a>
+  <a href="#blank">
+    <img src="assets/badges/badge_google.png" 
+      alt="Get it on Google Play" 
+      height="50">
+  </a>
   <a href="https://github.com/Benji377/Timety/releases/latest">
     <img src="assets/badges/badge_github.png"
       alt="Get it on GitHub"
