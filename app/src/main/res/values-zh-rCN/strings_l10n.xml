@@ -366,6 +366,8 @@
     <string name="settingsLabelAutoDndLiftBreaks">休息期间解除</string>
     <string name="settingsLabelAutoDndLiftBreaksSubtitle">在休息时恢复通知</string>
     <string name="settingsLabelAutoDndSubtitle">专注期间自动静音通知</string>
+    <string name="settingsLabelBackgroundActivity">Background activity</string>
+    <string name="settingsLabelBackgroundActivitySubtitle">If reminders arrive late, allow Timety to run in the background</string>
     <string name="settingsLabelCommunity">社区 &amp;与帮助</string>
     <string name="settingsLabelCommunitySubtitle">在 GitHub 上提问与分享技巧</string>
     <string name="settingsLabelDailyMotivation">每日励志时间</string>
