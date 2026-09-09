@@ -107,6 +107,12 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">轻触某日，即可查看该日所有专注时段</string>
     <string name="focusStatsSectionClockTitle">每日专注节奏</string>
+    <string name="focusSessionDeleteContent">This removes the session for good and takes back the XP it earned.</string>
+    <string name="focusSessionDeleteTitle">Delete Session?</string>
+    <string name="focusSessionDeletedSnackbar">Session deleted</string>
+    <string name="focusSessionEditTitle">Edit Session</string>
+    <string name="focusSessionEditorTarget">Attributed to</string>
+    <string name="focusSessionUpdatedSnackbar">Session updated</string>
     <string name="focusStatsSectionDistractionsEmpty">此日无分心记录</string>
     <string name="focusStatsSectionDistractionsSubtitle">所选日期，分心记录由新至旧</string>
     <string name="focusStatsSectionDistractionsTitle">分心</string>
@@ -239,6 +245,8 @@
     <string name="habitsSheetEmpty">暂无习惯</string>
     <string name="taskDeleteContent">确定要删除此任务吗？</string>
     <string name="taskDeleteTitle">删除任务</string>
+    <string name="taskFocusLogSnackbar">Focus session attached</string>
+    <string name="taskFocusLogTitle">Log Focus Time</string>
     <string name="taskDetailsLabelCategory">分类</string>
     <string name="taskDetailsLabelCategoryAddNew">添加新分类</string>
     <string name="taskDetailsLabelCategoryEmpty">无</string>
@@ -376,6 +384,8 @@
     <string name="settingsLabelFeedbackSubtitle">报告问题或建议新功能</string>
     <string name="settingsLabelFocusAutocomplete">自动完成关联的任务或习惯</string>
     <string name="settingsLabelFocusAutocompleteSubtitle">专注计时结束时，自动标记所选任务或习惯为已完成</string>
+    <string name="settingsLabelFocusAskOnTaskComplete">Ask to log focus time</string>
+    <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Offers to attach a focus session when you check off a task</string>
     <string name="settingsLabelFocusGoal">每日专注目标</string>
     <string name="settingsLabelFocusNodeTime">单段专注上限</string>
     <string name="settingsLabelFocusNodeTimeSubtitle">单个专注阶段的最长时长</string>
@@ -463,6 +473,13 @@
     <string name="notificationHabitListSuffix"> 等更多</string>
     <string name="notificationHabitReminder">\n今天别忘了做 %1$s！</string>
     <string name="notificationHabitTitle">习惯提醒</string>
+    <string name="missedReminderBodySingle">You missed your reminder for %1$s while your device was off. Tap to view it.</string>
+    <string name="missedRemindersBodyMultiple">You missed %1$d reminders while your device was off. Tap to view them.</string>
+    <string name="missedRemindersTitle">Missed Reminders</string>
+    <string name="exactAlarmPromptTitle">Enable reliable reminders</string>
+    <string name="exactAlarmPromptBody">Without \"Alarms &amp; reminders\" access, Android may delay quick habit and task reminders by several minutes, especially while your phone is idle. Enable it now for on-time reminders.</string>
+    <string name="exactAlarmPromptConfirm">Open Settings</string>
+    <string name="exactAlarmPromptDismiss">Not now</string>
     <string name="notificationQuote1">征服你的一天！</string>
     <string name="notificationQuote2">积跬步以至千里。继续前行！</string>
     <string name="notificationQuote3">今日有何安排？让我们行动起来。</string>
