@@ -59,7 +59,7 @@ Choose your preferred way to stay productive.
       alt="Get it on F-Droid"
       height="50">
   </a>
-  <a href="#blank">
+  <a href="https://play.google.com/store/apps/details?id=io.github.benji377.timety">
     <img src="assets/badges/badge_google.png" 
       alt="Get it on Google Play" 
       height="50">
