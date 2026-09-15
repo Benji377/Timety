@@ -31,7 +31,7 @@ jobs:
         with:
           # Temurin is preinstalled on ubuntu-latest, so setup resolves it instead of downloading.
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '17.0.20+101'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -69,7 +69,7 @@ jobs:
         uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '17.0.20+101'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
