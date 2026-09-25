@@ -30,15 +30,6 @@ enum class TaskSortOption {
     CATEGORY
 }
 
-/** Predefined offsets (or a custom one) for scheduling a task reminder relative to its due date. */
-enum class ReminderOption {
-    ON_TIME,
-    MINUTES_30_BEFORE,
-    HOUR_1_BEFORE,
-    DAY_1_BEFORE,
-    CUSTOM
-}
-
 /**
  * A user-defined category used to group tasks, identified by a unique name and display color.
  * Tasks reference categories by [name] ([TaskEntity.category]), not by id, so renaming a category

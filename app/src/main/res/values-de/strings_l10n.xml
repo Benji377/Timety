@@ -265,7 +265,6 @@
     <string name="taskDetailsLocationDetails">Details zum Ort</string>
     <string name="taskDetailsLocationNoInfo">Keine Ortsinformationen für diesen Standort gefunden</string>
     <string name="taskDetailsLocationOffline">Keine Internetverbindung - Standortsuche und Ortsinformationen sind nicht verfügbar</string>
-    <string name="taskDetailsLabelReminderSet">Erinnerung einstellen</string>
     <string name="taskDetailsLabelReminderTooEarly">Die benutzerdefinierte Erinnerung muss vor dem Fälligkeitsdatum liegen</string>
     <string name="taskDetailsLabelSubtaskHint">Teilaufgaben hinzufügen…</string>
     <string name="taskDetailsLabelTitle">Aufgabentitel</string>
@@ -279,7 +278,6 @@
     <string name="taskDetailsSectionLocation">Ort</string>
     <string name="taskDetailsSectionPriorityAndEffort">Priorität &amp; Aufwand</string>
     <string name="taskDetailsSectionScheduling">Zeitplanung</string>
-    <string name="taskDetailsSnackbarReminderNoDue">Bitte lege zuerst ein Fälligkeitsdatum fest</string>
     <string name="taskDetailsSnackbarTitleRequired">Titel ist erforderlich!</string>
     <string name="taskDetailsTitleDetails">Aufgabendetails</string>
     <string name="taskDetailsTitleEdit">Aufgabe bearbeiten</string>

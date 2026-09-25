@@ -265,7 +265,6 @@
     <string name="taskDetailsLocationDetails">Dettagli del luogo</string>
     <string name="taskDetailsLocationNoInfo">Nessuna informazione sul luogo trovata per questa posizione</string>
     <string name="taskDetailsLocationOffline">Nessuna connessione a internet: la ricerca della posizione e i dettagli del luogo non sono disponibili</string>
-    <string name="taskDetailsLabelReminderSet">Imposta promemoria</string>
     <string name="taskDetailsLabelReminderTooEarly">Il promemoria personalizzato deve essere precedente alla data di scadenza</string>
     <string name="taskDetailsLabelSubtaskHint">Aggiungi sotto-attività…</string>
     <string name="taskDetailsLabelTitle">Titolo attività</string>
@@ -279,7 +278,6 @@
     <string name="taskDetailsSectionLocation">Luogo</string>
     <string name="taskDetailsSectionPriorityAndEffort">Priorità e sforzo</string>
     <string name="taskDetailsSectionScheduling">Pianificazione</string>
-    <string name="taskDetailsSnackbarReminderNoDue">Imposta prima una data di scadenza</string>
     <string name="taskDetailsSnackbarTitleRequired">Il titolo è obbligatorio!</string>
     <string name="taskDetailsTitleDetails">Dettagli attività</string>
     <string name="taskDetailsTitleEdit">Modifica attività</string>
