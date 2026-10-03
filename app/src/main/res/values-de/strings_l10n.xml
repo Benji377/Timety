@@ -371,6 +371,8 @@
     <string name="settingsLabelAutoDndLiftBreaks">Während Pausen aufheben</string>
     <string name="settingsLabelAutoDndLiftBreaksSubtitle">Benachrichtigungen wiederherstellen, während du ruhst</string>
     <string name="settingsLabelAutoDndSubtitle">Schaltet Benachrichtigungen während Fokus-Sitzungen stumm</string>
+    <string name="settingsLabelBackgroundActivity">Background activity</string>
+    <string name="settingsLabelBackgroundActivitySubtitle">If reminders arrive late, allow Timety to run in the background</string>
     <string name="settingsLabelCommunity">Community &amp; Hilfe</string>
     <string name="settingsLabelCommunitySubtitle">Stelle Fragen und teile Tipps auf GitHub</string>
     <string name="settingsLabelDailyMotivation">Zeit für tägliche Motivation</string>
