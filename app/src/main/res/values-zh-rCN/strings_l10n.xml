@@ -619,6 +619,20 @@
     <string name="recurringTaskMonthlyOnDay">每月 %1$d 日</string>
     <string name="recurringTaskMonthlyOnNth">第 %1$s 个 %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">提前 %1$d 分钟</string>
+    <string name="reminderCustomInPast">A custom reminder must be in the future</string>
+    <string name="reminderFieldAdd">Add reminder</string>
+    <plurals name="reminderFieldCount">
+        <item quantity="other">%d reminders</item>
+    </plurals>
+    <string name="reminderFieldLabel">Reminders</string>
+    <string name="reminderShifted">Reminders adjusted to the new due date</string>
+    <string name="reminderSheetDue">Due %1$s</string>
+    <string name="reminderSheetEveryOccurrence">Applies to every occurrence</string>
+    <string name="reminderSheetHint">Tap a reminder to add it. Tap it again to remove it.</string>
+    <string name="reminderSheetNoDue">This task has no due date yet</string>
+    <string name="reminderWarnLimit">You can add up to %1$d reminders.</string>
+    <string name="reminderWarnNoDue">Set a due date to use these options. Custom times still work.</string>
+    <string name="reminderWarnPast">Options that would already be in the past are unavailable.</string>
     <string name="recurringTaskCompleteNow">立即完成</string>
     <string name="recurringTaskHistoryTitle">历史记录</string>
     <string name="recurringTaskHistoryEmpty">暂无完成记录。</string>
