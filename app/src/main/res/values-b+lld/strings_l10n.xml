@@ -222,6 +222,8 @@
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Cie mutivazions es\'a per chësta abitudin?</string>
     <string name="habitDetailLabelReminder">Ora dl lezit</string>
+    <string name="habitDetailReminderAddTime">Add time</string>
+    <string name="habitDetailReminderSheetHint">Reminders are skipped on days this habit is already done or not due.</string>
     <string name="habitDetailLabelColor">Culëur</string>
     <string name="habitDetailLabelColorPicker">Chir ora n culëur</string>
     <string name="habitDetailLabelStack">Rënga de abitudins</string>
@@ -490,7 +492,19 @@
     <string name="notificationChannelMotivationName">Mutivazion al Di</string>
     <string name="notificationChannelTasksDesc">Notifiches per ti ncëries abinedes</string>
     <string name="notificationChannelTasksName">Lezic ncëries</string>
-    <string name="notificationEveningBody">Es\'a finà duta la abitudins ncuei? Clica per les registré!</string>
+    <string name="notificationEveningAllDone">Everything is done. Great job today!</string>
+    <string name="notificationEveningBody">Take a moment to wrap up your day.</string>
+    <string name="notificationEveningLineHabit">Habit: %1$s</string>
+    <string name="notificationEveningLineTask">Overdue: %1$s</string>
+    <string name="notificationEveningMore">+%1$d more</string>
+    <plurals name="nNotificationEveningOpen">
+        <item quantity="zero">%d things still open today</item>
+        <item quantity="one">%d thing still open today</item>
+        <item quantity="two">%d things still open today</item>
+        <item quantity="few">%d things still open today</item>
+        <item quantity="many">%d things still open today</item>
+        <item quantity="other">%d things still open today</item>
+    </plurals>
     <string name="notificationEveningTitle">Cuntrol dla Sëira</string>
     <string name="notificationGoodMorning">Bon di!</string>
     <string name="notificationHabitBody">Tëmp de: %1$s!</string>

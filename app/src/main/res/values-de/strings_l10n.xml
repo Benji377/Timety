@@ -206,6 +206,8 @@
     <string name="habitDetailLabelNotes">Notizen</string>
     <string name="habitDetailLabelNotesHint">Warum baust du diese Gewohnheit auf?</string>
     <string name="habitDetailLabelReminder">Erinnerungszeit</string>
+    <string name="habitDetailReminderAddTime">Add time</string>
+    <string name="habitDetailReminderSheetHint">Reminders are skipped on days this habit is already done or not due.</string>
     <string name="habitDetailLabelColor">Farbe</string>
     <string name="habitDetailLabelColorPicker">Wähle eine Farbe</string>
     <string name="habitDetailLabelStack">Gewohnheits-Stapel</string>
@@ -470,7 +472,15 @@
     <string name="notificationChannelMotivationName">Tägliche Motivation</string>
     <string name="notificationChannelTasksDesc">Benachrichtigungen für deine geplanten Aufgaben</string>
     <string name="notificationChannelTasksName">Aufgaben-Erinnerungen</string>
-    <string name="notificationEveningBody">Hast du heute all deine Gewohnheiten erledigt? Tippe hier, um sie einzutragen!</string>
+    <string name="notificationEveningAllDone">Everything is done. Great job today!</string>
+    <string name="notificationEveningBody">Take a moment to wrap up your day.</string>
+    <string name="notificationEveningLineHabit">Habit: %1$s</string>
+    <string name="notificationEveningLineTask">Overdue: %1$s</string>
+    <string name="notificationEveningMore">+%1$d more</string>
+    <plurals name="nNotificationEveningOpen">
+        <item quantity="one">%d thing still open today</item>
+        <item quantity="other">%d things still open today</item>
+    </plurals>
     <string name="notificationEveningTitle">Abendlicher Check-in</string>
     <string name="notificationGoodMorning">Guten Morgen!</string>
     <string name="notificationHabitBody">Zeit für: %1$s!</string>
