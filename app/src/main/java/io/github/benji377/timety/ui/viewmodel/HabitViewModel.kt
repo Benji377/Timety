@@ -89,6 +89,11 @@ class HabitViewModel(
             .scheduleHabitReminder(habit)
     }
 
+    private suspend fun dismissHabitNotifications(habitId: String) {
+        ReminderScheduler.create(application)
+            .dismissHabitNotifications(habitId)
+    }
+
     private suspend fun cancelHabitReminder(habitId: String) {
         ReminderScheduler.create(application)
             .cancelHabitReminder(habitId)
@@ -153,6 +158,7 @@ class HabitViewModel(
                         HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
                     )
                     userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
+                    dismissHabitNotifications(habitId)
                 }
             }
             updateWidgets()
@@ -174,6 +180,7 @@ class HabitViewModel(
                     HabitCompletionEntity(habitId = habitId, completionDate = date)
                 )
                 userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
+                if (targetDay == LocalDate.now()) dismissHabitNotifications(habitId)
             }
             updateWidgets()
         }

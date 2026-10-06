@@ -54,7 +54,6 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
@@ -358,12 +357,14 @@ private fun HabitTileWrapper(
     val completionsThisWeek = HabitUtils.getCompletionsThisWeek(hwc, includeToday = true)
 
     var subtitleText = HabitUtils.buildHabitSubtitle(habit, completionsThisWeek)
-    if (habit.targetTimeMinutes != null) {
-        val time = LocalTime.of(habit.targetTimeMinutes / 60, habit.targetTimeMinutes % 60)
+    val reminderTimes = HabitUtils.parseReminderTimes(habit.reminderTimes)
+    if (reminderTimes.isNotEmpty()) {
         val pattern = if (use24HourFormat) "HH:mm" else "hh:mm a"
         val locale = LocalLocale.current.platformLocale
-        val formatted = time.atDate(LocalDate.now()).atZone(ZoneId.systemDefault())
-            .format(DateTimeFormatter.ofPattern(pattern, locale))
+        val formatter = DateTimeFormatter.ofPattern(pattern, locale)
+        val formatted = reminderTimes.joinToString(", ") {
+            LocalTime.of(it / 60, it % 60).format(formatter)
+        }
         subtitleText += " | $formatted"
     }
 

@@ -20,6 +20,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.habit.QuickHabitScheduling
 import java.time.DayOfWeek
 import java.time.Instant
@@ -111,41 +112,61 @@ class NotificationService(private val context: Context) {
     // Habits.
 
 
-    /** Schedules a repeating reminder for [habitId]: daily if [targetWeekdays] is null or empty, otherwise once per selected weekday. */
+    /**
+     * Schedules a repeating reminder for [habitId] at each of [times] (minutes from midnight):
+     * daily if [targetWeekdays] is null or empty, otherwise once per selected weekday.
+     */
     fun scheduleHabitReminder(
         habitId: String,
         title: String,
         body: String,
-        hour: Int,
-        minute: Int,
+        times: List<Int>,
         targetWeekdays: List<Int>? = null,
     ) {
         cancelHabitReminder(habitId)
         val weekdays = targetWeekdays?.toSortedSet()?.toList()
         val reminderDays: List<Int?> = if (weekdays.isNullOrEmpty()) listOf(null) else weekdays
 
-        for (weekday in reminderDays) {
-            val id = habitReminderId(habitId, weekday)
-            val triggerAt = nextReminderMillis(hour, minute, weekday)
-            val intent = reminderIntent(
-                notificationId = id,
-                title = title,
-                body = body,
-                channelId = CHANNEL_HABITS,
-                repeat = if (weekday == null) Repeat.DAILY else Repeat.WEEKLY,
-                habitId = habitId,
-                weekday = weekday ?: -1,
-                hour = hour,
-                minute = minute,
-            )
-            scheduleExact(triggerAt, id, intent)
+        times.take(HabitUtils.MAX_REMINDER_TIMES).forEachIndexed { slot, totalMinutes ->
+            val hour = (totalMinutes / 60).coerceIn(0, 23)
+            val minute = (totalMinutes % 60).coerceIn(0, 59)
+            for (weekday in reminderDays) {
+                val id = habitReminderId(habitId, weekday, slot)
+                val triggerAt = nextReminderMillis(hour, minute, weekday)
+                val intent = reminderIntent(
+                    notificationId = id,
+                    title = title,
+                    body = body,
+                    channelId = CHANNEL_HABITS,
+                    repeat = if (weekday == null) Repeat.DAILY else Repeat.WEEKLY,
+                    habitId = habitId,
+                    weekday = weekday ?: -1,
+                    hour = hour,
+                    minute = minute,
+                )
+                scheduleExact(triggerAt, id, intent)
+            }
         }
     }
 
 
     fun cancelHabitReminder(habitId: String) {
-        cancelAlarmAndNotification(habitReminderId(habitId, null))
-        for (weekday in 1..7) cancelAlarmAndNotification(habitReminderId(habitId, weekday))
+        for (slot in 0 until HabitUtils.MAX_REMINDER_TIMES) {
+            cancelAlarmAndNotification(habitReminderId(habitId, null, slot))
+            for (weekday in 1..7) {
+                cancelAlarmAndNotification(habitReminderId(habitId, weekday, slot))
+            }
+        }
+    }
+
+    /** Clears any of [habitId]'s reminders that are already showing, leaving the alarms armed. */
+    fun dismissHabitNotifications(habitId: String) {
+        for (slot in 0 until HabitUtils.MAX_REMINDER_TIMES) {
+            notificationManager.cancel(habitReminderId(habitId, null, slot))
+            for (weekday in 1..7) {
+                notificationManager.cancel(habitReminderId(habitId, weekday, slot))
+            }
+        }
     }
 
     // Quick habits (interval reminders).
@@ -245,9 +266,18 @@ class NotificationService(private val context: Context) {
         title: String,
         body: String,
         localized: Context,
+        lines: List<String> = emptyList(),
+        overflowText: String? = null,
     ) {
         val dayKey = AppDateUtils.dayKey(LocalDate.now())
         val builder = reminderNotification(id, CHANNEL_EVENING, title, body)
+        // Collapsed it shows [body] (the count); expanded it lists the open items.
+        if (lines.isNotEmpty()) {
+            val inbox = NotificationCompat.InboxStyle().setBigContentTitle(title)
+            lines.forEach { inbox.addLine(it) }
+            overflowText?.let { inbox.setSummaryText(it) }
+            builder.setStyle(inbox)
+        }
         DayRating.entries.forEach { rating ->
             val actionIntent = Intent(context, DayRatingReceiver::class.java).apply {
                 putExtra(DayRatingReceiver.EXTRA_DAY_KEY, dayKey)
@@ -486,10 +516,12 @@ class NotificationService(private val context: Context) {
         internal const val EXTRA_WEEKDAYS = "allowedWeekdays"
 
 
-        /** Deterministic notification/request-code ID for a habit's reminder, optionally scoped to one weekday. */
-        fun habitReminderId(habitId: String, weekday: Int?): Int {
+        /** Deterministic notification/request-code ID for a habit reminder, scoped to a weekday and to the [slot] of the reminder time. */
+        fun habitReminderId(habitId: String, weekday: Int?, slot: Int = 0): Int {
             val suffix = if (weekday == null) "daily" else "weekday_$weekday"
-            return "habit_time_${habitId}_$suffix".hashCode()
+            // Slot 0 keeps the pre-multi-reminder ID, so alarms armed by older versions still cancel.
+            val slotSuffix = if (slot == 0) "" else "_slot_$slot"
+            return "habit_time_${habitId}_$suffix$slotSuffix".hashCode()
         }
 
         /**

@@ -206,7 +206,6 @@
     <string name="habitDetailLabelNotes">Note</string>
     <string name="habitDetailLabelNotesHint">Perché stai sviluppando questa abitudine?</string>
     <string name="habitDetailLabelReminder">Orario promemoria</string>
-    <string name="habitDetailLabelReminderNoTime">Nessun orario specifico</string>
     <string name="habitDetailLabelColor">Colore</string>
     <string name="habitDetailLabelColorPicker">Scegli un colore</string>
     <string name="habitDetailLabelStack">Sequenza di abitudini</string>

@@ -8,7 +8,10 @@ import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.LocaleHelper
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.reminder.EveningSummary
+import io.github.benji377.timety.util.reminder.EveningSummaryBuilder
 import kotlinx.coroutines.flow.first
+import java.time.Instant
 
 
 /** Handles a fired reminder alarm by showing its notification and re-arming it if it repeats. */
@@ -36,12 +39,55 @@ class ReminderReceiver : BroadcastReceiver() {
 
         if (channelId == NotificationService.CHANNEL_EVENING) {
             launchAsync {
-                notificationService.showEndOfDayNotification(
-                    notificationId,
-                    title,
-                    body,
-                    localized = localizedContext(appContext),
-                )
+                val localized = localizedContext(appContext)
+                val summary = eveningSummary(appContext)
+                when {
+                    summary == null -> notificationService.showEndOfDayNotification(
+                        notificationId, title, body, localized,
+                    )
+
+                    summary.isAllDone -> notificationService.showEndOfDayNotification(
+                        notificationId,
+                        title,
+                        localized.getString(R.string.notificationEveningAllDone),
+                        localized,
+                    )
+
+                    else -> {
+                        val preview = summary.preview(EVENING_MAX_LINES)
+                        notificationService.showEndOfDayNotification(
+                            notificationId,
+                            title,
+                            localized.resources.getQuantityString(
+                                R.plurals.nNotificationEveningOpen, summary.total, summary.total,
+                            ),
+                            localized,
+                            lines = preview.items.map {
+                                localized.getString(
+                                    if (it.isTask) R.string.notificationEveningLineTask
+                                    else R.string.notificationEveningLineHabit,
+                                    it.name,
+                                )
+                            },
+                            overflowText = preview.hiddenCount.takeIf { it > 0 }?.let {
+                                localized.getString(R.string.notificationEveningMore, it)
+                            },
+                        )
+                    }
+                }
+                notificationService.rescheduleIfRepeating(intent)
+            }
+            return
+        }
+
+        val habitId = intent.getStringExtra(NotificationService.EXTRA_HABIT_ID)
+        if (channelId == NotificationService.CHANNEL_HABITS && habitId != null) {
+            launchAsync {
+                // Null means the habit was deleted, so its alarm chain ends here.
+                val needsReminder = habitNeedsReminder(appContext, habitId) ?: return@launchAsync
+                if (needsReminder) {
+                    notificationService.showNotification(notificationId, channelId, title, body)
+                }
                 notificationService.rescheduleIfRepeating(intent)
             }
             return
@@ -49,6 +95,33 @@ class ReminderReceiver : BroadcastReceiver() {
 
         notificationService.showNotification(notificationId, channelId, title, body)
         notificationService.rescheduleIfRepeating(intent)
+    }
+
+
+    /** Whether [habitId] still has something to do today, or null if the habit no longer exists. */
+    private suspend fun habitNeedsReminder(context: Context, habitId: String): Boolean? {
+        val app = context.applicationContext as? TimetyApplication ?: return true
+        val repository = app.container.habitRepository
+        val habit = repository.getHabitById(habitId) ?: return null
+        val completions = repository.getCompletionsForHabit(habitId).first()
+        return HabitUtils.needsReminderToday(HabitWithCompletions(habit, completions))
+    }
+
+
+    /** What is still open today, or null when the app container isn't available. */
+    private suspend fun eveningSummary(context: Context): EveningSummary? {
+        val app = context.applicationContext as? TimetyApplication ?: return null
+        val container = app.container
+        val completionsByHabit = container.habitRepository.allCompletions.first()
+            .groupBy { it.habitId }
+        return EveningSummaryBuilder.build(
+            habits = container.habitRepository.allHabits.first()
+                .map { HabitWithCompletions(it, completionsByHabit[it.id].orEmpty()) },
+            tasks = container.taskRepository.allTasks.first().map { it.task },
+            recurringTasks = container.recurringTaskRepository.allRecurringTasks.first()
+                .map { it.task },
+            now = Instant.now(),
+        )
     }
 
 
@@ -93,5 +166,10 @@ class ReminderReceiver : BroadcastReceiver() {
             habitList += context.getString(R.string.notificationHabitListSuffix)
         }
         return context.getString(R.string.notificationHabitReminder, habitList)
+    }
+
+    private companion object {
+        /** InboxStyle shows at most five lines; the rest collapse into a "+N more" footer. */
+        const val EVENING_MAX_LINES = 5
     }
 }

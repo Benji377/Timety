@@ -118,6 +118,7 @@ class ToggleHabitCompletionAction : ActionCallback {
                     HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
                 )
                 container.userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
+                ReminderScheduler.create(context).dismissHabitNotifications(habitId)
             }
         }
         HabitWidget().updateAll(context)

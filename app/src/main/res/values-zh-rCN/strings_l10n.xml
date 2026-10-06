@@ -202,7 +202,6 @@
     <string name="habitDetailLabelNotes">备注</string>
     <string name="habitDetailLabelNotesHint">建立这个习惯的原因？</string>
     <string name="habitDetailLabelReminder">提醒时间</string>
-    <string name="habitDetailLabelReminderNoTime">未指定时间</string>
     <string name="habitDetailLabelColor">颜色</string>
     <string name="habitDetailLabelColorPicker">选择颜色</string>
     <string name="habitDetailLabelStack">习惯堆叠</string>

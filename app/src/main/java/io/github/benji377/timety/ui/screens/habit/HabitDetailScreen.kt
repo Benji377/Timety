@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +51,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.ui.components.task.ReminderEntry
+import io.github.benji377.timety.ui.components.task.ReminderField
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
@@ -128,7 +129,9 @@ fun HabitDetailScreen(
     var selectedColor by remember(existingHabit) {
         mutableStateOf(existingHabit?.colorValue?.let { Color(it) } ?: HabitColor)
     }
-    var targetTimeMinutes by remember(existingHabit) { mutableStateOf(existingHabit?.targetTimeMinutes) }
+    var reminderTimes by remember(existingHabit) {
+        mutableStateOf(HabitUtils.parseReminderTimes(existingHabit?.reminderTimes))
+    }
 
     var showIconPicker by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
@@ -194,7 +197,7 @@ fun HabitDetailScreen(
             targetWeekdays = if (frequency == HabitFrequency.WEEKLY_EXACT) HabitUtils.serializeWeekdays(
                 selectedWeekdays
             ) else null,
-            targetTimeMinutes = targetTimeMinutes,
+            reminderTimes = HabitUtils.serializeReminderTimes(reminderTimes),
             createdAt = existingHabit?.createdAt ?: Instant.now(),
             colorValue = selectedColor.toArgb(),
             notes = notes.trim().ifEmpty { null },
@@ -483,33 +486,36 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // Time reminder.
+            // Time reminders.
             item {
-                Text(
-                    stringResource(R.string.habitDetailLabelReminder),
-                    fontWeight = AppTheme.fwBold
-                )
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                val timeLabel = targetTimeMinutes?.let {
-                    val time = LocalTime.of(it / 60, it % 60)
-                    AppDateFormatUtils.formatTime(
-                        time,
-                        LocalDateFormatSettings.current.use24HourFormat
-                    )
-                } ?: stringResource(R.string.habitDetailLabelReminderNoTime)
-
-                Box(modifier = Modifier.clickable(enabled = isEditing) { showTimePicker = true }) {
-                    OutlinedTextField(
-                        value = timeLabel,
-                        onValueChange = {},
-                        readOnly = true,
-                        enabled = false,
-                        leadingIcon = { Icon(Icons.Filled.NotificationsActive, null) },
-                        trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = detailFieldColors(isEditing),
+                val use24Hour = LocalDateFormatSettings.current.use24HourFormat
+                val entries = reminderTimes.map { minutes ->
+                    ReminderEntry(
+                        key = minutes.toLong(),
+                        preset = null,
+                        label = AppDateFormatUtils.formatTime(
+                            LocalTime.of(minutes / 60, minutes % 60),
+                            use24Hour,
+                        ),
                     )
                 }
+                val atLimit = reminderTimes.size >= HabitUtils.MAX_REMINDER_TIMES
+                ReminderField(
+                    entries = entries,
+                    isEditing = isEditing,
+                    sheetSubtitle = name,
+                    warning = if (atLimit) {
+                        stringResource(R.string.reminderWarnLimit, HabitUtils.MAX_REMINDER_TIMES)
+                    } else null,
+                    canAddPreset = { false },
+                    onTogglePreset = {},
+                    onRemoveCustom = { entry -> reminderTimes = reminderTimes - entry.key.toInt() },
+                    onAddCustom = { showTimePicker = true },
+                    customEnabled = !atLimit,
+                    presets = emptyList(),
+                    customLabel = stringResource(R.string.habitDetailReminderAddTime),
+                    hint = stringResource(R.string.habitDetailReminderSheetHint),
+                )
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
             }
         }
@@ -542,13 +548,13 @@ fun HabitDetailScreen(
 
         // Time picker dialog.
         if (showTimePicker) {
-            val initial = targetTimeMinutes
             NeoTimePickerDialog(
-                initialHour = initial?.let { it / 60 } ?: 8,
-                initialMinute = initial?.let { it % 60 } ?: 0,
+                initialHour = 8,
+                initialMinute = 0,
                 title = { Text(stringResource(R.string.habitDetailLabelReminder)) },
                 onConfirm = { hour, minute ->
-                    targetTimeMinutes = hour * 60 + minute
+                    reminderTimes = (reminderTimes + (hour * 60 + minute)).distinct().sorted()
+                        .take(HabitUtils.MAX_REMINDER_TIMES)
                     showTimePicker = false
                 },
                 onDismiss = { showTimePicker = false },

@@ -9,6 +9,7 @@ import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.habit.QuickHabitScheduling.MINUTES_PER_DAY
 import io.github.benji377.timety.util.habit.HabitUtils.parseWeekdays
 import java.time.LocalDate
 import java.time.ZoneId
@@ -31,6 +32,30 @@ object HabitUtils {
     /** Serializes weekday numbers into the `"[1,3,5]"` format read by [parseWeekdays]. */
     fun serializeWeekdays(days: Set<Int>): String =
         days.sorted().joinToString(separator = ",", prefix = "[", postfix = "]")
+
+
+    /** The most reminder times a single habit can have. */
+    const val MAX_REMINDER_TIMES = 5
+
+
+    /** Parses a stored `"[480,1200]"` reminder list into sorted, distinct minutes from midnight. */
+    fun parseReminderTimes(raw: String?): List<Int> {
+        if (raw.isNullOrBlank()) return emptyList()
+        return raw.removePrefix("[").removeSuffix("]")
+            .split(",")
+            .mapNotNull { it.trim().toIntOrNull() }
+            .filter { it in 0 until MINUTES_PER_DAY }
+            .distinct()
+            .sorted()
+            .take(MAX_REMINDER_TIMES)
+    }
+
+
+    /** Serializes reminder times into the format read by [parseReminderTimes]; null when empty. */
+    fun serializeReminderTimes(times: Collection<Int>): String? =
+        times.takeIf { it.isNotEmpty() }
+            ?.sorted()
+            ?.joinToString(separator = ",", prefix = "[", postfix = "]")
 
 
     fun isCompletedOn(hwc: HabitWithCompletions, date: LocalDate): Boolean =
@@ -71,6 +96,15 @@ object HabitUtils {
             ) < (habit.targetDaysPerWeek ?: 1)
         }
     }
+
+
+    /**
+     * Whether a reminder for [hwc] should fire today: the habit is on today's list and not yet
+     * done today. A flexible habit whose weekly target is met drops off the list, so it stops
+     * reminding without a separate check.
+     */
+    fun needsReminderToday(hwc: HabitWithCompletions): Boolean =
+        isHabitDueToday(hwc) && !isCompletedOn(hwc, LocalDate.now())
 
 
     /** Whether a flexible-frequency habit already met its weekly target before today. */

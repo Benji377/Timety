@@ -206,7 +206,6 @@
     <string name="habitDetailLabelNotes">Notizen</string>
     <string name="habitDetailLabelNotesHint">Warum baust du diese Gewohnheit auf?</string>
     <string name="habitDetailLabelReminder">Erinnerungszeit</string>
-    <string name="habitDetailLabelReminderNoTime">Keine bestimmte Zeit</string>
     <string name="habitDetailLabelColor">Farbe</string>
     <string name="habitDetailLabelColorPicker">Wähle eine Farbe</string>
     <string name="habitDetailLabelStack">Gewohnheits-Stapel</string>

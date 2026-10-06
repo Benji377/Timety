@@ -163,8 +163,11 @@ class ReminderScheduler private constructor(private val context: Context) {
 
 
     fun scheduleHabitReminder(habit: HabitEntity) {
-        notificationService.cancelHabitReminder(habit.id)
-        val totalMinutes = habit.targetTimeMinutes ?: return
+        val times = HabitUtils.parseReminderTimes(habit.reminderTimes)
+        if (times.isEmpty()) {
+            notificationService.cancelHabitReminder(habit.id)
+            return
+        }
         val weekdays = if (habit.frequency == HabitFrequency.WEEKLY_EXACT) {
             HabitUtils.parseWeekdays(habit.targetWeekdays).toList()
         } else {
@@ -174,11 +177,14 @@ class ReminderScheduler private constructor(private val context: Context) {
             habitId = habit.id,
             title = context.getString(R.string.notificationHabitTitle),
             body = context.getString(R.string.notificationHabitBody, habit.name),
-            hour = (totalMinutes / 60).coerceIn(0, 23),
-            minute = (totalMinutes % 60).coerceIn(0, 59),
+            times = times,
             targetWeekdays = weekdays,
         )
     }
+
+    /** Clears a habit's already-showing reminder notifications once it is done; the alarms stay armed. */
+    fun dismissHabitNotifications(habitId: String) =
+        notificationService.dismissHabitNotifications(habitId)
 
     fun cancelHabitReminder(habitId: String) = notificationService.cancelHabitReminder(habitId)
 

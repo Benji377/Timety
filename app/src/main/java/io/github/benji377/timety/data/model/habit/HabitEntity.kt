@@ -22,7 +22,7 @@ data class HabitEntity(
     val frequency: HabitFrequency,
     val targetDaysPerWeek: Int? = null,
     val targetWeekdays: String? = null, // Stored as a JSON string, e.g. "[1,3,5]".
-    val targetTimeMinutes: Int? = null, // Minutes from midnight.
+    val reminderTimes: String? = null, // Minutes from midnight as a JSON string, e.g. "[480,1200]".
     val createdAt: Instant,
     val colorValue: Int,
     val notes: String? = null,

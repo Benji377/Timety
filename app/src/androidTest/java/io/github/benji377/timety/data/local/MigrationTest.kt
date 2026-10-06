@@ -5,6 +5,7 @@ import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -87,6 +88,42 @@ class MigrationTest {
             val orderedIds = generateSequence { if (cursor.moveToNext()) cursor.getString(0) else null }
                 .toList()
             assertEquals(listOf("newest", "middle", "oldest"), orderedIds)
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate3To4_convertsReminderTimeAndKeepsCompletions() {
+        val dbName = "migration-test-3-4"
+
+        helper.createDatabase(dbName, 3).apply {
+            execSQL(
+                "INSERT INTO habits (id, name, frequency, targetTimeMinutes, createdAt, colorValue, sortOrder) " +
+                    "VALUES ('timed', 'Timed', 0, 480, 0, 1, 0)"
+            )
+            execSQL(
+                "INSERT INTO habits (id, name, frequency, createdAt, colorValue, sortOrder) " +
+                    "VALUES ('untimed', 'Untimed', 0, 0, 2, 1)"
+            )
+            execSQL("INSERT INTO habit_completions (habitId, completionDate) VALUES ('timed', 100)")
+            execSQL("INSERT INTO habit_completions (habitId, completionDate) VALUES ('timed', 200)")
+            execSQL("INSERT INTO habit_completions (habitId, completionDate) VALUES ('untimed', 300)")
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 4, true, MIGRATION_3_4)
+
+        db.query("SELECT id, reminderTimes FROM habits ORDER BY sortOrder").use { cursor ->
+            assertEquals(2, cursor.count)
+            cursor.moveToFirst()
+            assertEquals("[480]", cursor.getString(1))
+            cursor.moveToNext()
+            assertTrue(cursor.isNull(1))
+        }
+        // Rebuilding `habits` must not take its completions down with it.
+        db.query("SELECT COUNT(*) FROM habit_completions").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(3, cursor.getInt(0))
         }
         db.close()
     }

@@ -59,7 +59,8 @@ data class ReminderEntry(
 /**
  * Reminder editor shared by the task detail screens: a summary field that opens a bottom sheet of
  * one-tap preset chips plus any custom reminders. Tapping a selected chip removes it. Pass a null
- * [onAddCustom] when the screen only supports presets.
+ * [onAddCustom] when the screen only supports presets, or an empty [presets] when it only has
+ * custom entries (habits, whose reminders are clock times).
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -73,6 +74,9 @@ fun ReminderField(
     onRemoveCustom: (ReminderEntry) -> Unit,
     onAddCustom: (() -> Unit)?,
     customEnabled: Boolean = true,
+    presets: List<ReminderPreset> = ReminderPreset.entries,
+    customLabel: String = stringResource(R.string.taskDetailsReminderOptionCustom),
+    hint: String = stringResource(R.string.reminderSheetHint),
 ) {
     if (!isEditing && entries.isEmpty()) return
     var showSheet by remember { mutableStateOf(false) }
@@ -162,7 +166,7 @@ fun ReminderField(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
                     verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
                 ) {
-                    ReminderPreset.entries.forEach { preset ->
+                    presets.forEach { preset ->
                         val selected = entries.any { it.preset == preset }
                         val enabled = selected || canAddPreset(preset)
                         NeoFilterChip(
@@ -184,7 +188,7 @@ fun ReminderField(
                         NeoFilterChip(
                             selected = false,
                             onClick = onAddCustom,
-                            label = stringResource(R.string.taskDetailsReminderOptionCustom),
+                            label = customLabel,
                             enabled = customEnabled,
                             modifier = Modifier.alpha(if (customEnabled) 1f else 0.4f),
                             leadingIcon = {
@@ -194,7 +198,7 @@ fun ReminderField(
                     }
                 }
                 Text(
-                    text = warning ?: stringResource(R.string.reminderSheetHint),
+                    text = warning ?: hint,
                     color = if (warning != null) WarningColor
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = AppTheme.fsBodySmall,

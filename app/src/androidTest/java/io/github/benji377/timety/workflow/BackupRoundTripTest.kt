@@ -178,7 +178,7 @@ class BackupRoundTripTest {
             frequency = HabitFrequency.WEEKLY_EXACT,
             targetDaysPerWeek = 3,
             targetWeekdays = "[1,3,5]",
-            targetTimeMinutes = 21 * 60,
+            reminderTimes = "[1260]",
             createdAt = now,
             colorValue = 0xFF00FF00.toInt(),
             notes = "20 pages",

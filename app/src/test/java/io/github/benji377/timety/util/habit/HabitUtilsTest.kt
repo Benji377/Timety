@@ -76,4 +76,52 @@ class HabitUtilsTest {
         assertTrue(HabitUtils.isStackFullyCompleted(listOf(done, done), today))
         assertEquals(1, HabitUtils.getStackCompletionCount(listOf(done, notDone), today))
     }
+
+    @Test
+    fun testReminderTimesRoundTrip() {
+        assertEquals(emptyList<Int>(), HabitUtils.parseReminderTimes(null))
+        assertEquals(emptyList<Int>(), HabitUtils.parseReminderTimes("[]"))
+        assertEquals(listOf(480, 1200), HabitUtils.parseReminderTimes("[1200, 480, 480]"))
+        assertEquals(listOf(480), HabitUtils.parseReminderTimes("[480,1440,-5]"))
+        assertEquals(
+            HabitUtils.MAX_REMINDER_TIMES,
+            HabitUtils.parseReminderTimes("[1,2,3,4,5,6,7]").size,
+        )
+        assertEquals(null, HabitUtils.serializeReminderTimes(emptyList()))
+        assertEquals("[480,1200]", HabitUtils.serializeReminderTimes(listOf(1200, 480)))
+    }
+
+    @Test
+    fun testNeedsReminderToday() {
+        val today = LocalDate.now()
+        val open = HabitWithCompletions(habit(), emptyList())
+        val done = HabitWithCompletions(habit(), listOf(completedOn(today)))
+        assertTrue(HabitUtils.needsReminderToday(open))
+        assertFalse(HabitUtils.needsReminderToday(done))
+    }
+
+    @Test
+    fun testNeedsReminderTodayForWeeklyHabits() {
+        val today = LocalDate.now()
+        val otherDay = (1..7).first { it != today.dayOfWeek.value }
+        val exactElsewhere = habit().copy(
+            frequency = HabitFrequency.WEEKLY_EXACT,
+            targetWeekdays = HabitUtils.serializeWeekdays(setOf(otherDay)),
+        )
+        assertFalse(HabitUtils.needsReminderToday(HabitWithCompletions(exactElsewhere, emptyList())))
+
+        val exactToday = exactElsewhere.copy(
+            targetWeekdays = HabitUtils.serializeWeekdays(setOf(today.dayOfWeek.value)),
+        )
+        assertTrue(HabitUtils.needsReminderToday(HabitWithCompletions(exactToday, emptyList())))
+
+        // Target met on earlier days this week: the habit drops off the list and stops nagging.
+        val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+        val flexible = habit().copy(frequency = HabitFrequency.WEEKLY_FLEXIBLE, targetDaysPerWeek = 1)
+        if (monday != today) {
+            val met = HabitWithCompletions(flexible, listOf(completedOn(monday)))
+            assertFalse(HabitUtils.needsReminderToday(met))
+        }
+        assertTrue(HabitUtils.needsReminderToday(HabitWithCompletions(flexible, emptyList())))
+    }
 }

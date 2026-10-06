@@ -206,7 +206,8 @@
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Why are you building this habit?</string>
     <string name="habitDetailLabelReminder">Reminder time</string>
-    <string name="habitDetailLabelReminderNoTime">No specific time</string>
+    <string name="habitDetailReminderAddTime">Add time</string>
+    <string name="habitDetailReminderSheetHint">Reminders are skipped on days this habit is already done or not due.</string>
     <string name="habitDetailLabelColor">Color</string>
     <string name="habitDetailLabelColorPicker">Choose a Color</string>
     <string name="habitDetailLabelStack">Habit Stack</string>
@@ -471,7 +472,15 @@
     <string name="notificationChannelMotivationName">Daily Motivation</string>
     <string name="notificationChannelTasksDesc">Notifications for your scheduled tasks</string>
     <string name="notificationChannelTasksName">Task Reminders</string>
-    <string name="notificationEveningBody">Did you complete all your habits today? Tap to log them!</string>
+    <string name="notificationEveningAllDone">Everything is done. Great job today!</string>
+    <string name="notificationEveningBody">Take a moment to wrap up your day.</string>
+    <string name="notificationEveningLineHabit">Habit: %1$s</string>
+    <string name="notificationEveningLineTask">Overdue: %1$s</string>
+    <string name="notificationEveningMore">+%1$d more</string>
+    <plurals name="nNotificationEveningOpen">
+        <item quantity="one">%d thing still open today</item>
+        <item quantity="other">%d things still open today</item>
+    </plurals>
     <string name="notificationEveningTitle">Evening Check-in</string>
     <string name="notificationGoodMorning">Good Morning!</string>
     <string name="notificationHabitBody">Time to: %1$s!</string>

@@ -91,5 +91,37 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
     }
 }
 
+/**
+ * Replaces `habits.targetTimeMinutes` (one reminder time) with `reminderTimes` (a JSON
+ * list, so a habit can have several). SQLite on API 26 cannot drop a column, so the table is
+ * rebuilt. Dropping `habits` cascades to `habit_completions`, so those rows are parked in a
+ * temporary table and restored afterwards.
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE `habit_completions_backup` AS SELECT * FROM `habit_completions`")
+        db.execSQL(
+            "CREATE TABLE `habits_new` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, " +
+                    "`frequency` TEXT NOT NULL, `targetDaysPerWeek` INTEGER, `targetWeekdays` TEXT, " +
+                    "`reminderTimes` TEXT, `createdAt` INTEGER NOT NULL, `colorValue` INTEGER NOT NULL, " +
+                    "`notes` TEXT, `iconCodePoint` INTEGER, `stackName` TEXT, `stackOrder` INTEGER, " +
+                    "`sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+        )
+        db.execSQL(
+            "INSERT INTO `habits_new` SELECT `id`, `name`, `frequency`, `targetDaysPerWeek`, " +
+                    "`targetWeekdays`, " +
+                    "CASE WHEN `targetTimeMinutes` IS NULL THEN NULL " +
+                    "ELSE '[' || `targetTimeMinutes` || ']' END, " +
+                    "`createdAt`, `colorValue`, `notes`, `iconCodePoint`, `stackName`, " +
+                    "`stackOrder`, `sortOrder` FROM `habits`"
+        )
+        db.execSQL("DROP TABLE `habits`")
+        db.execSQL("ALTER TABLE `habits_new` RENAME TO `habits`")
+        db.execSQL("DELETE FROM `habit_completions`")
+        db.execSQL("INSERT INTO `habit_completions` SELECT * FROM `habit_completions_backup`")
+        db.execSQL("DROP TABLE `habit_completions_backup`")
+    }
+}
+
 /** All migrations, in order, to register on the Room builder. */
-val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)

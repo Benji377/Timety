@@ -35,6 +35,7 @@ import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.util.ProfileImageStore
+import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -251,7 +252,7 @@ class BackupService(
                 put("frequency", habit.frequency.name)
                 put("targetDaysPerWeek", habit.targetDaysPerWeek ?: JSONObject.NULL)
                 put("targetWeekdays", habit.targetWeekdays ?: JSONObject.NULL)
-                put("targetTimeMinutes", habit.targetTimeMinutes ?: JSONObject.NULL)
+                put("reminderTimes", habit.reminderTimes ?: JSONObject.NULL)
                 put("createdAt", habit.createdAt.toString())
                 put("colorValue", habit.colorValue)
                 put("notes", habit.notes ?: JSONObject.NULL)
@@ -581,10 +582,11 @@ class BackupService(
                         )
                     ) habitJson.optInt("targetDaysPerWeek") else null,
                     targetWeekdays = readString(habitJson, "targetWeekdays"),
-                    targetTimeMinutes = if (habitJson.has("targetTimeMinutes") && !habitJson.isNull(
-                            "targetTimeMinutes"
-                        )
-                    ) habitJson.optInt("targetTimeMinutes") else null,
+                    // Older backups carry a single `targetTimeMinutes` instead.
+                    reminderTimes = readString(habitJson, "reminderTimes")
+                        ?: if (habitJson.has("targetTimeMinutes") && !habitJson.isNull("targetTimeMinutes")) {
+                            HabitUtils.serializeReminderTimes(listOf(habitJson.optInt("targetTimeMinutes")))
+                        } else null,
                     createdAt = readInstant(habitJson, "createdAt") ?: Instant.now(),
                     colorValue = habitJson.optInt("colorValue", 0),
                     notes = readString(habitJson, "notes"),

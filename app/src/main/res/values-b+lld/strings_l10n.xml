@@ -222,7 +222,6 @@
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Cie mutivazions es\'a per chësta abitudin?</string>
     <string name="habitDetailLabelReminder">Ora dl lezit</string>
-    <string name="habitDetailLabelReminderNoTime">Deguna ora zessa</string>
     <string name="habitDetailLabelColor">Culëur</string>
     <string name="habitDetailLabelColorPicker">Chir ora n culëur</string>
     <string name="habitDetailLabelStack">Rënga de abitudins</string>
