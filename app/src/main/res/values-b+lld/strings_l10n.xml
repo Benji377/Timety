@@ -281,7 +281,6 @@
     <string name="taskDetailsLocationDetails">detail dl post</string>
     <string name="taskDetailsLocationNoInfo">Deguna infurmazions per chesc post</string>
     <string name="taskDetailsLocationOffline">Deguna cunession a internet - Cri post y nfurmazios ie nia mesum</string>
-    <string name="taskDetailsLabelReminderSet">Mët lezit</string>
     <string name="taskDetailsLabelReminderTooEarly">L lezit persunalisà muessa vester dant ala data de scadënza</string>
     <string name="taskDetailsLabelSubtaskHint">Njunté sot-ncëries…</string>
     <string name="taskDetailsLabelTitle">Titul dla ncëria</string>
@@ -295,7 +294,6 @@
     <string name="taskDetailsSectionLocation">Luelg</string>
     <string name="taskDetailsSectionPriorityAndEffort">Priorità y Sforz</string>
     <string name="taskDetailsSectionScheduling">Pianificazion</string>
-    <string name="taskDetailsSnackbarReminderNoDue">Mët prima na data de scadënza</string>
     <string name="taskDetailsSnackbarTitleRequired">L titul ie ubligà!</string>
     <string name="taskDetailsTitleDetails">Detaies dla ncëria</string>
     <string name="taskDetailsTitleEdit">Mudé ncëria</string>

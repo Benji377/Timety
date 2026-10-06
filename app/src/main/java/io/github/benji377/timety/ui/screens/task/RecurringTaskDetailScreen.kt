@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
@@ -28,7 +27,6 @@ import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -39,7 +37,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -59,7 +56,6 @@ import io.github.benji377.timety.data.model.task.MonthlyMode
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
-import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
@@ -70,7 +66,9 @@ import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.task.CategoryPicker
-import io.github.benji377.timety.ui.components.task.ReminderOptionInput
+import io.github.benji377.timety.ui.components.task.ReminderEntry
+import io.github.benji377.timety.ui.components.task.ReminderField
+import io.github.benji377.timety.ui.components.task.reminderPresetLabel
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -86,6 +84,8 @@ import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.task.RecurrenceUtils
+import io.github.benji377.timety.util.task.ReminderPreset
+import io.github.benji377.timety.util.task.ReminderUtils
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -147,7 +147,6 @@ fun RecurringTaskDetailScreen(
     var reminderOffsets by remember(existingTask) {
         mutableStateOf(existingTask?.reminderOffsetsMinutes ?: emptyList())
     }
-    var selectedReminderOption by remember { mutableStateOf(ReminderOption.MINUTES_30_BEFORE) }
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
     // Date-then-time picker flow; a non-null target keeps the dialog open.
@@ -413,50 +412,34 @@ fun RecurringTaskDetailScreen(
 
             // Reminder offsets, re-applied to every occurrence.
             item {
-                if (isEditing || reminderOffsets.isNotEmpty()) {
-                    Text(
-                        stringResource(R.string.taskDetailsLabelReminderSet),
-                        fontWeight = AppTheme.fwBold
+                val entries = reminderOffsets.sorted().map { minutes ->
+                    val preset = ReminderPreset.entries.firstOrNull { it.minutes == minutes }
+                    ReminderEntry(
+                        key = minutes.toLong(),
+                        preset = preset,
+                        label = if (preset != null) reminderPresetLabel(preset)
+                        else stringResource(R.string.recurringTaskReminderMinutesBefore, minutes),
                     )
-                    Spacer(Modifier.height(AppTheme.spaceSmall))
                 }
-                if (isEditing) {
-                    ReminderOptionInput(
-                        selected = selectedReminderOption,
-                        onSelectedChange = { selectedReminderOption = it },
-                        onAdd = {
-                            val minutes = reminderOptionOffsetMinutes(selectedReminderOption)
-                            if (minutes != null && minutes !in reminderOffsets) {
-                                reminderOffsets = (reminderOffsets + minutes).sorted()
-                            }
-                        },
-                        // Offsets are always relative to the due date; CUSTOM has no offset.
-                        includeCustom = false,
-                    )
-                    Spacer(Modifier.height(AppTheme.spaceSmall))
-                }
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
-                    reminderOffsets.forEach { minutes ->
-                        InputChip(
-                            selected = false,
-                            onClick = {
-                                if (isEditing) reminderOffsets = reminderOffsets - minutes
-                            },
-                            label = {
-                                Text(offsetLabel(minutes), fontSize = AppTheme.fsBodySmall)
-                            },
-                            trailingIcon = if (isEditing) {
-                                {
-                                    Icon(
-                                        Icons.Filled.Close,
-                                        contentDescription = stringResource(R.string.commonLabelRemove),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            } else null
-                        )
-                    }
-                }
+                ReminderField(
+                    entries = entries,
+                    isEditing = isEditing,
+                    sheetSubtitle = stringResource(R.string.reminderSheetEveryOccurrence),
+                    warning = if (reminderOffsets.size >= ReminderUtils.MAX_REMINDERS) {
+                        stringResource(R.string.reminderWarnLimit, ReminderUtils.MAX_REMINDERS)
+                    } else null,
+                    canAddPreset = { reminderOffsets.size < ReminderUtils.MAX_REMINDERS },
+                    onTogglePreset = { preset ->
+                        reminderOffsets = if (preset.minutes in reminderOffsets) {
+                            reminderOffsets - preset.minutes
+                        } else (reminderOffsets + preset.minutes).sorted()
+                    },
+                    // Offsets outside the presets (from backups) stay removable.
+                    onRemoveCustom = { entry ->
+                        reminderOffsets = reminderOffsets - entry.key.toInt()
+                    },
+                    onAddCustom = null,
+                )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
             }
 
@@ -633,24 +616,4 @@ private fun OccurrenceRow(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
-}
-
-/** The relative offset in minutes an option stands for; null for [ReminderOption.CUSTOM]. */
-private fun reminderOptionOffsetMinutes(option: ReminderOption): Int? = when (option) {
-    ReminderOption.ON_TIME -> 0
-    ReminderOption.MINUTES_30_BEFORE -> 30
-    ReminderOption.HOUR_1_BEFORE -> 60
-    ReminderOption.DAY_1_BEFORE -> 24 * 60
-    ReminderOption.CUSTOM -> null
-}
-
-/** The chip label for a stored offset; known values reuse the option labels. */
-@Composable
-@ReadOnlyComposable
-private fun offsetLabel(minutes: Int): String = when (minutes) {
-    0 -> stringResource(R.string.taskDetailsReminderOptionOnce)
-    30 -> stringResource(R.string.taskDetailsReminderOptionHalfHour)
-    60 -> stringResource(R.string.taskDetailsReminderOptionHour)
-    24 * 60 -> stringResource(R.string.taskDetailsReminderOptionDay)
-    else -> stringResource(R.string.recurringTaskReminderMinutesBefore, minutes)
 }

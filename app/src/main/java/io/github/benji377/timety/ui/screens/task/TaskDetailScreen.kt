@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,8 +44,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -80,7 +77,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
-import io.github.benji377.timety.data.model.task.ReminderOption
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSize
@@ -93,7 +89,9 @@ import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.task.CategoryPicker
-import io.github.benji377.timety.ui.components.task.ReminderOptionInput
+import io.github.benji377.timety.ui.components.task.ReminderEntry
+import io.github.benji377.timety.ui.components.task.ReminderField
+import io.github.benji377.timety.ui.components.task.reminderPresetLabel
 import io.github.benji377.timety.ui.screens.LocationPickerScreen
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -109,6 +107,9 @@ import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.location.LocationApi
 import io.github.benji377.timety.util.location.LocationServerException
+import io.github.benji377.timety.util.task.CustomReminderIssue
+import io.github.benji377.timety.util.task.ReminderPreset
+import io.github.benji377.timety.util.task.ReminderUtils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -116,7 +117,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
@@ -171,7 +171,6 @@ fun TaskDetailScreen(
     var showLocationPicker by remember { mutableStateOf(false) }
     var isAddingNewCategory by remember { mutableStateOf(false) }
     var newCategoryText by remember { mutableStateOf("") }
-    var selectedReminderOption by remember { mutableStateOf(ReminderOption.MINUTES_30_BEFORE) }
     var newSubtaskTitle by remember { mutableStateOf("") }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
@@ -179,39 +178,23 @@ fun TaskDetailScreen(
     val scope = rememberCoroutineScope()
 
     val titleRequiredMsg = stringResource(R.string.taskDetailsSnackbarTitleRequired)
-    val reminderNoDueMsg = stringResource(R.string.taskDetailsSnackbarReminderNoDue)
-    val reminderTooEarlyMsg = stringResource(R.string.taskDetailsLabelReminderTooEarly)
+    val reminderTooLateMsg = stringResource(R.string.taskDetailsLabelReminderTooEarly)
+    val reminderInPastMsg = stringResource(R.string.reminderCustomInPast)
+    val remindersShiftedMsg = stringResource(R.string.reminderShifted)
 
     // Date-then-time picker flow; a non-null target keeps the dialog open.
     var pickerTarget by remember { mutableStateOf<PickerTarget?>(null) }
 
-    fun addComputedReminder(reminderTime: Instant?) {
-        if (reminderTime == null) return
-        if (!reminders.contains(reminderTime)) {
-            reminders = (reminders + reminderTime).sorted()
-        }
+    fun addReminder(reminder: Instant) {
+        if (reminder !in reminders) reminders = (reminders + reminder).sorted()
     }
 
-    fun onAddReminderClicked() {
-        when (selectedReminderOption) {
-            ReminderOption.CUSTOM -> pickerTarget = PickerTarget.CUSTOM_REMINDER
-
-            else -> {
-                val due = dueDate
-                if (due == null) {
-                    scope.launch { snackbarHostState.showSnackbar(reminderNoDueMsg) }
-                    return
-                }
-                val reminderTime = when (selectedReminderOption) {
-                    ReminderOption.ON_TIME -> due
-                    ReminderOption.MINUTES_30_BEFORE -> due.minus(30, ChronoUnit.MINUTES)
-                    ReminderOption.HOUR_1_BEFORE -> due.minus(1, ChronoUnit.HOURS)
-                    ReminderOption.DAY_1_BEFORE -> due.minus(1, ChronoUnit.DAYS)
-                    ReminderOption.CUSTOM -> null
-                }
-                addComputedReminder(reminderTime)
-            }
-        }
+    // Preset reminders follow the due date; see ReminderUtils.shiftWithDueDate.
+    fun changeDueDate(newDue: Instant) {
+        val shift = ReminderUtils.shiftWithDueDate(reminders, dueDate, newDue, Instant.now())
+        dueDate = newDue
+        reminders = shift.reminders
+        if (shift.changed) scope.launch { snackbarHostState.showSnackbar(remindersShiftedMsg) }
     }
 
     val appBarTitle = when {
@@ -398,67 +381,53 @@ fun TaskDetailScreen(
                     )
                 }
 
-                if (isEditing || reminders.isNotEmpty()) {
-                    Spacer(Modifier.height(AppTheme.spaceMedium))
-                    if (isEditing) {
-                        ReminderOptionInput(
-                            selected = selectedReminderOption,
-                            onSelectedChange = { selectedReminderOption = it },
-                            onAdd = { onAddReminderClicked() },
-                            // CUSTOM picks an absolute time, so it works without a due date;
-                            // the relative options need one to compute the reminder from.
-                            addEnabled = dueDate != null ||
-                                    selectedReminderOption == ReminderOption.CUSTOM
-                        )
-                    }
-                    Spacer(Modifier.height(AppTheme.spaceSmall))
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
-                    ) {
-                        reminders.forEach { reminder ->
-                            InputChip(
-                                selected = false,
-                                onClick = { if (isEditing) reminders = reminders - reminder },
-                                shape = AppTheme.brMedium,
-                                colors = InputChipDefaults.inputChipColors(
-                                    containerColor = MaterialTheme.colorScheme.surface,
-                                ),
-                                border = InputChipDefaults.inputChipBorder(
-                                    enabled = true,
-                                    selected = false,
-                                    borderColor = MaterialTheme.colorScheme.outline,
-                                    borderWidth = AppTheme.borderHairline,
-                                ),
-                                label = {
-                                    Text(
-                                        "${
-                                            AppDateFormatUtils.formatDate(
-                                                reminder,
-                                                dateFmt.dateFormatCode
-                                            )
-                                        } - ${
-                                            AppDateFormatUtils.formatTime(
-                                                reminder,
-                                                dateFmt.use24HourFormat
-                                            )
-                                        }",
-                                        fontSize = AppTheme.fsBodySmall
-                                    )
-                                },
-                                trailingIcon = if (isEditing) {
-                                    {
-                                        Icon(
-                                            Icons.Filled.Close,
-                                            contentDescription = stringResource(R.string.commonLabelRemove),
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                } else null
-                            )
-                        }
-                    }
+                Spacer(Modifier.height(AppTheme.spaceMedium))
+                val due = dueDate
+                val now = Instant.now()
+                val formatReminder = { time: Instant ->
+                    "${AppDateFormatUtils.formatDate(time, dateFmt.dateFormatCode)} - " +
+                            AppDateFormatUtils.formatTime(time, dateFmt.use24HourFormat)
                 }
+                val entries = reminders.sorted().map { reminder ->
+                    val preset = due?.let { ReminderUtils.presetOf(it, reminder) }
+                    ReminderEntry(
+                        key = reminder.toEpochMilli(),
+                        preset = preset,
+                        label = if (preset != null) reminderPresetLabel(preset)
+                        else formatReminder(reminder),
+                        time = if (preset != null) formatReminder(reminder) else null,
+                    )
+                }
+                val canAddPreset = { preset: ReminderPreset ->
+                    due != null && ReminderUtils.isPresetAvailable(reminders, due, preset, now)
+                }
+                val warning = when {
+                    due == null -> stringResource(R.string.reminderWarnNoDue)
+                    reminders.size >= ReminderUtils.MAX_REMINDERS -> stringResource(
+                        R.string.reminderWarnLimit, ReminderUtils.MAX_REMINDERS
+                    )
+                    ReminderPreset.entries.any {
+                        !canAddPreset(it) && entries.none { e -> e.preset == it }
+                    } -> stringResource(R.string.reminderWarnPast)
+                    else -> null
+                }
+                ReminderField(
+                    entries = entries,
+                    isEditing = isEditing,
+                    sheetSubtitle = if (due != null) stringResource(
+                        R.string.reminderSheetDue, formatReminder(due)
+                    ) else stringResource(R.string.reminderSheetNoDue),
+                    warning = warning,
+                    canAddPreset = canAddPreset,
+                    onTogglePreset = { preset ->
+                        due?.let { reminders = ReminderUtils.toggle(reminders, it, preset) }
+                    },
+                    onRemoveCustom = { entry ->
+                        reminders = reminders.filterNot { it.toEpochMilli() == entry.key }
+                    },
+                    onAddCustom = { pickerTarget = PickerTarget.CUSTOM_REMINDER },
+                    customEnabled = reminders.size < ReminderUtils.MAX_REMINDERS,
+                )
             }
 
             // Location.
@@ -668,7 +637,7 @@ fun TaskDetailScreen(
 
     // Date and time picker dialog.
     pickerTarget?.let { target ->
-        // Due dates can't be before today; a custom reminder can't be after the task's due date.
+        // Due dates can't be before today; a custom reminder must fall between today and the due date.
         val zone = ZoneId.systemDefault()
         val todayUtcMillis =
             LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -678,7 +647,9 @@ fun TaskDetailScreen(
             object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean = when (target) {
                     PickerTarget.DUE_DATE -> utcTimeMillis >= todayUtcMillis
-                    PickerTarget.CUSTOM_REMINDER -> dueUtcMillis == null || utcTimeMillis <= dueUtcMillis
+                    PickerTarget.CUSTOM_REMINDER ->
+                        utcTimeMillis >= todayUtcMillis &&
+                                (dueUtcMillis == null || utcTimeMillis <= dueUtcMillis)
                 }
             }
         }
@@ -692,14 +663,15 @@ fun TaskDetailScreen(
             onConfirm = { date, hour, minute ->
                 val instant = date.atTime(hour, minute).atZone(zone).toInstant()
                 when (target) {
-                    PickerTarget.DUE_DATE -> dueDate = instant
-                    PickerTarget.CUSTOM_REMINDER -> {
-                        val due = dueDate
-                        if (due != null && instant.isAfter(due)) {
-                            scope.launch { snackbarHostState.showSnackbar(reminderTooEarlyMsg) }
-                        } else {
-                            addComputedReminder(instant)
-                        }
+                    PickerTarget.DUE_DATE -> changeDueDate(instant)
+                    PickerTarget.CUSTOM_REMINDER -> when (
+                        ReminderUtils.customIssue(instant, dueDate, Instant.now())
+                    ) {
+                        null -> addReminder(instant)
+                        CustomReminderIssue.IN_PAST ->
+                            scope.launch { snackbarHostState.showSnackbar(reminderInPastMsg) }
+                        CustomReminderIssue.AFTER_DUE ->
+                            scope.launch { snackbarHostState.showSnackbar(reminderTooLateMsg) }
                     }
                 }
                 pickerTarget = null

@@ -261,7 +261,6 @@
     <string name="taskDetailsLocationDetails">位置详情</string>
     <string name="taskDetailsLocationNoInfo">未找到该位置的信息</string>
     <string name="taskDetailsLocationOffline">无网络连接——位置搜索和详情不可用</string>
-    <string name="taskDetailsLabelReminderSet">设置提醒</string>
     <string name="taskDetailsLabelReminderTooEarly">自定义提醒时间必须早于截止日期</string>
     <string name="taskDetailsLabelSubtaskHint">添加子任务…</string>
     <string name="taskDetailsLabelTitle">任务标题</string>
@@ -275,7 +274,6 @@
     <string name="taskDetailsSectionLocation">位置</string>
     <string name="taskDetailsSectionPriorityAndEffort">优先级 &amp; 与工作量</string>
     <string name="taskDetailsSectionScheduling">日程安排</string>
-    <string name="taskDetailsSnackbarReminderNoDue">请先设置截止日期</string>
     <string name="taskDetailsSnackbarTitleRequired">请填写标题！</string>
     <string name="taskDetailsTitleDetails">任务详情</string>
     <string name="taskDetailsTitleEdit">编辑任务</string>
