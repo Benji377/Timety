@@ -202,6 +202,8 @@
     <string name="habitDetailLabelNotes">备注</string>
     <string name="habitDetailLabelNotesHint">建立这个习惯的原因？</string>
     <string name="habitDetailLabelReminder">提醒时间</string>
+    <string name="habitDetailReminderAddTime">Add time</string>
+    <string name="habitDetailReminderSheetHint">Reminders are skipped on days this habit is already done or not due.</string>
     <string name="habitDetailLabelColor">颜色</string>
     <string name="habitDetailLabelColorPicker">选择颜色</string>
     <string name="habitDetailLabelStack">习惯堆叠</string>
@@ -465,7 +467,14 @@
     <string name="notificationChannelMotivationName">每日励志</string>
     <string name="notificationChannelTasksDesc">已安排任务的提醒</string>
     <string name="notificationChannelTasksName">任务提醒</string>
-    <string name="notificationEveningBody">今天的习惯都完成了吗？点击记录！</string>
+    <string name="notificationEveningAllDone">Everything is done. Great job today!</string>
+    <string name="notificationEveningBody">Take a moment to wrap up your day.</string>
+    <string name="notificationEveningLineHabit">Habit: %1$s</string>
+    <string name="notificationEveningLineTask">Overdue: %1$s</string>
+    <string name="notificationEveningMore">+%1$d more</string>
+    <plurals name="nNotificationEveningOpen">
+        <item quantity="other">%d things still open today</item>
+    </plurals>
     <string name="notificationEveningTitle">晚间提醒</string>
     <string name="notificationGoodMorning">早安！</string>
     <string name="notificationHabitBody">该做 %1$s 了！</string>
