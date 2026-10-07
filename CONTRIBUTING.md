@@ -19,6 +19,8 @@ Because Timety is carefully designed around an offline, privacy-first, Neo-bruta
 
 ## Local Development Setup
 
+[![Architecture diagram of benji377/timety](https://gitdiagram.com/benji377/timety/diagram.png)](https://gitdiagram.com/benji377/timety?utm_source=readme&utm_medium=picture)
+
 ### Setting up the Environment
 
 1. Ensure you have the **Android Studio** and **Java 17** installed.
