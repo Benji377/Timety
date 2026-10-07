@@ -14,8 +14,8 @@ android {
         minSdk = 26
         targetSdk = 37
         // Must stay above 233, the last Flutter-era versionCode on F-Droid.
-        versionCode = 243
-        versionName = "2.2.1"
+        versionCode = 244
+        versionName = "2.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
