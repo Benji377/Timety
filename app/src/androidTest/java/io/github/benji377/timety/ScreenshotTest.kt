@@ -76,6 +76,8 @@ class ScreenshotTest {
         }
         composeTestRule.waitForIdle()
 
+        dismissExactAlarmPrompt()
+
         // 1. Home
         takeScreenshot("01_home_screen")
 
@@ -132,6 +134,21 @@ class ScreenshotTest {
         composeTestRule.onNodeWithText(str(R.string.navigationProfile)).performClick()
         composeTestRule.waitForIdle()
         takeScreenshot("05_profile_screen")
+    }
+
+    // The exact-alarm prompt shows on a fresh install and would otherwise dim every screenshot.
+    // It does not appear when the permission is already granted, so a timeout is not a failure.
+    private fun dismissExactAlarmPrompt() {
+        val dismissLabel = str(R.string.exactAlarmPromptDismiss)
+        val appeared = runCatching {
+            composeTestRule.waitUntil(timeoutMillis = 5_000) {
+                composeTestRule.onAllNodesWithText(dismissLabel).fetchSemanticsNodes().isNotEmpty()
+            }
+        }.isSuccess
+        if (appeared) {
+            composeTestRule.onNodeWithText(dismissLabel).performClick()
+            composeTestRule.waitForIdle()
+        }
     }
 
     private fun pressBack() {
