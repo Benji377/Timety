@@ -54,14 +54,14 @@ fun PickerField(
             readOnly = true,
             enabled = enabled,
             label = { Text(label) },
-            // Trailing gap on the leading slot: [content] here is a 40dp swatch or icon circle,
+            // Start and trailing gap on the leading slot: [content] here is a 40dp swatch or icon circle,
             // far wider than the 24dp glyph M3 sizes its own leading-icon spacing for, so without
             // this the label sits flush against the swatch's edge. Kept at spaceSmall rather than
             // anything wider because this padding also eats into the label's available width, and
             // these fields are half-width - at spaceMedium "Select an Icon" wraps to two lines.
             leadingIcon = {
                 Box(
-                    modifier = Modifier.padding(end = AppTheme.spaceSmall),
+                    modifier = Modifier.padding(start = AppTheme.spaceSmall, end = AppTheme.spaceSmall),
                     contentAlignment = Alignment.Center,
                 ) { content() }
             },
