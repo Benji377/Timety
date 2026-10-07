@@ -29,9 +29,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
-          # Temurin is preinstalled on ubuntu-latest, so setup resolves it instead of downloading.
-          distribution: 'temurin'
-          java-version: '25'
+          distribution: 'jetbrains'
+          java-version: '21'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -68,8 +67,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
-          distribution: 'temurin'
-          java-version: '25'
+          distribution: 'jetbrains'
+          java-version: '21'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
