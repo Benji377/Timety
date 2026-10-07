@@ -83,7 +83,7 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
             while (cursor.moveToNext()) {
                 db.execSQL(
                     "UPDATE `habits` SET `sortOrder` = ? WHERE `id` = ?",
-                    arrayOf(order, cursor.getString(idIndex))
+                    arrayOf<Any>(order, cursor.getString(idIndex))
                 )
                 order++
             }
