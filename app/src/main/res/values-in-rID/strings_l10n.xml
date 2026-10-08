@@ -9,7 +9,7 @@
     <string name="globalLabelTasks">Tugas</string>
     <string name="commonButtonGotIt">Mengerti</string>
     <string name="commonDaytimeAfternoon">Siang</string>
-    <string name="commonDaytimeAfternoonRange">12 PM – 5 PM</string>
+    <string name="commonDaytimeAfternoonRange">12 siang - 5 sore</string>
     <string name="commonDaytimeEvening">Evening</string>
     <string name="commonDaytimeEveningRange">5 PM – 9 PM</string>
     <string name="commonDaytimeMorning">Morning</string>
