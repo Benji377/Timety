@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.History
@@ -39,8 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
-import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.focus.FocusTargetSelection
+import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
@@ -62,24 +63,28 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as Ou
 private const val DEFAULT_BACKFILL_MINUTES = 25L
 
 /**
- * Dialog for logging or editing a focus session: pick a mode, a tag, and a start/end date and
+ * Dialog for logging or editing a focus session: pick a mode, a target, and a start/end date and
  * time, then call [onSave]. Rejects an end time before the start time.
  *
  * The same dialog covers the three surfaces that need it. Passing [fixedTargetLabel] replaces the
- * tag picker with a read-only target row, for sessions already attributed to a task or habit;
- * passing [onDelete] adds a Delete action, for sessions that are already logged.
+ * target picker with a read-only row, for a session logged straight against a just-completed
+ * task; passing [onDelete] adds a Delete action, for sessions that are already logged.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SessionEditorDialog(
     title: String,
     modes: List<FocusModeEntity>,
-    tags: List<FocusTagEntity>,
     onDismiss: () -> Unit,
-    onSave: (mode: FocusModeEntity, startTime: Instant, endTime: Instant, tagId: String?) -> Unit,
+    onSave: (
+        mode: FocusModeEntity,
+        startTime: Instant,
+        endTime: Instant,
+        target: FocusTargetSelection?,
+    ) -> Unit,
     icon: ImageVector = Icons.Filled.History,
     initialModeId: String? = null,
-    initialSelectedTagId: String? = null,
+    initialTarget: FocusTargetSelection? = null,
     initialStartTime: Instant? = null,
     initialEndTime: Instant? = null,
     fixedTargetLabel: String? = null,
@@ -89,7 +94,7 @@ fun SessionEditorDialog(
     // re-emission while the dialog is open must not reset (or outdate) the user's selection.
     var selectedModeId by remember(initialModeId) { mutableStateOf(initialModeId) }
     val selectedMode = modes.firstOrNull { it.id == selectedModeId } ?: modes.firstOrNull()
-    var selectedTagId by remember { mutableStateOf(initialSelectedTagId) }
+    var selectedTarget by remember { mutableStateOf(initialTarget) }
     // Proposed times are truncated to the minute: the pickers only offer whole minutes, so a
     // proposal carrying seconds would make an untouched field and an edited one disagree by up
     // to a minute in the logged duration.
@@ -101,7 +106,7 @@ fun SessionEditorDialog(
     var errorText by remember { mutableStateOf<String?>(null) }
 
     var modeExpanded by remember { mutableStateOf(false) }
-    var tagExpanded by remember { mutableStateOf(false) }
+    var showTargetSheet by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     val endBeforeStartError = stringResource(R.string.dialogTimeMachineErrorEndBeforeStart)
@@ -162,33 +167,7 @@ fun SessionEditorDialog(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 } else {
-                    val noTagLabel = stringResource(R.string.dialogTimeMachineNoTag)
-                    ExposedDropdownMenuBox(
-                        expanded = tagExpanded,
-                        onExpandedChange = { tagExpanded = it }) {
-                        OutlinedTextField(
-                            value = tags.firstOrNull { it.id == selectedTagId }?.name ?: noTagLabel,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text(stringResource(R.string.dialogTimeMachineTag)) },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = tagExpanded) },
-                            modifier = Modifier
-                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                .fillMaxWidth(),
-                        )
-                        ExposedDropdownMenu(
-                            expanded = tagExpanded,
-                            onDismissRequest = { tagExpanded = false }) {
-                            DropdownMenuItem(
-                                text = { Text(noTagLabel) },
-                                onClick = { selectedTagId = null; tagExpanded = false })
-                            tags.forEach { tag ->
-                                DropdownMenuItem(
-                                    text = { Text(tag.name) },
-                                    onClick = { selectedTagId = tag.id; tagExpanded = false })
-                            }
-                        }
-                    }
+                    TargetRow(target = selectedTarget, onClick = { showTargetSheet = true })
                 }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
@@ -227,10 +206,18 @@ fun SessionEditorDialog(
                     errorText = endBeforeStartError
                     return@Button
                 }
-                onSave(mode, startDateTime, endDateTime, selectedTagId)
+                onSave(mode, startDateTime, endDateTime, selectedTarget)
             }) { Text(stringResource(R.string.commonLabelSave)) }
         },
     )
+
+    if (showTargetSheet) {
+        TargetSelectorBottomSheet(
+            onDismissRequest = { showTargetSheet = false },
+            selected = selectedTarget,
+            onTargetSelected = { selectedTarget = it },
+        )
+    }
 
     pickerTarget?.let { target ->
         val referenceInstant = if (target == SessionTimeField.START) startDateTime else endDateTime
@@ -281,39 +268,25 @@ fun EditSessionDialog(
     val snackbarHostState = LocalSnackbarHostState.current
     val updatedMessage = stringResource(R.string.focusSessionUpdatedSnackbar)
     val deletedMessage = stringResource(R.string.focusSessionDeletedSnackbar)
-    val emptyTargetLabel = stringResource(R.string.focusTargetEmpty)
 
     SessionEditorDialog(
         title = stringResource(R.string.focusSessionEditTitle),
         icon = Icons.Filled.Edit,
         modes = modes,
-        tags = tags,
         initialModeId = session.modeId,
-        initialSelectedTagId = session.tagId,
+        initialTarget = remember(session) { FocusTargetSelection.fromSession(session, tags) },
         initialStartTime = session.startTime,
         // A session left open-ended has no end to prefill, so the editor proposes "now" -
         // exactly the correction the user opened it for.
         initialEndTime = session.endTime,
-        // Task- and habit-linked sessions keep their target; only their timing is editable.
-        fixedTargetLabel = if (session.targetType == FocusTargetType.TAG) {
-            null
-        } else {
-            session.targetLabel?.trim()?.takeIf { it.isNotEmpty() } ?: emptyTargetLabel
-        },
         onDelete = {
             focusViewModel.deleteSession(session)
             onDismiss()
             scope.launch { snackbarHostState.showSnackbar(deletedMessage) }
         },
         onDismiss = onDismiss,
-        onSave = { mode, start, end, tagId ->
-            focusViewModel.updateSession(
-                session,
-                mode,
-                start,
-                end,
-                tags.firstOrNull { it.id == tagId },
-            )
+        onSave = { mode, start, end, target ->
+            focusViewModel.updateSession(session, mode, start, end, target)
             onDismiss()
             scope.launch { snackbarHostState.showSnackbar(updatedMessage) }
         },
@@ -321,6 +294,37 @@ fun EditSessionDialog(
 }
 
 private enum class SessionTimeField { START, END }
+
+/** Tappable row showing the session's target; opens the target picker. */
+@Composable
+private fun TargetRow(target: FocusTargetSelection?, onClick: () -> Unit) {
+    OutlinedCard(onClick = onClick) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppTheme.spaceMedium),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (target != null) {
+                Icon(target.type.icon, contentDescription = null, tint = target.color)
+                Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.focusSessionEditorTarget),
+                    fontSize = AppTheme.fsLabel,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    target?.label?.trim()?.takeIf { it.isNotEmpty() }
+                        ?: stringResource(R.string.focusTargetEmpty),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+        }
+    }
+}
 
 @Composable
 private fun TimeRow(label: String, value: String, onClick: () -> Unit) {

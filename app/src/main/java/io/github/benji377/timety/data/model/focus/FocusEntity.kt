@@ -69,11 +69,16 @@ data class SessionPhaseEntity(
     val orderIndex: Int // Determines the phase's position within the mode.
 )
 
-/** What a focus session or tag selection is attributed to. */
+/**
+ * What a focus session or tag selection is attributed to. Persisted by name (DB and backups), so
+ * entries may be added but never renamed.
+ */
 enum class FocusTargetType(val value: Int) {
     TAG(0),
     TASK(1),
-    HABIT(2)
+    HABIT(2),
+    RECURRING_TASK(3),
+    GOAL(4)
 }
 
 /** A user-defined label for categorizing focus sessions. */

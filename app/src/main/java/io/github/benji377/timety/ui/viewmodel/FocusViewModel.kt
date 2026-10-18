@@ -17,23 +17,26 @@ import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.repository.FocusRepository
 import io.github.benji377.timety.data.repository.HabitRepository
+import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.SettingsRepository
+import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.data.repository.UserRepository
+import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.FocusTimerManager
+import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.HabitWidget
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -48,13 +51,16 @@ data class DistractionWithSession(
 
 /**
  * Drives focus mode selection, active session/phase navigation, and session logging, including
- * XP awards and auto-completion of the linked task or habit when a focus phase finishes.
+ * XP awards and auto-completion of the linked task, recurring task or habit when a focus phase
+ * finishes.
  */
 class FocusViewModel(
     application: android.app.Application,
     private val focusRepository: FocusRepository,
     private val userRepository: UserRepository,
     private val habitRepository: HabitRepository,
+    private val taskRepository: TaskRepository,
+    private val recurringTaskRepository: RecurringTaskRepository,
     private val settingsRepository: SettingsRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
 
@@ -108,23 +114,11 @@ class FocusViewModel(
         _awaitingContinue.value = awaiting
     }
 
-    private val _autoCompleteTaskEvent = MutableSharedFlow<String>()
-    val autoCompleteTaskEvent = _autoCompleteTaskEvent.asSharedFlow()
-
-    // Session target: tag, task, or habit.
     private val _selectedTarget = MutableStateFlow<FocusTargetSelection?>(null)
     val selectedTarget: StateFlow<FocusTargetSelection?> = _selectedTarget.asStateFlow()
 
-    fun setSelectedTag(tag: FocusTagEntity) {
-        _selectedTarget.value = FocusTargetSelection.tag(tag)
-    }
-
-    fun setSelectedTask(id: String, label: String, colorValue: Int) {
-        _selectedTarget.value = FocusTargetSelection.task(id, label, colorValue)
-    }
-
-    fun setSelectedHabit(id: String, label: String, colorValue: Int) {
-        _selectedTarget.value = FocusTargetSelection.habit(id, label, colorValue)
+    fun setSelectedTarget(target: FocusTargetSelection) {
+        _selectedTarget.value = target
     }
 
     fun clearSelectedTarget() {
@@ -174,47 +168,13 @@ class FocusViewModel(
                     }
                     sessionAccumulatedFocusSeconds += durationSeconds
 
-                    // Auto-completion logic.
-                    val autoCompleteEnabled = settingsRepository.autoCompleteFocusFlow.first()
-                    if (autoCompleteEnabled && target != null) {
-                        when (target.type) {
-                            FocusTargetType.TASK -> {
-                                _autoCompleteTaskEvent.emit(target.id)
-                            }
-
-                            FocusTargetType.HABIT -> {
-                                val today = LocalDate.now()
-                                val hcEntity = habitRepository.getHabitById(target.id)
-                                if (hcEntity != null) {
-                                    val completions =
-                                        habitRepository.getCompletionsForHabit(target.id).first()
-                                    val hwc =
-                                        HabitWithCompletions(
-                                            hcEntity,
-                                            completions
-                                        )
-                                    if (!HabitUtils.isCompletedOn(
-                                            hwc,
-                                            today
-                                        )
-                                    ) {
-                                        habitRepository.insertCompletion(
-                                            HabitCompletionEntity(
-                                                habitId = hcEntity.id,
-                                                completionDate = Instant.now()
-                                            )
-                                        )
-                                        userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
-                                        // Auto-completion bypasses HabitViewModel, so refresh
-                                        // the habit widget here too.
-                                        HabitWidget()
-                                            .updateAll(getApplication())
-                                    }
-                                }
-                            }
-
-                            else -> {}
-                        }
+                    // Once per session: a multi-phase session would otherwise complete a
+                    // recurring task again after every focus phase, skipping occurrences.
+                    if (target != null && !sessionTargetAutoCompleted &&
+                        settingsRepository.autoCompleteFocusFlow.first()
+                    ) {
+                        sessionTargetAutoCompleted = true
+                        autoCompleteTarget(target)
                     }
                 }
 
@@ -261,6 +221,7 @@ class FocusViewModel(
     }
 
     private var sessionAccumulatedFocusSeconds: Int = 0
+    private var sessionTargetAutoCompleted = false
 
     // Focus minutes already converted to XP by completed phases, so the remainder (stopwatch
     // time, a phase stopped midway) can be awarded at log time without double-paying.
@@ -292,7 +253,6 @@ class FocusViewModel(
         // Sessions under a minute round down to "0m" everywhere in the UI and only add noise
         // to the stats and calendar, so they are dropped instead of logged.
         if (sessionAccumulatedFocusSeconds >= 60 && modeId != null) {
-            val target = selectedTarget.value
             val sessionToLog = FocusSessionEntity(
                 id = currentSessionId,
                 modeId = modeId,
@@ -301,11 +261,7 @@ class FocusViewModel(
                 endTime = Instant.now(),
                 totalSecondsFocused = sessionAccumulatedFocusSeconds,
                 isCompleted = true,
-                tagId = if (target?.type == FocusTargetType.TAG) target.id else null,
-                targetType = target?.type ?: FocusTargetType.TAG,
-                targetId = target?.id,
-                targetLabel = target?.label,
-            )
+            ).withTarget(selectedTarget.value)
             val distractionsToLog = pendingDistractions.toList()
             // Stopwatch time and a phase stopped midway never pass through phaseCompleteEvent,
             // so their focus minutes would otherwise earn none of the advertised per-minute XP.
@@ -320,22 +276,61 @@ class FocusViewModel(
                 }
             }
         }
+        resetSessionState()
+    }
+
+    fun discardSession() = resetSessionState()
+
+    private fun resetSessionState() {
         pendingDistractions.clear()
         sessionAccumulatedFocusSeconds = 0
         sessionXpAwardedMinutes = 0
+        sessionTargetAutoCompleted = false
         sessionStartTime = null
         activeSessionModeId = null
         resetCurrentSession()
     }
 
+    /**
+     * Completes the session's target when the auto-complete setting is on. Runs here rather than
+     * in a screen so it also happens while the focus screen isn't shown. Goals are never
+     * completed: a session only counts time toward them, and their progress units aren't time.
+     */
+    private suspend fun autoCompleteTarget(target: FocusTargetSelection) {
+        when (target.type) {
+            FocusTargetType.TASK -> CompletionActions.completeTask(
+                getApplication(), taskRepository, userRepository, target.id
+            )
 
-    fun discardSession() {
-        pendingDistractions.clear()
-        sessionAccumulatedFocusSeconds = 0
-        sessionXpAwardedMinutes = 0
-        sessionStartTime = null
-        activeSessionModeId = null
-        resetCurrentSession()
+            FocusTargetType.RECURRING_TASK -> {
+                val task = recurringTaskRepository.getTaskById(target.id) ?: return
+                CompletionActions.completeRecurringOccurrence(
+                    getApplication(), recurringTaskRepository, userRepository, task
+                )
+            }
+
+            FocusTargetType.HABIT -> completeHabitToday(target.id)
+            FocusTargetType.TAG, FocusTargetType.GOAL -> {}
+        }
+    }
+
+    private suspend fun completeHabitToday(habitId: String) {
+        val habit = habitRepository.getHabitById(habitId) ?: return
+        // Shares the completion lock with the in-app and widget toggles, which read-check-write
+        // the same row; unsynchronized, a concurrent tap could add a duplicate completion.
+        habitRepository.completionMutex.withLock {
+            val completions = habitRepository.getCompletionsForHabit(habitId).first()
+            if (HabitUtils.isCompletedOn(HabitWithCompletions(habit, completions), LocalDate.now())) {
+                return
+            }
+            habitRepository.insertCompletion(
+                HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
+            )
+            userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
+        }
+        ReminderScheduler.create(getApplication()).dismissHabitNotifications(habitId)
+        // Auto-completion bypasses HabitViewModel, so refresh the habit widget here too.
+        HabitWidget().updateAll(getApplication())
     }
 
     private suspend fun ensureSystemModes(modes: List<FocusModeEntity>) {
@@ -511,22 +506,17 @@ class FocusViewModel(
         getMinutesFocusedOnDay(LocalDate.now(), zone)
 
 
-    /** Logs a manually backfilled session for a time range that already elapsed, and awards its XP. */
+    /**
+     * Logs a manually backfilled session for a time range that already elapsed, and awards its
+     * XP. Never auto-completes [target]: backfilling only records time that was already spent.
+     */
     fun logPastSession(
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        tag: FocusTagEntity?
+        target: FocusTargetSelection?
     ) {
-        logBackfilledSession(
-            mode = mode,
-            startTime = startTime,
-            endTime = endTime,
-            tagId = tag?.id,
-            targetType = FocusTargetType.TAG,
-            targetId = tag?.id,
-            targetLabel = tag?.name,
-        )
+        logBackfilledSession(mode, startTime, endTime, target)
     }
 
     /**
@@ -541,13 +531,10 @@ class FocusViewModel(
         taskTitle: String
     ) {
         logBackfilledSession(
-            mode = mode,
-            startTime = startTime,
-            endTime = endTime,
-            tagId = null,
-            targetType = FocusTargetType.TASK,
-            targetId = taskId,
-            targetLabel = taskTitle,
+            mode,
+            startTime,
+            endTime,
+            FocusTargetSelection.of(FocusTargetType.TASK, taskId, taskTitle),
         )
     }
 
@@ -555,10 +542,7 @@ class FocusViewModel(
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        tagId: String?,
-        targetType: FocusTargetType,
-        targetId: String?,
-        targetLabel: String?
+        target: FocusTargetSelection?
     ) {
         val totalSeconds = endTime.epochSecond - startTime.epochSecond
         if (totalSeconds <= 0) return
@@ -572,11 +556,7 @@ class FocusViewModel(
                     endTime = endTime,
                     totalSecondsFocused = totalSeconds.toInt(),
                     isCompleted = true,
-                    tagId = tagId,
-                    targetType = targetType,
-                    targetId = targetId,
-                    targetLabel = targetLabel,
-                )
+                ).withTarget(target)
             )
             awardFocusXp((totalSeconds / 60).toInt())
         }
@@ -584,30 +564,25 @@ class FocusViewModel(
 
     /**
      * Applies an edit to an already logged session: its focused time is re-derived from the new
-     * range and the XP it earned is corrected by the difference. [tag] only re-tags tag-targeted
-     * sessions; a session logged against a task or habit keeps its target.
+     * range and the XP it earned is corrected by the difference. Retargeting doesn't undo or
+     * redo any auto-completion the session triggered when it was recorded.
      */
     fun updateSession(
         session: FocusSessionEntity,
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        tag: FocusTagEntity?
+        target: FocusTargetSelection?
     ) {
         val totalSeconds = (endTime.epochSecond - startTime.epochSecond).toInt()
         if (totalSeconds <= 0) return
 
-        val retimed = session.copy(
+        val updated = session.copy(
             modeId = mode.id,
             startTime = startTime,
             endTime = endTime,
             totalSecondsFocused = totalSeconds,
-        )
-        val updated = if (session.targetType == FocusTargetType.TAG) {
-            retimed.copy(tagId = tag?.id, targetId = tag?.id, targetLabel = tag?.name)
-        } else {
-            retimed
-        }
+        ).withTarget(target)
 
         viewModelScope.launch {
             focusRepository.updateSession(updated)
@@ -622,6 +597,14 @@ class FocusViewModel(
             awardFocusXp(-(session.totalSecondsFocused / 60))
         }
     }
+
+    // tagId mirrors targetId for tag targets only; the stats tag filter and the calendar read it.
+    private fun FocusSessionEntity.withTarget(target: FocusTargetSelection?) = copy(
+        tagId = target?.takeIf { it.type == FocusTargetType.TAG }?.id,
+        targetType = target?.type ?: FocusTargetType.TAG,
+        targetId = target?.id,
+        targetLabel = target?.label,
+    )
 
     // Focus XP is paid per whole minute, so a session's XP can be handed out and taken back
     // symmetrically: editing or deleting one reverses exactly what logging it awarded.

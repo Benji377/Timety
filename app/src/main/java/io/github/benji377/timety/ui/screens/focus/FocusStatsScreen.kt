@@ -26,10 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.TaskAlt
-import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -66,6 +63,8 @@ import io.github.benji377.timety.data.model.focus.DistractionUIType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.focus.color
+import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.WeekNavigator
@@ -73,10 +72,9 @@ import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.ChartTeal
 import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
-import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
@@ -148,7 +146,8 @@ fun FocusStatsScreen(
     val defaultModeLabel = stringResource(R.string.focusLabelDefault)
 
     fun resolveTargetName(session: FocusSessionEntity): String = when (session.targetType) {
-        FocusTargetType.TASK, FocusTargetType.HABIT ->
+        FocusTargetType.TASK, FocusTargetType.RECURRING_TASK, FocusTargetType.HABIT,
+        FocusTargetType.GOAL ->
             session.targetLabel?.trim()?.takeIf { it.isNotEmpty() } ?: defaultTargetEmpty
 
         FocusTargetType.TAG ->
@@ -311,8 +310,8 @@ fun FocusStatsScreen(
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
-            // Deliberately unfiltered: this section is an all-time summary. Task- and
-            // habit-linked sessions carry no tagId, so applying the tag filter here would
+            // Deliberately unfiltered: this section is an all-time summary. Sessions linked to
+            // anything but a tag carry no tagId, so applying the tag filter here would
             // zero out their bars and make the breakdown look broken.
             TargetBreakdownSection(sessions)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
@@ -511,17 +510,9 @@ private fun SessionRow(
     tagById: Map<String, FocusTagEntity>,
     onEdit: () -> Unit,
 ) {
-    val (icon: ImageVector, color: Color) = when (session.targetType) {
-        FocusTargetType.TASK -> Icons.Filled.TaskAlt to TaskColor
-        FocusTargetType.HABIT -> Icons.Filled.Alarm to HabitColor
-        FocusTargetType.TAG -> Icons.Outlined.LocalOffer to (session.tagId?.let {
-            tagById[it]?.let { tag ->
-                Color(
-                    tag.colorValue
-                )
-            }
-        } ?: FocusColor)
-    }
+    val icon = session.targetType.icon
+    val color = session.tagId?.let { tagById[it] }?.let { Color(it.colorValue) }
+        ?: session.targetType.color
     val dfs = LocalDateFormatSettings.current
     val dateStr = AppDateFormatUtils.formatDate(
         session.startTime,
@@ -688,44 +679,35 @@ private data class TargetTypeStat(
     val minutes: Int
 )
 
-@Composable
-private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
-    val tagsLabel = stringResource(R.string.globalLabelTags)
-    val tasksLabel = stringResource(R.string.globalLabelTasks)
-    val habitsLabel = stringResource(R.string.globalLabelHabits)
-
-    val totals = remember(sessions) {
-        val map = mutableMapOf(
-            FocusTargetType.TAG to 0,
-            FocusTargetType.TASK to 0,
-            FocusTargetType.HABIT to 0
-        )
-        sessions.forEach { s ->
-            map[s.targetType] = (map[s.targetType] ?: 0) + s.totalSecondsFocused / 60
-        }
-        map
+private val FocusTargetType.pluralLabelRes: Int
+    get() = when (this) {
+        FocusTargetType.TAG -> R.string.globalLabelTags
+        FocusTargetType.TASK -> R.string.globalLabelTasks
+        FocusTargetType.RECURRING_TASK -> R.string.recurringTasksTitle
+        FocusTargetType.HABIT -> R.string.globalLabelHabits
+        FocusTargetType.GOAL -> R.string.globalLabelGoals
     }
 
-    val stats = listOf(
+// Recurring tasks share the task blue everywhere else, but adjacent segments of the stacked bar
+// below need distinct colors to stay readable.
+private val FocusTargetType.chartColor: Color
+    get() = if (this == FocusTargetType.RECURRING_TASK) ChartTeal else color
+
+@Composable
+private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
+    val totals = remember(sessions) {
+        sessions.groupBy { it.targetType }
+            .mapValues { (_, typed) -> typed.sumOf { it.totalSecondsFocused / 60 } }
+    }
+
+    val stats = FocusTargetType.entries.map { type ->
         TargetTypeStat(
-            tagsLabel,
-            FocusColor,
-            Icons.Outlined.LocalOffer,
-            totals[FocusTargetType.TAG] ?: 0
-        ),
-        TargetTypeStat(
-            tasksLabel,
-            TaskColor,
-            Icons.Filled.TaskAlt,
-            totals[FocusTargetType.TASK] ?: 0
-        ),
-        TargetTypeStat(
-            habitsLabel,
-            HabitColor,
-            Icons.Filled.Alarm,
-            totals[FocusTargetType.HABIT] ?: 0
-        ),
-    )
+            stringResource(type.pluralLabelRes),
+            type.chartColor,
+            type.icon,
+            totals[type] ?: 0
+        )
+    }
     val totalMinutes = stats.sumOf { it.minutes }
 
     Column {

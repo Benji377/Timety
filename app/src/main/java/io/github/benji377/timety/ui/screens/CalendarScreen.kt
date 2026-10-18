@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
+import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.focus.color
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
@@ -830,12 +832,13 @@ private fun FocusSessionsAccordion(
                             // untagged sessions get the same neutral solid used for muted text
                             // elsewhere on this screen.
                             tint = tag?.let { Color(it.colorValue) }
+                                ?: session.targetType.takeIf { it != FocusTargetType.TAG }?.color
                                 ?: MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            // Task- and habit-linked sessions carry no tag, so name them by the
-                            // target they were logged against rather than calling them untagged.
+                            // Sessions linked to anything but a tag carry no tag, so name them by
+                            // the target they were logged against rather than calling them untagged.
                             val title = tag?.name
                                 ?: session.targetLabel?.trim()?.takeIf { it.isNotEmpty() }
                                 ?: untaggedLabel

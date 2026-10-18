@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.FastForward
@@ -27,7 +26,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Task
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.ButtonDefaults
@@ -69,6 +67,7 @@ import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.services.FocusTimerManager
@@ -87,14 +86,12 @@ import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
-import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
@@ -136,7 +133,6 @@ fun FocusScreen(
     onNavigateToSettings: () -> Unit = {},
     focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val context = LocalContext.current
@@ -153,12 +149,6 @@ fun FocusScreen(
     val isRunning = timerFlags.isRunning
     val isPaused = timerFlags.isPaused
 
-    LaunchedEffect(focusViewModel) {
-        focusViewModel.autoCompleteTaskEvent.collect { taskId ->
-            taskViewModel.markTaskCompleted(taskId)
-        }
-    }
-
     val allModes by focusViewModel.allModes.collectAsState()
     val modeIndex by focusViewModel.currentModeIndex.collectAsState()
     val activeMode = allModes.getOrNull(modeIndex)
@@ -167,9 +157,7 @@ fun FocusScreen(
     val awaitingContinue by focusViewModel.awaitingContinue.collectAsState()
 
     val selectedTarget by focusViewModel.selectedTarget.collectAsState()
-    val allTags by focusViewModel.allTags.collectAsState()
     val allSessions by focusViewModel.allSessions.collectAsState()
-    val tasks by taskViewModel.allTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
     val keepScreenOnDuringFocus by settingsViewModel.keepScreenOnDuringFocus.collectAsState()
@@ -577,27 +565,10 @@ fun FocusScreen(
     if (showTargetSelection) {
         TargetSelectorBottomSheet(
             onDismissRequest = { showTargetSelection = false },
-            tags = allTags,
-            tasks = tasks,
-            habitsWithCompletions = habitsWithCompletions,
-            selectedType = selectedTarget?.type ?: FocusTargetType.TAG,
-            selectedId = selectedTarget?.id,
-            onTagSelected = { focusViewModel.setSelectedTag(it) },
-            onTaskSelected = {
-                focusViewModel.setSelectedTask(
-                    it.id,
-                    it.title,
-                    TaskColor.toArgb()
-                )
-            },
-            onHabitSelected = {
-                focusViewModel.setSelectedHabit(
-                    it.id,
-                    it.name,
-                    HabitColor.toArgb()
-                )
-            },
+            selected = selectedTarget,
+            onTargetSelected = { focusViewModel.setSelectedTarget(it) },
             onCreateNewTag = { showCreateTagDialog = true },
+            focusViewModel = focusViewModel,
         )
     }
 
@@ -620,15 +591,10 @@ fun FocusScreen(
         SessionEditorDialog(
             title = stringResource(R.string.dialogTimeMachineTitle),
             modes = allModes,
-            tags = allTags,
-            initialSelectedTagId = selectedTarget?.takeIf { it.type == FocusTargetType.TAG }?.id,
+            initialTarget = selectedTarget,
             onDismiss = { showTimeMachine = false },
-            onSave = { mode, start, end, tagId ->
-                focusViewModel.logPastSession(
-                    mode,
-                    start,
-                    end,
-                    allTags.firstOrNull { it.id == tagId })
+            onSave = { mode, start, end, target ->
+                focusViewModel.logPastSession(mode, start, end, target)
                 showTimeMachine = false
                 scope.launch {
                     snackbarHostState.showSnackbar(dialogTimeMachineSuccessStr)
@@ -761,11 +727,8 @@ private fun TimerGauge(
     }
 
     val gaugeColor = if (isResting) WarningColor else FocusColor
-    val bottomTextIcon = when (selectedTarget?.type) {
-        FocusTargetType.TASK -> Icons.Filled.Task
-        FocusTargetType.HABIT -> Icons.Filled.Alarm
-        else -> null
-    }
+    // Tags are identified by their color alone, so only the other target types get an icon.
+    val bottomTextIcon = selectedTarget?.type?.takeIf { it != FocusTargetType.TAG }?.icon
 
     InteractiveGauge(
         progress = gaugeProgress,

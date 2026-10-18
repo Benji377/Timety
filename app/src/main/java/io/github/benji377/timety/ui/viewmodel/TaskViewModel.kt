@@ -81,24 +81,6 @@ class TaskViewModel(
         }
     }
 
-    /** Marks the task complete and awards XP; used by the focus auto-complete flow. */
-    fun markTaskCompleted(taskId: String) {
-        viewModelScope.launch {
-            // Fetched from the DB, not the allTasks snapshot: the flow may not have
-            // emitted yet when the focus auto-complete event fires.
-            val task = taskRepository.getTaskById(taskId) ?: return@launch
-            if (task.isCompleted) return@launch
-            val updatedTask = task.copy(
-                isCompleted = true,
-                completedAt = Instant.now()
-            )
-            taskRepository.updateTask(updatedTask)
-            scheduleTaskReminders(updatedTask)
-            userRepository.addXp(ExperienceEngine.XP_PER_TASK)
-            updateWidgets()
-        }
-    }
-
     private suspend fun scheduleTaskReminders(task: TaskEntity) {
         ReminderScheduler.create(application)
             .scheduleTaskReminders(task)

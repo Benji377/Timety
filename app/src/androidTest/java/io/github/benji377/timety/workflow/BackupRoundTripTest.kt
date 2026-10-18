@@ -132,9 +132,9 @@ class BackupRoundTripTest {
         )
         assertEquals("focus tag", seeded.tag, target.focusRepository.allTags.first().single())
         assertEquals(
-            "focus session",
-            seeded.session,
-            target.focusRepository.allSessions.first().single(),
+            "focus sessions",
+            listOf(seeded.session, seeded.goalSession),
+            target.focusRepository.allSessions.first().sortedBy { it.id },
         )
         assertEquals(
             "distraction",
@@ -301,6 +301,20 @@ class BackupRoundTripTest {
         )
         container.focusRepository.insertSession(session)
 
+        // One of the newer target types, which older app versions don't know.
+        val goalSession = FocusSessionEntity(
+            id = "session-2",
+            modeId = mode.id,
+            startTime = now.minus(3, ChronoUnit.HOURS),
+            endTime = now.minus(2, ChronoUnit.HOURS),
+            totalSecondsFocused = 3600,
+            isCompleted = true,
+            targetType = FocusTargetType.GOAL,
+            targetId = goal.id,
+            targetLabel = goal.name,
+        )
+        container.focusRepository.insertSession(goalSession)
+
         val distraction = DistractionEntity(
             sessionId = session.id,
             time = now,
@@ -313,7 +327,8 @@ class BackupRoundTripTest {
 
         return Seeded(
             habit, habitCompletion, quickHabit, task, subtask, recurringTask, occurrence,
-            goal, goalEntry, dayRating, profile, mode, phase, tag, session, distraction,
+            goal, goalEntry, dayRating, profile, mode, phase, tag, session, goalSession,
+            distraction,
         )
     }
 
@@ -333,6 +348,7 @@ class BackupRoundTripTest {
         val phase: SessionPhaseEntity,
         val tag: FocusTagEntity,
         val session: FocusSessionEntity,
+        val goalSession: FocusSessionEntity,
         val distraction: DistractionEntity,
     )
 }

@@ -526,10 +526,8 @@
     <string name="dialogTimeMachineEndTime">Orario di fine</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">L\'orario di fine deve essere successivo a quello di inizio</string>
     <string name="dialogTimeMachineMode">Modalità di focus</string>
-    <string name="dialogTimeMachineNoTag">Nessuna etichetta</string>
     <string name="dialogTimeMachineStartTime">Orario di inizio</string>
     <string name="dialogTimeMachineSuccess">Sessione registrata!</string>
-    <string name="dialogTimeMachineTag">Etichetta</string>
     <string name="dialogTimeMachineTitle">Registra sessione passata</string>
     <string name="locationApiDialogBestPractice">Miglior pratica</string>
     <string name="locationApiDialogBestPracticeDesc">Ospita la tua istanza Photon per una maggiore privacy</string>

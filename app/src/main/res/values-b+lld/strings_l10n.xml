@@ -562,10 +562,8 @@
     <string name="dialogTimeMachineEndTime">Ora de fin</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">L\'ora de fin muessa vester do l\'ora de taché</string>
     <string name="dialogTimeMachineMode">Modalità de Focus</string>
-    <string name="dialogTimeMachineNoTag">Deguna eticheta</string>
     <string name="dialogTimeMachineStartTime">Ora de taché</string>
     <string name="dialogTimeMachineSuccess">Sescion registreda!</string>
-    <string name="dialogTimeMachineTag">Eticheta</string>
     <string name="dialogTimeMachineTitle">Registré sescion passeda</string>
     <string name="locationApiDialogBestPractice">Pruzess Miëur</string>
     <string name="locationApiDialogBestPracticeDesc">Aministrea la tia istyanza Photon per ti privacy</string>

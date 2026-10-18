@@ -48,8 +48,7 @@ fun rememberTaskCompletionToggle(
             title = stringResource(R.string.taskFocusLogTitle),
             icon = Icons.Outlined.Timer,
             modes = modes,
-            // Sessions logged this way are attributed to the task, so there is no tag to pick.
-            tags = emptyList(),
+            // Sessions logged this way are attributed to the task, so there is no target to pick.
             fixedTargetLabel = task.title,
             onDismiss = { pendingTask = null },
             onSave = { mode, start, end, _ ->

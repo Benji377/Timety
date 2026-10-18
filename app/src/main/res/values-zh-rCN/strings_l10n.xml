@@ -517,10 +517,8 @@
     <string name="dialogTimeMachineEndTime">结束时间</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">结束时间必须晚于开始时间</string>
     <string name="dialogTimeMachineMode">专注模式</string>
-    <string name="dialogTimeMachineNoTag">无标签</string>
     <string name="dialogTimeMachineStartTime">开始时间</string>
     <string name="dialogTimeMachineSuccess">已记录专注时段！</string>
-    <string name="dialogTimeMachineTag">标签</string>
     <string name="dialogTimeMachineTitle">记录过去的专注时段</string>
     <string name="locationApiDialogBestPractice">最佳实践</string>
     <string name="locationApiDialogBestPracticeDesc">为保护隐私，建议自行托管 Photon 实例</string>

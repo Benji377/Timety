@@ -7,23 +7,16 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.UserRepository
+import io.github.benji377.timety.services.CompletionActions
+import io.github.benji377.timety.services.RecurringCompletionUndo
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.util.stats.ExperienceEngine
-import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
-
-/** What [RecurringTaskViewModel.completeOccurrence] changed, so an Undo action can revert it. */
-data class RecurringCompletionUndo(
-    val occurrenceId: Long,
-    val previousDueDate: Instant,
-    /** The task as stored after completion, i.e. with the advanced due date. */
-    val advancedTask: RecurringTaskEntity,
-)
 
 /** Exposes recurring tasks with their occurrence logs, and applies XP/reminder side effects. */
 class RecurringTaskViewModel(
@@ -80,16 +73,11 @@ class RecurringTaskViewModel(
         onCompleted: (RecurringCompletionUndo) -> Unit = {},
     ) {
         viewModelScope.launch {
-            val now = Instant.now()
-            val occurrenceId = recurringTaskRepository.insertOccurrence(
-                RecurringOccurrenceEntity(recurringTaskId = task.id, completedAt = now)
+            onCompleted(
+                CompletionActions.completeRecurringOccurrence(
+                    application, recurringTaskRepository, userRepository, task
+                )
             )
-            val advanced = task.copy(dueDate = RecurrenceUtils.nextDueDate(task, now))
-            recurringTaskRepository.updateTask(advanced)
-            scheduleReminders(advanced)
-            userRepository.addXp(ExperienceEngine.XP_PER_TASK)
-            updateWidgets()
-            onCompleted(RecurringCompletionUndo(occurrenceId, task.dueDate, advanced))
         }
     }
 

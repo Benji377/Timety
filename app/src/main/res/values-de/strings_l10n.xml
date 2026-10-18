@@ -526,10 +526,8 @@
     <string name="dialogTimeMachineEndTime">Endzeit</string>
     <string name="dialogTimeMachineErrorEndBeforeStart">Die Endzeit muss nach der Startzeit liegen</string>
     <string name="dialogTimeMachineMode">Fokus-Modus</string>
-    <string name="dialogTimeMachineNoTag">Kein Tag</string>
     <string name="dialogTimeMachineStartTime">Startzeit</string>
     <string name="dialogTimeMachineSuccess">Sitzung protokolliert!</string>
-    <string name="dialogTimeMachineTag">Tag</string>
     <string name="dialogTimeMachineTitle">Vergangene Sitzung eintragen</string>
     <string name="locationApiDialogBestPractice">Empfehlung</string>
     <string name="locationApiDialogBestPracticeDesc">Hoste deine eigene Photon-Instanz für mehr Privatsphäre</string>
