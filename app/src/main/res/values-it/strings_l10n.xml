@@ -264,8 +264,7 @@
     <string name="taskDetailsLabelLocation">Luogo</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
     <string name="taskDetailsLocationDetails">Dettagli del luogo</string>
-    <string name="taskDetailsLocationNoInfo">Nessuna informazione sul luogo trovata per questa posizione</string>
-    <string name="taskDetailsLocationOffline">Nessuna connessione a internet: la ricerca della posizione e i dettagli del luogo non sono disponibili</string>
+    <string name="taskDetailsLocationOffline">No internet connection – location search is unavailable</string>
     <string name="taskDetailsLabelReminderTooEarly">Il promemoria personalizzato deve essere precedente alla data di scadenza</string>
     <string name="taskDetailsLabelSubtaskHint">Aggiungi sotto-attività…</string>
     <string name="taskDetailsLabelTitle">Titolo attività</string>
