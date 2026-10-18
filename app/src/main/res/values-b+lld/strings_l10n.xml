@@ -280,8 +280,7 @@
     <string name="taskDetailsLabelLocation">Luelg</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
     <string name="taskDetailsLocationDetails">Detaies dl post</string>
-    <string name="taskDetailsLocationNoInfo">Deguna infurmazions per chesc post</string>
-    <string name="taskDetailsLocationOffline">Deguna cunession a internet - Cri post y nfurmazios ie nia mesum</string>
+    <string name="taskDetailsLocationOffline">No internet connection – location search is unavailable</string>
     <string name="taskDetailsLabelReminderTooEarly">L lezit persunalisà muessa vester dant ala data de scadënza</string>
     <string name="taskDetailsLabelSubtaskHint">Njunté sot-ncëries…</string>
     <string name="taskDetailsLabelTitle">Titul dla ncëria</string>
