@@ -44,7 +44,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
@@ -79,6 +78,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
+import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
@@ -102,17 +102,13 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
-import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.location.LocationApi
-import io.github.benji377.timety.util.location.LocationServerException
 import io.github.benji377.timety.util.task.CustomReminderIssue
 import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -149,6 +145,7 @@ fun TaskDetailScreen(
     var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
     var description by remember(existingTask) { mutableStateOf(existingTask?.description ?: "") }
     var location by remember(existingTask) { mutableStateOf(existingTask?.location ?: "") }
+    var place by remember(existingTask) { mutableStateOf(existingTask?.place) }
     var priority by remember(existingTask) {
         mutableStateOf(
             existingTask?.priority ?: Priority.MEDIUM
@@ -227,6 +224,7 @@ fun TaskDetailScreen(
                                 title = trimmedTitle,
                                 description = description.trim(),
                                 location = location.trim(),
+                                place = place,
                                 priority = priority,
                                 size = size,
                                 dueDate = dueDate,
@@ -440,7 +438,12 @@ fun TaskDetailScreen(
             item {
                 OutlinedTextField(
                     value = location,
-                    onValueChange = { location = it },
+                    onValueChange = {
+                        location = it
+                        // Hand-editing the text detaches it from the picked place, so the
+                        // details can never describe something other than what's shown.
+                        place = null
+                    },
                     enabled = isEditing,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.taskDetailsLabelLocation)) },
@@ -457,11 +460,9 @@ fun TaskDetailScreen(
                     }
                 )
 
-                // The location search and the place details both need the network; the app
-                // is offline-first, so a missing connection is surfaced as a small inline
-                // label instead of a dialog.
-                val isOnline = LocationApi.isOnline(LocalContext.current)
-                if (!isOnline && (isEditing || location.isNotBlank())) {
+                // Only the location search needs the network; the app is offline-first, so a
+                // missing connection is surfaced as a small inline label instead of a dialog.
+                if (isEditing && !LocationApi.isOnline(LocalContext.current)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = AppTheme.spaceSmall)
@@ -481,8 +482,9 @@ fun TaskDetailScreen(
                     }
                 }
 
-                if (!isEditing && location.isNotBlank() && isOnline) {
-                    PlaceDetailsSection(location = location)
+                val savedPlace = place
+                if (!isEditing && savedPlace != null) {
+                    PlaceDetailsSection(place = savedPlace)
                 }
 
                 if (showLocationPicker) {
@@ -494,8 +496,9 @@ fun TaskDetailScreen(
                     ) {
                         LocationPickerScreen(
                             initialQuery = location,
-                            onLocationSelected = { selectedLocation ->
-                                location = selectedLocation
+                            onLocationSelected = { selectedPlace ->
+                                location = selectedPlace.name
+                                place = selectedPlace
                                 showLocationPicker = false
                             },
                             onBack = { showLocationPicker = false }
@@ -800,122 +803,49 @@ private fun <T> AccordionSelector(
     }
 }
 
-/**
- * Expandable place details for the saved location, resolved on demand through the
- * configured location API. Only composed while online: the caller shows an inline
- * offline label instead when there is no connection.
- */
+/** Expandable details of the place picked for the task, read from the stored snapshot. */
 @Composable
-private fun PlaceDetailsSection(
-    location: String,
-    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-) {
-    val locationApiEndpoint by settingsViewModel.locationApiEndpoint.collectAsState()
-    var place by remember(location) { mutableStateOf<JSONObject?>(null) }
-    var isLoading by remember(location) { mutableStateOf(false) }
-    var serverErrorCode by remember(location) { mutableStateOf<Int?>(null) }
-    var networkError by remember(location) { mutableStateOf(false) }
-    var fetched by remember(location) { mutableStateOf(false) }
-
+private fun PlaceDetailsSection(place: TaskPlace) {
     StyledExpansionTile(
         title = stringResource(R.string.taskDetailsLocationDetails),
         titleColor = TaskColor,
     ) {
-        // The tile content only composes while expanded, so the lookup is lazy and
-        // runs once per location.
-        LaunchedEffect(location) {
-            if (fetched) return@LaunchedEffect
-            isLoading = true
-            try {
-                place = LocationApi.search(locationApiEndpoint, location, limit = 1).firstOrNull()
-                fetched = true
-            } catch (e: CancellationException) {
-                // Collapsing the tile mid-load cancels this effect; not a network failure.
-                throw e
-            } catch (e: LocationServerException) {
-                serverErrorCode = e.code
-                fetched = true
-            } catch (_: Exception) {
-                networkError = true
-                fetched = true
-            } finally {
-                isLoading = false
-            }
-        }
-
         Column(modifier = Modifier.padding(horizontal = AppTheme.spaceLarge)) {
-            val errorCode = serverErrorCode
-            when {
-                isLoading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-
-                errorCode != null -> Text(
-                    stringResource(R.string.locationPickerServerError, errorCode),
-                    fontSize = AppTheme.fsBodySmall,
-                    color = MaterialTheme.colorScheme.error
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Outlined.LocationOn,
+                    contentDescription = null,
+                    tint = TaskColor,
+                    modifier = Modifier.size(AppTheme.iconSizeMedium)
                 )
-
-                networkError -> Text(
-                    stringResource(R.string.locationPickerNetworkError),
-                    fontSize = AppTheme.fsBodySmall,
-                    color = MaterialTheme.colorScheme.error
-                )
-
-                place == null -> Text(
-                    stringResource(R.string.taskDetailsLocationNoInfo),
+                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                Text(place.name, fontWeight = FontWeight.Bold)
+            }
+            if (place.details.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                Text(
+                    place.details,
                     fontSize = AppTheme.fsBodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
-                else -> place?.let { feature ->
-                    val props = feature.optJSONObject("properties") ?: JSONObject()
-                    val name = LocationApi.primaryName(props)
-                        .ifEmpty { stringResource(R.string.locationPickerUnknown) }
-                    val details = LocationApi.detailsString(props)
-                    val country = props.optString("country", "")
-                    val coordinates = feature.optJSONObject("geometry")
-                        ?.optJSONArray("coordinates")
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Outlined.LocationOn,
-                            contentDescription = null,
-                            tint = TaskColor,
-                            modifier = Modifier.size(AppTheme.iconSizeMedium)
-                        )
-                        Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                        Text(name, fontWeight = FontWeight.Bold)
-                    }
-                    if (details.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-                        Text(
-                            details,
-                            fontSize = AppTheme.fsBodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (country.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-                        Text(
-                            country,
-                            fontSize = AppTheme.fsBodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (coordinates != null && coordinates.length() >= 2) {
-                        Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-                        Text(
-                            // GeoJSON stores [longitude, latitude]; display as "lat, lon".
-                            String.format(
-                                java.util.Locale.ROOT,
-                                "%.5f, %.5f",
-                                coordinates.optDouble(1),
-                                coordinates.optDouble(0)
-                            ),
-                            fontSize = AppTheme.fsBodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+            }
+            if (place.country.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                Text(
+                    place.country,
+                    fontSize = AppTheme.fsBodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            val latitude = place.latitude
+            val longitude = place.longitude
+            if (latitude != null && longitude != null) {
+                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                Text(
+                    String.format(java.util.Locale.ROOT, "%.5f, %.5f", latitude, longitude),
+                    fontSize = AppTheme.fsBodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

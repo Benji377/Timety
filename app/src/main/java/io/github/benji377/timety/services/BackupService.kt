@@ -29,6 +29,7 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
+import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.data.model.user.DayRatingEntity
@@ -173,6 +174,7 @@ class BackupService(
                 put("description", task.description)
                 put("dueDate", task.dueDate?.toString() ?: JSONObject.NULL)
                 put("location", task.location)
+                put("place", task.place?.toJson() ?: JSONObject.NULL)
                 put("priority", task.priority.name)
                 put("category", task.category)
                 put("size", task.size.name)
@@ -473,6 +475,7 @@ class BackupService(
                     description = readString(taskJson, "description") ?: "",
                     dueDate = readInstant(taskJson, "dueDate"),
                     location = readString(taskJson, "location") ?: "",
+                    place = taskJson.optJSONObject("place")?.let { TaskPlace.fromJson(it) },
                     priority = enumOrDefault(readString(taskJson, "priority"), Priority.MEDIUM),
                     category = readString(taskJson, "category") ?: "",
                     size = enumOrDefault(readString(taskJson, "size"), TaskSize.MEDIUM),

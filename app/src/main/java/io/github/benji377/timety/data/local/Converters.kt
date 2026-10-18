@@ -1,9 +1,11 @@
 package io.github.benji377.timety.data.local
 
 import androidx.room.TypeConverter
+import io.github.benji377.timety.data.model.task.TaskPlace
+import org.json.JSONObject
 import java.time.Instant
 
-/** Room type converters for [Instant] and for lists of [Instant], [Int], and [String]. */
+/** Room type converters for [Instant], [TaskPlace], and for lists of [Instant], [Int], and [String]. */
 class Converters {
     @TypeConverter
     fun fromTimestamp(value: Long?): Instant? {
@@ -52,5 +54,20 @@ class Converters {
     fun toStringList(data: String?): List<String> {
         if (data.isNullOrBlank()) return emptyList()
         return data.split("|||")
+    }
+
+    @TypeConverter
+    fun fromTaskPlace(place: TaskPlace?): String? {
+        return place?.toJson()?.toString()
+    }
+
+    @TypeConverter
+    fun toTaskPlace(data: String?): TaskPlace? {
+        if (data.isNullOrBlank()) return null
+        return try {
+            TaskPlace.fromJson(JSONObject(data))
+        } catch (_: Exception) {
+            null
+        }
     }
 }

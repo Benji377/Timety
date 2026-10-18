@@ -264,8 +264,7 @@
     <string name="taskDetailsLabelLocation">Location</string>
     <string name="taskDetailsLabelPriority">Priority</string>
     <string name="taskDetailsLocationDetails">Place Details</string>
-    <string name="taskDetailsLocationNoInfo">No place information found for this location</string>
-    <string name="taskDetailsLocationOffline">No internet connection – location search and place details are unavailable</string>
+    <string name="taskDetailsLocationOffline">No internet connection – location search is unavailable</string>
     <string name="taskDetailsLabelReminderTooEarly">Custom reminder must be before the Due Date</string>
     <string name="taskDetailsLabelSubtaskHint">Add subtasks…</string>
     <string name="taskDetailsLabelTitle">Task Title</string>

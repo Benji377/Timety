@@ -264,7 +264,6 @@
     <string name="taskDetailsLabelLocation">Ort</string>
     <string name="taskDetailsLabelPriority">Priorität</string>
     <string name="taskDetailsLocationDetails">Details zum Ort</string>
-    <string name="taskDetailsLocationNoInfo">Keine Ortsinformationen für diesen Standort gefunden</string>
     <string name="taskDetailsLocationOffline">Keine Internetverbindung - Standortsuche und Ortsinformationen sind nicht verfügbar</string>
     <string name="taskDetailsLabelReminderTooEarly">Die benutzerdefinierte Erinnerung muss vor dem Fälligkeitsdatum liegen</string>
     <string name="taskDetailsLabelSubtaskHint">Teilaufgaben hinzufügen…</string>

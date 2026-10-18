@@ -127,4 +127,29 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate4To5_addsNullablePlaceAndKeepsTasks() {
+        val dbName = "migration-test-4-5"
+
+        helper.createDatabase(dbName, 4).apply {
+            execSQL(
+                "INSERT INTO tasks (id, title, description, location, priority, category, size, " +
+                    "isCompleted, createdAt, reminders) " +
+                    "VALUES ('t1', 'Visit', '', 'Central Park', 'MEDIUM', '', 'MEDIUM', 0, 0, '')"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 5, true, MIGRATION_4_5)
+
+        // Existing tasks keep their location text and have no stored place.
+        db.query("SELECT location, place FROM tasks WHERE id = 't1'").use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals("Central Park", cursor.getString(0))
+            assertTrue(cursor.isNull(1))
+        }
+        db.close()
+    }
 }

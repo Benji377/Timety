@@ -68,6 +68,8 @@ data class TaskEntity(
     val completedAt: Instant? = null,
     val createdAt: Instant,
     val reminders: List<Instant> = emptyList(),
+    // Set only when [location] was picked from a search; a hand-typed location has no place.
+    val place: TaskPlace? = null,
 )
 
 /** A task paired with its subtasks, for a Room `@Relation` query. */

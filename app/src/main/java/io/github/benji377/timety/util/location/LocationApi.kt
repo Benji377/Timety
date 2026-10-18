@@ -3,6 +3,7 @@ package io.github.benji377.timety.util.location
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import io.github.benji377.timety.data.model.task.TaskPlace
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -13,8 +14,7 @@ import java.net.URLEncoder
 class LocationServerException(val code: Int) : Exception("Server error: $code")
 
 /**
- * Photon-compatible forward-geocoding client, shared by the location picker and the
- * task detail place-info view.
+ * Photon-compatible forward-geocoding client used by the location picker.
  */
 object LocationApi {
 
@@ -105,6 +105,24 @@ object LocationApi {
         }
 
         return parts.joinToString(" • ")
+    }
+
+    /**
+     * Snapshots a search result for storing on a task. [name] is the label shown in the picker,
+     * which may be a localized fallback when the result has no usable name.
+     */
+    fun toPlace(feature: JSONObject, name: String): TaskPlace {
+        val properties = feature.optJSONObject("properties") ?: JSONObject()
+        // GeoJSON stores [longitude, latitude].
+        val coordinates = feature.optJSONObject("geometry")?.optJSONArray("coordinates")
+            ?.takeIf { it.length() >= 2 }
+        return TaskPlace(
+            name = name,
+            details = detailsString(properties),
+            country = properties.optString("country", ""),
+            latitude = coordinates?.optDouble(1),
+            longitude = coordinates?.optDouble(0),
+        )
     }
 
     fun isOnline(context: Context): Boolean {

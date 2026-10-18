@@ -260,7 +260,6 @@
     <string name="taskDetailsLabelLocation">位置</string>
     <string name="taskDetailsLabelPriority">优先级</string>
     <string name="taskDetailsLocationDetails">位置详情</string>
-    <string name="taskDetailsLocationNoInfo">未找到该位置的信息</string>
     <string name="taskDetailsLocationOffline">无网络连接——位置搜索和详情不可用</string>
     <string name="taskDetailsLabelReminderTooEarly">自定义提醒时间必须早于截止日期</string>
     <string name="taskDetailsLabelSubtaskHint">添加子任务…</string>

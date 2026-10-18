@@ -123,5 +123,16 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+/**
+ * Adds `tasks.place`, a JSON snapshot of the picked search result, so place details no longer
+ * need a network lookup by name (which could resolve to a different place with the same name).
+ * Existing tasks keep their location text with no place.
+ */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `place` TEXT")
+    }
+}
+
 /** All migrations, in order, to register on the Room builder. */
-val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)

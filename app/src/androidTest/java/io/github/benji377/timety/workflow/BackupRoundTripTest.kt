@@ -24,6 +24,7 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
+import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
@@ -210,6 +211,13 @@ class BackupRoundTripTest {
             description = "Two pages",
             dueDate = now.plus(2, ChronoUnit.DAYS),
             location = "Office",
+            place = TaskPlace(
+                name = "Office",
+                details = "Office • Main Street 1 • Bolzano, Trentino-Alto Adige, 39100",
+                country = "Italy",
+                latitude = 46.49816,
+                longitude = 11.35478,
+            ),
             priority = Priority.VERY_HIGH,
             category = "Work",
             size = TaskSize.LARGE,

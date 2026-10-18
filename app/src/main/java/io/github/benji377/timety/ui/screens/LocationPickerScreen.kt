@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
@@ -65,7 +66,7 @@ fun LocationPickerScreen(
         factory = AppViewModelProvider.Factory
     ),
     initialQuery: String = "",
-    onLocationSelected: (String) -> Unit,
+    onLocationSelected: (TaskPlace) -> Unit,
     onBack: () -> Unit
 ) {
     var query by remember { mutableStateOf(initialQuery) }
@@ -240,7 +241,7 @@ fun LocationPickerScreen(
                                     )
                                 },
                                 modifier = Modifier.clickable {
-                                    onLocationSelected(title)
+                                    onLocationSelected(LocationApi.toPlace(feature, title))
                                 }
                             )
                             HorizontalDivider()
