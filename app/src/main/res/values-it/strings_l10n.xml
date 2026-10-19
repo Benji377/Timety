@@ -388,7 +388,7 @@
     <string name="settingsLabelFeedback">Invia feedback</string>
     <string name="settingsLabelFeedbackSubtitle">Segnala bug o richiedi nuove funzionalità</string>
     <string name="settingsLabelFocusAutocomplete">Completa automaticamente attività o abitudine collegata</string>
-    <string name="settingsLabelFocusAutocompleteSubtitle">Segna l\'attività o l\'abitudine selezionata come completata quando finisce un timer</string>
+    <string name="settingsLabelFocusAutocompleteSubtitle">Marks the selected task, recurring task or habit as complete when a focus timer finishes. Goals are never completed</string>
     <string name="settingsLabelFocusAskOnTaskComplete">Chiedi di registrare il tempo di focus</string>
     <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Propone di collegare una sessione di focus quando completi un\'attività</string>
     <string name="settingsLabelFocusGoal">Obiettivo di focus giornaliero</string>
@@ -523,13 +523,11 @@
         <item quantity="one">%d categoria</item>
         <item quantity="other">%d categorie</item>
     </plurals>
-    <string name="dialogTimeMachineEndTime">Orario di fine</string>
-    <string name="dialogTimeMachineErrorEndBeforeStart">L\'orario di fine deve essere successivo a quello di inizio</string>
+    <string name="dialogTimeMachineDuration">Duration</string>
+    <string name="dialogTimeMachineEnds">Ends %1$s</string>
     <string name="dialogTimeMachineMode">Modalità di focus</string>
-    <string name="dialogTimeMachineNoTag">Nessuna etichetta</string>
     <string name="dialogTimeMachineStartTime">Orario di inizio</string>
     <string name="dialogTimeMachineSuccess">Sessione registrata!</string>
-    <string name="dialogTimeMachineTag">Etichetta</string>
     <string name="dialogTimeMachineTitle">Registra sessione passata</string>
     <string name="locationApiDialogBestPractice">Miglior pratica</string>
     <string name="locationApiDialogBestPracticeDesc">Ospita la tua istanza Photon per una maggiore privacy</string>
@@ -615,6 +613,9 @@
     <string name="distractionSnack">Spuntino</string>
     <string name="distractionStretched">Stretching</string>
     <string name="targetSheetTitle">Seleziona target del focus</string>
+    <string name="targetSheetRecurringNextDue">Next due %1$s</string>
+    <string name="targetSheetGoalProgress">%1$d / %2$d %3$s</string>
+    <string name="targetSheetGoalsEmpty">No active goals</string>
     <string name="recurrenceLabel">Ripeti</string>
     <string name="recurrenceEveryLabel">Ogni</string>
     <string name="recurrenceWeekly">Settimanale</string>
