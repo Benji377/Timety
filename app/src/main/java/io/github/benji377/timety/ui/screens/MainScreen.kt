@@ -9,6 +9,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -186,9 +187,14 @@ fun MainScreen(
             startDestination = BottomNavItems[0].route,
             // consumeWindowInsets is required alongside padding: the screens' own TopAppBars
             // apply status-bar insets too, so without consumption the top inset is applied twice.
+            // imePadding then shrinks every screen above the keyboard: edge-to-edge windows are no
+            // longer resized by adjustResize, so without it the keyboard covers fields near the
+            // bottom. Applied after the consumption, it only adds the part of the keyboard height
+            // not already covered by the bottom bar / navigation-bar padding.
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
+                .imePadding()
         ) {
             composable(BottomNavItem.Home.route) {
                 HomeScreen(
