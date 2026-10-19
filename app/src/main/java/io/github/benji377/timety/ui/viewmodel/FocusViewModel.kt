@@ -27,6 +27,7 @@ import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.stats.ExperienceEngine
+import io.github.benji377.timety.util.stats.FocusSessionDayStats
 import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -495,12 +496,10 @@ class FocusViewModel(
 
     // Stats helpers.
 
-    fun getMinutesFocusedOnDay(day: LocalDate, zone: ZoneId = ZoneId.systemDefault()): Int {
-        val totalSeconds = allSessions.value
-            .filter { it.startTime.atZone(zone).toLocalDate() == day }
-            .sumOf { it.totalSecondsFocused }
-        return totalSeconds / 60
-    }
+    fun getMinutesFocusedOnDay(day: LocalDate, zone: ZoneId = ZoneId.systemDefault()): Int =
+        // Counts only the minutes that fell on [day], so a session crossing midnight is credited to
+        // each day it touched instead of dumping its whole length onto the day it started.
+        allSessions.value.sumOf { FocusSessionDayStats.minutesByDay(it, zone)[day] ?: 0 }
 
     fun getMinutesFocusedToday(zone: ZoneId = ZoneId.systemDefault()): Int =
         getMinutesFocusedOnDay(LocalDate.now(), zone)

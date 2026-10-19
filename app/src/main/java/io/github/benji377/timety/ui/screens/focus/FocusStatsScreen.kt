@@ -83,10 +83,12 @@ import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.FocusHeatmapBucketer
+import io.github.benji377.timety.util.stats.FocusSessionDayStats
 import io.github.benji377.timety.util.stats.HeatmapDay
 import io.github.benji377.timety.util.stats.StatsUtils
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -131,15 +133,16 @@ fun FocusStatsScreen(
     val endOfWeek = startOfWeek.plusDays(6)
     val isCurrentRealWeek = AppDateUtils.isWithinInclusive(LocalDate.now(), startOfWeek, endOfWeek)
 
-    val clockSessions = remember(filteredSessions, selectedDay) {
-        filteredSessions.filter {
-            AppDateUtils.isSameDay(
-                it.startTime.atZone(zone).toLocalDate(),
-                selectedDay
-            )
+    // Every session overlapping the day, counting only the minutes that fell on it, so a
+    // 22:00-02:00 session reads 2h on each side of midnight. The clock and the session list both
+    // show it on both days; it is still one stored session, listed with its real start and length.
+    val clockMinutesBySession = remember(filteredSessions, selectedDay) {
+        filteredSessions.mapNotNull { session ->
+            FocusSessionDayStats.minutesByDay(session, zone)[selectedDay]?.let { session to it }
         }
     }
-    val clockTotalMins = clockSessions.sumOf { it.totalSecondsFocused / 60 }
+    val clockSessions = clockMinutesBySession.map { it.first }
+    val clockTotalMins = clockMinutesBySession.sumOf { it.second }
 
     val defaultTargetEmpty = stringResource(R.string.focusTargetEmpty)
     val defaultTargetUntagged = stringResource(R.string.focusTargetUntagged)
@@ -207,6 +210,7 @@ fun FocusStatsScreen(
                 Box(modifier = Modifier.size(250.dp), contentAlignment = Alignment.Center) {
                     FocusClockChart(
                         sessions = clockSessions,
+                        day = selectedDay,
                         color = FocusColor,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -428,11 +432,13 @@ private fun DayPillSelector(
     }
 }
 
-// Draws a 24-hour clock face with an arc per session, starting at 00:00 at the top and
-// sweeping clockwise. A session that crosses midnight is clipped to the end of the day.
+// Draws a 24-hour clock face for [day] with an arc per session, starting at 00:00 at the top and
+// sweeping clockwise. Each session is clipped to [day], so one crossing midnight draws its evening
+// part on the day it started and its early-morning part on the next.
 @Composable
 private fun FocusClockChart(
     sessions: List<FocusSessionEntity>,
+    day: LocalDate,
     color: Color,
     modifier: Modifier = Modifier
 ) {
@@ -470,13 +476,15 @@ private fun FocusClockChart(
             )
         }
 
+        val dayStart = day.atStartOfDay(zone).toInstant()
+        val nextDayStart = day.plusDays(1).atStartOfDay(zone).toInstant()
+        fun hourOfDay(instant: Instant): Double =
+            Duration.between(dayStart, instant).seconds / 3600.0
+
         sessions.forEach { session ->
-            val startZoned = session.startTime.atZone(zone)
-            val startHour = startZoned.hour + startZoned.minute / 60.0
             val end = session.endTime ?: Instant.now()
-            val endZoned = end.atZone(zone)
-            var endHour = endZoned.hour + endZoned.minute / 60.0
-            if (startZoned.toLocalDate() != endZoned.toLocalDate()) endHour = 24.0
+            val startHour = hourOfDay(maxOf(session.startTime, dayStart))
+            val endHour = hourOfDay(minOf(end, nextDayStart))
 
             val sweepHours = endHour - startHour
             if (sweepHours <= 0) return@forEach
@@ -595,11 +603,12 @@ private fun VolumeBarChart(
     isCurrentRealWeek: Boolean,
     zone: ZoneId
 ) {
+    // A midnight-crossing session is credited to each day it spanned, so its bar height matches the
+    // heatmap and the daily goal instead of stacking the whole session onto its start day.
     val dailyMins = IntArray(7)
-    sessions.forEach { session ->
-        val day = session.startTime.atZone(zone).toLocalDate()
+    FocusSessionDayStats.minutesByDay(sessions, zone).forEach { (day, minutes) ->
         val offset = java.time.temporal.ChronoUnit.DAYS.between(startOfWeek, day)
-        if (offset in 0..6) dailyMins[offset.toInt()] += session.totalSecondsFocused / 60
+        if (offset in 0..6) dailyMins[offset.toInt()] += minutes
     }
     val maxY = StatsUtils.maxValue(dailyMins.toList(), minimum = 60.0)
     val denom = (maxY * 1.2).toFloat().coerceAtLeast(1f)
