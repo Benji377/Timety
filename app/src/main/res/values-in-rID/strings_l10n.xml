@@ -383,7 +383,7 @@
     <string name="settingsLabelFeedback">Send Feedback</string>
     <string name="settingsLabelFeedbackSubtitle">Report bugs or request new features</string>
     <string name="settingsLabelFocusAutocomplete">Auto-complete linked task or habit</string>
-    <string name="settingsLabelFocusAutocompleteSubtitle">Marks the selected task or habit as complete when a focus timer finishes</string>
+    <string name="settingsLabelFocusAutocompleteSubtitle">Marks the selected task, recurring task or habit as complete when a focus timer finishes. Goals are never completed</string>
     <string name="settingsLabelFocusAskOnTaskComplete">Ask to log focus time</string>
     <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Offers to attach a focus session when you check off a task</string>
     <string name="settingsLabelFocusGoal">Daily Focus Goal</string>
@@ -514,13 +514,11 @@
     <plurals name="settingsCategoriesCount">
         <item quantity="other">%d categories</item>
     </plurals>
-    <string name="dialogTimeMachineEndTime">End Time</string>
-    <string name="dialogTimeMachineErrorEndBeforeStart">End time must be after start time</string>
+    <string name="dialogTimeMachineDuration">Duration</string>
+    <string name="dialogTimeMachineEnds">Ends %1$s</string>
     <string name="dialogTimeMachineMode">Focus Mode</string>
-    <string name="dialogTimeMachineNoTag">No Tag</string>
     <string name="dialogTimeMachineStartTime">Start Time</string>
     <string name="dialogTimeMachineSuccess">Session Logged!</string>
-    <string name="dialogTimeMachineTag">Tag</string>
     <string name="dialogTimeMachineTitle">Log Past Session</string>
     <string name="locationApiDialogBestPractice">Best Practice</string>
     <string name="locationApiDialogBestPracticeDesc">Self-host your own Photon instance for privacy</string>
@@ -599,6 +597,9 @@
     <string name="distractionSnack">Snack</string>
     <string name="distractionStretched">Stretched</string>
     <string name="targetSheetTitle">Select Focus Target</string>
+    <string name="targetSheetRecurringNextDue">Next due %1$s</string>
+    <string name="targetSheetGoalProgress">%1$d / %2$d %3$s</string>
+    <string name="targetSheetGoalsEmpty">No active goals</string>
     <string name="recurrenceLabel">Repeat</string>
     <string name="recurrenceEveryLabel">Every</string>
     <string name="recurrenceWeekly">Weekly</string>
