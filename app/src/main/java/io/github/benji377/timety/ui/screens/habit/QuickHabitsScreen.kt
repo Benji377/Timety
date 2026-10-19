@@ -2,8 +2,6 @@ package io.github.benji377.timety.ui.screens.habit
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,13 +21,11 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -55,11 +51,12 @@ import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
-import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
+import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -242,7 +239,7 @@ private fun QuickHabitCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun QuickHabitEditDialog(
     initial: QuickHabitEntity?,
@@ -275,6 +272,12 @@ private fun QuickHabitEditDialog(
     var endMinute by remember { mutableIntStateOf(initial?.endMinuteOfDay ?: (20 * 60)) }
     var editingWindowStart by remember { mutableStateOf<Boolean?>(null) }
 
+    // labelBuilder isn't composable, so the segment labels are resolved here.
+    val minutesLabel = stringResource(R.string.quickHabitUnitMinutes)
+    val hoursLabel = stringResource(R.string.quickHabitUnitHours)
+    val everyDayLabel = stringResource(R.string.quickHabitEveryDay)
+    val specificDaysLabel = stringResource(R.string.quickHabitSpecificDays)
+
     val canSave = name.isNotBlank() &&
             intervalValue != null && intervalValue >= 1 &&
             (!specificDays || selectedWeekdays.isNotEmpty())
@@ -296,10 +299,12 @@ private fun QuickHabitEditDialog(
                     placeholder = { Text(stringResource(R.string.quickHabitNameHint)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                QuickHabitSectionDivider()
 
-                Text(stringResource(R.string.quickHabitIntervalLabel))
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
+                QuickHabitSectionHeader(
+                    title = stringResource(R.string.quickHabitIntervalLabel),
+                    subtitle = stringResource(R.string.quickHabitIntervalSubtitle),
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
@@ -314,48 +319,48 @@ private fun QuickHabitEditDialog(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.width(96.dp),
                     )
-                    SingleChoiceSegmentedButtonRow {
-                        SegmentedButton(
-                            selected = !unitIsHours,
-                            onClick = { unitIsHours = false },
-                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                        ) { Text(stringResource(R.string.quickHabitUnitMinutes)) }
-                        SegmentedButton(
-                            selected = unitIsHours,
-                            onClick = { unitIsHours = true },
-                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                        ) { Text(stringResource(R.string.quickHabitUnitHours)) }
-                    }
+                    NeoSegmentedSelector(
+                        values = listOf(false, true),
+                        selectedValue = unitIsHours,
+                        isEditing = true,
+                        onSelected = { unitIsHours = it },
+                        labelBuilder = { isHours -> if (isHours) hoursLabel else minutesLabel },
+                        modifier = Modifier.weight(1f),
+                        activeBgColor = HabitColor,
+                    )
                 }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                QuickHabitSectionDivider()
 
-                Text(stringResource(R.string.quickHabitDaysLabel))
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
-                    NeoFilterChip(
-                        selected = !specificDays,
-                        onClick = { specificDays = false },
-                        label = stringResource(R.string.quickHabitEveryDay),
-                    )
-                    NeoFilterChip(
-                        selected = specificDays,
-                        onClick = { specificDays = true },
-                        label = stringResource(R.string.quickHabitSpecificDays),
-                    )
-                }
+                QuickHabitSectionHeader(
+                    title = stringResource(R.string.quickHabitDaysLabel),
+                    subtitle = stringResource(R.string.quickHabitDaysSubtitle),
+                )
+                NeoSegmentedSelector(
+                    values = listOf(false, true),
+                    selectedValue = specificDays,
+                    isEditing = true,
+                    onSelected = { specificDays = it },
+                    labelBuilder = { specific -> if (specific) specificDaysLabel else everyDayLabel },
+                    activeBgColor = HabitColor,
+                )
                 if (specificDays) {
                     Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                    WeekdayChips(
+                    WeekdayToggleRow(
                         selected = selectedWeekdays,
                         onToggle = { day ->
                             selectedWeekdays =
                                 if (day in selectedWeekdays) selectedWeekdays - day
                                 else selectedWeekdays + day
                         },
+                        selectedColor = HabitColor,
                     )
                 }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                QuickHabitSectionDivider()
 
+                QuickHabitSectionHeader(
+                    title = stringResource(R.string.quickHabitActiveHoursLabel),
+                    subtitle = stringResource(R.string.quickHabitActiveHoursSubtitle),
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -458,27 +463,22 @@ private fun QuickHabitEditDialog(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/** Divider separating the quick-habit dialog's sections. */
 @Composable
-private fun WeekdayChips(selected: Set<Int>, onToggle: (Int) -> Unit) {
-    val dayLabels = listOf(
-        1 to stringResource(R.string.calendarHeaderMon),
-        2 to stringResource(R.string.calendarHeaderTue),
-        3 to stringResource(R.string.calendarHeaderWed),
-        4 to stringResource(R.string.calendarHeaderThu),
-        5 to stringResource(R.string.calendarHeaderFri),
-        6 to stringResource(R.string.calendarHeaderSat),
-        7 to stringResource(R.string.calendarHeaderSun),
+private fun QuickHabitSectionDivider() {
+    HorizontalDivider(modifier = Modifier.padding(vertical = AppTheme.spaceLarge))
+}
+
+/** Bold section title plus a one-line caption explaining what the controls below it do. */
+@Composable
+private fun QuickHabitSectionHeader(title: String, subtitle: String) {
+    Text(title, fontWeight = AppTheme.fwBold)
+    Text(
+        subtitle,
+        fontSize = AppTheme.fsBodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
-        dayLabels.forEach { (day, label) ->
-            NeoFilterChip(
-                selected = day in selected,
-                onClick = { onToggle(day) },
-                label = label,
-            )
-        }
-    }
+    Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
 }
 
 @Composable

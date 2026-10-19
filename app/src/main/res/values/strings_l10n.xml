@@ -690,10 +690,14 @@
     <string name="quickHabitNameLabel">Name</string>
     <string name="quickHabitNameHint">e.g. Drink water</string>
     <string name="quickHabitIntervalLabel">Repeat every</string>
+    <string name="quickHabitIntervalSubtitle">How often you get reminded</string>
     <string name="quickHabitUnitMinutes">Minutes</string>
     <string name="quickHabitUnitHours">Hours</string>
     <string name="quickHabitAllDayLabel">All day</string>
     <string name="quickHabitDaysLabel">Days</string>
+    <string name="quickHabitDaysSubtitle">Which days the reminders run on</string>
+    <string name="quickHabitActiveHoursLabel">Active hours</string>
+    <string name="quickHabitActiveHoursSubtitle">Only remind you within this time window</string>
     <string name="quickHabitEveryDay">Every day</string>
     <string name="quickHabitSpecificDays">Specific days</string>
     <string name="quickHabitStartLabel">From</string>

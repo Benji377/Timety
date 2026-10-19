@@ -31,13 +31,15 @@ import io.github.benji377.timety.ui.theme.AppTheme
  * Multi-select weekday picker (Monday first) styled as a [NeoSegmentedSelector] track: seven
  * equal single-letter segments, so it never wraps regardless of locale. Each selected day gets
  * the selector's inset fill; [selected] holds ISO weekday numbers (1 = Monday). Square-cornered
- * and slimmer than the selector, since single letters need less room than labels.
+ * and slimmer than the selector, since single letters need less room than labels. Like the
+ * selector, a disabled row keeps its selected fills and only mutes the track.
  */
 @Composable
 fun WeekdayToggleRow(
     selected: Set<Int>,
     onToggle: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     selectedColor: Color = MaterialTheme.colorScheme.primary,
 ) {
     val borderColor = MaterialTheme.colorScheme.outline
@@ -46,7 +48,10 @@ fun WeekdayToggleRow(
             .fillMaxWidth()
             .height(AppTheme.neoIconButtonSize)
             .clip(AppTheme.brMedium)
-            .background(MaterialTheme.colorScheme.surface)
+            .background(
+                if (enabled) MaterialTheme.colorScheme.surface
+                else MaterialTheme.colorScheme.surfaceVariant
+            )
             .border(AppTheme.borderCard, borderColor, AppTheme.brMedium)
     ) {
         (1..7).forEach { day ->
@@ -74,6 +79,7 @@ fun WeekdayToggleRow(
                     }
                     .toggleable(
                         value = isSelected,
+                        enabled = enabled,
                         role = Role.Checkbox,
                         onValueChange = { onToggle(day) },
                     )
