@@ -57,7 +57,7 @@
     <string name="greetingMorningMotivation">Aufwachen! Lass uns heute produktiv sein.</string>
     <string name="greetingNight">Gute Nacht %1$s!</string>
     <string name="greetingNightMotivation">Es wird spät! Überleg dir, bald Feierabend zu machen.</string>
-    <string name="homeDailyGoal">Tagesziel</string>
+    <string name="homeFocusToday">Focus Today</string>
     <string name="homeDailyGoalDone">Du bist für heute komplett fertig!</string>
     <string name="homeSectionHabitsDue">Heutige Gewohnheiten (%1$d)</string>
     <string name="homeSectionTasksDue">Fällige Aufgaben (%1$d)</string>
@@ -392,6 +392,8 @@
     <string name="settingsLabelFocusAskOnTaskComplete">Nach Fokuszeit fragen</string>
     <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Bietet an, eine Fokus-Sitzung zuzuordnen, wenn du eine Aufgabe abhakst</string>
     <string name="settingsLabelFocusGoal">Tägliches Fokus-Ziel</string>
+    <string name="settingsLabelFocusGoalOff">Off</string>
+    <string name="settingsLabelFocusGoalSubtitle">Set to 0 to turn the target off</string>
     <string name="settingsLabelFocusNodeTime">Max. Phasen-Dauer</string>
     <string name="settingsLabelFocusNodeTimeSubtitle">Maximale Länge für einen einzelnen Fokusblock</string>
     <string name="settingsLabelFocusStopwatch">Max. Stoppuhr-Limit</string>
@@ -688,10 +690,14 @@
     <string name="quickHabitNameLabel">Name</string>
     <string name="quickHabitNameHint">z.B. Wasser trinken</string>
     <string name="quickHabitIntervalLabel">Wiederhole alle</string>
+    <string name="quickHabitIntervalSubtitle">How often you get reminded</string>
     <string name="quickHabitUnitMinutes">Minuten</string>
     <string name="quickHabitUnitHours">Stunden</string>
     <string name="quickHabitAllDayLabel">Ganztägig</string>
     <string name="quickHabitDaysLabel">Tage</string>
+    <string name="quickHabitDaysSubtitle">Which days the reminders run on</string>
+    <string name="quickHabitActiveHoursLabel">Active hours</string>
+    <string name="quickHabitActiveHoursSubtitle">Only remind you within this time window</string>
     <string name="quickHabitEveryDay">Jeden Tag</string>
     <string name="quickHabitSpecificDays">Bestimmte Tage</string>
     <string name="quickHabitStartLabel">Von</string>
