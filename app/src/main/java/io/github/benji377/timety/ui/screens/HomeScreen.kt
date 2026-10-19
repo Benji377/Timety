@@ -97,7 +97,7 @@ fun HomeScreen(
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val userProfile by userViewModel.userProfile.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
-    val dailyTarget by settingsViewModel.dailyGoalMins.collectAsState()
+    val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     val upcomingWindowDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val completeRecurring =
@@ -114,6 +114,7 @@ fun HomeScreen(
     val userName = userProfile?.name ?: "User"
 
     val todayLocalDate = LocalDate.now()
+    val focusTargetToday = dailyFocusTarget.minutesOn(todayLocalDate)
     val focusMinsToday = remember(sessions, todayLocalDate) {
         sessions.filter {
             LocalDateTime.ofInstant(it.startTime, ZoneId.systemDefault())
@@ -223,22 +224,22 @@ fun HomeScreen(
                 )
             }
 
-            // Daily focus-goal progress card.
-            DailyGoalCard(
-                focusMinsToday = focusMinsToday,
-                dailyTarget = dailyTarget,
-                onClick = onNavigateToFocus,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = AppTheme.spaceXLarge)
-            )
+            // Daily focus-goal progress card, hidden when today has no target.
+            if (focusTargetToday != null) {
+                DailyGoalCard(
+                    focusMinsToday = focusMinsToday,
+                    dailyTarget = focusTargetToday,
+                    onClick = onNavigateToFocus,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = AppTheme.spaceXLarge)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
 
-            // Tasks and habits list. Kept on the screen's own flat background (no tinted overlay)
-            // - the app uses one flat neutral background and no alpha-blended fills, and the
-            // divider above already separates this section visually.
+            // Tasks and habits list.
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -412,10 +413,7 @@ private fun DailyGoalCard(
         onClick = onClick,
         modifier = modifier,
         borderColor = FocusColor,
-        // Flat, solid fill (no alpha) so the card still reads as "filled" and distinct from the
-        // plain-white cards elsewhere on the screen. Backgrounds stay neutral and let the accent
-        // colors do the work (a solid accent
-        // fill behind body text would fight the FocusColor border/value text for contrast).
+        // Neutral fill sets it apart from the plain surface cards without fighting the accent text.
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
@@ -425,7 +423,7 @@ private fun DailyGoalCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.homeDailyGoal).uppercase(),
+                    text = stringResource(R.string.homeFocusToday).uppercase(),
                     fontSize = AppTheme.fsLabel,
                     fontWeight = AppTheme.fwBold,
                     letterSpacing = AppTheme.lsWide,

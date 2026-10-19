@@ -57,7 +57,6 @@
     <string name="greetingMorningMotivation">Aufwachen! Lass uns heute produktiv sein.</string>
     <string name="greetingNight">Gute Nacht %1$s!</string>
     <string name="greetingNightMotivation">Es wird spät! Überleg dir, bald Feierabend zu machen.</string>
-    <string name="homeDailyGoal">Tagesziel</string>
     <string name="homeDailyGoalDone">Du bist für heute komplett fertig!</string>
     <string name="homeSectionHabitsDue">Heutige Gewohnheiten (%1$d)</string>
     <string name="homeSectionTasksDue">Fällige Aufgaben (%1$d)</string>

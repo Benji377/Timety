@@ -57,7 +57,7 @@
     <string name="greetingMorningMotivation">Rise and shine! Let\'s make today productive.</string>
     <string name="greetingNight">Good night %1$s!</string>
     <string name="greetingNightMotivation">It\'s getting late! Consider wrapping up soon.</string>
-    <string name="homeDailyGoal">Daily Goal</string>
+    <string name="homeFocusToday">Focus Today</string>
     <string name="homeDailyGoalDone">You\'re all caught up for today!</string>
     <string name="homeSectionHabitsDue">Habits Today (%1$d)</string>
     <string name="homeSectionTasksDue">Tasks Due (%1$d)</string>
@@ -392,6 +392,8 @@
     <string name="settingsLabelFocusAskOnTaskComplete">Ask to log focus time</string>
     <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Offers to attach a focus session when you check off a task</string>
     <string name="settingsLabelFocusGoal">Daily Focus Goal</string>
+    <string name="settingsLabelFocusGoalOff">Off</string>
+    <string name="settingsLabelFocusGoalSubtitle">Set to 0 to turn the target off</string>
     <string name="settingsLabelFocusNodeTime">Max Phase Node Time</string>
     <string name="settingsLabelFocusNodeTimeSubtitle">Maximum length for a single focus block</string>
     <string name="settingsLabelFocusStopwatch">Max Stopwatch Limit</string>
@@ -688,10 +690,14 @@
     <string name="quickHabitNameLabel">Name</string>
     <string name="quickHabitNameHint">e.g. Drink water</string>
     <string name="quickHabitIntervalLabel">Repeat every</string>
+    <string name="quickHabitIntervalSubtitle">How often you get reminded</string>
     <string name="quickHabitUnitMinutes">Minutes</string>
     <string name="quickHabitUnitHours">Hours</string>
     <string name="quickHabitAllDayLabel">All day</string>
     <string name="quickHabitDaysLabel">Days</string>
+    <string name="quickHabitDaysSubtitle">Which days the reminders run on</string>
+    <string name="quickHabitActiveHoursLabel">Active hours</string>
+    <string name="quickHabitActiveHoursSubtitle">Only remind you within this time window</string>
     <string name="quickHabitEveryDay">Every day</string>
     <string name="quickHabitSpecificDays">Specific days</string>
     <string name="quickHabitStartLabel">From</string>

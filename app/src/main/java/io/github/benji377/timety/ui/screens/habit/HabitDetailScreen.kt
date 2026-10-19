@@ -2,11 +2,8 @@ package io.github.benji377.timety.ui.screens.habit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,11 +56,11 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
-import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
+import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -88,7 +85,7 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as Ou
  * Creates, views, or edits a habit. With a null [habitId] the screen starts in creation mode;
  * otherwise it opens in read-only view mode until the user taps edit.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDetailScreen(
     habitId: String? = null,
@@ -448,40 +445,16 @@ fun HabitDetailScreen(
                         }
                     }
                 } else if (frequency == HabitFrequency.WEEKLY_EXACT) {
-                    NeoCard(
-                        containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
-                    ) {
-                        val dayLabels = listOf(
-                            1 to stringResource(R.string.calendarHeaderMon),
-                            2 to stringResource(R.string.calendarHeaderTue),
-                            3 to stringResource(R.string.calendarHeaderWed),
-                            4 to stringResource(R.string.calendarHeaderThu),
-                            5 to stringResource(R.string.calendarHeaderFri),
-                            6 to stringResource(R.string.calendarHeaderSat),
-                            7 to stringResource(R.string.calendarHeaderSun),
-                        )
-                        FlowRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(AppTheme.spaceLarge),
-                            horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
-                            verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
-                        ) {
-                            dayLabels.forEach { (day, label) ->
-                                val isSelected = selectedWeekdays.contains(day)
-                                NeoFilterChip(
-                                    selected = isSelected,
-                                    enabled = isEditing,
-                                    onClick = {
-                                        selectedWeekdays =
-                                            if (isSelected) selectedWeekdays - day else selectedWeekdays + day
-                                    },
-                                    label = label,
-                                    selectedColor = selectedColor,
-                                )
-                            }
-                        }
-                    }
+                    WeekdayToggleRow(
+                        selected = selectedWeekdays,
+                        onToggle = { day ->
+                            selectedWeekdays =
+                                if (day in selectedWeekdays) selectedWeekdays - day
+                                else selectedWeekdays + day
+                        },
+                        enabled = isEditing,
+                        selectedColor = selectedColor,
+                    )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }

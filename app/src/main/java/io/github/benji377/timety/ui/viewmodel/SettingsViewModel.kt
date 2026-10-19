@@ -1,6 +1,7 @@
 package io.github.benji377.timety.ui.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import io.github.benji377.timety.data.model.focus.DailyFocusTarget
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
@@ -41,10 +42,10 @@ class SettingsViewModel(
         SharingStarted.WhileSubscribed(5000),
         true
     )
-    val dailyGoalMins = repository.dailyGoalMinsFlow.stateIn(
+    val dailyFocusTarget = repository.dailyFocusTargetFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        90
+        DailyFocusTarget()
     )
     val maxStopwatchMins = repository.maxStopwatchMinsFlow.stateIn(
         viewModelScope,
@@ -113,6 +114,12 @@ class SettingsViewModel(
         viewModelScope.launch { repository.saveAskFocusOnTaskComplete(ask) }
 
     fun setDailyGoalMins(mins: Int) = viewModelScope.launch { repository.saveDailyGoalMins(mins) }
+
+    /** Ignored when [days] is empty: at least one weekday stays selected while the target is on. */
+    fun setDailyGoalWeekdays(days: Set<Int>) {
+        if (days.isEmpty()) return
+        viewModelScope.launch { repository.saveDailyGoalWeekdays(days) }
+    }
     fun setMaxStopwatchMins(mins: Int) =
         viewModelScope.launch { repository.saveMaxStopwatchMins(mins) }
 
