@@ -89,6 +89,7 @@ import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.DayQualityCalculator
+import io.github.benji377.timety.util.stats.FocusSessionDayStats
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.roundToInt
@@ -192,8 +193,10 @@ private fun OverviewStatsScreen(
 
     // Day-keyed activity maps for the day-quality breakdown.
     val focusMinutesByDayKey = remember(sessions) {
-        sessions.groupBy { AppDateUtils.dayKey(it.startTime.atZone(zone).toLocalDate()) }
-            .mapValues { (_, daySessions) -> daySessions.sumOf { it.totalSecondsFocused } / 60 }
+        // Split across days so a midnight-crossing session feeds each day's quality, not just its
+        // start day - consistent with the focus heatmap and daily goal.
+        FocusSessionDayStats.minutesByDay(sessions, zone)
+            .mapKeys { (day, _) -> AppDateUtils.dayKey(day) }
     }
     val tasksByDayKey = remember(tasksPerDay) {
         tasksPerDay.mapKeys { (day, _) -> AppDateUtils.dayKey(day) }

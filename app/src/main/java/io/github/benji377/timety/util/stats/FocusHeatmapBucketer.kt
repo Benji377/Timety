@@ -49,11 +49,9 @@ object FocusHeatmapBucketer {
         today: LocalDate = LocalDate.now(),
         zone: ZoneId = ZoneId.systemDefault(),
     ): HeatmapGrid {
-        val minutesByDay = mutableMapOf<LocalDate, Int>()
-        sessions.forEach { session ->
-            val day = session.startTime.atZone(zone).toLocalDate()
-            minutesByDay[day] = (minutesByDay[day] ?: 0) + session.totalSecondsFocused / 60
-        }
+        // A session that crosses midnight is split across the days it spans, so each cell reflects
+        // the minutes actually focused that day rather than the whole session landing on day one.
+        val minutesByDay = FocusSessionDayStats.minutesByDay(sessions, zone)
 
         val currentWeekStart = AppDateUtils.startOfWeekMonday(today)
         val gridStart = currentWeekStart.minusWeeks((WEEKS_SHOWN - 1).toLong())

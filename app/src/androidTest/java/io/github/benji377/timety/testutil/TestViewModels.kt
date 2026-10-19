@@ -72,6 +72,8 @@ class TestViewModels(
                             container.focusRepository,
                             container.userRepository,
                             container.habitRepository,
+                            container.taskRepository,
+                            container.recurringTaskRepository,
                             container.settingsRepository,
                         )
 

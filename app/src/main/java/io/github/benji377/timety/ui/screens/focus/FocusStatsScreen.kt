@@ -26,10 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.TaskAlt
-import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -66,6 +63,8 @@ import io.github.benji377.timety.data.model.focus.DistractionUIType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.focus.color
+import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.WeekNavigator
@@ -73,10 +72,9 @@ import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.ChartTeal
 import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
-import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
@@ -85,10 +83,12 @@ import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.FocusHeatmapBucketer
+import io.github.benji377.timety.util.stats.FocusSessionDayStats
 import io.github.benji377.timety.util.stats.HeatmapDay
 import io.github.benji377.timety.util.stats.StatsUtils
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -133,22 +133,24 @@ fun FocusStatsScreen(
     val endOfWeek = startOfWeek.plusDays(6)
     val isCurrentRealWeek = AppDateUtils.isWithinInclusive(LocalDate.now(), startOfWeek, endOfWeek)
 
-    val clockSessions = remember(filteredSessions, selectedDay) {
-        filteredSessions.filter {
-            AppDateUtils.isSameDay(
-                it.startTime.atZone(zone).toLocalDate(),
-                selectedDay
-            )
+    // Every session overlapping the day, counting only the minutes that fell on it, so a
+    // 22:00-02:00 session reads 2h on each side of midnight. The clock and the session list both
+    // show it on both days; it is still one stored session, listed with its real start and length.
+    val clockMinutesBySession = remember(filteredSessions, selectedDay) {
+        filteredSessions.mapNotNull { session ->
+            FocusSessionDayStats.minutesByDay(session, zone)[selectedDay]?.let { session to it }
         }
     }
-    val clockTotalMins = clockSessions.sumOf { it.totalSecondsFocused / 60 }
+    val clockSessions = clockMinutesBySession.map { it.first }
+    val clockTotalMins = clockMinutesBySession.sumOf { it.second }
 
     val defaultTargetEmpty = stringResource(R.string.focusTargetEmpty)
     val defaultTargetUntagged = stringResource(R.string.focusTargetUntagged)
     val defaultModeLabel = stringResource(R.string.focusLabelDefault)
 
     fun resolveTargetName(session: FocusSessionEntity): String = when (session.targetType) {
-        FocusTargetType.TASK, FocusTargetType.HABIT ->
+        FocusTargetType.TASK, FocusTargetType.RECURRING_TASK, FocusTargetType.HABIT,
+        FocusTargetType.GOAL ->
             session.targetLabel?.trim()?.takeIf { it.isNotEmpty() } ?: defaultTargetEmpty
 
         FocusTargetType.TAG ->
@@ -208,6 +210,7 @@ fun FocusStatsScreen(
                 Box(modifier = Modifier.size(250.dp), contentAlignment = Alignment.Center) {
                     FocusClockChart(
                         sessions = clockSessions,
+                        day = selectedDay,
                         color = FocusColor,
                         modifier = Modifier.fillMaxSize()
                     )
@@ -311,8 +314,8 @@ fun FocusStatsScreen(
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
-            // Deliberately unfiltered: this section is an all-time summary. Task- and
-            // habit-linked sessions carry no tagId, so applying the tag filter here would
+            // Deliberately unfiltered: this section is an all-time summary. Sessions linked to
+            // anything but a tag carry no tagId, so applying the tag filter here would
             // zero out their bars and make the breakdown look broken.
             TargetBreakdownSection(sessions)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
@@ -429,11 +432,13 @@ private fun DayPillSelector(
     }
 }
 
-// Draws a 24-hour clock face with an arc per session, starting at 00:00 at the top and
-// sweeping clockwise. A session that crosses midnight is clipped to the end of the day.
+// Draws a 24-hour clock face for [day] with an arc per session, starting at 00:00 at the top and
+// sweeping clockwise. Each session is clipped to [day], so one crossing midnight draws its evening
+// part on the day it started and its early-morning part on the next.
 @Composable
 private fun FocusClockChart(
     sessions: List<FocusSessionEntity>,
+    day: LocalDate,
     color: Color,
     modifier: Modifier = Modifier
 ) {
@@ -471,13 +476,15 @@ private fun FocusClockChart(
             )
         }
 
+        val dayStart = day.atStartOfDay(zone).toInstant()
+        val nextDayStart = day.plusDays(1).atStartOfDay(zone).toInstant()
+        fun hourOfDay(instant: Instant): Double =
+            Duration.between(dayStart, instant).seconds / 3600.0
+
         sessions.forEach { session ->
-            val startZoned = session.startTime.atZone(zone)
-            val startHour = startZoned.hour + startZoned.minute / 60.0
             val end = session.endTime ?: Instant.now()
-            val endZoned = end.atZone(zone)
-            var endHour = endZoned.hour + endZoned.minute / 60.0
-            if (startZoned.toLocalDate() != endZoned.toLocalDate()) endHour = 24.0
+            val startHour = hourOfDay(maxOf(session.startTime, dayStart))
+            val endHour = hourOfDay(minOf(end, nextDayStart))
 
             val sweepHours = endHour - startHour
             if (sweepHours <= 0) return@forEach
@@ -511,17 +518,9 @@ private fun SessionRow(
     tagById: Map<String, FocusTagEntity>,
     onEdit: () -> Unit,
 ) {
-    val (icon: ImageVector, color: Color) = when (session.targetType) {
-        FocusTargetType.TASK -> Icons.Filled.TaskAlt to TaskColor
-        FocusTargetType.HABIT -> Icons.Filled.Alarm to HabitColor
-        FocusTargetType.TAG -> Icons.Outlined.LocalOffer to (session.tagId?.let {
-            tagById[it]?.let { tag ->
-                Color(
-                    tag.colorValue
-                )
-            }
-        } ?: FocusColor)
-    }
+    val icon = session.targetType.icon
+    val color = session.tagId?.let { tagById[it] }?.let { Color(it.colorValue) }
+        ?: session.targetType.color
     val dfs = LocalDateFormatSettings.current
     val dateStr = AppDateFormatUtils.formatDate(
         session.startTime,
@@ -604,11 +603,12 @@ private fun VolumeBarChart(
     isCurrentRealWeek: Boolean,
     zone: ZoneId
 ) {
+    // A midnight-crossing session is credited to each day it spanned, so its bar height matches the
+    // heatmap and the daily goal instead of stacking the whole session onto its start day.
     val dailyMins = IntArray(7)
-    sessions.forEach { session ->
-        val day = session.startTime.atZone(zone).toLocalDate()
+    FocusSessionDayStats.minutesByDay(sessions, zone).forEach { (day, minutes) ->
         val offset = java.time.temporal.ChronoUnit.DAYS.between(startOfWeek, day)
-        if (offset in 0..6) dailyMins[offset.toInt()] += session.totalSecondsFocused / 60
+        if (offset in 0..6) dailyMins[offset.toInt()] += minutes
     }
     val maxY = StatsUtils.maxValue(dailyMins.toList(), minimum = 60.0)
     val denom = (maxY * 1.2).toFloat().coerceAtLeast(1f)
@@ -688,44 +688,35 @@ private data class TargetTypeStat(
     val minutes: Int
 )
 
-@Composable
-private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
-    val tagsLabel = stringResource(R.string.globalLabelTags)
-    val tasksLabel = stringResource(R.string.globalLabelTasks)
-    val habitsLabel = stringResource(R.string.globalLabelHabits)
-
-    val totals = remember(sessions) {
-        val map = mutableMapOf(
-            FocusTargetType.TAG to 0,
-            FocusTargetType.TASK to 0,
-            FocusTargetType.HABIT to 0
-        )
-        sessions.forEach { s ->
-            map[s.targetType] = (map[s.targetType] ?: 0) + s.totalSecondsFocused / 60
-        }
-        map
+private val FocusTargetType.pluralLabelRes: Int
+    get() = when (this) {
+        FocusTargetType.TAG -> R.string.globalLabelTags
+        FocusTargetType.TASK -> R.string.globalLabelTasks
+        FocusTargetType.RECURRING_TASK -> R.string.recurringTasksTitle
+        FocusTargetType.HABIT -> R.string.globalLabelHabits
+        FocusTargetType.GOAL -> R.string.globalLabelGoals
     }
 
-    val stats = listOf(
+// Recurring tasks share the task blue everywhere else, but adjacent segments of the stacked bar
+// below need distinct colors to stay readable.
+private val FocusTargetType.chartColor: Color
+    get() = if (this == FocusTargetType.RECURRING_TASK) ChartTeal else color
+
+@Composable
+private fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
+    val totals = remember(sessions) {
+        sessions.groupBy { it.targetType }
+            .mapValues { (_, typed) -> typed.sumOf { it.totalSecondsFocused / 60 } }
+    }
+
+    val stats = FocusTargetType.entries.map { type ->
         TargetTypeStat(
-            tagsLabel,
-            FocusColor,
-            Icons.Outlined.LocalOffer,
-            totals[FocusTargetType.TAG] ?: 0
-        ),
-        TargetTypeStat(
-            tasksLabel,
-            TaskColor,
-            Icons.Filled.TaskAlt,
-            totals[FocusTargetType.TASK] ?: 0
-        ),
-        TargetTypeStat(
-            habitsLabel,
-            HabitColor,
-            Icons.Filled.Alarm,
-            totals[FocusTargetType.HABIT] ?: 0
-        ),
-    )
+            stringResource(type.pluralLabelRes),
+            type.chartColor,
+            type.icon,
+            totals[type] ?: 0
+        )
+    }
     val totalMinutes = stats.sumOf { it.minutes }
 
     Column {
