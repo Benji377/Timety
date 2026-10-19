@@ -388,38 +388,40 @@ fun FocusScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Daily goal badge.
-            NeoCard(
-                modifier = Modifier.padding(bottom = AppTheme.spaceMedium),
-                shape = AppTheme.brPill,
-                borderColor = FocusColor,
-                onClick = onNavigateToSettings,
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(
-                        horizontal = AppTheme.spaceLarge,
-                        vertical = AppTheme.spaceSmall
-                    ),
+            // Daily goal badge, only on days with a target (not off, weekday not deselected).
+            if (focusTargetToday != null) {
+                NeoCard(
+                    modifier = Modifier.padding(bottom = AppTheme.spaceMedium),
+                    shape = AppTheme.brPill,
+                    borderColor = FocusColor,
+                    onClick = onNavigateToSettings,
                 ) {
-                    Icon(
-                        Icons.Filled.TrackChanges,
-                        contentDescription = null,
-                        tint = FocusColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                    Text(
-                        text = if (focusTargetToday != null) {
-                            "$focusMinsToday / $focusTargetToday m"
-                        } else {
-                            "$focusMinsToday m"
-                        },
-                        fontWeight = FontWeight.Black,
-                        fontSize = 15.sp,
-                        color = FocusColor,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(
+                            horizontal = AppTheme.spaceLarge,
+                            vertical = AppTheme.spaceSmall
+                        ),
+                    ) {
+                        Icon(
+                            Icons.Filled.TrackChanges,
+                            contentDescription = null,
+                            tint = FocusColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                        Text(
+                            text = "$focusMinsToday / $focusTargetToday m",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 15.sp,
+                            color = FocusColor,
+                        )
+                    }
                 }
+            } else {
+                // Roughly the badge's footprint (48dp clickable-card minimum plus its bottom
+                // padding), so the gauge stays put when the badge isn't shown.
+                Spacer(modifier = Modifier.height(48.dp + AppTheme.spaceMedium))
             }
 
             // Interactive timer gauge.
