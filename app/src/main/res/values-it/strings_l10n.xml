@@ -57,7 +57,7 @@
     <string name="greetingMorningMotivation">Sveglia! Rendiamo questa giornata produttiva.</string>
     <string name="greetingNight">Buonanotte %1$s!</string>
     <string name="greetingNightMotivation">Si fa tardi! Pensa a chiudere presto.</string>
-    <string name="homeDailyGoal">Obiettivo giornaliero</string>
+    <string name="homeFocusToday">Focus Today</string>
     <string name="homeDailyGoalDone">Hai completato tutto per oggi!</string>
     <string name="homeSectionHabitsDue">Abitudini di oggi (%1$d)</string>
     <string name="homeSectionTasksDue">Attività in scadenza (%1$d)</string>
@@ -392,6 +392,8 @@
     <string name="settingsLabelFocusAskOnTaskComplete">Chiedi di registrare il tempo di focus</string>
     <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Propone di collegare una sessione di focus quando completi un\'attività</string>
     <string name="settingsLabelFocusGoal">Obiettivo di focus giornaliero</string>
+    <string name="settingsLabelFocusGoalOff">Off</string>
+    <string name="settingsLabelFocusGoalSubtitle">Set to 0 to turn the target off</string>
     <string name="settingsLabelFocusNodeTime">Tempo massimo fase</string>
     <string name="settingsLabelFocusNodeTimeSubtitle">Lunghezza massima per un singolo blocco di focus</string>
     <string name="settingsLabelFocusStopwatch">Limite massimo cronometro</string>
@@ -688,10 +690,14 @@
     <string name="quickHabitNameLabel">Nome</string>
     <string name="quickHabitNameHint">ad esempio Bevi acqua</string>
     <string name="quickHabitIntervalLabel">Ripeti ogni</string>
+    <string name="quickHabitIntervalSubtitle">How often you get reminded</string>
     <string name="quickHabitUnitMinutes">Minuti</string>
     <string name="quickHabitUnitHours">Ore</string>
     <string name="quickHabitAllDayLabel">Tutto il giorno</string>
     <string name="quickHabitDaysLabel">Giorni</string>
+    <string name="quickHabitDaysSubtitle">Which days the reminders run on</string>
+    <string name="quickHabitActiveHoursLabel">Active hours</string>
+    <string name="quickHabitActiveHoursSubtitle">Only remind you within this time window</string>
     <string name="quickHabitEveryDay">Ogni giorno</string>
     <string name="quickHabitSpecificDays">Giorni specifici</string>
     <string name="quickHabitStartLabel">Da</string>
