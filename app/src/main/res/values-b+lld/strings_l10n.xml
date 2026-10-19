@@ -408,7 +408,7 @@
     <string name="settingsLabelFeedback">Mëna Feedback</string>
     <string name="settingsLabelFeedbackSubtitle">Ramuarda fai o damanda trueps nueves</string>
     <string name="settingsLabelFocusAutocomplete">Fina automaticamënter la ncëria liejeda</string>
-    <string name="settingsLabelFocusAutocompleteSubtitle">Mërca la ncëria o l\'abitudin sciche finada canche l timer fina</string>
+    <string name="settingsLabelFocusAutocompleteSubtitle">Marks the selected task, recurring task or habit as complete when a focus timer finishes. Goals are never completed</string>
     <string name="settingsLabelFocusAskOnTaskComplete">Damanda de registré l tëmp de focus</string>
     <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Te lascia njunté na sescion de focus canche te finësces na ncëria</string>
     <string name="settingsLabelFocusGoal">Travert de focus dl di</string>
@@ -559,13 +559,11 @@
         <item quantity="many">%d categuries</item>
         <item quantity="other">%d categuries</item>
     </plurals>
-    <string name="dialogTimeMachineEndTime">Ora de fin</string>
-    <string name="dialogTimeMachineErrorEndBeforeStart">L\'ora de fin muessa vester do l\'ora de taché</string>
+    <string name="dialogTimeMachineDuration">Duration</string>
+    <string name="dialogTimeMachineEnds">Ends %1$s</string>
     <string name="dialogTimeMachineMode">Modalità de Focus</string>
-    <string name="dialogTimeMachineNoTag">Deguna eticheta</string>
     <string name="dialogTimeMachineStartTime">Ora de taché</string>
     <string name="dialogTimeMachineSuccess">Sescion registreda!</string>
-    <string name="dialogTimeMachineTag">Eticheta</string>
     <string name="dialogTimeMachineTitle">Registré sescion passeda</string>
     <string name="locationApiDialogBestPractice">Pruzess Miëur</string>
     <string name="locationApiDialogBestPracticeDesc">Aministrea la tia istyanza Photon per ti privacy</string>
@@ -679,6 +677,9 @@
     <string name="distractionSnack">Pan dala nuef(Spuntino)</string>
     <string name="distractionStretched">Trat ora (Stretching)</string>
     <string name="targetSheetTitle">Cëria travert dl focus</string>
+    <string name="targetSheetRecurringNextDue">Next due %1$s</string>
+    <string name="targetSheetGoalProgress">%1$d / %2$d %3$s</string>
+    <string name="targetSheetGoalsEmpty">No active goals</string>
     <string name="recurrenceLabel">Repeté</string>
     <string name="recurrenceEveryLabel">Uni</string>
     <string name="recurrenceWeekly">Dl\'ena</string>
