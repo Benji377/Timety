@@ -204,7 +204,7 @@ private fun OverviewStatsScreen(
 
     val tasksCompletedToday = tasksPerDay[now] ?: 0
     val focusMinsToday = remember(sessions) { focusViewModel.getMinutesFocusedOnDay(now, zone) }
-    // Null on days without a target, shown as "-" rather than a misleading 0% or 100%.
+    // Null on days without a target, shown as "-".
     val goalPercent = dailyFocusTarget.minutesOn(now)?.let { target ->
         ((focusMinsToday.toDouble() / target).coerceIn(0.0, 1.0) * 100).toInt()
     }

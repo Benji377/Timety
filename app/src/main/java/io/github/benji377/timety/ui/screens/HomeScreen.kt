@@ -239,9 +239,7 @@ fun HomeScreen(
 
             HorizontalDivider()
 
-            // Tasks and habits list. Kept on the screen's own flat background (no tinted overlay)
-            // - the app uses one flat neutral background and no alpha-blended fills, and the
-            // divider above already separates this section visually.
+            // Tasks and habits list.
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -415,10 +413,7 @@ private fun DailyGoalCard(
         onClick = onClick,
         modifier = modifier,
         borderColor = FocusColor,
-        // Flat, solid fill (no alpha) so the card still reads as "filled" and distinct from the
-        // plain-white cards elsewhere on the screen. Backgrounds stay neutral and let the accent
-        // colors do the work (a solid accent
-        // fill behind body text would fight the FocusColor border/value text for contrast).
+        // Neutral fill sets it apart from the plain surface cards without fighting the accent text.
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {

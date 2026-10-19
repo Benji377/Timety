@@ -28,11 +28,8 @@ import io.github.benji377.timety.ui.theme.AppTheme
 
 
 /**
- * Multi-select weekday picker (Monday first) styled as a [NeoSegmentedSelector] track: seven
- * equal single-letter segments, so it never wraps regardless of locale. Each selected day gets
- * the selector's inset fill; [selected] holds ISO weekday numbers (1 = Monday). Square-cornered
- * and slimmer than the selector, since single letters need less room than labels. Like the
- * selector, a disabled row keeps its selected fills and only mutes the track.
+ * Multi-select weekday picker in the [NeoSegmentedSelector] style, with single-letter segments
+ * that never wrap. [selected] holds ISO weekday numbers (1 = Monday).
  */
 @Composable
 fun WeekdayToggleRow(
@@ -56,8 +53,7 @@ fun WeekdayToggleRow(
     ) {
         (1..7).forEach { day ->
             val isSelected = day in selected
-            // Same rule as NeoSegmentedSelector: a divider only between two unselected days, since
-            // a selected segment already has its own border.
+            // Selected segments have their own border, so dividers only sit between unselected days.
             val drawsDivider = day < 7 && !isSelected && (day + 1) !in selected
             // The one-letter label is ambiguous (T/T, S/S), so screen readers get the longer name.
             val description = weekdayShortName(day)

@@ -29,11 +29,7 @@ enum class ThemeMode(val storageValue: String) {
     }
 }
 
-/**
- * Identifies a collapsible accordion section whose expanded/collapsed state is persisted, with
- * [defaultExpanded] matching that section's original hardcoded default so existing installs see
- * no change until they actually toggle it.
- */
+/** A collapsible accordion section with persisted state; [defaultExpanded] applies until toggled. */
 enum class AccordionKey(val storageKey: String, val defaultExpanded: Boolean) {
     HOME_TASKS_DUE("home_tasks_due", true),
     HOME_HABITS_DUE("home_habits_due", false),
@@ -87,8 +83,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val askFocusOnTaskCompleteFlow: Flow<Boolean> =
         dataStore.data.map { it[ASK_FOCUS_ON_TASK_COMPLETE] ?: true }
 
-    // A missing or empty weekday set means every day, so installs from before weekdays existed
-    // keep their daily target.
+    // Missing or empty weekdays mean every day.
     val dailyFocusTargetFlow: Flow<DailyFocusTarget> = dataStore.data.map { prefs ->
         DailyFocusTarget(
             minutes = prefs[DAILY_GOAL_MINS] ?: DailyFocusTarget.DEFAULT_MINUTES,

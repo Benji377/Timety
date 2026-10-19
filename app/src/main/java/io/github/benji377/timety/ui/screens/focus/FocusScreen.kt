@@ -388,7 +388,7 @@ fun FocusScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Daily goal badge, only on days with a target (not off, weekday not deselected).
+            // Daily goal badge, only on days with a target.
             if (focusTargetToday != null) {
                 NeoCard(
                     modifier = Modifier.padding(bottom = AppTheme.spaceMedium),
@@ -419,8 +419,7 @@ fun FocusScreen(
                     }
                 }
             } else {
-                // Roughly the badge's footprint (48dp clickable-card minimum plus its bottom
-                // padding), so the gauge stays put when the badge isn't shown.
+                // Roughly the badge's height plus padding, so the gauge doesn't move.
                 Spacer(modifier = Modifier.height(48.dp + AppTheme.spaceMedium))
             }
 
