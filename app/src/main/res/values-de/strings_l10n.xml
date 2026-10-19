@@ -388,7 +388,7 @@
     <string name="settingsLabelFeedback">Feedback senden</string>
     <string name="settingsLabelFeedbackSubtitle">Melde Fehler oder wünsche dir neue Funktionen</string>
     <string name="settingsLabelFocusAutocomplete">Verknüpfte Aufgabe/Gewohnheit autom. abschließen</string>
-    <string name="settingsLabelFocusAutocompleteSubtitle">Markiert die gewählte Aufgabe/Gewohnheit als erledigt, wenn ein Fokus-Timer endet</string>
+    <string name="settingsLabelFocusAutocompleteSubtitle">Marks the selected task, recurring task or habit as complete when a focus timer finishes. Goals are never completed</string>
     <string name="settingsLabelFocusAskOnTaskComplete">Nach Fokuszeit fragen</string>
     <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Bietet an, eine Fokus-Sitzung zuzuordnen, wenn du eine Aufgabe abhakst</string>
     <string name="settingsLabelFocusGoal">Tägliches Fokus-Ziel</string>
@@ -523,13 +523,11 @@
         <item quantity="one">%d Kategorie</item>
         <item quantity="other">%d Kategorien</item>
     </plurals>
-    <string name="dialogTimeMachineEndTime">Endzeit</string>
-    <string name="dialogTimeMachineErrorEndBeforeStart">Die Endzeit muss nach der Startzeit liegen</string>
+    <string name="dialogTimeMachineDuration">Duration</string>
+    <string name="dialogTimeMachineEnds">Ends %1$s</string>
     <string name="dialogTimeMachineMode">Fokus-Modus</string>
-    <string name="dialogTimeMachineNoTag">Kein Tag</string>
     <string name="dialogTimeMachineStartTime">Startzeit</string>
     <string name="dialogTimeMachineSuccess">Sitzung protokolliert!</string>
-    <string name="dialogTimeMachineTag">Tag</string>
     <string name="dialogTimeMachineTitle">Vergangene Sitzung eintragen</string>
     <string name="locationApiDialogBestPractice">Empfehlung</string>
     <string name="locationApiDialogBestPracticeDesc">Hoste deine eigene Photon-Instanz für mehr Privatsphäre</string>
@@ -615,6 +613,9 @@
     <string name="distractionSnack">Jause</string>
     <string name="distractionStretched">Gedehnt</string>
     <string name="targetSheetTitle">Fokus-Ziel wählen</string>
+    <string name="targetSheetRecurringNextDue">Next due %1$s</string>
+    <string name="targetSheetGoalProgress">%1$d / %2$d %3$s</string>
+    <string name="targetSheetGoalsEmpty">No active goals</string>
     <string name="recurrenceLabel">Wiederholen</string>
     <string name="recurrenceEveryLabel">Jeden</string>
     <string name="recurrenceWeekly">Wöchentlich</string>
