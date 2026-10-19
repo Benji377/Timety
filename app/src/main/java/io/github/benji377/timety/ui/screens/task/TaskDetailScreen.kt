@@ -194,6 +194,12 @@ fun TaskDetailScreen(
         if (shift.changed) scope.launch { snackbarHostState.showSnackbar(remindersShiftedMsg) }
     }
 
+    // Presets lose their reference point without a due date.
+    fun clearDueDate() {
+        dueDate?.let { reminders = ReminderUtils.withoutPresets(reminders, it) }
+        dueDate = null
+    }
+
     val appBarTitle = when {
         isNewTask -> stringResource(R.string.taskDetailsTitleNew)
         isEditing -> stringResource(R.string.taskDetailsTitleEdit)
@@ -374,7 +380,18 @@ fun TaskDetailScreen(
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text(stringResource(R.string.taskDetailsLabelDueDateSet)) },
                         leadingIcon = { Icon(Icons.Filled.Event, null) },
-                        trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
+                        trailingIcon = {
+                            when {
+                                !isEditing -> Unit
+                                dueDate != null -> IconButton(onClick = { clearDueDate() }) {
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = stringResource(R.string.commonClear),
+                                    )
+                                }
+                                else -> Icon(Icons.Filled.Edit, null)
+                            }
+                        },
                         colors = detailFieldColors(isEditing),
                     )
                 }

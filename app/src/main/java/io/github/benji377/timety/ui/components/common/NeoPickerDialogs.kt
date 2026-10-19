@@ -140,15 +140,16 @@ fun NeoDateTimePickerDialog(
         DatePickerDialog(
             onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = {
-                    val millis = state.selectedDateMillis
-                    if (millis != null) {
-                        pickedDate = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneOffset.UTC).toLocalDate()
-                    } else {
-                        onDismiss()
-                    }
-                }) { Text(stringResource(R.string.commonLabelConfirm)) }
+                val millis = state.selectedDateMillis
+                TextButton(
+                    enabled = millis != null,
+                    onClick = {
+                        if (millis != null) {
+                            pickedDate = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneOffset.UTC).toLocalDate()
+                        }
+                    },
+                ) { Text(stringResource(R.string.commonLabelConfirm)) }
             },
             dismissButton = {
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }

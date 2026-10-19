@@ -60,6 +60,13 @@ class ReminderUtilsTest {
     }
 
     @Test
+    fun withoutPresets_dropsPresetsAndKeepsCustoms() {
+        val custom = Instant.parse("2026-10-02T09:00:00Z")
+        val reminders = listOf(custom, before(due, 30), before(due, 60))
+        assertEquals(listOf(custom), ReminderUtils.withoutPresets(reminders, due))
+    }
+
+    @Test
     fun customIssue_rejectsPastAndAfterDue() {
         assertEquals(CustomReminderIssue.IN_PAST, ReminderUtils.customIssue(now, due, now))
         assertEquals(CustomReminderIssue.IN_PAST, ReminderUtils.customIssue(now.minusSeconds(1), null, now))

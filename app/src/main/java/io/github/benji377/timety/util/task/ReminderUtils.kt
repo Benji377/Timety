@@ -37,6 +37,10 @@ object ReminderUtils {
     fun timeFor(due: Instant, preset: ReminderPreset): Instant =
         due.minus(preset.minutes.toLong(), ChronoUnit.MINUTES)
 
+    /** [reminders] minus the presets of [due]. */
+    fun withoutPresets(reminders: List<Instant>, due: Instant): List<Instant> =
+        reminders.filter { presetOf(due, it) == null }
+
     /** Removes [preset]'s reminder if present, otherwise adds it. */
     fun toggle(reminders: List<Instant>, due: Instant, preset: ReminderPreset): List<Instant> {
         val time = timeFor(due, preset)
