@@ -167,7 +167,7 @@ private fun OverviewStatsScreen(
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val dayRatings by dayRatingViewModel.allRatings.collectAsState()
-    val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
+    val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     // Collected so the KPI/chart recompute whenever new sessions are logged.
     val sessions by focusViewModel.allSessions.collectAsState()
 
@@ -204,9 +204,10 @@ private fun OverviewStatsScreen(
 
     val tasksCompletedToday = tasksPerDay[now] ?: 0
     val focusMinsToday = remember(sessions) { focusViewModel.getMinutesFocusedOnDay(now, zone) }
-    val focusTarget = if (dailyGoalMins > 0) dailyGoalMins else 1
-    val goalPercent =
-        ((focusMinsToday.toDouble() / focusTarget.toDouble()).coerceIn(0.0, 1.0) * 100).toInt()
+    // Null on days without a target, shown as "-" rather than a misleading 0% or 100%.
+    val goalPercent = dailyFocusTarget.minutesOn(now)?.let { target ->
+        ((focusMinsToday.toDouble() / target).coerceIn(0.0, 1.0) * 100).toInt()
+    }
 
     val last7Days = remember(now) { (0..6).map { now.minusDays((6 - it).toLong()) } }
     val dailyFocus = remember(last7Days, sessions) {
@@ -244,7 +245,7 @@ private fun OverviewStatsScreen(
 
             StatCard(
                 title = stringResource(R.string.statsLabelFocusGoal),
-                value = "$goalPercent%",
+                value = goalPercent?.let { "$it%" } ?: "-",
                 icon = Icons.Filled.TrackChanges,
                 color = WarningColor,
                 modifier = Modifier.fillMaxWidth()

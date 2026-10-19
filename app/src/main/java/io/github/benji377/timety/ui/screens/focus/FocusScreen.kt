@@ -159,7 +159,7 @@ fun FocusScreen(
     val selectedTarget by focusViewModel.selectedTarget.collectAsState()
     val allSessions by focusViewModel.allSessions.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
-    val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
+    val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     val keepScreenOnDuringFocus by settingsViewModel.keepScreenOnDuringFocus.collectAsState()
 
     // Only holds the screen awake while this screen is on the foreground - no wakelock, no
@@ -291,6 +291,7 @@ fun FocusScreen(
     val currentPhase = activePhases.getOrNull(phaseIndex)
 
     val focusMinsToday = remember(allSessions) { focusViewModel.getMinutesFocusedToday() }
+    val focusTargetToday = dailyFocusTarget.minutesOn(LocalDate.now())
 
     val activeModeName =
         if (activeMode != null) localizedFocusModeName(activeMode) else stringResource(R.string.focusModeSelect)
@@ -409,7 +410,11 @@ fun FocusScreen(
                     )
                     Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                     Text(
-                        text = "$focusMinsToday / $dailyGoalMins m",
+                        text = if (focusTargetToday != null) {
+                            "$focusMinsToday / $focusTargetToday m"
+                        } else {
+                            "$focusMinsToday m"
+                        },
                         fontWeight = FontWeight.Black,
                         fontSize = 15.sp,
                         color = FocusColor,

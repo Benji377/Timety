@@ -92,6 +92,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
+import io.github.benji377.timety.data.model.focus.DailyFocusTarget
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
@@ -99,6 +100,7 @@ import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -179,7 +181,7 @@ fun SettingsScreen(
     val dateFormat by settingsViewModel.dateFormat.collectAsState()
     val autoCompleteFocus by settingsViewModel.autoCompleteFocus.collectAsState()
     val askFocusOnTaskComplete by settingsViewModel.askFocusOnTaskComplete.collectAsState()
-    val dailyGoalMins by settingsViewModel.dailyGoalMins.collectAsState()
+    val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     val maxStopwatchMins by settingsViewModel.maxStopwatchMins.collectAsState()
     val maxNodeMins by settingsViewModel.maxNodeMins.collectAsState()
     val upcomingTasksHorizon by settingsViewModel.upcomingTasksHorizon.collectAsState()
@@ -461,18 +463,45 @@ fun SettingsScreen(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusGoal)) },
                     supportingContent = {
-                        Text(AppDateFormatUtils.formatMinutesCompact(dailyGoalMins))
+                        Column {
+                            Text(
+                                if (dailyFocusTarget.isEnabled) {
+                                    AppDateFormatUtils.formatMinutesCompact(dailyFocusTarget.minutes)
+                                } else {
+                                    stringResource(R.string.settingsLabelFocusGoalOff)
+                                }
+                            )
+                            Text(stringResource(R.string.settingsLabelFocusGoalSubtitle))
+                        }
                     },
                     leadingContent = { Icon(Icons.Filled.TrackChanges, null, tint = FocusColor) },
                     trailingContent = { Icon(Icons.Filled.ChevronRight, null) },
                     modifier = Modifier.clickable {
                         durationDialogSpec = DurationDialogSpec(
                             title = focusGoalTitle,
-                            current = dailyGoalMins, min = 10, max = 480,
+                            current = dailyFocusTarget.minutes,
+                            min = 0,
+                            max = DailyFocusTarget.MAX_MINUTES,
                             onSave = { settingsViewModel.setDailyGoalMins(it) }
                         )
                     }
                 )
+                if (dailyFocusTarget.isEnabled) {
+                    // Deselecting the last weekday is a no-op: zero minutes is the only "off".
+                    WeekdayToggleRow(
+                        selected = dailyFocusTarget.weekdays,
+                        onToggle = { day ->
+                            val days = dailyFocusTarget.weekdays
+                            settingsViewModel.setDailyGoalWeekdays(
+                                if (day in days) days - day else days + day
+                            )
+                        },
+                        selectedColor = FocusColor,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 56.dp, end = 16.dp, top = AppTheme.spaceXSmall, bottom = AppTheme.spaceLarge),
+                    )
+                }
                 ListItem(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                     headlineContent = { Text(stringResource(R.string.settingsLabelFocusAutocomplete)) },

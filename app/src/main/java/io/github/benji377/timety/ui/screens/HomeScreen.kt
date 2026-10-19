@@ -97,7 +97,7 @@ fun HomeScreen(
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val userProfile by userViewModel.userProfile.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
-    val dailyTarget by settingsViewModel.dailyGoalMins.collectAsState()
+    val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     val upcomingWindowDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val completeRecurring =
@@ -114,6 +114,7 @@ fun HomeScreen(
     val userName = userProfile?.name ?: "User"
 
     val todayLocalDate = LocalDate.now()
+    val focusTargetToday = dailyFocusTarget.minutesOn(todayLocalDate)
     val focusMinsToday = remember(sessions, todayLocalDate) {
         sessions.filter {
             LocalDateTime.ofInstant(it.startTime, ZoneId.systemDefault())
@@ -223,17 +224,19 @@ fun HomeScreen(
                 )
             }
 
-            // Daily focus-goal progress card.
-            DailyGoalCard(
-                focusMinsToday = focusMinsToday,
-                dailyTarget = dailyTarget,
-                onClick = onNavigateToFocus,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = AppTheme.spaceXLarge)
-            )
+            // Daily focus-goal progress card, hidden when today has no target.
+            if (focusTargetToday != null) {
+                DailyGoalCard(
+                    focusMinsToday = focusMinsToday,
+                    dailyTarget = focusTargetToday,
+                    onClick = onNavigateToFocus,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = AppTheme.spaceXLarge)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
 
             // Tasks and habits list. Kept on the screen's own flat background (no tinted overlay)
@@ -425,7 +428,7 @@ private fun DailyGoalCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.homeDailyGoal).uppercase(),
+                    text = stringResource(R.string.homeFocusToday).uppercase(),
                     fontSize = AppTheme.fsLabel,
                     fontWeight = AppTheme.fwBold,
                     letterSpacing = AppTheme.lsWide,

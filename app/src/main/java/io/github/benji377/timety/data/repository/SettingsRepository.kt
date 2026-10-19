@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import io.github.benji377.timety.data.model.focus.DailyFocusTarget
+import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -57,6 +59,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val AUTO_COMPLETE_FOCUS = booleanPreferencesKey("autoCompleteFocus")
         val ASK_FOCUS_ON_TASK_COMPLETE = booleanPreferencesKey("askFocusOnTaskComplete")
         val DAILY_GOAL_MINS = intPreferencesKey("dailyGoalMins")
+        val DAILY_GOAL_WEEKDAYS = stringPreferencesKey("dailyGoalWeekdays")
         val MAX_STOPWATCH_MINS = intPreferencesKey("maxStopwatchMins")
         val MAX_NODE_MINS = intPreferencesKey("maxNodeMins")
         val UPCOMING_TASKS_HORIZON = intPreferencesKey("upcomingTasksHorizon")
@@ -83,7 +86,18 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.data.map { it[AUTO_COMPLETE_FOCUS] ?: false }
     val askFocusOnTaskCompleteFlow: Flow<Boolean> =
         dataStore.data.map { it[ASK_FOCUS_ON_TASK_COMPLETE] ?: true }
-    val dailyGoalMinsFlow: Flow<Int> = dataStore.data.map { it[DAILY_GOAL_MINS] ?: 90 }
+
+    // A missing or empty weekday set means every day, so installs from before weekdays existed
+    // keep their daily target.
+    val dailyFocusTargetFlow: Flow<DailyFocusTarget> = dataStore.data.map { prefs ->
+        DailyFocusTarget(
+            minutes = prefs[DAILY_GOAL_MINS] ?: DailyFocusTarget.DEFAULT_MINUTES,
+            weekdays = HabitUtils.parseWeekdays(prefs[DAILY_GOAL_WEEKDAYS])
+                .filter { it in DailyFocusTarget.ALL_WEEKDAYS }
+                .toSet()
+                .ifEmpty { DailyFocusTarget.ALL_WEEKDAYS }
+        )
+    }
     val maxStopwatchMinsFlow: Flow<Int> = dataStore.data.map { it[MAX_STOPWATCH_MINS] ?: 120 }
     val maxNodeMinsFlow: Flow<Int> = dataStore.data.map { it[MAX_NODE_MINS] ?: 240 }
     val upcomingTasksHorizonFlow: Flow<Int> = dataStore.data.map { it[UPCOMING_TASKS_HORIZON] ?: 7 }
@@ -138,6 +152,12 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun saveDailyGoalMins(mins: Int) {
         dataStore.edit { it[DAILY_GOAL_MINS] = mins }
+    }
+
+    /** Saves the target weekdays; an empty set is rejected since it would silently mean "off". */
+    suspend fun saveDailyGoalWeekdays(days: Set<Int>) {
+        require(days.isNotEmpty()) { "A daily focus target needs at least one weekday" }
+        dataStore.edit { it[DAILY_GOAL_WEEKDAYS] = HabitUtils.serializeWeekdays(days) }
     }
 
     suspend fun saveMaxStopwatchMins(mins: Int) {

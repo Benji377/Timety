@@ -57,7 +57,6 @@
     <string name="greetingMorningMotivation">雄关漫道真如铁，而今迈步从头越。</string>
     <string name="greetingNight">晚安 %1$s！</string>
     <string name="greetingNightMotivation">夜色已深，且请收束笔墨，早些歇息罢。</string>
-    <string name="homeDailyGoal">今日目标</string>
     <string name="homeDailyGoalDone">今日诸事已毕，可以安心歇下了！</string>
     <string name="homeSectionHabitsDue">今日习惯 (%1$d)</string>
     <string name="homeSectionTasksDue">待办任务 (%1$d)</string>
