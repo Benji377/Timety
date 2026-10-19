@@ -57,7 +57,7 @@
     <string name="greetingMorningMotivation">Leva su! Fajon de ncuei n di produtif.</string>
     <string name="greetingNight">Bona nuet %1$s!</string>
     <string name="greetingNightMotivation">L se fej tert! Pënsa a stlù ju tosc.</string>
-    <string name="homeDailyGoal">Travert dl di</string>
+    <string name="homeFocusToday">Focus Today</string>
     <string name="homeDailyGoalDone">Te es finà dut per ncuei!</string>
     <string name="homeSectionHabitsDue">Abitudins de ncuei (%1$d)</string>
     <string name="homeSectionTasksDue">Ncëries da finé (%1$d)</string>
@@ -412,6 +412,8 @@
     <string name="settingsLabelFocusAskOnTaskComplete">Damanda de registré l tëmp de focus</string>
     <string name="settingsLabelFocusAskOnTaskCompleteSubtitle">Te lascia njunté na sescion de focus canche te finësces na ncëria</string>
     <string name="settingsLabelFocusGoal">Travert de focus dl di</string>
+    <string name="settingsLabelFocusGoalOff">Off</string>
+    <string name="settingsLabelFocusGoalSubtitle">Set to 0 to turn the target off</string>
     <string name="settingsLabelFocusNodeTime">Tëmp mascim dla fasa</string>
     <string name="settingsLabelFocusNodeTimeSubtitle">Lunghezza mascima per n blòch de focus</string>
     <string name="settingsLabelFocusStopwatch">Lemit mascim dl cronometer</string>
@@ -772,10 +774,14 @@
     <string name="quickHabitNameLabel">Inuem</string>
     <string name="quickHabitNameHint">ej. Bever ega</string>
     <string name="quickHabitIntervalLabel">Repeté uni</string>
+    <string name="quickHabitIntervalSubtitle">How often you get reminded</string>
     <string name="quickHabitUnitMinutes">Menuc</string>
     <string name="quickHabitUnitHours">Ëures</string>
     <string name="quickHabitAllDayLabel">Dut l di</string>
     <string name="quickHabitDaysLabel">Dis</string>
+    <string name="quickHabitDaysSubtitle">Which days the reminders run on</string>
+    <string name="quickHabitActiveHoursLabel">Active hours</string>
+    <string name="quickHabitActiveHoursSubtitle">Only remind you within this time window</string>
     <string name="quickHabitEveryDay">Uni di</string>
     <string name="quickHabitSpecificDays">Dis spezifics</string>
     <string name="quickHabitStartLabel">Da</string>
