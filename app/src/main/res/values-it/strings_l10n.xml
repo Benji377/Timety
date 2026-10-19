@@ -523,8 +523,6 @@
         <item quantity="one">%d categoria</item>
         <item quantity="other">%d categorie</item>
     </plurals>
-    <string name="dialogTimeMachineEndTime">Orario di fine</string>
-    <string name="dialogTimeMachineErrorEndBeforeStart">L\'orario di fine deve essere successivo a quello di inizio</string>
     <string name="dialogTimeMachineMode">Modalità di focus</string>
     <string name="dialogTimeMachineStartTime">Orario di inizio</string>
     <string name="dialogTimeMachineSuccess">Sessione registrata!</string>

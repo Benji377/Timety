@@ -28,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -117,7 +118,7 @@ fun SessionEditorDialog(
     // editing, derive it from the stored range; an open-ended session (no end) falls back to the
     // span up to now, which is the correction the editor was opened for.
     var durationMinutes by remember {
-        mutableStateOf(
+        mutableIntStateOf(
             if (initialStartTime != null) {
                 Duration.between(initialStartTime, initialEndTime ?: now).toMinutes()
                     .toInt().coerceIn(MIN_SESSION_MINUTES, MAX_SESSION_MINUTES)

@@ -514,8 +514,6 @@
     <plurals name="settingsCategoriesCount">
         <item quantity="other">%d 个分类</item>
     </plurals>
-    <string name="dialogTimeMachineEndTime">结束时间</string>
-    <string name="dialogTimeMachineErrorEndBeforeStart">结束时间必须晚于开始时间</string>
     <string name="dialogTimeMachineMode">专注模式</string>
     <string name="dialogTimeMachineStartTime">开始时间</string>
     <string name="dialogTimeMachineSuccess">已记录专注时段！</string>

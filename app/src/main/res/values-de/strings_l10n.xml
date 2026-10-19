@@ -523,8 +523,6 @@
         <item quantity="one">%d Kategorie</item>
         <item quantity="other">%d Kategorien</item>
     </plurals>
-    <string name="dialogTimeMachineEndTime">Endzeit</string>
-    <string name="dialogTimeMachineErrorEndBeforeStart">Die Endzeit muss nach der Startzeit liegen</string>
     <string name="dialogTimeMachineMode">Fokus-Modus</string>
     <string name="dialogTimeMachineStartTime">Startzeit</string>
     <string name="dialogTimeMachineSuccess">Sitzung protokolliert!</string>

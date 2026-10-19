@@ -559,8 +559,6 @@
         <item quantity="many">%d categuries</item>
         <item quantity="other">%d categuries</item>
     </plurals>
-    <string name="dialogTimeMachineEndTime">Ora de fin</string>
-    <string name="dialogTimeMachineErrorEndBeforeStart">L\'ora de fin muessa vester do l\'ora de taché</string>
     <string name="dialogTimeMachineMode">Modalità de Focus</string>
     <string name="dialogTimeMachineStartTime">Ora de taché</string>
     <string name="dialogTimeMachineSuccess">Sescion registreda!</string>
