@@ -119,12 +119,13 @@ ksp {
 
 // navigation-compose strictly pins kotlinx-serialization 1.7.3, which crashes
 // room-testing's schema parser; force the newer version on the test classpath.
+val kotlinxSerialization = libs.versions.kotlinxSerialization.get()
 configurations.matching { it.name.contains("AndroidTest") }.configureEach {
     resolutionStrategy.force(
-        "org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0",
-        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.11.0",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.11.0",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinxSerialization",
+        "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$kotlinxSerialization",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerialization",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:$kotlinxSerialization",
     )
 }
 
