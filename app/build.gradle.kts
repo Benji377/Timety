@@ -124,7 +124,7 @@ configurations.matching { it.name.contains("AndroidTest") }.configureEach {
         "org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0",
         "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.11.0",
         "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0",
-        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.11.0",
+        "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.12.0",
     )
 }
 
