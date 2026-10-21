@@ -1,0 +1,68 @@
+name: "I wrote about Timety"
+description: Share an article, video, podcast or post that mentions Timety so it can be added to the press page.
+title: "[Press] "
+labels: ["press"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for writing about Timety, that really means a lot! 💙
+        Fill in the details below and I'll add your piece to [PRESS.md](../blob/main/PRESS.md).
+  - type: input
+    id: url
+    attributes:
+      label: Link
+      description: The full URL of your article, video, podcast or post.
+      placeholder: https://example.com/my-post-about-timety
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: The title of your piece, as you'd like it to appear.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Author or website
+      description: Your name, blog, channel or site name.
+      placeholder: e.g. My Blog / @myhandle
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Article / blog post
+        - Review
+        - Tutorial / guide
+        - Video
+        - Podcast
+        - Social media post
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: The language your piece is written or spoken in.
+      placeholder: e.g. English, Deutsch, Italiano, Ελληνικά
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Publication date
+      description: Roughly is fine (month and year).
+      placeholder: e.g. 2026-10
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Quick check
+      options:
+        - label: This is my own work (or I have the author's okay to share it), and it contains original content about Timety.
+          required: true

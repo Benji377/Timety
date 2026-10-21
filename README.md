@@ -145,5 +145,11 @@ How to contribute:
 
 *Note: If you ever need context for a specific word or phrase, drop by our GitHub Discussions and ask!*
 
+## Timety in the press
+
+Timety has been featured by bloggers and writers around the world, and I'm very grateful for it! 
+Have a look at the [press & mentions page](PRESS.md) to see what others have written, or [let me know](../../issues/new?template=press-article.yml) if you wrote about Timety yourself.
+
+
 ## Privacy
 Timety is proudly **Offline-First**. All of your tasks, habits, and focus history are stored securely on your local device using Room. No accounts, no cloud sync, no tracking.
