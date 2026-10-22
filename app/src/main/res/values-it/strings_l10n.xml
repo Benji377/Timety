@@ -326,7 +326,6 @@
     <string name="calendarHeaderThu">G</string>
     <string name="calendarHeaderTue">M</string>
     <string name="calendarHeaderWed">M</string>
-    <string name="calendarHeaderWeekly">Settimanale</string>
     <string name="calendarLabelFocusOngoing">In corso</string>
     <string name="calendarLabelSelect">Seleziona un giorno per visualizzare i dettagli</string>
     <string name="calendarSectionFocus">Sessioni di focus (%1$d)</string>
