@@ -407,6 +407,8 @@
     <string name="settingsLabelLocationApi">API di ricerca luoghi</string>
     <string name="settingsLabelValidating">Verifica…</string>
     <string name="settingsLabelMaintainer">Manutentore</string>
+    <string name="settingsLabelShowGreeting">Show Greeting</string>
+    <string name="settingsLabelShowGreetingSubtitle">Greeting and motivation at the top of the home screen</string>
     <string name="settingsLabelSourceCode">Codice sorgente</string>
     <string name="settingsLabelSourceCodeSubtitle">Repository GitHub</string>
     <string name="settingsLabelTags">Etichette di focus</string>
