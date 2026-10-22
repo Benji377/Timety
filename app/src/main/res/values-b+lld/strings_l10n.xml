@@ -342,7 +342,6 @@
     <string name="calendarHeaderThu">J</string>
     <string name="calendarHeaderTue">M</string>
     <string name="calendarHeaderWed">M</string>
-    <string name="calendarHeaderWeekly">Dl\'ena</string>
     <string name="calendarLabelFocusOngoing">N lëur</string>
     <string name="calendarLabelSelect">Cëria ora n di per i detaies</string>
     <string name="calendarSectionFocus">Sescions de focus (%1$d)</string>

@@ -327,9 +327,14 @@
     <string name="calendarHeaderThu">T</string>
     <string name="calendarHeaderTue">T</string>
     <string name="calendarHeaderWed">W</string>
-    <string name="calendarHeaderWeekly">Weekly</string>
     <string name="calendarLabelFocusOngoing">Ongoing</string>
     <string name="calendarLabelSelect">Select a day to view details</string>
+    <string name="calendarReportComparedHint">Changes are compared with the previous week.</string>
+    <string name="calendarReportFocusSessions">Focus sessions</string>
+    <string name="calendarReportFocusTime">Focus time</string>
+    <string name="calendarReportHabitCheckIns">Habit check-ins</string>
+    <string name="calendarReportTasksCompleted">Tasks completed</string>
+    <string name="calendarReportTasksDue">Tasks due</string>
     <string name="calendarSectionFocus">Focus Sessions (%1$d)</string>
     <string name="calendarSectionFocusEmpty">No focus sessions logged</string>
     <string name="calendarSectionHabits">Habits (%1$d)</string>
@@ -338,6 +343,8 @@
     <string name="calendarSectionTasksEmpty">No tasks scheduled or logged</string>
     <string name="calendarTitle">Calendar</string>
     <string name="calendarTooltipToday">Go to Today</string>
+    <string name="calendarWeekSummaryDescription">Tasks completed: %1$d, habit check-ins: %2$d, focus time: %3$s</string>
+    <string name="calendarWeeklyReportTitle">Weekly Report</string>
     <string name="statsLabelFocus">Focus Time</string>
     <string name="statsLabelFocusGoal">Daily Focus Goal</string>
     <string name="statsLabelFocusMins">Focus Minutes</string>

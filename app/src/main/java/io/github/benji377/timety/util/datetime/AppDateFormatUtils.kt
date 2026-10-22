@@ -1,5 +1,6 @@
 package io.github.benji377.timety.util.datetime
 
+import java.text.DecimalFormatSymbols
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -9,6 +10,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.roundToInt
 
 
 /** Locale- and user-preference-aware date/time formatting shared across the app's UI. */
@@ -29,6 +31,20 @@ object AppDateFormatUtils {
         val hours = minutes / 60
         val rem = minutes % 60
         return if (rem == 0) "${hours}h" else "${hours}h ${rem}m"
+    }
+
+
+    /**
+     * Duration in at most four characters, for cells too narrow for [formatMinutesCompact]:
+     * "45m" under an hour, tenths of an hour below ten hours ("5.3h", "2h"), whole hours above.
+     */
+    fun formatMinutesTiny(minutes: Int, locale: Locale = Locale.getDefault()): String {
+        if (minutes < 60) return "${minutes}m"
+        val tenths = (minutes / 6.0).roundToInt()
+        if (tenths >= 100) return "${(minutes / 60.0).roundToInt()}h"
+        if (tenths % 10 == 0) return "${tenths / 10}h"
+        val separator = DecimalFormatSymbols.getInstance(locale).decimalSeparator
+        return "${tenths / 10}$separator${tenths % 10}h"
     }
 
 

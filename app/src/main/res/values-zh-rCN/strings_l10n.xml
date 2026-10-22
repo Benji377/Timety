@@ -322,7 +322,6 @@
     <string name="calendarHeaderThu">四</string>
     <string name="calendarHeaderTue">二</string>
     <string name="calendarHeaderWed">三</string>
-    <string name="calendarHeaderWeekly">每周</string>
     <string name="calendarLabelFocusOngoing">进行中</string>
     <string name="calendarLabelSelect">点击日期查看详情</string>
     <string name="calendarSectionFocus">专注时段 (%1$d)</string>

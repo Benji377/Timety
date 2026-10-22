@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,17 +38,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -61,9 +63,11 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.ui.components.calendar.WeeklyReportDialog
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
+import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
 import io.github.benji377.timety.ui.components.focus.EditSessionDialog
@@ -87,7 +91,8 @@ import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
-import java.time.Instant
+import io.github.benji377.timety.util.stats.WeeklySummary
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -119,6 +124,7 @@ fun CalendarScreen(
 
     var focusedMonth by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(LocalDate.now()) }
+    var reportWeekStart by rememberSaveable { mutableStateOf<LocalDate?>(null) }
 
     // Filter and sort the task/session/habit data for the selected day's accordion lists.
     val selectedDayTasks = remember(tasks, selectedDate) {
@@ -162,6 +168,19 @@ fun CalendarScreen(
             val completed = habitsWithCompletions.filter { HabitUtils.isCompletedOn(it, d) }
             (scheduled + completed).distinctBy { it.habit.id }
         } ?: emptyList()
+    }
+
+    reportWeekStart?.let { weekStart ->
+        val plainTasks = tasks.map { it.task }
+        val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
+        fun summaryOf(start: LocalDate) =
+            WeeklySummary.of(start, plainTasks, recurringItems, habitCompletions, sessions, zone)
+        WeeklyReportDialog(
+            weekStart = weekStart,
+            summary = summaryOf(weekStart),
+            previous = summaryOf(weekStart.minusWeeks(1)),
+            onDismiss = { reportWeekStart = null }
+        )
     }
 
     Scaffold(
@@ -217,7 +236,8 @@ fun CalendarScreen(
                         sessions = sessions,
                         habitsWithCompletions = habitsWithCompletions,
                         recurringItems = recurringItems,
-                        onDaySelected = { selectedDate = it }
+                        onDaySelected = { selectedDate = it },
+                        onOpenWeeklyReport = { reportWeekStart = it }
                     )
                 }
             }
@@ -339,7 +359,8 @@ private fun CalendarGrid(
     sessions: List<FocusSessionEntity>,
     habitsWithCompletions: List<HabitWithCompletions>,
     recurringItems: List<RecurringTaskWithOccurrences>,
-    onDaySelected: (LocalDate) -> Unit
+    onDaySelected: (LocalDate) -> Unit,
+    onOpenWeeklyReport: (weekStart: LocalDate) -> Unit,
 ) {
     val zone = ZoneId.systemDefault()
     val weeks = remember(focusedMonth) { CalendarUtils.generateWeeks(focusedMonth) }
@@ -390,55 +411,43 @@ private fun CalendarGrid(
                     )
                 }
             }
+            // An icon rather than a "Weekly" label: no translation of that word fits the column on a
+            // small phone, and the icon also reads as tappable. It opens the selected day's week.
             Box(
                 modifier = Modifier
                     .weight(1.5f)
-                    .padding(bottom = 8.dp),
+                    .padding(bottom = 8.dp)
+                    .clip(AppTheme.brMedium)
+                    .clickable { onOpenWeeklyReport(weekStartOf(selectedDate ?: today)) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    stringResource(R.string.calendarHeaderWeekly),
-                    fontWeight = FontWeight.Bold,
-                    color = TaskColor,
-                    maxLines = 1
+                Icon(
+                    Icons.Outlined.Insights,
+                    contentDescription = stringResource(R.string.calendarWeeklyReportTitle),
+                    tint = TaskColor,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
 
         // Memoized: these scans touch every task/completion/session for all ~6 week rows and
         // would otherwise re-run on every recomposition (e.g. each day tap).
-        val weeklyCounts = remember(weeks, tasks, sessions, habitsWithCompletions, recurringItems) {
+        val weeklySummaries = remember(weeks, tasks, sessions, habitsWithCompletions, recurringItems) {
+            val plainTasks = tasks.map { it.task }
+            val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
             weeks.associateWith { week ->
-                val weekStart = week.first()
-                val weekEnd = week.last()
-                fun inWeek(instant: Instant): Boolean {
-                    val d = instant.atZone(zone).toLocalDate()
-                    return !d.isBefore(weekStart) && !d.isAfter(weekEnd)
-                }
-
-                val taskCount = tasks.count { t ->
-                    t.task.dueDate != null && inWeek(t.task.dueDate)
-                } + recurringItems.count { inWeek(it.task.dueDate) } +
-                        recurringItems.sumOf { item ->
-                            item.occurrences.count { inWeek(it.completedAt) }
-                        }
-                val habitCount = habitsWithCompletions.sumOf { h ->
-                    h.completions.count { c ->
-                        val d = c.completionDate.atZone(zone).toLocalDate()
-                        !d.isBefore(weekStart) && !d.isAfter(weekEnd)
-                    }
-                }
-                val focusCount = sessions.count { s ->
-                    val d = s.startTime.atZone(zone).toLocalDate()
-                    !d.isBefore(weekStart) && !d.isAfter(weekEnd)
-                }
-                Triple(taskCount, habitCount, focusCount)
+                WeeklySummary.of(week.first(), plainTasks, recurringItems, habitCompletions, sessions, zone)
             }
         }
+        // Bars compare the weeks on screen with each other, so they scale to the busiest one.
+        val maxTasksCompleted = weeklySummaries.values.maxOfOrNull { it.tasksCompleted } ?: 0
+        val maxHabitCheckIns = weeklySummaries.values.maxOfOrNull { it.habitCheckIns } ?: 0
+        // Three rows of text would overflow the fixed-height chip at large font sizes, so the
+        // number gives way there and the bars carry the week on their own.
+        val showFocusTime = LocalDensity.current.fontScale <= MAX_FONT_SCALE_FOR_WEEK_NUMBER
 
         weeks.forEach { week ->
-            val (weeklyTaskCount, weeklyHabitCount, weeklyFocusCount) =
-                weeklyCounts[week] ?: Triple(0, 0, 0)
+            val summary = weeklySummaries.getValue(week)
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 week.forEach { day ->
@@ -528,54 +537,95 @@ private fun CalendarGrid(
                 // per week row, and an outline on each turned the column into a visible ladder
                 // running down the side of the grid. The fill alone is enough to separate the
                 // summary from the day cells beside it.
-                Box(
-                    modifier = Modifier
-                        .weight(1.5f)
-                        .height(53.dp)
-                        .padding(horizontal = AppTheme.spaceXSmall)
-                        .background(MaterialTheme.colorScheme.surface, AppTheme.brMedium),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                SpanStyle(
-                                    color = TaskColor,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) { append("$weeklyTaskCount") }
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                append(
-                                    " | "
-                                )
-                            }
-                            withStyle(
-                                SpanStyle(
-                                    color = HabitColor,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) { append("$weeklyHabitCount") }
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                append(
-                                    " | "
-                                )
-                            }
-                            withStyle(
-                                SpanStyle(
-                                    color = SuccessColor,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) { append("$weeklyFocusCount") }
-                        },
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1
-                    )
-                }
+                WeekSummaryChip(
+                    summary = summary,
+                    maxTasksCompleted = maxTasksCompleted,
+                    maxHabitCheckIns = maxHabitCheckIns,
+                    showFocusTime = showFocusTime,
+                    onClick = { onOpenWeeklyReport(week.first()) },
+                    modifier = Modifier.weight(1.5f)
+                )
             }
         }
     }
 }
+
+/**
+ * One week row's summary: focus time as the only number (its green dots count the same sessions,
+ * so it can't disagree with them), then bars for completed tasks and habit check-ins. Exact
+ * values live in the weekly report and in the chip's content description.
+ */
+@Composable
+private fun WeekSummaryChip(
+    summary: WeeklySummary,
+    maxTasksCompleted: Int,
+    maxHabitCheckIns: Int,
+    showFocusTime: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val description = stringResource(
+        R.string.calendarWeekSummaryDescription,
+        summary.tasksCompleted,
+        summary.habitCheckIns,
+        AppDateFormatUtils.formatMinutesCompact(summary.focusMinutes)
+    )
+    Box(
+        modifier = modifier
+            .height(53.dp)
+            .padding(horizontal = AppTheme.spaceXSmall)
+            .clip(AppTheme.brMedium)
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick)
+            .clearAndSetSemantics { contentDescription = description },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = AppTheme.spaceSmall)
+        ) {
+            if (showFocusTime) {
+                Text(
+                    // A dash keeps empty and future weeks quiet instead of a column of "0m".
+                    text = if (summary.focusMinutes > 0) {
+                        AppDateFormatUtils.formatMinutesTiny(summary.focusMinutes)
+                    } else {
+                        "-"
+                    },
+                    color = if (summary.focusMinutes > 0) {
+                        SuccessColor
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    maxLines = 1
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+            }
+            WeekBar(summary.tasksCompleted, maxTasksCompleted, TaskColor)
+            Spacer(modifier = Modifier.height(3.dp))
+            WeekBar(summary.habitCheckIns, maxHabitCheckIns, HabitColor)
+        }
+    }
+}
+
+@Composable
+private fun WeekBar(value: Int, max: Int, color: Color) {
+    NeoProgressBar(
+        progress = { if (max > 0) value.toFloat() / max else 0f },
+        color = color,
+        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(4.dp)
+    )
+}
+
+private fun weekStartOf(date: LocalDate): LocalDate = date.with(DayOfWeek.MONDAY)
+
+/** Above this system font scale the week chip drops its number; see [WeekSummaryChip]. */
+private const val MAX_FONT_SCALE_FOR_WEEK_NUMBER = 1.3f
 
 @Composable
 private fun Dot(color: Color) {
