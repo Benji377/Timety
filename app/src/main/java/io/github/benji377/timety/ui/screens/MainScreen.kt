@@ -50,6 +50,9 @@ import io.github.benji377.timety.ui.screens.goal.GoalsScreen
 import io.github.benji377.timety.ui.screens.habit.HabitDetailScreen
 import io.github.benji377.timety.ui.screens.habit.HabitListScreen
 import io.github.benji377.timety.ui.screens.habit.QuickHabitsScreen
+import io.github.benji377.timety.ui.screens.settings.SettingsPage
+import io.github.benji377.timety.ui.screens.settings.SettingsPageScreen
+import io.github.benji377.timety.ui.screens.settings.SettingsScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTasksScreen
 import io.github.benji377.timety.ui.screens.task.TaskCategoriesScreen
@@ -223,7 +226,7 @@ fun MainScreen(
             composable(BottomNavItem.Focus.route) {
                 FocusScreen(
                     onNavigateToModes = { navController.navigate(AppRoute.FOCUS_MODES.route) },
-                    onNavigateToSettings = { navController.navigate(AppRoute.SETTINGS.route) }
+                    onNavigateToFocusSettings = { navController.navigate(SettingsPage.FOCUS.route) }
                 )
             }
             composable(AppRoute.FOCUS_MODES.route) {
@@ -280,9 +283,18 @@ fun MainScreen(
             composable(AppRoute.SETTINGS.route) {
                 SettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToTags = { navController.navigate(AppRoute.FOCUS_TAGS.route) },
-                    onNavigateToCategories = { navController.navigate(AppRoute.TASK_CATEGORIES.route) }
+                    onOpenPage = { page -> navController.navigate(page.route) }
                 )
+            }
+            SettingsPage.entries.forEach { page ->
+                composable(page.route) {
+                    SettingsPageScreen(
+                        page = page,
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToTags = { navController.navigate(AppRoute.FOCUS_TAGS.route) },
+                        onNavigateToCategories = { navController.navigate(AppRoute.TASK_CATEGORIES.route) }
+                    )
+                }
             }
             composable(AppRoute.FOCUS_TAGS.route) {
                 FocusTagsWidget(

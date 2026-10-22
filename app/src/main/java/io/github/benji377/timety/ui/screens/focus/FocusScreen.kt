@@ -130,7 +130,7 @@ object FocusScreenTags {
 @Composable
 fun FocusScreen(
     onNavigateToModes: () -> Unit,
-    onNavigateToSettings: () -> Unit = {},
+    onNavigateToFocusSettings: () -> Unit = {},
     focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -394,7 +394,7 @@ fun FocusScreen(
                     modifier = Modifier.padding(bottom = AppTheme.spaceMedium),
                     shape = AppTheme.brPill,
                     borderColor = FocusColor,
-                    onClick = onNavigateToSettings,
+                    onClick = onNavigateToFocusSettings,
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

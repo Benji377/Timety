@@ -84,7 +84,11 @@ class TestViewModels(
                         DayRatingViewModel(container.dayRatingRepository)
 
                     modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
-                        SettingsViewModel(application, container.settingsRepository)
+                        SettingsViewModel(
+                            application,
+                            container.settingsRepository,
+                            container.backupService,
+                        )
 
                     else -> throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
                 }

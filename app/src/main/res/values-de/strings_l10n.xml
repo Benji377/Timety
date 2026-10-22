@@ -416,13 +416,10 @@
     <string name="settingsLabelUpcomingTask">Fenster für anstehende Aufgaben</string>
     <string name="settingsLabelUpcomingTaskSubtitle">%1$d Tage im Voraus</string>
     <string name="settingsLabelVersion">Version %1$s</string>
-    <string name="settingsSectionApi">API &amp; Dienste</string>
     <string name="settingsSectionAppearance">Erscheinungsbild</string>
     <string name="settingsSectionDataBackup">Daten &amp; Backup</string>
-    <string name="settingsSectionFocusProductivity">Fokus &amp; Produktivität</string>
     <string name="settingsSectionLocaleFormat">Lokalisierung &amp; Formatierung</string>
     <string name="settingsSectionNotifications">Benachrichtigungen</string>
-    <string name="settingsSectionOrganization">Organisation</string>
     <string name="settingsSectionSupport">Support &amp; Feedback</string>
     <string name="settingsTitle">Einstellungen</string>
     <string name="shortcutNewTask">Neue Aufgabe</string>
