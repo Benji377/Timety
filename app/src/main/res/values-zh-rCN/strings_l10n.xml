@@ -402,6 +402,8 @@
     <string name="settingsLabelLocationApi">位置搜索 API</string>
     <string name="settingsLabelValidating">验证中…</string>
     <string name="settingsLabelMaintainer">维护者</string>
+    <string name="settingsLabelShowGreeting">Show Greeting</string>
+    <string name="settingsLabelShowGreetingSubtitle">Greeting and motivation at the top of the home screen</string>
     <string name="settingsLabelSourceCode">源代码</string>
     <string name="settingsLabelSourceCodeSubtitle">GitHub 仓库</string>
     <string name="settingsLabelTags">专注标签</string>
