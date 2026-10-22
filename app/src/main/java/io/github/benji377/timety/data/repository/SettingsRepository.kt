@@ -54,6 +54,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val DATE_FORMAT = stringPreferencesKey("dateFormat")
         val AUTO_COMPLETE_FOCUS = booleanPreferencesKey("autoCompleteFocus")
         val ASK_FOCUS_ON_TASK_COMPLETE = booleanPreferencesKey("askFocusOnTaskComplete")
+        val SHOW_HOME_GREETING = booleanPreferencesKey("showHomeGreeting")
         val DAILY_GOAL_MINS = intPreferencesKey("dailyGoalMins")
         val DAILY_GOAL_WEEKDAYS = stringPreferencesKey("dailyGoalWeekdays")
         val MAX_STOPWATCH_MINS = intPreferencesKey("maxStopwatchMins")
@@ -82,6 +83,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.data.map { it[AUTO_COMPLETE_FOCUS] ?: false }
     val askFocusOnTaskCompleteFlow: Flow<Boolean> =
         dataStore.data.map { it[ASK_FOCUS_ON_TASK_COMPLETE] ?: true }
+    val showHomeGreetingFlow: Flow<Boolean> =
+        dataStore.data.map { it[SHOW_HOME_GREETING] ?: true }
 
     // Missing or empty weekdays mean every day.
     val dailyFocusTargetFlow: Flow<DailyFocusTarget> = dataStore.data.map { prefs ->
@@ -143,6 +146,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun saveAskFocusOnTaskComplete(ask: Boolean) {
         dataStore.edit { it[ASK_FOCUS_ON_TASK_COMPLETE] = ask }
+    }
+
+    suspend fun saveShowHomeGreeting(show: Boolean) {
+        dataStore.edit { it[SHOW_HOME_GREETING] = show }
     }
 
     suspend fun saveDailyGoalMins(mins: Int) {

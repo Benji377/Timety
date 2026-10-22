@@ -74,8 +74,8 @@ import kotlin.math.roundToInt
 
 
 /**
- * Home screen: greeting, a compact daily focus-goal progress card, and accordion lists of due
- * tasks, today's habits, and upcoming tasks.
+ * Home screen: an optional greeting, a compact daily focus-goal progress card, and accordion lists
+ * of due tasks, today's habits, and upcoming tasks.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,6 +98,7 @@ fun HomeScreen(
     val userProfile by userViewModel.userProfile.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
+    val showGreeting by settingsViewModel.showHomeGreeting.collectAsState()
     val upcomingWindowDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val completeRecurring =
@@ -204,28 +205,32 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Greeting and motivation text.
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = greeting,
-                    fontSize = AppTheme.fsHeadingLarge,
-                    fontWeight = AppTheme.fwExtraBold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = motivation,
-                    fontSize = AppTheme.fsBodyLarge,
-                    fontWeight = AppTheme.fwBold,
-                    color = TaskColor
-                )
+            // Greeting and motivation text, hidden when turned off in settings.
+            if (showGreeting) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                ) {
+                    Text(
+                        text = greeting,
+                        fontSize = AppTheme.fsHeadingLarge,
+                        fontWeight = AppTheme.fwExtraBold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = motivation,
+                        fontSize = AppTheme.fsBodyLarge,
+                        fontWeight = AppTheme.fwBold,
+                        color = TaskColor
+                    )
+                }
             }
 
             // Daily focus-goal progress card, hidden when today has no target.
             if (focusTargetToday != null) {
+                // Without the greeting's padding the card would sit flush against the top bar.
+                if (!showGreeting) Spacer(modifier = Modifier.height(16.dp))
                 DailyGoalCard(
                     focusMinsToday = focusMinsToday,
                     dailyTarget = focusTargetToday,
@@ -237,7 +242,8 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            HorizontalDivider()
+            // With nothing above it, the divider would double the top bar's own border.
+            if (showGreeting || focusTargetToday != null) HorizontalDivider()
 
             // Tasks and habits list.
             Box(

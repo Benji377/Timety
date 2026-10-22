@@ -42,6 +42,11 @@ class SettingsViewModel(
         SharingStarted.WhileSubscribed(5000),
         true
     )
+    val showHomeGreeting = repository.showHomeGreetingFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        true
+    )
     val dailyFocusTarget = repository.dailyFocusTargetFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -112,6 +117,9 @@ class SettingsViewModel(
 
     fun setAskFocusOnTaskComplete(ask: Boolean) =
         viewModelScope.launch { repository.saveAskFocusOnTaskComplete(ask) }
+
+    fun setShowHomeGreeting(show: Boolean) =
+        viewModelScope.launch { repository.saveShowHomeGreeting(show) }
 
     fun setDailyGoalMins(mins: Int) = viewModelScope.launch { repository.saveDailyGoalMins(mins) }
 

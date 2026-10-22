@@ -54,6 +54,7 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.WavingHand
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -181,6 +182,7 @@ fun SettingsScreen(
     val dateFormat by settingsViewModel.dateFormat.collectAsState()
     val autoCompleteFocus by settingsViewModel.autoCompleteFocus.collectAsState()
     val askFocusOnTaskComplete by settingsViewModel.askFocusOnTaskComplete.collectAsState()
+    val showHomeGreeting by settingsViewModel.showHomeGreeting.collectAsState()
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     val maxStopwatchMins by settingsViewModel.maxStopwatchMins.collectAsState()
     val maxNodeMins by settingsViewModel.maxNodeMins.collectAsState()
@@ -394,6 +396,21 @@ fun SettingsScreen(
                     currentLabel = currentThemeLabel,
                     options = themeOptions,
                     onSelect = { settingsViewModel.setThemePref(ThemeMode.fromStorage(it)) }
+                )
+            }
+            item {
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    headlineContent = { Text(stringResource(R.string.settingsLabelShowGreeting)) },
+                    supportingContent = { Text(stringResource(R.string.settingsLabelShowGreetingSubtitle)) },
+                    leadingContent = { Icon(Icons.Outlined.WavingHand, null) },
+                    trailingContent = {
+                        Switch(
+                            checked = showHomeGreeting,
+                            onCheckedChange = { settingsViewModel.setShowHomeGreeting(it) },
+                            colors = SwitchDefaults.colors(checkedTrackColor = SuccessColor)
+                        )
+                    }
                 )
             }
 
