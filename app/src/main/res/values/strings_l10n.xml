@@ -329,7 +329,8 @@
     <string name="calendarHeaderWed">W</string>
     <string name="calendarLabelFocusOngoing">Ongoing</string>
     <string name="calendarLabelSelect">Select a day to view details</string>
-    <string name="calendarReportComparedHint">Changes are compared with the previous week.</string>
+    <string name="calendarMonthlyReportTitle">Monthly Report</string>
+    <string name="calendarReportComparedHint">Changes are compared with %1$s.</string>
     <string name="calendarReportFocusSessions">Focus sessions</string>
     <string name="calendarReportFocusTime">Focus time</string>
     <string name="calendarReportHabitCheckIns">Habit check-ins</string>

@@ -63,7 +63,7 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
-import io.github.benji377.timety.ui.components.calendar.WeeklyReportDialog
+import io.github.benji377.timety.ui.components.calendar.PeriodReportDialog
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
@@ -91,8 +91,8 @@ import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
-import io.github.benji377.timety.util.stats.WeeklySummary
-import java.time.DayOfWeek
+import io.github.benji377.timety.util.stats.PeriodSummary
+import io.github.benji377.timety.util.stats.ReportPeriod
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -124,7 +124,8 @@ fun CalendarScreen(
 
     var focusedMonth by remember { mutableStateOf(LocalDate.now().withDayOfMonth(1)) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(LocalDate.now()) }
-    var reportWeekStart by rememberSaveable { mutableStateOf<LocalDate?>(null) }
+    // The report being shown, as (period, first day); a Pair of Serializables survives rotation.
+    var openReport by rememberSaveable { mutableStateOf<Pair<ReportPeriod, LocalDate>?>(null) }
 
     // Filter and sort the task/session/habit data for the selected day's accordion lists.
     val selectedDayTasks = remember(tasks, selectedDate) {
@@ -170,16 +171,21 @@ fun CalendarScreen(
         } ?: emptyList()
     }
 
-    reportWeekStart?.let { weekStart ->
+    openReport?.let { (period, start) ->
         val plainTasks = tasks.map { it.task }
         val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
-        fun summaryOf(start: LocalDate) =
-            WeeklySummary.of(start, plainTasks, recurringItems, habitCompletions, sessions, zone)
-        WeeklyReportDialog(
-            weekStart = weekStart,
-            summary = summaryOf(weekStart),
-            previous = summaryOf(weekStart.minusWeeks(1)),
-            onDismiss = { reportWeekStart = null }
+        fun summaryOf(range: ClosedRange<LocalDate>) =
+            PeriodSummary.of(range, plainTasks, recurringItems, habitCompletions, sessions, zone)
+        // The current period's figures cover all of it (days still ahead add nothing done, while
+        // tasks due later stay counted); only the comparison is cut to the days elapsed so far.
+        val comparedWith = period.comparisonRange(start, LocalDate.now())
+        PeriodReportDialog(
+            period = period,
+            start = start,
+            comparedWith = comparedWith,
+            summary = summaryOf(start..period.endOf(start)),
+            previous = summaryOf(comparedWith),
+            onDismiss = { openReport = null }
         )
     }
 
@@ -237,7 +243,8 @@ fun CalendarScreen(
                         habitsWithCompletions = habitsWithCompletions,
                         recurringItems = recurringItems,
                         onDaySelected = { selectedDate = it },
-                        onOpenWeeklyReport = { reportWeekStart = it }
+                        onOpenWeeklyReport = { openReport = ReportPeriod.WEEK to it },
+                        onOpenMonthlyReport = { openReport = ReportPeriod.MONTH to focusedMonth }
                     )
                 }
             }
@@ -361,6 +368,7 @@ private fun CalendarGrid(
     recurringItems: List<RecurringTaskWithOccurrences>,
     onDaySelected: (LocalDate) -> Unit,
     onOpenWeeklyReport: (weekStart: LocalDate) -> Unit,
+    onOpenMonthlyReport: () -> Unit,
 ) {
     val zone = ZoneId.systemDefault()
     val weeks = remember(focusedMonth) { CalendarUtils.generateWeeks(focusedMonth) }
@@ -412,18 +420,19 @@ private fun CalendarGrid(
                 }
             }
             // An icon rather than a "Weekly" label: no translation of that word fits the column on a
-            // small phone, and the icon also reads as tappable. It opens the selected day's week.
+            // small phone, and the icon also reads as tappable. Heading the whole column, it opens
+            // the shown month's report, while each week chip below opens its own week.
             Box(
                 modifier = Modifier
                     .weight(1.5f)
                     .padding(bottom = 8.dp)
                     .clip(AppTheme.brMedium)
-                    .clickable { onOpenWeeklyReport(weekStartOf(selectedDate ?: today)) },
+                    .clickable(onClick = onOpenMonthlyReport),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Outlined.Insights,
-                    contentDescription = stringResource(R.string.calendarWeeklyReportTitle),
+                    contentDescription = stringResource(R.string.calendarMonthlyReportTitle),
                     tint = TaskColor,
                     modifier = Modifier.size(20.dp)
                 )
@@ -436,7 +445,10 @@ private fun CalendarGrid(
             val plainTasks = tasks.map { it.task }
             val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
             weeks.associateWith { week ->
-                WeeklySummary.of(week.first(), plainTasks, recurringItems, habitCompletions, sessions, zone)
+                PeriodSummary.of(
+                    week.first()..ReportPeriod.WEEK.endOf(week.first()),
+                    plainTasks, recurringItems, habitCompletions, sessions, zone
+                )
             }
         }
         // Bars compare the weeks on screen with each other, so they scale to the busiest one.
@@ -557,7 +569,7 @@ private fun CalendarGrid(
  */
 @Composable
 private fun WeekSummaryChip(
-    summary: WeeklySummary,
+    summary: PeriodSummary,
     maxTasksCompleted: Int,
     maxHabitCheckIns: Int,
     showFocusTime: Boolean,
@@ -621,8 +633,6 @@ private fun WeekBar(value: Int, max: Int, color: Color) {
             .height(4.dp)
     )
 }
-
-private fun weekStartOf(date: LocalDate): LocalDate = date.with(DayOfWeek.MONDAY)
 
 /** Above this system font scale the week chip drops its number; see [WeekSummaryChip]. */
 private const val MAX_FONT_SCALE_FOR_WEEK_NUMBER = 1.3f

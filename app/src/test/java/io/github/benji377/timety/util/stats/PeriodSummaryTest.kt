@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 
-class WeeklySummaryTest {
+class PeriodSummaryTest {
 
     private val zone: ZoneId = ZoneOffset.UTC
 
@@ -60,7 +60,7 @@ class WeeklySummaryTest {
         recurring: List<RecurringTaskWithOccurrences> = emptyList(),
         habits: List<Instant> = emptyList(),
         sessions: List<FocusSessionEntity> = emptyList(),
-    ) = WeeklySummary.of(monday, tasks, recurring, habits, sessions, zone)
+    ) = PeriodSummary.of(monday..sunday, tasks, recurring, habits, sessions, zone)
 
     @Test
     fun tasks_dueAndCompletedCountedSeparately() {
@@ -113,6 +113,46 @@ class WeeklySummaryTest {
 
     @Test
     fun emptyWeek_isAllZeros() {
-        assertEquals(WeeklySummary(0, 0, 0, 0, 0), summarize())
+        assertEquals(PeriodSummary(0, 0, 0, 0, 0), summarize())
+    }
+
+    @Test
+    fun comparison_ongoingWeek_comparesTheSameElapsedDays() {
+        val thursday = monday.plusDays(3)
+        assertEquals(
+            monday.minusWeeks(1)..thursday.minusWeeks(1),
+            ReportPeriod.WEEK.comparisonRange(monday, today = thursday)
+        )
+    }
+
+    @Test
+    fun comparison_finishedOrFuturePeriod_comparesTheWholePreviousOne() {
+        val previousWeek = monday.minusWeeks(1)..sunday.minusWeeks(1)
+        assertEquals(previousWeek, ReportPeriod.WEEK.comparisonRange(monday, today = sunday.plusDays(1)))
+        assertEquals(previousWeek, ReportPeriod.WEEK.comparisonRange(monday, today = monday.minusDays(1)))
+    }
+
+    @Test
+    fun comparison_ongoingMonth_comparesTheSameDaysOfLastMonth() {
+        val october = LocalDate.of(2026, 10, 1)
+        assertEquals(
+            LocalDate.of(2026, 9, 1)..LocalDate.of(2026, 9, 22),
+            ReportPeriod.MONTH.comparisonRange(october, today = LocalDate.of(2026, 10, 22))
+        )
+    }
+
+    @Test
+    fun comparison_monthLongerThanTheLastOne_stopsAtTheLastOnesEnd() {
+        val march = LocalDate.of(2026, 3, 1)
+        assertEquals(
+            LocalDate.of(2026, 2, 1)..LocalDate.of(2026, 2, 28),
+            ReportPeriod.MONTH.comparisonRange(march, today = LocalDate.of(2026, 3, 31))
+        )
+    }
+
+    @Test
+    fun period_endOf_coversWeeksAndMonthsOfAnyLength() {
+        assertEquals(sunday, ReportPeriod.WEEK.endOf(monday))
+        assertEquals(LocalDate.of(2028, 2, 29), ReportPeriod.MONTH.endOf(LocalDate.of(2028, 2, 1)))
     }
 }

@@ -35,30 +35,43 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.stats.WeeklySummary
+import io.github.benji377.timety.util.stats.PeriodSummary
+import io.github.benji377.timety.util.stats.ReportPeriod
 import java.time.LocalDate
 import kotlin.math.abs
 
 
 /**
- * The calendar's weekly report: every number behind a week chip, labelled, with the change from
- * the week before. Doubles as the legend for the chip's number and bars.
+ * The calendar's weekly or monthly report: every number behind the grid, labelled, with the
+ * change from the [comparedWith] days of the period before. The weekly one doubles as the legend
+ * for a week chip's number and bars.
  */
 @Composable
-fun WeeklyReportDialog(
-    weekStart: LocalDate,
-    summary: WeeklySummary,
-    previous: WeeklySummary,
+fun PeriodReportDialog(
+    period: ReportPeriod,
+    start: LocalDate,
+    comparedWith: ClosedRange<LocalDate>,
+    summary: PeriodSummary,
+    previous: PeriodSummary,
     onDismiss: () -> Unit,
 ) {
     NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Column {
-                Text(stringResource(R.string.calendarWeeklyReportTitle))
                 Text(
-                    "${AppDateFormatUtils.formatShortDate(weekStart)} - " +
-                        AppDateFormatUtils.formatShortDate(weekStart.plusDays(6)),
+                    stringResource(
+                        when (period) {
+                            ReportPeriod.WEEK -> R.string.calendarWeeklyReportTitle
+                            ReportPeriod.MONTH -> R.string.calendarMonthlyReportTitle
+                        }
+                    )
+                )
+                Text(
+                    when (period) {
+                        ReportPeriod.WEEK -> formatRange(start..period.endOf(start))
+                        ReportPeriod.MONTH -> AppDateFormatUtils.formatMonthYear(start)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -102,7 +115,7 @@ fun WeeklyReportDialog(
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = AppTheme.spaceMedium))
                 Text(
-                    stringResource(R.string.calendarReportComparedHint),
+                    stringResource(R.string.calendarReportComparedHint, formatRange(comparedWith)),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -144,6 +157,9 @@ private fun ReportRow(
     }
     Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
 }
+
+private fun formatRange(range: ClosedRange<LocalDate>): String =
+    "${AppDateFormatUtils.formatShortDate(range.start)} - ${AppDateFormatUtils.formatShortDate(range.endInclusive)}"
 
 // No change shows nothing rather than "+0", so the eye lands on the rows that moved.
 private fun countChange(delta: Int): String? = when {
