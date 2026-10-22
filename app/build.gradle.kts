@@ -14,8 +14,8 @@ android {
         minSdk = 26
         targetSdk = 37
         // Must stay above 233, the last Flutter-era versionCode on F-Droid.
-        versionCode = 245
-        versionName = "2.3.1"
+        versionCode = 246
+        versionName = "2.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -146,6 +146,7 @@ dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.activity.compose)
 
     // Compose

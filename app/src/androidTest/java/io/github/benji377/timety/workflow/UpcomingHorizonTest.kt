@@ -113,7 +113,8 @@ class UpcomingHorizonTest {
             TaskEntity(
                 id = "task-today",
                 title = "Call the dentist",
-                dueDate = Instant.now().plus(1, ChronoUnit.HOURS),
+                // Late today rather than "in an hour", which is tomorrow when the test runs after 23:00.
+                dueDate = today.atTime(23, 59).atZone(zone).toInstant(),
                 createdAt = Instant.now(),
             ),
         )

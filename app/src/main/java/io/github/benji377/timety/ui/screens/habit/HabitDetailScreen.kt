@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -97,6 +98,8 @@ fun HabitDetailScreen(
     val isNewHabit = habitId == null
 
     var isEditing by remember { mutableStateOf(isNewHabit) }
+    // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
+    val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
     var name by remember(existingHabit) { mutableStateOf(existingHabit?.name ?: "") }
@@ -187,7 +190,7 @@ fun HabitDetailScreen(
         }
 
         val habitToSave = HabitEntity(
-            id = habitId ?: UUID.randomUUID().toString(),
+            id = habitId ?: newItemId,
             name = trimmedName,
             frequency = frequency,
             targetDaysPerWeek = if (frequency == HabitFrequency.WEEKLY_FLEXIBLE) targetDaysPerWeek else null,

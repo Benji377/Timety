@@ -79,7 +79,7 @@ class FocusAutoCompleteTest {
     }
 
     @Test
-    fun recurringTask_isCompletedOncePerSession_notOncePerPhase() {
+    fun recurringTask_isCompletedOncePerDay_notPerPhaseOrSession() {
         val task = RecurringTaskEntity(
             id = "recurring-1",
             title = "Water the plants",
@@ -100,7 +100,8 @@ class FocusAutoCompleteTest {
         stopSession()
         startSession(FocusTargetSelection.of(FocusTargetType.RECURRING_TASK, task.id, task.title))
         finishFocusPhase()
-        awaitOccurrences(task.id, 2, "a new session may complete it again")
+        Thread.sleep(500)
+        assertEquals("a second session the same day must not complete it again", 1, occurrenceCount(task.id))
     }
 
     @Test

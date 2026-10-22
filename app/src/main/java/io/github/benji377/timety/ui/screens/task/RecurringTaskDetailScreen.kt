@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -122,6 +123,8 @@ fun RecurringTaskDetailScreen(
     val dateFmt = LocalDateFormatSettings.current
 
     var isEditing by remember(recurringTaskId) { mutableStateOf(isNew) }
+    // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
+    val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
     var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
@@ -181,7 +184,7 @@ fun RecurringTaskDetailScreen(
             else -> MonthlyChoice.DAY_OF_MONTH
         }
         val taskToSave = RecurringTaskEntity(
-            id = recurringTaskId ?: UUID.randomUUID().toString(),
+            id = recurringTaskId ?: newItemId,
             title = trimmedTitle,
             description = description.trim(),
             category = category,
@@ -533,8 +536,7 @@ fun RecurringTaskDetailScreen(
         }
         val initialTime = dueDate?.atZone(zone)
         NeoDateTimePickerDialog(
-            initialDateMillis = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null)
-                ?.toEpochMilli() ?: System.currentTimeMillis(),
+            initialDate = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null) ?: Instant.now(),
             initialHour = initialTime?.hour ?: 12,
             initialMinute = initialTime?.minute ?: 0,
             timeTitle = stringResource(

@@ -29,6 +29,7 @@ class TimerSoundReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val now = System.currentTimeMillis()
+        if (!FocusTimerManager.isPhaseChimeExpected(now)) return
         if (now - lastPlayTimeMs < 2000) return
         lastPlayTimeMs = now
 

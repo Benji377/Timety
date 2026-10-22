@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -304,7 +305,13 @@ class FocusViewModel(
             )
 
             FocusTargetType.RECURRING_TASK -> {
-                val task = recurringTaskRepository.getTaskById(target.id) ?: return
+                val entry = recurringTaskRepository.allRecurringTasks.first()
+                    .firstOrNull { it.task.id == target.id } ?: return
+                // Once per day, like a habit: a second session must not log another occurrence.
+                val today = LocalDate.now()
+                val zone = ZoneId.systemDefault()
+                if (entry.occurrences.any { it.completedAt.atZone(zone).toLocalDate() == today }) return
+                val task = entry.task
                 CompletionActions.completeRecurringOccurrence(
                     getApplication(), recurringTaskRepository, userRepository, task
                 )
@@ -573,13 +580,19 @@ class FocusViewModel(
         endTime: Instant,
         target: FocusTargetSelection?
     ) {
-        val totalSeconds = (endTime.epochSecond - startTime.epochSecond).toInt()
-        if (totalSeconds <= 0) return
+        val span = (endTime.epochSecond - startTime.epochSecond).toInt()
+        if (span <= 0) return
+        // The editor's span includes breaks; keep the real focus time unless the times changed.
+        val storedEnd = session.endTime
+        val timesUnchanged = startTime == session.startTime && storedEnd != null &&
+            Duration.between(session.startTime, storedEnd).toMinutes() ==
+            Duration.between(startTime, endTime).toMinutes()
+        val totalSeconds = if (timesUnchanged) session.totalSecondsFocused else span
 
         val updated = session.copy(
             modeId = mode.id,
             startTime = startTime,
-            endTime = endTime,
+            endTime = if (timesUnchanged) storedEnd else endTime,
             totalSecondsFocused = totalSeconds,
         ).withTarget(target)
 

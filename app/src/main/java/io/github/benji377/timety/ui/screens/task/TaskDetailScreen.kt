@@ -56,6 +56,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -140,6 +141,8 @@ fun TaskDetailScreen(
     val existingTask = existingTaskWithSubtasks?.task
 
     var isEditing by remember(taskId) { mutableStateOf(isNewTask) }
+    // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
+    val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
     var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
@@ -226,7 +229,7 @@ fun TaskDetailScreen(
                                 return@DetailTopBarActions
                             }
                             val taskToSave = TaskEntity(
-                                id = taskId ?: UUID.randomUUID().toString(),
+                                id = taskId ?: newItemId,
                                 title = trimmedTitle,
                                 description = description.trim(),
                                 location = location.trim(),
@@ -674,8 +677,7 @@ fun TaskDetailScreen(
             }
         }
         NeoDateTimePickerDialog(
-            initialDateMillis = (if (target == PickerTarget.DUE_DATE) dueDate else null)
-                ?.toEpochMilli() ?: System.currentTimeMillis(),
+            initialDate = (if (target == PickerTarget.DUE_DATE) dueDate else null) ?: Instant.now(),
             initialHour = 12,
             initialMinute = 0,
             timeTitle = stringResource(R.string.taskDetailsLabelDueDateSet),

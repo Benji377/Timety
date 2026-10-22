@@ -108,6 +108,13 @@ class FocusTimerService : Service() {
         return START_STICKY
     }
 
+    // Swiping the app away from Recents ends the session; nothing is logged.
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        cancelAlarm()
+        FocusTimerManager.stopTimer(discard = true)
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {

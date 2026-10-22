@@ -169,6 +169,42 @@ class BackupRoundTripTest {
         )
     }
 
+    @Test
+    fun brokenBackup_failsWithoutChangingDataOrSettings() = runBlocking {
+        val seeded = seedOneOfEverything(target)
+        target.settingsRepository.saveShowHomeGreeting(false)
+
+        // Valid up to the tasks array, whose entry is not an object: parsing fails mid-restore.
+        val broken = JSONObject(source.backupService.exportToShareUri().getOrThrow().readText())
+            .put("preferences", JSONObject().put("showHomeGreeting", true))
+            .put("tasks", org.json.JSONArray().put("not a task"))
+
+        assertTrue(target.backupService.importFromJson(broken).isFailure)
+        assertEquals("habit", seeded.habit, target.habitRepository.allHabits.first().single())
+        assertEquals(false, target.settingsRepository.showHomeGreetingFlow.first())
+    }
+
+    @Test
+    fun restore_dropsMistypedSettings_andKeepsTheStoredDndFilter() = runBlocking {
+        target.settingsRepository.saveStoredInterruptionFilter(2)
+        val payload = JSONObject()
+            .put("payloadType", "user_data")
+            .put(
+                "preferences",
+                JSONObject()
+                    .put("appLocaleCode", 1)
+                    .put("showHomeGreeting", false)
+                    .put("notASetting", "x"),
+            )
+
+        target.backupService.importFromJson(payload).getOrThrow()
+
+        // A mistyped locale would otherwise crash every launch when read as a String.
+        assertEquals("system", target.settingsRepository.appLocaleCodeFlow.first())
+        assertEquals(false, target.settingsRepository.showHomeGreetingFlow.first())
+        assertEquals(2, target.settingsRepository.storedInterruptionFilterFlow.first())
+    }
+
     private fun android.net.Uri.readText(): String =
         context.contentResolver.openInputStream(this)!!.use { it.reader().readText() }
 

@@ -434,7 +434,7 @@ private fun GoalEntryDialog(
     if (showDateTimePicker) {
         val zoned = timestamp.atZone(ZoneId.systemDefault())
         NeoDateTimePickerDialog(
-            initialDateMillis = timestamp.toEpochMilli(),
+            initialDate = timestamp,
             initialHour = zoned.hour,
             initialMinute = zoned.minute,
             onConfirm = { date, hour, minute ->

@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +55,7 @@ import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
+import io.github.benji377.timety.ui.components.common.datePickerMillis
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -91,6 +93,8 @@ fun GoalDetailScreen(
     val isNewGoal = goalId == null
 
     var isEditing by remember { mutableStateOf(isNewGoal) }
+    // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
+    val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
     var name by remember(existingGoal?.id) { mutableStateOf(existingGoal?.name ?: "") }
@@ -142,7 +146,7 @@ fun GoalDetailScreen(
         if (nameError || targetError || unitError) return
 
         val goalToSave = GoalEntity(
-            id = goalId ?: UUID.randomUUID().toString(),
+            id = goalId ?: newItemId,
             name = trimmedName,
             description = description.trim(),
             colorValue = selectedColor.toArgb(),
@@ -412,7 +416,7 @@ fun GoalDetailScreen(
         // days-left treat the chosen date as still "in time".
         if (showDatePicker) {
             val state =
-                rememberDatePickerState(initialSelectedDateMillis = targetDate.toEpochMilli())
+                rememberDatePickerState(initialSelectedDateMillis = datePickerMillis(targetDate))
             DatePickerDialog(
                 onDismissRequest = { showDatePicker = false },
                 confirmButton = {

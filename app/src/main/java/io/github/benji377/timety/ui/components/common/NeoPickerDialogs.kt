@@ -24,8 +24,13 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 
+
+/** The Material date picker works in UTC days: [instant]'s local date as UTC-midnight millis. */
+fun datePickerMillis(instant: Instant, zone: ZoneId = ZoneId.systemDefault()): Long =
+    instant.atZone(zone).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
 /**
  * Alert dialog wrapping a Material [TimePicker], confirming with the picked hour and minute.
@@ -110,14 +115,13 @@ fun NeoDurationPickerDialog(
 
 /**
  * Two-step date-then-time picker: a [DatePickerDialog] followed by a [NeoTimePickerDialog],
- * confirming with the picked date, hour, and minute. The date is derived from the picker's UTC
- * millis; callers combine the parts into an Instant in their own zone. Cancelling either step
- * calls [onDismiss].
+ * confirming with the picked date, hour, and minute. Opens on [initialDate]'s local day; callers
+ * combine the parts into an Instant in their own zone. Cancelling either step calls [onDismiss].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NeoDateTimePickerDialog(
-    initialDateMillis: Long,
+    initialDate: Instant,
     initialHour: Int,
     initialMinute: Int,
     onConfirm: (date: LocalDate, hour: Int, minute: Int) -> Unit,
@@ -126,6 +130,7 @@ fun NeoDateTimePickerDialog(
     selectableDates: SelectableDates? = null,
 ) {
     var pickedDate by remember { mutableStateOf<LocalDate?>(null) }
+    val initialDateMillis = datePickerMillis(initialDate)
 
     val date = pickedDate
     if (date == null) {

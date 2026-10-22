@@ -28,9 +28,13 @@ class ReminderScheduler private constructor(private val context: Context) {
     // Tasks.
 
 
+    /** Re-arms [task]'s reminders; one already showing stays, so a resync can't swallow it. */
     fun scheduleTaskReminders(task: TaskEntity) {
-        cancelTaskReminders(task.id)
-        if (task.isCompleted) return
+        if (task.isCompleted) {
+            cancelTaskReminders(task.id)
+            return
+        }
+        cancelTaskAlarms(task.id)
 
         val now = Instant.now()
         val baseId = task.id.hashCode()
@@ -73,6 +77,11 @@ class ReminderScheduler private constructor(private val context: Context) {
         for (i in 0 until TASK_ID_SLOTS) notificationService.cancelNotification(baseId + i)
     }
 
+    private fun cancelTaskAlarms(taskId: String) {
+        val baseId = taskId.hashCode()
+        for (i in 0 until TASK_ID_SLOTS) notificationService.cancelAlarm(baseId + i)
+    }
+
     // Recurring tasks.
 
 
@@ -81,7 +90,7 @@ class ReminderScheduler private constructor(private val context: Context) {
      * occurrence advances the due date and calls this again for the one after.
      */
     fun scheduleRecurringTaskReminders(task: RecurringTaskEntity) {
-        cancelRecurringTaskReminders(task.id)
+        cancelRecurringTaskAlarms(task.id)
 
         val now = Instant.now()
         val baseId = NotificationService.recurringTaskReminderBaseId(task.id)
@@ -112,6 +121,11 @@ class ReminderScheduler private constructor(private val context: Context) {
     fun cancelRecurringTaskReminders(id: String) {
         val baseId = NotificationService.recurringTaskReminderBaseId(id)
         for (i in 0 until TASK_ID_SLOTS) notificationService.cancelNotification(baseId + i)
+    }
+
+    private fun cancelRecurringTaskAlarms(id: String) {
+        val baseId = NotificationService.recurringTaskReminderBaseId(id)
+        for (i in 0 until TASK_ID_SLOTS) notificationService.cancelAlarm(baseId + i)
     }
 
 

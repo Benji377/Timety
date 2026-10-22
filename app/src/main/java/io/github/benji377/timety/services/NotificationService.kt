@@ -123,7 +123,7 @@ class NotificationService(private val context: Context) {
         times: List<Int>,
         targetWeekdays: List<Int>? = null,
     ) {
-        cancelHabitReminder(habitId)
+        cancelHabitAlarms(habitId)
         val weekdays = targetWeekdays?.toSortedSet()?.toList()
         val reminderDays: List<Int?> = if (weekdays.isNullOrEmpty()) listOf(null) else weekdays
 
@@ -151,10 +151,15 @@ class NotificationService(private val context: Context) {
 
 
     fun cancelHabitReminder(habitId: String) {
+        cancelHabitAlarms(habitId)
+        dismissHabitNotifications(habitId)
+    }
+
+    private fun cancelHabitAlarms(habitId: String) {
         for (slot in 0 until HabitUtils.MAX_REMINDER_TIMES) {
-            cancelAlarmAndNotification(habitReminderId(habitId, null, slot))
+            cancelAlarm(habitReminderId(habitId, null, slot))
             for (weekday in 1..7) {
-                cancelAlarmAndNotification(habitReminderId(habitId, weekday, slot))
+                cancelAlarm(habitReminderId(habitId, weekday, slot))
             }
         }
     }
@@ -175,7 +180,7 @@ class NotificationService(private val context: Context) {
     /**
      * Schedules the next occurrence of a quick habit as a single exact alarm; [rescheduleIfRepeating]
      * chains the following one when it fires. Cancels any existing alarm first, so this doubles as
-     * the "reschedule after edit" path.
+     * the "reschedule after edit" path; a reminder already showing stays.
      */
     fun scheduleQuickHabit(
         id: String,
@@ -187,7 +192,7 @@ class NotificationService(private val context: Context) {
         allowedWeekdays: Set<Int>,
     ) {
         val notificationId = quickHabitId(id)
-        cancelAlarmAndNotification(notificationId)
+        cancelAlarm(notificationId)
         val triggerAt = QuickHabitScheduling.nextTrigger(
             now = Instant.now(),
             intervalMinutes = intervalMinutes,
@@ -201,6 +206,7 @@ class NotificationService(private val context: Context) {
             body = body,
             channelId = CHANNEL_QUICK_HABITS,
             repeat = Repeat.INTERVAL,
+            quickHabitId = id,
             intervalMinutes = intervalMinutes,
             startMinuteOfDay = startMinuteOfDay ?: -1,
             endMinuteOfDay = endMinuteOfDay ?: -1,
@@ -249,6 +255,16 @@ class NotificationService(private val context: Context) {
 
 
     fun cancelNotification(notificationId: Int) = cancelAlarmAndNotification(notificationId)
+
+    /** Cancels only the pending alarm; a reminder already showing stays until the user handles it. */
+    fun cancelAlarm(requestCode: Int) {
+        val intent = Intent(context, ReminderReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, requestCode, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
+    }
 
     // Called by ReminderReceiver when an alarm fires.
 
@@ -404,12 +420,7 @@ class NotificationService(private val context: Context) {
     }
 
     private fun cancelAlarmAndNotification(requestCode: Int) {
-        val intent = Intent(context, ReminderReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, requestCode, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(pendingIntent)
+        cancelAlarm(requestCode)
         notificationManager.cancel(requestCode)
     }
 
@@ -420,6 +431,7 @@ class NotificationService(private val context: Context) {
         channelId: String,
         repeat: Repeat,
         habitId: String? = null,
+        quickHabitId: String? = null,
         weekday: Int = -1,
         hour: Int = -1,
         minute: Int = -1,
@@ -434,6 +446,7 @@ class NotificationService(private val context: Context) {
         putExtra(EXTRA_CHANNEL_ID, channelId)
         putExtra(EXTRA_REPEAT, repeat.name)
         habitId?.let { putExtra(EXTRA_HABIT_ID, it) }
+        quickHabitId?.let { putExtra(EXTRA_QUICK_HABIT_ID, it) }
         putExtra(EXTRA_WEEKDAY, weekday)
         putExtra(EXTRA_HOUR, hour)
         putExtra(EXTRA_MINUTE, minute)
@@ -506,6 +519,7 @@ class NotificationService(private val context: Context) {
         internal const val EXTRA_BODY = "body"
         internal const val EXTRA_CHANNEL_ID = "channelId"
         internal const val EXTRA_HABIT_ID = "habitId"
+        internal const val EXTRA_QUICK_HABIT_ID = "quickHabitId"
         internal const val EXTRA_WEEKDAY = "weekday"
         internal const val EXTRA_HOUR = "hour"
         internal const val EXTRA_MINUTE = "minute"

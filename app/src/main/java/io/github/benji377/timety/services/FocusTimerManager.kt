@@ -58,6 +58,8 @@ data class TimerFlags(val isRunning: Boolean = false, val isPaused: Boolean = fa
  * its state as a [StateFlow] consumed by [FocusTimerService] and the UI.
  */
 object FocusTimerManager {
+    private const val CHIME_GRACE_MS = 15_000L
+
     private val _timerState = MutableStateFlow(TimerState())
     val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
 
@@ -93,6 +95,19 @@ object FocusTimerManager {
     private var phaseBaseTime: Instant? = null
     private var currentPhaseTotalSeconds: Int = 0
     private var accumulatedElapsed: Int = 0
+
+    @Volatile
+    private var lastSessionStoppedAtMs: Long = 0L
+
+    /**
+     * Whether a phase-end chime firing now belongs to a real session: one is active, or one just
+     * stopped as its last phase ended. A fresh process (the old one was killed) has neither.
+     */
+    fun isPhaseChimeExpected(nowMs: Long): Boolean {
+        val state = _timerState.value
+        return state.isRunning || state.isPaused || state.isAwaitingContinue ||
+            nowMs - lastSessionStoppedAtMs < CHIME_GRACE_MS
+    }
 
 
     /** Configures the timer for a new phase without starting it; call [startTimer] to begin ticking. */
@@ -186,6 +201,7 @@ object FocusTimerManager {
             )
         }
         if (wasActive) {
+            lastSessionStoppedAtMs = System.currentTimeMillis()
             stopEvent.tryEmit(StopInfo(elapsed, state.isRestPhase, discard))
         }
     }
