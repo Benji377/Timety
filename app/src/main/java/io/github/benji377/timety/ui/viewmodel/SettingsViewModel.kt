@@ -147,11 +147,9 @@ class SettingsViewModel(
 
     fun setDailyGoalMins(mins: Int) = viewModelScope.launch { repository.saveDailyGoalMins(mins) }
 
-    /** Ignored when [days] is empty: at least one weekday stays selected while the target is on. */
-    fun setDailyGoalWeekdays(days: Set<Int>) {
-        if (days.isEmpty()) return
-        viewModelScope.launch { repository.saveDailyGoalWeekdays(days) }
-    }
+    fun toggleDailyGoalWeekday(day: Int) =
+        viewModelScope.launch { repository.toggleDailyGoalWeekday(day) }
+
     fun setMaxStopwatchMins(mins: Int) =
         viewModelScope.launch { repository.saveMaxStopwatchMins(mins) }
 

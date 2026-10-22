@@ -178,6 +178,21 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[DAILY_GOAL_MINS] = mins }
     }
 
+    /**
+     * Flips [day] in the target weekdays as one read-modify-write, so quick successive taps can't
+     * overwrite each other. Deselecting the last day is ignored: zero minutes is the only "off".
+     */
+    suspend fun toggleDailyGoalWeekday(day: Int) {
+        dataStore.edit { prefs ->
+            val days = HabitUtils.parseWeekdays(prefs[DAILY_GOAL_WEEKDAYS])
+                .filter { it in DailyFocusTarget.ALL_WEEKDAYS }
+                .toSet()
+                .ifEmpty { DailyFocusTarget.ALL_WEEKDAYS }
+            val toggled = if (day in days) days - day else days + day
+            if (toggled.isNotEmpty()) prefs[DAILY_GOAL_WEEKDAYS] = HabitUtils.serializeWeekdays(toggled)
+        }
+    }
+
     /** Saves the target weekdays; an empty set is rejected since it would silently mean "off". */
     suspend fun saveDailyGoalWeekdays(days: Set<Int>) {
         require(days.isNotEmpty()) { "A daily focus target needs at least one weekday" }

@@ -44,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -186,8 +187,8 @@ fun FocusScreen(
     // since been ended by other means (e.g. the notification's Stop action), and isPaused alone
     // can't tell a dialog-induced pause from a pause the user made deliberately before opening
     // the dialog.
-    var pausedForStop by remember { mutableStateOf(false) }
-    var pausedForReset by remember { mutableStateOf(false) }
+    var pausedForStop by rememberSaveable { mutableStateOf(false) }
+    var pausedForReset by rememberSaveable { mutableStateOf(false) }
 
     // If the session ends by some other means while a confirmation dialog is open (e.g. the
     // user stops it from the notification shade), the dialog would otherwise linger on a dead
@@ -308,6 +309,13 @@ fun FocusScreen(
         var nextIndex = (currentIndex + direction) % allModes.size
         if (nextIndex < 0) nextIndex += allModes.size
         focusViewModel.setCurrentModeIndex(nextIndex)
+    }
+
+    // A rebuild (e.g. a theme switch) drops an open confirmation dialog; that counts as Cancel.
+    LaunchedEffect(Unit) {
+        if ((pausedForStop || pausedForReset) && isPaused) sendAction(FocusTimerService.ACTION_START)
+        pausedForStop = false
+        pausedForReset = false
     }
 
     fun requestStop() {
@@ -629,6 +637,7 @@ fun FocusScreen(
             // Partial-phase banking + session logging happen via
             // FocusTimerManager.stopEvent, shared with the notification's Stop action.
             sendAction(FocusTimerService.ACTION_STOP)
+            pausedForStop = false
             showStopConfirmation = false
         },
         onDismiss = {
@@ -638,6 +647,7 @@ fun FocusScreen(
             // a phantom new phase. isPaused alone would resume a timer the user had already
             // paused themselves before requesting the stop.
             if (pausedForStop && isPaused) sendAction(FocusTimerService.ACTION_START)
+            pausedForStop = false
             showStopConfirmation = false
         },
     )
@@ -648,6 +658,7 @@ fun FocusScreen(
         content = stringResource(R.string.focusDialogSessionResetContent),
         onConfirm = {
             sendAction(FocusTimerService.ACTION_DISCARD)
+            pausedForReset = false
             showResetConfirmation = false
         },
         onDismiss = {
@@ -656,6 +667,7 @@ fun FocusScreen(
             // timer is already paused by the user (pausedForReset = false in that case), so
             // isPaused alone would wrongly resume a timer the user had deliberately paused.
             if (pausedForReset && isPaused) sendAction(FocusTimerService.ACTION_START)
+            pausedForReset = false
             showResetConfirmation = false
         },
     )

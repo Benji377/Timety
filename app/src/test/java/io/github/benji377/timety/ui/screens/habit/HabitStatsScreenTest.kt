@@ -66,13 +66,20 @@ class HabitStatsScreenTest {
             )
         )
 
-        // Broken streak, should return max
+        // Broken by two missed days, should return max
         assertEquals(
             3, calculateBestStreak(
                 listOf(
                     today, // 1
-                    today.minusDays(2), today.minusDays(3), today.minusDays(4) // 3
+                    today.minusDays(3), today.minusDays(4), today.minusDays(5) // 3
                 )
+            )
+        )
+
+        // A single missed day is bridged, not a break
+        assertEquals(
+            4, calculateBestStreak(
+                listOf(today, today.minusDays(2), today.minusDays(3), today.minusDays(4))
             )
         )
     }

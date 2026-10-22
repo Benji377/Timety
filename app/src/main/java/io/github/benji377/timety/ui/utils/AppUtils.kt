@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.utils
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -23,8 +25,24 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
 
-/** Small shared UI helpers: size/priority glyphs and a category color swatch. */
+/** Small shared UI helpers: size/priority glyphs and labels, and a category color swatch. */
 object AppUtils {
+
+    @StringRes
+    fun priorityLabel(priority: Priority): Int = when (priority) {
+        Priority.LOW -> R.string.taskPriorityLow
+        Priority.MEDIUM -> R.string.taskPriorityMedium
+        Priority.HIGH -> R.string.taskPriorityHigh
+        Priority.VERY_HIGH -> R.string.taskPriorityVeryHigh
+    }
+
+    @StringRes
+    fun sizeLabel(size: TaskSize): Int = when (size) {
+        TaskSize.SMALL -> R.string.taskSizeSmall
+        TaskSize.MEDIUM -> R.string.taskSizeMedium
+        TaskSize.LARGE -> R.string.taskSizeLarge
+        TaskSize.VERY_LARGE -> R.string.taskSizeVeryLarge
+    }
 
     fun getSizeEmoji(size: TaskSize): String {
         return when (size) {

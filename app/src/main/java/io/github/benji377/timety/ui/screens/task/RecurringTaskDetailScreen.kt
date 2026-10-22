@@ -122,23 +122,23 @@ fun RecurringTaskDetailScreen(
     val zone = ZoneId.systemDefault()
     val dateFmt = LocalDateFormatSettings.current
 
-    var isEditing by remember(recurringTaskId) { mutableStateOf(isNew) }
+    var isEditing by rememberSaveable(recurringTaskId) { mutableStateOf(isNew) }
     // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
     val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
-    var description by remember(existingTask) { mutableStateOf(existingTask?.description ?: "") }
-    var category by remember(existingTask) { mutableStateOf(existingTask?.category ?: "") }
+    var title by rememberSaveable(existingTask) { mutableStateOf(existingTask?.title ?: "") }
+    var description by rememberSaveable(existingTask) { mutableStateOf(existingTask?.description ?: "") }
+    var category by rememberSaveable(existingTask) { mutableStateOf(existingTask?.category ?: "") }
     var isAddingNewCategory by remember { mutableStateOf(false) }
     var newCategoryText by remember { mutableStateOf("") }
-    var dueDate by remember(existingTask) { mutableStateOf(existingTask?.dueDate) }
-    var unit by remember(existingTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
-    var interval by remember(existingTask) { mutableIntStateOf(existingTask?.interval ?: 1) }
-    var selectedWeekdays by remember(existingTask) {
+    var dueDate by rememberSaveable(existingTask) { mutableStateOf(existingTask?.dueDate) }
+    var unit by rememberSaveable(existingTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
+    var interval by rememberSaveable(existingTask) { mutableIntStateOf(existingTask?.interval ?: 1) }
+    var selectedWeekdays by rememberSaveable(existingTask) {
         mutableStateOf(HabitUtils.parseWeekdays(existingTask?.daysOfWeek))
     }
-    var monthlyChoice by remember(existingTask) {
+    var monthlyChoice by rememberSaveable(existingTask) {
         mutableStateOf(
             when {
                 existingTask?.monthlyMode != MonthlyMode.NTH_WEEKDAY -> MonthlyChoice.DAY_OF_MONTH
@@ -147,7 +147,7 @@ fun RecurringTaskDetailScreen(
             }
         )
     }
-    var reminderOffsets by remember(existingTask) {
+    var reminderOffsets by rememberSaveable(existingTask) {
         mutableStateOf(existingTask?.reminderOffsetsMinutes ?: emptyList())
     }
 
@@ -200,7 +200,8 @@ fun RecurringTaskDetailScreen(
                 MonthlyMode.NTH_WEEKDAY
             } else MonthlyMode.DAY_OF_MONTH,
             monthlyDay = if (unit == RecurrenceUnit.MONTH && effectiveChoice == MonthlyChoice.DAY_OF_MONTH) {
-                dueLocal.dayOfMonth
+                // A due date clamped to a short month (Feb 28 for "the 31st") must not become the rule.
+                existingTask?.monthlyDay?.takeIf { existingTask.dueDate == due } ?: dueLocal.dayOfMonth
             } else null,
             monthlyOrdinal = when {
                 unit != RecurrenceUnit.MONTH -> null

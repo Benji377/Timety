@@ -61,6 +61,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.PickerPalette
+import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
@@ -92,33 +93,33 @@ fun GoalDetailScreen(
     val existingGoal = existingGoalWithEntries?.goal
     val isNewGoal = goalId == null
 
-    var isEditing by remember { mutableStateOf(isNewGoal) }
+    var isEditing by rememberSaveable { mutableStateOf(isNewGoal) }
     // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
     val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var name by remember(existingGoal?.id) { mutableStateOf(existingGoal?.name ?: "") }
+    var name by rememberSaveable(existingGoal?.id) { mutableStateOf(existingGoal?.name ?: "") }
     var nameError by remember { mutableStateOf(false) }
-    var description by remember(existingGoal?.id) {
+    var description by rememberSaveable(existingGoal?.id) {
         mutableStateOf(
             existingGoal?.description ?: ""
         )
     }
-    var targetValueText by remember(existingGoal?.id) {
+    var targetValueText by rememberSaveable(existingGoal?.id) {
         mutableStateOf(existingGoal?.targetValue?.toString() ?: "")
     }
     var targetError by remember { mutableStateOf(false) }
-    var unitLabel by remember(existingGoal?.id) { mutableStateOf(existingGoal?.unitLabel ?: "") }
+    var unitLabel by rememberSaveable(existingGoal?.id) { mutableStateOf(existingGoal?.unitLabel ?: "") }
     var unitError by remember { mutableStateOf(false) }
-    var targetDate by remember(existingGoal?.id) {
+    var targetDate by rememberSaveable(existingGoal?.id) {
         mutableStateOf(
             existingGoal?.targetDate
                 ?: LocalDate.now().plusDays(30).atTime(LocalTime.of(23, 59))
                     .atZone(ZoneId.systemDefault()).toInstant()
         )
     }
-    var selectedIconIndex by remember(existingGoal?.id) { mutableStateOf(existingGoal?.iconCodePoint) }
-    var selectedColor by remember(existingGoal?.id) {
+    var selectedIconIndex by rememberSaveable(existingGoal?.id) { mutableStateOf(existingGoal?.iconCodePoint) }
+    var selectedColor by rememberSaveable(existingGoal?.id, stateSaver = ColorSaver) {
         mutableStateOf(existingGoal?.colorValue?.let { Color(it) } ?: GoalColor)
     }
 

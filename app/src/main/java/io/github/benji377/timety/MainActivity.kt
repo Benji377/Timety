@@ -19,6 +19,8 @@ import androidx.lifecycle.lifecycleScope
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.data.repository.dataStore
+import io.github.benji377.timety.ui.navigation.AppRoute
+import io.github.benji377.timety.ui.navigation.BottomNavRoutes
 import io.github.benji377.timety.ui.screens.MainScreen
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TimetyTheme
@@ -43,7 +45,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        navTarget.value = intent.getStringExtra(EXTRA_NAV_TARGET)
+        setIntent(intent)
+        navTarget.value = intent.navTargetExtra()
     }
 
     override fun attachBaseContext(newBase: Context) {
@@ -59,7 +62,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val settings = SettingsRepository(dataStore)
-        navTarget.value = intent?.getStringExtra(EXTRA_NAV_TARGET)
+        // Only a fresh launch carries a request; a rebuild (rotation, language change) would replay it.
+        if (savedInstanceState == null) navTarget.value = intent?.navTargetExtra()
 
         // Recreate the Activity when the selected language changes.
         lifecycleScope.launch {
@@ -111,5 +115,17 @@ class MainActivity : ComponentActivity() {
          * in `res/xml/shortcuts.xml` and by widget tap intents.
          */
         const val EXTRA_NAV_TARGET = "navTarget"
+
+        // Shortcuts and widgets only open a tab or a single item; other routes from outside are ignored.
+        private val EXTERNAL_DETAIL_ROUTES = setOf(
+            AppRoute.TASK_DETAIL.route,
+            AppRoute.RECURRING_TASK_DETAIL.route,
+            AppRoute.HABIT_DETAIL.route,
+        )
+
+        private fun Intent.navTargetExtra(): String? =
+            getStringExtra(EXTRA_NAV_TARGET)?.takeIf { route ->
+                route in BottomNavRoutes || route.substringBefore('/') in EXTERNAL_DETAIL_ROUTES
+            }
     }
 }

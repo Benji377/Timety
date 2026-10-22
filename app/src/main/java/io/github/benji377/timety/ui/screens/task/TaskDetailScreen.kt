@@ -140,33 +140,36 @@ fun TaskDetailScreen(
     val existingTaskWithSubtasks = taskId?.let { id -> allTasks.find { it.task.id == id } }
     val existingTask = existingTaskWithSubtasks?.task
 
-    var isEditing by remember(taskId) { mutableStateOf(isNewTask) }
+    var isEditing by rememberSaveable(taskId) { mutableStateOf(isNewTask) }
     // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
     val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
-    var description by remember(existingTask) { mutableStateOf(existingTask?.description ?: "") }
-    var location by remember(existingTask) { mutableStateOf(existingTask?.location ?: "") }
-    var place by remember(existingTask) { mutableStateOf(existingTask?.place) }
-    var priority by remember(existingTask) {
+    var title by rememberSaveable(existingTask) { mutableStateOf(existingTask?.title ?: "") }
+    var description by rememberSaveable(existingTask) { mutableStateOf(existingTask?.description ?: "") }
+    var location by rememberSaveable(existingTask) { mutableStateOf(existingTask?.location ?: "") }
+    var place by rememberSaveable(existingTask) { mutableStateOf(existingTask?.place) }
+    var priority by rememberSaveable(existingTask) {
         mutableStateOf(
             existingTask?.priority ?: Priority.MEDIUM
         )
     }
-    var size by remember(existingTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
-    var dueDate by remember(existingTask) { mutableStateOf(existingTask?.dueDate) }
-    var category by remember(existingTask) { mutableStateOf(existingTask?.category ?: "") }
-    var reminders by remember(existingTask) {
+    var size by rememberSaveable(existingTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
+    var dueDate by rememberSaveable(existingTask) { mutableStateOf(existingTask?.dueDate) }
+    var category by rememberSaveable(existingTask) { mutableStateOf(existingTask?.category ?: "") }
+    var reminders by rememberSaveable(existingTask) {
         mutableStateOf(
             existingTask?.reminders ?: emptyList()
         )
     }
-    var subtasks by remember(existingTaskWithSubtasks) {
+    var subtasks by rememberSaveable(existingTaskWithSubtasks) {
         mutableStateOf(
             existingTaskWithSubtasks?.subtasks ?: emptyList()
         )
     }
+
+    val priorityLabels = Priority.entries.associateWith { stringResource(AppUtils.priorityLabel(it)) }
+    val sizeLabels = TaskSize.entries.associateWith { stringResource(AppUtils.sizeLabel(it)) }
 
     var showLocationPicker by remember { mutableStateOf(false) }
     var isAddingNewCategory by remember { mutableStateOf(false) }
@@ -335,7 +338,7 @@ fun TaskDetailScreen(
                             tint = if (isSelected) Color.White else null
                         )
                     },
-                    labelBuilder = { p -> p.name.replace("_", "") }
+                    labelBuilder = { p -> priorityLabels.getValue(p) }
                 )
 
                 Spacer(Modifier.height(AppTheme.spaceLarge))
@@ -353,7 +356,7 @@ fun TaskDetailScreen(
                             color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
-                    labelBuilder = { s -> s.name.replace("_", "") }
+                    labelBuilder = { s -> sizeLabels.getValue(s) }
                 )
             }
 

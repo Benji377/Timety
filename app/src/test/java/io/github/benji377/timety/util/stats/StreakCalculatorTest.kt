@@ -78,13 +78,27 @@ class StreakCalculatorTest {
         assertFalse(result.atRisk)
     }
 
-    // Best streak stays strict, so it can diverge from the forgiving current streak.
+    // Best streak follows the same never-miss-twice rule as the current streak.
 
     @Test
-    fun bestStreak_staysStrictAcrossABridgedMiss() {
-        // Forgiving current streak = 3, but the strict best run is only 2 (the gap splits it).
+    fun bestStreak_bridgesASingleMiss_likeTheCurrentStreak() {
         val dates = listOf(daysAgo(0), daysAgo(2), daysAgo(3))
         assertEquals(3, StreakCalculator.calculateCurrentStreak(dates))
-        assertEquals(2, StreakCalculator.calculateBestStreak(dates))
+        assertEquals(3, StreakCalculator.calculateBestStreak(dates))
+    }
+
+    @Test
+    fun bestStreak_endsAtTwoConsecutiveMisses() {
+        // Runs of 2 (days 10, 9) and 4 (days 6, 5, 3, 2), split by the missed days 8 and 7.
+        val dates = listOf(daysAgo(10), daysAgo(9), daysAgo(6), daysAgo(5), daysAgo(3), daysAgo(2))
+        assertEquals(4, StreakCalculator.calculateBestStreak(dates))
+    }
+
+    @Test
+    fun bestStreak_isNeverBelowTheCurrentStreak() {
+        // Every other day: the old strict rule gave "current 4, best 1".
+        val dates = listOf(daysAgo(0), daysAgo(2), daysAgo(4), daysAgo(6))
+        assertEquals(4, StreakCalculator.calculateCurrentStreak(dates))
+        assertEquals(4, StreakCalculator.calculateBestStreak(dates))
     }
 }

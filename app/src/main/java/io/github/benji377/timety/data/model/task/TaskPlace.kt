@@ -12,7 +12,7 @@ data class TaskPlace(
     val country: String = "",
     val latitude: Double? = null,
     val longitude: Double? = null,
-) {
+) : java.io.Serializable {
     fun toJson(): JSONObject = JSONObject().apply {
         put("name", name)
         put("details", details)

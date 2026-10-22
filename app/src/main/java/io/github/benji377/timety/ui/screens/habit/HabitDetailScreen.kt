@@ -68,6 +68,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.theme.hairlineBorder
+import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
@@ -97,27 +98,27 @@ fun HabitDetailScreen(
     val existingHabit = habitId?.let { id -> allHabits.find { it.id == id } }
     val isNewHabit = habitId == null
 
-    var isEditing by remember { mutableStateOf(isNewHabit) }
+    var isEditing by rememberSaveable { mutableStateOf(isNewHabit) }
     // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
     val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var name by remember(existingHabit) { mutableStateOf(existingHabit?.name ?: "") }
+    var name by rememberSaveable(existingHabit) { mutableStateOf(existingHabit?.name ?: "") }
     var nameError by remember { mutableStateOf(false) }
-    var notes by remember(existingHabit) { mutableStateOf(existingHabit?.notes ?: "") }
-    var stackName by remember(existingHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
+    var notes by rememberSaveable(existingHabit) { mutableStateOf(existingHabit?.notes ?: "") }
+    var stackName by rememberSaveable(existingHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
 
-    var frequency by remember(existingHabit) {
+    var frequency by rememberSaveable(existingHabit) {
         mutableStateOf(
             existingHabit?.frequency ?: HabitFrequency.DAILY
         )
     }
-    var targetDaysPerWeek by remember(existingHabit) {
+    var targetDaysPerWeek by rememberSaveable(existingHabit) {
         mutableIntStateOf(
             existingHabit?.targetDaysPerWeek ?: 3
         )
     }
-    var selectedWeekdays by remember(existingHabit) {
+    var selectedWeekdays by rememberSaveable(existingHabit) {
         mutableStateOf(
             existingHabit?.targetWeekdays?.let { HabitUtils.parseWeekdays(it) }
                 ?.takeIf { it.isNotEmpty() }
@@ -125,11 +126,11 @@ fun HabitDetailScreen(
         )
     }
 
-    var selectedIconIndex by remember(existingHabit) { mutableStateOf(existingHabit?.iconCodePoint) }
-    var selectedColor by remember(existingHabit) {
+    var selectedIconIndex by rememberSaveable(existingHabit) { mutableStateOf(existingHabit?.iconCodePoint) }
+    var selectedColor by rememberSaveable(existingHabit, stateSaver = ColorSaver) {
         mutableStateOf(existingHabit?.colorValue?.let { Color(it) } ?: HabitColor)
     }
-    var reminderTimes by remember(existingHabit) {
+    var reminderTimes by rememberSaveable(existingHabit) {
         mutableStateOf(HabitUtils.parseReminderTimes(existingHabit?.reminderTimes))
     }
 
