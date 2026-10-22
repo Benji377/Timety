@@ -436,13 +436,10 @@
     <string name="settingsLabelUpcomingTask">Fënestra per ncëries proscimes</string>
     <string name="settingsLabelUpcomingTaskSubtitle">%1$d dis inant</string>
     <string name="settingsLabelVersion">Verscion %1$s</string>
-    <string name="settingsSectionApi">API y Servijes</string>
     <string name="settingsSectionAppearance">Ududa</string>
     <string name="settingsSectionDataBackup">Dac y Segurëza</string>
-    <string name="settingsSectionFocusProductivity">Focus y Produtività</string>
     <string name="settingsSectionLocaleFormat">Sistem y Format</string>
     <string name="settingsSectionNotifications">Notifiches</string>
-    <string name="settingsSectionOrganization">Urganisazion</string>
     <string name="settingsSectionSupport">Sustëni y Feedback</string>
     <string name="settingsTitle">Mpustazions</string>
     <string name="shortcutNewTask">Nueva ncëria</string>

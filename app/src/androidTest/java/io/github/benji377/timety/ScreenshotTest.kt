@@ -30,6 +30,7 @@ import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.di.AppContainer
+import io.github.benji377.timety.ui.screens.settings.SettingsPage
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.runBlocking
@@ -134,6 +135,16 @@ class ScreenshotTest {
         composeTestRule.onNodeWithText(str(R.string.navigationProfile)).performClick()
         composeTestRule.waitForIdle()
         takeScreenshot("05_profile_screen")
+
+        // Settings landing page (gear icon in the Profile app bar)
+        composeTestRule.onNodeWithContentDescription(str(R.string.settingsTitle)).performClick()
+        composeTestRule.waitForIdle()
+        takeScreenshot("11_settings_screen")
+
+        // Focus settings, the busiest subpage
+        composeTestRule.onNodeWithText(str(SettingsPage.FOCUS.titleRes)).performClick()
+        composeTestRule.waitForIdle()
+        takeScreenshot("12_settings_focus_screen")
     }
 
     // The exact-alarm prompt shows on a fresh install and would otherwise dim every screenshot.
@@ -173,6 +184,7 @@ class ScreenshotTest {
 
         container.settingsRepository.saveThemePref(ThemeMode.LIGHT)
         container.settingsRepository.saveDailyGoalMins(120)
+        container.settingsRepository.saveShowHomeGreeting(true)
 
         // --- Habits ---
         val habitColor = HabitColor.toArgb()

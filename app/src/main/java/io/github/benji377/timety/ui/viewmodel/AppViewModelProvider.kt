@@ -95,7 +95,8 @@ object AppViewModelProvider {
                 modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
                     SettingsViewModel(
                         application,
-                        container.settingsRepository
+                        container.settingsRepository,
+                        container.backupService
                     )
                 }
 

@@ -411,13 +411,10 @@
     <string name="settingsLabelUpcomingTask">即将到来的任务范围</string>
     <string name="settingsLabelUpcomingTaskSubtitle">提前 %1$d 天显示</string>
     <string name="settingsLabelVersion">版本 %1$s</string>
-    <string name="settingsSectionApi">API &amp; 与服务</string>
     <string name="settingsSectionAppearance">外观</string>
     <string name="settingsSectionDataBackup">数据 &amp; 与备份</string>
-    <string name="settingsSectionFocusProductivity">专注 &amp; 与生产力</string>
     <string name="settingsSectionLocaleFormat">本地 &amp; 化与格式</string>
     <string name="settingsSectionNotifications">通知</string>
-    <string name="settingsSectionOrganization">分类管理</string>
     <string name="settingsSectionSupport">支持 &amp; 与反馈</string>
     <string name="settingsTitle">设置</string>
     <string name="shortcutNewTask">新建任务</string>

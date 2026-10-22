@@ -416,13 +416,10 @@
     <string name="settingsLabelUpcomingTask">Finestra attività imminenti</string>
     <string name="settingsLabelUpcomingTaskSubtitle">%1$d giorni in anticipo</string>
     <string name="settingsLabelVersion">Versione %1$s</string>
-    <string name="settingsSectionApi">API e Servizi</string>
     <string name="settingsSectionAppearance">Aspetto</string>
     <string name="settingsSectionDataBackup">Dati e Backup</string>
-    <string name="settingsSectionFocusProductivity">Focus e Produttività</string>
     <string name="settingsSectionLocaleFormat">Localizzazione e Formattazione</string>
     <string name="settingsSectionNotifications">Notifiche</string>
-    <string name="settingsSectionOrganization">Organizzazione</string>
     <string name="settingsSectionSupport">Supporto e Feedback</string>
     <string name="settingsTitle">Impostazioni</string>
     <string name="shortcutNewTask">Nuova attività</string>

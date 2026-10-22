@@ -1,21 +1,29 @@
 package io.github.benji377.timety.ui.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.focus.DailyFocusTarget
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
+import io.github.benji377.timety.services.BackupService
 import io.github.benji377.timety.services.ReminderScheduler
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/** Result of the last backup restore, held until the settings UI has shown it. */
+enum class RestoreOutcome { SUCCESS, FAILURE }
+
 /** Exposes user-configurable app settings as state and persists changes through [SettingsRepository]. */
 class SettingsViewModel(
     private val application: android.app.Application,
-    private val repository: SettingsRepository
+    private val repository: SettingsRepository,
+    private val backupService: BackupService
 ) : androidx.lifecycle.AndroidViewModel(application) {
     val themePref = repository.themePrefFlow.stateIn(
         viewModelScope,
@@ -102,6 +110,22 @@ class SettingsViewModel(
         SharingStarted.WhileSubscribed(5000),
         false
     )
+
+    private val _restoreOutcome = MutableStateFlow<RestoreOutcome?>(null)
+    val restoreOutcome: StateFlow<RestoreOutcome?> = _restoreOutcome.asStateFlow()
+
+    /**
+     * Restores a backup in the view model's scope, so leaving the settings page mid-restore can't
+     * cancel it halfway. The outcome waits in [restoreOutcome] until [consumeRestoreOutcome].
+     */
+    fun restoreBackup(uri: Uri) = viewModelScope.launch {
+        val result = backupService.importFromUri(uri)
+        _restoreOutcome.value = if (result.isSuccess) RestoreOutcome.SUCCESS else RestoreOutcome.FAILURE
+    }
+
+    fun consumeRestoreOutcome() {
+        _restoreOutcome.value = null
+    }
 
     fun setThemePref(theme: ThemeMode) =
         viewModelScope.launch { repository.saveThemePref(theme) }
