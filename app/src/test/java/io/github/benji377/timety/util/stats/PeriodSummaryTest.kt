@@ -151,6 +151,45 @@ class PeriodSummaryTest {
     }
 
     @Test
+    fun comparisonCutoff_ongoingWeek_isTheSameTimeOnTheSameWeekday() {
+        val thursdayMorning = monday.plusDays(3).atTime(8, 15).atZone(zone)
+        assertEquals(
+            at(monday.minusWeeks(1).plusDays(3), 8, 15),
+            ReportPeriod.WEEK.comparisonCutoff(monday, thursdayMorning),
+        )
+    }
+
+    @Test
+    fun comparisonCutoff_isNullWhenThePreviousPeriodIsComparedInFull() {
+        val nextMonday = sunday.plusDays(1).atTime(8, 0).atZone(zone)
+        assertEquals(null, ReportPeriod.WEEK.comparisonCutoff(monday, nextMonday))
+        // March 31 has no February counterpart: all of February is compared.
+        val march31 = LocalDate.of(2026, 3, 31).atTime(8, 0).atZone(zone)
+        assertEquals(null, ReportPeriod.MONTH.comparisonCutoff(LocalDate.of(2026, 3, 1), march31))
+    }
+
+    @Test
+    fun until_countsOnlyWhatHappenedBeforeIt() {
+        val cutoff = at(sunday, 12)
+        val summary = PeriodSummary.of(
+            monday..sunday,
+            tasks = listOf(
+                task("morning", at(sunday, 9), completedAt = at(sunday, 9)),
+                task("evening", at(sunday, 18), completedAt = at(sunday, 18)),
+            ),
+            recurring = emptyList(),
+            habitCompletions = listOf(at(sunday, 7), at(sunday, 20)),
+            sessions = listOf(session(at(sunday, 10), 30), session(at(sunday, 15), 30)),
+            zone = zone,
+            until = cutoff,
+        )
+        assertEquals(1, summary.tasksCompleted)
+        assertEquals(1, summary.habitCheckIns)
+        assertEquals(1, summary.focusSessions)
+        assertEquals(30, summary.focusMinutes)
+    }
+
+    @Test
     fun period_endOf_coversWeeksAndMonthsOfAnyLength() {
         assertEquals(sunday, ReportPeriod.WEEK.endOf(monday))
         assertEquals(LocalDate.of(2028, 2, 29), ReportPeriod.MONTH.endOf(LocalDate.of(2028, 2, 1)))

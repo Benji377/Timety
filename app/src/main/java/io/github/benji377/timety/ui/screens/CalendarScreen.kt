@@ -92,8 +92,10 @@ import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.stats.PeriodSummary
 import io.github.benji377.timety.util.stats.ReportPeriod
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZonedDateTime
 
 
 /**
@@ -173,17 +175,18 @@ fun CalendarScreen(
     openReport?.let { (period, start) ->
         val plainTasks = tasks.map { it.task }
         val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
-        fun summaryOf(range: ClosedRange<LocalDate>) =
-            PeriodSummary.of(range, plainTasks, recurringItems, habitCompletions, sessions, zone)
-        // The current period's figures cover all of it (days still ahead add nothing done, while
-        // tasks due later stay counted); only the comparison is cut to the days elapsed so far.
-        val comparedWith = period.comparisonRange(start, LocalDate.now())
+        fun summaryOf(range: ClosedRange<LocalDate>, until: Instant? = null) =
+            PeriodSummary.of(range, plainTasks, recurringItems, habitCompletions, sessions, zone, until)
+        // The current period's figures cover all of it (time still ahead adds nothing done, while
+        // tasks due later stay counted); only the comparison is cut to the time elapsed so far.
+        val now = ZonedDateTime.now(zone)
+        val comparedWith = period.comparisonRange(start, now.toLocalDate())
         PeriodReportDialog(
             period = period,
             start = start,
             comparedWith = comparedWith,
             summary = summaryOf(start..period.endOf(start)),
-            previous = summaryOf(comparedWith),
+            previous = summaryOf(comparedWith, period.comparisonCutoff(start, now)),
             onDismiss = { openReport = null }
         )
     }

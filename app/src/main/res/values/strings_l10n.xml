@@ -95,6 +95,7 @@
     <string name="focusModePomodoro">Pomodoro Classic</string>
     <string name="focusModeSelect">Select Mode</string>
     <string name="focusModeSnackbarInUse">This mode has logged sessions and can\'t be deleted.</string>
+    <string name="focusModeSnackbarRunning">Stop the running session before deleting its mode.</string>
     <string name="focusModeSnackbarSaved">Mode saved!</string>
     <string name="focusModeStopwatch">Stopwatch</string>
     <string name="focusModesTitle">Manage Modes</string>
@@ -489,11 +490,11 @@
     <string name="backupActionShareCloudSubtitle">Send to Drive, Dropbox, WhatsApp…</string>
     <string name="backupExportFailure">Export failed: %1$s</string>
     <string name="backupExportSubject">Timety Export</string>
+    <string name="backupImportFailedTitle">Import failed</string>
     <string name="backupExportSuccess">Export saved to</string>
     <string name="backupExportTitle">Save Export</string>
     <string name="backupImportConfirmBody">This will OVERWRITE all current user data and settings. This cannot be undone. Are you sure?</string>
     <string name="backupImportConfirmTitle">Import JSON Data?</string>
-    <string name="backupImportFailure">Import failed: Check file format</string>
     <string name="backupRestoreSuccessBody">Your data has been restored. Please completely close and restart Timety to load the imported data.</string>
     <string name="backupRestoreSuccessTitle">Restore Successful!</string>
     <string name="backupShareFailure">Share failed: %1$s</string>

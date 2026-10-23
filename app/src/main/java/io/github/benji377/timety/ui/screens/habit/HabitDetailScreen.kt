@@ -68,6 +68,7 @@ import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
+import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -100,22 +101,23 @@ fun HabitDetailScreen(
     val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var name by rememberSaveable(existingHabit) { mutableStateOf(existingHabit?.name ?: "") }
+    val formHabit = rememberFormSource(existingHabit, isEditing)
+    var name by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.name ?: "") }
     var nameError by remember { mutableStateOf(false) }
-    var notes by rememberSaveable(existingHabit) { mutableStateOf(existingHabit?.notes ?: "") }
-    var stackName by rememberSaveable(existingHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
+    var notes by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.notes ?: "") }
+    var stackName by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
 
-    var frequency by rememberSaveable(existingHabit) {
+    var frequency by rememberSaveable(formHabit) {
         mutableStateOf(
             existingHabit?.frequency ?: HabitFrequency.DAILY
         )
     }
-    var targetDaysPerWeek by rememberSaveable(existingHabit) {
+    var targetDaysPerWeek by rememberSaveable(formHabit) {
         mutableIntStateOf(
             existingHabit?.targetDaysPerWeek ?: 3
         )
     }
-    var selectedWeekdays by rememberSaveable(existingHabit) {
+    var selectedWeekdays by rememberSaveable(formHabit) {
         mutableStateOf(
             existingHabit?.targetWeekdays?.let { HabitUtils.parseWeekdays(it) }
                 ?.takeIf { it.isNotEmpty() }
@@ -123,11 +125,11 @@ fun HabitDetailScreen(
         )
     }
 
-    var selectedIconIndex by rememberSaveable(existingHabit) { mutableStateOf(existingHabit?.iconCodePoint) }
-    var selectedColor by rememberSaveable(existingHabit, stateSaver = ColorSaver) {
+    var selectedIconIndex by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.iconCodePoint) }
+    var selectedColor by rememberSaveable(formHabit, stateSaver = ColorSaver) {
         mutableStateOf(existingHabit?.colorValue?.let { Color(it) } ?: HabitColor)
     }
-    var reminderTimes by rememberSaveable(existingHabit) {
+    var reminderTimes by rememberSaveable(formHabit) {
         mutableStateOf(HabitUtils.parseReminderTimes(existingHabit?.reminderTimes))
     }
 

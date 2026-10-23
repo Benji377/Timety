@@ -42,7 +42,7 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as Ou
 @Composable
 fun PhaseEditorDialog(
     initialPhase: SessionPhaseEntity?,
-    maxNodeMins: Int = AppTheme.MAX_NODE_MINS,
+    maxNodeMins: Int,
     onDismiss: () -> Unit,
     onSave: (PhaseType, Int) -> Unit,
     onDelete: (() -> Unit)? = null,

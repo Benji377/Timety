@@ -79,6 +79,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
@@ -130,18 +131,19 @@ fun RecurringTaskDetailScreen(
     val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var title by rememberSaveable(existingTask) { mutableStateOf(existingTask?.title ?: "") }
-    var description by rememberSaveable(existingTask) { mutableStateOf(existingTask?.description ?: "") }
-    var category by rememberSaveable(existingTask) { mutableStateOf(existingTask?.category ?: "") }
+    val formTask = rememberFormSource(existingTask, isEditing)
+    var title by rememberSaveable(formTask) { mutableStateOf(existingTask?.title ?: "") }
+    var description by rememberSaveable(formTask) { mutableStateOf(existingTask?.description ?: "") }
+    var category by rememberSaveable(formTask) { mutableStateOf(existingTask?.category ?: "") }
     var isAddingNewCategory by remember { mutableStateOf(false) }
     var newCategoryText by remember { mutableStateOf("") }
-    var dueDate by rememberSaveable(existingTask) { mutableStateOf(existingTask?.dueDate) }
-    var unit by rememberSaveable(existingTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
-    var interval by rememberSaveable(existingTask) { mutableIntStateOf(existingTask?.interval ?: 1) }
-    var selectedWeekdays by rememberSaveable(existingTask) {
+    var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
+    var unit by rememberSaveable(formTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
+    var interval by rememberSaveable(formTask) { mutableIntStateOf(existingTask?.interval ?: 1) }
+    var selectedWeekdays by rememberSaveable(formTask) {
         mutableStateOf(HabitUtils.parseWeekdays(existingTask?.daysOfWeek))
     }
-    var monthlyChoice by rememberSaveable(existingTask) {
+    var monthlyChoice by rememberSaveable(formTask) {
         mutableStateOf(
             when {
                 existingTask?.monthlyMode != MonthlyMode.NTH_WEEKDAY -> MonthlyChoice.DAY_OF_MONTH
@@ -150,7 +152,7 @@ fun RecurringTaskDetailScreen(
             }
         )
     }
-    var reminderOffsets by rememberSaveable(existingTask) {
+    var reminderOffsets by rememberSaveable(formTask) {
         mutableStateOf(existingTask?.reminderOffsetsMinutes ?: emptyList())
     }
 

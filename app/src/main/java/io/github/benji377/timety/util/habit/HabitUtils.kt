@@ -133,10 +133,11 @@ object HabitUtils {
             val canBeDue = hwc.habit.frequency != HabitFrequency.WEEKLY_EXACT ||
                 day.dayOfWeek.value in weekdays
             if (!canBeDue || (offset == 0L && !needsReminderToday(hwc))) continue
-            for (minute in times) {
-                val at = day.atTime(minute / 60, minute % 60).atZone(now.zone)
-                if (at.isAfter(now)) return at
-            }
+            // The earliest by instant, whatever the stored order or a DST gap does to the times.
+            times.map { day.atTime(it / 60, it % 60).atZone(now.zone) }
+                .filter { it.isAfter(now) }
+                .minOrNull()
+                ?.let { return it }
         }
         return null
     }

@@ -45,6 +45,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.time.Instant
 
@@ -111,7 +112,13 @@ class BackupService(
             val text = context.contentResolver.openInputStream(uri)?.use { input ->
                 input.bufferedReader(Charsets.UTF_8).readText()
             } ?: error("Unable to open input stream for $uri")
-            importFromJson(JSONObject(text)).getOrThrow()
+            // The parser's own message quotes the whole file.
+            val json = try {
+                JSONObject(text)
+            } catch (_: JSONException) {
+                error("This file is not valid JSON. It may be incomplete or damaged.")
+            }
+            importFromJson(json).getOrThrow()
         }
     }
 
@@ -130,6 +137,10 @@ class BackupService(
             val schemaVersion = json.optInt("schemaVersion", SCHEMA_VERSION)
             if (schemaVersion > SCHEMA_VERSION) {
                 error("This backup was created by a newer version of Timety and cannot be imported.")
+            }
+            // The running session is logged against a focus mode the restore would replace.
+            if (FocusTimerManager.timerState.value.isSessionActive) {
+                error("Stop the running focus session before importing a backup.")
             }
             // The data is restored in one transaction, so a broken file changes nothing; settings
             // and alarms are only replaced once that has committed.

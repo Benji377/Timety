@@ -83,6 +83,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         // restore it on next start. Absent means Auto-DND currently owns nothing to restore.
         val STORED_INTERRUPTION_FILTER = intPreferencesKey("storedInterruptionFilter")
 
+        // Not a user-facing setting: whether the per-weekday habit alarms of older versions were
+        // cancelled on this device. Not backed up; a restore just runs the cleanup once more.
+        val LEGACY_HABIT_ALARMS_CLEARED = booleanPreferencesKey("legacyHabitAlarmsCleared")
+
         private val RESTORABLE_BOOLEAN_KEYS = listOf(
             USE_24_HOUR_FORMAT, AUTO_COMPLETE_FOCUS, ASK_FOCUS_ON_TASK_COMPLETE, SHOW_HOME_GREETING,
             KEEP_SCREEN_ON_DURING_FOCUS, AUTO_DND_ENABLED, AUTO_DND_LIFT_DURING_BREAKS,
@@ -251,12 +255,20 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it.remove(STORED_INTERRUPTION_FILTER) }
     }
 
+    suspend fun isLegacyHabitAlarmsCleared(): Boolean =
+        dataStore.data.first()[LEGACY_HABIT_ALARMS_CLEARED] ?: false
+
+    suspend fun saveLegacyHabitAlarmsCleared() {
+        dataStore.edit { it[LEGACY_HABIT_ALARMS_CLEARED] = true }
+    }
+
     suspend fun exportAll(): Map<String, Any?> {
         val prefs = dataStore.data.first()
-        // STORED_INTERRUPTION_FILTER is transient runtime state, not a user setting - excluded
-        // so restoring a backup can't leave a stale filter that nothing will ever restore.
+        // Device state, not user settings: a restored STORED_INTERRUPTION_FILTER would be stale
+        // and nothing would ever restore it.
+        val deviceStateKeys = setOf(STORED_INTERRUPTION_FILTER.name, LEGACY_HABIT_ALARMS_CLEARED.name)
         return prefs.asMap()
-            .filterKeys { it.name != STORED_INTERRUPTION_FILTER.name }
+            .filterKeys { it.name !in deviceStateKeys }
             .mapKeys { it.key.name }
     }
 

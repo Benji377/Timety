@@ -122,9 +122,6 @@ object AppTheme {
 
     const val PULSE_DURATION_MS = 2000
 
-    // Settings defaults.
-    const val MAX_NODE_MINS = 240
-
     const val OPACITY_MEDIUM = 0.5f
 }
 

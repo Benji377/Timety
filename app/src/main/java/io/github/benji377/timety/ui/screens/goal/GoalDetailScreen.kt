@@ -63,6 +63,7 @@ import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -98,28 +99,29 @@ fun GoalDetailScreen(
     val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var name by rememberSaveable(existingGoal?.id) { mutableStateOf(existingGoal?.name ?: "") }
+    val formGoalId = rememberFormSource(existingGoal?.id, isEditing)
+    var name by rememberSaveable(formGoalId) { mutableStateOf(existingGoal?.name ?: "") }
     var nameError by remember { mutableStateOf(false) }
-    var description by rememberSaveable(existingGoal?.id) {
+    var description by rememberSaveable(formGoalId) {
         mutableStateOf(
             existingGoal?.description ?: ""
         )
     }
-    var targetValueText by rememberSaveable(existingGoal?.id) {
+    var targetValueText by rememberSaveable(formGoalId) {
         mutableStateOf(existingGoal?.targetValue?.toString() ?: "")
     }
     var targetError by remember { mutableStateOf(false) }
-    var unitLabel by rememberSaveable(existingGoal?.id) { mutableStateOf(existingGoal?.unitLabel ?: "") }
+    var unitLabel by rememberSaveable(formGoalId) { mutableStateOf(existingGoal?.unitLabel ?: "") }
     var unitError by remember { mutableStateOf(false) }
-    var targetDate by rememberSaveable(existingGoal?.id) {
+    var targetDate by rememberSaveable(formGoalId) {
         mutableStateOf(
             existingGoal?.targetDate
                 ?: LocalDate.now().plusDays(30).atTime(LocalTime.of(23, 59))
                     .atZone(ZoneId.systemDefault()).toInstant()
         )
     }
-    var selectedIconIndex by rememberSaveable(existingGoal?.id) { mutableStateOf(existingGoal?.iconCodePoint) }
-    var selectedColor by rememberSaveable(existingGoal?.id, stateSaver = ColorSaver) {
+    var selectedIconIndex by rememberSaveable(formGoalId) { mutableStateOf(existingGoal?.iconCodePoint) }
+    var selectedColor by rememberSaveable(formGoalId, stateSaver = ColorSaver) {
         mutableStateOf(existingGoal?.colorValue?.let { Color(it) } ?: GoalColor)
     }
 

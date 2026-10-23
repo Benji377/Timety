@@ -105,6 +105,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -150,24 +151,26 @@ fun TaskDetailScreen(
     val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var title by rememberSaveable(existingTask) { mutableStateOf(existingTask?.title ?: "") }
-    var description by rememberSaveable(existingTask) { mutableStateOf(existingTask?.description ?: "") }
-    var location by rememberSaveable(existingTask) { mutableStateOf(existingTask?.location ?: "") }
-    var place by rememberSaveable(existingTask) { mutableStateOf(existingTask?.place) }
-    var priority by rememberSaveable(existingTask) {
+    val formSource = rememberFormSource(existingTaskWithSubtasks, isEditing)
+    val formTask = formSource?.task
+    var title by rememberSaveable(formTask) { mutableStateOf(existingTask?.title ?: "") }
+    var description by rememberSaveable(formTask) { mutableStateOf(existingTask?.description ?: "") }
+    var location by rememberSaveable(formTask) { mutableStateOf(existingTask?.location ?: "") }
+    var place by rememberSaveable(formTask) { mutableStateOf(existingTask?.place) }
+    var priority by rememberSaveable(formTask) {
         mutableStateOf(
             existingTask?.priority ?: Priority.MEDIUM
         )
     }
-    var size by rememberSaveable(existingTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
-    var dueDate by rememberSaveable(existingTask) { mutableStateOf(existingTask?.dueDate) }
-    var category by rememberSaveable(existingTask) { mutableStateOf(existingTask?.category ?: "") }
-    var reminders by rememberSaveable(existingTask) {
+    var size by rememberSaveable(formTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
+    var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
+    var category by rememberSaveable(formTask) { mutableStateOf(existingTask?.category ?: "") }
+    var reminders by rememberSaveable(formTask) {
         mutableStateOf(
             existingTask?.reminders ?: emptyList()
         )
     }
-    var subtasks by rememberSaveable(existingTaskWithSubtasks) {
+    var subtasks by rememberSaveable(formSource) {
         mutableStateOf(
             existingTaskWithSubtasks?.subtasks ?: emptyList()
         )

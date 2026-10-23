@@ -116,8 +116,6 @@ class NotificationService(private val context: Context) {
      * before. The receiver arms the next one when it fires, like a quick habit's chain.
      */
     fun scheduleHabitReminder(habitId: String, title: String, body: String, triggerAtMillis: Long) {
-        // Older versions armed one repeating alarm per weekday and time; clear any still pending.
-        legacyHabitReminderIds(habitId).forEach { cancelAlarm(it) }
         val id = habitReminderId(habitId)
         val intent = reminderIntent(
             notificationId = id,
@@ -133,15 +131,23 @@ class NotificationService(private val context: Context) {
 
     fun cancelHabitReminder(habitId: String) {
         cancelAlarm(habitReminderId(habitId))
-        legacyHabitReminderIds(habitId).forEach { cancelAlarm(it) }
         dismissHabitNotifications(habitId)
     }
 
     /** Clears [habitId]'s reminder if it is showing, leaving the next one armed. */
     fun dismissHabitNotifications(habitId: String) {
         notificationManager.cancel(habitReminderId(habitId))
-        // A reminder posted by an older version can still be showing under its old ID.
-        legacyHabitReminderIds(habitId).forEach { notificationManager.cancel(it) }
+    }
+
+    /**
+     * Cancels the per-weekday and per-time alarms older versions armed for [habitId], and any
+     * reminder they posted that is still showing.
+     */
+    fun cancelLegacyHabitReminders(habitId: String) {
+        legacyHabitReminderIds(habitId).forEach {
+            cancelAlarm(it)
+            notificationManager.cancel(it)
+        }
     }
 
     // Quick habits (interval reminders).

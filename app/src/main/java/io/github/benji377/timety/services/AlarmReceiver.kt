@@ -17,9 +17,14 @@ class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val app = context.applicationContext as? TimetyApplication ?: return
         if (intent.action == MidnightWidgetRefresh.ACTION) {
+            // Re-armed first, so a failed refresh can't end the chain.
+            MidnightWidgetRefresh.schedule(app)
             launchAsync {
-                MidnightWidgetRefresh.refreshWidgets(app)
-                MidnightWidgetRefresh.schedule(app)
+                try {
+                    MidnightWidgetRefresh.refreshWidgets(app)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Midnight widget refresh failed", e)
+                }
             }
             return
         }

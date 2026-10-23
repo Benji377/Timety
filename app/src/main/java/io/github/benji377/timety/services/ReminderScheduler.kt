@@ -310,7 +310,12 @@ class ReminderScheduler private constructor(private val context: Context) {
                 .atStartOfDay(ZoneId.systemDefault()).toInstant()
             val recentCompletions = app.container.habitRepository.getCompletionsSince(weekStart)
                 .groupBy { it.habitId }
-            app.container.habitRepository.allHabits.first()
+            val habits = app.container.habitRepository.allHabits.first()
+            if (!settings.isLegacyHabitAlarmsCleared()) {
+                habits.forEach { scheduler.notificationService.cancelLegacyHabitReminders(it.id) }
+                settings.saveLegacyHabitAlarmsCleared()
+            }
+            habits
                 .filter { HabitUtils.parseReminderTimes(it.reminderTimes).isNotEmpty() }
                 .forEach { habit ->
                     scheduler.scheduleHabitReminder(

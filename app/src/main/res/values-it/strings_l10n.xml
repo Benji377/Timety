@@ -479,7 +479,6 @@
     <string name="backupExportTitle">Salva esportazione</string>
     <string name="backupImportConfirmBody">Questo SOVRASCRIVERÀ tutti i dati utente e le impostazioni attuali. Questa operazione non può essere annullata. Sei sicuro?</string>
     <string name="backupImportConfirmTitle">Importare dati JSON?</string>
-    <string name="backupImportFailure">Importazione fallita: Controlla il formato del file</string>
     <string name="backupRestoreSuccessBody">I tuoi dati sono stati ripristinati. Per favore chiudi completamente e riavvia Timety per caricare i dati importati.</string>
     <string name="backupRestoreSuccessTitle">Ripristino completato con successo!</string>
     <string name="backupShareFailure">Condivisione fallita: %1$s</string>

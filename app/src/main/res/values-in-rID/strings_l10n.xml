@@ -474,7 +474,6 @@
     <string name="backupExportTitle">Save Export</string>
     <string name="backupImportConfirmBody">This will OVERWRITE all current user data and settings. This cannot be undone. Are you sure?</string>
     <string name="backupImportConfirmTitle">Import JSON Data?</string>
-    <string name="backupImportFailure">Import failed: Check file format</string>
     <string name="backupRestoreSuccessBody">Your data has been restored. Please completely close and restart Timety to load the imported data.</string>
     <string name="backupRestoreSuccessTitle">Restore Successful!</string>
     <string name="backupShareFailure">Share failed: %1$s</string>

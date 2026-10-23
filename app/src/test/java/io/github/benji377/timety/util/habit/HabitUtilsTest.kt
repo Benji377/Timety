@@ -182,6 +182,24 @@ class HabitUtilsTest {
     }
 
     @Test
+    fun nextReminder_isTheEarliestTime_whateverTheStoredOrder() {
+        val unordered = reminding(times = "[1080,840]")
+        assertEquals(at(LocalDate.now(), 14), HabitUtils.nextReminderAt(unordered, noon))
+    }
+
+    @Test
+    fun nextReminder_timeInADstGap_doesNotJumpAheadOfALaterOne() {
+        // Europe/Rome skips 02:00-03:00 on March 29 2026, so 02:30 becomes 03:30, after 03:00.
+        val rome = ZoneId.of("Europe/Rome")
+        val dstDay = LocalDate.of(2026, 3, 29)
+        val night = dstDay.atTime(0, 30).atZone(rome)
+        assertEquals(
+            dstDay.atTime(3, 0).atZone(rome),
+            HabitUtils.nextReminderAt(reminding(times = "[150,180]"), night),
+        )
+    }
+
+    @Test
     fun nextReminder_isNullWithoutTimesOrDays() {
         assertEquals(null, HabitUtils.nextReminderAt(reminding(times = "[]"), noon))
         val noDays = reminding(frequency = HabitFrequency.WEEKLY_EXACT, weekdays = emptySet())

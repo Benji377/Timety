@@ -51,10 +51,13 @@ data class DistractionWithSession(
     val session: FocusSessionEntity
 )
 
+/** Why a focus mode can't be deleted right now. */
+enum class ModeDeleteBlocker { HAS_SESSIONS, SESSION_RUNNING }
+
 /**
  * Drives focus mode selection, active session/phase navigation, and session logging, including
- * XP awards and auto-completion of the linked task, recurring task or habit when a focus phase
- * finishes.
+ * XP awards and auto-completion of the linked task, recurring task or habit once a session with a
+ * finished focus phase is logged. A discarded session awards nothing.
  */
 class FocusViewModel(
     application: android.app.Application,
@@ -91,11 +94,12 @@ class FocusViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Active mode / phase navigation state.
-    private val _currentModeIndex = MutableStateFlow(0)
-    val currentModeIndex = _currentModeIndex.asStateFlow()
-    fun setCurrentModeIndex(index: Int) {
-        _currentModeIndex.value = index
+    // Active mode / phase navigation state. The mode is kept by id, so deleting another mode can't
+    // shift the selection; null or a deleted id falls back to the first mode.
+    private val _currentModeId = MutableStateFlow<String?>(null)
+    val currentModeId = _currentModeId.asStateFlow()
+    fun setCurrentModeId(id: String) {
+        _currentModeId.value = id
     }
 
 
@@ -160,34 +164,19 @@ class FocusViewModel(
 
         viewModelScope.launch {
             FocusTimerManager.phaseCompleteEvent.collect { (isRestPhase, durationSeconds) ->
-                val target = selectedTarget.value
-
+                // XP and auto-complete wait for the session to be logged, so a discarded one pays nothing.
                 if (!isRestPhase) {
-                    val durationMinutes = durationSeconds / 60
-                    if (durationMinutes > 0) {
-                        userRepository.addXp(durationMinutes * ExperienceEngine.XP_PER_FOCUS_MINS)
-                        sessionXpAwardedMinutes += durationMinutes
-                    }
                     sessionAccumulatedFocusSeconds += durationSeconds
-
-                    // Once per session: a multi-phase session would otherwise complete a
-                    // recurring task again after every focus phase, skipping occurrences.
-                    if (target != null && !sessionTargetAutoCompleted &&
-                        settingsRepository.autoCompleteFocusFlow.first()
-                    ) {
-                        sessionTargetAutoCompleted = true
-                        autoCompleteTarget(target)
-                    }
+                    sessionFocusPhaseCompleted = true
                 }
 
                 if (sessionStartTime == null) {
                     sessionStartTime = Instant.now().minusSeconds(durationSeconds.toLong())
                 }
 
-                val currentMode = allModes.value.getOrNull(currentModeIndex.value)
                 var isLastPhase = false
-                if (currentMode != null) {
-                    val phases = getPhasesForMode(currentMode.id).first()
+                activeSessionModeId?.let { modeId ->
+                    val phases = getPhasesForMode(modeId).first()
                     if (currentPhaseIndex.value + 1 >= phases.size) {
                         isLastPhase = true
                     }
@@ -223,16 +212,14 @@ class FocusViewModel(
     }
 
     private var sessionAccumulatedFocusSeconds: Int = 0
-    private var sessionTargetAutoCompleted = false
 
-    // Focus minutes already converted to XP by completed phases, so the remainder (stopwatch
-    // time, a phase stopped midway) can be awarded at log time without double-paying.
-    private var sessionXpAwardedMinutes: Int = 0
+    // Auto-complete needs a finished focus phase, not just a session stopped partway.
+    private var sessionFocusPhaseCompleted = false
     private var sessionStartTime: Instant? = null
     private val pendingDistractions = mutableListOf<DistractionEntity>()
 
     // Mode the running session was started with, captured at start time. Reading
-    // currentModeIndex/allModes at stop time is unreliable (the stop can arrive from the
+    // currentModeId/allModes at stop time is unreliable (the stop can arrive from the
     // notification while the mode list flow is not being collected), and inserting a session
     // with a made-up mode id violates the focus_sessions foreign key and crashes the app.
     private var activeSessionModeId: String? = null
@@ -251,7 +238,7 @@ class FocusViewModel(
     }
 
     fun completeSessionAndLog() {
-        val modeId = activeSessionModeId ?: allModes.value.getOrNull(currentModeIndex.value)?.id
+        val modeId = activeSessionModeId
         // Sessions under a minute round down to "0m" everywhere in the UI and only add noise
         // to the stats and calendar, so they are dropped instead of logged.
         if (sessionAccumulatedFocusSeconds >= 60 && modeId != null) {
@@ -265,16 +252,14 @@ class FocusViewModel(
                 isCompleted = true,
             ).withTarget(selectedTarget.value)
             val distractionsToLog = pendingDistractions.toList()
-            // Stopwatch time and a phase stopped midway never pass through phaseCompleteEvent,
-            // so their focus minutes would otherwise earn none of the advertised per-minute XP.
-            val unawardedMinutes =
-                sessionAccumulatedFocusSeconds / 60 - sessionXpAwardedMinutes
+            val targetToComplete = selectedTarget.value?.takeIf { sessionFocusPhaseCompleted }
 
             viewModelScope.launch {
                 focusRepository.insertSession(sessionToLog)
                 distractionsToLog.forEach { focusRepository.insertDistraction(it) }
-                if (unawardedMinutes > 0) {
-                    userRepository.addXp(unawardedMinutes * ExperienceEngine.XP_PER_FOCUS_MINS)
+                awardFocusXp(sessionToLog.totalSecondsFocused / 60)
+                if (targetToComplete != null && settingsRepository.autoCompleteFocusFlow.first()) {
+                    autoCompleteTarget(targetToComplete)
                 }
             }
         }
@@ -286,8 +271,7 @@ class FocusViewModel(
     private fun resetSessionState() {
         pendingDistractions.clear()
         sessionAccumulatedFocusSeconds = 0
-        sessionXpAwardedMinutes = 0
-        sessionTargetAutoCompleted = false
+        sessionFocusPhaseCompleted = false
         sessionStartTime = null
         activeSessionModeId = null
         resetCurrentSession()
@@ -459,13 +443,18 @@ class FocusViewModel(
         viewModelScope.launch { focusRepository.insertModeWithPhases(mode, phases) }
     }
 
-    fun deleteMode(mode: FocusModeEntity, onBlocked: () -> Unit = {}) {
+    fun deleteMode(mode: FocusModeEntity, onBlocked: (ModeDeleteBlocker) -> Unit = {}) {
         if (mode.isSystem) return
+        // The running session is logged against its mode when it ends.
+        if (mode.id == activeSessionModeId) {
+            onBlocked(ModeDeleteBlocker.SESSION_RUNNING)
+            return
+        }
         viewModelScope.launch {
             // focus_sessions references modes with a RESTRICT foreign key, so deleting a mode
             // that has logged sessions would throw. Keep the mode and tell the user instead.
             if (focusRepository.modeHasSessions(mode.id)) {
-                onBlocked()
+                onBlocked(ModeDeleteBlocker.HAS_SESSIONS)
             } else {
                 focusRepository.deleteMode(mode)
             }

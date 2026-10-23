@@ -17,7 +17,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Result of the last backup restore, held until the settings UI has shown it. */
-enum class RestoreOutcome { SUCCESS, FAILURE }
+sealed interface RestoreOutcome {
+    data object Success : RestoreOutcome
+
+    /** [message] is the error's own English text: it varies too much to translate. */
+    data class Failure(val message: String) : RestoreOutcome
+}
+
+private const val MAX_FAILURE_MESSAGE_LENGTH = 300
 
 /** Exposes user-configurable app settings as state and persists changes through [SettingsRepository]. */
 class SettingsViewModel(
@@ -119,8 +126,13 @@ class SettingsViewModel(
      * cancel it halfway. The outcome waits in [restoreOutcome] until [consumeRestoreOutcome].
      */
     fun restoreBackup(uri: Uri) = viewModelScope.launch {
-        val result = backupService.importFromUri(uri)
-        _restoreOutcome.value = if (result.isSuccess) RestoreOutcome.SUCCESS else RestoreOutcome.FAILURE
+        _restoreOutcome.value = backupService.importFromUri(uri).fold(
+            onSuccess = { RestoreOutcome.Success },
+            onFailure = {
+                // Capped: some messages quote the offending data at length.
+                RestoreOutcome.Failure((it.message ?: it.javaClass.simpleName).take(MAX_FAILURE_MESSAGE_LENGTH))
+            },
+        )
     }
 
     fun consumeRestoreOutcome() {

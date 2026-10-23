@@ -6,6 +6,7 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 
@@ -39,6 +40,19 @@ enum class ReportPeriod {
         // March 31 has no February counterpart, so the comparison stops at February's end.
         return previousStart..minOf(previousStart.plusDays(elapsedDays), previousEnd)
     }
+
+    /**
+     * The moment in the [comparisonRange] that matches [now], so its last day counts only up to
+     * the same time of day as today does. Null when that range is compared in full.
+     */
+    fun comparisonCutoff(start: LocalDate, now: ZonedDateTime): Instant? {
+        val today = now.toLocalDate()
+        if (today.isBefore(start) || today.isAfter(endOf(start))) return null
+        val previousStart = previousStart(start)
+        val day = previousStart.plusDays(ChronoUnit.DAYS.between(start, today))
+        if (day.isAfter(endOf(previousStart))) return null
+        return day.atTime(now.toLocalTime()).atZone(now.zone).toInstant()
+    }
 }
 
 /** What happened between two days, as shown by the calendar's weekly column and reports. */
@@ -55,8 +69,9 @@ data class PeriodSummary(
 ) {
     companion object {
         /**
-         * Summarizes [range], both ends inclusive. Recurring tasks count once for their next due
-         * date and once per logged completion, never twice for the same completion.
+         * Summarizes [range], both ends inclusive, or only up to [until] when given. Recurring
+         * tasks count once for their next due date and once per logged completion, never twice
+         * for the same completion.
          */
         fun of(
             range: ClosedRange<LocalDate>,
@@ -65,11 +80,13 @@ data class PeriodSummary(
             habitCompletions: List<Instant>,
             sessions: List<FocusSessionEntity>,
             zone: ZoneId,
+            until: Instant? = null,
         ): PeriodSummary {
             // The range's bounds as instants, so each item is a comparison rather than a time-zone
             // conversion: a calendar month summarizes every completion once per week row.
             val start = range.start.atStartOfDay(zone).toInstant()
-            val end = range.endInclusive.plusDays(1).atStartOfDay(zone).toInstant()
+            val rangeEnd = range.endInclusive.plusDays(1).atStartOfDay(zone).toInstant()
+            val end = until?.let { minOf(it, rangeEnd) } ?: rangeEnd
             fun inRange(instant: Instant) = !instant.isBefore(start) && instant.isBefore(end)
 
             // The day before is included so a session that started just before midnight still
@@ -77,7 +94,8 @@ data class PeriodSummary(
             val focusMinutes = FocusSessionDayStats
                 .minutesByDay(
                     sessions.filter {
-                        it.startTime.atZone(zone).toLocalDate() in range.start.minusDays(1)..range.endInclusive
+                        it.startTime.isBefore(end) &&
+                            it.startTime.atZone(zone).toLocalDate() in range.start.minusDays(1)..range.endInclusive
                     },
                     zone
                 )
