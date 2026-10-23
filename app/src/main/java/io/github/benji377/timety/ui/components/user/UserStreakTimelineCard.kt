@@ -70,27 +70,27 @@ fun UserStreakTimelineCard(
 ) {
     val today = remember { LocalDate.now() }
     val streak = remember(activityDates) { StreakCalculator.currentStreak(activityDates) }
-    val taskKeys = remember(taskDates) { taskDates.map { AppDateUtils.dayKey(it) }.toSet() }
-    val focusKeys = remember(focusDates) { focusDates.map { AppDateUtils.dayKey(it) }.toSet() }
-    val habitKeys = remember(habitDates) { habitDates.map { AppDateUtils.dayKey(it) }.toSet() }
+    val taskDays = remember(taskDates) { taskDates.toSet() }
+    val focusDays = remember(focusDates) { focusDates.toSet() }
+    val habitDays = remember(habitDates) { habitDates.toSet() }
+    val activityDays = remember(activityDates) { activityDates.toSet() }
 
-    val days = remember(today, streak, taskKeys, focusKeys, habitKeys) {
+    val days = remember(today, streak, taskDays, focusDays, habitDays) {
         (0..6).map { index ->
             val day = today.minusDays((6 - index).toLong())
-            val key = AppDateUtils.dayKey(day)
             StreakDayInfo(
                 date = day,
                 isToday = AppDateUtils.isSameDay(day, today),
-                inCurrentStreak = streak.streakDayKeys.contains(key),
-                isBend = streak.bridgedDayKeys.contains(key),
-                hasTask = taskKeys.contains(key),
-                hasFocus = focusKeys.contains(key),
-                hasHabit = habitKeys.contains(key),
+                inCurrentStreak = day in streak.streakDays,
+                isBend = day in streak.bridgedDays,
+                hasTask = day in taskDays,
+                hasFocus = day in focusDays,
+                hasHabit = day in habitDays,
             )
         }
     }
 
-    val statusText = streakStatusText(activityDates, currentStreak, streak.atRisk)
+    val statusText = streakStatusText(activityDays, currentStreak, streak.atRisk)
 
     val listState = rememberLazyListState()
     LaunchedEffect(days.size) {
@@ -194,19 +194,17 @@ private data class StreakDayInfo(
 @Composable
 @ReadOnlyComposable
 private fun streakStatusText(
-    activityDates: List<LocalDate>,
+    activityDays: Set<LocalDate>,
     currentStreak: Int,
     atRisk: Boolean,
 ): String {
-    if (activityDates.isEmpty()) return stringResource(R.string.streakStatusNone)
+    if (activityDays.isEmpty()) return stringResource(R.string.streakStatusNone)
     // The "won or lost" day: yesterday was missed but the streak survives — one more miss ends it.
     if (atRisk) return stringResource(R.string.streakDontMissTwice)
 
     val today = LocalDate.now()
-    val todayKey = AppDateUtils.dayKey(today)
-    val yesterdayKey = AppDateUtils.dayKey(today.minusDays(1))
-    val hasToday = activityDates.any { AppDateUtils.dayKey(it) == todayKey }
-    val hasYesterday = activityDates.any { AppDateUtils.dayKey(it) == yesterdayKey }
+    val hasToday = today in activityDays
+    val hasYesterday = today.minusDays(1) in activityDays
 
     return when {
         hasToday && currentStreak > 0 -> stringResource(R.string.streakStatusActive)

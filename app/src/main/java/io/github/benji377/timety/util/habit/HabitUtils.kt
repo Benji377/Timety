@@ -13,6 +13,7 @@ import io.github.benji377.timety.util.habit.QuickHabitScheduling.MINUTES_PER_DAY
 import io.github.benji377.timety.util.habit.HabitUtils.parseWeekdays
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZonedDateTime
 
 
 /** Habit scheduling, completion, and stack-locking rules shared by the habit list and widgets. */
@@ -113,6 +114,32 @@ object HabitUtils {
      */
     fun needsReminderToday(hwc: HabitWithCompletions): Boolean =
         isHabitDueToday(hwc) && !isCompletedOn(hwc, LocalDate.now())
+
+
+    /**
+     * When [hwc]'s next reminder should ring after [now], or null if it has none. A habit keeps a
+     * single pending reminder: today's remaining times are skipped once it no longer needs one
+     * today, later days ring on every day the habit can be due, and the receiver checks again when
+     * one fires (a flexible habit's weekly target can be met in the meantime).
+     */
+    fun nextReminderAt(hwc: HabitWithCompletions, now: ZonedDateTime): ZonedDateTime? {
+        val times = parseReminderTimes(hwc.habit.reminderTimes)
+        if (times.isEmpty()) return null
+        val weekdays = parseWeekdays(hwc.habit.targetWeekdays)
+        val today = now.toLocalDate()
+        // Eight days, so a weekly habit whose only time today has passed finds next week's.
+        for (offset in 0L..7L) {
+            val day = today.plusDays(offset)
+            val canBeDue = hwc.habit.frequency != HabitFrequency.WEEKLY_EXACT ||
+                day.dayOfWeek.value in weekdays
+            if (!canBeDue || (offset == 0L && !needsReminderToday(hwc))) continue
+            for (minute in times) {
+                val at = day.atTime(minute / 60, minute % 60).atZone(now.zone)
+                if (at.isAfter(now)) return at
+            }
+        }
+        return null
+    }
 
 
     /** Whether a flexible-frequency habit already met its weekly target before today. */

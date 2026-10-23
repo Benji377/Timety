@@ -95,11 +95,12 @@ class ReminderReceiver : BroadcastReceiver() {
         if (channelId == NotificationService.CHANNEL_HABITS && habitId != null) {
             launchAsync {
                 // Null means the habit was deleted, so its alarm chain ends here.
-                val needsReminder = habitNeedsReminder(appContext, habitId) ?: return@launchAsync
-                if (needsReminder) {
+                val hwc = storedHabit(appContext, habitId) ?: return@launchAsync
+                if (HabitUtils.needsReminderToday(hwc)) {
                     notificationService.showNotification(notificationId, channelId, title, body)
                 }
-                notificationService.rescheduleIfRepeating(intent)
+                // The habit's only pending reminder just fired; arm the next one.
+                ReminderScheduler.create(appContext).scheduleHabitReminder(hwc)
             }
             return
         }
@@ -115,13 +116,12 @@ class ReminderReceiver : BroadcastReceiver() {
             .any { it.id == id && it.isEnabled }
     }
 
-    /** Whether [habitId] still has something to do today, or null if the habit no longer exists. */
-    private suspend fun habitNeedsReminder(context: Context, habitId: String): Boolean? {
-        val app = context.applicationContext as? TimetyApplication ?: return true
+    /** [habitId] with its completions, or null if the habit no longer exists. */
+    private suspend fun storedHabit(context: Context, habitId: String): HabitWithCompletions? {
+        val app = context.applicationContext as TimetyApplication
         val repository = app.container.habitRepository
         val habit = repository.getHabitById(habitId) ?: return null
-        val completions = repository.getCompletionsForHabit(habitId).first()
-        return HabitUtils.needsReminderToday(HabitWithCompletions(habit, completions))
+        return HabitWithCompletions(habit, repository.getCompletionsForHabit(habitId).first())
     }
 
 

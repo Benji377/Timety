@@ -66,7 +66,11 @@ data class PeriodSummary(
             sessions: List<FocusSessionEntity>,
             zone: ZoneId,
         ): PeriodSummary {
-            fun inRange(instant: Instant) = instant.atZone(zone).toLocalDate() in range
+            // The range's bounds as instants, so each item is a comparison rather than a time-zone
+            // conversion: a calendar month summarizes every completion once per week row.
+            val start = range.start.atStartOfDay(zone).toInstant()
+            val end = range.endInclusive.plusDays(1).atStartOfDay(zone).toInstant()
+            fun inRange(instant: Instant) = !instant.isBefore(start) && instant.isBefore(end)
 
             // The day before is included so a session that started just before midnight still
             // contributes the minutes it spent inside the range.

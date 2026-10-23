@@ -335,7 +335,7 @@ class FocusViewModel(
             )
             userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
         }
-        ReminderScheduler.create(getApplication()).dismissHabitNotifications(habitId)
+        ReminderScheduler.refreshHabitReminder(getApplication(), habitId)
         // Auto-completion bypasses HabitViewModel, so refresh the habit widget here too.
         HabitWidget().updateAll(getApplication())
     }

@@ -63,7 +63,7 @@ class HabitViewModel(
     fun addHabit(habit: HabitEntity) {
         viewModelScope.launch {
             habitRepository.insertHabit(habit)
-            scheduleHabitReminder(habit)
+            refreshHabitReminder(habit.id)
             updateWidgets()
         }
     }
@@ -71,7 +71,7 @@ class HabitViewModel(
     fun updateHabit(habit: HabitEntity) {
         viewModelScope.launch {
             habitRepository.updateHabit(habit)
-            scheduleHabitReminder(habit)
+            refreshHabitReminder(habit.id)
             updateWidgets()
         }
     }
@@ -84,15 +84,8 @@ class HabitViewModel(
         }
     }
 
-    private suspend fun scheduleHabitReminder(habit: HabitEntity) {
-        ReminderScheduler.create(application)
-            .scheduleHabitReminder(habit)
-    }
-
-    private suspend fun dismissHabitNotifications(habitId: String) {
-        ReminderScheduler.create(application)
-            .dismissHabitNotifications(habitId)
-    }
+    private suspend fun refreshHabitReminder(habitId: String) =
+        ReminderScheduler.refreshHabitReminder(application, habitId)
 
     private suspend fun cancelHabitReminder(habitId: String) {
         ReminderScheduler.create(application)
@@ -158,9 +151,10 @@ class HabitViewModel(
                         HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
                     )
                     userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
-                    dismissHabitNotifications(habitId)
                 }
             }
+            // Done drops today's remaining reminders; undone brings them back.
+            refreshHabitReminder(habitId)
             updateWidgets()
         }
     }
@@ -180,8 +174,8 @@ class HabitViewModel(
                     HabitCompletionEntity(habitId = habitId, completionDate = date)
                 )
                 userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
-                if (targetDay == LocalDate.now()) dismissHabitNotifications(habitId)
             }
+            refreshHabitReminder(habitId)
             updateWidgets()
         }
     }
@@ -198,6 +192,7 @@ class HabitViewModel(
                 habitRepository.deleteCompletion(completion)
                 userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
             }
+            refreshHabitReminder(habitId)
             updateWidgets()
         }
     }

@@ -124,4 +124,67 @@ class HabitUtilsTest {
         }
         assertTrue(HabitUtils.needsReminderToday(HabitWithCompletions(flexible, emptyList())))
     }
+
+    // Next reminder: one pending reminder per habit, today's skipped once it's done.
+
+    private val zone = ZoneId.systemDefault()
+    private val noon = LocalDate.now().atTime(12, 0).atZone(zone)
+
+    private fun reminding(
+        times: String = "[540,1080]",
+        frequency: HabitFrequency = HabitFrequency.DAILY,
+        weekdays: Set<Int>? = null,
+        completions: List<HabitCompletionEntity> = emptyList(),
+    ) = HabitWithCompletions(
+        habit().copy(
+            reminderTimes = times,
+            frequency = frequency,
+            targetWeekdays = weekdays?.let { HabitUtils.serializeWeekdays(it) },
+        ),
+        completions,
+    )
+
+    private fun at(day: LocalDate, hour: Int) = day.atTime(hour, 0).atZone(zone)
+
+    @Test
+    fun nextReminder_isTodaysNextTime() {
+        assertEquals(at(LocalDate.now(), 18), HabitUtils.nextReminderAt(reminding(), noon))
+    }
+
+    @Test
+    fun nextReminder_skipsTodayOnceDone() {
+        val done = reminding(completions = listOf(completedOn(LocalDate.now())))
+        assertEquals(at(LocalDate.now().plusDays(1), 9), HabitUtils.nextReminderAt(done, noon))
+    }
+
+    @Test
+    fun nextReminder_movesToTomorrowAfterTheLastTime() {
+        val evening = LocalDate.now().atTime(19, 0).atZone(zone)
+        assertEquals(at(LocalDate.now().plusDays(1), 9), HabitUtils.nextReminderAt(reminding(), evening))
+    }
+
+    @Test
+    fun nextReminder_weeklyHabitWaitsForItsWeekday() {
+        val tomorrow = LocalDate.now().plusDays(1)
+        val habit = reminding(frequency = HabitFrequency.WEEKLY_EXACT, weekdays = setOf(tomorrow.dayOfWeek.value))
+        assertEquals(at(tomorrow, 9), HabitUtils.nextReminderAt(habit, noon))
+    }
+
+    @Test
+    fun nextReminder_weeklyHabitWhoseTimesPassedTodayRingsNextWeek() {
+        val today = LocalDate.now()
+        val habit = reminding(
+            times = "[540]",
+            frequency = HabitFrequency.WEEKLY_EXACT,
+            weekdays = setOf(today.dayOfWeek.value),
+        )
+        assertEquals(at(today.plusDays(7), 9), HabitUtils.nextReminderAt(habit, noon))
+    }
+
+    @Test
+    fun nextReminder_isNullWithoutTimesOrDays() {
+        assertEquals(null, HabitUtils.nextReminderAt(reminding(times = "[]"), noon))
+        val noDays = reminding(frequency = HabitFrequency.WEEKLY_EXACT, weekdays = emptySet())
+        assertEquals(null, HabitUtils.nextReminderAt(noDays, noon))
+    }
 }

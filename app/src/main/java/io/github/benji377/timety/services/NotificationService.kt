@@ -22,7 +22,6 @@ import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.habit.QuickHabitScheduling
-import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -113,65 +112,36 @@ class NotificationService(private val context: Context) {
 
 
     /**
-     * Schedules a repeating reminder for [habitId] at each of [times] (minutes from midnight):
-     * daily if [targetWeekdays] is null or empty, otherwise once per selected weekday.
+     * Arms [habitId]'s single pending reminder at [triggerAtMillis], replacing the one armed
+     * before. The receiver arms the next one when it fires, like a quick habit's chain.
      */
-    fun scheduleHabitReminder(
-        habitId: String,
-        title: String,
-        body: String,
-        times: List<Int>,
-        targetWeekdays: List<Int>? = null,
-    ) {
-        cancelHabitAlarms(habitId)
-        val weekdays = targetWeekdays?.toSortedSet()?.toList()
-        val reminderDays: List<Int?> = if (weekdays.isNullOrEmpty()) listOf(null) else weekdays
-
-        times.take(HabitUtils.MAX_REMINDER_TIMES).forEachIndexed { slot, totalMinutes ->
-            val hour = (totalMinutes / 60).coerceIn(0, 23)
-            val minute = (totalMinutes % 60).coerceIn(0, 59)
-            for (weekday in reminderDays) {
-                val id = habitReminderId(habitId, weekday, slot)
-                val triggerAt = nextReminderMillis(hour, minute, weekday)
-                val intent = reminderIntent(
-                    notificationId = id,
-                    title = title,
-                    body = body,
-                    channelId = CHANNEL_HABITS,
-                    repeat = if (weekday == null) Repeat.DAILY else Repeat.WEEKLY,
-                    habitId = habitId,
-                    weekday = weekday ?: -1,
-                    hour = hour,
-                    minute = minute,
-                )
-                scheduleExact(triggerAt, id, intent)
-            }
-        }
+    fun scheduleHabitReminder(habitId: String, title: String, body: String, triggerAtMillis: Long) {
+        // Older versions armed one repeating alarm per weekday and time; clear any still pending.
+        legacyHabitReminderIds(habitId).forEach { cancelAlarm(it) }
+        val id = habitReminderId(habitId)
+        val intent = reminderIntent(
+            notificationId = id,
+            title = title,
+            body = body,
+            channelId = CHANNEL_HABITS,
+            repeat = Repeat.NONE,
+            habitId = habitId,
+        )
+        scheduleExact(triggerAtMillis, id, intent)
     }
 
 
     fun cancelHabitReminder(habitId: String) {
-        cancelHabitAlarms(habitId)
+        cancelAlarm(habitReminderId(habitId))
+        legacyHabitReminderIds(habitId).forEach { cancelAlarm(it) }
         dismissHabitNotifications(habitId)
     }
 
-    private fun cancelHabitAlarms(habitId: String) {
-        for (slot in 0 until HabitUtils.MAX_REMINDER_TIMES) {
-            cancelAlarm(habitReminderId(habitId, null, slot))
-            for (weekday in 1..7) {
-                cancelAlarm(habitReminderId(habitId, weekday, slot))
-            }
-        }
-    }
-
-    /** Clears any of [habitId]'s reminders that are already showing, leaving the alarms armed. */
+    /** Clears [habitId]'s reminder if it is showing, leaving the next one armed. */
     fun dismissHabitNotifications(habitId: String) {
-        for (slot in 0 until HabitUtils.MAX_REMINDER_TIMES) {
-            notificationManager.cancel(habitReminderId(habitId, null, slot))
-            for (weekday in 1..7) {
-                notificationManager.cancel(habitReminderId(habitId, weekday, slot))
-            }
-        }
+        notificationManager.cancel(habitReminderId(habitId))
+        // A reminder posted by an older version can still be showing under its old ID.
+        legacyHabitReminderIds(habitId).forEach { notificationManager.cancel(it) }
     }
 
     // Quick habits (interval reminders).
@@ -221,7 +191,7 @@ class NotificationService(private val context: Context) {
 
 
     fun scheduleDailyMotivation(hour: Int, minute: Int, title: String, body: String) {
-        val triggerAt = nextReminderMillis(hour, minute, null)
+        val triggerAt = nextReminderMillis(hour, minute)
         val intent = reminderIntent(
             notificationId = DAILY_MOTIVATION_ID,
             title = title,
@@ -238,7 +208,7 @@ class NotificationService(private val context: Context) {
 
 
     fun scheduleEndOfDayCheckup(hour: Int, minute: Int, title: String, body: String) {
-        val triggerAt = nextReminderMillis(hour, minute, null)
+        val triggerAt = nextReminderMillis(hour, minute)
         val intent = reminderIntent(
             notificationId = END_OF_DAY_CHECKUP_ID,
             title = title,
@@ -259,10 +229,11 @@ class NotificationService(private val context: Context) {
     /** Cancels only the pending alarm; a reminder already showing stays until the user handles it. */
     fun cancelAlarm(requestCode: Int) {
         val intent = Intent(context, ReminderReceiver::class.java)
+        // Without a PendingIntent there is no pending alarm, so there is nothing to create or cancel.
         val pendingIntent = PendingIntent.getBroadcast(
             context, requestCode, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        ) ?: return
         alarmManager.cancel(pendingIntent)
     }
 
@@ -384,8 +355,7 @@ class NotificationService(private val context: Context) {
         }
         val hour = intent.getIntExtra(EXTRA_HOUR, 0)
         val minute = intent.getIntExtra(EXTRA_MINUTE, 0)
-        val weekday = if (repeat == Repeat.WEEKLY) intent.getIntExtra(EXTRA_WEEKDAY, -1) else null
-        val triggerAt = nextReminderMillis(hour, minute, weekday, forceRollover = true)
+        val triggerAt = nextReminderMillis(hour, minute, forceRollover = true)
         scheduleExact(triggerAt, id, intent)
     }
 
@@ -432,7 +402,6 @@ class NotificationService(private val context: Context) {
         repeat: Repeat,
         habitId: String? = null,
         quickHabitId: String? = null,
-        weekday: Int = -1,
         hour: Int = -1,
         minute: Int = -1,
         intervalMinutes: Int = -1,
@@ -447,7 +416,6 @@ class NotificationService(private val context: Context) {
         putExtra(EXTRA_REPEAT, repeat.name)
         habitId?.let { putExtra(EXTRA_HABIT_ID, it) }
         quickHabitId?.let { putExtra(EXTRA_QUICK_HABIT_ID, it) }
-        putExtra(EXTRA_WEEKDAY, weekday)
         putExtra(EXTRA_HOUR, hour)
         putExtra(EXTRA_MINUTE, minute)
         putExtra(EXTRA_INTERVAL, intervalMinutes)
@@ -460,33 +428,23 @@ class NotificationService(private val context: Context) {
     private fun nextReminderMillis(
         hour: Int,
         minute: Int,
-        weekday: Int?,
         forceRollover: Boolean = false
     ): Long {
         val zone = ZoneId.systemDefault()
         val now = ZonedDateTime.now(zone)
-        var scheduled = if (weekday == null) {
-            now.withHour(hour).withMinute(minute).withSecond(0).withNano(0)
-        } else {
-            val target = DayOfWeek.of(weekday)
-            val daysUntil = ((target.value - now.dayOfWeek.value) + 7) % 7
-            now.plusDays(daysUntil.toLong()).withHour(hour).withMinute(minute).withSecond(0)
-                .withNano(0)
-        }
-        // Roll over to the next occurrence if the computed time has already passed. A just-fired
-        // repeating alarm ([forceRollover]) also rolls over when the recomputed time is within the
-        // next minute, so minor clock skew can't re-arm the same occurrence — but a genuinely
-        // future occurrence (the alarm fired late, e.g. after doze) is kept instead of skipped,
-        // otherwise a weekly reminder firing a day late would silently drop a whole week.
+        var scheduled = now.withHour(hour).withMinute(minute).withSecond(0).withNano(0)
+        // Roll over to tomorrow if the computed time has already passed. A just-fired daily alarm
+        // ([forceRollover]) also rolls over when the recomputed time is within the next minute, so
+        // minor clock skew can't re-arm the same occurrence.
         val rolloverThreshold = if (forceRollover) now.plusMinutes(1) else now
         if (!scheduled.isAfter(rolloverThreshold)) {
-            scheduled = if (weekday == null) scheduled.plusDays(1) else scheduled.plusDays(7)
+            scheduled = scheduled.plusDays(1)
         }
         return scheduled.toInstant().toEpochMilli()
     }
 
     private enum class Repeat {
-        NONE, DAILY, WEEKLY, INTERVAL;
+        NONE, DAILY, INTERVAL;
 
         companion object {
             fun fromExtra(value: String?): Repeat = entries.find { it.name == value } ?: NONE
@@ -520,7 +478,6 @@ class NotificationService(private val context: Context) {
         internal const val EXTRA_CHANNEL_ID = "channelId"
         internal const val EXTRA_HABIT_ID = "habitId"
         internal const val EXTRA_QUICK_HABIT_ID = "quickHabitId"
-        internal const val EXTRA_WEEKDAY = "weekday"
         internal const val EXTRA_HOUR = "hour"
         internal const val EXTRA_MINUTE = "minute"
         internal const val EXTRA_REPEAT = "repeat"
@@ -530,10 +487,17 @@ class NotificationService(private val context: Context) {
         internal const val EXTRA_WEEKDAYS = "allowedWeekdays"
 
 
-        /** Deterministic notification/request-code ID for a habit reminder, scoped to a weekday and to the [slot] of the reminder time. */
-        fun habitReminderId(habitId: String, weekday: Int?, slot: Int = 0): Int {
+        /** Deterministic notification/request-code ID of a habit's single pending reminder. */
+        fun habitReminderId(habitId: String): Int = legacyHabitReminderId(habitId, null, 0)
+
+        /** IDs older versions used for a habit's per-weekday and per-time alarms, other than [habitReminderId]. */
+        private fun legacyHabitReminderIds(habitId: String): List<Int> =
+            (0 until HabitUtils.MAX_REMINDER_TIMES).flatMap { slot ->
+                listOf<Int?>(null).plus(1..7).map { weekday -> legacyHabitReminderId(habitId, weekday, slot) }
+            }.filter { it != habitReminderId(habitId) }
+
+        private fun legacyHabitReminderId(habitId: String, weekday: Int?, slot: Int): Int {
             val suffix = if (weekday == null) "daily" else "weekday_$weekday"
-            // Slot 0 keeps the pre-multi-reminder ID, so alarms armed by older versions still cancel.
             val slotSuffix = if (slot == 0) "" else "_slot_$slot"
             return "habit_time_${habitId}_$suffix$slotSuffix".hashCode()
         }

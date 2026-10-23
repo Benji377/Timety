@@ -1,6 +1,5 @@
 package io.github.benji377.timety.util.stats
 
-import io.github.benji377.timety.util.datetime.AppDateUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -10,7 +9,6 @@ import java.time.LocalDate
 class StreakCalculatorTest {
 
     private fun daysAgo(n: Long): LocalDate = LocalDate.now().minusDays(n)
-    private fun key(n: Long): String = AppDateUtils.dayKey(daysAgo(n))
 
     // Current streak — forgiving "never miss twice" rule.
 
@@ -43,8 +41,8 @@ class StreakCalculatorTest {
         val dates = listOf(daysAgo(0), daysAgo(2), daysAgo(3), daysAgo(4))
         val result = StreakCalculator.currentStreak(dates)
         assertEquals(4, result.length)
-        assertTrue(result.bridgedDayKeys.contains(key(1)))
-        assertFalse(result.streakDayKeys.contains(key(1)))
+        assertTrue(result.bridgedDays.contains(daysAgo(1)))
+        assertFalse(result.streakDays.contains(daysAgo(1)))
     }
 
     @Test
@@ -63,7 +61,7 @@ class StreakCalculatorTest {
         val result = StreakCalculator.currentStreak(dates)
         assertTrue(result.length > 0)
         assertTrue(result.atRisk)
-        assertTrue(result.bridgedDayKeys.contains(key(1)))
+        assertTrue(result.bridgedDays.contains(daysAgo(1)))
     }
 
     @Test

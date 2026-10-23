@@ -88,7 +88,6 @@ import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.stats.PeriodSummary
@@ -376,20 +375,20 @@ private fun CalendarGrid(
 
     // Pre-compute sets of dates with activity for O(1) lookup during grid generation.
     // Recurring tasks mark their next due day and every completed occurrence's day.
-    val taskDateKeys = remember(tasks, recurringItems) {
+    val taskDates = remember(tasks, recurringItems) {
         val taskDays = tasks.mapNotNull { it.task.dueDate }
-            .map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }
+            .map { it.atZone(zone).toLocalDate() }
         val recurringDays = recurringItems.flatMap { item ->
             item.occurrences.map { it.completedAt } + item.task.dueDate
-        }.map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }
+        }.map { it.atZone(zone).toLocalDate() }
         (taskDays + recurringDays).toSet()
     }
-    val sessionDateKeys = remember(sessions) {
-        sessions.map { AppDateUtils.dayKey(it.startTime.atZone(zone).toLocalDate()) }.toSet()
+    val sessionDates = remember(sessions) {
+        sessions.map { it.startTime.atZone(zone).toLocalDate() }.toSet()
     }
-    val habitDateKeys = remember(habitsWithCompletions) {
+    val habitDates = remember(habitsWithCompletions) {
         habitsWithCompletions.flatMap { it.completions }
-            .map { AppDateUtils.dayKey(it.completionDate.atZone(zone).toLocalDate()) }
+            .map { it.completionDate.atZone(zone).toLocalDate() }
             .toSet()
     }
 
@@ -466,10 +465,9 @@ private fun CalendarGrid(
                     val isCurrentMonth = day.month == focusedMonth.month
                     val isSelected = day == selectedDate
                     val isToday = day == today
-                    val dateKey = AppDateUtils.dayKey(day)
-                    val hasTasks = taskDateKeys.contains(dateKey)
-                    val hasFocus = sessionDateKeys.contains(dateKey)
-                    val hasHabits = habitDateKeys.contains(dateKey)
+                    val hasTasks = day in taskDates
+                    val hasFocus = day in sessionDates
+                    val hasHabits = day in habitDates
 
                     // Only the selected day and today get a border; plain cells stay borderless,
                     // because outlining all ~35-42 cells reads as a cage rather than a grid.
