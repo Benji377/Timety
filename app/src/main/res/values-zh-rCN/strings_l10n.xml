@@ -20,6 +20,9 @@
     <string name="commonLabelCancel">取消</string>
     <string name="commonLabelConfirm">确认</string>
     <string name="commonLabelDelete">删除</string>
+    <string name="commonLabelEdit">编辑</string>
+    <string name="commonLabelNext">下一个</string>
+    <string name="commonLabelPrevious">上一个</string>
     <string name="commonLabelRemove">移除</string>
     <string name="commonLabelSave">保存</string>
     <string name="commonLabelShare">分享</string>
@@ -62,8 +65,11 @@
     <string name="homeSectionHabitsDue">今日习惯 (%1$d)</string>
     <string name="homeSectionTasksDue">待办任务 (%1$d)</string>
     <string name="homeSectionTasksUpcoming">即将到来的任务 (%1$d)</string>
+    <string name="focusActionContinue">继续</string>
     <string name="focusActionPause">暂停</string>
+    <string name="focusActionReset">重置</string>
     <string name="focusActionResume">继续</string>
+    <string name="focusActionStart">开始</string>
     <string name="focusActionStop">停止</string>
     <string name="focusDialogSessionResetContent">计时器已暂停。确认以重置计时，或者取消以继续计时。</string>
     <string name="focusDialogSessionResetTitle">重置专注计时吗？</string>
@@ -89,6 +95,7 @@
     <string name="focusModePomodoro">经典番茄钟</string>
     <string name="focusModeSelect">选择模式</string>
     <string name="focusModeSnackbarInUse">此模式下已有计时记录，无法删除。</string>
+    <string name="focusModeSnackbarRunning">请先结束当前专注，再删除其模式。</string>
     <string name="focusModeSnackbarSaved">模式已保存！</string>
     <string name="focusModeStopwatch">秒表</string>
     <string name="focusModesTitle">管理模式</string>
@@ -296,11 +303,19 @@
     <string name="taskListSortSize">按大小</string>
     <string name="taskListTitle">我的任务</string>
     <string name="taskListTooltipSort">排序方式</string>
+    <string name="taskPriorityHigh">高</string>
+    <string name="taskPriorityLow">低</string>
+    <string name="taskPriorityMedium">中</string>
+    <string name="taskPriorityVeryHigh">非常高</string>
     <string name="taskReminderBody">%1$s 记得完成 %2$s！</string>
     <string name="taskReminderBodyExact">现在是完成 %1$s 的时间！</string>
     <string name="taskReminderPrefixNow">现在： </string>
     <string name="taskReminderTitle">提醒：%1$s</string>
     <string name="taskSheetEmpty">暂无任务</string>
+    <string name="taskSizeLarge">大</string>
+    <string name="taskSizeMedium">中</string>
+    <string name="taskSizeSmall">小</string>
+    <string name="taskSizeVeryLarge">非常大</string>
     <string name="taskStatsCalibrationEmpty">还没有带专注时间的任务</string>
     <string name="taskStatsCalibrationHighSpread">您的 %1$s 类任务耗时差异较大</string>
     <string name="taskStatsCalibrationOrderingViolation">您的 %1$s 类任务比 %2$s 类任务耗时更短</string>
@@ -470,6 +485,7 @@
     <string name="backupActionShareCloudSubtitle">发送到 Drive、Dropbox、WhatsApp…</string>
     <string name="backupExportFailure">导出失败：%1$s</string>
     <string name="backupExportSubject">Timety 导出数据</string>
+    <string name="backupImportFailedTitle">导入失败</string>
     <string name="backupExportSuccess">已导出到</string>
     <string name="backupExportTitle">保存导出文件</string>
     <string name="backupImportConfirmBody">此操作将覆盖所有当前用户数据和设置，且不可撤销。确定继续吗？</string>
