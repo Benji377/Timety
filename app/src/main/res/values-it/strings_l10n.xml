@@ -20,6 +20,9 @@
     <string name="commonLabelCancel">Annulla</string>
     <string name="commonLabelConfirm">Conferma</string>
     <string name="commonLabelDelete">Elimina</string>
+    <string name="commonLabelEdit">Modifica</string>
+    <string name="commonLabelNext">Successivo</string>
+    <string name="commonLabelPrevious">Precedente</string>
     <string name="commonLabelRemove">Rimuovi</string>
     <string name="commonLabelSave">Salva</string>
     <string name="commonLabelShare">Condividi</string>
@@ -62,8 +65,11 @@
     <string name="homeSectionHabitsDue">Abitudini di oggi (%1$d)</string>
     <string name="homeSectionTasksDue">Attività in scadenza (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Prossime attività (%1$d)</string>
+    <string name="focusActionContinue">Continua</string>
     <string name="focusActionPause">Pausa</string>
+    <string name="focusActionReset">Reimposta</string>
     <string name="focusActionResume">Riprendi</string>
+    <string name="focusActionStart">Avvia</string>
     <string name="focusActionStop">Interrompi</string>
     <string name="focusDialogSessionResetContent">Il timer è in pausa mentre decidi. Conferma per resettare la sessione o annulla per continuare.</string>
     <string name="focusDialogSessionResetTitle">Resettare la sessione di focus?</string>
@@ -89,6 +95,7 @@
     <string name="focusModePomodoro">Pomodoro Classico</string>
     <string name="focusModeSelect">Seleziona modalità</string>
     <string name="focusModeSnackbarInUse">Questa modalità ha sessioni registrate e non può essere eliminata.</string>
+    <string name="focusModeSnackbarRunning">Interrompi la sessione in corso prima di eliminarne la modalità.</string>
     <string name="focusModeSnackbarSaved">Modalità salvata!</string>
     <string name="focusModeStopwatch">Cronometro</string>
     <string name="focusModesTitle">Gestisci modalità</string>
@@ -300,11 +307,19 @@
     <string name="taskListSortSize">Dimensione</string>
     <string name="taskListTitle">Le mie attività</string>
     <string name="taskListTooltipSort">Ordina per</string>
+    <string name="taskPriorityHigh">Alta</string>
+    <string name="taskPriorityLow">Bassa</string>
+    <string name="taskPriorityMedium">Media</string>
+    <string name="taskPriorityVeryHigh">Molto alta</string>
     <string name="taskReminderBody">%1$s ricordati di fare %2$s!</string>
     <string name="taskReminderBodyExact">È ora di fare %1$s!</string>
     <string name="taskReminderPrefixNow">Ora: </string>
     <string name="taskReminderTitle">Promemoria: %1$s</string>
     <string name="taskSheetEmpty">Nessuna attività disponibile</string>
+    <string name="taskSizeLarge">Grande</string>
+    <string name="taskSizeMedium">Media</string>
+    <string name="taskSizeSmall">Piccola</string>
+    <string name="taskSizeVeryLarge">Molto grande</string>
     <string name="taskStatsCalibrationEmpty">Ancora nessuna attività con dimensione e tempo di focus</string>
     <string name="taskStatsCalibrationHighSpread">Le tue attività %1$s variano molto nel tempo reale</string>
     <string name="taskStatsCalibrationOrderingViolation">Le tue attività %1$s richiedono meno tempo di quelle %2$s</string>
@@ -475,6 +490,7 @@
     <string name="backupActionShareCloudSubtitle">Invia a Drive, Dropbox, WhatsApp…</string>
     <string name="backupExportFailure">Esportazione fallita: %1$s</string>
     <string name="backupExportSubject">Esportazione Timety</string>
+    <string name="backupImportFailedTitle">Importazione fallita</string>
     <string name="backupExportSuccess">Esportazione salvata in</string>
     <string name="backupExportTitle">Salva esportazione</string>
     <string name="backupImportConfirmBody">Questo SOVRASCRIVERÀ tutti i dati utente e le impostazioni attuali. Questa operazione non può essere annullata. Sei sicuro?</string>
