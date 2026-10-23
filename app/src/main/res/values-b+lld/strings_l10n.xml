@@ -20,6 +20,9 @@
     <string name="commonLabelCancel">Anulé</string>
     <string name="commonLabelConfirm">Cunfermé</string>
     <string name="commonLabelDelete">Scancelé</string>
+    <string name="commonLabelEdit">Mudé</string>
+    <string name="commonLabelNext">Proscim</string>
+    <string name="commonLabelPrevious">Da dant</string>
     <string name="commonLabelRemove">Tò demez</string>
     <string name="commonLabelSave">Salvé</string>
     <string name="commonLabelShare">Spartì</string>
@@ -62,8 +65,11 @@
     <string name="homeSectionHabitsDue">Abitudins de ncuei (%1$d)</string>
     <string name="homeSectionTasksDue">Ncëries da finé (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Proscima ncëries (%1$d)</string>
+    <string name="focusActionContinue">Jì inant</string>
     <string name="focusActionPause">Pausa</string>
+    <string name="focusActionReset">Taché da nuev</string>
     <string name="focusActionResume">Fe inant</string>
+    <string name="focusActionStart">Mëter a jì</string>
     <string name="focusActionStop">Ferme</string>
     <string name="focusDialogSessionResetContent">L cronometer ie pausà. Cunfermea per taché da nuev, o anulea per jì inant.</string>
     <string name="focusDialogSessionResetTitle">Taché da nuev la sescion?</string>
@@ -89,6 +95,7 @@
     <string name="focusModePomodoro">Pomodoro Classich</string>
     <string name="focusModeSelect">Cëria modalità</string>
     <string name="focusModeSnackbarInUse">Chësta modalità à sescions registredes y ne possa nia unì scanceleda.</string>
+    <string name="focusModeSnackbarRunning">Archita la sescion dan tò demez chësta modalità.</string>
     <string name="focusModeSnackbarSaved">Modalità saveda!</string>
     <string name="focusModeStopwatch">Cronometer</string>
     <string name="focusModesTitle">Aministré modaliteies</string>
@@ -316,11 +323,19 @@
     <string name="taskListSortSize">Grandëza</string>
     <string name="taskListTitle">Mi ncëries</string>
     <string name="taskListTooltipSort">Urdiné aldò</string>
+    <string name="taskPriorityHigh">Aut</string>
+    <string name="taskPriorityLow">Bas</string>
+    <string name="taskPriorityMedium">Mesan</string>
+    <string name="taskPriorityVeryHigh">Scialdi aut</string>
     <string name="taskReminderBody">%1$s lezite de fé %2$s!</string>
     <string name="taskReminderBodyExact">L\'ie l\'ëura de fé %1$s!</string>
     <string name="taskReminderPrefixNow">Sën: </string>
     <string name="taskReminderTitle">Lezit: %1$s</string>
     <string name="taskSheetEmpty">Deguna ncëries de ndisposizion</string>
+    <string name="taskSizeLarge">Grant</string>
+    <string name="taskSizeMedium">Mesan</string>
+    <string name="taskSizeSmall">Pitl</string>
+    <string name="taskSizeVeryLarge">Scialdi grant</string>
     <string name="taskStatsCalibrationEmpty">Deguna ncëria cun tëmp de focus mo</string>
     <string name="taskStatsCalibrationHighSpread">Ti ncëries %1$s varia drët tl tëmp real</string>
     <string name="taskStatsCalibrationOrderingViolation">Ti ncëries %1$s tol manco tëmp che %2$s</string>
@@ -495,6 +510,7 @@
     <string name="backupActionShareCloudSubtitle">Mëna a Drive, Dropbox, WhatsApp…</string>
     <string name="backupExportFailure">Esportazion faleda: %1$s</string>
     <string name="backupExportSubject">Esportazion Timety</string>
+    <string name="backupImportFailedTitle">Mpurtazion faleda</string>
     <string name="backupExportSuccess">Esportazion saveda te</string>
     <string name="backupExportTitle">Salvé esportazion</string>
     <string name="backupImportConfirmBody">Chësc SRÌA SËURA dut i dac atuëi. Chësc ne pònia nia unì anulà. T\'es segur?</string>
