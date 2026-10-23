@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -78,6 +79,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
@@ -86,6 +88,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -113,29 +116,34 @@ fun RecurringTaskDetailScreen(
     viewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    val allRecurring by viewModel.allRecurringTasks.collectAsState()
+    val existingState = remember(recurringTaskId) {
+        recurringTaskId?.let { viewModel.observeTask(it) } ?: flowOf(null)
+    }.collectAsState(initial = null)
+    val existing = existingState.value
     val allCategories by taskViewModel.allCategories.collectAsState()
-    val existing = recurringTaskId?.let { id -> allRecurring.find { it.task.id == id } }
     val existingTask = existing?.task
     val isNew = recurringTaskId == null
     val zone = ZoneId.systemDefault()
     val dateFmt = LocalDateFormatSettings.current
 
-    var isEditing by remember(recurringTaskId) { mutableStateOf(isNew) }
+    var isEditing by rememberSaveable(recurringTaskId) { mutableStateOf(isNew) }
+    // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
+    val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
-    var description by remember(existingTask) { mutableStateOf(existingTask?.description ?: "") }
-    var category by remember(existingTask) { mutableStateOf(existingTask?.category ?: "") }
+    val formTask = rememberFormSource(existingTask, isEditing)
+    var title by rememberSaveable(formTask) { mutableStateOf(existingTask?.title ?: "") }
+    var description by rememberSaveable(formTask) { mutableStateOf(existingTask?.description ?: "") }
+    var category by rememberSaveable(formTask) { mutableStateOf(existingTask?.category ?: "") }
     var isAddingNewCategory by remember { mutableStateOf(false) }
     var newCategoryText by remember { mutableStateOf("") }
-    var dueDate by remember(existingTask) { mutableStateOf(existingTask?.dueDate) }
-    var unit by remember(existingTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
-    var interval by remember(existingTask) { mutableIntStateOf(existingTask?.interval ?: 1) }
-    var selectedWeekdays by remember(existingTask) {
+    var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
+    var unit by rememberSaveable(formTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
+    var interval by rememberSaveable(formTask) { mutableIntStateOf(existingTask?.interval ?: 1) }
+    var selectedWeekdays by rememberSaveable(formTask) {
         mutableStateOf(HabitUtils.parseWeekdays(existingTask?.daysOfWeek))
     }
-    var monthlyChoice by remember(existingTask) {
+    var monthlyChoice by rememberSaveable(formTask) {
         mutableStateOf(
             when {
                 existingTask?.monthlyMode != MonthlyMode.NTH_WEEKDAY -> MonthlyChoice.DAY_OF_MONTH
@@ -144,7 +152,7 @@ fun RecurringTaskDetailScreen(
             }
         )
     }
-    var reminderOffsets by remember(existingTask) {
+    var reminderOffsets by rememberSaveable(formTask) {
         mutableStateOf(existingTask?.reminderOffsetsMinutes ?: emptyList())
     }
 
@@ -181,7 +189,7 @@ fun RecurringTaskDetailScreen(
             else -> MonthlyChoice.DAY_OF_MONTH
         }
         val taskToSave = RecurringTaskEntity(
-            id = recurringTaskId ?: UUID.randomUUID().toString(),
+            id = recurringTaskId ?: newItemId,
             title = trimmedTitle,
             description = description.trim(),
             category = category,
@@ -197,7 +205,8 @@ fun RecurringTaskDetailScreen(
                 MonthlyMode.NTH_WEEKDAY
             } else MonthlyMode.DAY_OF_MONTH,
             monthlyDay = if (unit == RecurrenceUnit.MONTH && effectiveChoice == MonthlyChoice.DAY_OF_MONTH) {
-                dueLocal.dayOfMonth
+                // A due date clamped to a short month (Feb 28 for "the 31st") must not become the rule.
+                existingTask?.monthlyDay?.takeIf { existingTask.dueDate == due } ?: dueLocal.dayOfMonth
             } else null,
             monthlyOrdinal = when {
                 unit != RecurrenceUnit.MONTH -> null
@@ -533,8 +542,7 @@ fun RecurringTaskDetailScreen(
         }
         val initialTime = dueDate?.atZone(zone)
         NeoDateTimePickerDialog(
-            initialDateMillis = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null)
-                ?.toEpochMilli() ?: System.currentTimeMillis(),
+            initialDate = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null) ?: Instant.now(),
             initialHour = initialTime?.hour ?: 12,
             initialMinute = initialTime?.minute ?: 0,
             timeTitle = stringResource(

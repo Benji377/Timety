@@ -32,10 +32,12 @@ object AppDateUtils {
     }
 
 
-    /** Canonical `yyyy-MM-dd` key for a date, used to compare/deduplicate dates as strings. */
-    fun dayKey(date: LocalDate): String {
-        return "%04d-%02d-%02d".format(date.year, date.monthValue, date.dayOfMonth)
-    }
+    /**
+     * Canonical `yyyy-MM-dd` key for a date, stored for day ratings and in backups. ISO formatting
+     * ignores the locale, so the key never picks up another script's digits. In memory, compare
+     * [LocalDate]s instead: building keys is far slower.
+     */
+    fun dayKey(date: LocalDate): String = date.toString()
 
 
     /** Short localized weekday name, e.g. "Mon", for an ISO weekday number (1 = Monday). */

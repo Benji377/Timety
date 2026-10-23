@@ -359,9 +359,10 @@ private fun HabitTileWrapper(
     var subtitleText = HabitUtils.buildHabitSubtitle(habit, completionsThisWeek)
     val reminderTimes = HabitUtils.parseReminderTimes(habit.reminderTimes)
     if (reminderTimes.isNotEmpty()) {
-        val pattern = if (use24HourFormat) "HH:mm" else "hh:mm a"
         val locale = LocalLocale.current.platformLocale
-        val formatter = DateTimeFormatter.ofPattern(pattern, locale)
+        val formatter = remember(use24HourFormat, locale) {
+            DateTimeFormatter.ofPattern(if (use24HourFormat) "HH:mm" else "hh:mm a", locale)
+        }
         val formatted = reminderTimes.joinToString(", ") {
             LocalTime.of(it / 60, it % 60).format(formatter)
         }

@@ -33,6 +33,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
@@ -67,7 +68,6 @@ import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import kotlin.math.roundToInt
@@ -116,11 +116,9 @@ fun HomeScreen(
 
     val todayLocalDate = LocalDate.now()
     val focusTargetToday = dailyFocusTarget.minutesOn(todayLocalDate)
+    // Same count as the Focus screen: a session crossing midnight is split between the days.
     val focusMinsToday = remember(sessions, todayLocalDate) {
-        sessions.filter {
-            LocalDateTime.ofInstant(it.startTime, ZoneId.systemDefault())
-                .toLocalDate() == todayLocalDate
-        }.sumOf { it.totalSecondsFocused } / 60
+        focusViewModel.getMinutesFocusedOnDay(todayLocalDate)
     }
     val currentHour = LocalTime.now().hour
     val greeting = when (currentHour) {
@@ -251,7 +249,10 @@ fun HomeScreen(
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                if (urgentTasks.isEmpty() && todaysHabits.isEmpty() && recurringDueCount == 0) {
+                val nothingDueToday =
+                    urgentTasks.isEmpty() && todaysHabits.isEmpty() && recurringDueCount == 0
+                val nothingUpcoming = upcomingTasks.isEmpty() && recurringUpcoming.isEmpty()
+                if (nothingDueToday && nothingUpcoming) {
                     Text(
                         text = stringResource(R.string.homeDailyGoalDone),
                         modifier = Modifier.align(Alignment.Center)
@@ -261,6 +262,17 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
                     ) {
+                        if (nothingDueToday) {
+                            item {
+                                Text(
+                                    text = stringResource(R.string.homeDailyGoalDone),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = AppTheme.spaceXLarge)
+                                )
+                            }
+                        }
                         // Due tasks accordion.
                         if (urgentTasks.isNotEmpty() || recurringDueCount > 0) {
                             item {

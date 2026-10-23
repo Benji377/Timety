@@ -249,7 +249,7 @@ fun SessionEditorDialog(
     if (showStartPicker) {
         val startTime = startDateTime.atZone(zone)
         NeoDateTimePickerDialog(
-            initialDateMillis = startDateTime.toEpochMilli(),
+            initialDate = startDateTime,
             initialHour = startTime.hour,
             initialMinute = startTime.minute,
             onConfirm = { date, hour, minute ->

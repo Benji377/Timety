@@ -479,7 +479,6 @@
     <string name="backupExportTitle">Export speichern</string>
     <string name="backupImportConfirmBody">Dies wird alle aktuellen Benutzerdaten und Einstellungen ÜBERSCHREIBEN. Dies kann nicht rückgängig gemacht werden. Bist du sicher?</string>
     <string name="backupImportConfirmTitle">JSON-Daten importieren?</string>
-    <string name="backupImportFailure">Import fehlgeschlagen: Dateiformat prüfen</string>
     <string name="backupRestoreSuccessBody">Deine Daten wurden wiederhergestellt. Bitte schließe und starte Timety komplett neu, um die importierten Daten zu laden.</string>
     <string name="backupRestoreSuccessTitle">Wiederherstellung erfolgreich!</string>
     <string name="backupShareFailure">Teilen fehlgeschlagen: %1$s</string>

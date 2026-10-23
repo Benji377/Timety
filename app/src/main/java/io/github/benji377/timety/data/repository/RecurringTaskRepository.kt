@@ -15,6 +15,14 @@ class RecurringTaskRepository(
     val allRecurringTasks: Flow<List<RecurringTaskWithOccurrences>> =
         recurringTaskDao.getAllWithOccurrences()
 
+    fun observeTask(id: String): Flow<RecurringTaskWithOccurrences?> =
+        recurringTaskDao.observeWithOccurrences(id)
+
+    /** Every recurring task without its occurrence log, for callers that only need the schedule. */
+    suspend fun getAllTasks(): List<RecurringTaskEntity> = withContext(Dispatchers.IO) {
+        recurringTaskDao.getAll()
+    }
+
     suspend fun getTaskById(id: String): RecurringTaskEntity? = withContext(Dispatchers.IO) {
         recurringTaskDao.getById(id)
     }

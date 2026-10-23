@@ -120,8 +120,9 @@ object LocationApi {
             name = name,
             details = detailsString(properties),
             country = properties.optString("country", ""),
-            latitude = coordinates?.optDouble(1),
-            longitude = coordinates?.optDouble(0),
+            // A broken endpoint can send null or "1e999"; JSON can't store NaN or Infinity later.
+            latitude = coordinates?.optDouble(1)?.takeIf { it.isFinite() },
+            longitude = coordinates?.optDouble(0)?.takeIf { it.isFinite() },
         )
     }
 

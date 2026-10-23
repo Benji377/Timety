@@ -155,7 +155,7 @@ private fun UnifiedCalendarSheetContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = { displayedMonth = displayedMonth.minusMonths(1) }) {
-                Icon(Icons.Filled.ChevronLeft, contentDescription = null)
+                Icon(Icons.Filled.ChevronLeft, contentDescription = stringResource(R.string.commonLabelPrevious))
             }
             Text(
                 text = AppDateFormatUtils.formatMonthYear(
@@ -165,7 +165,7 @@ private fun UnifiedCalendarSheetContent(
                 fontWeight = FontWeight.SemiBold,
             )
             IconButton(onClick = { displayedMonth = displayedMonth.plusMonths(1) }) {
-                Icon(Icons.Filled.ChevronRight, contentDescription = null)
+                Icon(Icons.Filled.ChevronRight, contentDescription = stringResource(R.string.commonLabelNext))
             }
         }
 

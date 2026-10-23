@@ -499,7 +499,6 @@
     <string name="backupExportTitle">Salvé esportazion</string>
     <string name="backupImportConfirmBody">Chësc SRÌA SËURA dut i dac atuëi. Chësc ne pònia nia unì anulà. T\'es segur?</string>
     <string name="backupImportConfirmTitle">Mpurter dac JSON?</string>
-    <string name="backupImportFailure">Mpurtazion faleda: Cuntrulea l format dl file</string>
     <string name="backupRestoreSuccessBody">I ti dac ie unic turnei de reviers. Stlù ju nfin al fin y deuj a Timety da nuev per i ciarié.</string>
     <string name="backupRestoreSuccessTitle">Tornà de reviers cun suzes!</string>
     <string name="backupShareFailure">Scipartida faleda: %1$s</string>

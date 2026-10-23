@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,12 +55,15 @@ import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
+import io.github.benji377.timety.ui.components.common.datePickerMillis
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.PickerPalette
+import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -90,31 +94,34 @@ fun GoalDetailScreen(
     val existingGoal = existingGoalWithEntries?.goal
     val isNewGoal = goalId == null
 
-    var isEditing by remember { mutableStateOf(isNewGoal) }
+    var isEditing by rememberSaveable { mutableStateOf(isNewGoal) }
+    // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
+    val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var name by remember(existingGoal?.id) { mutableStateOf(existingGoal?.name ?: "") }
+    val formGoalId = rememberFormSource(existingGoal?.id, isEditing)
+    var name by rememberSaveable(formGoalId) { mutableStateOf(existingGoal?.name ?: "") }
     var nameError by remember { mutableStateOf(false) }
-    var description by remember(existingGoal?.id) {
+    var description by rememberSaveable(formGoalId) {
         mutableStateOf(
             existingGoal?.description ?: ""
         )
     }
-    var targetValueText by remember(existingGoal?.id) {
+    var targetValueText by rememberSaveable(formGoalId) {
         mutableStateOf(existingGoal?.targetValue?.toString() ?: "")
     }
     var targetError by remember { mutableStateOf(false) }
-    var unitLabel by remember(existingGoal?.id) { mutableStateOf(existingGoal?.unitLabel ?: "") }
+    var unitLabel by rememberSaveable(formGoalId) { mutableStateOf(existingGoal?.unitLabel ?: "") }
     var unitError by remember { mutableStateOf(false) }
-    var targetDate by remember(existingGoal?.id) {
+    var targetDate by rememberSaveable(formGoalId) {
         mutableStateOf(
             existingGoal?.targetDate
                 ?: LocalDate.now().plusDays(30).atTime(LocalTime.of(23, 59))
                     .atZone(ZoneId.systemDefault()).toInstant()
         )
     }
-    var selectedIconIndex by remember(existingGoal?.id) { mutableStateOf(existingGoal?.iconCodePoint) }
-    var selectedColor by remember(existingGoal?.id) {
+    var selectedIconIndex by rememberSaveable(formGoalId) { mutableStateOf(existingGoal?.iconCodePoint) }
+    var selectedColor by rememberSaveable(formGoalId, stateSaver = ColorSaver) {
         mutableStateOf(existingGoal?.colorValue?.let { Color(it) } ?: GoalColor)
     }
 
@@ -142,7 +149,7 @@ fun GoalDetailScreen(
         if (nameError || targetError || unitError) return
 
         val goalToSave = GoalEntity(
-            id = goalId ?: UUID.randomUUID().toString(),
+            id = goalId ?: newItemId,
             name = trimmedName,
             description = description.trim(),
             colorValue = selectedColor.toArgb(),
@@ -412,7 +419,7 @@ fun GoalDetailScreen(
         // days-left treat the chosen date as still "in time".
         if (showDatePicker) {
             val state =
-                rememberDatePickerState(initialSelectedDateMillis = targetDate.toEpochMilli())
+                rememberDatePickerState(initialSelectedDateMillis = datePickerMillis(targetDate))
             DatePickerDialog(
                 onDismissRequest = { showDatePicker = false },
                 confirmButton = {

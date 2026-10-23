@@ -19,6 +19,8 @@ class TaskRepository(
     val allCategories: Flow<List<TaskCategoryEntity>> =
         taskDao.getAllCategories()
 
+    fun observeTask(id: String): Flow<TaskWithSubtasks?> = taskDao.observeTaskWithSubtasks(id)
+
     suspend fun getOpenTasksDueBefore(deadline: java.time.Instant): List<TaskEntity> =
         withContext(Dispatchers.IO) {
             taskDao.getOpenTasksDueBefore(deadline)

@@ -88,13 +88,14 @@ import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.stats.PeriodSummary
 import io.github.benji377.timety.util.stats.ReportPeriod
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZonedDateTime
 
 
 /**
@@ -174,17 +175,18 @@ fun CalendarScreen(
     openReport?.let { (period, start) ->
         val plainTasks = tasks.map { it.task }
         val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
-        fun summaryOf(range: ClosedRange<LocalDate>) =
-            PeriodSummary.of(range, plainTasks, recurringItems, habitCompletions, sessions, zone)
-        // The current period's figures cover all of it (days still ahead add nothing done, while
-        // tasks due later stay counted); only the comparison is cut to the days elapsed so far.
-        val comparedWith = period.comparisonRange(start, LocalDate.now())
+        fun summaryOf(range: ClosedRange<LocalDate>, until: Instant? = null) =
+            PeriodSummary.of(range, plainTasks, recurringItems, habitCompletions, sessions, zone, until)
+        // The current period's figures cover all of it (time still ahead adds nothing done, while
+        // tasks due later stay counted); only the comparison is cut to the time elapsed so far.
+        val now = ZonedDateTime.now(zone)
+        val comparedWith = period.comparisonRange(start, now.toLocalDate())
         PeriodReportDialog(
             period = period,
             start = start,
             comparedWith = comparedWith,
             summary = summaryOf(start..period.endOf(start)),
-            previous = summaryOf(comparedWith),
+            previous = summaryOf(comparedWith, period.comparisonCutoff(start, now)),
             onDismiss = { openReport = null }
         )
     }
@@ -341,7 +343,7 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
         NeoIconButton(
             onClick = onPrevious,
             icon = Icons.Filled.ChevronLeft,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.commonLabelPrevious),
         )
         Text(
             text = AppDateFormatUtils.formatMonthYear(
@@ -353,7 +355,7 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
         NeoIconButton(
             onClick = onNext,
             icon = Icons.Filled.ChevronRight,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.commonLabelNext),
         )
     }
 }
@@ -376,20 +378,20 @@ private fun CalendarGrid(
 
     // Pre-compute sets of dates with activity for O(1) lookup during grid generation.
     // Recurring tasks mark their next due day and every completed occurrence's day.
-    val taskDateKeys = remember(tasks, recurringItems) {
+    val taskDates = remember(tasks, recurringItems) {
         val taskDays = tasks.mapNotNull { it.task.dueDate }
-            .map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }
+            .map { it.atZone(zone).toLocalDate() }
         val recurringDays = recurringItems.flatMap { item ->
             item.occurrences.map { it.completedAt } + item.task.dueDate
-        }.map { AppDateUtils.dayKey(it.atZone(zone).toLocalDate()) }
+        }.map { it.atZone(zone).toLocalDate() }
         (taskDays + recurringDays).toSet()
     }
-    val sessionDateKeys = remember(sessions) {
-        sessions.map { AppDateUtils.dayKey(it.startTime.atZone(zone).toLocalDate()) }.toSet()
+    val sessionDates = remember(sessions) {
+        sessions.map { it.startTime.atZone(zone).toLocalDate() }.toSet()
     }
-    val habitDateKeys = remember(habitsWithCompletions) {
+    val habitDates = remember(habitsWithCompletions) {
         habitsWithCompletions.flatMap { it.completions }
-            .map { AppDateUtils.dayKey(it.completionDate.atZone(zone).toLocalDate()) }
+            .map { it.completionDate.atZone(zone).toLocalDate() }
             .toSet()
     }
 
@@ -466,10 +468,9 @@ private fun CalendarGrid(
                     val isCurrentMonth = day.month == focusedMonth.month
                     val isSelected = day == selectedDate
                     val isToday = day == today
-                    val dateKey = AppDateUtils.dayKey(day)
-                    val hasTasks = taskDateKeys.contains(dateKey)
-                    val hasFocus = sessionDateKeys.contains(dateKey)
-                    val hasHabits = habitDateKeys.contains(dateKey)
+                    val hasTasks = day in taskDates
+                    val hasFocus = day in sessionDates
+                    val hasHabits = day in habitDates
 
                     // Only the selected day and today get a border; plain cells stay borderless,
                     // because outlining all ~35-42 cells reads as a cage rather than a grid.

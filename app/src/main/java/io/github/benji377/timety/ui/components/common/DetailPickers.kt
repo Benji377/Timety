@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -67,10 +71,12 @@ fun PickerField(
             },
             modifier = Modifier.fillMaxWidth(),
         )
+        // The tap target lies over the read-only field, so it carries the field's label itself.
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .clickable(enabled = enabled) { onClick() },
+                .clickable(enabled = enabled, role = Role.Button) { onClick() }
+                .semantics { contentDescription = label },
         )
     }
 }
@@ -110,9 +116,11 @@ fun IconPickerDialog(
                             .clip(CircleShape)
                             .background(if (isSelected) accentColor else Color.Transparent)
                             .hairlineBorder()
-                            .clickable(
+                            .selectable(
+                                selected = isSelected,
                                 interactionSource = interactionSource,
-                                indication = ripple()
+                                indication = ripple(),
+                                role = Role.RadioButton,
                             ) {
                                 onSelect(index)
                             },

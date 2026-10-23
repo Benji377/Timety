@@ -82,6 +82,23 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         // applied Auto-DND, kept here (rather than in-memory) so a killed process can still
         // restore it on next start. Absent means Auto-DND currently owns nothing to restore.
         val STORED_INTERRUPTION_FILTER = intPreferencesKey("storedInterruptionFilter")
+
+        // Not a user-facing setting: whether the per-weekday habit alarms of older versions were
+        // cancelled on this device. Not backed up; a restore just runs the cleanup once more.
+        val LEGACY_HABIT_ALARMS_CLEARED = booleanPreferencesKey("legacyHabitAlarmsCleared")
+
+        private val RESTORABLE_BOOLEAN_KEYS = listOf(
+            USE_24_HOUR_FORMAT, AUTO_COMPLETE_FOCUS, ASK_FOCUS_ON_TASK_COMPLETE, SHOW_HOME_GREETING,
+            KEEP_SCREEN_ON_DURING_FOCUS, AUTO_DND_ENABLED, AUTO_DND_LIFT_DURING_BREAKS,
+            EXACT_ALARM_PROMPT_SHOWN,
+        )
+        private val RESTORABLE_INT_KEYS = listOf(
+            DAILY_GOAL_MINS, MAX_STOPWATCH_MINS, MAX_NODE_MINS, UPCOMING_TASKS_HORIZON,
+        )
+        private val RESTORABLE_STRING_KEYS = listOf(
+            THEME_PREF, DATE_FORMAT, DAILY_GOAL_WEEKDAYS, DAILY_MOTIVATION_TIME,
+            END_OF_DAY_CHECKUP_TIME, LOCATION_API_ENDPOINT, APP_LOCALE_CODE,
+        )
     }
 
     val themePrefFlow: Flow<ThemeMode> =
@@ -165,6 +182,21 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[DAILY_GOAL_MINS] = mins }
     }
 
+    /**
+     * Flips [day] in the target weekdays as one read-modify-write, so quick successive taps can't
+     * overwrite each other. Deselecting the last day is ignored: zero minutes is the only "off".
+     */
+    suspend fun toggleDailyGoalWeekday(day: Int) {
+        dataStore.edit { prefs ->
+            val days = HabitUtils.parseWeekdays(prefs[DAILY_GOAL_WEEKDAYS])
+                .filter { it in DailyFocusTarget.ALL_WEEKDAYS }
+                .toSet()
+                .ifEmpty { DailyFocusTarget.ALL_WEEKDAYS }
+            val toggled = if (day in days) days - day else days + day
+            if (toggled.isNotEmpty()) prefs[DAILY_GOAL_WEEKDAYS] = HabitUtils.serializeWeekdays(toggled)
+        }
+    }
+
     /** Saves the target weekdays; an empty set is rejected since it would silently mean "off". */
     suspend fun saveDailyGoalWeekdays(days: Set<Int>) {
         require(days.isNotEmpty()) { "A daily focus target needs at least one weekday" }
@@ -223,25 +255,39 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it.remove(STORED_INTERRUPTION_FILTER) }
     }
 
+    suspend fun isLegacyHabitAlarmsCleared(): Boolean =
+        dataStore.data.first()[LEGACY_HABIT_ALARMS_CLEARED] ?: false
+
+    suspend fun saveLegacyHabitAlarmsCleared() {
+        dataStore.edit { it[LEGACY_HABIT_ALARMS_CLEARED] = true }
+    }
+
     suspend fun exportAll(): Map<String, Any?> {
         val prefs = dataStore.data.first()
-        // STORED_INTERRUPTION_FILTER is transient runtime state, not a user setting - excluded
-        // so restoring a backup can't leave a stale filter that nothing will ever restore.
+        // Device state, not user settings: a restored STORED_INTERRUPTION_FILTER would be stale
+        // and nothing would ever restore it.
+        val deviceStateKeys = setOf(STORED_INTERRUPTION_FILTER.name, LEGACY_HABIT_ALARMS_CLEARED.name)
         return prefs.asMap()
-            .filterKeys { it.name != STORED_INTERRUPTION_FILTER.name }
+            .filterKeys { it.name !in deviceStateKeys }
             .mapKeys { it.key.name }
     }
 
+    /**
+     * Replaces every user setting with [map]'s values. Unknown keys and values of the wrong type are
+     * dropped, so a hand-edited backup can't store a value the app later fails to read. The stored
+     * interruption filter is kept: it belongs to a focus session that may still be running.
+     */
     suspend fun restoreAll(map: Map<String, Any?>) {
         dataStore.edit { prefs ->
+            val storedFilter = prefs[STORED_INTERRUPTION_FILTER]
             prefs.clear()
-            map.forEach { (key, value) ->
-                when (value) {
-                    is Boolean -> prefs[booleanPreferencesKey(key)] = value
-                    is Int -> prefs[intPreferencesKey(key)] = value
-                    is String -> prefs[stringPreferencesKey(key)] = value
-                }
-            }
+            storedFilter?.let { prefs[STORED_INTERRUPTION_FILTER] = it }
+            restorableBooleanKeys().forEach { key -> (map[key.name] as? Boolean)?.let { prefs[key] = it } }
+            RESTORABLE_INT_KEYS.forEach { key -> (map[key.name] as? Int)?.let { prefs[key] = it } }
+            RESTORABLE_STRING_KEYS.forEach { key -> (map[key.name] as? String)?.let { prefs[key] = it } }
         }
     }
+
+    private fun restorableBooleanKeys(): List<Preferences.Key<Boolean>> =
+        RESTORABLE_BOOLEAN_KEYS + AccordionKey.entries.map { booleanPreferencesKey(it.storageKey) }
 }

@@ -3,8 +3,7 @@ package io.github.benji377.timety.services
 import android.content.Context
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
-import io.github.benji377.timety.data.model.habit.HabitEntity
-import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -12,11 +11,15 @@ import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.dataStore
 import io.github.benji377.timety.util.LocaleHelper
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.widget.MidnightWidgetRefresh
 import kotlinx.coroutines.flow.first
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 
@@ -28,9 +31,13 @@ class ReminderScheduler private constructor(private val context: Context) {
     // Tasks.
 
 
+    /** Re-arms [task]'s reminders; one already showing stays, so a resync can't swallow it. */
     fun scheduleTaskReminders(task: TaskEntity) {
-        cancelTaskReminders(task.id)
-        if (task.isCompleted) return
+        if (task.isCompleted) {
+            cancelTaskReminders(task.id)
+            return
+        }
+        cancelTaskAlarms(task.id)
 
         val now = Instant.now()
         val baseId = task.id.hashCode()
@@ -73,6 +80,11 @@ class ReminderScheduler private constructor(private val context: Context) {
         for (i in 0 until TASK_ID_SLOTS) notificationService.cancelNotification(baseId + i)
     }
 
+    private fun cancelTaskAlarms(taskId: String) {
+        val baseId = taskId.hashCode()
+        for (i in 0 until TASK_ID_SLOTS) notificationService.cancelAlarm(baseId + i)
+    }
+
     // Recurring tasks.
 
 
@@ -81,7 +93,7 @@ class ReminderScheduler private constructor(private val context: Context) {
      * occurrence advances the due date and calls this again for the one after.
      */
     fun scheduleRecurringTaskReminders(task: RecurringTaskEntity) {
-        cancelRecurringTaskReminders(task.id)
+        cancelRecurringTaskAlarms(task.id)
 
         val now = Instant.now()
         val baseId = NotificationService.recurringTaskReminderBaseId(task.id)
@@ -112,6 +124,11 @@ class ReminderScheduler private constructor(private val context: Context) {
     fun cancelRecurringTaskReminders(id: String) {
         val baseId = NotificationService.recurringTaskReminderBaseId(id)
         for (i in 0 until TASK_ID_SLOTS) notificationService.cancelNotification(baseId + i)
+    }
+
+    private fun cancelRecurringTaskAlarms(id: String) {
+        val baseId = NotificationService.recurringTaskReminderBaseId(id)
+        for (i in 0 until TASK_ID_SLOTS) notificationService.cancelAlarm(baseId + i)
     }
 
 
@@ -162,29 +179,24 @@ class ReminderScheduler private constructor(private val context: Context) {
     // Habits.
 
 
-    fun scheduleHabitReminder(habit: HabitEntity) {
-        val times = HabitUtils.parseReminderTimes(habit.reminderTimes)
-        if (times.isEmpty()) {
+    /**
+     * Arms [hwc]'s next reminder, its only pending one. Today's remaining times are skipped once
+     * it no longer needs a reminder today; with no reminder left the habit's alarm is cancelled.
+     */
+    fun scheduleHabitReminder(hwc: HabitWithCompletions) {
+        val habit = hwc.habit
+        val next = HabitUtils.nextReminderAt(hwc, ZonedDateTime.now())
+        if (next == null) {
             notificationService.cancelHabitReminder(habit.id)
             return
-        }
-        val weekdays = if (habit.frequency == HabitFrequency.WEEKLY_EXACT) {
-            HabitUtils.parseWeekdays(habit.targetWeekdays).toList()
-        } else {
-            null
         }
         notificationService.scheduleHabitReminder(
             habitId = habit.id,
             title = context.getString(R.string.notificationHabitTitle),
             body = context.getString(R.string.notificationHabitBody, habit.name),
-            times = times,
-            targetWeekdays = weekdays,
+            triggerAtMillis = next.toInstant().toEpochMilli(),
         )
     }
-
-    /** Clears a habit's already-showing reminder notifications once it is done; the alarms stay armed. */
-    fun dismissHabitNotifications(habitId: String) =
-        notificationService.dismissHabitNotifications(habitId)
 
     fun cancelHabitReminder(habitId: String) = notificationService.cancelHabitReminder(habitId)
 
@@ -252,22 +264,67 @@ class ReminderScheduler private constructor(private val context: Context) {
         }
 
 
-        /** Re-schedules every task, habit, and general reminder; used after boot/app-update since the OS clears pending alarms. */
+        /**
+         * Re-arms [habitId]'s reminder from its stored state, after the habit or its completions
+         * changed. A reminder already showing is cleared once the habit is done today.
+         */
+        suspend fun refreshHabitReminder(context: Context, habitId: String) {
+            val app = context.applicationContext as? TimetyApplication ?: return
+            val repository = app.container.habitRepository
+            val habit = repository.getHabitById(habitId) ?: return
+            val hwc = HabitWithCompletions(habit, repository.getCompletionsForHabit(habitId).first())
+            val scheduler = create(app)
+            if (HabitUtils.isCompletedOn(hwc, LocalDate.now())) {
+                scheduler.notificationService.dismissHabitNotifications(habitId)
+            }
+            scheduler.scheduleHabitReminder(hwc)
+        }
+
+
+        /** Re-arms every pending reminder and the midnight widget refresh; runs on each process start and system alarm reset. */
         suspend fun resyncAll(context: Context) {
             val app = context.applicationContext as? TimetyApplication ?: return
             val scheduler = create(app)
             val settings = app.container.settingsRepository
 
-            app.container.taskRepository.allTasks.first()
-                .forEach { scheduler.scheduleTaskReminders(it.task) }
-            app.container.recurringTaskRepository.allRecurringTasks.first()
-                .forEach { scheduler.scheduleRecurringTaskReminders(it.task) }
-            app.container.habitRepository.allHabits.first()
-                .forEach { scheduler.scheduleHabitReminder(it) }
-            app.container.quickHabitRepository.allQuickHabits.first()
-                .forEach { scheduler.scheduleQuickHabit(it) }
+            // Android caps an app's pending alarms (500). The few app-wide alarms go first, so if a
+            // huge number of reminders ever reaches the cap, the ones left out are item reminders.
             scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
             scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
+            MidnightWidgetRefresh.schedule(app)
+
+            val now = Instant.now()
+            // Only items with something ahead: completed or past ones were cancelled when they
+            // changed, and re-cancelling each of them costs a dozen system calls on every start.
+            app.container.taskRepository.allTasks.first()
+                .map { it.task }
+                .filter { task ->
+                    !task.isCompleted &&
+                        (task.reminders.any { it.isAfter(now) } || task.dueDate?.isAfter(now) == true)
+                }
+                .forEach { scheduler.scheduleTaskReminders(it) }
+            app.container.recurringTaskRepository.allRecurringTasks.first()
+                .forEach { scheduler.scheduleRecurringTaskReminders(it.task) }
+            // Whether a habit still needs a reminder today depends only on this week's completions.
+            val weekStart = AppDateUtils.startOfWeekMonday(LocalDate.now())
+                .atStartOfDay(ZoneId.systemDefault()).toInstant()
+            val recentCompletions = app.container.habitRepository.getCompletionsSince(weekStart)
+                .groupBy { it.habitId }
+            val habits = app.container.habitRepository.allHabits.first()
+            if (!settings.isLegacyHabitAlarmsCleared()) {
+                habits.forEach { scheduler.notificationService.cancelLegacyHabitReminders(it.id) }
+                settings.saveLegacyHabitAlarmsCleared()
+            }
+            habits
+                .filter { HabitUtils.parseReminderTimes(it.reminderTimes).isNotEmpty() }
+                .forEach { habit ->
+                    scheduler.scheduleHabitReminder(
+                        HabitWithCompletions(habit, recentCompletions[habit.id].orEmpty())
+                    )
+                }
+            app.container.quickHabitRepository.allQuickHabits.first()
+                .filter { it.isEnabled }
+                .forEach { scheduler.scheduleQuickHabit(it) }
         }
     }
 }

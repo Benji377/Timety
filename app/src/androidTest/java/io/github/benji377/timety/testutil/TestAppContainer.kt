@@ -59,7 +59,8 @@ class TestAppContainer(context: Context) : AppContainer {
     override val userRepository = UserRepository(database.userDao())
     override val dayRatingRepository = DayRatingRepository(database.dayRatingDao())
     override val settingsRepository = SettingsRepository(testDataStore)
-    override val backupService = BackupService(context, database, settingsRepository)
+    // Restoring into a test database must not touch the real app's alarms or widgets.
+    override val backupService = BackupService(context, database, settingsRepository, afterRestore = {})
 
     /** Releases the database and settings file; call from `@After` in every test that builds one. */
     fun close() {

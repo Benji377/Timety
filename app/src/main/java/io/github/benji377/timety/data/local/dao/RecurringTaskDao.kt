@@ -22,6 +22,13 @@ interface RecurringTaskDao {
     @Query("SELECT * FROM recurring_tasks WHERE id = :id")
     fun getById(id: String): RecurringTaskEntity?
 
+    @Query("SELECT * FROM recurring_tasks ORDER BY dueDate ASC")
+    fun getAll(): List<RecurringTaskEntity>
+
+    @Transaction
+    @Query("SELECT * FROM recurring_tasks WHERE id = :id")
+    fun observeWithOccurrences(id: String): Flow<RecurringTaskWithOccurrences?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(task: RecurringTaskEntity)
 

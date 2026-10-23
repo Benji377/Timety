@@ -2,8 +2,10 @@ package io.github.benji377.timety.services
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.glance.appwidget.updateAll
 import androidx.room.withTransaction
 import io.github.benji377.timety.data.local.TimetyDatabase
 import io.github.benji377.timety.data.model.focus.DistractionEntity
@@ -37,22 +39,35 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.util.ProfileImageStore
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.widget.HabitWidget
+import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.time.Instant
 
 
+/** The items whose reminders were scheduled before a restore replaced them. */
+data class ReplacedReminders(
+    val taskIds: List<String>,
+    val recurringTaskIds: List<String>,
+    val habitIds: List<String>,
+    val quickHabitIds: List<String>,
+)
+
 /**
  * Exports the app database and preferences to a portable JSON payload and restores them back,
- * including payloads produced by legacy backups.
+ * including payloads produced by legacy backups. [afterRestore] runs once a restore has fully
+ * succeeded, to replace the old data's alarms, notifications and widgets.
  */
 class BackupService(
     private val context: Context,
     private val database: TimetyDatabase,
     private val settingsRepository: SettingsRepository,
+    private val afterRestore: suspend (ReplacedReminders) -> Unit = { refreshAfterRestore(context, it) },
 ) {
     private val taskDao get() = database.taskDao()
     private val recurringTaskDao get() = database.recurringTaskDao()
@@ -97,7 +112,13 @@ class BackupService(
             val text = context.contentResolver.openInputStream(uri)?.use { input ->
                 input.bufferedReader(Charsets.UTF_8).readText()
             } ?: error("Unable to open input stream for $uri")
-            importFromJson(JSONObject(text)).getOrThrow()
+            // The parser's own message quotes the whole file.
+            val json = try {
+                JSONObject(text)
+            } catch (_: JSONException) {
+                error("This file is not valid JSON. It may be incomplete or damaged.")
+            }
+            importFromJson(json).getOrThrow()
         }
     }
 
@@ -117,11 +138,28 @@ class BackupService(
             if (schemaVersion > SCHEMA_VERSION) {
                 error("This backup was created by a newer version of Timety and cannot be imported.")
             }
+            // The running session is logged against a focus mode the restore would replace.
+            if (FocusTimerManager.timerState.value.isSessionActive) {
+                error("Stop the running focus session before importing a backup.")
+            }
+            // The data is restored in one transaction, so a broken file changes nothing; settings
+            // and alarms are only replaced once that has committed.
+            val preferences = json.optJSONObject("preferences")?.let { jsonToPreferencesMap(it) }
+            val replaced = scheduledReminders()
             database.withTransaction {
                 restorePayload(json)
             }
+            settingsRepository.restoreAll(preferences.orEmpty())
+            afterRestore(replaced)
         }
     }
+
+    private suspend fun scheduledReminders() = ReplacedReminders(
+        taskIds = taskDao.getAllTasks().first().map { it.task.id },
+        recurringTaskIds = recurringTaskDao.getAllWithOccurrences().first().map { it.task.id },
+        habitIds = habitDao.getAllHabits().first().map { it.id },
+        quickHabitIds = quickHabitDao.getAll().first().map { it.id },
+    )
 
     // Export.
 
@@ -369,9 +407,13 @@ class BackupService(
         }
 
         val sessions = focusDao.getAllSessions().first()
+        // One query for all distractions instead of one per session.
+        val distractionsBySession = focusDao.getAllDistractions().first()
+            .sortedBy { it.time }
+            .groupBy { it.sessionId }
         val sessionsArray = JSONArray()
         for (session in sessions) {
-            val distractions = focusDao.getDistractionsForSession(session.id).first()
+            val distractions = distractionsBySession[session.id].orEmpty()
             sessionsArray.put(
                 JSONObject().apply {
                     put("id", session.id)
@@ -418,11 +460,7 @@ class BackupService(
 
     // Restore.
 
-    private suspend fun restorePayload(json: JSONObject) {
-        json.optJSONObject("preferences")?.let { prefsJson ->
-            settingsRepository.restoreAll(jsonToPreferencesMap(prefsJson))
-        }
-
+    private fun restorePayload(json: JSONObject) {
         val userProfileJson = json.optJSONObject("userProfile")
         userDao.insertUserProfile(userProfileFromJson(userProfileJson))
 
@@ -435,7 +473,7 @@ class BackupService(
         // Optional key: backups from before the goals feature simply carry none.
         restoreGoals(json.optJSONArray("goals") ?: JSONArray())
         restoreDayRatings(json.optJSONArray("dayRatings") ?: JSONArray())
-        json.optJSONObject("focus")?.let { restoreFocus(it) }
+        restoreFocus(json.optJSONObject("focus") ?: JSONObject())
     }
 
     private fun jsonToPreferencesMap(obj: JSONObject): Map<String, Any?> {
@@ -837,4 +875,18 @@ class BackupService(
             "goals", "dayRatings", "focus", "userProfile", "preferences",
         )
     }
+}
+
+/** Swaps the old data's reminders, notifications and widgets for the restored data's. */
+private suspend fun refreshAfterRestore(context: Context, replaced: ReplacedReminders) {
+    val scheduler = ReminderScheduler.create(context)
+    replaced.taskIds.forEach { scheduler.cancelTaskReminders(it) }
+    replaced.recurringTaskIds.forEach { scheduler.cancelRecurringTaskReminders(it) }
+    replaced.habitIds.forEach { scheduler.cancelHabitReminder(it) }
+    replaced.quickHabitIds.forEach { scheduler.cancelQuickHabit(it) }
+    // Foreground-service notifications (a running focus session) survive cancelAll.
+    NotificationManagerCompat.from(context).cancelAll()
+    ReminderScheduler.resyncAll(context)
+    TaskWidget().updateAll(context)
+    HabitWidget().updateAll(context)
 }

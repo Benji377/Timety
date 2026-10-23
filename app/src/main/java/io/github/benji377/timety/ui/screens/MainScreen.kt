@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -231,7 +232,7 @@ fun MainScreen(
             }
             composable(AppRoute.FOCUS_MODES.route) {
                 FocusModesScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(BottomNavItem.Tasks.route) {
@@ -272,17 +273,17 @@ fun MainScreen(
                     onNavigateToRecurring = { taskId ->
                         navController.navigate(AppRoute.recurringTaskDetail(taskId))
                     },
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.STATISTICS.route) {
                 StatisticsScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.SETTINGS.route) {
                 SettingsScreen(
-                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() },
                     onOpenPage = { page -> navController.navigate(page.route) }
                 )
             }
@@ -290,7 +291,7 @@ fun MainScreen(
                 composable(page.route) {
                     SettingsPageScreen(
                         page = page,
-                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() },
                         onNavigateToTags = { navController.navigate(AppRoute.FOCUS_TAGS.route) },
                         onNavigateToCategories = { navController.navigate(AppRoute.TASK_CATEGORIES.route) }
                     )
@@ -298,22 +299,22 @@ fun MainScreen(
             }
             composable(AppRoute.FOCUS_TAGS.route) {
                 FocusTagsWidget(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.TASK_CATEGORIES.route) {
                 TaskCategoriesScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.QUICK_HABITS.route) {
                 QuickHabitsScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.GOALS.route) {
                 GoalsScreen(
-                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() },
                     onNavigateToGoalDetail = { goalId ->
                         navController.navigate(AppRoute.goalDetail(goalId))
                     }
@@ -322,7 +323,7 @@ fun MainScreen(
             composable(AppRoute.GOAL_DETAIL.route) {
                 GoalDetailScreen(
                     goalId = null,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(
@@ -334,12 +335,12 @@ fun MainScreen(
                 val goalId = backStackEntry.arguments?.getString(AppRoute.ARG_GOAL_ID)
                 GoalDetailScreen(
                     goalId = goalId,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.RECURRING_TASKS.route) {
                 RecurringTasksScreen(
-                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() },
                     onNavigateToDetail = { taskId ->
                         navController.navigate(AppRoute.recurringTaskDetail(taskId))
                     }
@@ -348,7 +349,7 @@ fun MainScreen(
             composable(AppRoute.RECURRING_TASK_DETAIL.route) {
                 RecurringTaskDetailScreen(
                     recurringTaskId = null,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(
@@ -360,13 +361,13 @@ fun MainScreen(
                 val taskId = backStackEntry.arguments?.getString(AppRoute.ARG_TASK_ID)
                 RecurringTaskDetailScreen(
                     recurringTaskId = taskId,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.TASK_DETAIL.route) {
                 TaskDetailScreen(
                     taskId = null,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(
@@ -378,13 +379,13 @@ fun MainScreen(
                 val taskId = backStackEntry.arguments?.getString(AppRoute.ARG_TASK_ID)
                 TaskDetailScreen(
                     taskId = taskId,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.HABIT_DETAIL.route) {
                 HabitDetailScreen(
                     habitId = null,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(
@@ -396,7 +397,7 @@ fun MainScreen(
                 val habitId = backStackEntry.arguments?.getString(AppRoute.ARG_HABIT_ID)
                 HabitDetailScreen(
                     habitId = habitId,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
         }

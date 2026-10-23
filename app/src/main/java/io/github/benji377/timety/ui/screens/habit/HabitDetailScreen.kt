@@ -1,7 +1,6 @@
 package io.github.benji377.timety.ui.screens.habit
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.DropdownMenuItem
@@ -36,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,14 +60,15 @@ import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
-import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.theme.hairlineBorder
+import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
+import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -96,25 +96,28 @@ fun HabitDetailScreen(
     val existingHabit = habitId?.let { id -> allHabits.find { it.id == id } }
     val isNewHabit = habitId == null
 
-    var isEditing by remember { mutableStateOf(isNewHabit) }
+    var isEditing by rememberSaveable { mutableStateOf(isNewHabit) }
+    // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
+    val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var name by remember(existingHabit) { mutableStateOf(existingHabit?.name ?: "") }
+    val formHabit = rememberFormSource(existingHabit, isEditing)
+    var name by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.name ?: "") }
     var nameError by remember { mutableStateOf(false) }
-    var notes by remember(existingHabit) { mutableStateOf(existingHabit?.notes ?: "") }
-    var stackName by remember(existingHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
+    var notes by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.notes ?: "") }
+    var stackName by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
 
-    var frequency by remember(existingHabit) {
+    var frequency by rememberSaveable(formHabit) {
         mutableStateOf(
             existingHabit?.frequency ?: HabitFrequency.DAILY
         )
     }
-    var targetDaysPerWeek by remember(existingHabit) {
+    var targetDaysPerWeek by rememberSaveable(formHabit) {
         mutableIntStateOf(
             existingHabit?.targetDaysPerWeek ?: 3
         )
     }
-    var selectedWeekdays by remember(existingHabit) {
+    var selectedWeekdays by rememberSaveable(formHabit) {
         mutableStateOf(
             existingHabit?.targetWeekdays?.let { HabitUtils.parseWeekdays(it) }
                 ?.takeIf { it.isNotEmpty() }
@@ -122,11 +125,11 @@ fun HabitDetailScreen(
         )
     }
 
-    var selectedIconIndex by remember(existingHabit) { mutableStateOf(existingHabit?.iconCodePoint) }
-    var selectedColor by remember(existingHabit) {
+    var selectedIconIndex by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.iconCodePoint) }
+    var selectedColor by rememberSaveable(formHabit, stateSaver = ColorSaver) {
         mutableStateOf(existingHabit?.colorValue?.let { Color(it) } ?: HabitColor)
     }
-    var reminderTimes by remember(existingHabit) {
+    var reminderTimes by rememberSaveable(formHabit) {
         mutableStateOf(HabitUtils.parseReminderTimes(existingHabit?.reminderTimes))
     }
 
@@ -187,7 +190,7 @@ fun HabitDetailScreen(
         }
 
         val habitToSave = HabitEntity(
-            id = habitId ?: UUID.randomUUID().toString(),
+            id = habitId ?: newItemId,
             name = trimmedName,
             frequency = frequency,
             targetDaysPerWeek = if (frequency == HabitFrequency.WEEKLY_FLEXIBLE) targetDaysPerWeek else null,

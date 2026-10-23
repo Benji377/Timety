@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
+import android.util.Log
 import android.widget.RemoteViews
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
@@ -60,7 +61,7 @@ class FocusTimerService : Service() {
                         old.totalPhaseSeconds == new.totalPhaseSeconds
             }
             .onEach { state ->
-                val sessionActive = state.isRunning || state.isPaused || state.isAwaitingContinue
+                val sessionActive = state.isSessionActive
                 dndController.syncForSessionState(sessionActive, state.isRestPhase)
                 if (sessionActive) {
                     updateNotification(state)
@@ -108,6 +109,13 @@ class FocusTimerService : Service() {
         return START_STICKY
     }
 
+    // Swiping the app away from Recents ends the session; nothing is logged.
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        cancelAlarm()
+        FocusTimerManager.stopTimer(discard = true)
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
@@ -138,18 +146,23 @@ class FocusTimerService : Service() {
 
         // Same guard as NotificationService.scheduleExact: exact-alarm access can be revoked
         // on Android 12+, and the phase-end chime is not worth a SecurityException crash.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                targetTimeMs,
-                soundPendingIntent
-            )
-        } else {
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                targetTimeMs,
-                soundPendingIntent
-            )
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    targetTimeMs,
+                    soundPendingIntent
+                )
+            } else {
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    targetTimeMs,
+                    soundPendingIntent
+                )
+            }
+        } catch (e: IllegalStateException) {
+            // The app's pending alarms are at the system cap; the session runs on without a chime.
+            Log.e(TAG, "Alarm limit reached; no phase-end chime", e)
         }
     }
 
@@ -266,6 +279,7 @@ class FocusTimerService : Service() {
     }
 
     companion object {
+        private const val TAG = "FocusTimerService"
         const val NOTIFICATION_ID = 1001
         private const val ALARM_REQUEST_CODE = 9998
 

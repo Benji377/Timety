@@ -52,7 +52,7 @@ fun WeekNavigator(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = { onShiftWeek(-7) }) {
-            Icon(Icons.Filled.ChevronLeft, contentDescription = null)
+            Icon(Icons.Filled.ChevronLeft, contentDescription = stringResource(R.string.commonLabelPrevious))
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -71,7 +71,7 @@ fun WeekNavigator(
         IconButton(onClick = { onShiftWeek(7) }, enabled = !isCurrentWeek) {
             Icon(
                 Icons.Filled.ChevronRight,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.commonLabelNext),
                 tint = if (isCurrentWeek) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onSurface
             )
         }

@@ -30,6 +30,8 @@ import io.github.benji377.timety.ui.components.focus.FocusModeEditCard
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.ModeDeleteBlocker
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -44,14 +46,17 @@ import java.util.UUID
 fun FocusModesScreen(
     onNavigateBack: () -> Unit,
     focusViewModel: FocusViewModel = activityScopedViewModel(),
+    settingsViewModel: SettingsViewModel = activityScopedViewModel(),
 ) {
     val modes by focusViewModel.allModes.collectAsState()
+    val maxNodeMins by settingsViewModel.maxNodeMins.collectAsState()
     var pendingMode by remember { mutableStateOf<FocusModeEntity?>(null) }
     val newModeLabel = stringResource(R.string.focusModeLabelNew)
     val snackbarHostState = LocalSnackbarHostState.current
     val modeSavedScope = androidx.compose.runtime.rememberCoroutineScope()
     val modeSavedMessage = stringResource(R.string.focusModeSnackbarSaved)
     val modeInUseMessage = stringResource(R.string.focusModeSnackbarInUse)
+    val modeRunningMessage = stringResource(R.string.focusModeSnackbarRunning)
 
     Scaffold(
         topBar = {
@@ -104,6 +109,7 @@ fun FocusModesScreen(
                                 orderIndex = 1
                             ),
                         ),
+                        maxNodeMins = maxNodeMins,
                         isNewMode = true,
                         onCancelNew = { pendingMode = null },
                         onSaveNew = { pendingMode = null },
@@ -127,6 +133,7 @@ fun FocusModesScreen(
                 FocusModeEditCard(
                     mode = mode,
                     phases = phases,
+                    maxNodeMins = maxNodeMins,
                     isNewMode = false,
                     onSave = { updatedMode, updatedPhases ->
                         focusViewModel.saveMode(
@@ -136,8 +143,12 @@ fun FocusModesScreen(
                         modeSavedScope.launch { snackbarHostState.showSnackbar(modeSavedMessage) }
                     },
                     onDelete = {
-                        focusViewModel.deleteMode(it) {
-                            modeSavedScope.launch { snackbarHostState.showSnackbar(modeInUseMessage) }
+                        focusViewModel.deleteMode(it) { blocker ->
+                            val message = when (blocker) {
+                                ModeDeleteBlocker.HAS_SESSIONS -> modeInUseMessage
+                                ModeDeleteBlocker.SESSION_RUNNING -> modeRunningMessage
+                            }
+                            modeSavedScope.launch { snackbarHostState.showSnackbar(message) }
                         }
                     },
                 )

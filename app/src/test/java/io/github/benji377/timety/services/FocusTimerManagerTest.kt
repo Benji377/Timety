@@ -169,6 +169,20 @@ class FocusTimerManagerTest {
     }
 
     @Test
+    fun stopwatchStopsItselfAtItsLimit_andReportsTheLimit() = runBlocking {
+        val stopInfo = async(Dispatchers.Default) { FocusTimerManager.stopEvent.first() }
+        FocusTimerManager.stopEvent.subscriptionCount.first { it > 0 }
+
+        FocusTimerManager.setMode("Stopwatch", 0, isRestPhase = false, isStopwatch = true, stopwatchLimitSeconds = 1)
+        FocusTimerManager.startTimer()
+
+        val info = withTimeout(5000) { stopInfo.await() }
+        assertFalse("reaching the limit logs the session", info.discard)
+        assertEquals(1, info.elapsedFocusSeconds)
+        assertFalse(FocusTimerManager.timerState.value.isSessionActive)
+    }
+
+    @Test
     fun countdownCompletionEntersAwaitingContinueAndBanksPhase() = runBlocking {
         val phaseComplete = async(Dispatchers.Default) { FocusTimerManager.phaseCompleteEvent.first() }
         FocusTimerManager.phaseCompleteEvent.subscriptionCount.first { it > 0 }

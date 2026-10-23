@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -51,11 +52,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -67,6 +68,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
@@ -101,6 +105,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -108,6 +113,7 @@ import io.github.benji377.timety.util.location.LocationApi
 import io.github.benji377.timety.util.task.CustomReminderIssue
 import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -132,38 +138,47 @@ fun TaskDetailScreen(
     onNavigateBack: () -> Unit,
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val allTasks by taskViewModel.allTasks.collectAsState()
+    val existingTaskWithSubtasks by remember(taskId) {
+        taskId?.let { taskViewModel.observeTask(it) } ?: flowOf(null)
+    }.collectAsState(initial = null)
     val allCategories by taskViewModel.allCategories.collectAsState()
     val dateFmt = LocalDateFormatSettings.current
     val isNewTask = taskId == null
-    val existingTaskWithSubtasks = taskId?.let { id -> allTasks.find { it.task.id == id } }
     val existingTask = existingTaskWithSubtasks?.task
 
-    var isEditing by remember(taskId) { mutableStateOf(isNewTask) }
+    var isEditing by rememberSaveable(taskId) { mutableStateOf(isNewTask) }
+    // Fixed for the screen's lifetime so a repeated Save overwrites instead of duplicating.
+    val newItemId = rememberSaveable { UUID.randomUUID().toString() }
 
     // Form state.
-    var title by remember(existingTask) { mutableStateOf(existingTask?.title ?: "") }
-    var description by remember(existingTask) { mutableStateOf(existingTask?.description ?: "") }
-    var location by remember(existingTask) { mutableStateOf(existingTask?.location ?: "") }
-    var place by remember(existingTask) { mutableStateOf(existingTask?.place) }
-    var priority by remember(existingTask) {
+    val formSource = rememberFormSource(existingTaskWithSubtasks, isEditing)
+    val formTask = formSource?.task
+    var title by rememberSaveable(formTask) { mutableStateOf(existingTask?.title ?: "") }
+    var description by rememberSaveable(formTask) { mutableStateOf(existingTask?.description ?: "") }
+    var location by rememberSaveable(formTask) { mutableStateOf(existingTask?.location ?: "") }
+    var place by rememberSaveable(formTask) { mutableStateOf(existingTask?.place) }
+    var priority by rememberSaveable(formTask) {
         mutableStateOf(
             existingTask?.priority ?: Priority.MEDIUM
         )
     }
-    var size by remember(existingTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
-    var dueDate by remember(existingTask) { mutableStateOf(existingTask?.dueDate) }
-    var category by remember(existingTask) { mutableStateOf(existingTask?.category ?: "") }
-    var reminders by remember(existingTask) {
+    var size by rememberSaveable(formTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
+    var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
+    var category by rememberSaveable(formTask) { mutableStateOf(existingTask?.category ?: "") }
+    var reminders by rememberSaveable(formTask) {
         mutableStateOf(
             existingTask?.reminders ?: emptyList()
         )
     }
-    var subtasks by remember(existingTaskWithSubtasks) {
+    var subtasks by rememberSaveable(formSource) {
         mutableStateOf(
             existingTaskWithSubtasks?.subtasks ?: emptyList()
         )
     }
+
+    val dueDateFieldLabel = stringResource(R.string.taskDetailsLabelDueDateSet)
+    val priorityLabels = Priority.entries.associateWith { stringResource(AppUtils.priorityLabel(it)) }
+    val sizeLabels = TaskSize.entries.associateWith { stringResource(AppUtils.sizeLabel(it)) }
 
     var showLocationPicker by remember { mutableStateOf(false) }
     var isAddingNewCategory by remember { mutableStateOf(false) }
@@ -226,7 +241,7 @@ fun TaskDetailScreen(
                                 return@DetailTopBarActions
                             }
                             val taskToSave = TaskEntity(
-                                id = taskId ?: UUID.randomUUID().toString(),
+                                id = taskId ?: newItemId,
                                 title = trimmedTitle,
                                 description = description.trim(),
                                 location = location.trim(),
@@ -332,7 +347,7 @@ fun TaskDetailScreen(
                             tint = if (isSelected) Color.White else null
                         )
                     },
-                    labelBuilder = { p -> p.name.replace("_", "") }
+                    labelBuilder = { p -> priorityLabels.getValue(p) }
                 )
 
                 Spacer(Modifier.height(AppTheme.spaceLarge))
@@ -350,7 +365,7 @@ fun TaskDetailScreen(
                             color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
-                    labelBuilder = { s -> s.name.replace("_", "") }
+                    labelBuilder = { s -> sizeLabels.getValue(s) }
                 )
             }
 
@@ -365,7 +380,10 @@ fun TaskDetailScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(enabled = isEditing) { pickerTarget = PickerTarget.DUE_DATE }
+                        .clickable(enabled = isEditing, role = Role.Button) {
+                            pickerTarget = PickerTarget.DUE_DATE
+                        }
+                        .semantics { contentDescription = dueDateFieldLabel }
                 ) {
                     OutlinedTextField(
                         value = dueDate?.let {
@@ -471,7 +489,10 @@ fun TaskDetailScreen(
                     trailingIcon = {
                         if (isEditing) {
                             IconButton(onClick = { showLocationPicker = true }) {
-                                Icon(Icons.Filled.Search, contentDescription = null)
+                                Icon(
+                                    Icons.Filled.Search,
+                                    contentDescription = stringResource(R.string.locationPickerTitle)
+                                )
                             }
                         }
                     }
@@ -674,8 +695,7 @@ fun TaskDetailScreen(
             }
         }
         NeoDateTimePickerDialog(
-            initialDateMillis = (if (target == PickerTarget.DUE_DATE) dueDate else null)
-                ?.toEpochMilli() ?: System.currentTimeMillis(),
+            initialDate = (if (target == PickerTarget.DUE_DATE) dueDate else null) ?: Instant.now(),
             initialHour = 12,
             initialMinute = 0,
             timeTitle = stringResource(R.string.taskDetailsLabelDueDateSet),
@@ -791,7 +811,14 @@ private fun <T> AccordionSelector(
                             }
                         } else m
                     }
-                    .clickable(enabled = isEditing) { onSelected(value) }
+                    .selectable(selected = isSelected, enabled = isEditing, role = Role.RadioButton) {
+                        onSelected(value)
+                    }
+                    // Unselected segments show only an icon, so they need the label spoken.
+                    .then(
+                        if (isSelected) Modifier
+                        else Modifier.semantics { contentDescription = labelBuilder(value) }
+                    )
                     .padding(AppTheme.segmentedSelectorInset)
                     .then(
                         if (isSelected) {

@@ -69,8 +69,8 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as Ou
 fun FocusModeEditCard(
     mode: FocusModeEntity,
     phases: List<SessionPhaseEntity>,
+    maxNodeMins: Int,
     isNewMode: Boolean = false,
-    maxNodeMins: Int = AppTheme.MAX_NODE_MINS,
     onCancelNew: (() -> Unit)? = null,
     onSaveNew: (() -> Unit)? = null,
     onSave: (FocusModeEntity, List<SessionPhaseEntity>) -> Unit,

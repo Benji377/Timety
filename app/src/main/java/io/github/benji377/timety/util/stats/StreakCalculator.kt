@@ -1,6 +1,5 @@
 package io.github.benji377.timety.util.stats
 
-import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.StreakCalculator.currentStreak
 import java.time.LocalDate
 
@@ -9,21 +8,21 @@ import java.time.LocalDate
 object StreakCalculator {
 
 
-    /** Longest run of consecutive calendar days with a completion, anywhere in [completions]. */
+    /**
+     * Longest run anywhere in [completions], under the same never-miss-twice rule as
+     * [currentStreak]: one missed day is bridged (and not counted), two in a row end the run.
+     */
     fun calculateBestStreak(completions: Iterable<LocalDate>): Int {
-        val sortedUniqueDates = sortedUniqueDayKeys(completions)
+        val sortedUniqueDates = completions.toSortedSet().toList()
         if (sortedUniqueDates.isEmpty()) return 0
 
         var highest = 1
         var currentRun = 1
 
-        // Dates are sorted and deduplicated, so a run only continues when consecutive entries
-        // are exactly one day apart; any gap resets the run.
+        // Dates are sorted and deduplicated: a run continues across a gap of at most one missed day.
         for (i in 1 until sortedUniqueDates.size) {
-            val prev = LocalDate.parse(sortedUniqueDates[i - 1])
-            val current = LocalDate.parse(sortedUniqueDates[i])
-
-            if (java.time.temporal.ChronoUnit.DAYS.between(prev, current) == 1L) {
+            val gap = sortedUniqueDates[i].toEpochDay() - sortedUniqueDates[i - 1].toEpochDay()
+            if (gap <= 2L) {
                 currentRun++
                 if (currentRun > highest) highest = currentRun
             } else {
@@ -41,14 +40,14 @@ object StreakCalculator {
      * missed days do.
      *
      * @property length completed days in the run; bridged misses do not count.
-     * @property streakDayKeys day keys of the completed days in the run.
-     * @property bridgedDayKeys day keys of the isolated missed days bridged inside the run (the "bends").
+     * @property streakDays the completed days in the run.
+     * @property bridgedDays the isolated missed days bridged inside the run (the "bends").
      * @property atRisk true when yesterday was missed and today is not done yet — the next miss breaks it.
      */
     data class CurrentStreak(
         val length: Int,
-        val streakDayKeys: Set<String>,
-        val bridgedDayKeys: Set<String>,
+        val streakDays: Set<LocalDate>,
+        val bridgedDays: Set<LocalDate>,
         val atRisk: Boolean,
     ) {
         companion object {
@@ -61,25 +60,24 @@ object StreakCalculator {
      * counted as a miss (the day hasn't ended), so the walk starts at yesterday in that case.
      */
     fun currentStreak(completions: Iterable<LocalDate>): CurrentStreak {
-        val dayKeys = completions.map { AppDateUtils.dayKey(it) }.toSet()
-        if (dayKeys.isEmpty()) return CurrentStreak.EMPTY
+        val days = completions.toSet()
+        if (days.isEmpty()) return CurrentStreak.EMPTY
 
         val today = LocalDate.now()
-        val earliest = LocalDate.parse(dayKeys.min())
-        fun done(day: LocalDate) = dayKeys.contains(AppDateUtils.dayKey(day))
+        val earliest = days.min()
+        fun done(day: LocalDate) = day in days
 
         // Today leniency: an incomplete today isn't a miss, so begin the walk at yesterday.
         var checkDate = if (done(today)) today else today.minusDays(1)
 
-        val completed = mutableSetOf<String>()
-        val bridged = mutableSetOf<String>()
-        val pendingMisses = mutableListOf<String>()
+        val completed = mutableSetOf<LocalDate>()
+        val bridged = mutableSetOf<LocalDate>()
+        val pendingMisses = mutableListOf<LocalDate>()
         var consecutiveMisses = 0
 
         while (!checkDate.isBefore(earliest)) {
-            val key = AppDateUtils.dayKey(checkDate)
-            if (dayKeys.contains(key)) {
-                completed.add(key)
+            if (done(checkDate)) {
+                completed.add(checkDate)
                 // A miss only counts as a bend once an older completion is found to sandwich it.
                 bridged.addAll(pendingMisses)
                 pendingMisses.clear()
@@ -87,7 +85,7 @@ object StreakCalculator {
             } else {
                 consecutiveMisses++
                 if (consecutiveMisses >= 2) break
-                pendingMisses.add(key)
+                pendingMisses.add(checkDate)
             }
             checkDate = checkDate.minusDays(1)
         }
@@ -100,8 +98,4 @@ object StreakCalculator {
     fun calculateCurrentStreak(completions: Iterable<LocalDate>): Int =
         currentStreak(completions).length
 
-
-    private fun sortedUniqueDayKeys(dates: Iterable<LocalDate>): List<String> {
-        return dates.map { AppDateUtils.dayKey(it) }.toSortedSet().toList()
-    }
 }

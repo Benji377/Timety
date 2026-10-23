@@ -88,7 +88,6 @@ import io.github.benji377.timety.util.stats.HeatmapDay
 import io.github.benji377.timety.util.stats.StatsUtils
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -478,8 +477,10 @@ private fun FocusClockChart(
 
         val dayStart = day.atStartOfDay(zone).toInstant()
         val nextDayStart = day.plusDays(1).atStartOfDay(zone).toInstant()
+        // Wall-clock time, so the 23- and 25-hour DST days still line up with the 24-hour face.
         fun hourOfDay(instant: Instant): Double =
-            Duration.between(dayStart, instant).seconds / 3600.0
+            if (!instant.isBefore(nextDayStart)) 24.0
+            else instant.atZone(zone).toLocalTime().toSecondOfDay() / 3600.0
 
         sessions.forEach { session ->
             val end = session.endTime ?: Instant.now()

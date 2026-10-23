@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
@@ -55,10 +57,12 @@ fun NeoFilterChip(
                 AppTheme.hairlineStroke,
                 shape
             )
-            .clickable(
+            .selectable(
+                selected = selected,
                 enabled = enabled,
                 interactionSource = interactionSource,
                 indication = ripple(),
+                role = Role.Checkbox,
                 onClick = onClick,
             )
             .padding(horizontal = AppTheme.spaceMedium, vertical = AppTheme.spaceSmall),

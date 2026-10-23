@@ -28,6 +28,7 @@ import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
+import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.testutil.TestAppContainer
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -167,6 +168,76 @@ class BackupRoundTripTest {
             1,
             target.habitRepository.allHabits.first().size,
         )
+    }
+
+    @Test
+    fun brokenBackup_failsWithoutChangingDataOrSettings() = runBlocking {
+        val seeded = seedOneOfEverything(target)
+        target.settingsRepository.saveShowHomeGreeting(false)
+
+        // Valid up to the tasks array, whose entry is not an object: parsing fails mid-restore.
+        val broken = JSONObject(source.backupService.exportToShareUri().getOrThrow().readText())
+            .put("preferences", JSONObject().put("showHomeGreeting", true))
+            .put("tasks", org.json.JSONArray().put("not a task"))
+
+        assertTrue(target.backupService.importFromJson(broken).isFailure)
+        assertEquals("habit", seeded.habit, target.habitRepository.allHabits.first().single())
+        assertEquals(false, target.settingsRepository.showHomeGreetingFlow.first())
+    }
+
+    @Test
+    fun restore_dropsMistypedSettings_andKeepsTheStoredDndFilter() = runBlocking {
+        target.settingsRepository.saveStoredInterruptionFilter(2)
+        val payload = JSONObject()
+            .put("payloadType", "user_data")
+            .put(
+                "preferences",
+                JSONObject()
+                    .put("appLocaleCode", 1)
+                    .put("showHomeGreeting", false)
+                    .put("notASetting", "x"),
+            )
+
+        target.backupService.importFromJson(payload).getOrThrow()
+
+        // A mistyped locale would otherwise crash every launch when read as a String.
+        assertEquals("system", target.settingsRepository.appLocaleCodeFlow.first())
+        assertEquals(false, target.settingsRepository.showHomeGreetingFlow.first())
+        assertEquals(2, target.settingsRepository.storedInterruptionFilterFlow.first())
+    }
+
+    @Test
+    fun restoreDuringAFocusSession_failsWithoutChangingAnything() = runBlocking {
+        val seeded = seedOneOfEverything(target)
+        val backup = JSONObject(source.backupService.exportToShareUri().getOrThrow().readText())
+        FocusTimerManager.setMode("Deep work", 25 * 60, isRestPhase = false)
+        FocusTimerManager.startTimer()
+        try {
+            val result = target.backupService.importFromJson(backup)
+            assertTrue(result.isFailure)
+            assertEquals(
+                "Stop the running focus session before importing a backup.",
+                result.exceptionOrNull()?.message,
+            )
+        } finally {
+            FocusTimerManager.stopTimer(discard = true)
+        }
+        // The session's mode is still there for it to be logged against.
+        assertEquals("mode", seeded.mode, target.focusRepository.allModes.first().single { it.id == seeded.mode.id })
+        assertEquals("habit", seeded.habit, target.habitRepository.allHabits.first().single())
+    }
+
+    @Test
+    fun export_leavesOutDeviceState() = runBlocking {
+        source.settingsRepository.saveStoredInterruptionFilter(2)
+        source.settingsRepository.saveLegacyHabitAlarmsCleared()
+        source.settingsRepository.saveShowHomeGreeting(false)
+
+        val exported = source.settingsRepository.exportAll()
+
+        assertEquals(false, exported["showHomeGreeting"])
+        assertTrue("storedInterruptionFilter" !in exported)
+        assertTrue("legacyHabitAlarmsCleared" !in exported)
     }
 
     private fun android.net.Uri.readText(): String =

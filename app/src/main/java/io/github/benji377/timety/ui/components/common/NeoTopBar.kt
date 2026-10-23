@@ -107,7 +107,7 @@ fun DetailTopBarActions(
         NeoIconButton(
             onClick = onEdit,
             icon = Icons.Filled.Edit,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.commonLabelEdit),
             modifier = Modifier.padding(end = AppTheme.spaceSmall),
         )
     } else {

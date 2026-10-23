@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -289,136 +291,97 @@ fun TaskListScreen(
                     }
                 } else {
                     // Group tasks into overdue, due-today, upcoming, and completed buckets.
-                    val zone = ZoneId.systemDefault()
-                    val now = Instant.now()
-                    val today = now.atZone(zone).toLocalDate()
-
-                    val overdue = mutableListOf<TaskWithSubtasks>()
-                    val dueToday = mutableListOf<TaskWithSubtasks>()
-                    val todo = mutableListOf<TaskWithSubtasks>()
-                    val done = mutableListOf<TaskWithSubtasks>()
-
-                    processedTasks.forEach { item ->
-                        val task = item.task
-                        when {
-                            task.isCompleted -> done.add(item)
-                            task.dueDate != null && task.dueDate.isBefore(now) -> overdue.add(item)
-                            task.dueDate != null && task.dueDate.atZone(zone)
-                                .toLocalDate() == today -> dueToday.add(item)
-
-                            else -> todo.add(item)
-                        }
-                    }
-
+                    val buckets = remember(processedTasks) { TaskBuckets.of(processedTasks) }
                     val recurringOverdue = filteredRecurring[RecurringStatus.OVERDUE].orEmpty()
                     val recurringToday = filteredRecurring[RecurringStatus.DUE_TODAY].orEmpty()
                     val recurringUpcoming = filteredRecurring[RecurringStatus.UPCOMING].orEmpty()
 
+                    val overdueTitle = "${stringResource(R.string.taskListSectionOverdue)} (${buckets.overdue.size + recurringOverdue.size})"
+                    val todayTitle = "${stringResource(R.string.taskListSectionToday)} (${buckets.dueToday.size + recurringToday.size})"
+                    val upcomingTitle = "${stringResource(R.string.taskListSectionUpcoming)} (${buckets.todo.size + recurringUpcoming.size})"
+                    val doneTitle = "${stringResource(R.string.taskListSectionDone)} (${buckets.done.size})"
+
+                    // Rows are lazy items rather than a Column inside one item, so an expanded
+                    // section with hundreds of completed tasks only composes what's on screen.
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
-                        // ExpansionSection doesn't accept a list directly, so each section is guarded
-                        // against being empty before it's rendered.
-                        if (overdue.isNotEmpty() || recurringOverdue.isNotEmpty()) {
-                            item {
-                                ExpansionSection(
-                                    title = "${stringResource(R.string.taskListSectionOverdue)} (${overdue.size + recurringOverdue.size})",
-                                    color = ErrorColor,
-                                    expanded = isOverdueExpanded,
-                                    onExpandedChange = {
-                                        settingsViewModel.setAccordionExpanded(
-                                            AccordionKey.TASKS_OVERDUE, it
-                                        )
-                                    },
-                                ) {
-                                    TaskSectionContent(
-                                        overdue,
-                                        isOverdue = true,
-                                        viewModel = viewModel,
-                                        onToggleCompleted = toggleTaskCompletion,
-                                        onNavigateToTaskDetail = onNavigateToTaskDetail,
-                                        recurringTasks = recurringOverdue,
-                                        recurringStatus = RecurringStatus.OVERDUE,
-                                        onCompleteRecurring = completeRecurring,
-                                        onNavigateToRecurringDetail = onNavigateToRecurringDetail,
-                                    )
-                                }
-                            }
+                        if (buckets.overdue.isNotEmpty() || recurringOverdue.isNotEmpty()) {
+                            taskSection(
+                                key = "overdue",
+                                title = overdueTitle,
+                                color = ErrorColor,
+                                expanded = isOverdueExpanded,
+                                onExpandedChange = {
+                                    settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_OVERDUE, it)
+                                },
+                                tasks = buckets.overdue,
+                                isOverdue = true,
+                                viewModel = viewModel,
+                                onToggleCompleted = toggleTaskCompletion,
+                                onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                recurringTasks = recurringOverdue,
+                                recurringStatus = RecurringStatus.OVERDUE,
+                                onCompleteRecurring = completeRecurring,
+                                onNavigateToRecurringDetail = onNavigateToRecurringDetail,
+                            )
                         }
-                        if (dueToday.isNotEmpty() || recurringToday.isNotEmpty()) {
-                            item {
-                                ExpansionSection(
-                                    title = "${stringResource(R.string.taskListSectionToday)} (${dueToday.size + recurringToday.size})",
-                                    color = WarningColor,
-                                    expanded = isDueTodayExpanded,
-                                    onExpandedChange = {
-                                        settingsViewModel.setAccordionExpanded(
-                                            AccordionKey.TASKS_DUE_TODAY, it
-                                        )
-                                    },
-                                ) {
-                                    TaskSectionContent(
-                                        dueToday,
-                                        isOverdue = false,
-                                        viewModel = viewModel,
-                                        onToggleCompleted = toggleTaskCompletion,
-                                        onNavigateToTaskDetail = onNavigateToTaskDetail,
-                                        recurringTasks = recurringToday,
-                                        recurringStatus = RecurringStatus.DUE_TODAY,
-                                        onCompleteRecurring = completeRecurring,
-                                        onNavigateToRecurringDetail = onNavigateToRecurringDetail,
-                                    )
-                                }
-                            }
+                        if (buckets.dueToday.isNotEmpty() || recurringToday.isNotEmpty()) {
+                            taskSection(
+                                key = "today",
+                                title = todayTitle,
+                                color = WarningColor,
+                                expanded = isDueTodayExpanded,
+                                onExpandedChange = {
+                                    settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_DUE_TODAY, it)
+                                },
+                                tasks = buckets.dueToday,
+                                isOverdue = false,
+                                viewModel = viewModel,
+                                onToggleCompleted = toggleTaskCompletion,
+                                onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                recurringTasks = recurringToday,
+                                recurringStatus = RecurringStatus.DUE_TODAY,
+                                onCompleteRecurring = completeRecurring,
+                                onNavigateToRecurringDetail = onNavigateToRecurringDetail,
+                            )
                         }
-                        if (todo.isNotEmpty() || recurringUpcoming.isNotEmpty()) {
-                            item {
-                                ExpansionSection(
-                                    title = "${stringResource(R.string.taskListSectionUpcoming)} (${todo.size + recurringUpcoming.size})",
-                                    color = TaskColor,
-                                    expanded = isUpcomingExpanded,
-                                    onExpandedChange = {
-                                        settingsViewModel.setAccordionExpanded(
-                                            AccordionKey.TASKS_UPCOMING, it
-                                        )
-                                    },
-                                ) {
-                                    TaskSectionContent(
-                                        todo,
-                                        isOverdue = false,
-                                        viewModel = viewModel,
-                                        onToggleCompleted = toggleTaskCompletion,
-                                        onNavigateToTaskDetail = onNavigateToTaskDetail,
-                                        recurringTasks = recurringUpcoming,
-                                        recurringStatus = RecurringStatus.UPCOMING,
-                                        onCompleteRecurring = completeRecurring,
-                                        onNavigateToRecurringDetail = onNavigateToRecurringDetail,
-                                    )
-                                }
-                            }
+                        if (buckets.todo.isNotEmpty() || recurringUpcoming.isNotEmpty()) {
+                            taskSection(
+                                key = "upcoming",
+                                title = upcomingTitle,
+                                color = TaskColor,
+                                expanded = isUpcomingExpanded,
+                                onExpandedChange = {
+                                    settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_UPCOMING, it)
+                                },
+                                tasks = buckets.todo,
+                                isOverdue = false,
+                                viewModel = viewModel,
+                                onToggleCompleted = toggleTaskCompletion,
+                                onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                recurringTasks = recurringUpcoming,
+                                recurringStatus = RecurringStatus.UPCOMING,
+                                onCompleteRecurring = completeRecurring,
+                                onNavigateToRecurringDetail = onNavigateToRecurringDetail,
+                            )
                         }
-                        if (done.isNotEmpty()) {
-                            item {
-                                ExpansionSection(
-                                    title = "${stringResource(R.string.taskListSectionDone)} (${done.size})",
-                                    color = SuccessColor,
-                                    expanded = isDoneExpanded,
-                                    onExpandedChange = {
-                                        settingsViewModel.setAccordionExpanded(
-                                            AccordionKey.TASKS_DONE, it
-                                        )
-                                    },
-                                ) {
-                                    TaskSectionContent(
-                                        done,
-                                        isOverdue = false,
-                                        viewModel = viewModel,
-                                        onToggleCompleted = toggleTaskCompletion,
-                                        onNavigateToTaskDetail = onNavigateToTaskDetail
-                                    )
-                                }
-                            }
+                        if (buckets.done.isNotEmpty()) {
+                            taskSection(
+                                key = "done",
+                                title = doneTitle,
+                                color = SuccessColor,
+                                expanded = isDoneExpanded,
+                                onExpandedChange = {
+                                    settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_DONE, it)
+                                },
+                                tasks = buckets.done,
+                                isOverdue = false,
+                                viewModel = viewModel,
+                                onToggleCompleted = toggleTaskCompletion,
+                                onNavigateToTaskDetail = onNavigateToTaskDetail,
+                            )
                         }
                     }
                 }
@@ -437,8 +400,43 @@ private fun sortOptionLabel(option: TaskSortOption): String = when (option) {
     TaskSortOption.CATEGORY -> stringResource(R.string.taskListSortCategory)
 }
 
-@Composable
-private fun TaskSectionContent(
+/** The task list's sections; completed tasks go to [done] whatever their due date. */
+private data class TaskBuckets(
+    val overdue: List<TaskWithSubtasks>,
+    val dueToday: List<TaskWithSubtasks>,
+    val todo: List<TaskWithSubtasks>,
+    val done: List<TaskWithSubtasks>,
+) {
+    companion object {
+        fun of(tasks: List<TaskWithSubtasks>): TaskBuckets {
+            val zone = ZoneId.systemDefault()
+            val now = Instant.now()
+            val today = now.atZone(zone).toLocalDate()
+            val overdue = mutableListOf<TaskWithSubtasks>()
+            val dueToday = mutableListOf<TaskWithSubtasks>()
+            val todo = mutableListOf<TaskWithSubtasks>()
+            val done = mutableListOf<TaskWithSubtasks>()
+            tasks.forEach { item ->
+                val task = item.task
+                when {
+                    task.isCompleted -> done.add(item)
+                    task.dueDate != null && task.dueDate.isBefore(now) -> overdue.add(item)
+                    task.dueDate != null && task.dueDate.atZone(zone).toLocalDate() == today -> dueToday.add(item)
+                    else -> todo.add(item)
+                }
+            }
+            return TaskBuckets(overdue, dueToday, todo, done)
+        }
+    }
+}
+
+/** One collapsible section: a header item, then a lazy item per row while expanded. */
+private fun LazyListScope.taskSection(
+    key: String,
+    title: String,
+    color: Color,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
     tasks: List<TaskWithSubtasks>,
     isOverdue: Boolean,
     viewModel: TaskViewModel,
@@ -449,29 +447,40 @@ private fun TaskSectionContent(
     onCompleteRecurring: (RecurringTaskEntity) -> Unit = {},
     onNavigateToRecurringDetail: (String) -> Unit = {},
 ) {
-    Column {
-        tasks.forEach { taskWithSubtasks ->
+    item(key = "$key-header") {
+        ExpansionSection(
+            title = title,
+            color = color,
+            expanded = expanded,
+            onExpandedChange = onExpandedChange,
+            bottomSpacing = 0.dp,
+        ) {}
+    }
+    if (expanded) {
+        items(tasks, key = { it.task.id }) { taskWithSubtasks ->
             val taskEntity = taskWithSubtasks.task
-            val subtasksCompleted = taskWithSubtasks.subtasks.count { it.isCompleted }
-            val subtasksTotal = taskWithSubtasks.subtasks.size
-
             TaskListTile(
                 task = taskEntity,
                 isOverdue = isOverdue,
-                subtasksCompleted = subtasksCompleted,
-                subtasksTotal = subtasksTotal,
+                subtasksCompleted = taskWithSubtasks.subtasks.count { it.isCompleted },
+                subtasksTotal = taskWithSubtasks.subtasks.size,
                 onToggleCompleted = { onToggleCompleted(taskEntity) },
                 onTap = { onNavigateToTaskDetail(taskEntity.id) },
-                onDelete = { viewModel.deleteTask(taskEntity) }
+                onDelete = { viewModel.deleteTask(taskEntity) },
+                modifier = Modifier.animateItem(),
             )
         }
-        recurringTasks.forEach { recurringTask ->
+        items(recurringTasks, key = { "recurring-${it.id}" }) { recurringTask ->
             RecurringTaskListTile(
                 task = recurringTask,
                 status = recurringStatus,
                 onComplete = { onCompleteRecurring(recurringTask) },
                 onTap = { onNavigateToRecurringDetail(recurringTask.id) },
+                modifier = Modifier.animateItem(),
             )
         }
     }
+    item(key = "$key-end") { Spacer(modifier = Modifier.height(SECTION_BOTTOM_SPACING)) }
 }
+
+private val SECTION_BOTTOM_SPACING = 12.dp

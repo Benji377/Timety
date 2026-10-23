@@ -8,6 +8,8 @@ import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.focus.PhaseType
+import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
@@ -20,6 +22,7 @@ import io.github.benji377.timety.testutil.awaitTrue
 import io.github.benji377.timety.testutil.get
 import io.github.benji377.timety.testutil.value
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.ModeDeleteBlocker
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -33,9 +36,9 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 /**
- * Drives [FocusViewModel] through finished focus phases to check what auto-complete does to each
- * target type: at most one completion per session, never for goals, and nothing while the setting
- * is off.
+ * Drives [FocusViewModel] through finished focus phases and session ends to check what
+ * auto-complete does to each target type: at most one completion per session, never for goals,
+ * nothing while the setting is off, and nothing at all (not even XP) for a discarded session.
  */
 @RunWith(AndroidJUnit4::class)
 class FocusAutoCompleteTest {
@@ -48,7 +51,7 @@ class FocusAutoCompleteTest {
     private lateinit var focusViewModel: FocusViewModel
 
     private val now: Instant = Instant.now().truncatedTo(ChronoUnit.MILLIS)
-    private val mode = FocusModeEntity("mode-1", "Deep work", FocusModeType.POMODORO)
+    private val mode = FocusModeEntity("mode-1", "Deep work", FocusModeType.CUSTOM)
 
     @Before
     fun setUp() {
@@ -58,7 +61,14 @@ class FocusAutoCompleteTest {
             container.userRepository.insertUserProfile(
                 UserProfileEntity(name = "Tester", accountCreated = now, totalXp = 0),
             )
-            container.focusRepository.insertModeWithPhases(mode, emptyList())
+            // Two phases, so finishing the first one waits for "continue" instead of ending the session.
+            container.focusRepository.insertModeWithPhases(
+                mode,
+                listOf(
+                    SessionPhaseEntity(modeId = mode.id, type = PhaseType.FOCUS, durationMinutes = PHASE_MINUTES, orderIndex = 0),
+                    SessionPhaseEntity(modeId = mode.id, type = PhaseType.REST, durationMinutes = 5, orderIndex = 1),
+                ),
+            )
             container.settingsRepository.saveAutoCompleteFocus(true)
         }
         focusViewModel = viewModels.get()
@@ -79,7 +89,7 @@ class FocusAutoCompleteTest {
     }
 
     @Test
-    fun recurringTask_isCompletedOncePerSession_notOncePerPhase() {
+    fun recurringTask_isCompletedOncePerDay_notPerPhaseOrSession() {
         val task = RecurringTaskEntity(
             id = "recurring-1",
             title = "Water the plants",
@@ -91,16 +101,18 @@ class FocusAutoCompleteTest {
         startSession(FocusTargetSelection.of(FocusTargetType.RECURRING_TASK, task.id, task.title))
 
         finishFocusPhase()
-        awaitOccurrences(task.id, 1, "the first focus phase should complete the occurrence")
         finishFocusPhase()
-        // Give a wrongly repeated completion the time to land before asserting it didn't.
+        // Give a premature completion the time to land before asserting it didn't.
         Thread.sleep(500)
-        assertEquals("a second phase must not complete it again", 1, occurrenceCount(task.id))
+        assertEquals("nothing is completed before the session is logged", 0, occurrenceCount(task.id))
 
         stopSession()
+        awaitOccurrences(task.id, 1, "logging the session should complete the occurrence once")
         startSession(FocusTargetSelection.of(FocusTargetType.RECURRING_TASK, task.id, task.title))
         finishFocusPhase()
-        awaitOccurrences(task.id, 2, "a new session may complete it again")
+        stopSession()
+        Thread.sleep(500)
+        assertEquals("a second session the same day must not complete it again", 1, occurrenceCount(task.id))
     }
 
     @Test
@@ -143,13 +155,13 @@ class FocusAutoCompleteTest {
         startSession(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title))
 
         finishFocusPhase()
-        Thread.sleep(500)
+        stopSession()
         assertTrue("setting off: the task stays open", !isTaskCompleted(task.id))
 
-        stopSession()
         runBlocking { container.settingsRepository.saveAutoCompleteFocus(true) }
         startSession(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title))
         finishFocusPhase()
+        stopSession()
         assertTrue("setting on: the task is completed", awaitTrue { isTaskCompleted(task.id) })
         assertTrue(
             "completion XP is awarded alongside the focus minutes",
@@ -157,6 +169,56 @@ class FocusAutoCompleteTest {
                 currentXp() == ExperienceEngine.XP_PER_TASK +
                     2 * PHASE_MINUTES * ExperienceEngine.XP_PER_FOCUS_MINS
             },
+        )
+    }
+
+    @Test
+    fun discardedSession_awardsNoXp_andCompletesNothing() {
+        val task = TaskEntity(id = "task-2", title = "Tidy the desk", createdAt = now)
+        runBlocking { container.taskRepository.insertTask(task) }
+        startSession(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title))
+
+        finishFocusPhase()
+        Thread.sleep(500)
+        assertEquals("a finished phase pays nothing yet", 0, currentXp())
+
+        FocusTimerManager.stopEvent.tryEmit(
+            FocusTimerManager.StopInfo(elapsedFocusSeconds = 120, wasRestPhase = false, discard = true)
+        )
+        Thread.sleep(500)
+        assertEquals("discarding pays no XP", 0, currentXp())
+        assertTrue("discarding completes nothing", !isTaskCompleted(task.id))
+        assertTrue("discarding logs no session", container.focusRepository.allSessions.value().isEmpty())
+    }
+
+    @Test
+    fun sessionStoppedBeforeAFocusPhaseFinished_isLoggedButCompletesNothing() {
+        val task = TaskEntity(id = "task-3", title = "Read a chapter", createdAt = now)
+        runBlocking { container.taskRepository.insertTask(task) }
+        startSession(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title))
+
+        FocusTimerManager.stopEvent.tryEmit(
+            FocusTimerManager.StopInfo(elapsedFocusSeconds = 120, wasRestPhase = false, discard = false)
+        )
+        assertTrue(
+            "the two minutes are logged and paid",
+            awaitTrue { currentXp() == 2 * ExperienceEngine.XP_PER_FOCUS_MINS },
+        )
+        Thread.sleep(500)
+        assertTrue("no focus phase finished: the task stays open", !isTaskCompleted(task.id))
+    }
+
+    @Test
+    fun theRunningSessionsMode_cannotBeDeleted() {
+        startSession(FocusTargetSelection.of(FocusTargetType.TAG, "default_tag", "None"))
+        var blocker: ModeDeleteBlocker? = null
+        focusViewModel.deleteMode(mode) { blocker = it }
+
+        assertEquals(ModeDeleteBlocker.SESSION_RUNNING, blocker)
+        Thread.sleep(500)
+        assertTrue(
+            "the mode is kept",
+            container.focusRepository.allModes.value().any { it.id == mode.id },
         )
     }
 

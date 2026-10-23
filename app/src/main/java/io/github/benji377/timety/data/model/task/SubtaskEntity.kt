@@ -24,4 +24,4 @@ data class SubtaskEntity(
     val taskId: String,
     val title: String,
     val isCompleted: Boolean = false
-)
+) : java.io.Serializable

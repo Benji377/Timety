@@ -33,6 +33,10 @@ data class TimerState(
     val isStopwatch: Boolean = false,
     val elapsedSeconds: Int = 0,
 ) {
+    /** A session is underway, including the gap between two phases. */
+    val isSessionActive: Boolean
+        get() = isRunning || isPaused || isAwaitingContinue
+
     val progress: Float
         get() = if (isStopwatch) 0f else if (totalPhaseSeconds > 0) (secondsRemaining.toFloat() / totalPhaseSeconds).coerceIn(
             0f,
@@ -58,6 +62,8 @@ data class TimerFlags(val isRunning: Boolean = false, val isPaused: Boolean = fa
  * its state as a [StateFlow] consumed by [FocusTimerService] and the UI.
  */
 object FocusTimerManager {
+    private const val CHIME_GRACE_MS = 15_000L
+
     private val _timerState = MutableStateFlow(TimerState())
     val timerState: StateFlow<TimerState> = _timerState.asStateFlow()
 
@@ -93,16 +99,33 @@ object FocusTimerManager {
     private var phaseBaseTime: Instant? = null
     private var currentPhaseTotalSeconds: Int = 0
     private var accumulatedElapsed: Int = 0
+    private var stopwatchLimitSeconds: Int = 0
+
+    @Volatile
+    private var lastSessionStoppedAtMs: Long = 0L
+
+    /**
+     * Whether a phase-end chime firing now belongs to a real session: one is active, or one just
+     * stopped as its last phase ended. A fresh process (the old one was killed) has neither.
+     */
+    fun isPhaseChimeExpected(nowMs: Long): Boolean {
+        return _timerState.value.isSessionActive || nowMs - lastSessionStoppedAtMs < CHIME_GRACE_MS
+    }
 
 
-    /** Configures the timer for a new phase without starting it; call [startTimer] to begin ticking. */
+    /**
+     * Configures the timer for a new phase without starting it; call [startTimer] to begin ticking.
+     * A stopwatch stops itself, and is logged, once it reaches [stopwatchLimitSeconds] (0 = no limit).
+     */
     fun setMode(
         name: String,
         totalPhaseSeconds: Int,
         isRestPhase: Boolean,
-        isStopwatch: Boolean = false
+        isStopwatch: Boolean = false,
+        stopwatchLimitSeconds: Int = 0,
     ) {
         if (_timerState.value.isRunning) return
+        this.stopwatchLimitSeconds = if (isStopwatch) stopwatchLimitSeconds else 0
         val resuming = _timerState.value.isPaused
         // isAwaitingContinue is deliberately NOT cleared here (startTimer does that): when
         // continuing into the next phase, clearing it would emit a transient all-idle state
@@ -168,7 +191,7 @@ object FocusTimerManager {
     fun stopTimer(discard: Boolean = false) {
         job?.cancel()
         val state = _timerState.value
-        val wasActive = state.isRunning || state.isPaused || state.isAwaitingContinue
+        val wasActive = state.isSessionActive
         val elapsed = when {
             state.isAwaitingContinue -> 0 // Already banked via phaseCompleteEvent.
             state.isStopwatch -> state.elapsedSeconds
@@ -186,6 +209,7 @@ object FocusTimerManager {
             )
         }
         if (wasActive) {
+            lastSessionStoppedAtMs = System.currentTimeMillis()
             stopEvent.tryEmit(StopInfo(elapsed, state.isRestPhase, discard))
         }
     }
@@ -197,6 +221,12 @@ object FocusTimerManager {
         val totalElapsed = accumulatedElapsed + currentChunkElapsed
 
         if (_timerState.value.isStopwatch) {
+            val limit = stopwatchLimitSeconds
+            if (limit > 0 && totalElapsed >= limit) {
+                _timerState.update { it.copy(elapsedSeconds = limit) }
+                stopTimer()
+                return
+            }
             _timerState.update { it.copy(elapsedSeconds = totalElapsed) }
         } else {
             val remaining = (currentPhaseTotalSeconds - totalElapsed).coerceAtLeast(0)

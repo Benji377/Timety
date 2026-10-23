@@ -6,10 +6,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.UploadFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -17,7 +20,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +37,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -51,7 +55,6 @@ internal fun DataBackupSettings(
     val context = LocalContext.current
     val backupExportSuccessStr = stringResource(R.string.backupExportSuccess)
     val backupExportFailureRaw = stringResource(R.string.backupExportFailure)
-    val backupImportFailureStr = stringResource(R.string.backupImportFailure)
     val backupExportSubjectStr = stringResource(R.string.backupExportSubject)
     val backupShareFailureRaw = stringResource(R.string.backupShareFailure)
     val scope = rememberCoroutineScope()
@@ -83,15 +86,6 @@ internal fun DataBackupSettings(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) pendingImportUri = uri
-    }
-
-    // A failed restore reports through the app-wide snackbar; a successful one through the
-    // restart dialog below, which consumes the outcome when dismissed.
-    LaunchedEffect(restoreOutcome) {
-        if (restoreOutcome == RestoreOutcome.FAILURE) {
-            settingsViewModel.consumeRestoreOutcome()
-            snackbarHostState.showSnackbar(backupImportFailureStr)
-        }
     }
 
     Spacer(modifier = Modifier.height(8.dp))
@@ -181,8 +175,28 @@ internal fun DataBackupSettings(
         )
     }
 
+    // Shows why a restore failed; nothing was changed. Dismissing consumes the outcome.
+    (restoreOutcome as? RestoreOutcome.Failure)?.let { failure ->
+        NeoAlertDialog(
+            onDismissRequest = { settingsViewModel.consumeRestoreOutcome() },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = ErrorColor)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.backupImportFailedTitle))
+                }
+            },
+            text = { Text(failure.message) },
+            confirmButton = {
+                TextButton(onClick = { settingsViewModel.consumeRestoreOutcome() }) {
+                    Text(stringResource(R.string.commonButtonGotIt))
+                }
+            }
+        )
+    }
+
     // Prompts the user to restart the app after a successful backup restore.
-    if (restoreOutcome == RestoreOutcome.SUCCESS) {
+    if (restoreOutcome == RestoreOutcome.Success) {
         NeoAlertDialog(
             onDismissRequest = { settingsViewModel.consumeRestoreOutcome() },
             title = { Text(stringResource(R.string.backupRestoreSuccessTitle)) },

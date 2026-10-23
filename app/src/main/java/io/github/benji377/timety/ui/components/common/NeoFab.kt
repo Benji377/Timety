@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.hairlineBorder
@@ -48,7 +50,9 @@ fun NeoExtendedFab(
 ) {
     ExtendedFloatingActionButton(
         onClick = onClick,
-        modifier = Modifier.hairlineBorder(AppTheme.brNeo),
+        modifier = Modifier
+            .hairlineBorder(AppTheme.brNeo)
+            .semantics { contentDescription = text },
         shape = AppTheme.brNeo,
         elevation = AppTheme.flatFabElevation,
         containerColor = containerColor,

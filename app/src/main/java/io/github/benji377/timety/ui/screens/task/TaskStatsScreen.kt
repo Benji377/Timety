@@ -560,12 +560,12 @@ private fun CalibrationBucketRow(bucket: CalibrationBucket) {
 private fun calibrationInsightText(insight: CalibrationInsight): String = when (insight) {
     is CalibrationInsight.OrderingViolation -> stringResource(
         R.string.taskStatsCalibrationOrderingViolation,
-        insight.largerSize.name.replace("_", ""),
-        insight.smallerSize.name.replace("_", ""),
+        stringResource(AppUtils.sizeLabel(insight.largerSize)),
+        stringResource(AppUtils.sizeLabel(insight.smallerSize)),
     )
 
     is CalibrationInsight.HighSpread -> stringResource(
         R.string.taskStatsCalibrationHighSpread,
-        insight.size.name.replace("_", ""),
+        stringResource(AppUtils.sizeLabel(insight.size)),
     )
 }

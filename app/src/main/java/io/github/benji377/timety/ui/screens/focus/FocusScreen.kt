@@ -44,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -150,8 +151,8 @@ fun FocusScreen(
     val isPaused = timerFlags.isPaused
 
     val allModes by focusViewModel.allModes.collectAsState()
-    val modeIndex by focusViewModel.currentModeIndex.collectAsState()
-    val activeMode = allModes.getOrNull(modeIndex)
+    val modeId by focusViewModel.currentModeId.collectAsState()
+    val activeMode = allModes.find { it.id == modeId } ?: allModes.firstOrNull()
     var activePhases by remember { mutableStateOf<List<SessionPhaseEntity>>(emptyList()) }
     val phaseIndex by focusViewModel.currentPhaseIndex.collectAsState()
     val awaitingContinue by focusViewModel.awaitingContinue.collectAsState()
@@ -161,6 +162,7 @@ fun FocusScreen(
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     val keepScreenOnDuringFocus by settingsViewModel.keepScreenOnDuringFocus.collectAsState()
+    val maxStopwatchMins by settingsViewModel.maxStopwatchMins.collectAsState()
 
     // Only holds the screen awake while this screen is on the foreground - no wakelock, no
     // permission needed. The lock-screen/background case is covered separately by the foreground
@@ -186,17 +188,20 @@ fun FocusScreen(
     // since been ended by other means (e.g. the notification's Stop action), and isPaused alone
     // can't tell a dialog-induced pause from a pause the user made deliberately before opening
     // the dialog.
-    var pausedForStop by remember { mutableStateOf(false) }
-    var pausedForReset by remember { mutableStateOf(false) }
+    var pausedForStop by rememberSaveable { mutableStateOf(false) }
+    var pausedForReset by rememberSaveable { mutableStateOf(false) }
 
     // If the session ends by some other means while a confirmation dialog is open (e.g. the
     // user stops it from the notification shade), the dialog would otherwise linger on a dead
     // session. Closing it here also means its onDismiss can safely key off the live isPaused
-    // state below without racing a dialog that refuses to go away.
+    // state below without racing a dialog that refuses to go away. The pause flags go too, so
+    // they can't resume a later session the user paused on purpose.
     LaunchedEffect(isRunning, isPaused, awaitingContinue) {
         if (!isRunning && !isPaused && !awaitingContinue) {
             showStopConfirmation = false
             showResetConfirmation = false
+            pausedForStop = false
+            pausedForReset = false
         }
     }
 
@@ -242,6 +247,7 @@ fun FocusScreen(
             totalPhaseSeconds = secondsForPhase(phase, flexibleMinutes),
             isRestPhase = phase.type == PhaseType.REST,
             isStopwatch = activeMode.type == FocusModeType.STOPWATCH,
+            stopwatchLimitSeconds = maxStopwatchMins * 60,
         )
         sendAction(FocusTimerService.ACTION_START)
     }
@@ -255,6 +261,7 @@ fun FocusScreen(
             totalPhaseSeconds = secondsForPhase(phase, flexibleMinutes),
             isRestPhase = phase.type == PhaseType.REST,
             isStopwatch = mode.type == FocusModeType.STOPWATCH,
+            stopwatchLimitSeconds = maxStopwatchMins * 60,
         )
         sendAction(FocusTimerService.ACTION_START)
     }
@@ -307,7 +314,14 @@ fun FocusScreen(
             allModes.indexOfFirst { it.id == activeMode?.id }.let { if (it < 0) 0 else it }
         var nextIndex = (currentIndex + direction) % allModes.size
         if (nextIndex < 0) nextIndex += allModes.size
-        focusViewModel.setCurrentModeIndex(nextIndex)
+        focusViewModel.setCurrentModeId(allModes[nextIndex].id)
+    }
+
+    // A rebuild (e.g. a theme switch) drops an open confirmation dialog; that counts as Cancel.
+    LaunchedEffect(Unit) {
+        if ((pausedForStop || pausedForReset) && isPaused) sendAction(FocusTimerService.ACTION_START)
+        pausedForStop = false
+        pausedForReset = false
     }
 
     fun requestStop() {
@@ -356,7 +370,7 @@ fun FocusScreen(
                 NeoIconButton(
                     onClick = { cycleMode(-1) },
                     icon = Icons.Filled.ArrowBackIosNew,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.commonLabelPrevious),
                     enabled = !modeSelectionLocked,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -380,7 +394,7 @@ fun FocusScreen(
                 NeoIconButton(
                     onClick = { cycleMode(1) },
                     icon = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.commonLabelNext),
                     enabled = !modeSelectionLocked,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -485,7 +499,7 @@ fun FocusScreen(
                     NeoIconButton(
                         onClick = { requestReset() },
                         icon = Icons.Filled.RestartAlt,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.focusActionReset),
                         modifier = Modifier.testTag(FocusScreenTags.RESET),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         size = AppTheme.focusTransportButtonSize,
@@ -530,7 +544,13 @@ fun FocusScreen(
                             awaitingContinue -> Icons.Filled.FastForward
                             else -> Icons.Filled.PlayArrow
                         },
-                        contentDescription = null,
+                        contentDescription = stringResource(
+                            when {
+                                isRunning -> R.string.focusActionStop
+                                awaitingContinue -> R.string.focusActionContinue
+                                else -> R.string.focusActionStart
+                            }
+                        ),
                         modifier = Modifier.size(40.dp),
                     )
                 }
@@ -553,7 +573,13 @@ fun FocusScreen(
                         } else {
                             Icons.Filled.Pause
                         },
-                        contentDescription = null,
+                        contentDescription = stringResource(
+                            when {
+                                awaitingContinue -> R.string.focusActionStop
+                                isPaused -> R.string.focusActionResume
+                                else -> R.string.focusActionPause
+                            }
+                        ),
                         modifier = Modifier.testTag(FocusScreenTags.PAUSE),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         size = AppTheme.focusTransportButtonSize,
@@ -629,6 +655,7 @@ fun FocusScreen(
             // Partial-phase banking + session logging happen via
             // FocusTimerManager.stopEvent, shared with the notification's Stop action.
             sendAction(FocusTimerService.ACTION_STOP)
+            pausedForStop = false
             showStopConfirmation = false
         },
         onDismiss = {
@@ -638,6 +665,7 @@ fun FocusScreen(
             // a phantom new phase. isPaused alone would resume a timer the user had already
             // paused themselves before requesting the stop.
             if (pausedForStop && isPaused) sendAction(FocusTimerService.ACTION_START)
+            pausedForStop = false
             showStopConfirmation = false
         },
     )
@@ -648,6 +676,7 @@ fun FocusScreen(
         content = stringResource(R.string.focusDialogSessionResetContent),
         onConfirm = {
             sendAction(FocusTimerService.ACTION_DISCARD)
+            pausedForReset = false
             showResetConfirmation = false
         },
         onDismiss = {
@@ -656,6 +685,7 @@ fun FocusScreen(
             // timer is already paused by the user (pausedForReset = false in that case), so
             // isPaused alone would wrongly resume a timer the user had deliberately paused.
             if (pausedForReset && isPaused) sendAction(FocusTimerService.ACTION_START)
+            pausedForReset = false
             showResetConfirmation = false
         },
     )
@@ -746,7 +776,8 @@ private fun TimerGauge(
         bottomText = selectedTarget?.label ?: stringResource(R.string.focusTargetEmpty),
         bottomTextColor = selectedTarget?.color ?: FocusColor,
         bottomTextIcon = bottomTextIcon,
-        onBottomTextTapped = if (isRunning || isPaused) null else {
+        // The target is fixed for the whole session, including the gap between phases.
+        onBottomTextTapped = if (timerState.isSessionActive) null else {
             { onTargetTapped() }
         },
         isInteractive = canDrag,

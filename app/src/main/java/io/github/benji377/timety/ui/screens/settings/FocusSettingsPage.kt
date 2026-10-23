@@ -126,12 +126,7 @@ internal fun FocusSettings(
         // Deselecting the last weekday is a no-op: zero minutes is the only "off".
         WeekdayToggleRow(
             selected = dailyFocusTarget.weekdays,
-            onToggle = { day ->
-                val days = dailyFocusTarget.weekdays
-                settingsViewModel.setDailyGoalWeekdays(
-                    if (day in days) days - day else days + day
-                )
-            },
+            onToggle = { day -> settingsViewModel.toggleDailyGoalWeekday(day) },
             selectedColor = FocusColor,
             modifier = Modifier
                 .fillMaxWidth()

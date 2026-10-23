@@ -3,6 +3,9 @@ package io.github.benji377.timety
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -34,6 +37,7 @@ import io.github.benji377.timety.ui.screens.settings.SettingsPage
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -145,6 +149,28 @@ class ScreenshotTest {
         composeTestRule.onNodeWithText(str(SettingsPage.FOCUS.titleRes)).performClick()
         composeTestRule.waitForIdle()
         takeScreenshot("12_settings_focus_screen")
+
+        assertTrue(
+            "Tappable elements a screen reader can't name:\n" + unlabeledTappables.joinToString("\n"),
+            unlabeledTappables.isEmpty(),
+        )
+    }
+
+    // Collected across all screens, so every screenshot is still written before the test fails.
+    private val unlabeledTappables = mutableListOf<String>()
+
+    /** Records each tappable element on screen that has neither text nor a content description. */
+    private fun checkTappablesAreLabeled(screen: String) {
+        val unlabeled = SemanticsMatcher("tappable without a label") { node ->
+            val config = node.config
+            config.contains(SemanticsActions.OnClick) &&
+                !config.contains(SemanticsProperties.ContentDescription) &&
+                !config.contains(SemanticsProperties.Text) &&
+                !config.contains(SemanticsProperties.EditableText)
+        }
+        composeTestRule.onAllNodes(unlabeled).fetchSemanticsNodes().forEach { node ->
+            unlabeledTappables += "$screen: bounds=${node.boundsInRoot}"
+        }
     }
 
     // The exact-alarm prompt shows on a fresh install and would otherwise dim every screenshot.
@@ -405,6 +431,7 @@ class ScreenshotTest {
     }
 
     private fun takeScreenshot(name: String) {
+        checkTappablesAreLabeled(name)
         val bitmap = composeTestRule.onRoot().captureToImage().asAndroidBitmap()
         // AGP's additionalTestOutputDir is pulled to build/outputs/ before the app (and with it
         // any app-private directory such as getExternalFilesDir) is uninstalled and wiped.
