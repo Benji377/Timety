@@ -43,4 +43,12 @@ Welcome to the full gallery of Timety's interface! Here is a closer look at the 
 </p>
 
 ---
+
+## Settings
+<p align="center">
+  <img src="11_settings_screen.png" width="45%" alt="Settings Screen">
+  <img src="12_settings_focus_screen.png" width="45%" alt="Focus Settings Screen">
+</p>
+
+---
 *Return to the [Main README](../../README.md).*
