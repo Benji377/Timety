@@ -191,27 +191,28 @@ private fun OverviewStatsScreen(
         map
     }
 
+    // Split across days so a midnight-crossing session feeds each day it touched, not just its
+    // start day - consistent with the focus heatmap and daily goal. Computed once per change and
+    // shared by today's total, the week chart, and the day-quality breakdown.
+    val focusMinutesByDay = remember(sessions) { FocusSessionDayStats.minutesByDay(sessions, zone) }
     // Day-keyed activity maps for the day-quality breakdown.
-    val focusMinutesByDayKey = remember(sessions) {
-        // Split across days so a midnight-crossing session feeds each day's quality, not just its
-        // start day - consistent with the focus heatmap and daily goal.
-        FocusSessionDayStats.minutesByDay(sessions, zone)
-            .mapKeys { (day, _) -> AppDateUtils.dayKey(day) }
+    val focusMinutesByDayKey = remember(focusMinutesByDay) {
+        focusMinutesByDay.mapKeys { (day, _) -> AppDateUtils.dayKey(day) }
     }
     val tasksByDayKey = remember(tasksPerDay) {
         tasksPerDay.mapKeys { (day, _) -> AppDateUtils.dayKey(day) }
     }
 
     val tasksCompletedToday = tasksPerDay[now] ?: 0
-    val focusMinsToday = remember(sessions) { focusViewModel.getMinutesFocusedOnDay(now, zone) }
+    val focusMinsToday = focusMinutesByDay[now] ?: 0
     // Null on days without a target, shown as "-".
     val goalPercent = dailyFocusTarget.minutesOn(now)?.let { target ->
         ((focusMinsToday.toDouble() / target).coerceIn(0.0, 1.0) * 100).toInt()
     }
 
     val last7Days = remember(now) { (0..6).map { now.minusDays((6 - it).toLong()) } }
-    val dailyFocus = remember(last7Days, sessions) {
-        last7Days.map { day -> focusViewModel.getMinutesFocusedOnDay(day, zone) }
+    val dailyFocus = remember(last7Days, focusMinutesByDay) {
+        last7Days.map { day -> focusMinutesByDay[day] ?: 0 }
     }
     val dailyTasks = remember(last7Days, tasksPerDay) {
         last7Days.map { day -> tasksPerDay[day] ?: 0 }

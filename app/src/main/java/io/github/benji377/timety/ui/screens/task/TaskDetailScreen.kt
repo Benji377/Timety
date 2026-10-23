@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -51,7 +52,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +68,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
@@ -109,6 +112,7 @@ import io.github.benji377.timety.util.location.LocationApi
 import io.github.benji377.timety.util.task.CustomReminderIssue
 import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -133,11 +137,12 @@ fun TaskDetailScreen(
     onNavigateBack: () -> Unit,
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val allTasks by taskViewModel.allTasks.collectAsState()
+    val existingTaskWithSubtasks by remember(taskId) {
+        taskId?.let { taskViewModel.observeTask(it) } ?: flowOf(null)
+    }.collectAsState(initial = null)
     val allCategories by taskViewModel.allCategories.collectAsState()
     val dateFmt = LocalDateFormatSettings.current
     val isNewTask = taskId == null
-    val existingTaskWithSubtasks = taskId?.let { id -> allTasks.find { it.task.id == id } }
     val existingTask = existingTaskWithSubtasks?.task
 
     var isEditing by rememberSaveable(taskId) { mutableStateOf(isNewTask) }
@@ -168,6 +173,7 @@ fun TaskDetailScreen(
         )
     }
 
+    val dueDateFieldLabel = stringResource(R.string.taskDetailsLabelDueDateSet)
     val priorityLabels = Priority.entries.associateWith { stringResource(AppUtils.priorityLabel(it)) }
     val sizeLabels = TaskSize.entries.associateWith { stringResource(AppUtils.sizeLabel(it)) }
 
@@ -371,7 +377,10 @@ fun TaskDetailScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(enabled = isEditing) { pickerTarget = PickerTarget.DUE_DATE }
+                        .clickable(enabled = isEditing, role = Role.Button) {
+                            pickerTarget = PickerTarget.DUE_DATE
+                        }
+                        .semantics { contentDescription = dueDateFieldLabel }
                 ) {
                     OutlinedTextField(
                         value = dueDate?.let {
@@ -477,7 +486,10 @@ fun TaskDetailScreen(
                     trailingIcon = {
                         if (isEditing) {
                             IconButton(onClick = { showLocationPicker = true }) {
-                                Icon(Icons.Filled.Search, contentDescription = null)
+                                Icon(
+                                    Icons.Filled.Search,
+                                    contentDescription = stringResource(R.string.locationPickerTitle)
+                                )
                             }
                         }
                     }
@@ -796,7 +808,14 @@ private fun <T> AccordionSelector(
                             }
                         } else m
                     }
-                    .clickable(enabled = isEditing) { onSelected(value) }
+                    .selectable(selected = isSelected, enabled = isEditing, role = Role.RadioButton) {
+                        onSelected(value)
+                    }
+                    // Unselected segments show only an icon, so they need the label spoken.
+                    .then(
+                        if (isSelected) Modifier
+                        else Modifier.semantics { contentDescription = labelBuilder(value) }
+                    )
                     .padding(AppTheme.segmentedSelectorInset)
                     .then(
                         if (isSelected) {

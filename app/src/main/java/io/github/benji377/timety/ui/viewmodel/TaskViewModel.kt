@@ -11,6 +11,7 @@ import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.TaskWidget
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -31,6 +32,9 @@ class TaskViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    /** The task being viewed in the editor, without loading every other task. */
+    fun observeTask(id: String): Flow<TaskWithSubtasks?> = taskRepository.observeTask(id)
 
     private fun updateWidgets() {
         viewModelScope.launch {

@@ -56,9 +56,6 @@ interface FocusDao {
     fun deleteSession(session: FocusSessionEntity)
 
     // Distractions
-    @Query("SELECT * FROM distractions WHERE sessionId = :sessionId")
-    fun getDistractionsForSession(sessionId: String): Flow<List<DistractionEntity>>
-
     @Query("SELECT * FROM distractions ORDER BY time DESC")
     fun getAllDistractions(): Flow<List<DistractionEntity>>
 

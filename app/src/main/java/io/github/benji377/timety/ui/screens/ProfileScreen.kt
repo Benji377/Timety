@@ -58,6 +58,10 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.focus.FocusSessionEntity
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
+import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -83,6 +87,8 @@ import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.util.ProfileImageStore
 import io.github.benji377.timety.util.stats.StreakCalculator
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -114,38 +120,17 @@ fun ProfileScreen(
     val userName = userProfile?.name ?: "User"
     val totalXp = userProfile?.totalXp ?: 0
 
-    // Each logged recurring occurrence counts as a completed task.
-    val totalTasksDone = tasks.count { it.task.isCompleted } +
-            recurringItems.sumOf { it.occurrences.size }
-    val totalHabitsMet = habitsWithCompletions.sumOf { it.completions.size }
-    val totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60
+    // Recomputed only when the data changes, not on every recomposition of this screen.
+    val stats = remember(tasks, habitsWithCompletions, recurringItems, sessions) {
+        ProfileStats.of(tasks, habitsWithCompletions, recurringItems, sessions)
+    }
+    val totalTasksDone = stats.totalTasksDone
+    val totalHabitsMet = stats.totalHabitsMet
+    val totalFocusMins = stats.totalFocusMins
     val totalSessions = sessions.size
-    // Gather completion dates across tasks, habits, and focus sessions to feed the streak calculation.
-    val taskDates = tasks.mapNotNull {
-        if (it.task.isCompleted) it.task.completedAt?.atZone(java.time.ZoneId.systemDefault())
-            ?.toLocalDate() else null
-    } + recurringItems.flatMap { item ->
-        item.occurrences.map {
-            it.completedAt.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-        }
-    }
-    val habitDates = habitsWithCompletions.flatMap {
-        it.completions.map { c ->
-            c.completionDate.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-        }
-    }
-    val focusDates = sessions.map {
-        java.time.LocalDateTime.ofInstant(
-            it.startTime,
-            java.time.ZoneId.systemDefault()
-        ).toLocalDate()
-    }
-    val allActivityDates = (taskDates + habitDates + focusDates).distinct().sorted()
-
-    val currentStreakInfo = StreakCalculator.currentStreak(allActivityDates)
+    val currentStreakInfo = stats.currentStreak
     val currentStreak = currentStreakInfo.length
-    val highestStreak =
-        StreakCalculator.calculateBestStreak(allActivityDates)
+    val highestStreak = stats.bestStreak
 
     val context = LocalContext.current
     val shareSubjectStr = stringResource(R.string.userShareSubject)
@@ -401,10 +386,10 @@ fun ProfileScreen(
             // Streak Timeline Card
             item {
                 UserStreakTimelineCard(
-                    activityDates = allActivityDates,
-                    taskDates = taskDates,
-                    focusDates = focusDates,
-                    habitDates = habitDates,
+                    activityDates = stats.activityDates,
+                    taskDates = stats.taskDates,
+                    focusDates = stats.focusDates,
+                    habitDates = stats.habitDates,
                     currentStreak = currentStreak
                 )
             }
@@ -492,3 +477,47 @@ fun ProfileScreen(
     }
 }
 
+/** Lifetime totals, streaks, and the activity dates behind the streak timeline. */
+private data class ProfileStats(
+    val totalTasksDone: Int,
+    val totalHabitsMet: Int,
+    val totalFocusMins: Int,
+    val taskDates: List<LocalDate>,
+    val habitDates: List<LocalDate>,
+    val focusDates: List<LocalDate>,
+    val activityDates: List<LocalDate>,
+    val currentStreak: StreakCalculator.CurrentStreak,
+    val bestStreak: Int,
+) {
+    companion object {
+        fun of(
+            tasks: List<TaskWithSubtasks>,
+            habits: List<HabitWithCompletions>,
+            recurring: List<RecurringTaskWithOccurrences>,
+            sessions: List<FocusSessionEntity>,
+        ): ProfileStats {
+            val zone = ZoneId.systemDefault()
+            // Completion dates across tasks, habits, and focus sessions feed the streak calculation.
+            val taskDates = tasks.mapNotNull { item ->
+                item.task.completedAt?.takeIf { item.task.isCompleted }?.atZone(zone)?.toLocalDate()
+            } + recurring.flatMap { item -> item.occurrences.map { it.completedAt.atZone(zone).toLocalDate() } }
+            val habitDates = habits.flatMap { item ->
+                item.completions.map { it.completionDate.atZone(zone).toLocalDate() }
+            }
+            val focusDates = sessions.map { it.startTime.atZone(zone).toLocalDate() }
+            val activityDates = (taskDates + habitDates + focusDates).distinct().sorted()
+            return ProfileStats(
+                // Each logged recurring occurrence counts as a completed task.
+                totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.occurrences.size },
+                totalHabitsMet = habits.sumOf { it.completions.size },
+                totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60,
+                taskDates = taskDates,
+                habitDates = habitDates,
+                focusDates = focusDates,
+                activityDates = activityDates,
+                currentStreak = StreakCalculator.currentStreak(activityDates),
+                bestStreak = StreakCalculator.calculateBestStreak(activityDates),
+            )
+        }
+    }
+}

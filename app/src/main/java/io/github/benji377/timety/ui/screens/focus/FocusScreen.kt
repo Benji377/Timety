@@ -364,7 +364,7 @@ fun FocusScreen(
                 NeoIconButton(
                     onClick = { cycleMode(-1) },
                     icon = Icons.Filled.ArrowBackIosNew,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.commonLabelPrevious),
                     enabled = !modeSelectionLocked,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -388,7 +388,7 @@ fun FocusScreen(
                 NeoIconButton(
                     onClick = { cycleMode(1) },
                     icon = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.commonLabelNext),
                     enabled = !modeSelectionLocked,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -493,7 +493,7 @@ fun FocusScreen(
                     NeoIconButton(
                         onClick = { requestReset() },
                         icon = Icons.Filled.RestartAlt,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.focusActionReset),
                         modifier = Modifier.testTag(FocusScreenTags.RESET),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         size = AppTheme.focusTransportButtonSize,
@@ -538,7 +538,13 @@ fun FocusScreen(
                             awaitingContinue -> Icons.Filled.FastForward
                             else -> Icons.Filled.PlayArrow
                         },
-                        contentDescription = null,
+                        contentDescription = stringResource(
+                            when {
+                                isRunning -> R.string.focusActionStop
+                                awaitingContinue -> R.string.focusActionContinue
+                                else -> R.string.focusActionStart
+                            }
+                        ),
                         modifier = Modifier.size(40.dp),
                     )
                 }
@@ -561,7 +567,13 @@ fun FocusScreen(
                         } else {
                             Icons.Filled.Pause
                         },
-                        contentDescription = null,
+                        contentDescription = stringResource(
+                            when {
+                                awaitingContinue -> R.string.focusActionStop
+                                isPaused -> R.string.focusActionResume
+                                else -> R.string.focusActionPause
+                            }
+                        ),
                         modifier = Modifier.testTag(FocusScreenTags.PAUSE),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         size = AppTheme.focusTransportButtonSize,

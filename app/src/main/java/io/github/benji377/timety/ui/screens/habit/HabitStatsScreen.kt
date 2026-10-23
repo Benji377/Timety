@@ -103,18 +103,27 @@ fun HabitStatsScreen(
             val startOfWeek = AppDateUtils.startOfWeekMonday(focusedDate)
             val endOfWeek = startOfWeek.plusDays(6)
             val zone = ZoneId.systemDefault()
-            val weekCompletions = habits.flatMap { hwc ->
-                hwc.completions.filter { c ->
-                    AppDateUtils.isWithinInclusive(
-                        c.completionDate.atZone(zone).toLocalDate(),
-                        startOfWeek,
-                        endOfWeek
-                    )
+            val weekCompletions = remember(habits, startOfWeek) {
+                habits.flatMap { hwc ->
+                    hwc.completions.filter { c ->
+                        AppDateUtils.isWithinInclusive(
+                            c.completionDate.atZone(zone).toLocalDate(),
+                            startOfWeek,
+                            endOfWeek
+                        )
+                    }
                 }
             }
-            val allTimeBestStreak = habits.maxOfOrNull { hwc ->
-                StreakCalculator.calculateBestStreak(completionDates(hwc))
-            } ?: 0
+            // Streaks scan every completion, so they're computed once per data change rather
+            // than on each recomposition or week shift.
+            val streaksByHabit = remember(habits) {
+                habits.associate { hwc ->
+                    val dates = completionDates(hwc)
+                    hwc.habit.id to (StreakCalculator.calculateCurrentStreak(dates) to
+                        StreakCalculator.calculateBestStreak(dates))
+                }
+            }
+            val allTimeBestStreak = streaksByHabit.values.maxOfOrNull { it.second } ?: 0
 
             LazyColumn(
                 modifier = Modifier
@@ -195,9 +204,7 @@ fun HabitStatsScreen(
                 }
 
                 items(habits, key = { it.habit.id }) { hwc ->
-                    val dates = completionDates(hwc)
-                    val currentStreak = StreakCalculator.calculateCurrentStreak(dates)
-                    val bestStreak = StreakCalculator.calculateBestStreak(dates)
+                    val (currentStreak, bestStreak) = streaksByHabit[hwc.habit.id] ?: (0 to 0)
 
                     NeoCard(
                         modifier = Modifier

@@ -396,9 +396,13 @@ class BackupService(
         }
 
         val sessions = focusDao.getAllSessions().first()
+        // One query for all distractions instead of one per session.
+        val distractionsBySession = focusDao.getAllDistractions().first()
+            .sortedBy { it.time }
+            .groupBy { it.sessionId }
         val sessionsArray = JSONArray()
         for (session in sessions) {
-            val distractions = focusDao.getDistractionsForSession(session.id).first()
+            val distractions = distractionsBySession[session.id].orEmpty()
             sessionsArray.put(
                 JSONObject().apply {
                     put("id", session.id)

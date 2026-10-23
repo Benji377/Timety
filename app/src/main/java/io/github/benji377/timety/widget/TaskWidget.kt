@@ -85,8 +85,7 @@ class TaskWidget : GlanceAppWidget() {
             dueDay != null && !dueDay.isAfter(today)
         }
 
-        val recurringByStatus = appContainer.recurringTaskRepository.allRecurringTasks.first()
-            .map { it.task }
+        val recurringByStatus = appContainer.recurringTaskRepository.getAllTasks()
             .groupBy { RecurrenceUtils.statusOf(it, now, horizonDays) }
         val dueRecurring = recurringByStatus[RecurringStatus.OVERDUE].orEmpty() +
                 recurringByStatus[RecurringStatus.DUE_TODAY].orEmpty()

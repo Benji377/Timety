@@ -87,6 +87,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -114,9 +115,11 @@ fun RecurringTaskDetailScreen(
     viewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    val allRecurring by viewModel.allRecurringTasks.collectAsState()
+    val existingState = remember(recurringTaskId) {
+        recurringTaskId?.let { viewModel.observeTask(it) } ?: flowOf(null)
+    }.collectAsState(initial = null)
+    val existing = existingState.value
     val allCategories by taskViewModel.allCategories.collectAsState()
-    val existing = recurringTaskId?.let { id -> allRecurring.find { it.task.id == id } }
     val existingTask = existing?.task
     val isNew = recurringTaskId == null
     val zone = ZoneId.systemDefault()

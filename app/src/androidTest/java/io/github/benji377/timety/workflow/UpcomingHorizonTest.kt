@@ -21,7 +21,6 @@ import org.junit.runner.RunWith
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 
 /**
  * The upcoming-tasks horizon reclassifies items on the home screen, the task list, the recurring

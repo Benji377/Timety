@@ -305,8 +305,7 @@ class FocusViewModel(
             )
 
             FocusTargetType.RECURRING_TASK -> {
-                val entry = recurringTaskRepository.allRecurringTasks.first()
-                    .firstOrNull { it.task.id == target.id } ?: return
+                val entry = recurringTaskRepository.observeTask(target.id).first() ?: return
                 // Once per day, like a habit: a second session must not log another occurrence.
                 val today = LocalDate.now()
                 val zone = ZoneId.systemDefault()

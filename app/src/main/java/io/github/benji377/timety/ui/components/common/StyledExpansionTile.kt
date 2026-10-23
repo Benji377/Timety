@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -79,7 +80,10 @@ fun StyledExpansionTile(
 }
 
 
-/** Overload of [StyledExpansionTile] that takes an arbitrary composable as the title. */
+/**
+ * Overload of [StyledExpansionTile] that takes an arbitrary composable as the title. A lazy list
+ * that emits the rows itself passes a zero [bottomSpacing] and adds the gap after its last row.
+ */
 @Composable
 fun StyledExpansionTile(
     title: @Composable () -> Unit,
@@ -87,6 +91,7 @@ fun StyledExpansionTile(
     initiallyExpanded: Boolean = false,
     expanded: Boolean? = null,
     onExpandedChange: ((Boolean) -> Unit)? = null,
+    bottomSpacing: Dp = 12.dp,
     content: @Composable () -> Unit
 ) {
     var internalExpanded by remember { mutableStateOf(initiallyExpanded) }
@@ -95,7 +100,7 @@ fun StyledExpansionTile(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp)
+            .padding(bottom = bottomSpacing)
     ) {
         Row(
             modifier = Modifier

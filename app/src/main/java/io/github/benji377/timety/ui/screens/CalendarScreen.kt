@@ -341,7 +341,7 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
         NeoIconButton(
             onClick = onPrevious,
             icon = Icons.Filled.ChevronLeft,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.commonLabelPrevious),
         )
         Text(
             text = AppDateFormatUtils.formatMonthYear(
@@ -353,7 +353,7 @@ private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNe
         NeoIconButton(
             onClick = onNext,
             icon = Icons.Filled.ChevronRight,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.commonLabelNext),
         )
     }
 }

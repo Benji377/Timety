@@ -13,6 +13,7 @@ import io.github.benji377.timety.data.repository.dataStore
 import io.github.benji377.timety.util.LocaleHelper
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.widget.MidnightWidgetRefresh
 import kotlinx.coroutines.flow.first
 import java.time.Duration
 import java.time.Instant
@@ -266,22 +267,33 @@ class ReminderScheduler private constructor(private val context: Context) {
         }
 
 
-        /** Re-schedules every task, habit, and general reminder; used after boot/app-update since the OS clears pending alarms. */
+        /** Re-arms every pending reminder and the midnight widget refresh; runs on each process start and system alarm reset. */
         suspend fun resyncAll(context: Context) {
             val app = context.applicationContext as? TimetyApplication ?: return
             val scheduler = create(app)
             val settings = app.container.settingsRepository
 
+            val now = Instant.now()
+            // Only items with something ahead: completed or past ones were cancelled when they
+            // changed, and re-cancelling each of them costs a dozen system calls on every start.
             app.container.taskRepository.allTasks.first()
-                .forEach { scheduler.scheduleTaskReminders(it.task) }
+                .map { it.task }
+                .filter { task ->
+                    !task.isCompleted &&
+                        (task.reminders.any { it.isAfter(now) } || task.dueDate?.isAfter(now) == true)
+                }
+                .forEach { scheduler.scheduleTaskReminders(it) }
             app.container.recurringTaskRepository.allRecurringTasks.first()
                 .forEach { scheduler.scheduleRecurringTaskReminders(it.task) }
             app.container.habitRepository.allHabits.first()
+                .filter { HabitUtils.parseReminderTimes(it.reminderTimes).isNotEmpty() }
                 .forEach { scheduler.scheduleHabitReminder(it) }
             app.container.quickHabitRepository.allQuickHabits.first()
+                .filter { it.isEnabled }
                 .forEach { scheduler.scheduleQuickHabit(it) }
             scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
             scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
+            MidnightWidgetRefresh.schedule(app)
         }
     }
 }

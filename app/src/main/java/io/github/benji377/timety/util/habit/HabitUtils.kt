@@ -58,10 +58,14 @@ object HabitUtils {
             ?.joinToString(separator = ",", prefix = "[", postfix = "]")
 
 
-    fun isCompletedOn(hwc: HabitWithCompletions, date: LocalDate): Boolean =
-        hwc.completions.any {
-            it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date
-        }
+    // Compares instants against the day's bounds, computed once, rather than converting every
+    // completion to a local date: these run per habit tile on every recomposition.
+    fun isCompletedOn(hwc: HabitWithCompletions, date: LocalDate): Boolean {
+        val zone = ZoneId.systemDefault()
+        val start = date.atStartOfDay(zone).toInstant()
+        val end = date.plusDays(1).atStartOfDay(zone).toInstant()
+        return hwc.completions.any { !it.completionDate.isBefore(start) && it.completionDate.isBefore(end) }
+    }
 
 
     /**
@@ -69,13 +73,17 @@ object HabitUtils {
      * today, which callers use when checking whether a flexible-frequency goal is still open.
      */
     fun getCompletionsThisWeek(hwc: HabitWithCompletions, includeToday: Boolean = true): Int {
+        val zone = ZoneId.systemDefault()
         val today = LocalDate.now()
-        val startOfWeek = AppDateUtils.startOfWeekMonday(today)
-        val startOfNextWeek = startOfWeek.plusDays(7)
+        val weekStart = AppDateUtils.startOfWeekMonday(today).atStartOfDay(zone).toInstant()
+        val weekEnd = AppDateUtils.startOfWeekMonday(today).plusDays(7).atStartOfDay(zone).toInstant()
+        val todayStart = today.atStartOfDay(zone).toInstant()
+        val todayEnd = today.plusDays(1).atStartOfDay(zone).toInstant()
         return hwc.completions.count {
-            val date = it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate()
-            val isInWeek = !date.isBefore(startOfWeek) && date.isBefore(startOfNextWeek)
-            isInWeek && (includeToday || date != today)
+            val at = it.completionDate
+            val isInWeek = !at.isBefore(weekStart) && at.isBefore(weekEnd)
+            val isToday = !at.isBefore(todayStart) && at.isBefore(todayEnd)
+            isInWeek && (includeToday || !isToday)
         }
     }
 

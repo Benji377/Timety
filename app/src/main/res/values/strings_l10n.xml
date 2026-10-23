@@ -20,6 +20,9 @@
     <string name="commonLabelCancel">Cancel</string>
     <string name="commonLabelConfirm">Confirm</string>
     <string name="commonLabelDelete">Delete</string>
+    <string name="commonLabelEdit">Edit</string>
+    <string name="commonLabelNext">Next</string>
+    <string name="commonLabelPrevious">Previous</string>
     <string name="commonLabelRemove">Remove</string>
     <string name="commonLabelSave">Save</string>
     <string name="commonLabelShare">Share</string>
@@ -62,8 +65,11 @@
     <string name="homeSectionHabitsDue">Habits Today (%1$d)</string>
     <string name="homeSectionTasksDue">Tasks Due (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Upcoming Tasks (%1$d)</string>
+    <string name="focusActionContinue">Continue</string>
     <string name="focusActionPause">Pause</string>
+    <string name="focusActionReset">Reset</string>
     <string name="focusActionResume">Resume</string>
+    <string name="focusActionStart">Start</string>
     <string name="focusActionStop">Stop</string>
     <string name="focusDialogSessionResetContent">The timer is paused while you decide. Confirm to reset the session, or cancel to continue.</string>
     <string name="focusDialogSessionResetTitle">Reset Focus Session?</string>

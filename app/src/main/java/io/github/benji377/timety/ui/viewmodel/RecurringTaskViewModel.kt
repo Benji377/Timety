@@ -12,6 +12,7 @@ import io.github.benji377.timety.services.RecurringCompletionUndo
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.TaskWidget
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -32,6 +33,10 @@ class RecurringTaskViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
+
+    /** The recurring task being viewed in the editor, without loading every other one. */
+    fun observeTask(id: String): Flow<RecurringTaskWithOccurrences?> =
+        recurringTaskRepository.observeTask(id)
 
     private fun updateWidgets() {
         viewModelScope.launch {
