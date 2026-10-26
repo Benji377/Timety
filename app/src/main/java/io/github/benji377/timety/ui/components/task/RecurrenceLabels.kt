@@ -14,6 +14,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 @Composable
 @ReadOnlyComposable
 fun recurrenceUnitName(unit: RecurrenceUnit): String = when (unit) {
+    RecurrenceUnit.DAY -> stringResource(R.string.recurrenceDaily)
     RecurrenceUnit.WEEK -> stringResource(R.string.recurrenceWeekly)
     RecurrenceUnit.MONTH -> stringResource(R.string.recurrenceMonthly)
     RecurrenceUnit.YEAR -> stringResource(R.string.recurrenceYearly)
@@ -52,6 +53,7 @@ fun recurrenceOrdinalName(ordinal: Int): String = when (ordinal) {
 fun recurrenceCadenceLabel(task: RecurringTaskEntity): String {
     val n = task.interval.coerceAtLeast(1)
     val plural = when (task.unit) {
+        RecurrenceUnit.DAY -> R.plurals.recurrenceEveryDays
         RecurrenceUnit.WEEK -> R.plurals.recurrenceEveryWeeks
         RecurrenceUnit.MONTH -> R.plurals.recurrenceEveryMonths
         RecurrenceUnit.YEAR -> R.plurals.recurrenceEveryYears
@@ -87,6 +89,6 @@ fun recurrenceCadenceLabel(task: RecurringTaskEntity): String {
             }
         }
 
-        RecurrenceUnit.YEAR -> base
+        RecurrenceUnit.DAY, RecurrenceUnit.YEAR -> base
     }
 }

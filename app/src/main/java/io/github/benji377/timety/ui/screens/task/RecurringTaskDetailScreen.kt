@@ -39,7 +39,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -139,7 +138,11 @@ fun RecurringTaskDetailScreen(
     var newCategoryText by remember { mutableStateOf("") }
     var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
     var unit by rememberSaveable(formTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
-    var interval by rememberSaveable(formTask) { mutableIntStateOf(existingTask?.interval ?: 1) }
+    // Required, with no default: a new task starts empty so the cadence is always a deliberate choice.
+    var intervalText by rememberSaveable(formTask) {
+        mutableStateOf(existingTask?.interval?.toString() ?: "")
+    }
+    var intervalError by rememberSaveable(formTask) { mutableStateOf(false) }
     var selectedWeekdays by rememberSaveable(formTask) {
         mutableStateOf(HabitUtils.parseWeekdays(existingTask?.daysOfWeek))
     }
@@ -172,6 +175,9 @@ fun RecurringTaskDetailScreen(
     val lastAvailable = dueLocalDate?.let { RecurrenceUtils.isLastWeekdayOfMonth(it) } ?: false
 
     fun save() {
+        // Flagged up front so the field shows its error even when another check stops the save.
+        val interval = intervalText.toIntOrNull()?.takeIf { it >= 1 }
+        intervalError = interval == null
         val trimmedTitle = title.trim()
         if (trimmedTitle.isEmpty()) {
             scope.launch { snackbarHostState.showSnackbar(titleRequiredMsg) }
@@ -183,6 +189,7 @@ fun RecurringTaskDetailScreen(
             scope.launch { snackbarHostState.showSnackbar(dueRequiredMsg) }
             return
         }
+        if (interval == null) return
         val effectiveChoice = when {
             monthlyChoice == MonthlyChoice.LAST_WEEKDAY && lastAvailable -> MonthlyChoice.LAST_WEEKDAY
             monthlyChoice == MonthlyChoice.NTH_WEEKDAY && nthOrdinal != null -> MonthlyChoice.NTH_WEEKDAY
@@ -195,7 +202,7 @@ fun RecurringTaskDetailScreen(
             category = category,
             dueDate = due,
             unit = unit,
-            interval = interval.coerceAtLeast(1),
+            interval = interval,
             daysOfWeek = if (unit == RecurrenceUnit.WEEK) {
                 HabitUtils.serializeWeekdays(
                     selectedWeekdays.ifEmpty { setOf(dueLocal.dayOfWeek.value) }
@@ -340,15 +347,23 @@ fun RecurringTaskDetailScreen(
                 )
                 Spacer(Modifier.height(AppTheme.spaceMedium))
                 OutlinedTextField(
-                    value = interval.toString(),
+                    value = intervalText,
                     onValueChange = { new ->
-                        if (new.length <= 2 && new.all(Char::isDigit)) {
-                            interval = new.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                        if (new.length <= 3 && new.all(Char::isDigit)) {
+                            intervalText = new
+                            if ((new.toIntOrNull() ?: 0) >= 1) intervalError = false
                         }
                     },
                     enabled = isEditing,
                     singleLine = true,
-                    label = { Text(stringResource(R.string.recurrenceEveryLabel)) },
+                    label = { Text(stringResource(R.string.recurrenceEveryLabel) + " *") },
+                    isError = intervalError,
+                    supportingText = {
+                        if (intervalError) Text(
+                            stringResource(R.string.recurrenceEveryRequest),
+                            color = ErrorColor
+                        )
+                    },
                     leadingIcon = { Icon(Icons.Filled.Repeat, null) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.width(160.dp)

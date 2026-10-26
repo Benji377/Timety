@@ -10,10 +10,11 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity.Companion.L
 import java.time.Instant
 
 /**
- * The calendar unit a recurring task repeats on. Sub-weekly cadences are habit territory, so DAY
- * is deliberately not offered.
+ * The calendar unit a recurring task repeats on. DAY covers custom gaps like "every 10 days" that
+ * weeks and months can't express.
  */
 enum class RecurrenceUnit {
+    DAY,
     WEEK,
     MONTH,
     YEAR
@@ -34,6 +35,7 @@ enum class MonthlyMode {
  * [RecurringOccurrenceEntity] and rolls [dueDate] forward to the next occurrence.
  *
  * The rule fields are a structured subset of RFC 5545 RRULE semantics:
+ * - DAY: every [interval] days from the due date.
  * - WEEK: every [interval] weeks on the [daysOfWeek] weekdays (week-aligned to the due date).
  * - MONTH + [MonthlyMode.DAY_OF_MONTH]: every [interval] months on day [monthlyDay].
  * - MONTH + [MonthlyMode.NTH_WEEKDAY]: every [interval] months on the [monthlyOrdinal]th

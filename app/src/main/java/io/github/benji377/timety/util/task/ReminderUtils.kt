@@ -10,6 +10,7 @@ enum class ReminderPreset(val minutes: Int) {
     MINUTES_30(30),
     HOUR_1(60),
     DAY_1(24 * 60),
+    WEEK_1(7 * 24 * 60),
 }
 
 /** Why a custom reminder time was rejected. */
