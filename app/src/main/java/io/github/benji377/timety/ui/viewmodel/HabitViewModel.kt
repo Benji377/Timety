@@ -19,13 +19,11 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-
 /** Exposes habits and their completions, and applies reminder/widget side effects for changes to them. */
 class HabitViewModel(
     private val application: android.app.Application,
     private val habitRepository: HabitRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
-
     val allHabits: StateFlow<List<HabitEntity>> = habitRepository.allHabits
         .stateIn(
             scope = viewModelScope,
@@ -89,7 +87,6 @@ class HabitViewModel(
             .cancelHabitReminder(habitId)
     }
 
-
     /**
      * Commits a drag-reorder of the standalone habits visible in one list section.
      * [newSectionOrder] is only that section's post-drag order; habits outside it (in other
@@ -124,7 +121,6 @@ class HabitViewModel(
         }
     }
 
-
     /** Fresh-from-DB completions for [habitId]; [habitsWithCompletions] may not have emitted yet. */
     private suspend fun completionsOf(habitId: String): List<HabitCompletionEntity>? {
         habitRepository.getHabitById(habitId) ?: return null
@@ -154,7 +150,6 @@ class HabitViewModel(
         }
     }
 
-
     /** Marks [habitId] complete on [date], unless it is already marked complete that day. */
     fun markCompletionOnDate(habitId: String, date: Instant) {
         viewModelScope.launch {
@@ -174,7 +169,6 @@ class HabitViewModel(
         }
     }
 
-
     /** Removes [habitId]'s completion on [date], if any. */
     fun unmarkCompletionOnDate(habitId: String, date: LocalDate) {
         viewModelScope.launch {
@@ -190,7 +184,6 @@ class HabitViewModel(
         }
     }
 }
-
 
 /**
  * Replaces the subsequence of [fullOrdered] identified by [key] matching an item in

@@ -57,7 +57,6 @@ class FocusRepository(
         focusDao.insertTag(tag)
     }
 
-
     suspend fun clearAll() = withContext(Dispatchers.IO) {
         focusDao.clearAllSessions()
         focusDao.clearAllModes()

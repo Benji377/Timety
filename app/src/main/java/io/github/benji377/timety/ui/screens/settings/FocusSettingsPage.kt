@@ -39,7 +39,6 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
-
 /** Focus settings: sessions (goal, limits, tags), linked tasks and habits, and Do Not Disturb. */
 @Composable
 internal fun FocusSettings(

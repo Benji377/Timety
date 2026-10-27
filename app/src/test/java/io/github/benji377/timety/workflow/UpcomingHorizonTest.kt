@@ -30,7 +30,6 @@ import java.time.ZoneId
  */
 @RunWith(AndroidJUnit4::class)
 class UpcomingHorizonTest {
-
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val zone: ZoneId = ZoneId.systemDefault()
     private val today: LocalDate = LocalDate.now()

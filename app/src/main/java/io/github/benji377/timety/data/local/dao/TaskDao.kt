@@ -27,7 +27,6 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :id")
     fun observeTaskWithSubtasks(id: String): Flow<TaskWithSubtasks?>
 
-
     @Query(
         "SELECT * FROM tasks WHERE isCompleted = 0 AND dueDate IS NOT NULL AND dueDate < :deadline " +
                 "ORDER BY dueDate ASC"

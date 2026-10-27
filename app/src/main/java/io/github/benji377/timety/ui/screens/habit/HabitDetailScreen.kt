@@ -34,8 +34,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,19 +47,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
-import io.github.benji377.timety.ui.components.task.ReminderEntry
-import io.github.benji377.timety.ui.components.task.ReminderField
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
+import io.github.benji377.timety.ui.components.task.ReminderEntry
+import io.github.benji377.timety.ui.components.task.ReminderField
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -74,13 +75,11 @@ import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.util.habit.HabitUtils
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
-import kotlin.math.roundToInt
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Creates, views, or edits a habit. With a null [habitId] the screen starts in creation mode;
@@ -272,7 +271,7 @@ fun HabitDetailScreen(
         ) {
             // Habit name.
             item {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = name,
                     onValueChange = { name = it; if (it.isNotBlank()) nameError = false },
                     enabled = isEditing,
@@ -299,7 +298,7 @@ fun HabitDetailScreen(
                     onExpandedChange = { if (isEditing) stackNameExpanded = it },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = if (isEditing) stackName else stackName.ifBlank { "-" },
                         onValueChange = {
                             stackName = it
@@ -381,7 +380,7 @@ fun HabitDetailScreen(
 
             // Notes.
             item {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
                     enabled = isEditing,
@@ -565,6 +564,5 @@ fun HabitDetailScreen(
         }
     }
 }
-
 
 private val HABIT_DETAIL_COLORS = listOf(HabitColor) + PickerPalette

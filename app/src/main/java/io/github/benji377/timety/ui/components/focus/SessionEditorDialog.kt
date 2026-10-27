@@ -46,8 +46,10 @@ import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -61,8 +63,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 /** Default length a backfilled session is proposed with, matching one classic pomodoro. */
 private const val DEFAULT_BACKFILL_MINUTES = 25
@@ -157,7 +157,7 @@ fun SessionEditorDialog(
                 ExposedDropdownMenuBox(
                     expanded = modeExpanded,
                     onExpandedChange = { modeExpanded = it }) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = selectedMode?.let { localizedFocusModeName(it) } ?: "",
                         onValueChange = {},
                         readOnly = true,
@@ -181,7 +181,7 @@ fun SessionEditorDialog(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
                 if (fixedTargetLabel != null) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = fixedTargetLabel,
                         onValueChange = {},
                         readOnly = true,
@@ -231,8 +231,8 @@ fun SessionEditorDialog(
             }
         },
         confirmButton = {
-            Button(onClick = {
-                val mode = selectedMode ?: return@Button
+            NeoButton(onClick = {
+                val mode = selectedMode ?: return@NeoButton
                 onSave(mode, startDateTime, endDateTime, selectedTarget)
             }) { Text(stringResource(R.string.commonLabelSave)) }
         },

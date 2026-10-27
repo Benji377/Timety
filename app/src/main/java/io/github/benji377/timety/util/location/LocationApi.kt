@@ -17,7 +17,6 @@ class LocationServerException(val code: Int) : Exception("Server error: $code")
  * Photon-compatible forward-geocoding client used by the location picker.
  */
 object LocationApi {
-
     /**
      * Searches the configured endpoint and returns the raw GeoJSON features.
      * Throws [LocationServerException] on a non-200 response and the usual

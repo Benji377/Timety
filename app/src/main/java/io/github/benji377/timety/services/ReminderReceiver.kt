@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.first
 import java.time.Instant
 import java.time.LocalDate
 
-
 /** Handles a fired reminder alarm by showing its notification and re-arming it if it repeats. */
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -115,7 +114,6 @@ class ReminderReceiver : BroadcastReceiver() {
         notificationService.rescheduleIfRepeating(intent)
     }
 
-
     private suspend fun quickHabitIsActive(context: Context, id: String): Boolean {
         val app = context.applicationContext as? TimetyApplication ?: return true
         return app.container.quickHabitRepository.allQuickHabits.first()
@@ -129,7 +127,6 @@ class ReminderReceiver : BroadcastReceiver() {
         val habit = repository.getHabitById(habitId) ?: return null
         return HabitWithCompletions(habit, repository.getCompletionsForHabit(habitId).first())
     }
-
 
     private suspend fun isTodayRated(context: Context): Boolean {
         val app = context.applicationContext as? TimetyApplication ?: return false
@@ -152,7 +149,6 @@ class ReminderReceiver : BroadcastReceiver() {
         )
     }
 
-
     /** [context] wrapped in the user's chosen app locale; the plain context if unavailable. */
     private suspend fun localizedContext(context: Context): Context {
         val app = context.applicationContext as? TimetyApplication ?: return context
@@ -161,7 +157,6 @@ class ReminderReceiver : BroadcastReceiver() {
             app.container.settingsRepository.appLocaleCodeFlow.first()
         )
     }
-
 
     private suspend fun motivationBody(context: Context, fallback: String): String {
         val app = context.applicationContext as? TimetyApplication ?: return fallback
@@ -174,7 +169,6 @@ class ReminderReceiver : BroadcastReceiver() {
         val quote = quotes[LocalDate.now().dayOfMonth % quotes.size]
         return quote + todaysHabitsSuffix(app, localized)
     }
-
 
     private suspend fun todaysHabitsSuffix(app: TimetyApplication, context: Context): String {
         val habits = app.container.habitRepository.allHabits.first()

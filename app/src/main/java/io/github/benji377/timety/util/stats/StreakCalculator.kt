@@ -1,14 +1,11 @@
 package io.github.benji377.timety.util.stats
 
-
 /**
  * Computes never-miss-twice streaks over numbered steps (consecutive integers, one per day,
  * scheduled day, week, or month): a single missed step is bridged without counting, two missed
  * steps in a row end the run.
  */
 object StreakCalculator {
-
-
     /** Longest run anywhere in [metSteps]. */
     fun bestStreak(metSteps: Iterable<Long>): Int {
         val sortedSteps = metSteps.toSortedSet().toList()
@@ -30,7 +27,6 @@ object StreakCalculator {
 
         return highest
     }
-
 
     /**
      * Met steps in the run ending at [currentStep]. The step in progress is never counted as a

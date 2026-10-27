@@ -32,7 +32,6 @@ import java.time.LocalDate
  */
 @RunWith(AndroidJUnit4::class)
 class EndOfDayNotificationTest {
-
     @get:Rule
     val notificationPermission: GrantPermissionRule =
         GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)

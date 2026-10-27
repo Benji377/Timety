@@ -9,7 +9,6 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-
 /** A calendar report's span: a Monday-to-Sunday week or a calendar month. */
 enum class ReportPeriod {
     WEEK,

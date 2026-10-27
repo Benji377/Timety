@@ -34,7 +34,6 @@ import kotlinx.coroutines.runBlocking
 
 /** Single-activity entry point that sets up localization, theme, and the Compose UI tree. */
 class MainActivity : ComponentActivity() {
-
     // Locale code applied when this Activity's base context was attached. Used to
     // detect a language change and recreate the Activity so resources reload.
     private var appliedLocaleCode: String = "system"

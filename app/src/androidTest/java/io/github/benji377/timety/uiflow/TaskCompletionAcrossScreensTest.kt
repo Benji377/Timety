@@ -40,7 +40,6 @@ import java.time.Instant
  */
 @RunWith(AndroidJUnit4::class)
 class TaskCompletionAcrossScreensTest {
-
     private val permission: GrantPermissionRule =
         GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 

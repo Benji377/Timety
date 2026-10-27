@@ -31,7 +31,6 @@ import java.time.LocalDate
 @RunWith(AndroidJUnit4::class)
 @Config(qualifiers = "w412dp-h915dp-xxhdpi")
 class MoodCalendarTest {
-
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
 

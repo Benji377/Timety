@@ -14,7 +14,6 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 
 class PeriodSummaryTest {
-
     private val zone: ZoneId = ZoneOffset.UTC
 
     // Monday Oct 19 2026 to Sunday Oct 25 2026.

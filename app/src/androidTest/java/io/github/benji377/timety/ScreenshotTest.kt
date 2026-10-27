@@ -47,10 +47,8 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-
 @RunWith(AndroidJUnit4::class)
 class ScreenshotTest {
-
     // Granted before the activity launches; otherwise MainScreen's permission prompt covers the
     // freshly launched activity (the test APK is reinstalled each run, revoking prior grants).
     val permissionRule: GrantPermissionRule =

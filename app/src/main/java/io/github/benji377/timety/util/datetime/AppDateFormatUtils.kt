@@ -12,18 +12,14 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.roundToInt
 
-
 /** Locale- and user-preference-aware date/time formatting shared across the app's UI. */
 object AppDateFormatUtils {
-
-
     /** Formats a duration as `mm:ss`, e.g. a focus timer's elapsed or remaining time. */
     fun formatDuration(totalSeconds: Int): String {
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
         return "%02d:%02d".format(minutes, seconds)
     }
-
 
     /** Compact human duration: "45m", "2h", "2h 30m". */
     fun formatMinutesCompact(minutes: Int): String {
@@ -32,7 +28,6 @@ object AppDateFormatUtils {
         val rem = minutes % 60
         return if (rem == 0) "${hours}h" else "${hours}h ${rem}m"
     }
-
 
     /**
      * Duration in at most four characters, for cells too narrow for [formatMinutesCompact]:
@@ -46,7 +41,6 @@ object AppDateFormatUtils {
         val separator = DecimalFormatSymbols.getInstance(locale).decimalSeparator
         return "${tenths / 10}$separator${tenths % 10}h"
     }
-
 
     /** Parses "HH:mm" leniently; falls back to the given default and clamps to valid ranges. */
     fun parseHHmm(value: String, defaultHour: Int = 8, defaultMinute: Int = 0): Pair<Int, Int> {
@@ -77,7 +71,6 @@ object AppDateFormatUtils {
             DateTimeFormatter.ofPattern(if (use24Hour) "HH:mm" else "h:mm a", locale)
         }
 
-
     fun formatDate(
         date: LocalDate,
         dateFormatCode: String,
@@ -90,7 +83,6 @@ object AppDateFormatUtils {
         zone: ZoneId = ZoneId.systemDefault(),
         locale: Locale = Locale.getDefault()
     ): String = formatDate(instant.atZone(zone).toLocalDate(), dateFormatCode, locale)
-
 
     fun formatTime(
         time: LocalTime,
@@ -105,7 +97,6 @@ object AppDateFormatUtils {
         locale: Locale = Locale.getDefault()
     ): String = formatTime(instant.atZone(zone).toLocalTime(), use24Hour, locale)
 
-
     fun formatTimeWithSeconds(
         instant: Instant,
         use24Hour: Boolean,
@@ -116,7 +107,6 @@ object AppDateFormatUtils {
             DateTimeFormatter.ofPattern(if (use24Hour) "HH:mm:ss" else "h:mm:ss a", locale)
         }
     )
-
 
     fun formatTimeOfDay(
         hour: Int,
@@ -134,7 +124,6 @@ object AppDateFormatUtils {
         return formatTimeOfDay(hour, minute, use24Hour, locale)
     }
 
-
     fun formatDateTime(
         instant: Instant,
         dateFormatCode: String,
@@ -147,19 +136,16 @@ object AppDateFormatUtils {
                 ldt.toLocalTime().format(timeFormatter(use24Hour, locale))
     }
 
-
     fun formatMonthYear(
         date: LocalDate,
         locale: Locale = Locale.getDefault()
     ): String =
         date.format(cached("my|$locale") { DateTimeFormatter.ofPattern("MMMM yyyy", locale) })
 
-
     fun formatShortDate(
         date: LocalDate,
         locale: Locale = Locale.getDefault()
     ): String = date.format(cached("sd|$locale") { DateTimeFormatter.ofPattern("MMM d", locale) })
-
 
     fun formatWeekdayDay(
         date: LocalDate,

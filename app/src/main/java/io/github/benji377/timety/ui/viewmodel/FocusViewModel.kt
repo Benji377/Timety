@@ -42,7 +42,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
 
-
 /** A logged distraction paired with the focus session it was recorded against. */
 data class DistractionWithSession(
     val distraction: DistractionEntity,
@@ -65,7 +64,6 @@ class FocusViewModel(
     private val recurringTaskRepository: RecurringTaskRepository,
     private val settingsRepository: SettingsRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
-
     // Modes, sessions, and tags.
     val allModes: StateFlow<List<FocusModeEntity>> = focusRepository.allModes
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -75,7 +73,6 @@ class FocusViewModel(
 
     val allTags: StateFlow<List<FocusTagEntity>> = focusRepository.allTags
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
 
     // A single live query over the distractions table joined in memory with the sessions list.
     // Joining per session instead would open one Room flow PER session — hundreds of concurrent
@@ -99,7 +96,6 @@ class FocusViewModel(
         _currentModeId.value = id
     }
 
-
     private val _currentPhaseIndex = MutableStateFlow(0)
     val currentPhaseIndex = _currentPhaseIndex.asStateFlow()
     fun setCurrentPhaseIndex(index: Int) {
@@ -109,7 +105,6 @@ class FocusViewModel(
     fun resetPhaseIndex() {
         _currentPhaseIndex.value = 0
     }
-
 
     private val _awaitingContinue = MutableStateFlow(false)
     val awaitingContinue: StateFlow<Boolean> = _awaitingContinue.asStateFlow()
@@ -493,7 +488,6 @@ class FocusViewModel(
 
     fun getMinutesFocusedToday(zone: ZoneId = ZoneId.systemDefault()): Int =
         getMinutesFocusedOnDay(LocalDate.now(), zone)
-
 
     /**
      * Logs a manually backfilled session for a time range that already elapsed. Never

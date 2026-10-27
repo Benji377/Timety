@@ -9,7 +9,6 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 
 class FocusSessionDayStatsTest {
-
     private val zone: ZoneId = ZoneOffset.UTC
     private val day1 = LocalDate.of(2026, 10, 18)
     private val day2 = LocalDate.of(2026, 10, 19)

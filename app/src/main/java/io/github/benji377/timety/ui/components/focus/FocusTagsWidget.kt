@@ -40,6 +40,7 @@ import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NamedColorEditDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -49,8 +50,6 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-
 
 /** Screen listing focus tags, with actions to create, edit, and delete them. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +80,7 @@ fun FocusTagsWidget(
             contentPadding = PaddingValues(bottom = AppTheme.space3XLarge),
         ) {
             item {
-                Button(
+                NeoButton(
                     onClick = { showAddDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()

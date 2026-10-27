@@ -24,10 +24,8 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
-
 /** Small shared UI helpers: size/priority glyphs and labels, and a category color swatch. */
 object AppUtils {
-
     @StringRes
     fun priorityLabel(priority: Priority): Int = when (priority) {
         Priority.LOW -> R.string.taskPriorityLow
@@ -52,7 +50,6 @@ object AppUtils {
             TaskSize.VERY_LARGE -> "XL"
         }
     }
-
 
     /** Small color swatch identifying a task category (filter pills, category picker). */
     @Composable

@@ -79,7 +79,6 @@ fun StyledExpansionTile(
     }
 }
 
-
 /**
  * Overload of [StyledExpansionTile] that takes an arbitrary composable as the title. A lazy list
  * that emits the rows itself passes a zero [bottomSpacing] and adds the gap after its last row.

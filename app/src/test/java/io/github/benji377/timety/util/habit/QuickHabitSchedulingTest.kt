@@ -7,7 +7,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 class QuickHabitSchedulingTest {
-
     private val zone = ZoneId.of("UTC")
     private val day = LocalDate.of(2026, 7, 9)
 

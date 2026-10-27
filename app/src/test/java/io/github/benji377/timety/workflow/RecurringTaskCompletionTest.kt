@@ -33,7 +33,6 @@ import java.time.ZoneId
  */
 @RunWith(AndroidJUnit4::class)
 class RecurringTaskCompletionTest {
-
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val application = context.applicationContext as Application
     private val zone: ZoneId = ZoneId.systemDefault()

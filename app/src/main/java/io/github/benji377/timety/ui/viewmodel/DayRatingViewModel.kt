@@ -27,7 +27,6 @@ class DayRatingViewModel(
     private val dayRatingRepository: DayRatingRepository,
     settingsRepository: SettingsRepository,
 ) : AndroidViewModel(application) {
-
     val ratingsByDay: StateFlow<Map<LocalDate, DayRating>> = dayRatingRepository.allRatings
         .map(MoodStats::byDay)
         .stateIn(

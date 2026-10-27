@@ -22,7 +22,6 @@ class RecurringTaskViewModel(
     private val application: android.app.Application,
     private val recurringTaskRepository: RecurringTaskRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
-
     val allRecurringTasks: StateFlow<List<RecurringTaskWithOccurrences>> =
         recurringTaskRepository.allRecurringTasks
             .stateIn(

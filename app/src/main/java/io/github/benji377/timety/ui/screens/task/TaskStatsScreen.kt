@@ -73,7 +73,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.roundToInt
 
-
 /**
  * Shows weekly task velocity and productivity charts plus an all-time category breakdown for the
  * selected week.

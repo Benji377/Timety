@@ -2,7 +2,6 @@ package io.github.benji377.timety.data.model.focus
 
 import java.time.LocalDate
 
-
 /**
  * The user's daily focus target: [minutes] to focus on each of the ISO [weekdays] (1 = Monday).
  * Zero minutes turns the target off. When on, at least one weekday is always selected.

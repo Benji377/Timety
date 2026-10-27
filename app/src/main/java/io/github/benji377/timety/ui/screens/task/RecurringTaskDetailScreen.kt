@@ -41,8 +41,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,19 +59,21 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.task.CategoryPicker
 import io.github.benji377.timety.ui.components.task.ReminderEntry
 import io.github.benji377.timety.ui.components.task.ReminderField
-import io.github.benji377.timety.ui.components.task.reminderPresetLabel
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
 import io.github.benji377.timety.ui.components.task.recurrenceUnitName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
+import io.github.benji377.timety.ui.components.task.reminderPresetLabel
 import io.github.benji377.timety.ui.components.task.weekdayShortName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -94,8 +96,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 /** Which monthly anchoring the user picked; mapped to [MonthlyMode] plus ordinal on save. */
 private enum class MonthlyChoice { DAY_OF_MONTH, NTH_WEEKDAY, LAST_WEEKDAY }
@@ -269,7 +269,7 @@ fun RecurringTaskDetailScreen(
         ) {
             // Title and description.
             item {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
                     enabled = isEditing,
@@ -291,7 +291,7 @@ fun RecurringTaskDetailScreen(
                     onCreateCategory = { taskViewModel.createCategory(it) }
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
                     enabled = isEditing,
@@ -313,7 +313,7 @@ fun RecurringTaskDetailScreen(
                             pickerTarget = RecurringPickerTarget.DUE_DATE
                         }
                 ) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = dueDate?.let {
                             "${AppDateFormatUtils.formatDate(it, dateFmt.dateFormatCode)} " +
                                     AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
@@ -346,7 +346,7 @@ fun RecurringTaskDetailScreen(
                     activeBgColor = TaskColor,
                 )
                 Spacer(Modifier.height(AppTheme.spaceMedium))
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = intervalText,
                     onValueChange = { new ->
                         if (new.length <= 3 && new.all(Char::isDigit)) {
@@ -471,7 +471,7 @@ fun RecurringTaskDetailScreen(
             if (!isNew && !isEditing && existing != null) {
                 item {
                     val completeTask = rememberRecurringCompleter(viewModel, snackbarHostState)
-                    Button(
+                    NeoButton(
                         onClick = { completeTask(existing.task) },
                         modifier = Modifier.fillMaxWidth(),
                     ) {

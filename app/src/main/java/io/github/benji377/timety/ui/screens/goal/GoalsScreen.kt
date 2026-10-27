@@ -49,9 +49,11 @@ import io.github.benji377.timety.data.model.goal.GoalWithEntries
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.detailFieldColors
@@ -66,9 +68,6 @@ import io.github.benji377.timety.util.goal.GoalUtils
 import io.github.benji377.timety.util.habit.HabitIcons
 import java.time.Instant
 import java.time.ZoneId
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Lists the user's goals: active ones as cards with an expected-vs-actual pace indicator and a
@@ -102,7 +101,7 @@ fun GoalsScreen(
             contentPadding = PaddingValues(bottom = AppTheme.space3XLarge),
         ) {
             item {
-                Button(
+                NeoButton(
                     onClick = { onNavigateToGoalDetail(null) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -180,7 +179,6 @@ fun GoalsScreen(
         }
     }
 }
-
 
 /**
  * One goal as a card: icon swatch, name, `12 / 30 km` readout, a progress bar with a tick mark at
@@ -287,7 +285,6 @@ private fun GoalCard(
     }
 }
 
-
 /** The "ahead/behind by N unit" and "N days left / overdue" line under an active goal's bar. */
 @Composable
 private fun PaceSummaryRow(goalWithEntries: GoalWithEntries) {
@@ -329,7 +326,6 @@ private fun PaceSummaryRow(goalWithEntries: GoalWithEntries) {
     }
 }
 
-
 /** Progress bar with an optional vertical tick mark at the pace-expected fraction. */
 @Composable
 private fun PacedProgressBar(
@@ -368,7 +364,6 @@ private fun PacedProgressBar(
     }
 }
 
-
 /**
  * Dialog for logging a progress increment: an integer amount (default 1) and an editable
  * timestamp defaulting to now, so yesterday's run can still be logged honestly.
@@ -391,7 +386,7 @@ private fun GoalEntryDialog(
         title = { Text(stringResource(R.string.goalEntryDialogTitle)) },
         text = {
             Column {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = valueText,
                     onValueChange = { input ->
                         if (input.length <= 6 && input.all { it.isDigit() }) valueText = input
@@ -403,7 +398,7 @@ private fun GoalEntryDialog(
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
                 Box(modifier = Modifier.clickable { showDateTimePicker = true }) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = AppDateFormatUtils.formatDateTime(
                             timestamp,
                             dateFmt.dateFormatCode,

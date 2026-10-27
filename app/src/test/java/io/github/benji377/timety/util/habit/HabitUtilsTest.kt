@@ -13,7 +13,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 class HabitUtilsTest {
-
     private fun habit(id: String = "h1") = HabitEntity(
         id = id,
         name = "Test Habit",

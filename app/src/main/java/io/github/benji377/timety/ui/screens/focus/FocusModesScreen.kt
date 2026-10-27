@@ -36,7 +36,6 @@ import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-
 /**
  * Lists the user's focus modes and lets them create, edit, or delete one. A newly created mode
  * defaults to a 25-minute focus phase followed by a 5-minute rest phase.

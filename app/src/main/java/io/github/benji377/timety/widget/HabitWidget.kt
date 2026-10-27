@@ -47,7 +47,6 @@ import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
 
-
 /** A single flattened row in the widget's habit list: a stack header/footer or a habit entry. */
 private sealed interface HabitWidgetRow {
     data class StackHeader(val name: String, val completed: Int, val total: Int) : HabitWidgetRow
@@ -62,7 +61,6 @@ private sealed interface HabitWidgetRow {
 
     data object StackFooter : HabitWidgetRow
 }
-
 
 /** Home-screen widget showing today's due habits, including stacked-habit lock state. */
 class HabitWidget : GlanceAppWidget() {
@@ -314,7 +312,6 @@ class HabitWidget : GlanceAppWidget() {
             )
         }
     }
-
 
     private fun frequencySubtitle(context: Context, hwc: HabitWithCompletions): String =
         when (hwc.habit.frequency) {

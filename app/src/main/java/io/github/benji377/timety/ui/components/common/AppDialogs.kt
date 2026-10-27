@@ -22,10 +22,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.ui.components.common.NeoButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /** Alert dialog with cancel/confirm actions; renders nothing while [visible] is false. */
 @Composable
@@ -48,7 +47,7 @@ fun ConfirmationDialog(
             NeoTextButton(onClick = onDismiss, text = dismissLabel ?: stringResource(R.string.commonLabelCancel))
         },
         confirmButton = {
-            Button(
+            NeoButton(
                 onClick = onConfirm,
                 colors = if (confirmColor == null) ButtonDefaults.buttonColors()
                 else ButtonDefaults.buttonColors(
@@ -61,7 +60,6 @@ fun ConfirmationDialog(
         },
     )
 }
-
 
 /** Alert dialog with a single text field, confirming only if the trimmed input is non-empty. */
 @Composable
@@ -81,7 +79,7 @@ fun TextInputDialog(
     NeoDialog(onDismissRequest = onDismiss) {
         Text(title, fontSize = AppTheme.fsHeadingSmall, fontWeight = AppTheme.fwBold)
         Spacer(modifier = Modifier.height(AppTheme.spaceMedium))
-        OutlinedTextField(
+        NeoOutlinedTextField(
             value = text,
             onValueChange = { text = it },
             label = { Text(labelText) },
@@ -104,7 +102,6 @@ fun TextInputDialog(
         }
     }
 }
-
 
 /**
  * Dialog for creating or editing a named, colored item (focus tag, task category): a name
@@ -129,7 +126,7 @@ fun NamedColorEditDialog(
         Text(title, fontSize = AppTheme.fsHeadingSmall, fontWeight = AppTheme.fwBold)
         Spacer(modifier = Modifier.height(AppTheme.spaceMedium))
         Column {
-            OutlinedTextField(
+            NeoOutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text(nameLabel) },
@@ -151,7 +148,7 @@ fun NamedColorEditDialog(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             NeoTextButton(onClick = onDismiss, text = stringResource(R.string.commonLabelCancel))
             Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-            Button(onClick = {
+            NeoButton(onClick = {
                 val trimmed = name.trim()
                 if (trimmed.isNotEmpty()) {
                     onConfirm(trimmed, selectedColor.toArgb())

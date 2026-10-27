@@ -13,7 +13,6 @@ import org.junit.runner.RunWith
 /** Replays the committed schema JSONs to prove each migration upgrades cleanly without wiping user data. */
 @RunWith(AndroidJUnit4::class)
 class MigrationTest {
-
     @get:Rule
     val helper = MigrationTestHelper(
         InstrumentationRegistry.getInstrumentation(),

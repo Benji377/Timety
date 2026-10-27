@@ -15,11 +15,8 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-
 /** Habit scheduling, completion, and stack-locking rules shared by the habit list and widgets. */
 object HabitUtils {
-
-
     /** Parses a `"[1,3,5]"`-style stored weekday set back into ISO weekday numbers (1 = Monday). */
     fun parseWeekdays(raw: String?): Set<Int> {
         if (raw.isNullOrBlank()) return emptySet()
@@ -29,23 +26,18 @@ object HabitUtils {
             .toSet()
     }
 
-
     /** Serializes weekday numbers into the `"[1,3,5]"` format read by [parseWeekdays]. */
     fun serializeWeekdays(days: Set<Int>): String =
         days.sorted().joinToString(separator = ",", prefix = "[", postfix = "]")
 
-
     /** The most reminder times a single habit can have. */
     const val MAX_REMINDER_TIMES = 5
-
 
     /** The highest target of a weekly flexible habit: every day of the week. */
     const val MAX_TARGET_PER_WEEK = 7
 
-
     /** The highest target of a monthly flexible habit, reachable even in February. */
     const val MAX_TARGET_PER_MONTH = 28
-
 
     /** Parses a stored `"[480,1200]"` reminder list into sorted, distinct minutes from midnight. */
     fun parseReminderTimes(raw: String?): List<Int> {
@@ -59,13 +51,11 @@ object HabitUtils {
             .take(MAX_REMINDER_TIMES)
     }
 
-
     /** Serializes reminder times into the format read by [parseReminderTimes]; null when empty. */
     fun serializeReminderTimes(times: Collection<Int>): String? =
         times.takeIf { it.isNotEmpty() }
             ?.sorted()
             ?.joinToString(separator = ",", prefix = "[", postfix = "]")
-
 
     // Compares instants against the day's bounds, computed once, rather than converting every
     // completion to a local date: these run per habit tile on every recomposition.
@@ -75,7 +65,6 @@ object HabitUtils {
         val end = date.plusDays(1).atStartOfDay(zone).toInstant()
         return hwc.completions.any { !it.completionDate.isBefore(start) && it.completionDate.isBefore(end) }
     }
-
 
     /**
      * Counts completions in the current period of [hwc]'s flexible target: the calendar month for
@@ -102,7 +91,6 @@ object HabitUtils {
         }
     }
 
-
     /**
      * Whether [hwc] should appear in today's habit list: daily habits always are, exact-weekday
      * habits check today against their target days, and weekly flexible habits are due as long as
@@ -124,7 +112,6 @@ object HabitUtils {
         }
     }
 
-
     /**
      * Whether a reminder for [hwc] should fire today: the habit is on today's list and not yet
      * done today. A weekly flexible habit whose target is met drops off the list, so it stops
@@ -132,7 +119,6 @@ object HabitUtils {
      */
     fun needsReminderToday(hwc: HabitWithCompletions): Boolean =
         isHabitDueToday(hwc) && !isCompletedOn(hwc, LocalDate.now())
-
 
     /**
      * When [hwc]'s next reminder should ring after [now], or null if it has none. A habit keeps a
@@ -162,14 +148,12 @@ object HabitUtils {
         return null
     }
 
-
     /** Whether a flexible-frequency habit already met this week's or month's target before today. */
     fun isPeriodGoalMet(hwc: HabitWithCompletions): Boolean {
         if (!hwc.habit.frequency.isFlexible) return false
         val doneThisPeriod = getCompletionsThisPeriod(hwc, includeToday = false)
         return doneThisPeriod >= (hwc.habit.targetCount ?: 1)
     }
-
 
     /** Localized subtitle describing a habit's schedule, e.g. "Daily" or "3/5 this week". */
     @Composable
@@ -196,7 +180,6 @@ object HabitUtils {
         }
     }
 
-
     /**
      * A stacked habit is locked until the one before it in the stack is done: the first habit in
      * a stack ([index] 0) is never locked, and any already-completed habit is never locked either.
@@ -208,12 +191,10 @@ object HabitUtils {
     ): Boolean =
         index > 0 && !isCurrentHabitDone && !isPreviousHabitDone
 
-
     fun isStackFullyCompleted(stackHabits: List<HabitWithCompletions>, date: LocalDate): Boolean {
         if (stackHabits.isEmpty()) return false
         return stackHabits.all { isCompletedOn(it, date) }
     }
-
 
     fun getStackCompletionCount(stackHabits: List<HabitWithCompletions>, date: LocalDate): Int =
         stackHabits.count { isCompletedOn(it, date) }

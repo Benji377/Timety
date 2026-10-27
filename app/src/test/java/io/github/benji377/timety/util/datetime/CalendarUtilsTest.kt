@@ -8,7 +8,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class CalendarUtilsTest {
-
     private fun assertCoversWholeMonth(month: LocalDate) {
         val weeks = CalendarUtils.generateWeeks(month)
         val days = weeks.flatten()

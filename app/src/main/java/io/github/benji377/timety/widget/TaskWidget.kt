@@ -51,7 +51,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-
 /** One row of the task widget: a plain or recurring task with its tap route and check action. */
 private data class TaskWidgetRow(
     val id: String,
@@ -61,7 +60,6 @@ private data class TaskWidgetRow(
     val dueLabel: String,
     val isOverdue: Boolean,
 )
-
 
 /**
  * Home-screen widget mirroring the Home screen's task lists: everything due today or earlier,
@@ -183,7 +181,6 @@ class TaskWidget : GlanceAppWidget() {
         }
     }
 
-
     @androidx.compose.runtime.Composable
     private fun TaskRowItem(context: Context, row: TaskWidgetRow) {
         val detailRoute = if (row.isRecurring) {
@@ -253,7 +250,6 @@ class TaskWidget : GlanceAppWidget() {
         }
     }
 
-
     /** Time of day for tasks due today, a short date otherwise; empty when there is no due date. */
     private fun dueLabel(
         dueDate: Instant?,
@@ -269,7 +265,6 @@ class TaskWidget : GlanceAppWidget() {
             AppDateFormatUtils.formatShortDate(dueDay)
         }
     }
-
 
     private fun priorityColor(priority: Priority) = when (priority) {
         Priority.LOW -> TaskColor

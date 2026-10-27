@@ -214,7 +214,6 @@ class SettingsViewModel(
     fun setAccordionExpanded(key: AccordionKey, expanded: Boolean) =
         viewModelScope.launch { repository.saveAccordionExpanded(key, expanded) }
 
-
     private suspend fun resyncNotifications() {
         ReminderScheduler.resyncAll(application)
     }

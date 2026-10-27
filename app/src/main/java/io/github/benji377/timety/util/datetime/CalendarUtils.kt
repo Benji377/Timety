@@ -3,11 +3,8 @@ package io.github.benji377.timety.util.datetime
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-
 /** Builds the Monday-start week grid used by the calendar month view. */
 object CalendarUtils {
-
-
     /**
      * Splits [month] into full Monday-to-Sunday weeks that together cover every day of the
      * month, padded with the trailing/leading days of adjacent months so each week has 7 days.
@@ -35,6 +32,5 @@ object CalendarUtils {
 
         return weeks
     }
-
 
 }

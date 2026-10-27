@@ -6,7 +6,6 @@ import java.time.LocalDate
 import java.util.Locale
 
 class AppDateFormatUtilsTest {
-
     @Test
     fun testFormatDuration() {
         assertEquals("00:00", AppDateFormatUtils.formatDuration(0))

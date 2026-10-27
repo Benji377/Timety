@@ -13,7 +13,6 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class EveningSummaryTest {
-
     private val now = Instant.parse("2026-10-06T18:00:00Z")
 
     private fun task(title: String, due: Instant?, done: Boolean = false) = TaskEntity(

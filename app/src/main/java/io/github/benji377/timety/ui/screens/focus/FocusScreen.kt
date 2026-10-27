@@ -44,8 +44,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,12 +68,13 @@ import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.FocusTargetType
-import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.services.FocusTimerService
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -96,11 +97,9 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import kotlin.math.roundToInt
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-
 
 // durationMinutes encodes special cases: 0 means a stopwatch phase with no fixed length, and -1
 // means a flexible phase whose length is set by the user via flexibleMinutes.
@@ -112,7 +111,6 @@ private fun secondsForPhase(
     -1 -> flexibleMinutes * 60
     else -> phase.durationMinutes * 60
 }
-
 
 /**
  * Test tags for the transport controls. Their icons swap with timer state and carry no content
@@ -510,7 +508,7 @@ fun FocusScreen(
 
                 Spacer(modifier = Modifier.width(32.dp))
 
-                Button(
+                NeoButton(
                     onClick = {
                         when {
                             isRunning -> requestStop()

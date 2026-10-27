@@ -2,12 +2,9 @@ package io.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,20 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Today
-import androidx.compose.material.icons.outlined.Insights
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,62 +28,35 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
-import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.color
-import io.github.benji377.timety.data.model.habit.HabitFrequency
-import io.github.benji377.timety.data.model.habit.HabitWithCompletions
-import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
-import io.github.benji377.timety.data.model.task.RecurringTaskEntity
-import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
-import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.calendar.PeriodReportDialog
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.MonthNavigator
 import io.github.benji377.timety.ui.components.common.NeoIconButton
-import io.github.benji377.timety.ui.components.common.NeoListTile
-import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.StyledExpansionTile
-import io.github.benji377.timety.ui.components.focus.EditSessionDialog
-import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
 import io.github.benji377.timety.ui.components.task.rememberTaskCompletionToggle
 import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
-import io.github.benji377.timety.ui.theme.SuccessColor
-import io.github.benji377.timety.ui.theme.TaskColor
-import io.github.benji377.timety.ui.utils.AppUtils
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
-import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.datetime.CalendarUtils
-import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.calendar.CalendarDayItems
 import io.github.benji377.timety.util.stats.PeriodSummary
 import io.github.benji377.timety.util.stats.ReportPeriod
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-
 
 /**
  * Calendar screen showing a month grid plus, for the selected day, accordion lists of due tasks,
@@ -126,48 +88,8 @@ fun CalendarScreen(
     // The report being shown, as (period, first day); a Pair of Serializables survives rotation.
     var openReport by rememberSaveable { mutableStateOf<Pair<ReportPeriod, LocalDate>?>(null) }
 
-    // Filter and sort the task/session/habit data for the selected day's accordion lists.
-    val selectedDayTasks = remember(tasks, selectedDate) {
-        selectedDate?.let { d ->
-            tasks.filter { t -> t.task.dueDate?.atZone(zone)?.toLocalDate() == d }
-                .sortedByDescending { it.task.priority.ordinal }
-        } ?: emptyList()
-    }
-
-    val selectedDaySessions = remember(sessions, selectedDate) {
-        selectedDate?.let { d ->
-            sessions.filter { s -> s.startTime.atZone(zone).toLocalDate() == d }
-                .sortedBy { it.startTime }
-        } ?: emptyList()
-    }
-
-    // Recurring tasks due on the selected day plus occurrences completed on it. Completing one
-    // advances its due date, so the upcoming entry moves to the next cycle on its own while the
-    // logged occurrence keeps the completion day marked.
-    val selectedDayRecurringDue = remember(recurringItems, selectedDate) {
-        selectedDate?.let { d ->
-            recurringItems.map { it.task }
-                .filter { it.dueDate.atZone(zone).toLocalDate() == d }
-                .sortedBy { it.dueDate }
-        } ?: emptyList()
-    }
-    val selectedDayRecurringDone = remember(recurringItems, selectedDate) {
-        selectedDate?.let { d ->
-            recurringItems.flatMap { item ->
-                item.occurrences
-                    .filter { it.completedAt.atZone(zone).toLocalDate() == d }
-                    .map { item.task to it }
-            }.sortedBy { it.second.completedAt }
-        } ?: emptyList()
-    }
-
-    // Combine habits scheduled for this day + habits actually completed on this day.
-    val selectedDayHabits = remember(habitsWithCompletions, selectedDate) {
-        selectedDate?.let { d ->
-            val scheduled = habitsWithCompletions.filter { isHabitScheduledOn(it, d) }
-            val completed = habitsWithCompletions.filter { HabitUtils.isCompletedOn(it, d) }
-            (scheduled + completed).distinctBy { it.habit.id }
-        } ?: emptyList()
+    val dayItems = remember(selectedDate, tasks, recurringItems, habitsWithCompletions, sessions) {
+        selectedDate?.let { CalendarDayItems.of(it, tasks, recurringItems, habitsWithCompletions, sessions, zone) }
     }
 
     openReport?.let { (period, start) ->
@@ -263,7 +185,7 @@ fun CalendarScreen(
                         color = MaterialTheme.colorScheme.outline
                     )
             ) {
-                if (selectedDate == null) {
+                if (selectedDate == null || dayItems == null) {
                     Text(
                         text = stringResource(R.string.calendarLabelSelect),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -277,14 +199,13 @@ fun CalendarScreen(
                     ) {
                         item {
                             HabitsAccordion(
-                                habits = selectedDayHabits,
+                                habits = dayItems.habits,
                                 selectedDate = d,
                                 onToggle = { habit, isCompleted ->
                                     if (isCompleted) {
                                         habitViewModel.unmarkCompletionOnDate(habit.habit.id, d)
                                     } else {
-                                        val now = java.time.LocalTime.now()
-                                        val retroInstant = d.atTime(now).atZone(zone).toInstant()
+                                        val retroInstant = d.atTime(LocalTime.now()).atZone(zone).toInstant()
                                         habitViewModel.markCompletionOnDate(
                                             habit.habit.id,
                                             retroInstant
@@ -296,9 +217,9 @@ fun CalendarScreen(
                         }
                         item {
                             TasksAccordion(
-                                tasks = selectedDayTasks,
-                                recurringDue = selectedDayRecurringDue,
-                                recurringDone = selectedDayRecurringDone,
+                                tasks = dayItems.tasks,
+                                recurringDue = dayItems.recurringDue,
+                                recurringDone = dayItems.recurringDone,
                                 onToggle = { task -> toggleTaskCompletion(task.task) },
                                 onTaskClick = { task -> onNavigateToTask(task.task.id) },
                                 onCompleteRecurring = completeRecurring,
@@ -310,7 +231,7 @@ fun CalendarScreen(
                         }
                         item {
                             FocusSessionsAccordion(
-                                sessions = selectedDaySessions,
+                                sessions = dayItems.sessions,
                                 focusViewModel = focusViewModel
                             )
                         }
@@ -318,594 +239,5 @@ fun CalendarScreen(
                 }
             }
         }
-    }
-}
-
-
-private fun isHabitScheduledOn(hwc: HabitWithCompletions, date: LocalDate): Boolean {
-    return when (hwc.habit.frequency) {
-        HabitFrequency.DAILY -> true
-        HabitFrequency.WEEKLY_FLEXIBLE -> true
-        HabitFrequency.WEEKLY_EXACT -> HabitUtils.parseWeekdays(hwc.habit.targetWeekdays)
-            .contains(date.dayOfWeek.value)
-        // No due days: it shows only on the days it was done.
-        HabitFrequency.MONTHLY_FLEXIBLE -> false
-    }
-}
-
-@Composable
-private fun CalendarGrid(
-    focusedMonth: LocalDate,
-    selectedDate: LocalDate?,
-    tasks: List<TaskWithSubtasks>,
-    sessions: List<FocusSessionEntity>,
-    habitsWithCompletions: List<HabitWithCompletions>,
-    recurringItems: List<RecurringTaskWithOccurrences>,
-    onDaySelected: (LocalDate) -> Unit,
-    onOpenWeeklyReport: (weekStart: LocalDate) -> Unit,
-    onOpenMonthlyReport: () -> Unit,
-) {
-    val zone = ZoneId.systemDefault()
-    val weeks = remember(focusedMonth) { CalendarUtils.generateWeeks(focusedMonth) }
-    val today = LocalDate.now()
-
-    // Pre-compute sets of dates with activity for O(1) lookup during grid generation.
-    // Recurring tasks mark their next due day and every completed occurrence's day.
-    val taskDates = remember(tasks, recurringItems) {
-        val taskDays = tasks.mapNotNull { it.task.dueDate }
-            .map { it.atZone(zone).toLocalDate() }
-        val recurringDays = recurringItems.flatMap { item ->
-            item.occurrences.map { it.completedAt } + item.task.dueDate
-        }.map { it.atZone(zone).toLocalDate() }
-        (taskDays + recurringDays).toSet()
-    }
-    val sessionDates = remember(sessions) {
-        sessions.map { it.startTime.atZone(zone).toLocalDate() }.toSet()
-    }
-    val habitDates = remember(habitsWithCompletions) {
-        habitsWithCompletions.flatMap { it.completions }
-            .map { it.completionDate.atZone(zone).toLocalDate() }
-            .toSet()
-    }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        // Header row: Mon..Sun + Weekly summary column.
-        Row(modifier = Modifier.fillMaxWidth()) {
-            val headers = listOf(
-                stringResource(R.string.calendarHeaderMon),
-                stringResource(R.string.calendarHeaderTue),
-                stringResource(R.string.calendarHeaderWed),
-                stringResource(R.string.calendarHeaderThu),
-                stringResource(R.string.calendarHeaderFri),
-                stringResource(R.string.calendarHeaderSat),
-                stringResource(R.string.calendarHeaderSun)
-            )
-            headers.forEach { header ->
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(bottom = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        header,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            // An icon rather than a "Weekly" label: no translation of that word fits the column on a
-            // small phone, and the icon also reads as tappable. Heading the whole column, it opens
-            // the shown month's report, while each week chip below opens its own week.
-            Box(
-                modifier = Modifier
-                    .weight(1.5f)
-                    .padding(bottom = 8.dp)
-                    .clip(AppTheme.brMedium)
-                    .clickable(onClick = onOpenMonthlyReport),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Outlined.Insights,
-                    contentDescription = stringResource(R.string.calendarMonthlyReportTitle),
-                    tint = TaskColor,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-
-        // Memoized: these scans touch every task/completion/session for all ~6 week rows and
-        // would otherwise re-run on every recomposition (e.g. each day tap).
-        val weeklySummaries = remember(weeks, tasks, sessions, habitsWithCompletions, recurringItems) {
-            val plainTasks = tasks.map { it.task }
-            val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
-            weeks.associateWith { week ->
-                PeriodSummary.of(
-                    week.first()..ReportPeriod.WEEK.endOf(week.first()),
-                    plainTasks, recurringItems, habitCompletions, sessions, zone
-                )
-            }
-        }
-        // Bars compare the weeks on screen with each other, so they scale to the busiest one.
-        val maxTasksCompleted = weeklySummaries.values.maxOfOrNull { it.tasksCompleted } ?: 0
-        val maxHabitCheckIns = weeklySummaries.values.maxOfOrNull { it.habitCheckIns } ?: 0
-        // Three rows of text would overflow the fixed-height chip at large font sizes, so the
-        // number gives way there and the bars carry the week on their own.
-        val showFocusTime = LocalDensity.current.fontScale <= MAX_FONT_SCALE_FOR_WEEK_NUMBER
-
-        weeks.forEach { week ->
-            val summary = weeklySummaries.getValue(week)
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                week.forEach { day ->
-                    val isCurrentMonth = day.month == focusedMonth.month
-                    val isSelected = day == selectedDate
-                    val isToday = day == today
-                    val hasTasks = day in taskDates
-                    val hasFocus = day in sessionDates
-                    val hasHabits = day in habitDates
-
-                    // Only the selected day and today get a border; plain cells stay borderless,
-                    // because outlining all ~35-42 cells reads as a cage rather than a grid.
-                    val cellBorderColor = when {
-                        // The selected cell's own fill is neutral, so its border is what actually
-                        // marks it: full-contrast `onSurface` ink, a step up from the muted
-                        // hairline used elsewhere.
-                        isSelected -> MaterialTheme.colorScheme.onSurface
-                        isToday -> TaskColor
-                        else -> Color.Transparent
-                    }
-                    // Padding sits outside the fixed height so the selection outline keeps clear of the dots.
-                    val dayInteractionSource = remember { MutableInteractionSource() }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(4.dp)
-                            .height(45.dp)
-                            .background(
-                                // Selection is a *neutral* fill, not the saturated TaskColor block
-                                // it used to be: a blue cell swallows the blue task dot, which
-                                // forced every dot on the selected day to go white and threw away
-                                // the whole point of the color coding. surfaceVariant plus the ink
-                                // border reads as selected while leaving the dots legible.
-                                color = if (isSelected) {
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                } else {
-                                    Color.Transparent
-                                },
-                                shape = AppTheme.brMedium
-                            )
-                            .border(
-                                width = AppTheme.borderHairline,
-                                color = cellBorderColor,
-                                shape = AppTheme.brMedium
-                            )
-                            .clickable(
-                                interactionSource = dayInteractionSource,
-                                indication = ripple(),
-                            ) { onDaySelected(day) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = day.dayOfMonth.toString(),
-                                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
-                                color = when {
-                                    isSelected || isCurrentMonth -> MaterialTheme.colorScheme.onSurface
-                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            // The dots keep their per-category colors on every day, selected
-                            // included - the color coding is the only place in the grid that says
-                            // *what* a day contains, so it must survive selection.
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (hasTasks) Dot(TaskColor)
-                                if (hasTasks && (hasFocus || hasHabits)) Spacer(
-                                    modifier = Modifier.width(
-                                        2.dp
-                                    )
-                                )
-                                if (hasFocus) Dot(SuccessColor)
-                                if (hasFocus && hasHabits) Spacer(modifier = Modifier.width(2.dp))
-                                if (hasHabits) Dot(HabitColor)
-                                if (!hasTasks && !hasFocus && !hasHabits) Spacer(
-                                    modifier = Modifier.height(
-                                        5.dp
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Filled chip, deliberately borderless: these stack flush in a column of six, one
-                // per week row, and an outline on each turned the column into a visible ladder
-                // running down the side of the grid. The fill alone is enough to separate the
-                // summary from the day cells beside it.
-                WeekSummaryChip(
-                    summary = summary,
-                    maxTasksCompleted = maxTasksCompleted,
-                    maxHabitCheckIns = maxHabitCheckIns,
-                    showFocusTime = showFocusTime,
-                    onClick = { onOpenWeeklyReport(week.first()) },
-                    modifier = Modifier.weight(1.5f)
-                )
-            }
-        }
-    }
-}
-
-/**
- * One week row's summary: focus time as the only number (its green dots count the same sessions,
- * so it can't disagree with them), then bars for completed tasks and habit check-ins. Exact
- * values live in the weekly report and in the chip's content description.
- */
-@Composable
-private fun WeekSummaryChip(
-    summary: PeriodSummary,
-    maxTasksCompleted: Int,
-    maxHabitCheckIns: Int,
-    showFocusTime: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val description = stringResource(
-        R.string.calendarWeekSummaryDescription,
-        summary.tasksCompleted,
-        summary.habitCheckIns,
-        AppDateFormatUtils.formatMinutesCompact(summary.focusMinutes)
-    )
-    Box(
-        modifier = modifier
-            .height(53.dp)
-            .padding(horizontal = AppTheme.spaceXSmall)
-            .clip(AppTheme.brMedium)
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
-            .clearAndSetSemantics { contentDescription = description },
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(horizontal = AppTheme.spaceSmall)
-        ) {
-            if (showFocusTime) {
-                Text(
-                    // A dash keeps empty and future weeks quiet instead of a column of "0m".
-                    text = if (summary.focusMinutes > 0) {
-                        AppDateFormatUtils.formatMinutesTiny(summary.focusMinutes)
-                    } else {
-                        "-"
-                    },
-                    color = if (summary.focusMinutes > 0) {
-                        SuccessColor
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.height(3.dp))
-            }
-            WeekBar(summary.tasksCompleted, maxTasksCompleted, TaskColor)
-            Spacer(modifier = Modifier.height(3.dp))
-            WeekBar(summary.habitCheckIns, maxHabitCheckIns, HabitColor)
-        }
-    }
-}
-
-@Composable
-private fun WeekBar(value: Int, max: Int, color: Color) {
-    NeoProgressBar(
-        progress = { if (max > 0) value.toFloat() / max else 0f },
-        color = color,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(4.dp)
-    )
-}
-
-/** Above this system font scale the week chip drops its number; see [WeekSummaryChip]. */
-private const val MAX_FONT_SCALE_FOR_WEEK_NUMBER = 1.3f
-
-@Composable
-private fun Dot(color: Color) {
-    Box(
-        modifier = Modifier
-            .size(5.dp)
-            .background(color, shape = CircleShape)
-    )
-}
-
-// Accordion widgets for the day-detail lists below.
-
-@Composable
-private fun HabitsAccordion(
-    habits: List<HabitWithCompletions>,
-    selectedDate: LocalDate,
-    onToggle: (HabitWithCompletions, Boolean) -> Unit,
-    onHabitClick: (HabitWithCompletions) -> Unit
-) {
-    StyledExpansionTile(
-        title = stringResource(R.string.calendarSectionHabits, habits.size),
-        titleColor = HabitColor,
-        initiallyExpanded = false
-    ) {
-        if (habits.isEmpty()) {
-            Text(
-                text = stringResource(R.string.calendarSectionHabitsEmpty),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(16.dp)
-            )
-        } else {
-            habits.forEach { hwc ->
-                val isCompleted = HabitUtils.isCompletedOn(hwc, selectedDate)
-                NeoListTile(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppTheme.listTileScreenMargin)
-                        .clickable { onHabitClick(hwc) },
-                    containerColor = MaterialTheme.colorScheme.background,
-                    // Completion is already conveyed by the strikethrough + dimmed text below;
-                    // the border stays a solid color rather than an alpha-faded one (reference
-                    // sheet forbids soft borders) - falling back to the neutral outline reads as
-                    // "no longer the active accent" without inventing a new faded tone.
-                    borderColor = if (isCompleted) MaterialTheme.colorScheme.outline else HabitColor,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(AppTheme.spaceMedium),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = isCompleted,
-                            onCheckedChange = { onToggle(hwc, isCompleted) },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = SuccessColor,
-                                uncheckedColor = HabitColor,
-                                checkmarkColor = Color.White
-                            )
-                        )
-                        Text(
-                            text = hwc.habit.name,
-                            textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
-                            color = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-        }
-    }
-}
-
-@Composable
-private fun TasksAccordion(
-    tasks: List<TaskWithSubtasks>,
-    recurringDue: List<RecurringTaskEntity>,
-    recurringDone: List<Pair<RecurringTaskEntity, RecurringOccurrenceEntity>>,
-    onToggle: (TaskWithSubtasks) -> Unit,
-    onTaskClick: (TaskWithSubtasks) -> Unit,
-    onCompleteRecurring: (RecurringTaskEntity) -> Unit,
-    onUncheckRecurring: (RecurringOccurrenceEntity) -> Unit,
-    onRecurringClick: (RecurringTaskEntity) -> Unit,
-) {
-    val totalCount = tasks.size + recurringDue.size + recurringDone.size
-    StyledExpansionTile(
-        title = stringResource(R.string.calendarSectionTasks, totalCount),
-        titleColor = TaskColor,
-        initiallyExpanded = false
-    ) {
-        if (totalCount == 0) {
-            Text(
-                text = stringResource(R.string.calendarSectionTasksEmpty),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(16.dp)
-            )
-        } else {
-            tasks.forEach { taskWithSubtasks ->
-                val task = taskWithSubtasks.task
-                DayTaskRow(
-                    title = task.title,
-                    isCompleted = task.isCompleted,
-                    onToggle = { onToggle(taskWithSubtasks) },
-                    onClick = { onTaskClick(taskWithSubtasks) },
-                    trailing = { AppUtils.PriorityIcon(priority = task.priority) },
-                )
-            }
-            recurringDue.forEach { task ->
-                DayTaskRow(
-                    title = task.title,
-                    isCompleted = false,
-                    onToggle = { onCompleteRecurring(task) },
-                    onClick = { onRecurringClick(task) },
-                    trailing = { RecurringMarkerIcon() },
-                )
-            }
-            recurringDone.forEach { (task, occurrence) ->
-                DayTaskRow(
-                    title = task.title,
-                    isCompleted = true,
-                    onToggle = { onUncheckRecurring(occurrence) },
-                    onClick = { onRecurringClick(task) },
-                    trailing = { RecurringMarkerIcon() },
-                )
-            }
-            Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-        }
-    }
-}
-
-/** Checkbox row card shared by normal and recurring tasks in the day-detail task accordion. */
-@Composable
-private fun DayTaskRow(
-    title: String,
-    isCompleted: Boolean,
-    onToggle: () -> Unit,
-    onClick: () -> Unit,
-    trailing: @Composable () -> Unit,
-) {
-    NeoListTile(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(AppTheme.listTileScreenMargin)
-            .clickable { onClick() },
-        containerColor = MaterialTheme.colorScheme.background,
-        borderColor = if (isCompleted) SuccessColor else TaskColor,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(AppTheme.spaceMedium),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = isCompleted,
-                onCheckedChange = { onToggle() },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = SuccessColor,
-                    uncheckedColor = TaskColor,
-                    checkmarkColor = Color.White
-                )
-            )
-            Text(
-                text = title,
-                modifier = Modifier.weight(1f),
-                textDecoration = if (isCompleted) TextDecoration.LineThrough else null
-            )
-            trailing()
-        }
-    }
-}
-
-@Composable
-private fun RecurringMarkerIcon() {
-    Icon(
-        imageVector = Icons.Filled.Repeat,
-        contentDescription = null,
-        tint = TaskColor,
-        modifier = Modifier.size(AppTheme.iconSizeSmall),
-    )
-}
-
-@Composable
-private fun FocusSessionsAccordion(
-    sessions: List<FocusSessionEntity>,
-    focusViewModel: FocusViewModel
-) {
-    val modes by focusViewModel.allModes.collectAsState()
-    val tags by focusViewModel.allTags.collectAsState()
-    val zone = ZoneId.systemDefault()
-    val use24Hour =
-        LocalDateFormatSettings.current.use24HourFormat
-    val ongoingLabel = stringResource(R.string.calendarLabelFocusOngoing)
-    val untaggedLabel = stringResource(R.string.focusTargetUntagged)
-    var editingSession by remember { mutableStateOf<FocusSessionEntity?>(null) }
-
-    StyledExpansionTile(
-        title = stringResource(R.string.calendarSectionFocus, sessions.size),
-        titleColor = SuccessColor,
-        initiallyExpanded = false
-    ) {
-        if (sessions.isEmpty()) {
-            Text(
-                text = stringResource(R.string.calendarSectionFocusEmpty),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(16.dp)
-            )
-        } else {
-            sessions.forEach { session ->
-                val mode = modes.firstOrNull { it.id == session.modeId } ?: modes.firstOrNull()
-                val tag = session.tagId?.let { tagId -> tags.firstOrNull { it.id == tagId } }
-
-                var timeString =
-                    AppDateFormatUtils.formatTime(
-                        session.startTime,
-                        use24Hour,
-                        zone
-                    )
-                timeString += if (session.endTime != null) {
-                    " - ${
-                        AppDateFormatUtils.formatTime(
-                            session.endTime,
-                            use24Hour,
-                            zone
-                        )
-                    }"
-                } else {
-                    " - $ongoingLabel"
-                }
-
-                val focusMins = session.totalSecondsFocused / 60
-
-                NeoListTile(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppTheme.listTileScreenMargin)
-                        .clickable { editingSession = session },
-                    containerColor = MaterialTheme.colorScheme.background,
-                    // Focus rows take the same accent-border treatment as the habit and task rows
-                    // above, using the color this screen already gives focus activity. The previous
-                    // `outlineVariant` was the soft tan the general fixes ban outright.
-                    borderColor = SuccessColor,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(AppTheme.spaceLarge),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Circle,
-                            contentDescription = null,
-                            // Solid fallback instead of an alpha-faded tint -
-                            // untagged sessions get the same neutral solid used for muted text
-                            // elsewhere on this screen.
-                            tint = tag?.let { Color(it.colorValue) }
-                                ?: session.targetType.takeIf { it != FocusTargetType.TAG }?.color
-                                ?: MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            // Sessions linked to anything but a tag carry no tag, so name them by
-                            // the target they were logged against rather than calling them untagged.
-                            val title = tag?.name
-                                ?: session.targetLabel?.trim()?.takeIf { it.isNotEmpty() }
-                                ?: untaggedLabel
-                            Text(text = title, fontWeight = FontWeight.Bold)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            if (mode != null) {
-                                Text(text = localizedFocusModeName(mode), fontSize = 13.sp)
-                                Spacer(modifier = Modifier.height(2.dp))
-                            }
-                            Text(
-                                text = timeString,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        Text(
-                            text = stringResource(R.string.focusMinutes, focusMins),
-                            color = SuccessColor,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-        }
-    }
-
-    editingSession?.let { session ->
-        EditSessionDialog(
-            session = session,
-            focusViewModel = focusViewModel,
-            onDismiss = { editingSession = null },
-        )
     }
 }

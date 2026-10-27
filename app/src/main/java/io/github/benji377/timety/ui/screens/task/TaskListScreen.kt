@@ -51,6 +51,7 @@ import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
@@ -72,8 +73,6 @@ import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.TaskFilterEngine
 import java.time.Instant
 import java.time.ZoneId
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Shows all tasks grouped into overdue, due-today, upcoming, and completed sections, with search,
@@ -190,7 +189,7 @@ fun TaskListScreen(
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.weight(1f),

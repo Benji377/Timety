@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 
-
 /** Bold section title with an optional muted subtitle, heading the stats-screen cards. */
 @Composable
 fun SectionHeader(title: String, subtitle: String? = null) {
@@ -33,7 +32,6 @@ fun SectionHeader(title: String, subtitle: String? = null) {
         }
     }
 }
-
 
 /** Small filled circle keying a chart legend or breakdown row to its series color. */
 @Composable

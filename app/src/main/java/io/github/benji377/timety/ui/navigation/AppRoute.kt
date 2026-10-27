@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.navigation
 
-
 /** Navigation destinations for the app's `NavHost`, paired with their route path segment. */
 enum class AppRoute(val route: String) {
     CALENDAR("calendar"),

@@ -46,7 +46,6 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import kotlinx.coroutines.launch
 
-
 /** Data & backup settings: export to a file or share sheet, and restore from a backup file. */
 @Composable
 internal fun DataBackupSettings(

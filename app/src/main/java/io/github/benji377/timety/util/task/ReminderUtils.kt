@@ -24,7 +24,6 @@ data class ReminderShift(val reminders: List<Instant>, val changed: Boolean)
  * reminder with the due date, so no offset is stored. Pure and unit-testable.
  */
 object ReminderUtils {
-
     /** Matches the scheduler's notification slots (11) with one spare. */
     const val MAX_REMINDERS = 10
 

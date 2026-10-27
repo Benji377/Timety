@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
 
-
 /**
  * Renders [items] in a plain [Column]. While [isReorderEnabled], each item drags immediately (no
  * long-press) to swap past its neighbors, and [onOrderChanged] fires with the new order on drag

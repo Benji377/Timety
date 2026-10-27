@@ -11,7 +11,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class MoodStatsTest {
-
     private fun row(key: String, value: Int) = DayRatingEntity(key, value, Instant.EPOCH)
 
     @Test

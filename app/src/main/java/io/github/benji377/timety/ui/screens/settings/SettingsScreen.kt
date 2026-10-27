@@ -8,7 +8,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 
-
 /** Settings landing page: one row per [SettingsPage], each opening that page. */
 @Composable
 fun SettingsScreen(

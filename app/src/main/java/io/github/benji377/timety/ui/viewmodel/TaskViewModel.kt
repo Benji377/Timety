@@ -22,7 +22,6 @@ class TaskViewModel(
     private val application: android.app.Application,
     private val taskRepository: TaskRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
-
     val allTasks: StateFlow<List<TaskWithSubtasks>> = taskRepository.allTasks
         .stateIn(
             scope = viewModelScope,

@@ -27,11 +27,10 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Dialog for adding or editing a session phase: its type (focus or rest) and duration in
@@ -75,7 +74,7 @@ fun PhaseEditorDialog(
                     }
                 }
                 Spacer(modifier = Modifier.height(AppTheme.space2XLarge))
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = timeText,
                     onValueChange = { timeText = it },
                     label = { Text(stringResource(R.string.focusPhaseLabelDuration)) },
@@ -95,7 +94,7 @@ fun PhaseEditorDialog(
             }
         },
         confirmButton = {
-            Button(onClick = {
+            NeoButton(onClick = {
                 val mins = timeText.toIntOrNull()
                 if (mins != null && mins > 0) {
                     val clamped = if (mins > maxNodeMins) maxNodeMins else mins

@@ -10,7 +10,6 @@ import kotlin.math.roundToInt
 
 /** Pacing math for goals: where progress *should* be by now on the createdAt → targetDate line. */
 object GoalUtils {
-
     /**
      * The progress a perfectly-paced user would have logged by [now]: the target scaled by the
      * elapsed fraction of the goal's lifetime. Clamped so pre-start reads 0 and overdue reads the

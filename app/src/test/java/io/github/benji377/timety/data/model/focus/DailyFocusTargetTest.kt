@@ -6,7 +6,6 @@ import org.junit.Test
 import java.time.LocalDate
 
 class DailyFocusTargetTest {
-
     // 2026-10-19 is a Monday, 2026-10-24 a Saturday.
     private val monday = LocalDate.of(2026, 10, 19)
     private val saturday = LocalDate.of(2026, 10, 24)

@@ -87,7 +87,6 @@ import java.time.ZoneId
 import kotlin.math.roundToInt
 import java.time.format.TextStyle as JavaTextStyle
 
-
 /**
  * Tab-based statistics screen: an overview tab plus dedicated tabs for tasks, focus, and habits.
  */
@@ -146,7 +145,6 @@ fun StatisticsScreen(
         }
     }
 }
-
 
 @Composable
 private fun OverviewStatsScreen(

@@ -38,7 +38,6 @@ import org.robolectric.annotation.Config
 @RunWith(AndroidJUnit4::class)
 @Config(qualifiers = "w412dp-h915dp-xxhdpi")
 class SettingsNavigationTest {
-
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
 

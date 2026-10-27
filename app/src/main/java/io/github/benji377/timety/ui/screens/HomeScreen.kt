@@ -72,7 +72,6 @@ import java.time.LocalTime
 import java.time.ZoneId
 import kotlin.math.roundToInt
 
-
 /**
  * Home screen: an optional greeting, a compact daily focus-goal progress card, and accordion lists
  * of due tasks, today's habits, and upcoming tasks.
@@ -414,7 +413,6 @@ fun HomeScreen(
     }
 }
 
-
 /**
  * Compact daily focus-goal card: label, minutes focused vs target, and a chunky progress bar
  * with the percentage beside it. Tapping navigates to the Focus screen.
@@ -466,7 +464,6 @@ private fun DailyGoalCard(
         }
     }
 }
-
 
 /**
  * Bordered progress bar for the daily goal. The first lap fills solid; past 100% a second lap

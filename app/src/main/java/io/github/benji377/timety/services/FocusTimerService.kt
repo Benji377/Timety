@@ -27,13 +27,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-
 /**
  * Foreground service that keeps a focus/stopwatch session alive and visible while [FocusTimerManager]
  * ticks in the background, rendering its state as an ongoing notification and arming the phase-end alarm.
  */
 class FocusTimerService : Service() {
-
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val notificationManager by lazy { NotificationManagerCompat.from(this) }
     private val alarmManager by lazy { getSystemService(ALARM_SERVICE) as AlarmManager }
@@ -286,7 +284,6 @@ class FocusTimerService : Service() {
         const val ACTION_START = "ACTION_START"
         const val ACTION_PAUSE = "ACTION_PAUSE"
         const val ACTION_STOP = "ACTION_STOP"
-
 
         const val ACTION_DISCARD = "ACTION_DISCARD"
     }

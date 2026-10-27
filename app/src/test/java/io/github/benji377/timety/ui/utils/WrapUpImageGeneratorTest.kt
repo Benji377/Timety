@@ -12,7 +12,6 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class WrapUpImageGeneratorTest {
-
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test

@@ -41,7 +41,6 @@ import java.time.temporal.ChronoUnit
  */
 @RunWith(AndroidJUnit4::class)
 class FocusAutoCompleteTest {
-
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val application = context.applicationContext as Application
 

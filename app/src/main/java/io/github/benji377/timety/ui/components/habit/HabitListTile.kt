@@ -50,7 +50,6 @@ import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.util.habit.HabitIcons
 import kotlinx.coroutines.launch
 
-
 /**
  * List row for a single habit, with a completion toggle, icon, name, notes, and optional progress
  * bar. Renders as a bordered card standalone, or as a slimmer row with a leading color bar when

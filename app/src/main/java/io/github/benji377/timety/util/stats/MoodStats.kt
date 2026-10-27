@@ -7,7 +7,6 @@ import java.time.LocalTime
 
 /** Pure helpers behind the profile's mood calendar and distribution bar. */
 object MoodStats {
-
     /** Each rated day's mood; rows with an unreadable key or rating are skipped. */
     fun byDay(ratings: List<DayRatingEntity>): Map<LocalDate, DayRating> =
         ratings.mapNotNull { row ->

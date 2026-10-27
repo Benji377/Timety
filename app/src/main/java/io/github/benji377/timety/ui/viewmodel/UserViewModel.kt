@@ -14,7 +14,6 @@ import java.time.Instant
 class UserViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
-
     val userProfile: StateFlow<UserProfileEntity?> = userRepository.userProfile
         .stateIn(
             scope = viewModelScope,

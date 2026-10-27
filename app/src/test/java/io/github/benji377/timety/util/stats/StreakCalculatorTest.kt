@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class StreakCalculatorTest {
-
     // Step 0 is the step in progress; -n is n steps ago.
     private fun stepsAgo(vararg n: Long): List<Long> = n.map { -it }
 

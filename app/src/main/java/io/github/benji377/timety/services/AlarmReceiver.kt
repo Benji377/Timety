@@ -7,7 +7,6 @@ import android.util.Log
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.widget.MidnightWidgetRefresh
 
-
 /**
  * Re-arms scheduled reminders after a reboot or app update (the OS clears pending alarms), a time
  * zone change (alarms are absolute instants) or newly granted exact-alarm access; also runs the

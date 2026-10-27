@@ -55,7 +55,6 @@ import java.time.temporal.ChronoUnit
  */
 @RunWith(AndroidJUnit4::class)
 class BackupRoundTripTest {
-
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
 
     private lateinit var source: TestAppContainer

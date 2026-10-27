@@ -11,7 +11,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 class RecurrenceUtilsTest {
-
     private val zone = ZoneId.of("UTC")
 
     private fun at(y: Int, mo: Int, d: Int, h: Int = 9): Instant =

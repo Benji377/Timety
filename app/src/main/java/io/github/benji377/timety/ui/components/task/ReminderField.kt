@@ -35,14 +35,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.util.task.ReminderPreset
-
 
 /**
  * A reminder as [ReminderField] shows it. [key] identifies it to the caller, [preset] is set when
@@ -85,7 +84,7 @@ fun ReminderField(
             .fillMaxWidth()
             .clickable(enabled = isEditing) { showSheet = true }
     ) {
-        OutlinedTextField(
+        NeoOutlinedTextField(
             value = when (entries.size) {
                 0 -> ""
                 1 -> entries.first().label
@@ -202,14 +201,13 @@ fun ReminderField(
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = AppTheme.fsBodySmall,
                 )
-                Button(onClick = { showSheet = false }, modifier = Modifier.fillMaxWidth()) {
+                NeoButton(onClick = { showSheet = false }, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.commonLabelClose))
                 }
             }
         }
     }
 }
-
 
 /** The user-facing label for a reminder preset. */
 @Composable

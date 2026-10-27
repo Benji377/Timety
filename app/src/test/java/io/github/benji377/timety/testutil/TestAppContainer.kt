@@ -32,7 +32,6 @@ import java.util.UUID
  * to gain the same one here or the tests stop reflecting production.
  */
 class TestAppContainer(context: Context) : AppContainer {
-
     /** Exposed so tests can reach a DAO directly when a repository has no method for the setup they need. */
     val database: TimetyDatabase =
         Room.inMemoryDatabaseBuilder(context, TimetyDatabase::class.java).build()

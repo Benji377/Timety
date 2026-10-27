@@ -18,7 +18,6 @@ import java.time.Instant
 class GoalViewModel(
     private val goalRepository: GoalRepository
 ) : ViewModel() {
-
     val goalsWithEntries: StateFlow<List<GoalWithEntries>> = goalRepository.allGoalsWithEntries
         .stateIn(
             scope = viewModelScope,

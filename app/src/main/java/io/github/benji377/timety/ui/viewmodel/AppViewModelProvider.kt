@@ -10,7 +10,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.TimetyApplication
 
-
 /**
  * Returns a [VM] scoped to the current activity rather than the current navigation destination,
  * so the same instance is shared across composables/screens.

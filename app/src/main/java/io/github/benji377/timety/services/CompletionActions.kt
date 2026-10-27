@@ -24,7 +24,6 @@ data class RecurringCompletionUndo(
  * means reminders and the task widget can't drift apart between them.
  */
 object CompletionActions {
-
     /**
      * Marks the task complete, re-syncs its reminders and refreshes the task widget.
      * Reads the task from the DB rather than a UI snapshot, which may not have caught up yet.

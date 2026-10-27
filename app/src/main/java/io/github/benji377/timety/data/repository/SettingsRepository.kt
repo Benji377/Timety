@@ -25,7 +25,6 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() }
 )
 
-
 /** Display theme options, persisted using their [storageValue] string. */
 enum class ThemeMode(val storageValue: String) {
     LIGHT("Light"),
