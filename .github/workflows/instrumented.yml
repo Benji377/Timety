@@ -5,6 +5,9 @@ name: Instrumented Tests
 on:
   push:
     branches: [ "main" ]
+  # TEMPORARY: lets this workflow's first PR run it; remove after merging.
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 concurrency:
