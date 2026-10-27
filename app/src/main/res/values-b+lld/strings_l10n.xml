@@ -222,12 +222,22 @@
         <item quantity="many">Travert: %d dis a l\'ena</item>
         <item quantity="other">Travert: %d dis a l\'ena</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="zero">Goal: %d days a month</item>
+        <item quantity="one">Goal: 1 day a month</item>
+        <item quantity="two">Goal: %d days a month</item>
+        <item quantity="few">Goal: %d days a month</item>
+        <item quantity="many">Goal: %d days a month</item>
+        <item quantity="other">Goal: %d days a month</item>
+    </plurals>
     <string name="habitDetailLabelIcon">Cëria ora n\'icona</string>
     <string name="habitDetailLabelName">Inuem abitudin</string>
     <string name="habitDetailLabelNameHint">ej. Lejer 10 plates, Allenamënt…</string>
     <string name="habitDetailLabelNameRequest">Nserësc n inuem</string>
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Cie mutivazions es\'a per chësta abitudin?</string>
+    <string name="habitDetailLabelPeriodMonth">Per month</string>
+    <string name="habitDetailLabelPeriodWeek">Per week</string>
     <string name="habitDetailLabelReminder">Ora dl lezit</string>
     <string name="habitDetailReminderAddTime">Njunté ora</string>
     <string name="habitDetailReminderSheetHint">I lezic ne unirà nia mustrei i dis che chësta abitudin ie bele fata o ne ie nia da fé.</string>
@@ -244,6 +254,7 @@
     <string name="habitDetailTitleNew">Nueva abitudin</string>
     <string name="habitFreqDaily">A uni di</string>
     <string name="habitFreqFlexible">%1$d / %2$d chësta ena</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d this month</string>
     <string name="habitFreqWeekly">Dl\'ena de %1$s</string>
     <string name="habitHistoryCompletedAt">Finà dala %1$s</string>
     <string name="habitHistoryEmpty">Niamò deguna storia.</string>
@@ -256,6 +267,7 @@
     <string name="habitHistoryTimePrompt">A ce ora es\'a finà chësta abitudin?</string>
     <string name="habitHistoryTitle">Storia dla abitudin</string>
     <string name="habitLabelFreqDaily">Abitudin a uni di</string>
+    <string name="habitLabelFreqMonthly">Monthly Habit</string>
     <string name="habitLabelFreqWeekly">Abitudin a l\'ena</string>
     <string name="habitMarkPastCompletionTooltip">Mërca coche finà te l passà</string>
     <string name="habitScreenEmpty">Niamò deguna abitudins! Clica sun + per fé na routine</string>
