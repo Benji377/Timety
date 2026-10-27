@@ -206,12 +206,18 @@
         <item quantity="one">Ziel: 1 Tag pro Woche</item>
         <item quantity="other">Ziel: %d Tage pro Woche</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="one">Goal: 1 day a month</item>
+        <item quantity="other">Goal: %d days a month</item>
+    </plurals>
     <string name="habitDetailLabelIcon">Wähle ein Icon</string>
     <string name="habitDetailLabelName">Name der Gewohnheit</string>
     <string name="habitDetailLabelNameHint">z.B. 10 Seiten lesen, Workout…</string>
     <string name="habitDetailLabelNameRequest">Bitte gib einen Namen ein</string>
     <string name="habitDetailLabelNotes">Notizen</string>
     <string name="habitDetailLabelNotesHint">Warum baust du diese Gewohnheit auf?</string>
+    <string name="habitDetailLabelPeriodMonth">Per month</string>
+    <string name="habitDetailLabelPeriodWeek">Per week</string>
     <string name="habitDetailLabelReminder">Erinnerungszeit</string>
     <string name="habitDetailReminderAddTime">Zeit hinzufügen</string>
     <string name="habitDetailReminderSheetHint">Erinnerungen entfallen an Tagen, an denen diese Gewohnheit schon erledigt oder nicht fällig ist.</string>
@@ -228,6 +234,7 @@
     <string name="habitDetailTitleNew">Neue Gewohnheit</string>
     <string name="habitFreqDaily">Täglich</string>
     <string name="habitFreqFlexible">%1$d / %2$d diese Woche</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d this month</string>
     <string name="habitFreqWeekly">Wöchentlich am %1$s</string>
     <string name="habitHistoryCompletedAt">Erledigt um %1$s</string>
     <string name="habitHistoryEmpty">Noch kein Verlauf.</string>
@@ -240,6 +247,7 @@
     <string name="habitHistoryTimePrompt">Um wie viel Uhr hast du diese Gewohnheit erledigt?</string>
     <string name="habitHistoryTitle">Gewohnheits-Verlauf</string>
     <string name="habitLabelFreqDaily">Tägliche Gewohnheit</string>
+    <string name="habitLabelFreqMonthly">Monthly Habit</string>
     <string name="habitLabelFreqWeekly">Wöchentliche Gewohnheit</string>
     <string name="habitMarkPastCompletionTooltip">Vergangene Erledigung markieren</string>
     <string name="habitScreenEmpty">Noch keine Gewohnheiten! Tippe auf +, um eine Routine aufzubauen</string>
