@@ -457,11 +457,7 @@
     <string name="userErrorGenerateImage">Failed to generate wrap-up image.</string>
     <string name="userProfileTitle">Profile</string>
     <string name="userShareSubject">My Timety Wrap-Up</string>
-    <string name="userShareSummary">Here\'s a summary of your achievements:</string>
     <string name="userShareText">Master your time with Timety!</string>
-    <string name="userStatFocusMins">Focus Mins</string>
-    <string name="userStatHabitsMet">Habits Met</string>
-    <string name="userStatTasksDone">Tasks Done</string>
     <string name="userTooltipEditAvatar">Edit Avatar</string>
     <string name="userTooltipShareWrapUp">Share Weekly Wrap-up</string>
     <string name="backupActionSaveDevice">Save to Device</string>

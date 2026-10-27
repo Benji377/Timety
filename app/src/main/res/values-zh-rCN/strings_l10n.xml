@@ -457,11 +457,7 @@
     <string name="userErrorGenerateImage">生成总结图片失败。</string>
     <string name="userProfileTitle">个人资料</string>
     <string name="userShareSubject">我的 Timety 周总结</string>
-    <string name="userShareSummary">以下是您的成就概览：</string>
     <string name="userShareText">用 Timety 掌控您的时间！</string>
-    <string name="userStatFocusMins">专注分钟数</string>
-    <string name="userStatHabitsMet">习惯完成数</string>
-    <string name="userStatTasksDone">完成任务数</string>
     <string name="userTooltipEditAvatar">编辑头像</string>
     <string name="userTooltipShareWrapUp">分享周总结</string>
     <string name="backupActionSaveDevice">保存到设备</string>

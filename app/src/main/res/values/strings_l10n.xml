@@ -470,13 +470,9 @@
     <string name="userErrorGenerateImage">Failed to generate wrap-up image.</string>
     <string name="userProfileTitle">Profile</string>
     <string name="userShareSubject">My Timety Wrap-Up</string>
-    <string name="userShareSummary">Here\'s a summary of your achievements:</string>
     <string name="userShareText">Master your time with Timety!</string>
-    <string name="userStatFocusMins">Focus Mins</string>
-    <string name="userStatHabitsMet">Habits Met</string>
-    <string name="userStatTasksDone">Tasks Done</string>
     <string name="userTooltipEditAvatar">Edit Avatar</string>
-    <string name="userTooltipShareWrapUp">Share Weekly Wrap-up</string>
+    <string name="userTooltipShareWrapUp">Share Wrap-up</string>
     <string name="backupActionSaveDevice">Save to Device</string>
     <string name="backupActionSaveDeviceSubtitle">Choose a local folder</string>
     <string name="backupActionShareCloud">Share / Upload to Cloud</string>
@@ -538,6 +534,7 @@
     <string name="wrapUpStatFocusLabel">Minutes Focused</string>
     <string name="wrapUpStatHabitsLabel">Habits Built</string>
     <string name="wrapUpStatTasksLabel">Tasks Completed</string>
+    <string name="wrapUpUsingSince">Using Timety since %1$s</string>
     <string name="categoryAddLabel">Add Category</string>
     <string name="categoryColorLabel">Color</string>
     <string name="categoryDeleteContent">Are you sure you want to delete \"%1$s\"? Tasks with this category will be uncategorized.</string>

@@ -461,11 +461,7 @@
     <string name="userErrorGenerateImage">Errore durante la generazione dell\'immagine di riepilogo.</string>
     <string name="userProfileTitle">Profilo</string>
     <string name="userShareSubject">Il mio riepilogo Timety</string>
-    <string name="userShareSummary">Ecco un riepilogo dei tuoi traguardi:</string>
     <string name="userShareText">Domina il tuo tempo con Timety!</string>
-    <string name="userStatFocusMins">Min focus</string>
-    <string name="userStatHabitsMet">Abitudini</string>
-    <string name="userStatTasksDone">Attività completate</string>
     <string name="userTooltipEditAvatar">Modifica avatar</string>
     <string name="userTooltipShareWrapUp">Condividi riepilogo settimanale</string>
     <string name="backupActionSaveDevice">Salva sul dispositivo</string>

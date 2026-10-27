@@ -1,16 +1,20 @@
 package io.github.benji377.timety.ui.screens
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +29,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -70,6 +76,7 @@ import io.github.benji377.timety.ui.components.mood.RateTodayCard
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.ui.theme.hairlineBorder
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.DayRatingViewModel
@@ -79,6 +86,7 @@ import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.util.ProfileImageStore
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.stats.MoodStats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -87,6 +95,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * Displays the user's profile: avatar and name, a month calendar of day moods with an all-time
@@ -128,15 +137,9 @@ fun ProfileScreen(
     val stats = remember(tasks, habitsWithCompletions, recurringItems, sessions) {
         ProfileStats.of(tasks, habitsWithCompletions, recurringItems, sessions)
     }
-    val totalTasksDone = stats.totalTasksDone
-    val totalHabitsMet = stats.totalHabitsMet
-    val totalFocusMins = stats.totalFocusMins
 
     val context = LocalContext.current
-    val shareSubjectStr = stringResource(R.string.userShareSubject)
-    val shareTextStr = stringResource(R.string.userShareText)
-    val shareWrapUpTooltipStr = stringResource(R.string.userTooltipShareWrapUp)
-    val errorGenerateImageStr = stringResource(R.string.userErrorGenerateImage)
+    val dateFormatSettings = LocalDateFormatSettings.current
     var showEditNameDialog by remember { mutableStateOf(false) }
     var tempName by remember { mutableStateOf("") }
     var showShareWrapupDialog by remember { mutableStateOf(false) }
@@ -155,73 +158,51 @@ fun ProfileScreen(
     }
 
     if (showShareWrapupDialog) {
+        val since = userProfile?.accountCreated?.let {
+            AppDateFormatUtils.formatDate(it.atZone(ZoneId.systemDefault()).toLocalDate(), dateFormatSettings.dateFormatCode)
+        }
+        val preview by produceState<Bitmap?>(null, userName, since, stats) {
+            value = withContext(Dispatchers.Default) {
+                runCatching {
+                    WrapUpImageGenerator.render(
+                        context, userName, since, stats.totalTasksDone, stats.totalFocusMins, stats.totalHabitsMet
+                    )
+                }.getOrNull()
+            }
+        }
         NeoAlertDialog(
             onDismissRequest = { showShareWrapupDialog = false },
             title = { Text(stringResource(R.string.userTooltipShareWrapUp)) },
             text = {
-                Column {
-                    Text(stringResource(R.string.userShareSummary), fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("${stringResource(R.string.userStatTasksDone)}: $totalTasksDone")
-                    Text("${stringResource(R.string.userStatHabitsMet)}: $totalHabitsMet")
-                    Text("${stringResource(R.string.userStatFocusMins)}: $totalFocusMins")
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .height(360.dp)
+                            .aspectRatio(WRAP_UP_ASPECT_RATIO),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        preview?.let {
+                            Image(
+                                bitmap = it.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(AppTheme.brMedium),
+                            )
+                        } ?: CircularProgressIndicator()
+                    }
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showShareWrapupDialog = false
-                    coroutineScope.launch(Dispatchers.IO) {
-                        try {
-                            val bytes =
-                                WrapUpImageGenerator.generate(
-                                    context,
-                                    userName,
-                                    totalTasksDone,
-                                    totalFocusMins,
-                                    totalHabitsMet
-                                )
-                            val cachePath = File(context.cacheDir, "shared")
-                            cachePath.mkdirs()
-                            val file = File(cachePath, "wrapup.png")
-                            file.writeBytes(bytes)
-                            val uri = FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.fileprovider",
-                                file
-                            )
-
-                            withContext(Dispatchers.Main) {
-                                val intent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "image/png"
-                                    putExtra(Intent.EXTRA_STREAM, uri)
-                                    putExtra(
-                                        Intent.EXTRA_SUBJECT,
-                                        shareSubjectStr
-                                    )
-                                    putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        shareTextStr
-                                    )
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        intent,
-                                        shareWrapUpTooltipStr
-                                    )
-                                )
-                            }
-                        } catch (_: Exception) {
-                            withContext(Dispatchers.Main) {
-                                android.widget.Toast.makeText(
-                                    context,
-                                    errorGenerateImageStr,
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                TextButton(
+                    enabled = preview != null,
+                    onClick = {
+                        showShareWrapupDialog = false
+                        preview?.let { bitmap ->
+                            coroutineScope.launch { shareWrapUp(context, bitmap) }
                         }
-                    }
-                }) {
+                    },
+                ) {
                     Text(stringResource(R.string.commonLabelShare))
                 }
             },
@@ -411,6 +392,30 @@ fun ProfileScreen(
 }
 
 private const val CLOCK_TICK_MS = 30_000L
+private const val WRAP_UP_ASPECT_RATIO = 1080f / 1920f
+
+/** Writes [bitmap] to the share cache and opens the system share sheet; toasts on failure. */
+private suspend fun shareWrapUp(context: Context, bitmap: Bitmap) {
+    val uri = withContext(Dispatchers.IO) {
+        runCatching {
+            val file = File(File(context.cacheDir, "shared").apply { mkdirs() }, "wrapup.png")
+            file.writeBytes(WrapUpImageGenerator.toPng(bitmap))
+            FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        }.getOrNull()
+    }
+    if (uri == null) {
+        Toast.makeText(context, R.string.userErrorGenerateImage, Toast.LENGTH_SHORT).show()
+        return
+    }
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/png"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.userShareSubject))
+        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.userShareText))
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, context.getString(R.string.userTooltipShareWrapUp)))
+}
 
 private val LocalDateSaver = Saver<LocalDate, Long>(save = { it.toEpochDay() }, restore = LocalDate::ofEpochDay)
 
@@ -419,7 +424,7 @@ private val NullableLocalDateSaver = Saver<LocalDate?, Long>(
     restore = LocalDate::ofEpochDay,
 )
 
-/** Lifetime totals shown in the share wrap-up. */
+/** Lifetime totals shown on the share wrap-up. */
 private data class ProfileStats(
     val totalTasksDone: Int,
     val totalHabitsMet: Int,

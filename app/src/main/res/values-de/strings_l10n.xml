@@ -461,11 +461,7 @@
     <string name="userErrorGenerateImage">Fehler beim Generieren des Wrap-up-Bildes.</string>
     <string name="userProfileTitle">Profil</string>
     <string name="userShareSubject">Mein Timety Wrap-Up</string>
-    <string name="userShareSummary">Hier ist eine Zusammenfassung deiner Erfolge:</string>
     <string name="userShareText">Meistere deine Zeit mit Timety!</string>
-    <string name="userStatFocusMins">Fokus Min.</string>
-    <string name="userStatHabitsMet">Gewohnheiten</string>
-    <string name="userStatTasksDone">Aufgaben erledigt</string>
     <string name="userTooltipEditAvatar">Avatar bearbeiten</string>
     <string name="userTooltipShareWrapUp">Wöchentliches Wrap-up teilen</string>
     <string name="backupActionSaveDevice">Auf dem Gerät speichern</string>
