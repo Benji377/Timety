@@ -206,12 +206,18 @@
         <item quantity="one">Obiettivo: 1 giorno a settimana</item>
         <item quantity="other">Obiettivo: %d giorni a settimana</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="one">Goal: 1 day a month</item>
+        <item quantity="other">Goal: %d days a month</item>
+    </plurals>
     <string name="habitDetailLabelIcon">Seleziona un\'icona</string>
     <string name="habitDetailLabelName">Nome dell\'abitudine</string>
     <string name="habitDetailLabelNameHint">es., Leggere 10 pagine, Allenamento…</string>
     <string name="habitDetailLabelNameRequest">Inserisci un nome</string>
     <string name="habitDetailLabelNotes">Note</string>
     <string name="habitDetailLabelNotesHint">Perché stai sviluppando questa abitudine?</string>
+    <string name="habitDetailLabelPeriodMonth">Per month</string>
+    <string name="habitDetailLabelPeriodWeek">Per week</string>
     <string name="habitDetailLabelReminder">Orario promemoria</string>
     <string name="habitDetailReminderAddTime">Aggiungi orario</string>
     <string name="habitDetailReminderSheetHint">I promemoria vengono saltati nei giorni in cui questa abitudine è già completata o non è prevista.</string>
@@ -228,6 +234,7 @@
     <string name="habitDetailTitleNew">Nuova abitudine</string>
     <string name="habitFreqDaily">Giornaliera</string>
     <string name="habitFreqFlexible">%1$d / %2$d questa settimana</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d this month</string>
     <string name="habitFreqWeekly">Settimanale: %1$s</string>
     <string name="habitHistoryCompletedAt">Completato alle %1$s</string>
     <string name="habitHistoryEmpty">Nessuna cronologia ancora.</string>
@@ -240,6 +247,7 @@
     <string name="habitHistoryTimePrompt">A che ora hai completato questa abitudine?</string>
     <string name="habitHistoryTitle">Cronologia dell\'abitudine</string>
     <string name="habitLabelFreqDaily">Abitudine giornaliera</string>
+    <string name="habitLabelFreqMonthly">Monthly Habit</string>
     <string name="habitLabelFreqWeekly">Abitudine settimanale</string>
     <string name="habitMarkPastCompletionTooltip">Segna completamento passato</string>
     <string name="habitScreenEmpty">Ancora nessuna abitudine! Tocca + per creare una routine</string>
