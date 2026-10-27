@@ -78,6 +78,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
+import kotlin.math.roundToInt
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 
@@ -112,10 +113,17 @@ fun HabitDetailScreen(
             existingHabit?.frequency ?: HabitFrequency.DAILY
         )
     }
-    var targetDaysPerWeek by rememberSaveable(formHabit) {
+    var targetCount by rememberSaveable(formHabit) {
         mutableIntStateOf(
-            existingHabit?.targetDaysPerWeek ?: 3
+            existingHabit?.targetCount ?: 3
         )
+    }
+    // A weekly target can't exceed the days in a week, however the frequency got there.
+    fun selectFrequency(newFrequency: HabitFrequency) {
+        frequency = newFrequency
+        if (newFrequency == HabitFrequency.WEEKLY_FLEXIBLE) {
+            targetCount = targetCount.coerceAtMost(HabitUtils.MAX_TARGET_PER_WEEK)
+        }
     }
     var selectedWeekdays by rememberSaveable(formHabit) {
         mutableStateOf(
@@ -193,11 +201,13 @@ fun HabitDetailScreen(
             id = habitId ?: newItemId,
             name = trimmedName,
             frequency = frequency,
-            targetDaysPerWeek = if (frequency == HabitFrequency.WEEKLY_FLEXIBLE) targetDaysPerWeek else null,
+            targetCount = if (frequency.isFlexible) targetCount else null,
             targetWeekdays = if (frequency == HabitFrequency.WEEKLY_EXACT) HabitUtils.serializeWeekdays(
                 selectedWeekdays
             ) else null,
-            reminderTimes = HabitUtils.serializeReminderTimes(reminderTimes),
+            // Monthly habits never remind (they have no due days), so stale times aren't kept.
+            reminderTimes = if (frequency == HabitFrequency.MONTHLY_FLEXIBLE) null
+            else HabitUtils.serializeReminderTimes(reminderTimes),
             createdAt = existingHabit?.createdAt ?: Instant.now(),
             colorValue = selectedColor.toArgb(),
             notes = notes.trim().ifEmpty { null },
@@ -403,15 +413,18 @@ fun HabitDetailScreen(
                         HabitFrequency.WEEKLY_FLEXIBLE,
                         HabitFrequency.WEEKLY_EXACT,
                     ),
-                    selectedValue = frequency,
+                    // Monthly is the flexible option's second period, picked inside its card.
+                    selectedValue = if (frequency.isFlexible) HabitFrequency.WEEKLY_FLEXIBLE else frequency,
                     isEditing = isEditing,
-                    onSelected = { frequency = it },
+                    onSelected = { if (!frequency.isFlexible || !it.isFlexible) selectFrequency(it) },
                     labelBuilder = { frequencyLabels.getValue(it) },
                     activeBgColor = selectedColor,
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
-                if (frequency == HabitFrequency.WEEKLY_FLEXIBLE) {
+                if (frequency.isFlexible) {
+                    val isMonthly = frequency == HabitFrequency.MONTHLY_FLEXIBLE
+                    val maxTarget = if (isMonthly) HabitUtils.MAX_TARGET_PER_MONTH else HabitUtils.MAX_TARGET_PER_WEEK
                     NeoCard(
                         containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent,
                     ) {
@@ -421,20 +434,34 @@ fun HabitDetailScreen(
                                 .padding(AppTheme.spaceLarge),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
+                            val periodLabels = mapOf(
+                                HabitFrequency.WEEKLY_FLEXIBLE to stringResource(R.string.habitDetailLabelPeriodWeek),
+                                HabitFrequency.MONTHLY_FLEXIBLE to stringResource(R.string.habitDetailLabelPeriodMonth),
+                            )
+                            NeoSegmentedSelector(
+                                values = listOf(HabitFrequency.WEEKLY_FLEXIBLE, HabitFrequency.MONTHLY_FLEXIBLE),
+                                selectedValue = frequency,
+                                isEditing = isEditing,
+                                onSelected = { selectFrequency(it) },
+                                labelBuilder = { periodLabels.getValue(it) },
+                                activeBgColor = selectedColor,
+                            )
+                            Spacer(modifier = Modifier.height(AppTheme.spaceMedium))
                             Text(
                                 text = quantityString(
-                                    R.plurals.habitDetailLabelGoal,
-                                    targetDaysPerWeek,
+                                    if (isMonthly) R.plurals.habitDetailLabelGoalMonth else R.plurals.habitDetailLabelGoal,
+                                    targetCount,
                                     zeroRes = R.string.habitDetailLabelGoalZero,
-                                    targetDaysPerWeek,
+                                    targetCount,
                                 ),
                                 fontWeight = AppTheme.fwBold,
                             )
                             Slider(
-                                value = targetDaysPerWeek.toFloat(),
-                                onValueChange = { if (isEditing) targetDaysPerWeek = it.toInt() },
-                                valueRange = 1f..7f,
-                                steps = 5,
+                                value = targetCount.toFloat(),
+                                onValueChange = { if (isEditing) targetCount = it.roundToInt() },
+                                valueRange = 1f..maxTarget.toFloat(),
+                                // Steps count the stops between the ends: one per whole value.
+                                steps = maxTarget - 2,
                                 enabled = isEditing,
                                 colors = SliderDefaults.colors(
                                     thumbColor = selectedColor,
@@ -462,8 +489,8 @@ fun HabitDetailScreen(
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // Time reminders.
-            item {
+            // Time reminders; monthly habits have no due days to remind on.
+            if (frequency != HabitFrequency.MONTHLY_FLEXIBLE) item {
                 val use24Hour = LocalDateFormatSettings.current.use24HourFormat
                 val entries = reminderTimes.map { minutes ->
                     ReminderEntry(

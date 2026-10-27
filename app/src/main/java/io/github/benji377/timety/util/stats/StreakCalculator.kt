@@ -4,7 +4,10 @@ import io.github.benji377.timety.util.stats.StreakCalculator.currentStreak
 import java.time.LocalDate
 
 
-/** Computes habit-completion streaks (consecutive-day runs) from a set of completion dates. */
+/**
+ * Computes never-miss-twice streaks. The rule runs over numbered steps (consecutive integers, one
+ * per day, scheduled day, week, or month); the [LocalDate] overloads use one step per day.
+ */
 object StreakCalculator {
 
 
@@ -12,16 +15,21 @@ object StreakCalculator {
      * Longest run anywhere in [completions], under the same never-miss-twice rule as
      * [currentStreak]: one missed day is bridged (and not counted), two in a row end the run.
      */
-    fun calculateBestStreak(completions: Iterable<LocalDate>): Int {
-        val sortedUniqueDates = completions.toSortedSet().toList()
-        if (sortedUniqueDates.isEmpty()) return 0
+    fun calculateBestStreak(completions: Iterable<LocalDate>): Int =
+        bestStreakOfSteps(completions.map { it.toEpochDay() })
+
+
+    /** [calculateBestStreak] over numbered steps: a run continues across at most one missed step. */
+    fun bestStreakOfSteps(metSteps: Iterable<Long>): Int {
+        val sortedSteps = metSteps.toSortedSet().toList()
+        if (sortedSteps.isEmpty()) return 0
 
         var highest = 1
         var currentRun = 1
 
-        // Dates are sorted and deduplicated: a run continues across a gap of at most one missed day.
-        for (i in 1 until sortedUniqueDates.size) {
-            val gap = sortedUniqueDates[i].toEpochDay() - sortedUniqueDates[i - 1].toEpochDay()
+        // Steps are sorted and deduplicated: a run continues across a gap of at most one missed step.
+        for (i in 1 until sortedSteps.size) {
+            val gap = sortedSteps[i] - sortedSteps[i - 1]
             if (gap <= 2L) {
                 currentRun++
                 if (currentRun > highest) highest = currentRun
@@ -55,29 +63,53 @@ object StreakCalculator {
         }
     }
 
+    /** A [CurrentStreak] over numbered steps rather than days. */
+    data class StepStreak(
+        val completed: Set<Long>,
+        val bridged: Set<Long>,
+        val atRisk: Boolean,
+    )
+
     /**
      * Walks backward from today applying the never-miss-twice rule. An incomplete *today* is never
      * counted as a miss (the day hasn't ended), so the walk starts at yesterday in that case.
      */
     fun currentStreak(completions: Iterable<LocalDate>): CurrentStreak {
-        val days = completions.toSet()
-        if (days.isEmpty()) return CurrentStreak.EMPTY
+        val streak = currentStreakOfSteps(
+            completions.map { it.toEpochDay() },
+            LocalDate.now().toEpochDay()
+        )
+        if (streak.completed.isEmpty()) return CurrentStreak.EMPTY
+        return CurrentStreak(
+            length = streak.completed.size,
+            streakDays = streak.completed.mapTo(mutableSetOf()) { LocalDate.ofEpochDay(it) },
+            bridgedDays = streak.bridged.mapTo(mutableSetOf()) { LocalDate.ofEpochDay(it) },
+            atRisk = streak.atRisk,
+        )
+    }
 
-        val today = LocalDate.now()
-        val earliest = days.min()
-        fun done(day: LocalDate) = day in days
+    /**
+     * [currentStreak] over numbered steps. [currentStep] is the step still in progress, which is
+     * never counted as a miss, so the walk starts at the step before it when it isn't met yet.
+     */
+    fun currentStreakOfSteps(metSteps: Iterable<Long>, currentStep: Long): StepStreak {
+        val steps = metSteps.toSet()
+        if (steps.isEmpty()) return StepStreak(emptySet(), emptySet(), false)
 
-        // Today leniency: an incomplete today isn't a miss, so begin the walk at yesterday.
-        var checkDate = if (done(today)) today else today.minusDays(1)
+        val earliest = steps.min()
+        fun done(step: Long) = step in steps
 
-        val completed = mutableSetOf<LocalDate>()
-        val bridged = mutableSetOf<LocalDate>()
-        val pendingMisses = mutableListOf<LocalDate>()
+        // Leniency for the step in progress: an incomplete one isn't a miss, so begin before it.
+        var checkStep = if (done(currentStep)) currentStep else currentStep - 1
+
+        val completed = mutableSetOf<Long>()
+        val bridged = mutableSetOf<Long>()
+        val pendingMisses = mutableListOf<Long>()
         var consecutiveMisses = 0
 
-        while (!checkDate.isBefore(earliest)) {
-            if (done(checkDate)) {
-                completed.add(checkDate)
+        while (checkStep >= earliest) {
+            if (done(checkStep)) {
+                completed.add(checkStep)
                 // A miss only counts as a bend once an older completion is found to sandwich it.
                 bridged.addAll(pendingMisses)
                 pendingMisses.clear()
@@ -85,16 +117,16 @@ object StreakCalculator {
             } else {
                 consecutiveMisses++
                 if (consecutiveMisses >= 2) break
-                pendingMisses.add(checkDate)
+                pendingMisses.add(checkStep)
             }
-            checkDate = checkDate.minusDays(1)
+            checkStep--
         }
 
-        val atRisk = completed.isNotEmpty() && !done(today) && !done(today.minusDays(1))
-        return CurrentStreak(completed.size, completed, bridged, atRisk)
+        val atRisk = completed.isNotEmpty() && !done(currentStep) && !done(currentStep - 1)
+        return StepStreak(completed, bridged, atRisk)
     }
 
-    /** Length of the forgiving [currentStreak]; used by the profile and per-habit stats. */
+    /** Length of the forgiving [currentStreak]. */
     fun calculateCurrentStreak(completions: Iterable<LocalDate>): Int =
         currentStreak(completions).length
 

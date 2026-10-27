@@ -184,7 +184,7 @@ fun HabitListScreen(
                             HabitUtils.isCompletedOn(
                                 hwc,
                                 today
-                            ) || HabitUtils.isWeeklyGoalMet(hwc) -> done.add(hwc)
+                            ) || HabitUtils.isPeriodGoalMet(hwc) -> done.add(hwc)
 
                             HabitUtils.isHabitDueToday(hwc) -> dueToday.add(hwc)
                             else -> upcoming.add(hwc)
@@ -354,11 +354,12 @@ private fun HabitTileWrapper(
     onOpenHistory: () -> Unit,
 ) {
     val habit = hwc.habit
-    val completionsThisWeek = HabitUtils.getCompletionsThisWeek(hwc, includeToday = true)
+    val completionsThisPeriod = HabitUtils.getCompletionsThisPeriod(hwc, includeToday = true)
 
-    var subtitleText = HabitUtils.buildHabitSubtitle(habit, completionsThisWeek)
+    var subtitleText = HabitUtils.buildHabitSubtitle(habit, completionsThisPeriod)
     val reminderTimes = HabitUtils.parseReminderTimes(habit.reminderTimes)
-    if (reminderTimes.isNotEmpty()) {
+    // Monthly habits never remind, even with times carried over from a backup.
+    if (reminderTimes.isNotEmpty() && habit.frequency != HabitFrequency.MONTHLY_FLEXIBLE) {
         val locale = LocalLocale.current.platformLocale
         val formatter = remember(use24HourFormat, locale) {
             DateTimeFormatter.ofPattern(if (use24HourFormat) "HH:mm" else "hh:mm a", locale)
@@ -369,8 +370,8 @@ private fun HabitTileWrapper(
         subtitleText += " | $formatted"
     }
 
-    val progressValue = if (habit.frequency == HabitFrequency.WEEKLY_FLEXIBLE && !isDone) {
-        completionsThisWeek.toFloat() / (habit.targetDaysPerWeek ?: 1).toFloat()
+    val progressValue = if (habit.frequency.isFlexible && !isDone) {
+        completionsThisPeriod.toFloat() / (habit.targetCount ?: 1).toFloat()
     } else null
 
     HabitListTile(

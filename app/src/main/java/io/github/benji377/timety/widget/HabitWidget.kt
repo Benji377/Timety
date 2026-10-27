@@ -330,8 +330,14 @@ class HabitWidget : GlanceAppWidget() {
 
             HabitFrequency.WEEKLY_FLEXIBLE -> context.getString(
                 R.string.habitFreqFlexible,
-                HabitUtils.getCompletionsThisWeek(hwc),
-                hwc.habit.targetDaysPerWeek ?: 0
+                HabitUtils.getCompletionsThisPeriod(hwc),
+                hwc.habit.targetCount ?: 0
+            )
+
+            HabitFrequency.MONTHLY_FLEXIBLE -> context.getString(
+                R.string.habitFreqFlexibleMonth,
+                HabitUtils.getCompletionsThisPeriod(hwc),
+                hwc.habit.targetCount ?: 0
             )
         }
 }

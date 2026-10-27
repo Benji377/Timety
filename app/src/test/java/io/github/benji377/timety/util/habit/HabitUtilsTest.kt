@@ -117,12 +117,51 @@ class HabitUtilsTest {
 
         // Target met on earlier days this week: the habit drops off the list and stops nagging.
         val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-        val flexible = habit().copy(frequency = HabitFrequency.WEEKLY_FLEXIBLE, targetDaysPerWeek = 1)
+        val flexible = habit().copy(frequency = HabitFrequency.WEEKLY_FLEXIBLE, targetCount = 1)
         if (monday != today) {
             val met = HabitWithCompletions(flexible, listOf(completedOn(monday)))
             assertFalse(HabitUtils.needsReminderToday(met))
         }
         assertTrue(HabitUtils.needsReminderToday(HabitWithCompletions(flexible, emptyList())))
+    }
+
+    @Test
+    fun monthlyHabit_isNeverDueAndNeverReminds() {
+        val monthly = habit().copy(frequency = HabitFrequency.MONTHLY_FLEXIBLE, targetCount = 2)
+        val open = HabitWithCompletions(monthly, emptyList())
+        assertFalse(HabitUtils.isHabitDueToday(open))
+        assertFalse(HabitUtils.needsReminderToday(open))
+        assertEquals(
+            null,
+            HabitUtils.nextReminderAt(HabitWithCompletions(monthly.copy(reminderTimes = "[540]"), emptyList()), noon),
+        )
+    }
+
+    @Test
+    fun monthlyHabit_countsTheCalendarMonth() {
+        val today = LocalDate.now()
+        val firstOfMonth = today.withDayOfMonth(1)
+        val monthly = habit().copy(frequency = HabitFrequency.MONTHLY_FLEXIBLE, targetCount = 2)
+        // The last day of the previous month doesn't count.
+        val hwc = HabitWithCompletions(
+            monthly,
+            listOf(completedOn(firstOfMonth.minusDays(1)), completedOn(firstOfMonth), completedOn(today)),
+        )
+        assertEquals(2, HabitUtils.getCompletionsThisPeriod(hwc))
+        if (firstOfMonth != today) {
+            assertEquals(1, HabitUtils.getCompletionsThisPeriod(hwc, includeToday = false))
+        }
+    }
+
+    @Test
+    fun monthlyHabit_goalMetOnEarlierDaysOfTheMonth() {
+        val today = LocalDate.now()
+        val firstOfMonth = today.withDayOfMonth(1)
+        val monthly = habit().copy(frequency = HabitFrequency.MONTHLY_FLEXIBLE, targetCount = 1)
+        assertFalse(HabitUtils.isPeriodGoalMet(HabitWithCompletions(monthly, emptyList())))
+        if (firstOfMonth != today) {
+            assertTrue(HabitUtils.isPeriodGoalMet(HabitWithCompletions(monthly, listOf(completedOn(firstOfMonth)))))
+        }
     }
 
     // Next reminder: one pending reminder per habit, today's skipped once it's done.

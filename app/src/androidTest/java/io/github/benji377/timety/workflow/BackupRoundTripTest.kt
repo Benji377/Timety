@@ -247,8 +247,9 @@ class BackupRoundTripTest {
         val habit = HabitEntity(
             id = "habit-1",
             name = "Read",
-            frequency = HabitFrequency.WEEKLY_EXACT,
-            targetDaysPerWeek = 3,
+            // The newest frequency: an exporter or importer that doesn't know it falls back to daily.
+            frequency = HabitFrequency.MONTHLY_FLEXIBLE,
+            targetCount = 3,
             targetWeekdays = "[1,3,5]",
             reminderTimes = "[1260]",
             createdAt = now,

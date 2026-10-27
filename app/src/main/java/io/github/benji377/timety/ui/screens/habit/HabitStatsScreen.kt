@@ -67,8 +67,8 @@ import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import io.github.benji377.timety.util.habit.HabitStreaks
 import io.github.benji377.timety.util.stats.StatsUtils
-import io.github.benji377.timety.util.stats.StreakCalculator
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.roundToInt
@@ -117,10 +117,9 @@ fun HabitStatsScreen(
             // Streaks scan every completion, so they're computed once per data change rather
             // than on each recomposition or week shift.
             val streaksByHabit = remember(habits) {
+                val today = LocalDate.now()
                 habits.associate { hwc ->
-                    val dates = completionDates(hwc)
-                    hwc.habit.id to (StreakCalculator.calculateCurrentStreak(dates) to
-                        StreakCalculator.calculateBestStreak(dates))
+                    hwc.habit.id to HabitStreaks.streaks(hwc.habit, completionDates(hwc), today)
                 }
             }
             val allTimeBestStreak = streaksByHabit.values.maxOfOrNull { it.second } ?: 0

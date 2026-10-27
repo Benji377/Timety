@@ -486,10 +486,12 @@ private fun HabitRow(
 ) {
     val habit = hwc.habit
     val isSelected = selected.isTarget(FocusTargetType.HABIT, habit.id)
-    val statusText = if (habit.frequency == HabitFrequency.DAILY) {
-        stringResource(R.string.habitLabelFreqDaily)
-    } else {
-        stringResource(R.string.habitLabelFreqWeekly)
+    val statusText = when (habit.frequency) {
+        HabitFrequency.DAILY -> stringResource(R.string.habitLabelFreqDaily)
+        HabitFrequency.WEEKLY_EXACT, HabitFrequency.WEEKLY_FLEXIBLE ->
+            stringResource(R.string.habitLabelFreqWeekly)
+
+        HabitFrequency.MONTHLY_FLEXIBLE -> stringResource(R.string.habitLabelFreqMonthly)
     }
 
     ListItem(

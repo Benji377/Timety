@@ -290,7 +290,7 @@ class BackupService(
                 put("id", habit.id)
                 put("name", habit.name)
                 put("frequency", habit.frequency.name)
-                put("targetDaysPerWeek", habit.targetDaysPerWeek ?: JSONObject.NULL)
+                put("targetDaysPerWeek", habit.targetCount ?: JSONObject.NULL)
                 put("targetWeekdays", habit.targetWeekdays ?: JSONObject.NULL)
                 put("reminderTimes", habit.reminderTimes ?: JSONObject.NULL)
                 put("createdAt", habit.createdAt.toString())
@@ -618,7 +618,7 @@ class BackupService(
                         readString(habitJson, "frequency"),
                         HabitFrequency.DAILY
                     ),
-                    targetDaysPerWeek = if (habitJson.has("targetDaysPerWeek") && !habitJson.isNull(
+                    targetCount = if (habitJson.has("targetDaysPerWeek") && !habitJson.isNull(
                             "targetDaysPerWeek"
                         )
                     ) habitJson.optInt("targetDaysPerWeek") else null,
