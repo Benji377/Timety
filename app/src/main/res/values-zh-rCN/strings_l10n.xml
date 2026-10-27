@@ -275,6 +275,7 @@
     <string name="taskDetailsReminderOptionDay">提前 1 天</string>
     <string name="taskDetailsReminderOptionHalfHour">提前 30 分钟</string>
     <string name="taskDetailsReminderOptionHour">提前 1 小时</string>
+    <string name="taskDetailsReminderOptionWeek">1 week before</string>
     <string name="taskDetailsReminderOptionOnce">准时</string>
     <string name="taskDetailsSectionChecklist">清单</string>
     <string name="taskDetailsSectionInfo">任务信息</string>
@@ -642,6 +643,8 @@
     <string name="targetSheetGoalsEmpty">暂无进行中的目标</string>
     <string name="recurrenceLabel">重复</string>
     <string name="recurrenceEveryLabel">每一个</string>
+    <string name="recurrenceEveryRequest">Enter at least 1</string>
+    <string name="recurrenceDaily">Daily</string>
     <string name="recurrenceWeekly">每周</string>
     <string name="recurrenceMonthly">每月</string>
     <string name="recurrenceYearly">每年</string>
@@ -687,6 +690,9 @@
     <string name="recurringTaskDeleteTitle">删除定期任务？</string>
     <string name="recurringTaskDeleteContent">此操作将同时删除完成历史记录，且不可撤销。</string>
     <string name="recurringTaskCompletedSnackbar">已完成！下次：%1$s</string>
+    <plurals name="recurrenceEveryDays">
+        <item quantity="other">Every %d days</item>
+    </plurals>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="other">每 %d 周</item>
     </plurals>
