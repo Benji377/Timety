@@ -340,8 +340,8 @@ fun HomeScreen(
                                         allHabitsForStacks = habitsWithCompletions,
                                         targetDate = todayLocalDate,
                                         habitBuilder = { hc, isDone, isStacked, isLocked, _ ->
-                                            val completionsThisWeek =
-                                                HabitUtils.getCompletionsThisWeek(hc)
+                                            val completionsThisPeriod =
+                                                HabitUtils.getCompletionsThisPeriod(hc)
                                             HabitListTile(
                                                 habit = hc.habit,
                                                 isCompleted = isDone,
@@ -349,7 +349,7 @@ fun HomeScreen(
                                                 isLocked = isLocked,
                                                 subtitleText = HabitUtils.buildHabitSubtitle(
                                                     hc.habit,
-                                                    completionsThisWeek
+                                                    completionsThisPeriod
                                                 ),
                                                 enableDismissible = false,
                                                 onToggleCompleted = {

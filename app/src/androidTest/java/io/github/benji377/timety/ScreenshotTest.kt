@@ -256,7 +256,7 @@ class ScreenshotTest {
                 id = "habit_workout",
                 name = "Workout",
                 frequency = HabitFrequency.WEEKLY_FLEXIBLE,
-                targetDaysPerWeek = 3,
+                targetCount = 3,
                 createdAt = Instant.now(),
                 colorValue = habitColor,
             )

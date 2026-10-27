@@ -206,12 +206,18 @@
         <item quantity="one">Goal: 1 day a week</item>
         <item quantity="other">Goal: %d days a week</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="one">Goal: 1 day a month</item>
+        <item quantity="other">Goal: %d days a month</item>
+    </plurals>
     <string name="habitDetailLabelIcon">Select an Icon</string>
     <string name="habitDetailLabelName">Habit Name</string>
     <string name="habitDetailLabelNameHint">e.g., Read 10 pages, Workout…</string>
     <string name="habitDetailLabelNameRequest">Please enter a name</string>
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Why are you building this habit?</string>
+    <string name="habitDetailLabelPeriodMonth">Per month</string>
+    <string name="habitDetailLabelPeriodWeek">Per week</string>
     <string name="habitDetailLabelReminder">Reminder time</string>
     <string name="habitDetailReminderAddTime">Add time</string>
     <string name="habitDetailReminderSheetHint">Reminders are skipped on days this habit is already done or not due.</string>
@@ -228,6 +234,7 @@
     <string name="habitDetailTitleNew">New Habit</string>
     <string name="habitFreqDaily">Daily</string>
     <string name="habitFreqFlexible">%1$d / %2$d this week</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d this month</string>
     <string name="habitFreqWeekly">Weekly on %1$s</string>
     <string name="habitHistoryCompletedAt">Completed at %1$s</string>
     <string name="habitHistoryEmpty">No history yet.</string>
@@ -240,6 +247,7 @@
     <string name="habitHistoryTimePrompt">At what time did you complete this habit?</string>
     <string name="habitHistoryTitle">Habit History</string>
     <string name="habitLabelFreqDaily">Daily Habit</string>
+    <string name="habitLabelFreqMonthly">Monthly Habit</string>
     <string name="habitLabelFreqWeekly">Weekly Habit</string>
     <string name="habitMarkPastCompletionTooltip">Mark past completion</string>
     <string name="habitScreenEmpty">No habits yet! Tap + to build a routine</string>

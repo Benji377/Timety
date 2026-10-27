@@ -330,6 +330,8 @@ private fun isHabitScheduledOn(hwc: HabitWithCompletions, date: LocalDate): Bool
         HabitFrequency.WEEKLY_FLEXIBLE -> true
         HabitFrequency.WEEKLY_EXACT -> HabitUtils.parseWeekdays(hwc.habit.targetWeekdays)
             .contains(date.dayOfWeek.value)
+        // No due days: it shows only on the days it was done.
+        HabitFrequency.MONTHLY_FLEXIBLE -> false
     }
 }
 
