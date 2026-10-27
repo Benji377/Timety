@@ -202,12 +202,17 @@
     <plurals name="habitDetailLabelGoal">
         <item quantity="other">目标：每周 %d 天</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="other">Goal: %d days a month</item>
+    </plurals>
     <string name="habitDetailLabelIcon">选择图标</string>
     <string name="habitDetailLabelName">习惯名称</string>
     <string name="habitDetailLabelNameHint">例如：阅读 10 页，锻炼几分钟…</string>
     <string name="habitDetailLabelNameRequest">请输入名称</string>
     <string name="habitDetailLabelNotes">备注</string>
     <string name="habitDetailLabelNotesHint">建立这个习惯的原因？</string>
+    <string name="habitDetailLabelPeriodMonth">Per month</string>
+    <string name="habitDetailLabelPeriodWeek">Per week</string>
     <string name="habitDetailLabelReminder">提醒时间</string>
     <string name="habitDetailReminderAddTime">添加时间</string>
     <string name="habitDetailReminderSheetHint">当天已完成或无需进行该习惯时，将跳过提醒。</string>
@@ -224,6 +229,7 @@
     <string name="habitDetailTitleNew">新习惯</string>
     <string name="habitFreqDaily">每日</string>
     <string name="habitFreqFlexible">%1$d / %2$d 本周</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d this month</string>
     <string name="habitFreqWeekly">每周的 %1$s</string>
     <string name="habitHistoryCompletedAt">完成于 %1$s</string>
     <string name="habitHistoryEmpty">暂无历史记录。</string>
@@ -236,6 +242,7 @@
     <string name="habitHistoryTimePrompt">您在何时完成了这个习惯？</string>
     <string name="habitHistoryTitle">习惯历史记录</string>
     <string name="habitLabelFreqDaily">每日习惯</string>
+    <string name="habitLabelFreqMonthly">Monthly Habit</string>
     <string name="habitLabelFreqWeekly">每周习惯</string>
     <string name="habitMarkPastCompletionTooltip">标记过去完成记录</string>
     <string name="habitScreenEmpty">目前还没有习惯！点击 + 来建立你的例程</string>
