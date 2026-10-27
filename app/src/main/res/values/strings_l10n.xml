@@ -279,6 +279,7 @@
     <string name="taskDetailsReminderOptionDay">1 day before</string>
     <string name="taskDetailsReminderOptionHalfHour">30 minutes before</string>
     <string name="taskDetailsReminderOptionHour">1 hour before</string>
+    <string name="taskDetailsReminderOptionWeek">1 week before</string>
     <string name="taskDetailsReminderOptionOnce">On time</string>
     <string name="taskDetailsSectionChecklist">Checklist</string>
     <string name="taskDetailsSectionInfo">Task Info</string>
@@ -658,6 +659,8 @@
     <string name="targetSheetGoalsEmpty">No active goals</string>
     <string name="recurrenceLabel">Repeat</string>
     <string name="recurrenceEveryLabel">Every</string>
+    <string name="recurrenceEveryRequest">Enter at least 1</string>
+    <string name="recurrenceDaily">Daily</string>
     <string name="recurrenceWeekly">Weekly</string>
     <string name="recurrenceMonthly">Monthly</string>
     <string name="recurrenceYearly">Yearly</string>
@@ -698,7 +701,6 @@
     <string name="reminderSheetNoDue">This task has no due date yet</string>
     <string name="reminderWarnLimit">You can add up to %1$d reminders.</string>
     <string name="reminderWarnNoDue">Set a due date to use these options. Custom times still work.</string>
-    <string name="reminderWarnPast">Options that would already be in the past are unavailable.</string>
     <string name="recurringTaskCompleteNow">Complete now</string>
     <string name="recurringTaskHistoryTitle">History</string>
     <string name="recurringTaskHistoryEmpty">No completions yet.</string>
@@ -706,6 +708,10 @@
     <string name="recurringTaskDeleteTitle">Delete recurring task?</string>
     <string name="recurringTaskDeleteContent">This also deletes its completion history. This action cannot be undone.</string>
     <string name="recurringTaskCompletedSnackbar">Completed! Next: %1$s</string>
+    <plurals name="recurrenceEveryDays">
+        <item quantity="one">Every day</item>
+        <item quantity="other">Every %d days</item>
+    </plurals>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="one">Every week</item>
         <item quantity="other">Every %d weeks</item>

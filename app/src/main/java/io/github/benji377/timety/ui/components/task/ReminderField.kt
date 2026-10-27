@@ -219,4 +219,5 @@ fun reminderPresetLabel(preset: ReminderPreset): String = when (preset) {
     ReminderPreset.MINUTES_30 -> stringResource(R.string.taskDetailsReminderOptionHalfHour)
     ReminderPreset.HOUR_1 -> stringResource(R.string.taskDetailsReminderOptionHour)
     ReminderPreset.DAY_1 -> stringResource(R.string.taskDetailsReminderOptionDay)
+    ReminderPreset.WEEK_1 -> stringResource(R.string.taskDetailsReminderOptionWeek)
 }

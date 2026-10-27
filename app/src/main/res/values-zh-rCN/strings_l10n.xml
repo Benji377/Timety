@@ -680,7 +680,6 @@
     <string name="reminderSheetNoDue">此任务尚未设置截止日期</string>
     <string name="reminderWarnLimit">最多可添加 %1$d 个提醒。</string>
     <string name="reminderWarnNoDue">设置截止日期后才能使用这些选项，自定义时间仍可使用。</string>
-    <string name="reminderWarnPast">已经过去的选项不可用。</string>
     <string name="recurringTaskCompleteNow">立即完成</string>
     <string name="recurringTaskHistoryTitle">历史记录</string>
     <string name="recurringTaskHistoryEmpty">暂无完成记录。</string>

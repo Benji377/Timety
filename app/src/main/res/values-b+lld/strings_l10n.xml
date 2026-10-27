@@ -770,7 +770,6 @@
     <string name="reminderSheetNoDue">Chësta ncëria à mo nia na scadënza</string>
     <string name="reminderWarnLimit">Te pëus njunté nfin a %1$d lezic.</string>
     <string name="reminderWarnNoDue">Mët na scadënza per nuzé chësta opzions. I tëmps persunalisei funziona inò.</string>
-    <string name="reminderWarnPast">La opzions che fossa bele tl passà ne n\'ie nia a despusizion.</string>
     <string name="recurringTaskCompleteNow">Finé śën</string>
     <string name="recurringTaskHistoryTitle">Storia</string>
     <string name="recurringTaskHistoryEmpty">Niamò degun finé.</string>

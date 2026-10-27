@@ -82,6 +82,7 @@ object RecurrenceUtils {
     ): LocalDate {
         val interval = task.interval.coerceAtLeast(1)
         return when (task.unit) {
+            RecurrenceUnit.DAY -> after.plusDays(interval.toLong())
             RecurrenceUnit.WEEK -> nextWeekly(after, task, anchor, interval)
             RecurrenceUnit.MONTH -> nextMonthly(after, task, anchor, interval)
             // plusYears clamps Feb 29 to Feb 28 in non-leap years.

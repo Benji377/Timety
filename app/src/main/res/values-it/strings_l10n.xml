@@ -698,7 +698,6 @@
     <string name="reminderSheetNoDue">Questa attività non ha ancora una scadenza</string>
     <string name="reminderWarnLimit">Puoi aggiungere fino a %1$d promemoria.</string>
     <string name="reminderWarnNoDue">Imposta una scadenza per usare queste opzioni. Gli orari personalizzati funzionano comunque.</string>
-    <string name="reminderWarnPast">Le opzioni che sarebbero già nel passato non sono disponibili.</string>
     <string name="recurringTaskCompleteNow">Completa ora</string>
     <string name="recurringTaskHistoryTitle">Storico</string>
     <string name="recurringTaskHistoryEmpty">Ancora nessun completamento.</string>

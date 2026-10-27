@@ -43,6 +43,32 @@ class RecurrenceUtilsTest {
     // 2026-07-09 is a Thursday.
 
     @Test
+    fun daily_customInterval_advancesThatManyDays() {
+        val t = task(at(2026, 7, 9), RecurrenceUnit.DAY, interval = 10)
+        assertEquals(at(2026, 7, 19), RecurrenceUtils.nextDueDate(t, at(2026, 7, 9, 12), zone))
+    }
+
+    @Test
+    fun daily_completedEarly_staysOnSchedule() {
+        // Completing three days before the due date doesn't shift the cycle.
+        val t = task(at(2026, 7, 9), RecurrenceUnit.DAY, interval = 10)
+        assertEquals(at(2026, 7, 19), RecurrenceUtils.nextDueDate(t, at(2026, 7, 6), zone))
+    }
+
+    @Test
+    fun daily_longOverdue_skipsMissedOccurrences() {
+        // Jul 19 and Jul 29 have passed, so the next real occurrence is Aug 8.
+        val t = task(at(2026, 7, 9), RecurrenceUnit.DAY, interval = 10)
+        assertEquals(at(2026, 8, 8), RecurrenceUtils.nextDueDate(t, at(2026, 8, 3), zone))
+    }
+
+    @Test
+    fun daily_crossesMonthAndYearBoundaries() {
+        val t = task(at(2026, 12, 20), RecurrenceUnit.DAY, interval = 24)
+        assertEquals(at(2027, 1, 13), RecurrenceUtils.nextDueDate(t, at(2026, 12, 20, 12), zone))
+    }
+
+    @Test
     fun weekly_singleDay_advancesOneWeek() {
         val t = task(at(2026, 7, 9), RecurrenceUnit.WEEK, daysOfWeek = "[4]")
         assertEquals(at(2026, 7, 16), RecurrenceUtils.nextDueDate(t, at(2026, 7, 9, 12), zone))
