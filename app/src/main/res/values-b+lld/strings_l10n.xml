@@ -295,6 +295,7 @@
     <string name="taskDetailsReminderOptionDay">1 di dant</string>
     <string name="taskDetailsReminderOptionHalfHour">30 menuc dant</string>
     <string name="taskDetailsReminderOptionHour">1 ora dant</string>
+    <string name="taskDetailsReminderOptionWeek">1 week before</string>
     <string name="taskDetailsReminderOptionOnce">A l\'ora</string>
     <string name="taskDetailsSectionChecklist">Lista da cuntrolé</string>
     <string name="taskDetailsSectionInfo">Info dla ncëria</string>
@@ -722,6 +723,8 @@
     <string name="targetSheetGoalsEmpty">Degun finamënt atif</string>
     <string name="recurrenceLabel">Repeté</string>
     <string name="recurrenceEveryLabel">Uni</string>
+    <string name="recurrenceEveryRequest">Enter at least 1</string>
+    <string name="recurrenceDaily">Daily</string>
     <string name="recurrenceWeekly">Dl\'ena</string>
     <string name="recurrenceMonthly">Al mëis</string>
     <string name="recurrenceYearly">Al ann</string>
@@ -777,6 +780,14 @@
     <string name="recurringTaskDeleteTitle">Scancelé la ncëria recurënta?</string>
     <string name="recurringTaskDeleteContent">Chësc scancelea nce la storia di finé. Chësta azion ne pòn nia unì anulàda.</string>
     <string name="recurringTaskCompletedSnackbar">Finà! Proscima: %1$s</string>
+    <plurals name="recurrenceEveryDays">
+        <item quantity="zero">Every %d days</item>
+        <item quantity="one">Every day</item>
+        <item quantity="two">Every %d days</item>
+        <item quantity="few">Every %d days</item>
+        <item quantity="many">Every %d days</item>
+        <item quantity="other">Every %d days</item>
+    </plurals>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="zero">Uni %d enes</item>
         <item quantity="one">Uni ena</item>
