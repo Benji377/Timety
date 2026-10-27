@@ -439,9 +439,6 @@ fun TaskDetailScreen(
                     reminders.size >= ReminderUtils.MAX_REMINDERS -> stringResource(
                         R.string.reminderWarnLimit, ReminderUtils.MAX_REMINDERS
                     )
-                    ReminderPreset.entries.any {
-                        !canAddPreset(it) && entries.none { e -> e.preset == it }
-                    } -> stringResource(R.string.reminderWarnPast)
                     else -> null
                 }
                 ReminderField(

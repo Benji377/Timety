@@ -698,7 +698,6 @@
     <string name="reminderSheetNoDue">Diese Aufgabe hat noch kein Fälligkeitsdatum</string>
     <string name="reminderWarnLimit">Du kannst bis zu %1$d Erinnerungen hinzufügen.</string>
     <string name="reminderWarnNoDue">Lege ein Fälligkeitsdatum fest, um diese Optionen zu nutzen. Eigene Zeiten funktionieren weiterhin.</string>
-    <string name="reminderWarnPast">Optionen, die bereits in der Vergangenheit lägen, sind nicht verfügbar.</string>
     <string name="recurringTaskCompleteNow">Jetzt erledigen</string>
     <string name="recurringTaskHistoryTitle">Verlauf</string>
     <string name="recurringTaskHistoryEmpty">Noch keine Erledigungen.</string>
