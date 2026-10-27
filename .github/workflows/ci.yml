@@ -12,8 +12,7 @@ concurrency:
 
 jobs:
   # Detekt runs source-only (no `classpath` is configured on the Detekt tasks), so it needs no
-  # compiled output and stays a cheap job on its own. Everything that does need a compile lives in
-  # the job below, so the app is only compiled once per run instead of once per job.
+  # compiled output and stays a cheap job on its own.
   detekt:
     name: Detekt
     runs-on: ubuntu-latest
@@ -48,15 +47,14 @@ jobs:
           sarif_file: app/build/reports/detekt/detekt.sarif
           category: detekt
 
-  # Lint and the unit tests share this job's single Kotlin compile. assembleDebug is deliberately
-  # not run here: it added ~26s of dexing and packaging while lintDebug and testDebugUnitTest
-  # already force the compile that catches breakage. The release workflow builds the real artifact.
-  lint-and-test:
-    name: Lint & Test
+  # Lint and the unit tests each compile the app, but as separate jobs they run side by side, so
+  # the run takes as long as the slower of the two instead of both. assembleDebug is not needed:
+  # both tasks already force the compile that catches breakage.
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      checks: write
       security-events: write
       actions: read
 
@@ -76,8 +74,57 @@ jobs:
           validate-wrappers: true
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Run Lint & Tests
-        run: ./gradlew lintDebug testDebugUnitTest
+      - name: Run Lint
+        run: ./gradlew lintDebug
+
+      - name: Upload Android Lint SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: app/build/reports/lint-results-debug.sarif
+          category: android-lint
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results-debug.html
+
+  # JVM tests, including the Robolectric ones that render Compose screens and drive the real
+  # database without an emulator.
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'jetbrains'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          validate-wrappers: true
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      # Robolectric downloads its Android framework jars on first use, outside the Gradle cache.
+      - name: Cache Robolectric jars
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ hashFiles('gradle/libs.versions.toml', 'app/src/test/resources/robolectric.properties') }}
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest
 
       - name: Publish test results
         if: always()
@@ -87,19 +134,11 @@ jobs:
           detailed_summary: true
           include_passed: true
 
-      - name: Upload Android Lint SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: app/build/reports/lint-results-debug.sarif
-          category: android-lint
-
       - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: lint-and-test-reports
+          name: unit-test-reports
           path: |
-            app/build/reports/lint-results-debug.html
             app/build/reports/tests/testDebugUnitTest/
             app/build/test-results/testDebugUnitTest/

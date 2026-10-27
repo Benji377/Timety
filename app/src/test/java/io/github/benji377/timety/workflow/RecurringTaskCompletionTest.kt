@@ -27,10 +27,9 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * Completing a recurring task has to do four things at once: log an occurrence, roll the due date
- * forward, award XP, and leave the data the task widget reads in a state where the task is no
- * longer due today. The last of those is what broke once already, when the view model advanced the
- * due date without telling the widget.
+ * Completing a recurring task has to do three things at once: log an occurrence, roll the due date
+ * forward, and leave the data the task widget reads in a state where the task is no longer due
+ * today.
  */
 @RunWith(AndroidJUnit4::class)
 class RecurringTaskCompletionTest {
@@ -55,7 +54,7 @@ class RecurringTaskCompletionTest {
     }
 
     @Test
-    fun completingAnOccurrence_logsIt_advancesTheDueDate_awardsXp_andClearsItFromToday() =
+    fun completingAnOccurrence_logsIt_advancesTheDueDate_andClearsItFromToday() =
         runBlocking {
             val dueToday = LocalDate.now().atStartOfDay(zone).plusHours(9).toInstant()
             val task = RecurringTaskEntity(

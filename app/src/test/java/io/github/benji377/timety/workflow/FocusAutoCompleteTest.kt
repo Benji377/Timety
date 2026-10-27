@@ -19,6 +19,7 @@ import io.github.benji377.timety.testutil.TestAppContainer
 import io.github.benji377.timety.testutil.TestViewModels
 import io.github.benji377.timety.testutil.awaitTrue
 import io.github.benji377.timety.testutil.get
+import io.github.benji377.timety.testutil.settle
 import io.github.benji377.timety.testutil.value
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.ModeDeleteBlocker
@@ -36,7 +37,7 @@ import java.time.temporal.ChronoUnit
 /**
  * Drives [FocusViewModel] through finished focus phases and session ends to check what
  * auto-complete does to each target type: at most one completion per session, never for goals,
- * nothing while the setting is off, and nothing at all (not even XP) for a discarded session.
+ * nothing while the setting is off, and nothing at all for a discarded session.
  */
 @RunWith(AndroidJUnit4::class)
 class FocusAutoCompleteTest {
@@ -98,7 +99,7 @@ class FocusAutoCompleteTest {
         finishFocusPhase()
         finishFocusPhase()
         // Give a premature completion the time to land before asserting it didn't.
-        Thread.sleep(500)
+        settle()
         assertEquals("nothing is completed before the session is logged", 0, occurrenceCount(task.id))
 
         stopSession()
@@ -106,7 +107,7 @@ class FocusAutoCompleteTest {
         startSession(FocusTargetSelection.of(FocusTargetType.RECURRING_TASK, task.id, task.title))
         finishFocusPhase()
         stopSession()
-        Thread.sleep(500)
+        settle()
         assertEquals("a second session the same day must not complete it again", 1, occurrenceCount(task.id))
     }
 
@@ -171,7 +172,7 @@ class FocusAutoCompleteTest {
         startSession(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title))
 
         finishFocusPhase()
-        Thread.sleep(500)
+        settle()
         assertTrue(
             "a finished phase logs nothing yet",
             container.focusRepository.allSessions.value().isEmpty(),
@@ -180,7 +181,7 @@ class FocusAutoCompleteTest {
         FocusTimerManager.stopEvent.tryEmit(
             FocusTimerManager.StopInfo(elapsedFocusSeconds = 120, wasRestPhase = false, discard = true)
         )
-        Thread.sleep(500)
+        settle()
         assertTrue("discarding completes nothing", !isTaskCompleted(task.id))
         assertTrue("discarding logs no session", container.focusRepository.allSessions.value().isEmpty())
     }
@@ -200,7 +201,7 @@ class FocusAutoCompleteTest {
                 container.focusRepository.allSessions.value().singleOrNull()?.totalSecondsFocused == 120
             },
         )
-        Thread.sleep(500)
+        settle()
         assertTrue("no focus phase finished: the task stays open", !isTaskCompleted(task.id))
     }
 
@@ -211,7 +212,7 @@ class FocusAutoCompleteTest {
         focusViewModel.deleteMode(mode) { blocker = it }
 
         assertEquals(ModeDeleteBlocker.SESSION_RUNNING, blocker)
-        Thread.sleep(500)
+        settle()
         assertTrue(
             "the mode is kept",
             container.focusRepository.allModes.value().any { it.id == mode.id },
@@ -241,7 +242,7 @@ class FocusAutoCompleteTest {
             FocusTimerManager.StopInfo(elapsedFocusSeconds = 0, wasRestPhase = false, discard = false)
         )
         // The stop is handled asynchronously; let it reset the session before the next one starts.
-        Thread.sleep(500)
+        settle()
     }
 
     private fun occurrenceCount(recurringTaskId: String): Int =

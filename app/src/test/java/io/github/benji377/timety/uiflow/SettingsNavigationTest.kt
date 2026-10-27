@@ -1,10 +1,11 @@
 package io.github.benji377.timety.uiflow
 
-import android.Manifest
 import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isOff
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -12,7 +13,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.GrantPermissionRule
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
@@ -27,8 +27,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 
 /**
  * Walks the split settings screen: the landing page lists every [SettingsPage], each page opens
@@ -36,17 +36,11 @@ import org.junit.runner.RunWith
  * directly on the Focus page.
  */
 @RunWith(AndroidJUnit4::class)
+@Config(qualifiers = "w412dp-h915dp-xxhdpi")
 class SettingsNavigationTest {
 
-    private val permission: GrantPermissionRule =
-        GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
-
-    private val compose = createAndroidComposeRule<MainActivity>()
-
-    // The notification permission has to be granted before the activity launches, or its prompt
-    // covers the screen and swallows the taps below.
     @get:Rule
-    val chain: RuleChain = RuleChain.outerRule(permission).around(compose)
+    val compose = createAndroidComposeRule<MainActivity>()
 
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val settings get() = (context.applicationContext as TimetyApplication).container.settingsRepository
@@ -103,13 +97,16 @@ class SettingsNavigationTest {
         val greetingRow = compose.onNodeWithText(str(R.string.settingsLabelShowGreeting))
         greetingRow.assertIsOn()
         greetingRow.performClick()
-        compose.waitForIdle()
-        greetingRow.assertIsOff()
 
         assertTrue(
             "turning the switch off should store the setting",
             awaitTrue { runBlocking { settings.showHomeGreetingFlow.first() } == false },
         )
+        // The switch reflects the stored value, which lands after a DataStore write off the main thread.
+        compose.waitUntil(timeoutMillis = 5_000) {
+            compose.onAllNodes(hasText(str(R.string.settingsLabelShowGreeting)) and isOff())
+                .fetchSemanticsNodes().isNotEmpty()
+        }
 
         // Leaving and re-entering the page must show the stored value, not a reset default.
         pressBack()

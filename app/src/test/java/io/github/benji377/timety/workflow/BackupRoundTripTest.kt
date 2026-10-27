@@ -1,6 +1,7 @@
 package io.github.benji377.timety.workflow
 
 import android.content.Context
+import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.benji377.timety.data.model.focus.DistractionEntity
@@ -40,6 +41,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -79,7 +81,7 @@ class BackupRoundTripTest {
     fun backupThenRestore_preservesEveryFieldAcrossAllTables() = runBlocking {
         val seeded = seedOneOfEverything(source)
 
-        val exported = source.backupService.exportToShareUri().getOrThrow()
+        val exported = exportFrom(source)
         assertTrue(
             "restore target should start empty",
             target.habitRepository.allHabits.first().isEmpty(),
@@ -152,7 +154,7 @@ class BackupRoundTripTest {
     @Test
     fun restoreLegacyPayloadMissingOptionalKeys_doesNotCrash() = runBlocking {
         seedOneOfEverything(source)
-        val full = JSONObject(source.backupService.exportToShareUri().getOrThrow().readText())
+        val full = JSONObject(exportFrom(source).readText())
 
         listOf("recurringTasks", "goals", "quickHabits", "dayRatings").forEach(full::remove)
 
@@ -174,7 +176,7 @@ class BackupRoundTripTest {
     @Test
     fun restoreProfileWithUnknownKeys_ignoresThem() = runBlocking {
         val seeded = seedOneOfEverything(source)
-        val full = JSONObject(source.backupService.exportToShareUri().getOrThrow().readText())
+        val full = JSONObject(exportFrom(source).readText())
         full.getJSONObject("userProfile")
             .put("totalXp", 1234)
             .put("unlockedAchievements", JSONArray(listOf("first_task")))
@@ -190,7 +192,7 @@ class BackupRoundTripTest {
         target.settingsRepository.saveShowHomeGreeting(false)
 
         // Valid up to the tasks array, whose entry is not an object: parsing fails mid-restore.
-        val broken = JSONObject(source.backupService.exportToShareUri().getOrThrow().readText())
+        val broken = JSONObject(exportFrom(source).readText())
             .put("preferences", JSONObject().put("showHomeGreeting", true))
             .put("tasks", org.json.JSONArray().put("not a task"))
 
@@ -223,7 +225,7 @@ class BackupRoundTripTest {
     @Test
     fun restoreDuringAFocusSession_failsWithoutChangingAnything() = runBlocking {
         val seeded = seedOneOfEverything(target)
-        val backup = JSONObject(source.backupService.exportToShareUri().getOrThrow().readText())
+        val backup = JSONObject(exportFrom(source).readText())
         FocusTimerManager.setMode("Deep work", 25 * 60, isRestPhase = false)
         FocusTimerManager.startTimer()
         try {
@@ -254,8 +256,16 @@ class BackupRoundTripTest {
         assertTrue("legacyHabitAlarmsCleared" !in exported)
     }
 
-    private fun android.net.Uri.readText(): String =
+    private fun Uri.readText(): String =
         context.contentResolver.openInputStream(this)!!.use { it.reader().readText() }
+
+    // Exports to a plain file: FileProvider caches its roots per process, which breaks once
+    // Robolectric gives the next test a new data directory.
+    private suspend fun exportFrom(container: TestAppContainer): Uri {
+        val uri = Uri.fromFile(File.createTempFile("backup", ".json", context.cacheDir))
+        container.backupService.exportToUri(uri).getOrThrow()
+        return uri
+    }
 
     private suspend fun seedOneOfEverything(container: TestAppContainer): Seeded {
         val habit = HabitEntity(
