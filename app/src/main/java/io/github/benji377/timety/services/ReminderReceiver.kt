@@ -40,46 +40,7 @@ class ReminderReceiver : BroadcastReceiver() {
 
         if (channelId == NotificationService.CHANNEL_EVENING) {
             launchAsync {
-                val localized = localizedContext(appContext)
-                val summary = eveningSummary(appContext)
-                val withRatingActions = !isTodayRated(appContext)
-                when {
-                    summary == null -> notificationService.showEndOfDayNotification(
-                        notificationId, title, body, localized,
-                        withRatingActions = withRatingActions,
-                    )
-
-                    summary.isAllDone -> notificationService.showEndOfDayNotification(
-                        notificationId,
-                        title,
-                        localized.getString(R.string.notificationEveningAllDone),
-                        localized,
-                        withRatingActions = withRatingActions,
-                    )
-
-                    else -> {
-                        val preview = summary.preview(EVENING_MAX_LINES)
-                        notificationService.showEndOfDayNotification(
-                            notificationId,
-                            title,
-                            localized.resources.getQuantityString(
-                                R.plurals.nNotificationEveningOpen, summary.total, summary.total,
-                            ),
-                            localized,
-                            lines = preview.items.map {
-                                localized.getString(
-                                    if (it.isTask) R.string.notificationEveningLineTask
-                                    else R.string.notificationEveningLineHabit,
-                                    it.name,
-                                )
-                            },
-                            overflowText = preview.hiddenCount.takeIf { it > 0 }?.let {
-                                localized.getString(R.string.notificationEveningMore, it)
-                            },
-                            withRatingActions = withRatingActions,
-                        )
-                    }
-                }
+                showEvening(appContext, notificationService, notificationId, title, body)
                 notificationService.rescheduleIfRepeating(intent)
             }
             return
@@ -112,6 +73,42 @@ class ReminderReceiver : BroadcastReceiver() {
 
         notificationService.showNotification(notificationId, channelId, title, body)
         notificationService.rescheduleIfRepeating(intent)
+    }
+
+    /** The evening check-in: what is still open today, with rating buttons while today is unrated. */
+    private suspend fun showEvening(
+        context: Context,
+        notificationService: NotificationService,
+        notificationId: Int,
+        title: String,
+        fallbackBody: String,
+    ) {
+        val localized = localizedContext(context)
+        val summary = eveningSummary(context)
+        val preview = summary?.takeUnless { it.isAllDone }?.preview(EVENING_MAX_LINES)
+        val body = when {
+            summary == null -> fallbackBody
+            summary.isAllDone -> localized.getString(R.string.notificationEveningAllDone)
+            else -> localized.resources.getQuantityString(
+                R.plurals.nNotificationEveningOpen, summary.total, summary.total,
+            )
+        }
+        notificationService.showEndOfDayNotification(
+            notificationId,
+            title,
+            body,
+            localized,
+            lines = preview?.items.orEmpty().map {
+                localized.getString(
+                    if (it.isTask) R.string.notificationEveningLineTask else R.string.notificationEveningLineHabit,
+                    it.name,
+                )
+            },
+            overflowText = preview?.hiddenCount?.takeIf { it > 0 }?.let {
+                localized.getString(R.string.notificationEveningMore, it)
+            },
+            withRatingActions = !isTodayRated(context),
+        )
     }
 
     private suspend fun quickHabitIsActive(context: Context, id: String): Boolean {

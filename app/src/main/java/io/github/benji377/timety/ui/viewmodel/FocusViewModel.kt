@@ -315,100 +315,14 @@ class FocusViewModel(
     }
 
     private suspend fun ensureSystemModes(modes: List<FocusModeEntity>) {
-        if (modes.none { it.id == FocusModeEntity.SYSTEM_STOPWATCH_ID }) {
+        val existing = modes.mapTo(HashSet()) { it.id }
+        for ((mode, phases) in SYSTEM_MODES) {
+            if (mode.id in existing) continue
             focusRepository.insertModeWithPhases(
-                FocusModeEntity(
-                    id = FocusModeEntity.SYSTEM_STOPWATCH_ID,
-                    name = "Stopwatch",
-                    type = FocusModeType.STOPWATCH,
-                    isSystem = true
-                ),
-                listOf(
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_STOPWATCH_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 0,
-                        orderIndex = 0
-                    )
-                ),
-            )
-        }
-        if (modes.none { it.id == FocusModeEntity.SYSTEM_FLEXIBLE_ID }) {
-            focusRepository.insertModeWithPhases(
-                FocusModeEntity(
-                    id = FocusModeEntity.SYSTEM_FLEXIBLE_ID,
-                    name = "Flexible",
-                    type = FocusModeType.FLEXIBLE,
-                    isSystem = true
-                ),
-                listOf(
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_FLEXIBLE_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = -1,
-                        orderIndex = 0
-                    )
-                ),
-            )
-        }
-        if (modes.none { it.id == FocusModeEntity.SYSTEM_POMODORO_ID }) {
-            focusRepository.insertModeWithPhases(
-                FocusModeEntity(
-                    id = FocusModeEntity.SYSTEM_POMODORO_ID,
-                    name = "Pomodoro Classic",
-                    type = FocusModeType.POMODORO,
-                    isSystem = true
-                ),
-                listOf(
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 25,
-                        orderIndex = 0
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.REST,
-                        durationMinutes = 5,
-                        orderIndex = 1
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 25,
-                        orderIndex = 2
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.REST,
-                        durationMinutes = 5,
-                        orderIndex = 3
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 25,
-                        orderIndex = 4
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.REST,
-                        durationMinutes = 5,
-                        orderIndex = 5
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 25,
-                        orderIndex = 6
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.REST,
-                        durationMinutes = 15,
-                        orderIndex = 7
-                    ),
-                ),
+                mode,
+                phases.mapIndexed { index, (type, minutes) ->
+                    SessionPhaseEntity(modeId = mode.id, type = type, durationMinutes = minutes, orderIndex = index)
+                },
             )
         }
     }
@@ -592,3 +506,26 @@ class FocusViewModel(
         targetLabel = target?.label,
     )
 }
+
+/** Built-in modes with their phases as (type, minutes); 0 minutes is open-ended, -1 is user-set. */
+private val SYSTEM_MODES = listOf(
+    FocusModeEntity(
+        id = FocusModeEntity.SYSTEM_STOPWATCH_ID,
+        name = "Stopwatch",
+        type = FocusModeType.STOPWATCH,
+        isSystem = true,
+    ) to listOf(PhaseType.FOCUS to 0),
+    FocusModeEntity(
+        id = FocusModeEntity.SYSTEM_FLEXIBLE_ID,
+        name = "Flexible",
+        type = FocusModeType.FLEXIBLE,
+        isSystem = true,
+    ) to listOf(PhaseType.FOCUS to -1),
+    // Four 25-minute focus blocks; the last break is the long one.
+    FocusModeEntity(
+        id = FocusModeEntity.SYSTEM_POMODORO_ID,
+        name = "Pomodoro Classic",
+        type = FocusModeType.POMODORO,
+        isSystem = true,
+    ) to (1..4).flatMap { block -> listOf(PhaseType.FOCUS to 25, PhaseType.REST to if (block == 4) 15 else 5) },
+)

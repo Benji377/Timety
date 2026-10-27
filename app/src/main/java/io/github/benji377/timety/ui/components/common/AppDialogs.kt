@@ -22,8 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
-import io.github.benji377.timety.ui.components.common.NeoButton
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /** Alert dialog with cancel/confirm actions; renders nothing while [visible] is false. */

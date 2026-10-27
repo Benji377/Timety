@@ -1,3 +1,5 @@
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
@@ -53,6 +55,10 @@ android {
         includeInBundle = false
     }
     buildTypes {
+        debug {
+            // JaCoCo report for unit tests: ./gradlew createDebugUnitTestCoverageReport
+            enableUnitTestCoverage = true
+        }
         release {
             vcsInfo {
                 // Embedded git state breaks F-Droid reproducible builds.
@@ -84,6 +90,11 @@ android {
             all {
                 // Robolectric's FileDescriptor shim reaches into JDK internals.
                 it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
+                // Robolectric loads app classes through its own class loader; JaCoCo has to see them.
+                it.extensions.configure<JacocoTaskExtension> {
+                    isIncludeNoLocationClasses = true
+                    excludes = listOf("jdk.internal.*")
+                }
             }
         }
     }
@@ -143,6 +154,8 @@ detekt {
     // Default rules; per-rule opt-outs and Compose tweaks live in the config file.
     buildUponDefaultConfig = true
     config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    // Production code only, like lint; tests never ship.
+    source.setFrom("src/main/java")
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {

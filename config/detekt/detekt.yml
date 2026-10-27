@@ -2,9 +2,20 @@
 # (https://detekt.dev/docs/introduction/compose) plus rules that don't fit this codebase,
 # disabled with a short reason each. Everything else runs at full strength — no baseline.
 
-# Size gates mostly flag the app's naturally large seams (BackupService, DAOs, screens).
+# Composables are long by nature (layout code), so the size gates only judge plain Kotlin.
 complexity:
-  active: false
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    ignoreAnnotated: ['Composable']
+    ignoreDefaultParameters: true
+    # Pure functions over the app's data sets take one list per entity type.
+    functionThreshold: 8
+  CyclomaticComplexMethod:
+    ignoreAnnotated: ['Composable']
+  # DAOs, repositories and view models are one function per operation.
+  TooManyFunctions:
+    active: false
 
 exceptions:
   # Broad catches in receivers/services are deliberate last-resort guards.
@@ -47,3 +58,5 @@ style:
     active: false
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']
+  UnusedImports:
+    active: true

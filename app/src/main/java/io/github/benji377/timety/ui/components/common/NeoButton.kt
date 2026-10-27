@@ -8,7 +8,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.remember
@@ -32,35 +31,6 @@ fun NeoButton(
     content: @Composable RowScope.() -> Unit
 ) {
     Button(
-        onClick = onClick,
-        modifier = modifier,
-        enabled = enabled,
-        shape = shape,
-        colors = colors,
-        elevation = elevation,
-        border = border,
-        contentPadding = contentPadding,
-        interactionSource = interactionSource,
-        content = content
-    )
-}
-
-/** Elevated variant of [NeoButton] with the same flat, hairline-bordered treatment. */
-@Composable
-@NonRestartableComposable
-fun NeoElevatedButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    shape: Shape = AppTheme.brNeo,
-    colors: ButtonColors = ButtonDefaults.elevatedButtonColors(),
-    elevation: ButtonElevation? = AppTheme.flatButtonElevation,
-    border: BorderStroke? = AppTheme.hairlineStroke,
-    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    content: @Composable RowScope.() -> Unit
-) {
-    ElevatedButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,

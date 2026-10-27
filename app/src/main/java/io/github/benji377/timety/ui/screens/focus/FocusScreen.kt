@@ -715,62 +715,50 @@ private fun TimerGauge(
     val canDrag = isFlexibleMode && !isRunning && !isPaused
     val isStopwatchPhaseType = activeMode?.type == FocusModeType.STOPWATCH
 
-    var gaugeProgress = 1f
-    var isStopwatchAnim = false
-    var gaugeLabel = focusLabelDefault
-    var centerText = "25:00"
-    var isResting = false
-
-    if (activeMode != null && currentPhase != null) {
-        when {
-            canDrag -> {
-                gaugeProgress = flexibleMinutes / 120f
-                gaugeLabel = focusLabelSetTime
-                centerText = AppDateFormatUtils.formatDuration(flexibleMinutes * 60)
-            }
-
-            !isStopwatchPhaseType -> {
-                if (isRunning || isPaused) {
-                    val total =
-                        if (timerState.totalPhaseSeconds > 0) timerState.totalPhaseSeconds else 1
-                    gaugeProgress = (timerState.secondsRemaining.toFloat() / total).coerceIn(0f, 1f)
-                    centerText = timerState.centerText
-                    isResting = timerState.isRestPhase
-                    gaugeLabel = if (timerState.isRestPhase) focusLabelRest else focusLabelDefault
-                } else {
-                    val totalPhaseSeconds =
-                        if (currentPhase.durationMinutes > 0) currentPhase.durationMinutes * 60 else 25 * 60
-                    gaugeProgress = 1f
-                    centerText = AppDateFormatUtils.formatDuration(totalPhaseSeconds)
-                    isResting = currentPhase.type == PhaseType.REST
-                    gaugeLabel = if (isResting) focusLabelRest else focusLabelDefault
-                }
-            }
-
-            else -> {
-                isStopwatchAnim = isRunning
-                gaugeProgress = 0f
-                gaugeLabel = focusLabelStopwatch
-                centerText = if (isRunning || isPaused) {
-                    timerState.centerText
-                } else {
-                    "00:00"
-                }
-            }
+    val isActive = isRunning || isPaused
+    val display = when {
+        activeMode == null || currentPhase == null -> GaugeDisplay(1f, focusLabelDefault, "25:00")
+        canDrag -> GaugeDisplay(
+            flexibleMinutes / 120f,
+            focusLabelSetTime,
+            AppDateFormatUtils.formatDuration(flexibleMinutes * 60),
+        )
+        isStopwatchPhaseType -> GaugeDisplay(
+            0f,
+            focusLabelStopwatch,
+            if (isActive) timerState.centerText else "00:00",
+            pulses = isRunning,
+        )
+        isActive -> GaugeDisplay(
+            (timerState.secondsRemaining.toFloat() / timerState.totalPhaseSeconds.coerceAtLeast(1)).coerceIn(0f, 1f),
+            if (timerState.isRestPhase) focusLabelRest else focusLabelDefault,
+            timerState.centerText,
+            isResting = timerState.isRestPhase,
+        )
+        else -> {
+            val isRest = currentPhase.type == PhaseType.REST
+            val phaseSeconds = if (currentPhase.durationMinutes > 0) currentPhase.durationMinutes * 60 else 25 * 60
+            GaugeDisplay(
+                1f,
+                if (isRest) focusLabelRest else focusLabelDefault,
+                AppDateFormatUtils.formatDuration(phaseSeconds),
+                isResting = isRest,
+            )
         }
     }
+    val isResting = display.isResting
 
     val gaugeColor = if (isResting) WarningColor else FocusColor
     // Tags are identified by their color alone, so only the other target types get an icon.
     val bottomTextIcon = selectedTarget?.type?.takeIf { it != FocusTargetType.TAG }?.icon
 
     InteractiveGauge(
-        progress = gaugeProgress,
-        isStopwatch = isStopwatchAnim,
+        progress = display.progress,
+        isStopwatch = display.pulses,
         color = gaugeColor,
         labelColor = gaugeColor,
         centerTextColor = gaugeColor,
-        centerText = centerText,
+        centerText = display.centerText,
         bottomText = selectedTarget?.label ?: stringResource(R.string.focusTargetEmpty),
         bottomTextColor = selectedTarget?.color ?: FocusColor,
         bottomTextIcon = bottomTextIcon,
@@ -779,7 +767,7 @@ private fun TimerGauge(
             { onTargetTapped() }
         },
         isInteractive = canDrag,
-        label = gaugeLabel,
+        label = display.label,
         onChanged = { newProgress ->
             if (canDrag) {
                 var newMins = (newProgress * 120).roundToInt()
@@ -789,3 +777,12 @@ private fun TimerGauge(
         },
     )
 }
+
+/** What the dial shows: ring fill, label above the time, the time itself, and its accents. */
+private data class GaugeDisplay(
+    val progress: Float,
+    val label: String,
+    val centerText: String,
+    val isResting: Boolean = false,
+    val pulses: Boolean = false,
+)

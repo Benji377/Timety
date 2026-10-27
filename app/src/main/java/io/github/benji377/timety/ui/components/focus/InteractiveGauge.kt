@@ -98,18 +98,20 @@ fun InteractiveGauge(
     // appears nowhere else in the palette.
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
 
-    val infiniteTransition = rememberInfiniteTransition(label = "gaugePulse")
-    val pulseValue by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(AppTheme.PULSE_DURATION_MS, easing = LinearEasing),
-        ),
-        label = "gaugePulseValue",
-    )
-
-    val paintProgress = if (isStopwatch) pulseValue else currentProgress
-    val trackOpacity = if (isStopwatch) (1f - pulseValue).coerceIn(0.2f, 1f) else 1f
+    // Only a stopwatch pulses. The value is read in the draw phase, so each frame redraws the
+    // ring without recomposing the gauge.
+    val pulse = if (isStopwatch) {
+        rememberInfiniteTransition(label = "gaugePulse").animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(AppTheme.PULSE_DURATION_MS, easing = LinearEasing),
+            ),
+            label = "gaugePulseValue",
+        )
+    } else {
+        null
+    }
 
     fun handlePointer(offset: Offset, size: IntSize) {
         if (!isInteractive) return
@@ -139,6 +141,9 @@ fun InteractiveGauge(
             val frameWidth = AppTheme.borderCard.toPx()
 
             val faceFillColor = if (isDark) GaugeBgDark else GaugeWhite
+            val pulseValue = pulse?.value
+            val paintProgress = pulseValue ?: currentProgress
+            val trackOpacity = pulseValue?.let { (1f - it).coerceIn(0.2f, 1f) } ?: 1f
 
             // The dial is one solid card that happens to be round: a flat face inside a single
             // hairline outline, the same two ingredients as every card in the app, so it reads as

@@ -53,58 +53,21 @@ object LocationApi {
         }
 
     /** Best single-line label for a search result: its name, else street, else city/state. */
-    fun primaryName(p: JSONObject): String {
-        val name = p.optString("name", "")
-        if (name.isNotEmpty()) return name
-
-        val street = p.optString("street", "")
-        val number = p.optString("housenumber", "")
-        if (street.isNotEmpty()) {
-            return if (number.isNotEmpty()) "$street $number" else street
-        }
-
-        val city = p.optString("city", "")
-        val state = p.optString("state", "")
-        if (city.isNotEmpty()) return city
-        if (state.isNotEmpty()) return state
-
-        return ""
-    }
+    fun primaryName(p: JSONObject): String =
+        p.text("name") ?: streetLine(p) ?: p.text("city") ?: p.text("state") ?: ""
 
     /** Secondary detail line for a search result: type, street/number, and city/state/postcode. */
     fun detailsString(p: JSONObject): String {
-        val parts = mutableListOf<String>()
-
-        val type = p.optString("osm_value", "")
-        if (type.isNotEmpty() && type != "yes") {
-            parts.add(type.replaceFirstChar { it.uppercase() })
-        }
-
-        val street = p.optString("street", "")
-        val number = p.optString("housenumber", "")
-        var streetInfo = ""
-        if (street.isNotEmpty()) streetInfo += street
-        if (street.isNotEmpty() && number.isNotEmpty()) streetInfo += " $number"
-        if (streetInfo.isNotEmpty()) parts.add(streetInfo)
-
-        var cityStr = p.optString("city", "")
-        if (cityStr.isEmpty()) cityStr = p.optString("town", "")
-        if (cityStr.isEmpty()) cityStr = p.optString("village", "")
-
-        val state = p.optString("state", "")
-        val postcode = p.optString("postcode", "")
-
-        val locationParts = mutableListOf<String>()
-        if (cityStr.isNotEmpty()) locationParts.add(cityStr)
-        if (state.isNotEmpty()) locationParts.add(state)
-        if (postcode.isNotEmpty()) locationParts.add(postcode)
-
-        if (locationParts.isNotEmpty()) {
-            parts.add(locationParts.joinToString(", "))
-        }
-
-        return parts.joinToString(" • ")
+        val type = p.text("osm_value")?.takeIf { it != "yes" }?.replaceFirstChar { it.uppercase() }
+        val city = p.text("city") ?: p.text("town") ?: p.text("village")
+        val area = listOfNotNull(city, p.text("state"), p.text("postcode")).joinToString(", ").ifEmpty { null }
+        return listOfNotNull(type, streetLine(p), area).joinToString(" • ")
     }
+
+    private fun streetLine(p: JSONObject): String? =
+        p.text("street")?.let { listOfNotNull(it, p.text("housenumber")).joinToString(" ") }
+
+    private fun JSONObject.text(key: String): String? = optString(key, "").ifEmpty { null }
 
     /**
      * Snapshots a search result for storing on a task. [name] is the label shown in the picker,

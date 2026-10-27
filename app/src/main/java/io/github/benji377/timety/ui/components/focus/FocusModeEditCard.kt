@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,7 +49,7 @@ import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
-import io.github.benji377.timety.ui.components.common.NeoElevatedButton
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -338,7 +339,7 @@ private fun EditorView(
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         TextButton(onClick = onCancel) { Text(stringResource(R.string.commonLabelCancel)) }
         Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-        NeoElevatedButton(onClick = onSave) {
+        NeoButton(onClick = onSave, colors = ButtonDefaults.elevatedButtonColors()) {
             Icon(
                 Icons.Filled.Save,
                 contentDescription = null,
