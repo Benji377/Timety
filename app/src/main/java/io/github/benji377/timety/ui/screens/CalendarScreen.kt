@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,8 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Today
@@ -65,6 +62,7 @@ import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.calendar.PeriodReportDialog
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
+import io.github.benji377.timety.ui.components.common.MonthNavigator
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
@@ -332,33 +330,6 @@ private fun isHabitScheduledOn(hwc: HabitWithCompletions, date: LocalDate): Bool
             .contains(date.dayOfWeek.value)
         // No due days: it shows only on the days it was done.
         HabitFrequency.MONTHLY_FLEXIBLE -> false
-    }
-}
-
-@Composable
-private fun MonthNavigator(focusedMonth: LocalDate, onPrevious: () -> Unit, onNext: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        NeoIconButton(
-            onClick = onPrevious,
-            icon = Icons.Filled.ChevronLeft,
-            contentDescription = stringResource(R.string.commonLabelPrevious),
-        )
-        Text(
-            text = AppDateFormatUtils.formatMonthYear(
-                focusedMonth
-            ),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-        NeoIconButton(
-            onClick = onNext,
-            icon = Icons.Filled.ChevronRight,
-            contentDescription = stringResource(R.string.commonLabelNext),
-        )
     }
 }
 

@@ -13,8 +13,14 @@ interface DayRatingDao {
     @Query("SELECT * FROM day_ratings ORDER BY dayKey ASC")
     fun getAll(): Flow<List<DayRatingEntity>>
 
+    @Query("SELECT * FROM day_ratings WHERE dayKey = :dayKey")
+    fun getByKey(dayKey: String): DayRatingEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsert(rating: DayRatingEntity)
+
+    @Query("DELETE FROM day_ratings WHERE dayKey = :dayKey")
+    fun deleteByKey(dayKey: String): Int
 
     @Query("DELETE FROM day_ratings")
     fun clearAll(): Int

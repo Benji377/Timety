@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,8 +36,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,25 +63,34 @@ import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TextInputDialog
+import io.github.benji377.timety.ui.components.mood.MoodCalendar
+import io.github.benji377.timety.ui.components.mood.MoodDistributionBar
+import io.github.benji377.timety.ui.components.mood.MoodPickerSheet
+import io.github.benji377.timety.ui.components.mood.RateTodayCard
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.DayRatingViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.util.ProfileImageStore
+import io.github.benji377.timety.util.stats.MoodStats
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 /**
- * Displays the user's profile: avatar and name, with options to edit them or share a "wrap-up"
- * summary image.
+ * Displays the user's profile: avatar and name, a month calendar of day moods with an all-time
+ * mood split below it, and options to edit the profile or share a "wrap-up" summary image.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,6 +100,7 @@ fun ProfileScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    dayRatingViewModel: DayRatingViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = io.github.benji377.timety.ui.viewmodel.activityScopedViewModel()
 ) {
     val userProfile by userViewModel.userProfile.collectAsState()
@@ -94,6 +108,19 @@ fun ProfileScreen(
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
+    val moods by dayRatingViewModel.ratingsByDay.collectAsState()
+    val checkupTime by dayRatingViewModel.checkupTime.collectAsState()
+
+    // Ticks so the rate-today card appears at the checkup time and today rolls over at midnight.
+    val now by produceState(LocalDateTime.now()) {
+        while (true) {
+            delay(CLOCK_TICK_MS)
+            value = LocalDateTime.now()
+        }
+    }
+    val today = now.toLocalDate()
+    var shownMonth by rememberSaveable(stateSaver = LocalDateSaver) { mutableStateOf(today.withDayOfMonth(1)) }
+    var pickerDay by rememberSaveable(stateSaver = NullableLocalDateSaver) { mutableStateOf<LocalDate?>(null) }
 
     val userName = userProfile?.name ?: "User"
 
@@ -203,6 +230,22 @@ fun ProfileScreen(
                     Text(stringResource(R.string.commonLabelClose))
                 }
             }
+        )
+    }
+
+    pickerDay?.let { day ->
+        MoodPickerSheet(
+            day = day,
+            current = moods[day],
+            onPick = {
+                dayRatingViewModel.setRating(day, it)
+                pickerDay = null
+            },
+            onClear = {
+                dayRatingViewModel.clearRating(day)
+                pickerDay = null
+            },
+            onDismiss = { pickerDay = null },
         )
     }
 
@@ -333,10 +376,48 @@ fun ProfileScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(40.dp)) }
+            item { Spacer(modifier = Modifier.height(24.dp)) }
+
+            if (MoodStats.shouldPromptToday(today in moods, now.toLocalTime(), checkupTime)) {
+                item {
+                    RateTodayCard(
+                        onPick = { dayRatingViewModel.setRating(today, it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = AppTheme.spaceLarge),
+                    )
+                }
+            }
+
+            item {
+                MoodCalendar(
+                    month = shownMonth,
+                    today = today,
+                    moods = moods,
+                    onMonthChange = { shownMonth = it },
+                    onDayClick = { pickerDay = it },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            item {
+                MoodDistributionBar(
+                    moods = moods.values,
+                    modifier = Modifier.padding(top = AppTheme.spaceXLarge, bottom = 40.dp),
+                )
+            }
         }
     }
 }
+
+private const val CLOCK_TICK_MS = 30_000L
+
+private val LocalDateSaver = Saver<LocalDate, Long>(save = { it.toEpochDay() }, restore = LocalDate::ofEpochDay)
+
+private val NullableLocalDateSaver = Saver<LocalDate?, Long>(
+    save = { it?.toEpochDay() },
+    restore = LocalDate::ofEpochDay,
+)
 
 /** Lifetime totals shown in the share wrap-up. */
 private data class ProfileStats(

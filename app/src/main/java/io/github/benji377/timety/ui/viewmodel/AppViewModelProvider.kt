@@ -84,7 +84,11 @@ object AppViewModelProvider {
                 }
 
                 modelClass.isAssignableFrom(DayRatingViewModel::class.java) -> {
-                    DayRatingViewModel(container.dayRatingRepository)
+                    DayRatingViewModel(
+                        application,
+                        container.dayRatingRepository,
+                        container.settingsRepository
+                    )
                 }
 
                 modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {

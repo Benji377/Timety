@@ -366,15 +366,6 @@
     <string name="statsLabelProductivity">Produktivitäts-Synergie</string>
     <string name="statsLabelSummary">Heutige Zusammenfassung</string>
     <string name="statsLabelSynergy">Fokus-Zeit vs. Aufgabenerledigung (Letzte 7 Tage)</string>
-    <string name="statsDayQualityTitle">Tagesqualität</string>
-    <string name="statsDayQualitySubtitle">Wie sich deine bewerteten Tage vergleichen</string>
-    <string name="statsDayQualityEmpty">Bewerte deinen Tag über die abendliche Check-in-Benachrichtigung, um zu sehen, wie sich deine guten Tage unterscheiden.</string>
-    <string name="statsDayQualityAverage">Durchschnittsbewertung</string>
-    <string name="statsDayQualityRowStats">%1$d min Fokus · %2$d Aufgaben pro Tag</string>
-    <plurals name="statsDayQualityDays">
-        <item quantity="one">%d Tag</item>
-        <item quantity="other">%d Tage</item>
-    </plurals>
     <string name="statsLabelTasksDone">Aufgaben erledigt</string>
     <string name="statsTabFocus">Fokus</string>
     <string name="statsTabHabits">Gewohnheiten</string>

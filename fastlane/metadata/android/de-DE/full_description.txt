@@ -10,4 +10,5 @@
   <li><b>Detaillierte Analysen:</b> Visualisiere deine Produktivität mit interaktiven Diagrammen, wöchentlichen Geschwindigkeitsmetriken und Tageszeit-Analysen.</li>
   <li><b>Smarte Benachrichtigungen:</b> Lokale Erinnerungen für Aufgaben, spezifische Zeiten für Gewohnheiten und dynamische tägliche Motivation.</li>
   <li><b>Einheitlicher Kalender:</b> Eine personalisierte Mikro-Punkt-Kalenderansicht, um Aufgaben, Fokus-Sitzungen und Gewohnheiten auf einen Blick zu sehen.</li>
+  <li><b>Stimmungskalender:</b> Bewerte jeden Tag beim abendlichen Check-in oder in deinem Profil und sieh einen Monat voller Stimmungen und deine Gesamtverteilung auf einen Blick.</li>
 </ul>

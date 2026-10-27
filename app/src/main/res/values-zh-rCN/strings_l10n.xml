@@ -362,14 +362,6 @@
     <string name="statsLabelProductivity">生产力协同</string>
     <string name="statsLabelSummary">今日概览</string>
     <string name="statsLabelSynergy">专注时长与任务完成情况（最近 7 天）</string>
-    <string name="statsDayQualityTitle">每日质量</string>
-    <string name="statsDayQualitySubtitle">您对每日的评价对比</string>
-    <string name="statsDayQualityEmpty">通过晚间检查通知来评价您的一天，即可看到好日子有何不同。</string>
-    <string name="statsDayQualityAverage">平均评分</string>
-    <string name="statsDayQualityRowStats">%1$d 分钟专注 · 每日 %2$d 个任务</string>
-    <plurals name="statsDayQualityDays">
-        <item quantity="other">%d 天</item>
-    </plurals>
     <string name="statsLabelTasksDone">已完成任务</string>
     <string name="statsTabFocus">专注</string>
     <string name="statsTabHabits">习惯</string>

@@ -366,15 +366,6 @@
     <string name="statsLabelProductivity">Sinergia di produttività</string>
     <string name="statsLabelSummary">Riepilogo di oggi</string>
     <string name="statsLabelSynergy">Tempo di focus vs Completamento attività (Ultimi 7 giorni)</string>
-    <string name="statsDayQualityTitle">Qualità del giorno</string>
-    <string name="statsDayQualitySubtitle">Come si confrontano i tuoi giorni valutati</string>
-    <string name="statsDayQualityEmpty">Valuta la tua giornata dalla notifica del check-in serale per vedere come si differenziano i tuoi giorni migliori.</string>
-    <string name="statsDayQualityAverage">Valutazione media</string>
-    <string name="statsDayQualityRowStats">%1$d min focus · %2$d attività al giorno</string>
-    <plurals name="statsDayQualityDays">
-        <item quantity="one">%d giorno</item>
-        <item quantity="other">%d giorni</item>
-    </plurals>
     <string name="statsLabelTasksDone">Attività completate</string>
     <string name="statsTabFocus">Focus</string>
     <string name="statsTabHabits">Abitudini</string>

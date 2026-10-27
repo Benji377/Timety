@@ -7,11 +7,13 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.LocaleHelper
+import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.reminder.EveningSummary
 import io.github.benji377.timety.util.reminder.EveningSummaryBuilder
 import kotlinx.coroutines.flow.first
 import java.time.Instant
+import java.time.LocalDate
 
 
 /** Handles a fired reminder alarm by showing its notification and re-arming it if it repeats. */
@@ -41,9 +43,11 @@ class ReminderReceiver : BroadcastReceiver() {
             launchAsync {
                 val localized = localizedContext(appContext)
                 val summary = eveningSummary(appContext)
+                val withRatingActions = !isTodayRated(appContext)
                 when {
                     summary == null -> notificationService.showEndOfDayNotification(
                         notificationId, title, body, localized,
+                        withRatingActions = withRatingActions,
                     )
 
                     summary.isAllDone -> notificationService.showEndOfDayNotification(
@@ -51,6 +55,7 @@ class ReminderReceiver : BroadcastReceiver() {
                         title,
                         localized.getString(R.string.notificationEveningAllDone),
                         localized,
+                        withRatingActions = withRatingActions,
                     )
 
                     else -> {
@@ -72,6 +77,7 @@ class ReminderReceiver : BroadcastReceiver() {
                             overflowText = preview.hiddenCount.takeIf { it > 0 }?.let {
                                 localized.getString(R.string.notificationEveningMore, it)
                             },
+                            withRatingActions = withRatingActions,
                         )
                     }
                 }
@@ -125,6 +131,11 @@ class ReminderReceiver : BroadcastReceiver() {
     }
 
 
+    private suspend fun isTodayRated(context: Context): Boolean {
+        val app = context.applicationContext as? TimetyApplication ?: return false
+        return app.container.dayRatingRepository.get(AppDateUtils.dayKey(LocalDate.now())) != null
+    }
+
     /** What is still open today, or null when the app container isn't available. */
     private suspend fun eveningSummary(context: Context): EveningSummary? {
         val app = context.applicationContext as? TimetyApplication ?: return null
@@ -160,7 +171,7 @@ class ReminderReceiver : BroadcastReceiver() {
             localized.getString(R.string.notificationQuote2),
             localized.getString(R.string.notificationQuote3),
         )
-        val quote = quotes[java.time.LocalDate.now().dayOfMonth % quotes.size]
+        val quote = quotes[LocalDate.now().dayOfMonth % quotes.size]
         return quote + todaysHabitsSuffix(app, localized)
     }
 

@@ -375,15 +375,6 @@
     <string name="statsLabelProductivity">Productivity Synergy</string>
     <string name="statsLabelSummary">Today\'s Summary</string>
     <string name="statsLabelSynergy">Focus Time vs. Task Completion (Last 7 Days)</string>
-    <string name="statsDayQualityTitle">Day Quality</string>
-    <string name="statsDayQualitySubtitle">How your rated days compare</string>
-    <string name="statsDayQualityEmpty">Rate your day from the evening checkup notification to see how your good days differ.</string>
-    <string name="statsDayQualityAverage">Average rating</string>
-    <string name="statsDayQualityRowStats">%1$d min focus · %2$d tasks per day</string>
-    <plurals name="statsDayQualityDays">
-        <item quantity="one">%d day</item>
-        <item quantity="other">%d days</item>
-    </plurals>
     <string name="statsLabelTasksDone">Tasks Completed</string>
     <string name="statsTabFocus">Focus</string>
     <string name="statsTabHabits">Habits</string>
@@ -505,6 +496,12 @@
     <string name="dayRatingBad">Bad</string>
     <string name="dayRatingOk">OK</string>
     <string name="dayRatingGreat">Great</string>
+    <string name="moodRateTodayTitle">How was your day?</string>
+    <string name="moodRateTodayBody">Tap a face to add today to your mood calendar.</string>
+    <string name="moodPickerTitle">How was %1$s?</string>
+    <string name="moodDayNotRated">Not rated</string>
+    <string name="moodDistributionTitle">All-time mood</string>
+    <string name="moodDistributionEmpty">Rate a day to see how your moods add up.</string>
     <string name="notificationChannelFocusDesc">Persistent notification for active focus sessions</string>
     <string name="notificationChannelFocusName">Active Focus Timer</string>
     <string name="notificationChannelHabitsDesc">Specific time reminders for your habits</string>

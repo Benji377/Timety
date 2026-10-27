@@ -44,6 +44,7 @@ Timety is an offline-first productivity and time-management application built wi
 *   **Rich Analytics:** Visualize your productivity with interactive charts, weekly velocity metrics, and time-of-day habit analysis.
 *   **Smart Notifications:** Local reminders for tasks, specific habit times, and dynamic daily motivation.
 *   **Unified Calendar:** A custom micro-dot calendar view to see your tasks, focus sessions, and habits at a glance.
+*   **Mood Calendar:** Rate each day from the evening check-in or your profile, and see a month of moods and your all-time split at a glance.
 
 ## Download & Installation
 

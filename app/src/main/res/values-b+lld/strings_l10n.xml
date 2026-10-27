@@ -382,19 +382,6 @@
     <string name="statsLabelProductivity">Sinergia de produtività</string>
     <string name="statsLabelSummary">Soma de ncuei</string>
     <string name="statsLabelSynergy">Tëmp de focus vs Fineda de ncëries (Ultimi 7 dis)</string>
-    <string name="statsDayQualityTitle">Cualità dl di</string>
-    <string name="statsDayQualitySubtitle">Coche ti dis valutiei se cunfronta</string>
-    <string name="statsDayQualityEmpty">Valutea ti di dala nutificazion de sëira per udëi coche ti dis miëures se desferenzieia.</string>
-    <string name="statsDayQualityAverage">Valutazion mesana</string>
-    <string name="statsDayQualityRowStats">%1$d min focus · %2$d ncëries al di</string>
-    <plurals name="statsDayQualityDays">
-        <item quantity="zero">%d dis</item>
-        <item quantity="one">%d di</item>
-        <item quantity="two">%d dis</item>
-        <item quantity="few">%d dis</item>
-        <item quantity="many">%d dis</item>
-        <item quantity="other">%d dis</item>
-    </plurals>
     <string name="statsLabelTasksDone">Ncëries finedes</string>
     <string name="statsTabFocus">Focus</string>
     <string name="statsTabHabits">Abitudins</string>

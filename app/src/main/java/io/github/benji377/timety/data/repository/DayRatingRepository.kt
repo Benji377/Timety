@@ -12,7 +12,15 @@ class DayRatingRepository(
 ) {
     val allRatings: Flow<List<DayRatingEntity>> = dayRatingDao.getAll()
 
+    suspend fun get(dayKey: String): DayRatingEntity? = withContext(Dispatchers.IO) {
+        dayRatingDao.getByKey(dayKey)
+    }
+
     suspend fun upsert(rating: DayRatingEntity) = withContext(Dispatchers.IO) {
         dayRatingDao.upsert(rating)
+    }
+
+    suspend fun delete(dayKey: String) = withContext(Dispatchers.IO) {
+        dayRatingDao.deleteByKey(dayKey)
     }
 }

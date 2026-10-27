@@ -15,6 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.user.DayRating
+import io.github.benji377.timety.ui.components.mood.labelRes
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -250,9 +251,10 @@ class NotificationService(private val context: Context) {
     }
 
     /**
-     * Shows the end-of-day checkup with one-tap Bad/OK/Great rating actions handled by
-     * [DayRatingReceiver]. The rated day is captured at post time, so a tap after midnight still
-     * rates the evening's day. [localized] resolves the action labels in the app locale.
+     * Shows the end-of-day checkup. Unless [withRatingActions] is false (today is already rated),
+     * it carries one-tap Bad/OK/Great actions handled by [DayRatingReceiver]. The rated day is
+     * captured at post time, so a tap after midnight still rates the evening's day. [localized]
+     * resolves the action labels in the app locale.
      */
     internal fun showEndOfDayNotification(
         id: Int,
@@ -261,6 +263,7 @@ class NotificationService(private val context: Context) {
         localized: Context,
         lines: List<String> = emptyList(),
         overflowText: String? = null,
+        withRatingActions: Boolean = true,
     ) {
         val dayKey = AppDateUtils.dayKey(LocalDate.now())
         val builder = reminderNotification(id, CHANNEL_EVENING, title, body)
@@ -271,7 +274,7 @@ class NotificationService(private val context: Context) {
             overflowText?.let { inbox.setSummaryText(it) }
             builder.setStyle(inbox)
         }
-        DayRating.entries.forEach { rating ->
+        if (withRatingActions) DayRating.entries.forEach { rating ->
             val actionIntent = Intent(context, DayRatingReceiver::class.java).apply {
                 putExtra(DayRatingReceiver.EXTRA_DAY_KEY, dayKey)
                 putExtra(DayRatingReceiver.EXTRA_RATING, rating.value)
@@ -283,17 +286,10 @@ class NotificationService(private val context: Context) {
                 actionIntent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
-            builder.addAction(0, dayRatingActionLabel(localized, rating), pendingAction)
+            builder.addAction(0, localized.getString(rating.labelRes), pendingAction)
         }
         notifySafely(id, builder.build())
     }
-
-    private fun dayRatingActionLabel(localized: Context, rating: DayRating): String =
-        when (rating) {
-            DayRating.BAD -> localized.getString(R.string.dayRatingBad)
-            DayRating.OK -> localized.getString(R.string.dayRatingOk)
-            DayRating.GREAT -> localized.getString(R.string.dayRatingGreat)
-        }
 
     private fun reminderNotification(
         id: Int,
