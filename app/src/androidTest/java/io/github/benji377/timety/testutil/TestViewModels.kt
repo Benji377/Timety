@@ -43,34 +43,30 @@ class TestViewModels(
                         TaskViewModel(
                             application,
                             container.taskRepository,
-                            container.userRepository,
                         )
 
                     modelClass.isAssignableFrom(RecurringTaskViewModel::class.java) ->
                         RecurringTaskViewModel(
                             application,
                             container.recurringTaskRepository,
-                            container.userRepository,
                         )
 
                     modelClass.isAssignableFrom(HabitViewModel::class.java) ->
                         HabitViewModel(
                             application,
                             container.habitRepository,
-                            container.userRepository,
                         )
 
                     modelClass.isAssignableFrom(QuickHabitViewModel::class.java) ->
                         QuickHabitViewModel(application, container.quickHabitRepository)
 
                     modelClass.isAssignableFrom(GoalViewModel::class.java) ->
-                        GoalViewModel(container.goalRepository, container.userRepository)
+                        GoalViewModel(container.goalRepository)
 
                     modelClass.isAssignableFrom(FocusViewModel::class.java) ->
                         FocusViewModel(
                             application,
                             container.focusRepository,
-                            container.userRepository,
                             container.habitRepository,
                             container.taskRepository,
                             container.recurringTaskRepository,

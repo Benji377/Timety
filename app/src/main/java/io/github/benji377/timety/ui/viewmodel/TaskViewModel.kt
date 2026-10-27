@@ -7,9 +7,7 @@ import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.data.repository.TaskRepository
-import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.ReminderScheduler
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,11 +17,10 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.UUID
 
-/** Exposes tasks, subtasks, and categories, and applies XP/reminder/widget side effects for changes to them. */
+/** Exposes tasks, subtasks, and categories, and applies reminder/widget side effects for changes to them. */
 class TaskViewModel(
     private val application: android.app.Application,
-    private val taskRepository: TaskRepository,
-    private val userRepository: UserRepository
+    private val taskRepository: TaskRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
 
     val allTasks: StateFlow<List<TaskWithSubtasks>> = taskRepository.allTasks
@@ -75,12 +72,6 @@ class TaskViewModel(
             )
             taskRepository.updateTask(updatedTask)
             scheduleTaskReminders(updatedTask)
-            val xpAmount = ExperienceEngine.XP_PER_TASK
-            if (updatedTask.isCompleted) {
-                userRepository.addXp(xpAmount)
-            } else {
-                userRepository.addXp(-xpAmount)
-            }
             updateWidgets()
         }
     }

@@ -12,7 +12,6 @@ import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.ReminderScheduler
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.withLock
 import java.time.Instant
@@ -47,7 +46,7 @@ class CompleteTaskAction : ActionCallback {
         val taskId = parameters[TaskIdKey] ?: return
         val container = (context.applicationContext as TimetyApplication).container
         CompletionActions.completeTask(
-            context, container.taskRepository, container.userRepository, taskId
+            context, container.taskRepository, taskId
         )
     }
 }
@@ -66,15 +65,14 @@ class CompleteRecurringTaskAction : ActionCallback {
         val container = (context.applicationContext as TimetyApplication).container
         val task = container.recurringTaskRepository.getTaskById(taskId) ?: return
         CompletionActions.completeRecurringOccurrence(
-            context, container.recurringTaskRepository, container.userRepository, task
+            context, container.recurringTaskRepository, task
         )
     }
 }
 
 /**
  * Toggles today's completion of a habit from its widget row, mirroring
- * [HabitViewModel.toggleCompletionToday][io.github.benji377.timety.ui.viewmodel.HabitViewModel]
- * including the XP award/revert.
+ * [HabitViewModel.toggleCompletionToday][io.github.benji377.timety.ui.viewmodel.HabitViewModel].
  */
 class ToggleHabitCompletionAction : ActionCallback {
     override suspend fun onAction(
@@ -89,19 +87,17 @@ class ToggleHabitCompletionAction : ActionCallback {
         // Shares HabitRepository's completionMutex with HabitViewModel's toggle path, since
         // both entry points read-check-write the same completion row: unsynchronized, two
         // quick taps (in-app or widget, or one of each) could both read "not completed" and
-        // insert a duplicate completion plus double XP.
+        // insert a duplicate completion.
         habitRepository.completionMutex.withLock {
             val today = LocalDate.now()
             val todayCompletion = habitRepository.getCompletionsForHabit(habitId).first()
                 .find { it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == today }
             if (todayCompletion != null) {
                 habitRepository.deleteCompletion(todayCompletion)
-                container.userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
             } else {
                 habitRepository.insertCompletion(
                     HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
                 )
-                container.userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
             }
         }
         // Done drops today's remaining reminders; undone brings them back.

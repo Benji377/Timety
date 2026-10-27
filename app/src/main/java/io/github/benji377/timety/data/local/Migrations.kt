@@ -134,5 +134,25 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
     }
 }
 
+/**
+ * Drops `user_profile.unlockedAchievements` and `user_profile.totalXp`. SQLite on API 26 cannot
+ * drop a column, so the table is rebuilt.
+ */
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE `user_profile_new` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, " +
+                    "`profileImagePath` TEXT, `accountCreated` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+        )
+        db.execSQL(
+            "INSERT INTO `user_profile_new` SELECT `id`, `name`, `profileImagePath`, " +
+                    "`accountCreated` FROM `user_profile`"
+        )
+        db.execSQL("DROP TABLE `user_profile`")
+        db.execSQL("ALTER TABLE `user_profile_new` RENAME TO `user_profile`")
+    }
+}
+
 /** All migrations, in order, to register on the Room builder. */
-val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+val ALL_MIGRATIONS =
+    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)

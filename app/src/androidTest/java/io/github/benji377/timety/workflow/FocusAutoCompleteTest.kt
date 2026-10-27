@@ -14,7 +14,6 @@ import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
-import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.testutil.TestAppContainer
 import io.github.benji377.timety.testutil.TestViewModels
@@ -23,7 +22,6 @@ import io.github.benji377.timety.testutil.get
 import io.github.benji377.timety.testutil.value
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.ModeDeleteBlocker
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -58,9 +56,6 @@ class FocusAutoCompleteTest {
         container = TestAppContainer(context)
         viewModels = TestViewModels(application, container)
         runBlocking {
-            container.userRepository.insertUserProfile(
-                UserProfileEntity(name = "Tester", accountCreated = now, totalXp = 0),
-            )
             // Two phases, so finishing the first one waits for "continue" instead of ending the session.
             container.focusRepository.insertModeWithPhases(
                 mode,
@@ -164,29 +159,28 @@ class FocusAutoCompleteTest {
         stopSession()
         assertTrue("setting on: the task is completed", awaitTrue { isTaskCompleted(task.id) })
         assertTrue(
-            "completion XP is awarded alongside the focus minutes",
-            awaitTrue {
-                currentXp() == ExperienceEngine.XP_PER_TASK +
-                    2 * PHASE_MINUTES * ExperienceEngine.XP_PER_FOCUS_MINS
-            },
+            "both sessions are logged",
+            awaitTrue { container.focusRepository.allSessions.value().size == 2 },
         )
     }
 
     @Test
-    fun discardedSession_awardsNoXp_andCompletesNothing() {
+    fun discardedSession_logsAndCompletesNothing() {
         val task = TaskEntity(id = "task-2", title = "Tidy the desk", createdAt = now)
         runBlocking { container.taskRepository.insertTask(task) }
         startSession(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title))
 
         finishFocusPhase()
         Thread.sleep(500)
-        assertEquals("a finished phase pays nothing yet", 0, currentXp())
+        assertTrue(
+            "a finished phase logs nothing yet",
+            container.focusRepository.allSessions.value().isEmpty(),
+        )
 
         FocusTimerManager.stopEvent.tryEmit(
             FocusTimerManager.StopInfo(elapsedFocusSeconds = 120, wasRestPhase = false, discard = true)
         )
         Thread.sleep(500)
-        assertEquals("discarding pays no XP", 0, currentXp())
         assertTrue("discarding completes nothing", !isTaskCompleted(task.id))
         assertTrue("discarding logs no session", container.focusRepository.allSessions.value().isEmpty())
     }
@@ -201,8 +195,10 @@ class FocusAutoCompleteTest {
             FocusTimerManager.StopInfo(elapsedFocusSeconds = 120, wasRestPhase = false, discard = false)
         )
         assertTrue(
-            "the two minutes are logged and paid",
-            awaitTrue { currentXp() == 2 * ExperienceEngine.XP_PER_FOCUS_MINS },
+            "the two minutes are logged",
+            awaitTrue {
+                container.focusRepository.allSessions.value().singleOrNull()?.totalSecondsFocused == 120
+            },
         )
         Thread.sleep(500)
         assertTrue("no focus phase finished: the task stays open", !isTaskCompleted(task.id))
@@ -261,8 +257,6 @@ class FocusAutoCompleteTest {
 
     private fun isTaskCompleted(id: String): Boolean =
         runBlocking { container.taskRepository.getTaskById(id)!!.isCompleted }
-
-    private fun currentXp(): Int? = container.userRepository.userProfile.value()?.totalXp
 
     private companion object {
         const val PHASE_MINUTES = 25

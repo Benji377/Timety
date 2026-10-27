@@ -20,13 +20,11 @@ import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.TaskRepository
-import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.util.habit.HabitUtils
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
 import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,13 +54,12 @@ enum class ModeDeleteBlocker { HAS_SESSIONS, SESSION_RUNNING }
 
 /**
  * Drives focus mode selection, active session/phase navigation, and session logging, including
- * XP awards and auto-completion of the linked task, recurring task or habit once a session with a
- * finished focus phase is logged. A discarded session awards nothing.
+ * auto-completion of the linked task, recurring task or habit once a session with a finished
+ * focus phase is logged. A discarded session completes nothing.
  */
 class FocusViewModel(
     application: android.app.Application,
     private val focusRepository: FocusRepository,
-    private val userRepository: UserRepository,
     private val habitRepository: HabitRepository,
     private val taskRepository: TaskRepository,
     private val recurringTaskRepository: RecurringTaskRepository,
@@ -164,7 +161,7 @@ class FocusViewModel(
 
         viewModelScope.launch {
             FocusTimerManager.phaseCompleteEvent.collect { (isRestPhase, durationSeconds) ->
-                // XP and auto-complete wait for the session to be logged, so a discarded one pays nothing.
+                // Auto-complete waits for the session to be logged, so a discarded one completes nothing.
                 if (!isRestPhase) {
                     sessionAccumulatedFocusSeconds += durationSeconds
                     sessionFocusPhaseCompleted = true
@@ -257,7 +254,6 @@ class FocusViewModel(
             viewModelScope.launch {
                 focusRepository.insertSession(sessionToLog)
                 distractionsToLog.forEach { focusRepository.insertDistraction(it) }
-                awardFocusXp(sessionToLog.totalSecondsFocused / 60)
                 if (targetToComplete != null && settingsRepository.autoCompleteFocusFlow.first()) {
                     autoCompleteTarget(targetToComplete)
                 }
@@ -285,7 +281,7 @@ class FocusViewModel(
     private suspend fun autoCompleteTarget(target: FocusTargetSelection) {
         when (target.type) {
             FocusTargetType.TASK -> CompletionActions.completeTask(
-                getApplication(), taskRepository, userRepository, target.id
+                getApplication(), taskRepository, target.id
             )
 
             FocusTargetType.RECURRING_TASK -> {
@@ -296,7 +292,7 @@ class FocusViewModel(
                 if (entry.occurrences.any { it.completedAt.atZone(zone).toLocalDate() == today }) return
                 val task = entry.task
                 CompletionActions.completeRecurringOccurrence(
-                    getApplication(), recurringTaskRepository, userRepository, task
+                    getApplication(), recurringTaskRepository, task
                 )
             }
 
@@ -317,7 +313,6 @@ class FocusViewModel(
             habitRepository.insertCompletion(
                 HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
             )
-            userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
         }
         ReminderScheduler.refreshHabitReminder(getApplication(), habitId)
         // Auto-completion bypasses HabitViewModel, so refresh the habit widget here too.
@@ -501,8 +496,8 @@ class FocusViewModel(
 
 
     /**
-     * Logs a manually backfilled session for a time range that already elapsed, and awards its
-     * XP. Never auto-completes [target]: backfilling only records time that was already spent.
+     * Logs a manually backfilled session for a time range that already elapsed. Never
+     * auto-completes [target]: backfilling only records time that was already spent.
      */
     fun logPastSession(
         mode: FocusModeEntity,
@@ -552,14 +547,13 @@ class FocusViewModel(
                     isCompleted = true,
                 ).withTarget(target)
             )
-            awardFocusXp((totalSeconds / 60).toInt())
         }
     }
 
     /**
      * Applies an edit to an already logged session: its focused time is re-derived from the new
-     * range and the XP it earned is corrected by the difference. Retargeting doesn't undo or
-     * redo any auto-completion the session triggered when it was recorded.
+     * range. Retargeting doesn't undo or redo any auto-completion the session triggered when it
+     * was recorded.
      */
     fun updateSession(
         session: FocusSessionEntity,
@@ -586,15 +580,13 @@ class FocusViewModel(
 
         viewModelScope.launch {
             focusRepository.updateSession(updated)
-            awardFocusXp(totalSeconds / 60 - session.totalSecondsFocused / 60)
         }
     }
 
-    /** Deletes a logged session (and its distractions, by cascade) and takes back the XP it earned. */
+    /** Deletes a logged session (and its distractions, by cascade). */
     fun deleteSession(session: FocusSessionEntity) {
         viewModelScope.launch {
             focusRepository.deleteSession(session)
-            awardFocusXp(-(session.totalSecondsFocused / 60))
         }
     }
 
@@ -605,12 +597,4 @@ class FocusViewModel(
         targetId = target?.id,
         targetLabel = target?.label,
     )
-
-    // Focus XP is paid per whole minute, so a session's XP can be handed out and taken back
-    // symmetrically: editing or deleting one reverses exactly what logging it awarded.
-    private suspend fun awardFocusXp(minutes: Int) {
-        if (minutes != 0) {
-            userRepository.addXp(minutes * ExperienceEngine.XP_PER_FOCUS_MINS)
-        }
-    }
 }

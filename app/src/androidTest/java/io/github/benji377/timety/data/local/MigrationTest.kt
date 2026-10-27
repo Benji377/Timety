@@ -10,10 +10,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Replays the committed schema JSONs to prove that a 2.0.0 database (version 1) upgrades cleanly to
- * 2.1.0 (version 2) without wiping user data.
- */
+/** Replays the committed schema JSONs to prove each migration upgrades cleanly without wiping user data. */
 @RunWith(AndroidJUnit4::class)
 class MigrationTest {
 
@@ -149,6 +146,30 @@ class MigrationTest {
             cursor.moveToFirst()
             assertEquals("Central Park", cursor.getString(0))
             assertTrue(cursor.isNull(1))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate5To6_dropsXpColumnsAndKeepsProfile() {
+        val dbName = "migration-test-5-6"
+
+        helper.createDatabase(dbName, 5).apply {
+            execSQL(
+                "INSERT INTO user_profile (id, name, profileImagePath, accountCreated, " +
+                    "unlockedAchievements, totalXp) VALUES (1, 'Benji', '/avatar.jpg', 42, 'a|||b', 900)"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 6, true, MIGRATION_5_6)
+
+        db.query("SELECT name, profileImagePath, accountCreated FROM user_profile WHERE id = 1").use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals("Benji", cursor.getString(0))
+            assertEquals("/avatar.jpg", cursor.getString(1))
+            assertEquals(42L, cursor.getLong(2))
         }
         db.close()
     }

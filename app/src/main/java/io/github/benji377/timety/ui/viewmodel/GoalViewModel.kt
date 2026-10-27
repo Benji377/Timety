@@ -6,8 +6,6 @@ import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
 import io.github.benji377.timety.data.model.goal.GoalWithEntries
 import io.github.benji377.timety.data.repository.GoalRepository
-import io.github.benji377.timety.data.repository.UserRepository
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -16,10 +14,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 
-/** Exposes goals with their progress entries, and owns the completion/XP transitions for them. */
+/** Exposes goals with their progress entries, and owns their completion transitions. */
 class GoalViewModel(
-    private val goalRepository: GoalRepository,
-    private val userRepository: UserRepository
+    private val goalRepository: GoalRepository
 ) : ViewModel() {
 
     val goalsWithEntries: StateFlow<List<GoalWithEntries>> = goalRepository.allGoalsWithEntries
@@ -67,13 +64,12 @@ class GoalViewModel(
         }
     }
 
-    // Serializes the read-check-write below: two overlapping syncs could otherwise both see
-    // "target newly reached" and award the goal XP twice.
+    // Serializes the read-check-write below so overlapping syncs see each other's completedAt.
     private val syncMutex = Mutex()
 
     /**
-     * Single owner of both completion transitions - reaching the target sets [GoalEntity.completedAt]
-     * and awards the XP, dropping back below clears it and reverts the XP - so the two can't diverge.
+     * Single owner of [GoalEntity.completedAt]: reaching the target sets it, dropping back below
+     * clears it.
      */
     private suspend fun syncCompletionState(goalId: String) = syncMutex.withLock {
         val goalWithEntries = goalRepository.getGoalWithEntriesById(goalId) ?: return@withLock
@@ -82,12 +78,10 @@ class GoalViewModel(
         when {
             targetReached && goal.completedAt == null -> {
                 goalRepository.updateGoal(goal.copy(completedAt = Instant.now()))
-                userRepository.addXp(ExperienceEngine.XP_PER_GOAL)
             }
 
             !targetReached && goal.completedAt != null -> {
                 goalRepository.updateGoal(goal.copy(completedAt = null))
-                userRepository.addXp(-ExperienceEngine.XP_PER_GOAL)
             }
         }
     }

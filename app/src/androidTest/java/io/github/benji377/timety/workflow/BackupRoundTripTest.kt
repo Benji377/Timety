@@ -32,6 +32,7 @@ import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.testutil.TestAppContainer
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -168,6 +169,19 @@ class BackupRoundTripTest {
             1,
             target.habitRepository.allHabits.first().size,
         )
+    }
+
+    @Test
+    fun restoreProfileWithUnknownKeys_ignoresThem() = runBlocking {
+        val seeded = seedOneOfEverything(source)
+        val full = JSONObject(source.backupService.exportToShareUri().getOrThrow().readText())
+        full.getJSONObject("userProfile")
+            .put("totalXp", 1234)
+            .put("unlockedAchievements", JSONArray(listOf("first_task")))
+
+        target.backupService.importFromJson(full).getOrThrow()
+
+        assertEquals("user profile", seeded.profile, target.userRepository.userProfile.first())
     }
 
     @Test
@@ -342,8 +356,6 @@ class BackupRoundTripTest {
         val profile = UserProfileEntity(
             name = "Benji",
             accountCreated = now,
-            unlockedAchievements = listOf("first_task"),
-            totalXp = 1234,
         )
         container.userRepository.insertUserProfile(profile)
 

@@ -29,7 +29,6 @@ object WrapUpImageGenerator {
     private val GRADIENT_MID = "#2A2418".toColorInt()
     private val TASK_COLOR = "#2563EB".toColorInt()
     private val TASK_COLOR_90 = "#E62563EB".toColorInt()
-    private val WARNING_COLOR = "#F59E0B".toColorInt()
     private val SUCCESS_COLOR = "#16A34A".toColorInt()
     private val HABIT_COLOR = "#7C3AED".toColorInt()
 
@@ -37,9 +36,6 @@ object WrapUpImageGenerator {
     fun generate(
         context: Context,
         name: String,
-        level: Int,
-        levelTitle: String,
-        streak: Int,
         tasksCompleted: Int,
         focusMins: Int,
         habitsMet: Int
@@ -54,8 +50,8 @@ object WrapUpImageGenerator {
 
         var y = H * 0.085f
         y = drawLogo(context, canvas, y)
-        y = drawHeader(context, canvas, name, level, levelTitle, y)
-        drawStats(context, canvas, streak, tasksCompleted, focusMins, habitsMet, y)
+        y = drawHeader(context, canvas, name, y)
+        drawStats(context, canvas, tasksCompleted, focusMins, habitsMet, y)
         drawFooter(context, canvas)
 
         val outputStream = ByteArrayOutputStream()
@@ -96,8 +92,6 @@ object WrapUpImageGenerator {
         context: Context,
         canvas: Canvas,
         name: String,
-        level: Int,
-        levelTitle: String,
         startY: Float
     ): Float {
         var y = startY
@@ -124,20 +118,7 @@ object WrapUpImageGenerator {
             paint,
             W - PAD * 2
         )
-        y += 14f
-
-        paint.apply {
-            color = WARNING_COLOR
-            textSize = 38f
-        }
-        y = paintTextTopLeft(
-            canvas,
-            context.getString(R.string.wrapUpHeaderLevel, level, levelTitle),
-            PAD,
-            y,
-            paint
-        )
-        y += 58f
+        y += 72f
 
         return y
     }
@@ -145,7 +126,6 @@ object WrapUpImageGenerator {
     private fun drawStats(
         context: Context,
         canvas: Canvas,
-        streak: Int,
         tasks: Int,
         focus: Int,
         habits: Int,
@@ -155,11 +135,6 @@ object WrapUpImageGenerator {
         var y = startY
 
         val rows = listOf(
-            StatRow(
-                "🔥", WARNING_COLOR,
-                context.getString(R.string.wrapUpStatStreakValue, streak),
-                context.getString(R.string.wrapUpStatStreakLabel)
-            ),
             StatRow("✅", TASK_COLOR, "$tasks", context.getString(R.string.wrapUpStatTasksLabel)),
             StatRow(
                 "⏱️",

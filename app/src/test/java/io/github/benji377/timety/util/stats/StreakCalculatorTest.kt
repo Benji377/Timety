@@ -1,102 +1,72 @@
 package io.github.benji377.timety.util.stats
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalDate
 
 class StreakCalculatorTest {
 
-    private fun daysAgo(n: Long): LocalDate = LocalDate.now().minusDays(n)
+    // Step 0 is the step in progress; -n is n steps ago.
+    private fun stepsAgo(vararg n: Long): List<Long> = n.map { -it }
+
+    private fun current(steps: List<Long>) = StreakCalculator.currentStreak(steps, 0L)
 
     // Current streak — forgiving "never miss twice" rule.
 
     @Test
     fun empty_isZero() {
-        assertEquals(0, StreakCalculator.calculateCurrentStreak(emptyList()))
+        assertEquals(0, current(emptyList()))
     }
 
     @Test
-    fun todayOnly_isOne() {
-        assertEquals(1, StreakCalculator.calculateCurrentStreak(listOf(daysAgo(0))))
+    fun currentStepOnly_isOne() {
+        assertEquals(1, current(stepsAgo(0)))
     }
 
     @Test
-    fun consecutiveDays_countAll() {
-        val dates = (0L..4L).map { daysAgo(it) }
-        assertEquals(5, StreakCalculator.calculateCurrentStreak(dates))
+    fun consecutiveSteps_countAll() {
+        assertEquals(5, current(stepsAgo(0, 1, 2, 3, 4)))
     }
 
     @Test
-    fun incompleteTodayButYesterdayDone_streakSurvives() {
-        // No completion today, but yesterday and before -> streak still active (today leniency).
-        val dates = listOf(daysAgo(1), daysAgo(2), daysAgo(3))
-        assertEquals(3, StreakCalculator.calculateCurrentStreak(dates))
+    fun unmetCurrentStepButPreviousMet_streakSurvives() {
+        assertEquals(3, current(stepsAgo(1, 2, 3)))
     }
 
     @Test
-    fun isolatedMiss_bridgesTheStreak() {
-        // today done, yesterday MISSED, then three done -> one bend, four completed days.
-        val dates = listOf(daysAgo(0), daysAgo(2), daysAgo(3), daysAgo(4))
-        val result = StreakCalculator.currentStreak(dates)
-        assertEquals(4, result.length)
-        assertTrue(result.bridgedDays.contains(daysAgo(1)))
-        assertFalse(result.streakDays.contains(daysAgo(1)))
+    fun isolatedMiss_isBridgedButNotCounted() {
+        assertEquals(4, current(stepsAgo(0, 2, 3, 4)))
+    }
+
+    @Test
+    fun singleMissBeforeUnmetCurrentStep_streakSurvives() {
+        assertEquals(1, current(stepsAgo(2)))
     }
 
     @Test
     fun twoConsecutiveMisses_breakTheStreak() {
-        // today done, then days 1 and 2 both missed -> only today counts.
-        val dates = listOf(daysAgo(0), daysAgo(3), daysAgo(4))
-        assertEquals(1, StreakCalculator.calculateCurrentStreak(dates))
-    }
-
-    // At-risk detection — the "don't miss twice" brink.
-
-    @Test
-    fun atRisk_whenYesterdayMissedAndTodayNotDone() {
-        // today not done, yesterday not done, but the day before was -> streak alive and on the brink.
-        val dates = listOf(daysAgo(2), daysAgo(3))
-        val result = StreakCalculator.currentStreak(dates)
-        assertTrue(result.length > 0)
-        assertTrue(result.atRisk)
-        assertTrue(result.bridgedDays.contains(daysAgo(1)))
-    }
-
-    @Test
-    fun notAtRisk_whenTodayDone() {
-        val result = StreakCalculator.currentStreak(listOf(daysAgo(0), daysAgo(1)))
-        assertFalse(result.atRisk)
-    }
-
-    @Test
-    fun notAtRisk_whenYesterdayDone() {
-        val result = StreakCalculator.currentStreak(listOf(daysAgo(1), daysAgo(2)))
-        assertFalse(result.atRisk)
+        assertEquals(1, current(stepsAgo(0, 3, 4)))
+        assertEquals(0, current(stepsAgo(3)))
     }
 
     // Best streak follows the same never-miss-twice rule as the current streak.
 
     @Test
     fun bestStreak_bridgesASingleMiss_likeTheCurrentStreak() {
-        val dates = listOf(daysAgo(0), daysAgo(2), daysAgo(3))
-        assertEquals(3, StreakCalculator.calculateCurrentStreak(dates))
-        assertEquals(3, StreakCalculator.calculateBestStreak(dates))
+        val steps = stepsAgo(0, 2, 3)
+        assertEquals(3, current(steps))
+        assertEquals(3, StreakCalculator.bestStreak(steps))
     }
 
     @Test
     fun bestStreak_endsAtTwoConsecutiveMisses() {
-        // Runs of 2 (days 10, 9) and 4 (days 6, 5, 3, 2), split by the missed days 8 and 7.
-        val dates = listOf(daysAgo(10), daysAgo(9), daysAgo(6), daysAgo(5), daysAgo(3), daysAgo(2))
-        assertEquals(4, StreakCalculator.calculateBestStreak(dates))
+        // Runs of 2 (steps 10, 9) and 4 (steps 6, 5, 3, 2), split by the missed steps 8 and 7.
+        assertEquals(4, StreakCalculator.bestStreak(stepsAgo(10, 9, 6, 5, 3, 2)))
     }
 
     @Test
     fun bestStreak_isNeverBelowTheCurrentStreak() {
-        // Every other day: the old strict rule gave "current 4, best 1".
-        val dates = listOf(daysAgo(0), daysAgo(2), daysAgo(4), daysAgo(6))
-        assertEquals(4, StreakCalculator.calculateCurrentStreak(dates))
-        assertEquals(4, StreakCalculator.calculateBestStreak(dates))
+        val steps = stepsAgo(0, 2, 4, 6)
+        assertEquals(4, current(steps))
+        assertEquals(4, StreakCalculator.bestStreak(steps))
     }
 }

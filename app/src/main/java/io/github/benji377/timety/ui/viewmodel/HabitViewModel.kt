@@ -6,9 +6,7 @@ import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.repository.HabitRepository
-import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.ReminderScheduler
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,11 +20,10 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 
-/** Exposes habits and their completions, and applies XP/reminder/widget side effects for changes to them. */
+/** Exposes habits and their completions, and applies reminder/widget side effects for changes to them. */
 class HabitViewModel(
     private val application: android.app.Application,
-    private val habitRepository: HabitRepository,
-    private val userRepository: UserRepository
+    private val habitRepository: HabitRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
 
     val allHabits: StateFlow<List<HabitEntity>> = habitRepository.allHabits
@@ -134,7 +131,7 @@ class HabitViewModel(
         return habitRepository.getCompletionsForHabit(habitId).first()
     }
 
-    /** Toggles today's completion for [habitId] and awards/reverts XP accordingly. */
+    /** Toggles today's completion for [habitId]. */
     fun toggleCompletionToday(habitId: String) {
         viewModelScope.launch {
             habitRepository.completionMutex.withLock {
@@ -145,12 +142,10 @@ class HabitViewModel(
                 }
                 if (todayCompletion != null) {
                     habitRepository.deleteCompletion(todayCompletion)
-                    userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
                 } else {
                     habitRepository.insertCompletion(
                         HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
                     )
-                    userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
                 }
             }
             // Done drops today's remaining reminders; undone brings them back.
@@ -160,7 +155,7 @@ class HabitViewModel(
     }
 
 
-    /** Marks [habitId] complete on [date] and awards XP, unless it is already marked complete that day. */
+    /** Marks [habitId] complete on [date], unless it is already marked complete that day. */
     fun markCompletionOnDate(habitId: String, date: Instant) {
         viewModelScope.launch {
             habitRepository.completionMutex.withLock {
@@ -173,7 +168,6 @@ class HabitViewModel(
                 habitRepository.insertCompletion(
                     HabitCompletionEntity(habitId = habitId, completionDate = date)
                 )
-                userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
             }
             refreshHabitReminder(habitId)
             updateWidgets()
@@ -181,7 +175,7 @@ class HabitViewModel(
     }
 
 
-    /** Removes [habitId]'s completion on [date], if any, and reverts the XP it had granted. */
+    /** Removes [habitId]'s completion on [date], if any. */
     fun unmarkCompletionOnDate(habitId: String, date: LocalDate) {
         viewModelScope.launch {
             habitRepository.completionMutex.withLock {
@@ -190,7 +184,6 @@ class HabitViewModel(
                     it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date
                 } ?: return@launch
                 habitRepository.deleteCompletion(completion)
-                userRepository.addXp(-ExperienceEngine.XP_PER_HABIT)
             }
             refreshHabitReminder(habitId)
             updateWidgets()

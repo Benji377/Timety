@@ -20,8 +20,8 @@ object HabitStreaks {
     /** The current and best streak of [habit] given its [completions], as of [today]. */
     fun streaks(habit: HabitEntity, completions: List<LocalDate>, today: LocalDate): Pair<Int, Int> {
         val met = metSteps(habit, completions)
-        val current = StreakCalculator.currentStreakOfSteps(met, currentStep(habit, today))
-        return current.completed.size to StreakCalculator.bestStreakOfSteps(met)
+        return StreakCalculator.currentStreak(met, currentStep(habit, today)) to
+            StreakCalculator.bestStreak(met)
     }
 
 

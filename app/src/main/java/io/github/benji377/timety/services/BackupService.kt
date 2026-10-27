@@ -453,8 +453,6 @@ class BackupService(
             put("name", profile.name)
             put("profileImagePath", profile.profileImagePath ?: JSONObject.NULL)
             put("accountCreated", profile.accountCreated.toString())
-            put("unlockedAchievements", JSONArray(profile.unlockedAchievements))
-            put("totalXp", profile.totalXp)
         }
     }
 
@@ -496,8 +494,6 @@ class BackupService(
             // unless the file happens to exist on this device (same-device restore).
             profileImagePath = ProfileImageStore.validOrNull(readString(json, "profileImagePath")),
             accountCreated = readInstant(json, "accountCreated") ?: Instant.now(),
-            unlockedAchievements = readStringList(json, "unlockedAchievements"),
-            totalXp = json.optInt("totalXp", 0),
         )
     }
 
@@ -844,11 +840,6 @@ class BackupService(
                     .atZone(java.time.ZoneId.systemDefault())
                     .toInstant()
             }.getOrNull()
-
-    private fun readStringList(json: JSONObject, key: String): List<String> {
-        val array = json.optJSONArray(key) ?: return emptyList()
-        return (0 until array.length()).map { array.getString(it) }
-    }
 
     private inline fun <reified T : Enum<T>> enumOrDefault(name: String?, default: T): T {
         if (name == null) return default

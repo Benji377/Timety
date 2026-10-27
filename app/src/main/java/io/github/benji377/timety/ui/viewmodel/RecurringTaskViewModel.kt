@@ -6,11 +6,9 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
-import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.RecurringCompletionUndo
 import io.github.benji377.timety.services.ReminderScheduler
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,11 +17,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
 
-/** Exposes recurring tasks with their occurrence logs, and applies XP/reminder side effects. */
+/** Exposes recurring tasks with their occurrence logs, and applies reminder side effects. */
 class RecurringTaskViewModel(
     private val application: android.app.Application,
-    private val recurringTaskRepository: RecurringTaskRepository,
-    private val userRepository: UserRepository
+    private val recurringTaskRepository: RecurringTaskRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
 
     val allRecurringTasks: StateFlow<List<RecurringTaskWithOccurrences>> =
@@ -70,7 +67,7 @@ class RecurringTaskViewModel(
 
     /**
      * Logs a completed occurrence now, rolls the task's due date forward to the next occurrence,
-     * reschedules its reminders, and awards XP. [onCompleted] receives the data needed to offer
+     * and reschedules its reminders. [onCompleted] receives the data needed to offer
      * an Undo action (see [undoCompleteOccurrence]).
      */
     fun completeOccurrence(
@@ -80,39 +77,36 @@ class RecurringTaskViewModel(
         viewModelScope.launch {
             onCompleted(
                 CompletionActions.completeRecurringOccurrence(
-                    application, recurringTaskRepository, userRepository, task
+                    application, recurringTaskRepository, task
                 )
             )
         }
     }
 
-    /** Reverts a completion: removes its occurrence, restores the due date, and takes back the XP. */
+    /** Reverts a completion: removes its occurrence and restores the due date. */
     fun undoCompleteOccurrence(undo: RecurringCompletionUndo) {
         viewModelScope.launch {
             recurringTaskRepository.deleteOccurrenceById(undo.occurrenceId)
             val restored = undo.advancedTask.copy(dueDate = undo.previousDueDate)
             recurringTaskRepository.updateTask(restored)
             scheduleReminders(restored)
-            userRepository.addXp(-ExperienceEngine.XP_PER_TASK)
             updateWidgets()
         }
     }
 
-    /** Logs a manually backdated occurrence and awards XP; the due date is left untouched. */
+    /** Logs a manually backdated occurrence; the due date is left untouched. */
     fun addPastOccurrence(taskId: String, completedAt: Instant) {
         viewModelScope.launch {
             recurringTaskRepository.insertOccurrence(
                 RecurringOccurrenceEntity(recurringTaskId = taskId, completedAt = completedAt)
             )
-            userRepository.addXp(ExperienceEngine.XP_PER_TASK)
         }
     }
 
-    /** Removes a logged occurrence and reverts the XP it had granted. */
+    /** Removes a logged occurrence. */
     fun deleteOccurrence(occurrence: RecurringOccurrenceEntity) {
         viewModelScope.launch {
             recurringTaskRepository.deleteOccurrence(occurrence)
-            userRepository.addXp(-ExperienceEngine.XP_PER_TASK)
         }
     }
 

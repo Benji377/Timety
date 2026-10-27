@@ -6,13 +6,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
-import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.testutil.TestAppContainer
 import io.github.benji377.timety.testutil.TestViewModels
 import io.github.benji377.timety.testutil.awaitTrue
 import io.github.benji377.timety.testutil.get
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
 import kotlinx.coroutines.flow.first
@@ -48,11 +46,6 @@ class RecurringTaskCompletionTest {
     fun setUp() {
         container = TestAppContainer(context)
         viewModels = TestViewModels(application, container)
-        runBlocking {
-            container.userRepository.insertUserProfile(
-                UserProfileEntity(name = "Tester", accountCreated = Instant.now(), totalXp = 0),
-            )
-        }
     }
 
     @After
@@ -107,14 +100,6 @@ class RecurringTaskCompletionTest {
                 "completing should log exactly one occurrence",
                 1,
                 withOccurrences.occurrences.size,
-            )
-
-            assertTrue(
-                "completing a recurring occurrence should award task XP",
-                awaitTrue {
-                    runBlocking { container.userRepository.userProfile.first() }?.totalXp ==
-                        ExperienceEngine.XP_PER_TASK
-                },
             )
         }
 }

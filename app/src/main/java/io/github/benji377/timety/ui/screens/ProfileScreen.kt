@@ -7,13 +7,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,11 +24,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Coffee
-import androidx.compose.material.icons.outlined.MilitaryTech
-import androidx.compose.material.icons.outlined.Repeat
-import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -66,17 +59,8 @@ import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TextInputDialog
-import io.github.benji377.timety.ui.components.stats.StatCard
-import io.github.benji377.timety.ui.components.stats.StatCardStyle
-import io.github.benji377.timety.ui.components.user.StreakStatusBadge
-import io.github.benji377.timety.ui.components.user.UserStreakTimelineCard
-import io.github.benji377.timety.ui.components.user.UserXpBreakdownCard
 import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.HabitColor
-import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
-import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
@@ -86,17 +70,14 @@ import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.util.ProfileImageStore
-import io.github.benji377.timety.util.stats.StreakCalculator
-import java.time.LocalDate
-import java.time.ZoneId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * Displays the user's profile: avatar, name, XP progress, streak timeline, and all-time stats,
- * with options to edit the name or share a "wrap-up" summary image.
+ * Displays the user's profile: avatar and name, with options to edit them or share a "wrap-up"
+ * summary image.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,12 +94,8 @@ fun ProfileScreen(
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
-    val currentLevel by userViewModel.currentLevel.collectAsState()
-    val levelTitle by userViewModel.levelTitle.collectAsState()
-    val levelProgress by userViewModel.levelProgress.collectAsState()
 
     val userName = userProfile?.name ?: "User"
-    val totalXp = userProfile?.totalXp ?: 0
 
     // Recomputed only when the data changes, not on every recomposition of this screen.
     val stats = remember(tasks, habitsWithCompletions, recurringItems, sessions) {
@@ -127,10 +104,6 @@ fun ProfileScreen(
     val totalTasksDone = stats.totalTasksDone
     val totalHabitsMet = stats.totalHabitsMet
     val totalFocusMins = stats.totalFocusMins
-    val totalSessions = sessions.size
-    val currentStreakInfo = stats.currentStreak
-    val currentStreak = currentStreakInfo.length
-    val highestStreak = stats.bestStreak
 
     val context = LocalContext.current
     val shareSubjectStr = stringResource(R.string.userShareSubject)
@@ -165,7 +138,6 @@ fun ProfileScreen(
                     Text("${stringResource(R.string.userStatTasksDone)}: $totalTasksDone")
                     Text("${stringResource(R.string.userStatHabitsMet)}: $totalHabitsMet")
                     Text("${stringResource(R.string.userStatFocusMins)}: $totalFocusMins")
-                    Text("${stringResource(R.string.userStatBestStreak)}: $highestStreak")
                 }
             },
             confirmButton = {
@@ -177,9 +149,6 @@ fun ProfileScreen(
                                 WrapUpImageGenerator.generate(
                                     context,
                                     userName,
-                                    currentLevel,
-                                    levelTitle,
-                                    highestStreak,
                                     totalTasksDone,
                                     totalFocusMins,
                                     totalHabitsMet
@@ -342,14 +311,9 @@ fun ProfileScreen(
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
 
-            // Name Section (streak flame sits left of the name)
+            // Name Section
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    StreakStatusBadge(
-                        isActive = currentStreak > 0,
-                        atRisk = currentStreakInfo.atRisk,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = userName,
                         style = MaterialTheme.typography.headlineLarge.copy(
@@ -369,125 +333,16 @@ fun ProfileScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // XP Card
-            item {
-                UserXpBreakdownCard(
-                    currentLevel = currentLevel,
-                    levelTitle = levelTitle,
-                    totalXp = totalXp,
-                    levelProgress = levelProgress
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // Streak Timeline Card
-            item {
-                UserStreakTimelineCard(
-                    activityDates = stats.activityDates,
-                    taskDates = stats.taskDates,
-                    focusDates = stats.focusDates,
-                    habitDates = stats.habitDates,
-                    currentStreak = currentStreak
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // All-Time Statistics Section
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = stringResource(R.string.userStatsAllTimeTitle),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.userStatsAllTimeSubtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        StatCard(
-                            title = stringResource(R.string.userStatTasksDone),
-                            value = totalTasksDone.toString(),
-                            icon = Icons.Outlined.CheckCircle,
-                            color = TaskColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatCard(
-                            title = stringResource(R.string.userStatHabitsMet),
-                            value = totalHabitsMet.toString(),
-                            icon = Icons.Outlined.Repeat,
-                            color = HabitColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        StatCard(
-                            title = stringResource(R.string.userStatFocusMins),
-                            value = totalFocusMins.toString(),
-                            icon = Icons.Outlined.Timer,
-                            color = FocusColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatCard(
-                            title = stringResource(R.string.userStatSessions),
-                            value = totalSessions.toString(),
-                            icon = Icons.Outlined.Coffee,
-                            color = FocusColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        StatCard(
-                            title = stringResource(R.string.userStatBestStreak),
-                            value = highestStreak.toString(),
-                            icon = Icons.Outlined.MilitaryTech,
-                            color = WarningColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-
             item { Spacer(modifier = Modifier.height(40.dp)) }
         }
     }
 }
 
-/** Lifetime totals, streaks, and the activity dates behind the streak timeline. */
+/** Lifetime totals shown in the share wrap-up. */
 private data class ProfileStats(
     val totalTasksDone: Int,
     val totalHabitsMet: Int,
     val totalFocusMins: Int,
-    val taskDates: List<LocalDate>,
-    val habitDates: List<LocalDate>,
-    val focusDates: List<LocalDate>,
-    val activityDates: List<LocalDate>,
-    val currentStreak: StreakCalculator.CurrentStreak,
-    val bestStreak: Int,
 ) {
     companion object {
         fun of(
@@ -495,29 +350,11 @@ private data class ProfileStats(
             habits: List<HabitWithCompletions>,
             recurring: List<RecurringTaskWithOccurrences>,
             sessions: List<FocusSessionEntity>,
-        ): ProfileStats {
-            val zone = ZoneId.systemDefault()
-            // Completion dates across tasks, habits, and focus sessions feed the streak calculation.
-            val taskDates = tasks.mapNotNull { item ->
-                item.task.completedAt?.takeIf { item.task.isCompleted }?.atZone(zone)?.toLocalDate()
-            } + recurring.flatMap { item -> item.occurrences.map { it.completedAt.atZone(zone).toLocalDate() } }
-            val habitDates = habits.flatMap { item ->
-                item.completions.map { it.completionDate.atZone(zone).toLocalDate() }
-            }
-            val focusDates = sessions.map { it.startTime.atZone(zone).toLocalDate() }
-            val activityDates = (taskDates + habitDates + focusDates).distinct().sorted()
-            return ProfileStats(
-                // Each logged recurring occurrence counts as a completed task.
-                totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.occurrences.size },
-                totalHabitsMet = habits.sumOf { it.completions.size },
-                totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60,
-                taskDates = taskDates,
-                habitDates = habitDates,
-                focusDates = focusDates,
-                activityDates = activityDates,
-                currentStreak = StreakCalculator.currentStreak(activityDates),
-                bestStreak = StreakCalculator.calculateBestStreak(activityDates),
-            )
-        }
+        ): ProfileStats = ProfileStats(
+            // Each logged recurring occurrence counts as a completed task.
+            totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.occurrences.size },
+            totalHabitsMet = habits.sumOf { it.completions.size },
+            totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60,
+        )
     }
 }

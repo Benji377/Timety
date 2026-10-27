@@ -35,7 +35,6 @@ import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.di.AppContainer
 import io.github.benji377.timety.ui.screens.settings.SettingsPage
 import io.github.benji377.timety.ui.theme.HabitColor
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -414,19 +413,8 @@ class ScreenshotTest {
         )
 
         // --- User profile ---
-        // XP as if the seeded activity had been done in-app.
-        val completedTasks = 1
-        val habitCompletions = 4
-        val focusMinutes = 45 + 40 + 30
-        val seededXp = completedTasks * ExperienceEngine.XP_PER_TASK +
-            habitCompletions * ExperienceEngine.XP_PER_HABIT +
-            focusMinutes * ExperienceEngine.XP_PER_FOCUS_MINS
         container.userRepository.insertUserProfile(
-            UserProfileEntity(
-                name = "Bobert",
-                accountCreated = Instant.now(),
-                totalXp = seededXp
-            )
+            UserProfileEntity(name = "Bobert", accountCreated = Instant.now())
         )
     }
 

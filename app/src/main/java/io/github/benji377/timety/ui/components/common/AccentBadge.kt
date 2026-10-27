@@ -17,7 +17,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
  * Circular badge holding an icon or short label: solid neutral fill plus a hairline border in
- * [color], the app's one icon-badge idiom (XP breakdown, session rows, stat buckets). The fill
+ * [color], the app's one icon-badge idiom (session rows, stat buckets). The fill
  * stays solid - an alpha tint would read as a borderless soft-UI badge.
  */
 @Composable

@@ -49,7 +49,7 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
         UserProfileEntity::class,
         DayRatingEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 /** Room database for Timety, exposing DAOs for tasks, habits, focus sessions, and the user profile. */

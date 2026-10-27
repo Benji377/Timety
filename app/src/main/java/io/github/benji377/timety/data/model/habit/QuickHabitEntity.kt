@@ -6,7 +6,7 @@ import java.time.Instant
 
 /**
  * A recurring interval reminder ("drink water every 2 h"). Unlike [HabitEntity] this is a pure
- * nag: it has no completions, streaks, or XP — just a name, a repeat interval, and an optional
+ * nag: it has no completions or streaks — just a name, a repeat interval, and an optional
  * active time-of-day window during which it fires.
  */
 @Entity(tableName = "quick_habits")

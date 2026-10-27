@@ -37,24 +37,21 @@ object AppViewModelProvider {
                 modelClass.isAssignableFrom(TaskViewModel::class.java) -> {
                     TaskViewModel(
                         application,
-                        container.taskRepository,
-                        container.userRepository
+                        container.taskRepository
                     )
                 }
 
                 modelClass.isAssignableFrom(RecurringTaskViewModel::class.java) -> {
                     RecurringTaskViewModel(
                         application,
-                        container.recurringTaskRepository,
-                        container.userRepository
+                        container.recurringTaskRepository
                     )
                 }
 
                 modelClass.isAssignableFrom(HabitViewModel::class.java) -> {
                     HabitViewModel(
                         application,
-                        container.habitRepository,
-                        container.userRepository
+                        container.habitRepository
                     )
                 }
 
@@ -67,8 +64,7 @@ object AppViewModelProvider {
 
                 modelClass.isAssignableFrom(GoalViewModel::class.java) -> {
                     GoalViewModel(
-                        container.goalRepository,
-                        container.userRepository
+                        container.goalRepository
                     )
                 }
 
@@ -76,7 +72,6 @@ object AppViewModelProvider {
                     FocusViewModel(
                         application,
                         container.focusRepository,
-                        container.userRepository,
                         container.habitRepository,
                         container.taskRepository,
                         container.recurringTaskRepository,
