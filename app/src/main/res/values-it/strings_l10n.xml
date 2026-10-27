@@ -279,6 +279,7 @@
     <string name="taskDetailsReminderOptionDay">1 giorno prima</string>
     <string name="taskDetailsReminderOptionHalfHour">30 minuti prima</string>
     <string name="taskDetailsReminderOptionHour">1 ora prima</string>
+    <string name="taskDetailsReminderOptionWeek">1 week before</string>
     <string name="taskDetailsReminderOptionOnce">Puntuale</string>
     <string name="taskDetailsSectionChecklist">Lista di controllo</string>
     <string name="taskDetailsSectionInfo">Info attività</string>
@@ -658,6 +659,8 @@
     <string name="targetSheetGoalsEmpty">Nessun obiettivo attivo</string>
     <string name="recurrenceLabel">Ripeti</string>
     <string name="recurrenceEveryLabel">Ogni</string>
+    <string name="recurrenceEveryRequest">Enter at least 1</string>
+    <string name="recurrenceDaily">Daily</string>
     <string name="recurrenceWeekly">Settimanale</string>
     <string name="recurrenceMonthly">Mensile</string>
     <string name="recurrenceYearly">Annuale</string>
@@ -705,6 +708,10 @@
     <string name="recurringTaskDeleteTitle">Eliminare l\'attività ricorrente?</string>
     <string name="recurringTaskDeleteContent">Questo elimina anche la sua cronologia di completamento. Questa azione non può essere annullata.</string>
     <string name="recurringTaskCompletedSnackbar">Completato! Successivo: %1$s</string>
+    <plurals name="recurrenceEveryDays">
+        <item quantity="one">Every day</item>
+        <item quantity="other">Every %d days</item>
+    </plurals>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="one">Ogni settimana</item>
         <item quantity="other">Ogni %d settimane</item>
