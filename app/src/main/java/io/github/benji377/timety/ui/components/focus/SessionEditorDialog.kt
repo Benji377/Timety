@@ -117,17 +117,20 @@ fun SessionEditorDialog(
     // The length is picked as a duration, not an end instant, and clamped to [1, 24h]. When
     // editing, derive it from the stored range; an open-ended session (no end) falls back to the
     // span up to now, which is the correction the editor was opened for.
-    var durationMinutes by remember {
-        mutableIntStateOf(
-            if (initialStartTime != null) {
-                Duration.between(initialStartTime, initialEndTime ?: now).toMinutes()
-                    .toInt().coerceIn(MIN_SESSION_MINUTES, MAX_SESSION_MINUTES)
-            } else {
-                DEFAULT_BACKFILL_MINUTES
-            }
-        )
+    val initialDurationMinutes = remember {
+        if (initialStartTime != null) {
+            Duration.between(initialStartTime, initialEndTime ?: now).toMinutes()
+                .toInt().coerceIn(MIN_SESSION_MINUTES, MAX_SESSION_MINUTES)
+        } else {
+            DEFAULT_BACKFILL_MINUTES
+        }
     }
+    var durationMinutes by remember { mutableIntStateOf(initialDurationMinutes) }
     val endDateTime = startDateTime.plus(durationMinutes.toLong(), ChronoUnit.MINUTES)
+    // Untouched times hand back the stored end, so a span the clamp shortened (a session left
+    // paused for a day) isn't read as an edit that rewrites the logged focus time.
+    val timesUntouched = initialStartTime != null && initialEndTime != null &&
+        startDateTime == initialStartTime && durationMinutes == initialDurationMinutes
 
     var modeExpanded by remember { mutableStateOf(false) }
     var showTargetSheet by remember { mutableStateOf(false) }
@@ -233,7 +236,7 @@ fun SessionEditorDialog(
         confirmButton = {
             NeoButton(onClick = {
                 val mode = selectedMode ?: return@NeoButton
-                onSave(mode, startDateTime, endDateTime, selectedTarget)
+                onSave(mode, startDateTime, initialEndTime?.takeIf { timesUntouched } ?: endDateTime, selectedTarget)
             }) { Text(stringResource(R.string.commonLabelSave)) }
         },
     )

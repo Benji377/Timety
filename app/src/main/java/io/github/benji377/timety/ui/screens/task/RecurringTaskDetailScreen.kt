@@ -137,6 +137,8 @@ fun RecurringTaskDetailScreen(
     var isAddingNewCategory by remember { mutableStateOf(false) }
     var newCategoryText by remember { mutableStateOf("") }
     var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
+    // The picked time, kept apart from dueDate: a time inside a DST gap resolves to a later instant.
+    var dueTimeMinutes by rememberSaveable(formTask) { mutableStateOf(existingTask?.timeOfDayMinutes) }
     var unit by rememberSaveable(formTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
     // Required, with no default: a new task starts empty so the cadence is always a deliberate choice.
     var intervalText by rememberSaveable(formTask) {
@@ -201,6 +203,7 @@ fun RecurringTaskDetailScreen(
             description = description.trim(),
             category = category,
             dueDate = due,
+            timeOfDayMinutes = dueTimeMinutes ?: due.atZone(zone).let { it.hour * 60 + it.minute },
             unit = unit,
             interval = interval,
             daysOfWeek = if (unit == RecurrenceUnit.WEEK) {
@@ -211,8 +214,12 @@ fun RecurringTaskDetailScreen(
             monthlyMode = if (unit == RecurrenceUnit.MONTH && effectiveChoice != MonthlyChoice.DAY_OF_MONTH) {
                 MonthlyMode.NTH_WEEKDAY
             } else MonthlyMode.DAY_OF_MONTH,
-            monthlyDay = if (unit == RecurrenceUnit.MONTH && effectiveChoice == MonthlyChoice.DAY_OF_MONTH) {
-                // A due date clamped to a short month (Feb 28 for "the 31st") must not become the rule.
+            monthlyDay = if (
+                unit == RecurrenceUnit.YEAR ||
+                (unit == RecurrenceUnit.MONTH && effectiveChoice == MonthlyChoice.DAY_OF_MONTH)
+            ) {
+                // A due date clamped to a short month (Feb 28 for "the 31st" or a yearly Feb 29)
+                // must not become the rule.
                 existingTask?.monthlyDay?.takeIf { existingTask.dueDate == due } ?: dueLocal.dayOfMonth
             } else null,
             monthlyOrdinal = when {
@@ -558,8 +565,8 @@ fun RecurringTaskDetailScreen(
         val initialTime = dueDate?.atZone(zone)
         NeoDateTimePickerDialog(
             initialDate = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null) ?: Instant.now(),
-            initialHour = initialTime?.hour ?: 12,
-            initialMinute = initialTime?.minute ?: 0,
+            initialHour = dueTimeMinutes?.div(60) ?: initialTime?.hour ?: 12,
+            initialMinute = dueTimeMinutes?.rem(60) ?: initialTime?.minute ?: 0,
             timeTitle = stringResource(
                 if (target == RecurringPickerTarget.DUE_DATE) R.string.recurringTaskLabelNextDue
                 else R.string.recurringTaskHistoryAddPast
@@ -568,9 +575,13 @@ fun RecurringTaskDetailScreen(
             onConfirm = { date, hour, minute ->
                 val instant = date.atTime(hour, minute).atZone(zone).toInstant()
                 when (target) {
-                    RecurringPickerTarget.DUE_DATE -> dueDate = instant
+                    RecurringPickerTarget.DUE_DATE -> {
+                        dueDate = instant
+                        dueTimeMinutes = hour * 60 + minute
+                    }
+                    // The date picker allows today, so a later time today is clamped to now.
                     RecurringPickerTarget.PAST_OCCURRENCE ->
-                        recurringTaskId?.let { viewModel.addPastOccurrence(it, instant) }
+                        recurringTaskId?.let { viewModel.addPastOccurrence(it, minOf(instant, Instant.now())) }
                 }
                 pickerTarget = null
             },

@@ -62,22 +62,33 @@ interface TaskDao {
     @Query("DELETE FROM task_categories")
     fun clearAllCategories()
 
-    @Query("SELECT DISTINCT category FROM tasks WHERE category != ''")
+    // Tasks and recurring tasks share one set of categories.
+    @Query(
+        "SELECT category FROM tasks WHERE category != '' " +
+                "UNION SELECT category FROM recurring_tasks WHERE category != ''"
+    )
     fun getDistinctTaskCategoryNames(): List<String>
 
     @Query("UPDATE tasks SET category = :newName WHERE category = :oldName")
     fun renameTaskCategory(oldName: String, newName: String)
 
+    @Query("UPDATE recurring_tasks SET category = :newName WHERE category = :oldName")
+    fun renameRecurringTaskCategory(oldName: String, newName: String)
+
     @Transaction
     fun updateCategoryAndTasks(oldName: String, updated: TaskCategoryEntity) {
         insertCategory(updated)
-        if (updated.name != oldName) renameTaskCategory(oldName, updated.name)
+        if (updated.name != oldName) {
+            renameTaskCategory(oldName, updated.name)
+            renameRecurringTaskCategory(oldName, updated.name)
+        }
     }
 
     @Transaction
     fun deleteCategoryAndClearTasks(category: TaskCategoryEntity) {
         deleteCategory(category)
         renameTaskCategory(category.name, "")
+        renameRecurringTaskCategory(category.name, "")
     }
 
     // Subtasks

@@ -75,7 +75,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val KEEP_SCREEN_ON_DURING_FOCUS = booleanPreferencesKey("keepScreenOnDuringFocus")
         val AUTO_DND_ENABLED = booleanPreferencesKey("autoDndEnabled")
         val AUTO_DND_LIFT_DURING_BREAKS = booleanPreferencesKey("autoDndLiftDuringBreaks")
-        val EXACT_ALARM_PROMPT_SHOWN = booleanPreferencesKey("exactAlarmPromptShown")
+
+        // Not backed up: whether the user chose "Don't ask again" on the exact-alarm prompt. A
+        // device-level answer, like the permission itself. Replaces "exactAlarmPromptShown",
+        // which stopped the prompt after the first launch whatever the answer was.
+        val EXACT_ALARM_PROMPT_DECLINED = booleanPreferencesKey("exactAlarmPromptDeclined")
 
         // Not a user-facing setting: the interruption filter FocusDndController owned before it
         // applied Auto-DND, kept here (rather than in-memory) so a killed process can still
@@ -89,7 +93,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         private val RESTORABLE_BOOLEAN_KEYS = listOf(
             USE_24_HOUR_FORMAT, AUTO_COMPLETE_FOCUS, ASK_FOCUS_ON_TASK_COMPLETE, SHOW_HOME_GREETING,
             KEEP_SCREEN_ON_DURING_FOCUS, AUTO_DND_ENABLED, AUTO_DND_LIFT_DURING_BREAKS,
-            EXACT_ALARM_PROMPT_SHOWN,
         )
         private val RESTORABLE_INT_KEYS = listOf(
             DAILY_GOAL_MINS, MAX_STOPWATCH_MINS, MAX_NODE_MINS, UPCOMING_TASKS_HORIZON,
@@ -139,8 +142,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val autoDndEnabledFlow: Flow<Boolean> = dataStore.data.map { it[AUTO_DND_ENABLED] ?: false }
     val autoDndLiftDuringBreaksFlow: Flow<Boolean> =
         dataStore.data.map { it[AUTO_DND_LIFT_DURING_BREAKS] ?: false }
-    val exactAlarmPromptShownFlow: Flow<Boolean> =
-        dataStore.data.map { it[EXACT_ALARM_PROMPT_SHOWN] ?: false }
+    val exactAlarmPromptDeclinedFlow: Flow<Boolean> =
+        dataStore.data.map { it[EXACT_ALARM_PROMPT_DECLINED] ?: false }
 
     /** Null means Auto-DND currently owns no filter to restore. */
     val storedInterruptionFilterFlow: Flow<Int?> =
@@ -242,8 +245,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[AUTO_DND_LIFT_DURING_BREAKS] = lift }
     }
 
-    suspend fun saveExactAlarmPromptShown(shown: Boolean) {
-        dataStore.edit { it[EXACT_ALARM_PROMPT_SHOWN] = shown }
+    suspend fun saveExactAlarmPromptDeclined(declined: Boolean) {
+        dataStore.edit { it[EXACT_ALARM_PROMPT_DECLINED] = declined }
     }
 
     suspend fun saveStoredInterruptionFilter(filter: Int) {

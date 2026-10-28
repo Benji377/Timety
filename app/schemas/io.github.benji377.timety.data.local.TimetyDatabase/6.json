@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "307f1eec387142c9d82fb6c73ce1ae97",
+    "identityHash": "5f695ce5b162ee03831993c2062a2afa",
     "entities": [
       {
         "tableName": "tasks",
@@ -194,7 +194,7 @@
       },
       {
         "tableName": "recurring_tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `category` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `category` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -225,6 +225,11 @@
             "columnName": "dueDate",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "timeOfDayMinutes",
+            "columnName": "timeOfDayMinutes",
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "unit",
@@ -286,7 +291,7 @@
       },
       {
         "tableName": "recurring_occurrences",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `recurringTaskId` TEXT NOT NULL, `completedAt` INTEGER NOT NULL, FOREIGN KEY(`recurringTaskId`) REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `recurringTaskId` TEXT NOT NULL, `completedAt` INTEGER NOT NULL, `previousDueDate` INTEGER, FOREIGN KEY(`recurringTaskId`) REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -305,6 +310,11 @@
             "columnName": "completedAt",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "previousDueDate",
+            "columnName": "previousDueDate",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -1020,7 +1030,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '307f1eec387142c9d82fb6c73ce1ae97')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5f695ce5b162ee03831993c2062a2afa')"
     ]
   }
 }

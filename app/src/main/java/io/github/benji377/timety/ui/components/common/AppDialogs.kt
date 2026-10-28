@@ -103,7 +103,8 @@ fun TextInputDialog(
 
 /**
  * Dialog for creating or editing a named, colored item (focus tag, task category): a name
- * field plus a [ColorSwatchGrid]. Confirms only if the trimmed name is non-empty.
+ * field plus a [ColorSwatchGrid]. Confirms only if the trimmed name is non-empty and
+ * [isNameTaken] rejects it, in which case the field shows [nameTakenMessage].
  */
 @Composable
 fun NamedColorEditDialog(
@@ -116,9 +117,12 @@ fun NamedColorEditDialog(
     colors: List<Color>,
     onConfirm: (name: String, colorValue: Int) -> Unit,
     onDismiss: () -> Unit,
+    isNameTaken: (String) -> Boolean = { false },
+    nameTakenMessage: String? = null,
 ) {
     var name by remember { mutableStateOf(initialName) }
     var selectedColor by remember { mutableStateOf(initialColor) }
+    val nameTaken = isNameTaken(name)
 
     NeoDialog(onDismissRequest = onDismiss) {
         Text(title, fontSize = AppTheme.fsHeadingSmall, fontWeight = AppTheme.fwBold)
@@ -128,6 +132,10 @@ fun NamedColorEditDialog(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text(nameLabel) },
+                isError = nameTaken,
+                supportingText = if (nameTaken && nameTakenMessage != null) {
+                    { Text(nameTakenMessage) }
+                } else null,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
@@ -146,9 +154,9 @@ fun NamedColorEditDialog(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             NeoTextButton(onClick = onDismiss, text = stringResource(R.string.commonLabelCancel))
             Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-            NeoButton(onClick = {
+            NeoButton(enabled = !nameTaken, onClick = {
                 val trimmed = name.trim()
-                if (trimmed.isNotEmpty()) {
+                if (trimmed.isNotEmpty() && !nameTaken) {
                     onConfirm(trimmed, selectedColor.toArgb())
                 }
             }) {

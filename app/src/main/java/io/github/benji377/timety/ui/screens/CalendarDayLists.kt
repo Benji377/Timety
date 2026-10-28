@@ -51,6 +51,7 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
@@ -78,6 +79,10 @@ internal fun HabitsAccordion(
                 modifier = Modifier.padding(16.dp)
             )
         } else {
+            // A habit is done on the day itself, so future days can't be checked off ahead of
+            // time, as in the habit history sheet. A stray future check can still be removed.
+            val today by rememberToday()
+            val isFutureDay = selectedDate.isAfter(today)
             habits.forEach { hwc ->
                 val isCompleted = HabitUtils.isCompletedOn(hwc, selectedDate)
                 NeoListTile(
@@ -101,6 +106,7 @@ internal fun HabitsAccordion(
                         Checkbox(
                             checked = isCompleted,
                             onCheckedChange = { onToggle(hwc, isCompleted) },
+                            enabled = isCompleted || !isFutureDay,
                             colors = CheckboxDefaults.colors(
                                 checkedColor = SuccessColor,
                                 uncheckedColor = HabitColor,

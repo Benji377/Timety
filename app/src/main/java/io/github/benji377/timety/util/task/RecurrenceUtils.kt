@@ -8,6 +8,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
@@ -51,7 +52,7 @@ object RecurrenceUtils {
      * The next due date strictly after both [task]'s current due date and [now]: it walks the
      * task's occurrence dates forward and skips everything not in the future, so completing a
      * long-overdue task jumps straight to the next real occurrence instead of firing every missed
-     * one. The time of day is carried over from the current due date.
+     * one. The time of day is the task's stored one, else the current due date's.
      */
     fun nextDueDate(
         task: RecurringTaskEntity,
@@ -60,7 +61,9 @@ object RecurrenceUtils {
     ): Instant {
         val zonedDue = task.dueDate.atZone(zone)
         val anchor = zonedDue.toLocalDate()
-        val time = zonedDue.toLocalTime()
+        // The stored time keeps a due time inside a DST gap (02:30 resolved to 03:30 on the
+        // spring-forward day) from sticking at the shifted time on every later occurrence.
+        val time = task.timeOfDayMinutes?.let { LocalTime.of(it / 60, it % 60) } ?: zonedDue.toLocalTime()
         var date = anchor
         var guard = 0
         while (guard < MAX_STEPS) {
@@ -84,9 +87,18 @@ object RecurrenceUtils {
             RecurrenceUnit.DAY -> after.plusDays(interval.toLong())
             RecurrenceUnit.WEEK -> nextWeekly(after, task, anchor, interval)
             RecurrenceUnit.MONTH -> nextMonthly(after, task, anchor, interval)
-            // plusYears clamps Feb 29 to Feb 28 in non-leap years.
-            RecurrenceUnit.YEAR -> after.plusYears(interval.toLong())
+            RecurrenceUnit.YEAR -> nextYearly(after, task, interval)
         }
+    }
+
+    /**
+     * The same date [interval] years on. plusYears clamps Feb 29 to Feb 28 in non-leap years, so
+     * the stored day puts it back to the 29th once a leap year comes round again.
+     */
+    private fun nextYearly(after: LocalDate, task: RecurringTaskEntity, interval: Int): LocalDate {
+        val date = after.plusYears(interval.toLong())
+        val day = task.monthlyDay ?: return date
+        return date.withDayOfMonth(day.coerceIn(1, date.lengthOfMonth()))
     }
 
     private fun nextWeekly(

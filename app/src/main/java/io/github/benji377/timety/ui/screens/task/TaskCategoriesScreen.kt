@@ -52,19 +52,28 @@ import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 
 /**
- * Lists task categories with per-category task counts and lets the user add, edit, or delete them.
+ * Lists task categories with per-category task counts (recurring tasks included) and lets the user
+ * add, edit, or delete them. Names must be unique, ignoring case and surrounding spaces.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCategoriesScreen(
     onNavigateBack: () -> Unit,
-    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
+    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val categories by taskViewModel.allCategories.collectAsState()
+    val nameTakenMessage = stringResource(R.string.categoryNameTaken)
+    // The category being edited may keep its own name (or change only its case).
+    fun isNameTaken(name: String, except: TaskCategoryEntity?) = categories.any {
+        it.id != except?.id && TaskCategoryEntity.isSameName(it.name, name)
+    }
 
     var categoryDialogTarget by remember { mutableStateOf<TaskCategoryEntity?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -112,7 +121,8 @@ fun TaskCategoriesScreen(
                 }
             } else {
                 items(categories, key = { it.id }) { category ->
-                    val taskCount = tasks.count { it.task.category == category.name }
+                    val taskCount = tasks.count { it.task.category == category.name } +
+                        recurringItems.count { it.task.category == category.name }
                     NeoListTile(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -180,6 +190,8 @@ fun TaskCategoriesScreen(
                 showAddDialog = false
             },
             onDismiss = { showAddDialog = false },
+            isNameTaken = { isNameTaken(it, except = null) },
+            nameTakenMessage = nameTakenMessage,
         )
     }
     categoryDialogTarget?.let { category ->
@@ -196,6 +208,8 @@ fun TaskCategoriesScreen(
                 categoryDialogTarget = null
             },
             onDismiss = { categoryDialogTarget = null },
+            isNameTaken = { isNameTaken(it, except = category) },
+            nameTakenMessage = nameTakenMessage,
         )
     }
 

@@ -1,6 +1,7 @@
 package io.github.benji377.timety.ui.viewmodel
 
 import android.net.Uri
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.focus.DailyFocusTarget
 import io.github.benji377.timety.data.repository.AccordionKey
@@ -8,6 +9,7 @@ import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.services.BackupService
 import io.github.benji377.timety.services.ReminderScheduler
+import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -145,6 +147,8 @@ class SettingsViewModel(
     fun setUse24HourFormat(use24Hour: Boolean) = viewModelScope.launch {
         repository.saveUse24HourFormat(use24Hour)
         resyncNotifications()
+        // The task widget shows due times, and only redraws on a data change otherwise.
+        TaskWidget().updateAll(application)
     }
 
     fun setDateFormat(format: String) = viewModelScope.launch { repository.saveDateFormat(format) }
@@ -166,8 +170,10 @@ class SettingsViewModel(
         viewModelScope.launch { repository.saveMaxStopwatchMins(mins) }
 
     fun setMaxNodeMins(mins: Int) = viewModelScope.launch { repository.saveMaxNodeMins(mins) }
-    fun setUpcomingTasksHorizon(days: Int) =
-        viewModelScope.launch { repository.saveUpcomingTasksHorizon(days) }
+    fun setUpcomingTasksHorizon(days: Int) = viewModelScope.launch {
+        repository.saveUpcomingTasksHorizon(days)
+        TaskWidget().updateAll(application)
+    }
 
     fun setDailyMotivationTime(time: String) = viewModelScope.launch {
         repository.saveDailyMotivationTime(time)
@@ -218,12 +224,14 @@ class SettingsViewModel(
         ReminderScheduler.resyncAll(application)
     }
 
-    /** True (once) the first time this is called; marks the exact-alarm prompt as shown regardless of the outcome. */
-    suspend fun consumeExactAlarmPromptDue(): Boolean {
-        val alreadyShown = repository.exactAlarmPromptShownFlow.first()
-        repository.saveExactAlarmPromptShown(true)
-        return !alreadyShown
-    }
+    /**
+     * Whether the exact-alarm prompt may show at launch: until the user grants the permission
+     * (checked by the caller) or picks "Don't ask again". "Not now" asks again next launch.
+     */
+    suspend fun isExactAlarmPromptAllowed(): Boolean = !repository.exactAlarmPromptDeclinedFlow.first()
+
+    fun declineExactAlarmPrompt() =
+        viewModelScope.launch { repository.saveExactAlarmPromptDeclined(true) }
 
     /** Checks that [url] is a reachable Photon-compatible geocoding endpoint before it is saved. */
     suspend fun validateLocationApiEndpoint(url: String): Boolean {

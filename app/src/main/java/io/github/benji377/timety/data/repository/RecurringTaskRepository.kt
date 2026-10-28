@@ -6,6 +6,7 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 
 /** Repository for recurring tasks and their occurrences, wrapping [RecurringTaskDao] with IO dispatching. */
@@ -14,6 +15,10 @@ class RecurringTaskRepository(
 ) {
     val allRecurringTasks: Flow<List<RecurringTaskWithOccurrences>> =
         recurringTaskDao.getAllWithOccurrences()
+
+    // Serializes completing and unchecking across the app, the widget and focus auto-complete,
+    // which all read the due date, then write it; this repository is a process-wide singleton.
+    val completionMutex = Mutex()
 
     fun observeTask(id: String): Flow<RecurringTaskWithOccurrences?> =
         recurringTaskDao.observeWithOccurrences(id)
@@ -51,5 +56,9 @@ class RecurringTaskRepository(
 
     suspend fun deleteOccurrenceById(id: Long) = withContext(Dispatchers.IO) {
         recurringTaskDao.deleteOccurrenceById(id)
+    }
+
+    suspend fun getLatestAdvancingOccurrenceId(taskId: String): Long? = withContext(Dispatchers.IO) {
+        recurringTaskDao.getLatestAdvancingOccurrenceId(taskId)
     }
 }

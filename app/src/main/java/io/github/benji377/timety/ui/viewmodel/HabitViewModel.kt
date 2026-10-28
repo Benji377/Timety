@@ -56,26 +56,26 @@ class HabitViewModel(
     }
 
     fun addHabit(habit: HabitEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             habitRepository.insertHabit(habit)
             refreshHabitReminder(habit.id)
-            updateWidgets()
+            HabitWidget().updateAll(application)
         }
     }
 
     fun updateHabit(habit: HabitEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             habitRepository.updateHabit(habit)
             refreshHabitReminder(habit.id)
-            updateWidgets()
+            HabitWidget().updateAll(application)
         }
     }
 
     fun deleteHabit(habit: HabitEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             habitRepository.deleteHabit(habit)
             cancelHabitReminder(habit.id)
-            updateWidgets()
+            HabitWidget().updateAll(application)
         }
     }
 
@@ -156,6 +156,8 @@ class HabitViewModel(
             habitRepository.completionMutex.withLock {
                 val completions = completionsOf(habitId) ?: return@launch
                 val targetDay = date.atZone(ZoneId.systemDefault()).toLocalDate()
+                // Habits can't be completed ahead of time; the screens disable future days too.
+                if (targetDay.isAfter(LocalDate.now())) return@launch
                 val alreadyCompleted = completions.any {
                     it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == targetDay
                 }

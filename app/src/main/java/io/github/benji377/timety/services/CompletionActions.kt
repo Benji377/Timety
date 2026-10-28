@@ -8,6 +8,7 @@ import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.widget.TaskWidget
+import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 
 /** What [CompletionActions.completeRecurringOccurrence] changed, so an Undo action can revert it. */
@@ -45,23 +46,61 @@ object CompletionActions {
 
     /**
      * Logs a completed occurrence now, rolls the task's due date forward to the next occurrence,
-     * reschedules its reminders and refreshes the task widget.
+     * reschedules its reminders and refreshes the task widget. Reads the task from the DB and
+     * returns null, changing nothing, when it is gone or its due date is no longer the one in
+     * [task]: a second tap from a list that hasn't caught up yet must not complete it twice.
      */
     suspend fun completeRecurringOccurrence(
         context: Context,
         recurringTaskRepository: RecurringTaskRepository,
         task: RecurringTaskEntity,
-    ): RecurringCompletionUndo {
-        val now = Instant.now()
-        val occurrenceId = recurringTaskRepository.insertOccurrence(
-            RecurringOccurrenceEntity(recurringTaskId = task.id, completedAt = now)
-        )
-        val advanced = task.copy(dueDate = RecurrenceUtils.nextDueDate(task, now))
-        recurringTaskRepository.updateTask(advanced)
+    ): RecurringCompletionUndo? {
+        val undo = recurringTaskRepository.completionMutex.withLock {
+            val stored = recurringTaskRepository.getTaskById(task.id) ?: return null
+            if (stored.dueDate != task.dueDate) return null
+            val now = Instant.now()
+            val occurrenceId = recurringTaskRepository.insertOccurrence(
+                RecurringOccurrenceEntity(
+                    recurringTaskId = stored.id,
+                    completedAt = now,
+                    previousDueDate = stored.dueDate,
+                )
+            )
+            val advanced = stored.copy(dueDate = RecurrenceUtils.nextDueDate(stored, now))
+            recurringTaskRepository.updateTask(advanced)
+            RecurringCompletionUndo(occurrenceId, stored.dueDate, advanced)
+        }
+        rescheduleRecurring(context, undo.advancedTask)
+        return undo
+    }
+
+    /**
+     * Removes a logged occurrence. When it is the completion that last advanced the task and the
+     * task is still exactly where that completion left it, the due date goes back too; otherwise
+     * (a backdated entry, an older completion, or a task edited since) only the log entry goes,
+     * so the schedule never lands somewhere the user didn't set.
+     */
+    suspend fun uncheckRecurringOccurrence(
+        context: Context,
+        recurringTaskRepository: RecurringTaskRepository,
+        occurrence: RecurringOccurrenceEntity,
+    ) {
+        val restored = recurringTaskRepository.completionMutex.withLock {
+            val task = recurringTaskRepository.getTaskById(occurrence.recurringTaskId)
+            val previous = occurrence.previousDueDate
+            val restorable = task != null && previous != null &&
+                recurringTaskRepository.getLatestAdvancingOccurrenceId(task.id) == occurrence.id &&
+                task.dueDate == RecurrenceUtils.nextDueDate(task.copy(dueDate = previous), occurrence.completedAt)
+            recurringTaskRepository.deleteOccurrenceById(occurrence.id)
+            if (restorable) task.copy(dueDate = previous).also { recurringTaskRepository.updateTask(it) } else null
+        }
+        if (restored != null) rescheduleRecurring(context, restored) else TaskWidget().updateAll(context)
+    }
+
+    private suspend fun rescheduleRecurring(context: Context, task: RecurringTaskEntity) {
         val scheduler = ReminderScheduler.create(context)
         scheduler.cancelRecurringTaskReminders(task.id)
-        scheduler.scheduleRecurringTaskReminders(advanced)
+        scheduler.scheduleRecurringTaskReminders(task)
         TaskWidget().updateAll(context)
-        return RecurringCompletionUndo(occurrenceId, task.dueDate, advanced)
     }
 }

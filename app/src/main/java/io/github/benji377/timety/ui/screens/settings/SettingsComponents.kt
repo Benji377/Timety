@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
@@ -25,8 +26,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -36,6 +35,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -123,6 +123,54 @@ internal enum class SettingsTrailing {
     NONE,
 }
 
+/**
+ * The shared settings row: leading icon, title with an optional subtitle, and trailing content.
+ * Material's ListItem pins its icons to the top once the text wraps to three lines; settings rows
+ * keep them centred instead, so a long subtitle doesn't knock its row out of line with the rest.
+ * Paddings, heights and text styles follow ListItem's.
+ */
+@Composable
+private fun SettingsRow(
+    title: String,
+    subtitle: String?,
+    leading: @Composable () -> Unit,
+    trailing: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = if (subtitle == null) 56.dp else 72.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+            leading()
+        }
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (subtitle != null) {
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (trailing != null) {
+            Spacer(Modifier.width(16.dp))
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+                trailing()
+            }
+        }
+    }
+}
+
 /** A tappable settings row; [subtitle] may span several lines. */
 @Composable
 internal fun NavSettingsItem(
@@ -133,12 +181,11 @@ internal fun NavSettingsItem(
     iconTint: Color = LocalContentColor.current,
     trailing: SettingsTrailing = SettingsTrailing.CHEVRON,
 ) {
-    ListItem(
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text(title) },
-        supportingContent = subtitle?.let { { Text(it) } },
-        leadingContent = { Icon(icon, null, tint = iconTint) },
-        trailingContent = when (trailing) {
+    SettingsRow(
+        title = title,
+        subtitle = subtitle,
+        leading = { Icon(icon, null, tint = iconTint) },
+        trailing = when (trailing) {
             SettingsTrailing.CHEVRON -> {
                 { Icon(Icons.Filled.ChevronRight, null) }
             }
@@ -148,14 +195,7 @@ internal fun NavSettingsItem(
             }
 
             SettingsTrailing.EXTERNAL -> {
-                {
-                    Icon(
-                        Icons.AutoMirrored.Filled.OpenInNew,
-                        null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                { Icon(Icons.AutoMirrored.Filled.OpenInNew, null) }
             }
 
             SettingsTrailing.NONE -> null
@@ -175,12 +215,11 @@ internal fun SwitchSettingsItem(
     iconTint: Color = LocalContentColor.current,
     enabled: Boolean = true,
 ) {
-    ListItem(
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text(title) },
-        supportingContent = subtitle?.let { { Text(it) } },
-        leadingContent = { Icon(icon, null, tint = iconTint) },
-        trailingContent = {
+    SettingsRow(
+        title = title,
+        subtitle = subtitle,
+        leading = { Icon(icon, null, tint = iconTint) },
+        trailing = {
             Switch(
                 checked = checked,
                 enabled = enabled,
@@ -209,11 +248,11 @@ internal fun DropdownSettingsItem(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    ListItem(
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text(headlineText) },
-        leadingContent = leadingIcon,
-        trailingContent = {
+    SettingsRow(
+        title = headlineText,
+        subtitle = null,
+        leading = leadingIcon,
+        trailing = {
             Box {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(

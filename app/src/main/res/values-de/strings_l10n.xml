@@ -114,7 +114,6 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Tippe auf einen Tag, um seine Sitzungen zu prüfen</string>
     <string name="focusStatsSectionClockTitle">Täglicher Fokus-Rhythmus</string>
-    <string name="focusSessionDeleteContent">Die Sitzung wird endgültig gelöscht und die dafür erhaltenen XP werden wieder abgezogen.</string>
     <string name="focusSessionDeleteTitle">Sitzung löschen?</string>
     <string name="focusSessionDeletedSnackbar">Sitzung gelöscht</string>
     <string name="focusSessionEditTitle">Sitzung bearbeiten</string>

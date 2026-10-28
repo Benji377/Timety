@@ -41,44 +41,41 @@ class RecurringTaskViewModel(
     }
 
     fun addTask(task: RecurringTaskEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             recurringTaskRepository.insertTask(task)
             scheduleReminders(task)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 
     fun updateTask(task: RecurringTaskEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             recurringTaskRepository.updateTask(task)
             scheduleReminders(task)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 
     fun deleteTask(task: RecurringTaskEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             recurringTaskRepository.deleteTask(task)
             ReminderScheduler.create(application).cancelRecurringTaskReminders(task.id)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 
     /**
      * Logs a completed occurrence now, rolls the task's due date forward to the next occurrence,
      * and reschedules its reminders. [onCompleted] receives the data needed to offer
-     * an Undo action (see [undoCompleteOccurrence]).
+     * an Undo action (see [undoCompleteOccurrence]); it isn't called when a repeated tap is ignored.
      */
     fun completeOccurrence(
         task: RecurringTaskEntity,
         onCompleted: (RecurringCompletionUndo) -> Unit = {},
     ) {
         viewModelScope.launch {
-            onCompleted(
-                CompletionActions.completeRecurringOccurrence(
-                    application, recurringTaskRepository, task
-                )
-            )
+            CompletionActions.completeRecurringOccurrence(application, recurringTaskRepository, task)
+                ?.let(onCompleted)
         }
     }
 
@@ -102,7 +99,17 @@ class RecurringTaskViewModel(
         }
     }
 
-    /** Removes a logged occurrence. */
+    /**
+     * Unchecks a completion shown as done, putting the due date back when it is safe to; see
+     * [CompletionActions.uncheckRecurringOccurrence].
+     */
+    fun uncheckOccurrence(occurrence: RecurringOccurrenceEntity) {
+        viewModelScope.launch {
+            CompletionActions.uncheckRecurringOccurrence(application, recurringTaskRepository, occurrence)
+        }
+    }
+
+    /** Removes a logged occurrence from the history; the due date is left untouched. */
     fun deleteOccurrence(occurrence: RecurringOccurrenceEntity) {
         viewModelScope.launch {
             recurringTaskRepository.deleteOccurrence(occurrence)

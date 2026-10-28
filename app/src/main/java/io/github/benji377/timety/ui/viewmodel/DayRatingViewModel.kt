@@ -27,16 +27,17 @@ class DayRatingViewModel(
     private val dayRatingRepository: DayRatingRepository,
     settingsRepository: SettingsRepository,
 ) : AndroidViewModel(application) {
-    val ratingsByDay: StateFlow<Map<LocalDate, DayRating>> = dayRatingRepository.allRatings
+    /** Null until the ratings have loaded, so screens don't mistake "not loaded" for "unrated". */
+    val ratingsByDay: StateFlow<Map<LocalDate, DayRating>?> = dayRatingRepository.allRatings
         .map(MoodStats::byDay)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyMap()
+            initialValue = null
         )
 
-    /** When the evening checkup fires; the rate-today prompt shows from then on. */
-    val checkupTime: StateFlow<LocalTime> = settingsRepository.endOfDayCheckupTimeFlow
+    /** When the evening checkup fires; the rate-today prompt shows from then on. Null until loaded. */
+    val checkupTime: StateFlow<LocalTime?> = settingsRepository.endOfDayCheckupTimeFlow
         .map { time ->
             val (hour, minute) = AppDateFormatUtils.parseHHmm(time, defaultHour = 20, defaultMinute = 0)
             LocalTime.of(hour, minute)
@@ -44,7 +45,7 @@ class DayRatingViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = LocalTime.of(20, 0)
+            initialValue = null
         )
 
     fun setRating(day: LocalDate, rating: DayRating) = viewModelScope.launch {

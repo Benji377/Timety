@@ -150,6 +150,9 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         )
         db.execSQL("DROP TABLE `user_profile`")
         db.execSQL("ALTER TABLE `user_profile_new` RENAME TO `user_profile`")
+
+        db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `timeOfDayMinutes` INTEGER")
+        db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `previousDueDate` INTEGER")
     }
 }
 

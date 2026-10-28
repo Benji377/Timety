@@ -12,6 +12,7 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.util.habit.QuickHabitScheduling.MINUTES_PER_DAY
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
@@ -91,6 +92,7 @@ internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObjec
     put("description", task.description)
     put("category", task.category)
     put("dueDate", task.dueDate.toString())
+    put("timeOfDayMinutes", orNull(task.timeOfDayMinutes))
     put("unit", task.unit.name)
     put("interval", task.interval)
     put("daysOfWeek", orNull(task.daysOfWeek))
@@ -111,6 +113,7 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
         description = json.stringOrNull("description") ?: "",
         category = json.stringOrNull("category") ?: "",
         dueDate = json.instantOrNull("dueDate") ?: Instant.now(),
+        timeOfDayMinutes = json.intOrNull("timeOfDayMinutes")?.takeIf { it in 0 until MINUTES_PER_DAY },
         unit = json.enumOr("unit", RecurrenceUnit.WEEK),
         interval = json.optInt("interval", 1).coerceAtLeast(1),
         daysOfWeek = json.stringOrNull("daysOfWeek"),

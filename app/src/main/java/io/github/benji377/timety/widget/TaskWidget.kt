@@ -1,7 +1,6 @@
 package io.github.benji377.timety.widget
 
 import android.content.Context
-import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -73,7 +72,8 @@ class TaskWidget : GlanceAppWidget() {
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now()
         val now = Instant.now()
-        val use24Hour = DateFormat.is24HourFormat(context)
+        // The app's own time-format setting, not the device's, so the widget matches the app.
+        val use24Hour = appContainer.settingsRepository.use24HourFormatFlow.first()
         val horizonDays = appContainer.settingsRepository.upcomingTasksHorizonFlow.first()
 
         // Exclusive cutoff after the horizon window; one query covers overdue + due + upcoming.

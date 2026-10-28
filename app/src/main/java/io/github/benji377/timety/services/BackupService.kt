@@ -2,6 +2,7 @@ package io.github.benji377.timety.services
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.pm.PackageInfoCompat
@@ -27,11 +28,13 @@ import io.github.benji377.timety.services.backup.sessionToBackupJson
 import io.github.benji377.timety.services.backup.tagFromBackup
 import io.github.benji377.timety.services.backup.taskFromBackup
 import io.github.benji377.timety.services.backup.toBackupJson
+import io.github.benji377.timety.util.ProfileImageStore
 import io.github.benji377.timety.widget.HabitWidget
 import io.github.benji377.timety.widget.TaskWidget
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -71,7 +74,8 @@ class BackupService(
     suspend fun exportToUri(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val json = buildPayload().toString(2)
-            context.contentResolver.openOutputStream(uri)?.use { out ->
+            // "wt" truncates: plain "w" can leave an old, longer file's tail behind the new JSON.
+            context.contentResolver.openOutputStream(uri, "wt")?.use { out ->
                 out.write(json.toByteArray(Charsets.UTF_8))
             } ?: error("Unable to open output stream for $uri")
         }
@@ -108,7 +112,7 @@ class BackupService(
 
     /** Restores an already-parsed backup payload; also used when importing legacy backups. */
     suspend fun importFromJson(json: JSONObject): Result<Unit> = withContext(Dispatchers.IO) {
-        runCatching {
+        runCatching<Unit> {
             // Restoring clears every table before inserting, so an arbitrary JSON file that
             // merely parses must be rejected up front or it would wipe all data and "succeed".
             // Legacy backups carry no payloadType, so any recognized data key also passes.
@@ -135,8 +139,16 @@ class BackupService(
             database.withTransaction {
                 restorePayload(json)
             }
-            settingsRepository.restoreAll(preferences.orEmpty())
-            afterRestore(replaced)
+            // The data is in from here on, so reporting "Import failed" would be wrong: a failed
+            // settings step leaves the old settings, and the next app start re-arms every alarm.
+            try {
+                settingsRepository.restoreAll(preferences.orEmpty())
+                afterRestore(replaced)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Backup data restored, but settings or reminders were not refreshed", e)
+            }
         }
     }
 
@@ -195,20 +207,28 @@ class BackupService(
     // features added later) restore as empty.
 
     private fun restorePayload(json: JSONObject) {
-        userDao.insertUserProfile(profileFromBackup(json.optJSONObject("userProfile")))
+        val restoredProfile = profileFromBackup(json.optJSONObject("userProfile"))
+        // Backups hold only the avatar's file path. When that no longer resolves (a photo since
+        // replaced, or another device), this device's current avatar is kept instead of cleared.
+        userDao.insertUserProfile(
+            if (restoredProfile.profileImagePath != null) restoredProfile
+            else restoredProfile.copy(
+                profileImagePath = ProfileImageStore.validOrNull(userDao.getUserProfileSynchronous()?.profileImagePath)
+            )
+        )
 
         taskDao.clearAll()
         json.objects("tasks").map(::taskFromBackup).forEach { (task, subtasks) ->
             taskDao.insertTask(task)
             subtasks.forEach(taskDao::insertSubtask)
         }
-        restoreTaskCategories(json.objects("taskCategories"))
 
         recurringTaskDao.clearAll()
         json.objects("recurringTasks").map(::recurringTaskFromBackup).forEach { (task, occurrences) ->
             recurringTaskDao.insert(task)
             occurrences.forEach(recurringTaskDao::insertOccurrence)
         }
+        restoreTaskCategories(json.objects("taskCategories"))
 
         habitDao.clearAll()
         json.objects("habits").map(::habitFromBackup).forEach { (habit, completions) ->
@@ -231,7 +251,7 @@ class BackupService(
         restoreFocus(json.optJSONObject("focus") ?: JSONObject())
     }
 
-    /** Must run after the tasks are restored: missing categories are derived from them. */
+    /** Must run after the tasks and recurring tasks are restored: missing categories are derived from them. */
     private fun restoreTaskCategories(categories: List<JSONObject>) {
         taskDao.clearAllCategories()
         categories.mapNotNull(::categoryFromBackup).forEach(taskDao::insertCategoryIfAbsent)
@@ -259,6 +279,7 @@ class BackupService(
     }
 
     companion object {
+        private const val TAG = "BackupService"
         private const val SCHEMA_VERSION = 1
         private const val PAYLOAD_TYPE = "user_data"
 

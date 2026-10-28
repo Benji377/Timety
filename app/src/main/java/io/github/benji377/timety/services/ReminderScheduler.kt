@@ -1,6 +1,7 @@
 package io.github.benji377.timety.services
 
 import android.content.Context
+import android.util.Log
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
@@ -14,7 +15,9 @@ import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.widget.MidnightWidgetRefresh
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.withLock
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -243,7 +246,19 @@ class ReminderScheduler private constructor(private val context: Context) {
     }
 
     companion object {
+        private const val TAG = "ReminderScheduler"
         private const val TASK_ID_SLOTS = 11
+
+        /** Runs one item's re-arm, logging a failure so it can't stop the items after it. */
+        private suspend fun armSafely(what: String, arm: suspend () -> Unit) {
+            try {
+                arm()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Couldn't re-arm $what", e)
+            }
+        }
 
         /** Builds a scheduler whose string resources are resolved in the app's configured locale. */
         suspend fun create(context: Context): ReminderScheduler {
@@ -276,22 +291,43 @@ class ReminderScheduler private constructor(private val context: Context) {
 
             // Android caps an app's pending alarms (500). The few app-wide alarms go first, so if a
             // huge number of reminders ever reaches the cap, the ones left out are item reminders.
-            scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
-            scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
-            MidnightWidgetRefresh.schedule(app)
+            armSafely("daily motivation") {
+                scheduler.scheduleDailyMotivation(settings.dailyMotivationTimeFlow.first())
+            }
+            armSafely("evening check-in") {
+                scheduler.scheduleEndOfDayCheckup(settings.endOfDayCheckupTimeFlow.first())
+            }
+            armSafely("midnight widget refresh") { MidnightWidgetRefresh.schedule(app) }
 
             val now = Instant.now()
             // Only items with something ahead: completed or past ones were cancelled when they
             // changed, and re-cancelling each of them costs a dozen system calls on every start.
-            app.container.taskRepository.allTasks.first()
+            fun hasReminderAhead(task: TaskEntity) = !task.isCompleted &&
+                (task.reminders.any { it.isAfter(now) } || task.dueDate?.isAfter(now) == true)
+            val taskRepository = app.container.taskRepository
+            taskRepository.allTasks.first()
                 .map { it.task }
-                .filter { task ->
-                    !task.isCompleted &&
-                        (task.reminders.any { it.isAfter(now) } || task.dueDate?.isAfter(now) == true)
+                .filter(::hasReminderAhead)
+                .forEach { snapshot ->
+                    armSafely("task ${snapshot.id}") {
+                        // Re-read right before arming: the list above is a snapshot, and a task
+                        // completed or edited since (say, from a reminder on a cold start) must
+                        // not get its old reminders back.
+                        taskRepository.getTaskById(snapshot.id)
+                            ?.takeIf(::hasReminderAhead)
+                            ?.let(scheduler::scheduleTaskReminders)
+                    }
                 }
-                .forEach { scheduler.scheduleTaskReminders(it) }
-            app.container.recurringTaskRepository.allRecurringTasks.first()
-                .forEach { scheduler.scheduleRecurringTaskReminders(it.task) }
+            val recurringTaskRepository = app.container.recurringTaskRepository
+            recurringTaskRepository.getAllTasks().forEach { snapshot ->
+                armSafely("recurring task ${snapshot.id}") {
+                    // Under the completion lock, so a completion can't advance it in between.
+                    recurringTaskRepository.completionMutex.withLock {
+                        recurringTaskRepository.getTaskById(snapshot.id)
+                            ?.let(scheduler::scheduleRecurringTaskReminders)
+                    }
+                }
+            }
             // Whether a habit still needs a reminder today depends only on this week's completions.
             val weekStart = AppDateUtils.startOfWeekMonday(LocalDate.now())
                 .atStartOfDay(ZoneId.systemDefault()).toInstant()
@@ -302,16 +338,20 @@ class ReminderScheduler private constructor(private val context: Context) {
                 habits.forEach { scheduler.notificationService.cancelLegacyHabitReminders(it.id) }
                 settings.saveLegacyHabitAlarmsCleared()
             }
+            // Habit and quick-habit reminders check their item again when they fire, so a stale
+            // snapshot here can't show a reminder that no longer applies.
             habits
                 .filter { HabitUtils.parseReminderTimes(it.reminderTimes).isNotEmpty() }
                 .forEach { habit ->
-                    scheduler.scheduleHabitReminder(
-                        HabitWithCompletions(habit, recentCompletions[habit.id].orEmpty())
-                    )
+                    armSafely("habit ${habit.id}") {
+                        scheduler.scheduleHabitReminder(
+                            HabitWithCompletions(habit, recentCompletions[habit.id].orEmpty())
+                        )
+                    }
                 }
             app.container.quickHabitRepository.allQuickHabits.first()
                 .filter { it.isEnabled }
-                .forEach { scheduler.scheduleQuickHabit(it) }
+                .forEach { armSafely("quick habit ${it.id}") { scheduler.scheduleQuickHabit(it) } }
         }
     }
 }

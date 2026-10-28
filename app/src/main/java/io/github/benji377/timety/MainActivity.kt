@@ -2,8 +2,10 @@ package io.github.benji377.timety
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -59,6 +61,14 @@ class MainActivity : ComponentActivity() {
         // targetSdk 35+ enforces edge-to-edge on Android 15; opting in explicitly keeps the
         // rendering identical on older OS versions.
         enableEdgeToEdge()
+
+        // Android 12+ sends a root activity to the background on Back instead of finishing it.
+        // Do the same on older versions: finishing drops the activity-scoped focus view model,
+        // and with it the bookkeeping of a session still running in the timer service. Navigation's
+        // own Back handling registers later, so it still takes precedence while it can pop.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            onBackPressedDispatcher.addCallback(this) { moveTaskToBack(true) }
+        }
 
         val settings = SettingsRepository(dataStore)
         // Only a fresh launch carries a request; a rebuild (rotation, language change) would replay it.

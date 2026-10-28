@@ -142,8 +142,13 @@ fun CategoryPicker(
                         IconButton(onClick = {
                             val trimmed = newCategoryText.trim()
                             if (trimmed.isNotEmpty()) {
-                                onCreateCategory(trimmed)
-                                onCategoryChange(trimmed)
+                                // A name that already exists (ignoring case) picks that category
+                                // instead of creating a near-duplicate.
+                                val existing = existingCategories.firstOrNull {
+                                    TaskCategoryEntity.isSameName(it.name, trimmed)
+                                }
+                                if (existing == null) onCreateCategory(trimmed)
+                                onCategoryChange(existing?.name ?: trimmed)
                                 onIsAddingNewCategoryChange(false)
                                 onNewCategoryTextChange("")
                             }
