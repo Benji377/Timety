@@ -156,6 +156,8 @@ class HabitViewModel(
             habitRepository.completionMutex.withLock {
                 val completions = completionsOf(habitId) ?: return@launch
                 val targetDay = date.atZone(ZoneId.systemDefault()).toLocalDate()
+                // Habits can't be completed ahead of time; the screens disable future days too.
+                if (targetDay.isAfter(LocalDate.now())) return@launch
                 val alreadyCompleted = completions.any {
                     it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == targetDay
                 }
