@@ -113,6 +113,7 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">轻触某日，即可查看该日所有专注时段</string>
     <string name="focusStatsSectionClockTitle">每日专注节奏</string>
+    <string name="focusSessionDeleteContent">此操作将永久删除该专注记录。</string>
     <string name="focusSessionDeleteTitle">删除专注记录？</string>
     <string name="focusSessionDeletedSnackbar">专注记录已删除</string>
     <string name="focusSessionEditTitle">编辑专注记录</string>
@@ -200,12 +201,17 @@
     <plurals name="habitDetailLabelGoal">
         <item quantity="other">目标：每周 %d 天</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="other">目标：每月 %d 天</item>
+    </plurals>
     <string name="habitDetailLabelIcon">选择图标</string>
     <string name="habitDetailLabelName">习惯名称</string>
     <string name="habitDetailLabelNameHint">例如：阅读 10 页，锻炼几分钟…</string>
     <string name="habitDetailLabelNameRequest">请输入名称</string>
     <string name="habitDetailLabelNotes">备注</string>
     <string name="habitDetailLabelNotesHint">建立这个习惯的原因？</string>
+    <string name="habitDetailLabelPeriodMonth">每月</string>
+    <string name="habitDetailLabelPeriodWeek">每周</string>
     <string name="habitDetailLabelReminder">提醒时间</string>
     <string name="habitDetailReminderAddTime">添加时间</string>
     <string name="habitDetailReminderSheetHint">当天已完成或无需进行该习惯时，将跳过提醒。</string>
@@ -222,6 +228,7 @@
     <string name="habitDetailTitleNew">新习惯</string>
     <string name="habitFreqDaily">每日</string>
     <string name="habitFreqFlexible">%1$d / %2$d 本周</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d 本月</string>
     <string name="habitFreqWeekly">每周的 %1$s</string>
     <string name="habitHistoryCompletedAt">完成于 %1$s</string>
     <string name="habitHistoryEmpty">暂无历史记录。</string>
@@ -234,6 +241,7 @@
     <string name="habitHistoryTimePrompt">您在何时完成了这个习惯？</string>
     <string name="habitHistoryTitle">习惯历史记录</string>
     <string name="habitLabelFreqDaily">每日习惯</string>
+    <string name="habitLabelFreqMonthly">每月习惯</string>
     <string name="habitLabelFreqWeekly">每周习惯</string>
     <string name="habitMarkPastCompletionTooltip">标记过去完成记录</string>
     <string name="habitScreenEmpty">目前还没有习惯！点击 + 来建立你的例程</string>
@@ -273,6 +281,7 @@
     <string name="taskDetailsReminderOptionDay">提前 1 天</string>
     <string name="taskDetailsReminderOptionHalfHour">提前 30 分钟</string>
     <string name="taskDetailsReminderOptionHour">提前 1 小时</string>
+    <string name="taskDetailsReminderOptionWeek">提前 1 周</string>
     <string name="taskDetailsReminderOptionOnce">准时</string>
     <string name="taskDetailsSectionChecklist">清单</string>
     <string name="taskDetailsSectionInfo">任务信息</string>
@@ -458,7 +467,7 @@
     <string name="userShareSubject">我的 Timety 周总结</string>
     <string name="userShareText">用 Timety 掌控您的时间！</string>
     <string name="userTooltipEditAvatar">编辑头像</string>
-    <string name="userTooltipShareWrapUp">分享周总结</string>
+    <string name="userTooltipShareWrapUp">分享总结</string>
     <string name="backupActionSaveDevice">保存到设备</string>
     <string name="backupActionSaveDeviceSubtitle">选择本地文件夹</string>
     <string name="backupActionShareCloud">分享 / 上传到云端</string>
@@ -478,6 +487,12 @@
     <string name="dayRatingBad">差</string>
     <string name="dayRatingOk">一般</string>
     <string name="dayRatingGreat">好</string>
+    <string name="moodRateTodayTitle">今天过得怎么样？</string>
+    <string name="moodRateTodayBody">点按一个表情，将今天添加到您的心情日历。</string>
+    <string name="moodPickerTitle">%1$s 过得怎么样？</string>
+    <string name="moodDayNotRated">未评分</string>
+    <string name="moodDistributionTitle">历史心情</string>
+    <string name="moodDistributionEmpty">给某一天评分，看看您的心情分布。</string>
     <string name="notificationChannelFocusDesc">专注进行中的常驻通知</string>
     <string name="notificationChannelFocusName">专注计时</string>
     <string name="notificationChannelHabitsDesc">习惯的定时提醒</string>
@@ -504,6 +519,9 @@
     <string name="exactAlarmPromptBody">未开启“闹钟和提醒”权限时，Android 可能会将快捷习惯和任务提醒延迟数分钟，尤其是在手机空闲时。立即开启，确保提醒准时送达。</string>
     <string name="exactAlarmPromptConfirm">打开设置</string>
     <string name="exactAlarmPromptDismiss">暂不</string>
+    <string name="exactAlarmPromptNever">不再询问</string>
+    <string name="settingsLabelExactAlarms">准时提醒</string>
+    <string name="settingsLabelExactAlarmsSubtitle">已关闭：Android 可能会将提醒延迟数分钟。点按以允许“闹钟和提醒”。</string>
     <string name="notificationQuote1">征服你的一天！</string>
     <string name="notificationQuote2">积跬步以至千里。继续前行！</string>
     <string name="notificationQuote3">今日有何安排？让我们行动起来。</string>
@@ -513,6 +531,7 @@
     <string name="wrapUpStatFocusLabel">专注分钟数</string>
     <string name="wrapUpStatHabitsLabel">习惯完成数</string>
     <string name="wrapUpStatTasksLabel">完成任务数</string>
+    <string name="wrapUpUsingSince">自 %1$s 起使用 Timety</string>
     <string name="categoryAddLabel">添加分类</string>
     <string name="categoryColorLabel">颜色</string>
     <string name="categoryDeleteContent">确定要删除 \"%1$s\" 吗？该分类下的任务将变为未分类。</string>
@@ -520,6 +539,7 @@
     <string name="categoryEditTitle">编辑分类</string>
     <string name="categoryEmpty">暂无分类。点击上方按钮添加。</string>
     <string name="categoryNameLabel">分类名称</string>
+    <string name="categoryNameTaken">已存在同名分类</string>
     <string name="categoryTaskCountZero">暂无任务</string>
     <plurals name="categoryTaskCount">
         <item quantity="other">%d 个任务</item>
@@ -584,6 +604,8 @@
     <string name="targetSheetGoalsEmpty">暂无进行中的目标</string>
     <string name="recurrenceLabel">重复</string>
     <string name="recurrenceEveryLabel">每一个</string>
+    <string name="recurrenceEveryRequest">请输入至少 1</string>
+    <string name="recurrenceDaily">每天</string>
     <string name="recurrenceWeekly">每周</string>
     <string name="recurrenceMonthly">每月</string>
     <string name="recurrenceYearly">每年</string>
@@ -629,6 +651,9 @@
     <string name="recurringTaskDeleteTitle">删除定期任务？</string>
     <string name="recurringTaskDeleteContent">此操作将同时删除完成历史记录，且不可撤销。</string>
     <string name="recurringTaskCompletedSnackbar">已完成！下次：%1$s</string>
+    <plurals name="recurrenceEveryDays">
+        <item quantity="other">每 %d 天</item>
+    </plurals>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="other">每 %d 周</item>
     </plurals>
@@ -649,6 +674,7 @@
     <string name="quickHabitNameHint">例如：喝水</string>
     <string name="quickHabitIntervalLabel">重复间隔</string>
     <string name="quickHabitIntervalSubtitle">提醒的频率</string>
+    <string name="quickHabitIntervalTooLong">间隔超过活跃时段，每天只会提醒一次。请选择更短的间隔或更长的活跃时段。</string>
     <string name="quickHabitUnitMinutes">分钟</string>
     <string name="quickHabitUnitHours">小时</string>
     <string name="quickHabitAllDayLabel">全天</string>
