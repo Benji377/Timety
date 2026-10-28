@@ -113,6 +113,7 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Tap a day to inspect its sessions</string>
     <string name="focusStatsSectionClockTitle">Daily Focus Rhythm</string>
+    <string name="focusSessionDeleteContent">This removes the session for good.</string>
     <string name="focusSessionDeleteTitle">Delete Session?</string>
     <string name="focusSessionDeletedSnackbar">Session deleted</string>
     <string name="focusSessionEditTitle">Edit Session</string>
@@ -200,12 +201,17 @@
     <plurals name="habitDetailLabelGoal">
         <item quantity="other">Goal: %d days a week</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="other">Goal: %d days a month</item>
+    </plurals>
     <string name="habitDetailLabelIcon">Select an Icon</string>
     <string name="habitDetailLabelName">Habit Name</string>
     <string name="habitDetailLabelNameHint">e.g., Read 10 pages, Workout…</string>
     <string name="habitDetailLabelNameRequest">Please enter a name</string>
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Why are you building this habit?</string>
+    <string name="habitDetailLabelPeriodMonth">Per month</string>
+    <string name="habitDetailLabelPeriodWeek">Per week</string>
     <string name="habitDetailLabelReminder">Reminder time</string>
     <string name="habitDetailReminderAddTime">Add time</string>
     <string name="habitDetailReminderSheetHint">Reminders are skipped on days this habit is already done or not due.</string>
@@ -222,6 +228,7 @@
     <string name="habitDetailTitleNew">New Habit</string>
     <string name="habitFreqDaily">Daily</string>
     <string name="habitFreqFlexible">%1$d / %2$d this week</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d this month</string>
     <string name="habitFreqWeekly">Weekly on %1$s</string>
     <string name="habitHistoryCompletedAt">Completed at %1$s</string>
     <string name="habitHistoryEmpty">No history yet.</string>
@@ -234,6 +241,7 @@
     <string name="habitHistoryTimePrompt">At what time did you complete this habit?</string>
     <string name="habitHistoryTitle">Habit History</string>
     <string name="habitLabelFreqDaily">Daily Habit</string>
+    <string name="habitLabelFreqMonthly">Monthly Habit</string>
     <string name="habitLabelFreqWeekly">Weekly Habit</string>
     <string name="habitMarkPastCompletionTooltip">Mark past completion</string>
     <string name="habitScreenEmpty">No habits yet! Tap + to build a routine</string>
@@ -273,6 +281,7 @@
     <string name="taskDetailsReminderOptionDay">1 day before</string>
     <string name="taskDetailsReminderOptionHalfHour">30 minutes before</string>
     <string name="taskDetailsReminderOptionHour">1 hour before</string>
+    <string name="taskDetailsReminderOptionWeek">1 week before</string>
     <string name="taskDetailsReminderOptionOnce">On time</string>
     <string name="taskDetailsSectionChecklist">Checklist</string>
     <string name="taskDetailsSectionInfo">Task Info</string>
@@ -458,7 +467,7 @@
     <string name="userShareSubject">My Timety Wrap-Up</string>
     <string name="userShareText">Master your time with Timety!</string>
     <string name="userTooltipEditAvatar">Edit Avatar</string>
-    <string name="userTooltipShareWrapUp">Share Weekly Wrap-up</string>
+    <string name="userTooltipShareWrapUp">Share Wrap-up</string>
     <string name="backupActionSaveDevice">Save to Device</string>
     <string name="backupActionSaveDeviceSubtitle">Choose a local folder</string>
     <string name="backupActionShareCloud">Share / Upload to Cloud</string>
@@ -478,6 +487,12 @@
     <string name="dayRatingBad">Bad</string>
     <string name="dayRatingOk">OK</string>
     <string name="dayRatingGreat">Great</string>
+    <string name="moodRateTodayTitle">How was your day?</string>
+    <string name="moodRateTodayBody">Tap a face to add today to your mood calendar.</string>
+    <string name="moodPickerTitle">How was %1$s?</string>
+    <string name="moodDayNotRated">Not rated</string>
+    <string name="moodDistributionTitle">All-time mood</string>
+    <string name="moodDistributionEmpty">Rate a day to see how your moods add up.</string>
     <string name="notificationChannelFocusDesc">Persistent notification for active focus sessions</string>
     <string name="notificationChannelFocusName">Active Focus Timer</string>
     <string name="notificationChannelHabitsDesc">Specific time reminders for your habits</string>
@@ -504,6 +519,9 @@
     <string name="exactAlarmPromptBody">Without \"Alarms &amp; reminders\" access, Android may delay quick habit and task reminders by several minutes, especially while your phone is idle. Enable it now for on-time reminders.</string>
     <string name="exactAlarmPromptConfirm">Open Settings</string>
     <string name="exactAlarmPromptDismiss">Not now</string>
+    <string name="exactAlarmPromptNever">Don\'t ask again</string>
+    <string name="settingsLabelExactAlarms">Precise reminder timing</string>
+    <string name="settingsLabelExactAlarmsSubtitle">Off: Android may delay reminders by several minutes. Tap to allow \"Alarms &amp; reminders\".</string>
     <string name="notificationQuote1">Conquer your day!</string>
     <string name="notificationQuote2">Small steps lead to big results. Keep going!</string>
     <string name="notificationQuote3">What\'s on the agenda today? Let\'s make it happen.</string>
@@ -513,6 +531,7 @@
     <string name="wrapUpStatFocusLabel">Minutes Focused</string>
     <string name="wrapUpStatHabitsLabel">Habits Built</string>
     <string name="wrapUpStatTasksLabel">Tasks Completed</string>
+    <string name="wrapUpUsingSince">Using Timety since %1$s</string>
     <string name="categoryAddLabel">Add Category</string>
     <string name="categoryColorLabel">Color</string>
     <string name="categoryDeleteContent">Are you sure you want to delete \"%1$s\"? Tasks with this category will be uncategorized.</string>
@@ -520,6 +539,7 @@
     <string name="categoryEditTitle">Edit Category</string>
     <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
     <string name="categoryNameLabel">Category Name</string>
+    <string name="categoryNameTaken">A category with this name already exists</string>
     <string name="categoryTaskCountZero">No tasks</string>
     <plurals name="categoryTaskCount">
         <item quantity="other">%d tasks</item>
@@ -584,6 +604,8 @@
     <string name="targetSheetGoalsEmpty">No active goals</string>
     <string name="recurrenceLabel">Repeat</string>
     <string name="recurrenceEveryLabel">Every</string>
+    <string name="recurrenceEveryRequest">Enter at least 1</string>
+    <string name="recurrenceDaily">Daily</string>
     <string name="recurrenceWeekly">Weekly</string>
     <string name="recurrenceMonthly">Monthly</string>
     <string name="recurrenceYearly">Yearly</string>
@@ -629,6 +651,9 @@
     <string name="recurringTaskDeleteTitle">Delete recurring task?</string>
     <string name="recurringTaskDeleteContent">This also deletes its completion history. This action cannot be undone.</string>
     <string name="recurringTaskCompletedSnackbar">Completed! Next: %1$s</string>
+    <plurals name="recurrenceEveryDays">
+        <item quantity="other">Every %d days</item>
+    </plurals>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="other">Every %d weeks</item>
     </plurals>
@@ -649,6 +674,7 @@
     <string name="quickHabitNameHint">e.g. Drink water</string>
     <string name="quickHabitIntervalLabel">Repeat every</string>
     <string name="quickHabitIntervalSubtitle">How often you get reminded</string>
+    <string name="quickHabitIntervalTooLong">Longer than the active hours, so it would only remind you once a day. Pick a shorter interval or longer hours.</string>
     <string name="quickHabitUnitMinutes">Minutes</string>
     <string name="quickHabitUnitHours">Hours</string>
     <string name="quickHabitAllDayLabel">All day</string>

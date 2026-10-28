@@ -118,6 +118,7 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Clica n di per cialé si sescions</string>
     <string name="focusStatsSectionClockTitle">Ritm de focus al di</string>
+    <string name="focusSessionDeleteContent">Chësc tol demez per for la sescion.</string>
     <string name="focusSessionDeleteTitle">Scancelé la sescion?</string>
     <string name="focusSessionDeletedSnackbar">Sescion scanceleda</string>
     <string name="focusSessionEditTitle">Mudé la sescion</string>
@@ -220,12 +221,22 @@
         <item quantity="many">Travert: %d dis a l\'ena</item>
         <item quantity="other">Travert: %d dis a l\'ena</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="zero">Travert: %d dis al mëns</item>
+        <item quantity="one">Travert: 1 di al mëns</item>
+        <item quantity="two">Travert: %d dis al mëns</item>
+        <item quantity="few">Travert: %d dis al mëns</item>
+        <item quantity="many">Travert: %d dis al mëns</item>
+        <item quantity="other">Travert: %d dis al mëns</item>
+    </plurals>
     <string name="habitDetailLabelIcon">Cëria ora n\'icona</string>
     <string name="habitDetailLabelName">Inuem abitudin</string>
     <string name="habitDetailLabelNameHint">ej. Lejer 10 plates, Allenamënt…</string>
     <string name="habitDetailLabelNameRequest">Nserësc n inuem</string>
     <string name="habitDetailLabelNotes">Notes</string>
     <string name="habitDetailLabelNotesHint">Cie mutivazions es\'a per chësta abitudin?</string>
+    <string name="habitDetailLabelPeriodMonth">Al mëns</string>
+    <string name="habitDetailLabelPeriodWeek">A l\'ena</string>
     <string name="habitDetailLabelReminder">Ora dl lezit</string>
     <string name="habitDetailReminderAddTime">Njunté ora</string>
     <string name="habitDetailReminderSheetHint">I lezic ne unirà nia mustrei i dis che chësta abitudin ie bele fata o ne ie nia da fé.</string>
@@ -242,6 +253,7 @@
     <string name="habitDetailTitleNew">Nueva abitudin</string>
     <string name="habitFreqDaily">A uni di</string>
     <string name="habitFreqFlexible">%1$d / %2$d chësta ena</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d chësc mëns</string>
     <string name="habitFreqWeekly">Dl\'ena de %1$s</string>
     <string name="habitHistoryCompletedAt">Finà dala %1$s</string>
     <string name="habitHistoryEmpty">Niamò deguna storia.</string>
@@ -254,6 +266,7 @@
     <string name="habitHistoryTimePrompt">A ce ora es\'a finà chësta abitudin?</string>
     <string name="habitHistoryTitle">Storia dla abitudin</string>
     <string name="habitLabelFreqDaily">Abitudin a uni di</string>
+    <string name="habitLabelFreqMonthly">Abitudin al mëns</string>
     <string name="habitLabelFreqWeekly">Abitudin a l\'ena</string>
     <string name="habitMarkPastCompletionTooltip">Mërca coche finà te l passà</string>
     <string name="habitScreenEmpty">Niamò deguna abitudins! Clica sun + per fé na routine</string>
@@ -293,6 +306,7 @@
     <string name="taskDetailsReminderOptionDay">1 di dant</string>
     <string name="taskDetailsReminderOptionHalfHour">30 menuc dant</string>
     <string name="taskDetailsReminderOptionHour">1 ora dant</string>
+    <string name="taskDetailsReminderOptionWeek">1 ena dant</string>
     <string name="taskDetailsReminderOptionOnce">A l\'ora</string>
     <string name="taskDetailsSectionChecklist">Lista da cuntrolé</string>
     <string name="taskDetailsSectionInfo">Info dla ncëria</string>
@@ -478,7 +492,7 @@
     <string name="userShareSubject">Mi soma sun Timety</string>
     <string name="userShareText">Dumineia ti tëmp cun Timety!</string>
     <string name="userTooltipEditAvatar">Mude Avatar</string>
-    <string name="userTooltipShareWrapUp">Përti l result dl\'ena</string>
+    <string name="userTooltipShareWrapUp">Përti l result</string>
     <string name="backupActionSaveDevice">Salvé sun l\'aparat</string>
     <string name="backupActionSaveDeviceSubtitle">Cëria ora na cartela</string>
     <string name="backupActionShareCloud">Përti / Ciarié sun l Cloud</string>
@@ -498,6 +512,12 @@
     <string name="dayRatingBad">Rí</string>
     <string name="dayRatingOk">OK</string>
     <string name="dayRatingGreat">Bën</string>
+    <string name="moodRateTodayTitle">Co ie pa stat ti di?</string>
+    <string name="moodRateTodayBody">Azica n mus per njunté ncuei a ti calënder dla ueia.</string>
+    <string name="moodPickerTitle">Co ie pa stat %1$s?</string>
+    <string name="moodDayNotRated">Nia tlassificà</string>
+    <string name="moodDistributionTitle">La ueia de duc i tëmps</string>
+    <string name="moodDistributionEmpty">Ti dé na valutazion a n di per udëi coche la va cun ti umor.</string>
     <string name="notificationChannelFocusDesc">Notificazion per sescions de focus atives</string>
     <string name="notificationChannelFocusName">Timer Focus Atif</string>
     <string name="notificationChannelHabitsDesc">Lezic spezifics per ti abitudins</string>
@@ -529,6 +549,9 @@
     <string name="exactAlarmPromptBody">Zënza l azess a «Alarmes &amp; lezic» pòl Android ntardivé i lezic de plu menuc, dantaldut canche l telefon ne vën nia adurà. Ativëia l śën per lezic a l\'ora.</string>
     <string name="exactAlarmPromptConfirm">Daurì i mpustazions</string>
     <string name="exactAlarmPromptDismiss">Nia śën</string>
+    <string name="exactAlarmPromptNever">No plu damandé</string>
+    <string name="settingsLabelExactAlarms">Lezic a l\'ora</string>
+    <string name="settingsLabelExactAlarmsSubtitle">Destodà: Android possa ntardivé i lezic de plu menuc. Azica per lascé pro «Alarmes &amp; lezic».</string>
     <string name="notificationQuote1">Dumineia ti di!</string>
     <string name="notificationQuote2">Pici vares porta a grandi resultac. Tira inant!</string>
     <string name="notificationQuote3">Cie ies\'l in dro ncuei? Lajons taché.</string>
@@ -538,6 +561,7 @@
     <string name="wrapUpStatFocusLabel">Menuc cunzentrei</string>
     <string name="wrapUpStatHabitsLabel">Abitudins fates</string>
     <string name="wrapUpStatTasksLabel">Ncëries finedes</string>
+    <string name="wrapUpUsingSince">Adurvé Timety da %1$s inant</string>
     <string name="categoryAddLabel">Njunté nueva categoria</string>
     <string name="categoryColorLabel">Culëur</string>
     <string name="categoryDeleteContent">T\'es segur de ulëi scancelé \"%1$s\"? La ncëries cun chësta categoria restarà zënza.</string>
@@ -545,6 +569,7 @@
     <string name="categoryEditTitle">Mudé categoria</string>
     <string name="categoryEmpty">Mo deguna categories. Clica sun l buton dassëura per njunté una.</string>
     <string name="categoryNameLabel">Inuem dla categoria</string>
+    <string name="categoryNameTaken">Na categoria cun chësc inuem esist bele</string>
     <string name="categoryTaskCountZero">Deguna ncëries</string>
     <plurals name="categoryTaskCount">
         <item quantity="zero">1 ncëria</item>
@@ -654,6 +679,8 @@
     <string name="targetSheetGoalsEmpty">Degun finamënt atif</string>
     <string name="recurrenceLabel">Repeté</string>
     <string name="recurrenceEveryLabel">Uni</string>
+    <string name="recurrenceEveryRequest">Dá ite almanco 1</string>
+    <string name="recurrenceDaily">A uni di</string>
     <string name="recurrenceWeekly">Dl\'ena</string>
     <string name="recurrenceMonthly">Al mëis</string>
     <string name="recurrenceYearly">Al ann</string>
@@ -709,6 +736,14 @@
     <string name="recurringTaskDeleteTitle">Scancelé la ncëria recurënta?</string>
     <string name="recurringTaskDeleteContent">Chësc scancelea nce la storia di finé. Chësta azion ne pòn nia unì anulàda.</string>
     <string name="recurringTaskCompletedSnackbar">Finà! Proscima: %1$s</string>
+    <plurals name="recurrenceEveryDays">
+        <item quantity="zero">Uni %d dis</item>
+        <item quantity="one">Uni di</item>
+        <item quantity="two">Uni %d dis</item>
+        <item quantity="few">Uni %d dis</item>
+        <item quantity="many">Uni %d dis</item>
+        <item quantity="other">Uni %d dis</item>
+    </plurals>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="zero">Uni %d enes</item>
         <item quantity="one">Uni ena</item>
@@ -744,6 +779,7 @@
     <string name="quickHabitNameHint">ej. Bever ega</string>
     <string name="quickHabitIntervalLabel">Repeté uni</string>
     <string name="quickHabitIntervalSubtitle">Tan suvënz che te vëniel lecurdà</string>
+    <string name="quickHabitIntervalTooLong">Plu lonch che l\'ëures atives, nsci te lecurdëssel mé n iede al di. Chir ora n interval plu curt o ëures atives plu longes.</string>
     <string name="quickHabitUnitMinutes">Menuc</string>
     <string name="quickHabitUnitHours">Ëures</string>
     <string name="quickHabitAllDayLabel">Dut l di</string>
