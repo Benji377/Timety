@@ -114,7 +114,7 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Tippe auf einen Tag, um seine Sitzungen zu prüfen</string>
     <string name="focusStatsSectionClockTitle">Täglicher Fokus-Rhythmus</string>
-    <string name="focusSessionDeleteContent">Die Sitzung wird endgültig gelöscht und die dafür erhaltenen XP werden wieder abgezogen.</string>
+    <string name="focusSessionDeleteContent">This removes the session for good.</string>
     <string name="focusSessionDeleteTitle">Sitzung löschen?</string>
     <string name="focusSessionDeletedSnackbar">Sitzung gelöscht</string>
     <string name="focusSessionEditTitle">Sitzung bearbeiten</string>
@@ -525,6 +525,9 @@
     <string name="exactAlarmPromptBody">Ohne den Zugriff auf „Wecker &amp; Erinnerungen“ kann Android schnelle Gewohnheits- und Aufgaben-Erinnerungen um mehrere Minuten verzögern, besonders wenn dein Handy im Ruhezustand ist. Aktiviere ihn jetzt für pünktliche Erinnerungen.</string>
     <string name="exactAlarmPromptConfirm">Einstellungen öffnen</string>
     <string name="exactAlarmPromptDismiss">Nicht jetzt</string>
+    <string name="exactAlarmPromptNever">Don\'t ask again</string>
+    <string name="settingsLabelExactAlarms">Precise reminder timing</string>
+    <string name="settingsLabelExactAlarmsSubtitle">Off: Android may delay reminders by several minutes. Tap to allow \"Alarms &amp; reminders\".</string>
     <string name="notificationQuote1">Erobere deinen Tag!</string>
     <string name="notificationQuote2">Kleine Schritte führen zu großen Ergebnissen. Mach weiter so!</string>
     <string name="notificationQuote3">Was steht heute auf der Agenda? Lass es uns anpacken.</string>
@@ -542,6 +545,7 @@
     <string name="categoryEditTitle">Kategorie bearbeiten</string>
     <string name="categoryEmpty">Noch keine Kategorien. Tippe auf den Button oben, um eine hinzuzufügen.</string>
     <string name="categoryNameLabel">Kategoriename</string>
+    <string name="categoryNameTaken">A category with this name already exists</string>
     <string name="categoryTaskCountZero">Keine Aufgaben</string>
     <plurals name="categoryTaskCount">
         <item quantity="one">1 Aufgabe</item>
@@ -691,6 +695,7 @@
     <string name="quickHabitNameHint">z.B. Wasser trinken</string>
     <string name="quickHabitIntervalLabel">Wiederhole alle</string>
     <string name="quickHabitIntervalSubtitle">Wie oft du erinnert wirst</string>
+    <string name="quickHabitIntervalTooLong">Longer than the active hours, so it would only remind you once a day. Pick a shorter interval or longer hours.</string>
     <string name="quickHabitUnitMinutes">Minuten</string>
     <string name="quickHabitUnitHours">Stunden</string>
     <string name="quickHabitAllDayLabel">Ganztägig</string>
