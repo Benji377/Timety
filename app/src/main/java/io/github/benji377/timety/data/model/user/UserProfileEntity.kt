@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.Instant
 
-/** The single local user profile, tracking XP and unlocked achievements. */
+/** The single local user profile: the name and picture the app greets the user with. */
 @Entity(tableName = "user_profile")
 data class UserProfileEntity(
     @PrimaryKey
@@ -12,6 +12,4 @@ data class UserProfileEntity(
     val name: String,
     val profileImagePath: String? = null,
     val accountCreated: Instant,
-    val unlockedAchievements: List<String> = emptyList(), // Requires a Room TypeConverter.
-    val totalXp: Int = 0
 )

@@ -42,7 +42,6 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.WarningAccent
 
-
 /** About page: community and feedback links, then the app card with version and project links. */
 @Composable
 internal fun AboutSettings() {

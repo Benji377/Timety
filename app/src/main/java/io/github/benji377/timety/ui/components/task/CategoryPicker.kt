@@ -30,12 +30,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.InfoColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.utils.AppUtils
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 /**
  * Category selector shared by the task and recurring-task detail screens: a dropdown over
@@ -62,7 +62,7 @@ fun CategoryPicker(
     }
 
     if (!isEditing) {
-        OutlinedTextField(
+        NeoOutlinedTextField(
             value = category.ifEmpty { stringResource(R.string.taskDetailsLabelCategoryEmpty) },
             onValueChange = {},
             enabled = false,
@@ -77,7 +77,7 @@ fun CategoryPicker(
         if (!isAddingNewCategory) {
             var expanded by remember { mutableStateOf(false) }
             ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = category,
                     onValueChange = {},
                     readOnly = true,
@@ -131,7 +131,7 @@ fun CategoryPicker(
                 }
             }
         } else {
-            OutlinedTextField(
+            NeoOutlinedTextField(
                 value = newCategoryText,
                 onValueChange = onNewCategoryTextChange,
                 modifier = Modifier.fillMaxWidth(),

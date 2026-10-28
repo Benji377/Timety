@@ -15,7 +15,6 @@ import java.time.ZoneId
  * split is only for "how many minutes did I focus on day X" aggregations.
  */
 object FocusSessionDayStats {
-
     /** Minutes of [session] attributable to each calendar day it overlaps, in [zone]. */
     fun minutesByDay(session: FocusSessionEntity, zone: ZoneId): Map<LocalDate, Int> {
         val totalMinutes = session.totalSecondsFocused / 60

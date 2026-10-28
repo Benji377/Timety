@@ -64,7 +64,6 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneId
 
-
 /**
  * Bottom sheet showing a habit's completion history: stat summary, a month calendar, and a
  * chronological timeline. Tapping a past date adds or removes a completion for it.

@@ -33,8 +33,6 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.util.habit.HabitIcons
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Read-only outlined field that opens a picker on tap, showing the current selection
@@ -52,7 +50,7 @@ fun PickerField(
     Box(modifier = modifier) {
         // The field itself follows [enabled] so it picks up the normal enabled/disabled
         // styling (surface vs. transparent background); the overlay box catches taps.
-        OutlinedTextField(
+        NeoOutlinedTextField(
             value = "",
             onValueChange = {},
             readOnly = true,
@@ -80,7 +78,6 @@ fun PickerField(
         )
     }
 }
-
 
 /**
  * Dialog with a grid of the [HabitIcons] catalog; selecting an icon confirms and closes.
@@ -140,7 +137,6 @@ fun IconPickerDialog(
         },
     )
 }
-
 
 /** Dialog with a [ColorSwatchGrid] of [colors]; selecting a swatch confirms and closes. */
 @Composable

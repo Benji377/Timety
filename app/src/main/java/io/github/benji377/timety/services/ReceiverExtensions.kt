@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-
 /**
  * Runs [block] on the IO dispatcher while goAsync keeps the broadcast alive, finishing the
  * pending result when the block completes or throws.

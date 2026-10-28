@@ -42,6 +42,7 @@ import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NamedColorEditDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -52,8 +53,6 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-
 
 /**
  * Lists task categories with per-category task counts and lets the user add, edit, or delete them.
@@ -88,7 +87,7 @@ fun TaskCategoriesScreen(
             contentPadding = PaddingValues(bottom = AppTheme.space3XLarge),
         ) {
             item {
-                Button(
+                NeoButton(
                     onClick = { showAddDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()

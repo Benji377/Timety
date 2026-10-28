@@ -27,7 +27,6 @@ data class EveningSummary(val taskTitles: List<String>, val habitNames: List<Str
 
 /** Collects the evening check-up's open items. Pure and unit-testable. */
 object EveningSummaryBuilder {
-
     /**
      * Overdue tasks are incomplete ones whose due date has passed, recurring tasks included; habits
      * are those [HabitUtils.needsReminderToday] says still need doing.

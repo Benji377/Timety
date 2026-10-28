@@ -17,7 +17,6 @@ import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.testutil.awaitTrue
 import io.github.benji377.timety.ui.components.task.taskCheckboxTag
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -41,7 +40,6 @@ import java.time.Instant
  */
 @RunWith(AndroidJUnit4::class)
 class TaskCompletionAcrossScreensTest {
-
     private val permission: GrantPermissionRule =
         GrantPermissionRule.grant(Manifest.permission.POST_NOTIFICATIONS)
 
@@ -66,7 +64,7 @@ class TaskCompletionAcrossScreensTest {
         runBlocking {
             container.taskRepository.clearAll()
             container.userRepository.insertUserProfile(
-                UserProfileEntity(name = "Tester", accountCreated = Instant.now(), totalXp = 0),
+                UserProfileEntity(name = "Tester", accountCreated = Instant.now()),
             )
             container.taskRepository.insertTask(task)
         }
@@ -78,7 +76,7 @@ class TaskCompletionAcrossScreensTest {
     }
 
     @Test
-    fun checkingOffATask_awardsXp_promptsToLogFocus_andTheProfileStillRenders() {
+    fun checkingOffATask_promptsToLogFocus_andTheProfileStillRenders() {
         compose.onNodeWithText(context.getString(R.string.navigationTasks)).performClick()
         compose.waitForIdle()
 
@@ -89,13 +87,6 @@ class TaskCompletionAcrossScreensTest {
         assertTrue(
             "tapping the checkbox should complete the task",
             awaitTrue { runBlocking { container.taskRepository.getTaskById(task.id) }?.isCompleted == true },
-        )
-        assertTrue(
-            "completing a task from the list should award task XP",
-            awaitTrue {
-                runBlocking { container.userRepository.userProfile.first() }?.totalXp ==
-                    ExperienceEngine.XP_PER_TASK
-            },
         )
 
         // The "ask to log focus time" setting is on by default, so checking a task off offers to
@@ -108,9 +99,8 @@ class TaskCompletionAcrossScreensTest {
         compose.onNodeWithText(context.getString(R.string.navigationProfile)).performClick()
         compose.waitForIdle()
 
-        // Asserted on the seeded profile name rather than a stat card: the stat cards are below
-        // the fold and not composed yet, and the screen's own title is the literal string
-        // "Profile", which also labels the tab that navigated here.
+        // Asserted on the seeded profile name: the screen's title is the literal string "Profile",
+        // which also labels the tab that navigated here.
         compose.onNodeWithText("Tester").assertIsDisplayed()
         assertEquals(
             "the completion should still be the only one after navigating away and back",

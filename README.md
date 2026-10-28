@@ -25,7 +25,7 @@
   </p>
 </p>
 
-Timety is an offline-first productivity and time-management application built with Kotlin for Android. It integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful, gamified experience.
+Timety is an offline-first productivity and time-management application built with Kotlin for Android. It integrates Task Management, Focus Sessions, and Habit Tracking into one beautiful experience.
 
 <p align="center">
   <img src="screenshots/output/01_home_screen.png" width="32%" alt="Home Screen">
@@ -42,9 +42,9 @@ Timety is an offline-first productivity and time-management application built wi
 *   **Focus Engine:** A robust stopwatch and timer system tailored for deep work. Includes support for tags, custom modes, and short/long break phases.
 *   **Habit Tracker:** Build lasting routines with flexible frequencies (daily, specific weekdays, or flexible weekly goals).
 *   **Rich Analytics:** Visualize your productivity with interactive charts, weekly velocity metrics, and time-of-day habit analysis.
-*   **Gamification:** Track your active days, build streaks, and level up your productivity profile.
 *   **Smart Notifications:** Local reminders for tasks, specific habit times, and dynamic daily motivation.
 *   **Unified Calendar:** A custom micro-dot calendar view to see your tasks, focus sessions, and habits at a glance.
+*   **Mood Calendar:** Rate each day from the evening check-in or your profile, and see a month of moods and your all-time split at a glance.
 
 ## Download & Installation
 

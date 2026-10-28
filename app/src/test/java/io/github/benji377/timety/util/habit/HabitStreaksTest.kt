@@ -8,7 +8,6 @@ import java.time.Instant
 import java.time.LocalDate
 
 class HabitStreaksTest {
-
     // A Wednesday; its Monday-based week starts on Oct 26.
     private val today = LocalDate.of(2026, 10, 28)
 

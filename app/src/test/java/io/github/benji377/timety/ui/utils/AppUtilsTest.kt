@@ -5,7 +5,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AppUtilsTest {
-
     @Test
     fun testGetSizeEmoji() {
         assertEquals("S", AppUtils.getSizeEmoji(TaskSize.SMALL))

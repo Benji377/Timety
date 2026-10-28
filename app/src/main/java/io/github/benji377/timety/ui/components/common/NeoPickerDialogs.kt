@@ -27,7 +27,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 
-
 /** The Material date picker works in UTC days: [instant]'s local date as UTC-midnight millis. */
 fun datePickerMillis(instant: Instant, zone: ZoneId = ZoneId.systemDefault()): Long =
     instant.atZone(zone).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -70,7 +69,6 @@ fun NeoTimePickerDialog(
     )
 }
 
-
 /**
  * Alert dialog wrapping a Material [TimeInput] used as an hours-and-minutes duration field,
  * confirming with the total minutes coerced into [minMinutes]..[maxMinutes]. Always 24-hour so
@@ -111,7 +109,6 @@ fun NeoDurationPickerDialog(
         },
     )
 }
-
 
 /**
  * Two-step date-then-time picker: a [DatePickerDialog] followed by a [NeoTimePickerDialog],

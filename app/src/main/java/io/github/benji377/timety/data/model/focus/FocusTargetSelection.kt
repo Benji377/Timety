@@ -26,7 +26,6 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
-
 /**
  * UI-facing selection of what a focus session targets, carrying a display label and color
  * alongside the underlying id.
@@ -88,7 +87,6 @@ val FocusTargetType.color: Color
         FocusTargetType.GOAL -> GoalColor
     }
 
-
 /** UI presentation (icon, color, localized label) for each [DistractionType]. */
 enum class DistractionUIType(
     val entityType: DistractionType,
@@ -126,5 +124,4 @@ enum class DistractionUIType(
             entries.firstOrNull { it.entityType == type } ?: DISTRACTED
     }
 }
-
 

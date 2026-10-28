@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,7 +49,9 @@ import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
@@ -56,9 +59,6 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.ui.theme.hairlineBorder
-import io.github.benji377.timety.ui.components.common.NeoElevatedButton as ElevatedButton
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Card that shows a focus mode's timeline and, when in editing mode, lets its name and phases be
@@ -278,7 +278,7 @@ private fun EditorView(
     }
     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
-    OutlinedTextField(
+    NeoOutlinedTextField(
         value = name,
         onValueChange = onNameChange,
         label = { Text(stringResource(R.string.focusModeLabelName)) },
@@ -339,7 +339,7 @@ private fun EditorView(
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         TextButton(onClick = onCancel) { Text(stringResource(R.string.commonLabelCancel)) }
         Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-        ElevatedButton(onClick = onSave) {
+        NeoButton(onClick = onSave, colors = ButtonDefaults.elevatedButtonColors()) {
             Icon(
                 Icons.Filled.Save,
                 contentDescription = null,

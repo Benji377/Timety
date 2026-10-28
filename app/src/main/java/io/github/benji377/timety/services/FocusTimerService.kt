@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
+import android.view.View
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.compose.ui.graphics.toArgb
@@ -27,13 +28,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-
 /**
  * Foreground service that keeps a focus/stopwatch session alive and visible while [FocusTimerManager]
  * ticks in the background, rendering its state as an ongoing notification and arming the phase-end alarm.
  */
 class FocusTimerService : Service() {
-
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val notificationManager by lazy { NotificationManagerCompat.from(this) }
     private val alarmManager by lazy { getSystemService(ALARM_SERVICE) as AlarmManager }
@@ -131,17 +130,17 @@ class FocusTimerService : Service() {
         }
 
         // A single exact alarm per phase, targeting the phase's absolute end time; not re-armed every tick.
-        if (state.isRunning && !state.isPaused && !state.isStopwatch && state.secondsRemaining > 0) {
-            scheduleAlarm(state.secondsRemaining)
-        }
+        val countingDown = state.isRunning && !state.isPaused && !state.isStopwatch
+        if (countingDown && state.secondsRemaining > 0) scheduleAlarm(state.secondsRemaining)
     }
 
+    private fun soundPendingIntent(): PendingIntent = PendingIntent.getBroadcast(
+        this, ALARM_REQUEST_CODE, Intent(this, TimerSoundReceiver::class.java),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
     private fun scheduleAlarm(secondsRemaining: Int) {
-        val soundIntent = Intent(this, TimerSoundReceiver::class.java)
-        val soundPendingIntent = PendingIntent.getBroadcast(
-            this, ALARM_REQUEST_CODE, soundIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val soundPendingIntent = soundPendingIntent()
         val targetTimeMs = System.currentTimeMillis() + (secondsRemaining * 1000L)
 
         // Same guard as NotificationService.scheduleExact: exact-alarm access can be revoked
@@ -166,13 +165,28 @@ class FocusTimerService : Service() {
         }
     }
 
-    private fun cancelAlarm() {
-        val soundIntent = Intent(this, TimerSoundReceiver::class.java)
-        val soundPendingIntent = PendingIntent.getBroadcast(
-            this, ALARM_REQUEST_CODE, soundIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(soundPendingIntent)
+    private fun cancelAlarm() = alarmManager.cancel(soundPendingIntent())
+
+    /** The notification's layout: title, mode name, and a live chronometer or the frozen time. */
+    private fun timerView(state: TimerState, title: String, accentColor: Int, isStatic: Boolean): RemoteViews {
+        val view = RemoteViews(packageName, R.layout.custom_timer_notification)
+        view.setTextViewText(R.id.notification_title, title)
+        view.setTextViewText(R.id.notification_body, state.modeName)
+        view.setTextColor(R.id.notification_title, accentColor)
+        view.setTextColor(R.id.notification_chronometer, accentColor)
+        view.setTextColor(R.id.notification_paused_text, accentColor)
+        view.setViewVisibility(R.id.notification_chronometer, if (isStatic) View.GONE else View.VISIBLE)
+        view.setViewVisibility(R.id.notification_paused_text, if (isStatic) View.VISIBLE else View.GONE)
+        if (isStatic) {
+            // The frozen time: elapsed for a stopwatch, remaining for a countdown.
+            view.setTextViewText(R.id.notification_paused_text, state.centerText)
+        } else {
+            val countDown = !state.isStopwatch
+            val offsetMs = if (countDown) state.secondsRemaining * 1000L else -state.elapsedSeconds * 1000L
+            view.setChronometer(R.id.notification_chronometer, SystemClock.elapsedRealtime() + offsetMs, null, true)
+            view.setChronometerCountDown(R.id.notification_chronometer, countDown)
+        }
+        return view
     }
 
     private fun buildNotification(state: TimerState): Notification {
@@ -192,34 +206,7 @@ class FocusTimerService : Service() {
             else -> FocusColor
         }.toArgb()
 
-        val customView = RemoteViews(packageName, R.layout.custom_timer_notification)
-        customView.setTextViewText(R.id.notification_title, title)
-        customView.setTextViewText(R.id.notification_body, state.modeName)
-        customView.setTextColor(R.id.notification_title, accentColor)
-        customView.setTextColor(R.id.notification_chronometer, accentColor)
-        customView.setTextColor(R.id.notification_paused_text, accentColor)
-
-        if (isStatic) {
-            // Show the frozen time (elapsed for stopwatch, remaining for countdown) instead of
-            // the layout's "--:--" placeholder.
-            customView.setTextViewText(R.id.notification_paused_text, state.centerText)
-            customView.setViewVisibility(R.id.notification_chronometer, android.view.View.GONE)
-            customView.setViewVisibility(R.id.notification_paused_text, android.view.View.VISIBLE)
-        } else {
-            customView.setViewVisibility(R.id.notification_chronometer, android.view.View.VISIBLE)
-            customView.setViewVisibility(R.id.notification_paused_text, android.view.View.GONE)
-
-            val elapsedRealtime = SystemClock.elapsedRealtime()
-            if (state.isStopwatch) {
-                val baseTime = elapsedRealtime - (state.elapsedSeconds * 1000L)
-                customView.setChronometer(R.id.notification_chronometer, baseTime, null, true)
-                customView.setChronometerCountDown(R.id.notification_chronometer, false)
-            } else {
-                val baseTime = elapsedRealtime + (state.secondsRemaining * 1000L)
-                customView.setChronometer(R.id.notification_chronometer, baseTime, null, true)
-                customView.setChronometerCountDown(R.id.notification_chronometer, true)
-            }
-        }
+        val customView = timerView(state, title, accentColor, isStatic)
 
         val contentIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -242,41 +229,32 @@ class FocusTimerService : Service() {
             .setShowWhen(false)
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
-        // The pause/resume action is omitted while awaiting continue - resuming there needs the next
-        // phase's config, which only the focus screen and its view model know, so only "Stop" is
-        // offered. Session bookkeeping for Stop happens app-side via [FocusTimerManager.stopEvent], so
-        // the action stays correct while the app is backgrounded.
+        addActions(builder, state)
+        return builder.build()
+    }
+
+    /**
+     * Pause/resume and Stop. Pause/resume is left out while awaiting the next phase: resuming needs
+     * that phase's config, which only the focus screen knows. Stop's bookkeeping runs app-side via
+     * [FocusTimerManager.stopEvent], so it works while the app is in the background.
+     */
+    private fun addActions(builder: NotificationCompat.Builder, state: TimerState) {
         if (!state.isAwaitingContinue) {
-            val pauseResumeIntent = Intent(this, FocusTimerService::class.java).apply {
-                action = if (state.isRunning) ACTION_PAUSE else ACTION_START
-            }
-            val pendingPauseResumeIntent = PendingIntent.getService(
-                this,
-                1,
-                pauseResumeIntent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
             builder.addAction(
                 if (state.isRunning) R.drawable.ic_action_pause else R.drawable.ic_action_play,
                 getString(if (state.isRunning) R.string.focusActionPause else R.string.focusActionResume),
-                pendingPauseResumeIntent
+                serviceAction(1, if (state.isRunning) ACTION_PAUSE else ACTION_START),
             )
         }
-
-        val stopIntent = Intent(this, FocusTimerService::class.java).apply {
-            action = ACTION_STOP
-        }
-        val pendingStopIntent = PendingIntent.getService(
-            this, 2, stopIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        builder.addAction(
-            R.drawable.ic_action_stop,
-            getString(R.string.focusActionStop),
-            pendingStopIntent
-        )
-
-        return builder.build()
+        builder.addAction(R.drawable.ic_action_stop, getString(R.string.focusActionStop), serviceAction(2, ACTION_STOP))
     }
+
+    private fun serviceAction(requestCode: Int, action: String): PendingIntent = PendingIntent.getService(
+        this,
+        requestCode,
+        Intent(this, FocusTimerService::class.java).setAction(action),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
 
     companion object {
         private const val TAG = "FocusTimerService"
@@ -286,7 +264,6 @@ class FocusTimerService : Service() {
         const val ACTION_START = "ACTION_START"
         const val ACTION_PAUSE = "ACTION_PAUSE"
         const val ACTION_STOP = "ACTION_STOP"
-
 
         const val ACTION_DISCARD = "ACTION_DISCARD"
     }

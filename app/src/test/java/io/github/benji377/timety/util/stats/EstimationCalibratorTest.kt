@@ -11,7 +11,6 @@ import org.junit.Test
 import java.time.Instant
 
 class EstimationCalibratorTest {
-
     private fun task(id: String, size: TaskSize): TaskEntity =
         TaskEntity(id = id, title = id, size = size, isCompleted = true, createdAt = Instant.now())
 

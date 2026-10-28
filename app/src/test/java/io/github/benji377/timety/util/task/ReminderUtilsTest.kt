@@ -9,7 +9,6 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class ReminderUtilsTest {
-
     private val now = Instant.parse("2026-10-01T08:00:00Z")
     private val due = Instant.parse("2026-10-03T14:30:00Z")
 

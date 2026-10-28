@@ -51,8 +51,10 @@ import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -70,8 +72,6 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
 
 /**
  * Lists the user's quick habits (interval reminders) and lets them add, edit, pause, or delete
@@ -108,7 +108,7 @@ fun QuickHabitsScreen(
             contentPadding = PaddingValues(bottom = AppTheme.space3XLarge),
         ) {
             item {
-                Button(
+                NeoButton(
                     onClick = { showAddDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -292,7 +292,7 @@ private fun QuickHabitEditDialog(
         },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.quickHabitNameLabel)) },
@@ -309,7 +309,7 @@ private fun QuickHabitEditDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
                 ) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = intervalText,
                         onValueChange = { new ->
                             if (new.length <= 4 && new.all(Char::isDigit)) intervalText = new
@@ -405,7 +405,7 @@ private fun QuickHabitEditDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
         confirmButton = {
-            Button(
+            NeoButton(
                 enabled = canSave,
                 onClick = {
                     onConfirm(

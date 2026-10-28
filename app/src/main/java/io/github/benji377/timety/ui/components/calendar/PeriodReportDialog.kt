@@ -40,7 +40,6 @@ import io.github.benji377.timety.util.stats.ReportPeriod
 import java.time.LocalDate
 import kotlin.math.abs
 
-
 /**
  * The calendar's weekly or monthly report: every number behind the grid, labelled, with the
  * change from the [comparedWith] days of the period before. The weekly one doubles as the legend

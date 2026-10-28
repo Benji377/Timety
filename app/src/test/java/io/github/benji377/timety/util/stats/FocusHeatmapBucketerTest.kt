@@ -9,7 +9,6 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 
 class FocusHeatmapBucketerTest {
-
     private val zone: ZoneId = ZoneOffset.UTC
     private val today = LocalDate.of(2026, 7, 12) // a Sunday
 

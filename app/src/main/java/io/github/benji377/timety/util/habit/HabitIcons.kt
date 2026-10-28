@@ -44,7 +44,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import io.github.benji377.timety.util.habit.HabitIcons.defaultIcon
 import androidx.compose.material.icons.outlined.Brush as BrushOutlined
 
-
 /** Curated icon set users can pick from when customizing a habit's appearance. */
 object HabitIcons {
     /** Icons offered in the habit icon picker, grouped by theme for display. */
@@ -103,10 +102,8 @@ object HabitIcons {
         Icons.Filled.LocalCafe,
     )
 
-
     /** Fallback icon for habits with no icon selected or an out-of-range stored index. */
     val defaultIcon: ImageVector = Icons.Filled.Circle
-
 
     /** Looks up an icon by its stored [index], falling back to [defaultIcon] when invalid. */
     fun iconAt(index: Int?): ImageVector {

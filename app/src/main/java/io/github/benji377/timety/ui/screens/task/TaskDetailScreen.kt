@@ -1,50 +1,24 @@
 package io.github.benji377.timety.ui.screens.task
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.filled.Title
-import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
@@ -56,62 +30,31 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
-import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
-import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.StyledExpansionTile
-import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.task.CategoryPicker
-import io.github.benji377.timety.ui.components.task.ReminderEntry
-import io.github.benji377.timety.ui.components.task.ReminderField
-import io.github.benji377.timety.ui.components.task.reminderPresetLabel
-import io.github.benji377.timety.ui.screens.LocationPickerScreen
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
-import io.github.benji377.timety.ui.theme.InfoColor
-import io.github.benji377.timety.ui.theme.SuccessColor
-import io.github.benji377.timety.ui.theme.TaskColor
-import io.github.benji377.timety.ui.theme.WarningColor
-import io.github.benji377.timety.ui.utils.AppUtils
-import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
-import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.location.LocationApi
 import io.github.benji377.timety.util.task.CustomReminderIssue
-import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -120,8 +63,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Shows a single task for viewing, creating, or editing: title, category, description, priority,
@@ -142,7 +83,6 @@ fun TaskDetailScreen(
         taskId?.let { taskViewModel.observeTask(it) } ?: flowOf(null)
     }.collectAsState(initial = null)
     val allCategories by taskViewModel.allCategories.collectAsState()
-    val dateFmt = LocalDateFormatSettings.current
     val isNewTask = taskId == null
     val existingTask = existingTaskWithSubtasks?.task
 
@@ -176,14 +116,8 @@ fun TaskDetailScreen(
         )
     }
 
-    val dueDateFieldLabel = stringResource(R.string.taskDetailsLabelDueDateSet)
-    val priorityLabels = Priority.entries.associateWith { stringResource(AppUtils.priorityLabel(it)) }
-    val sizeLabels = TaskSize.entries.associateWith { stringResource(AppUtils.sizeLabel(it)) }
-
-    var showLocationPicker by remember { mutableStateOf(false) }
     var isAddingNewCategory by remember { mutableStateOf(false) }
     var newCategoryText by remember { mutableStateOf("") }
-    var newSubtaskTitle by remember { mutableStateOf("") }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -284,7 +218,7 @@ fun TaskDetailScreen(
                 )
             }
             item {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
                     enabled = isEditing,
@@ -308,7 +242,7 @@ fun TaskDetailScreen(
                 )
 
                 Spacer(Modifier.height(AppTheme.spaceLarge))
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
                     enabled = isEditing,
@@ -328,44 +262,12 @@ fun TaskDetailScreen(
                 )
             }
             item {
-                Text(
-                    stringResource(R.string.taskDetailsLabelPriority),
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(AppTheme.spaceSmall))
-                AccordionSelector(
-                    values = Priority.entries,
-                    selectedValue = priority,
+                PriorityAndEffortFields(
+                    priority = priority,
+                    size = size,
                     isEditing = isEditing,
-                    onSelected = { priority = it },
-                    iconBuilder = { p, isSelected ->
-                        // Selection is signaled by the segment's own fill and border (see
-                        // AccordionSelector), not by fading the icon - so the icon only needs an
-                        // override when it would otherwise clash with a selected segment's fill.
-                        AppUtils.PriorityIcon(
-                            priority = p,
-                            tint = if (isSelected) Color.White else null
-                        )
-                    },
-                    labelBuilder = { p -> priorityLabels.getValue(p) }
-                )
-
-                Spacer(Modifier.height(AppTheme.spaceLarge))
-                Text(stringResource(R.string.taskDetailsLabelEffort), fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(AppTheme.spaceSmall))
-                AccordionSelector(
-                    values = TaskSize.entries,
-                    selectedValue = size,
-                    isEditing = isEditing,
-                    onSelected = { size = it },
-                    iconBuilder = { s, isSelected ->
-                        Text(
-                            text = AppUtils.getSizeEmoji(s),
-                            fontSize = AppTheme.fsBodyLarge,
-                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    labelBuilder = { s -> sizeLabels.getValue(s) }
+                    onPriorityChange = { priority = it },
+                    onSizeChange = { size = it },
                 )
             }
 
@@ -377,86 +279,19 @@ fun TaskDetailScreen(
                 )
             }
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(enabled = isEditing, role = Role.Button) {
-                            pickerTarget = PickerTarget.DUE_DATE
-                        }
-                        .semantics { contentDescription = dueDateFieldLabel }
-                ) {
-                    OutlinedTextField(
-                        value = dueDate?.let {
-                            stringResource(
-                                R.string.taskDetailsLabelDueDate,
-                                AppDateFormatUtils.formatDate(it, dateFmt.dateFormatCode),
-                                AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
-                            )
-                        } ?: "",
-                        onValueChange = {},
-                        enabled = false,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.taskDetailsLabelDueDateSet)) },
-                        leadingIcon = { Icon(Icons.Filled.Event, null) },
-                        trailingIcon = {
-                            when {
-                                !isEditing -> Unit
-                                dueDate != null -> IconButton(onClick = { clearDueDate() }) {
-                                    Icon(
-                                        Icons.Filled.Close,
-                                        contentDescription = stringResource(R.string.commonClear),
-                                    )
-                                }
-                                else -> Icon(Icons.Filled.Edit, null)
-                            }
-                        },
-                        colors = detailFieldColors(isEditing),
-                    )
-                }
-
-                Spacer(Modifier.height(AppTheme.spaceMedium))
-                val due = dueDate
-                val now = Instant.now()
-                val formatReminder = { time: Instant ->
-                    "${AppDateFormatUtils.formatDate(time, dateFmt.dateFormatCode)} - " +
-                            AppDateFormatUtils.formatTime(time, dateFmt.use24HourFormat)
-                }
-                val entries = reminders.sorted().map { reminder ->
-                    val preset = due?.let { ReminderUtils.presetOf(it, reminder) }
-                    ReminderEntry(
-                        key = reminder.toEpochMilli(),
-                        preset = preset,
-                        label = if (preset != null) reminderPresetLabel(preset)
-                        else formatReminder(reminder),
-                        time = if (preset != null) formatReminder(reminder) else null,
-                    )
-                }
-                val canAddPreset = { preset: ReminderPreset ->
-                    due != null && ReminderUtils.isPresetAvailable(reminders, due, preset, now)
-                }
-                val warning = when {
-                    due == null -> stringResource(R.string.reminderWarnNoDue)
-                    reminders.size >= ReminderUtils.MAX_REMINDERS -> stringResource(
-                        R.string.reminderWarnLimit, ReminderUtils.MAX_REMINDERS
-                    )
-                    else -> null
-                }
-                ReminderField(
-                    entries = entries,
+                DueDateField(
+                    dueDate = dueDate,
                     isEditing = isEditing,
-                    sheetSubtitle = if (due != null) stringResource(
-                        R.string.reminderSheetDue, formatReminder(due)
-                    ) else stringResource(R.string.reminderSheetNoDue),
-                    warning = warning,
-                    canAddPreset = canAddPreset,
-                    onTogglePreset = { preset ->
-                        due?.let { reminders = ReminderUtils.toggle(reminders, it, preset) }
-                    },
-                    onRemoveCustom = { entry ->
-                        reminders = reminders.filterNot { it.toEpochMilli() == entry.key }
-                    },
+                    onPick = { pickerTarget = PickerTarget.DUE_DATE },
+                    onClear = ::clearDueDate,
+                )
+                Spacer(Modifier.height(AppTheme.spaceMedium))
+                TaskReminderField(
+                    reminders = reminders,
+                    dueDate = dueDate,
+                    isEditing = isEditing,
+                    onRemindersChange = { reminders = it },
                     onAddCustom = { pickerTarget = PickerTarget.CUSTOM_REMINDER },
-                    customEnabled = reminders.size < ReminderUtils.MAX_REMINDERS,
                 )
             }
 
@@ -468,78 +303,20 @@ fun TaskDetailScreen(
                 )
             }
             item {
-                OutlinedTextField(
-                    value = location,
-                    onValueChange = {
+                LocationField(
+                    location = location,
+                    place = place,
+                    isEditing = isEditing,
+                    onTextChange = {
                         location = it
-                        // Hand-editing the text detaches it from the picked place, so the
-                        // details can never describe something other than what's shown.
+                        // Typed text no longer describes the picked place, so drop its details.
                         place = null
                     },
-                    enabled = isEditing,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.taskDetailsLabelLocation)) },
-                    leadingIcon = { Icon(Icons.Outlined.Map, null) },
-                    // Left as a bare IconButton: it's a trailingIcon inside the already-bordered
-                    // NeoOutlinedTextField, so a second border here would nest inside the first
-                    // one instead of reading as a distinct control.
-                    trailingIcon = {
-                        if (isEditing) {
-                            IconButton(onClick = { showLocationPicker = true }) {
-                                Icon(
-                                    Icons.Filled.Search,
-                                    contentDescription = stringResource(R.string.locationPickerTitle)
-                                )
-                            }
-                        }
-                    }
+                    onPlacePicked = {
+                        location = it.name
+                        place = it
+                    },
                 )
-
-                // Only the location search needs the network; the app is offline-first, so a
-                // missing connection is surfaced as a small inline label instead of a dialog.
-                if (isEditing && !LocationApi.isOnline(LocalContext.current)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = AppTheme.spaceSmall)
-                    ) {
-                        Icon(
-                            Icons.Outlined.CloudOff,
-                            contentDescription = null,
-                            tint = WarningColor,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                        Text(
-                            stringResource(R.string.taskDetailsLocationOffline),
-                            fontSize = AppTheme.fsBodySmall,
-                            color = WarningColor
-                        )
-                    }
-                }
-
-                val savedPlace = place
-                if (!isEditing && savedPlace != null) {
-                    PlaceDetailsSection(place = savedPlace)
-                }
-
-                if (showLocationPicker) {
-                    Dialog(
-                        onDismissRequest = { showLocationPicker = false },
-                        properties = DialogProperties(
-                            usePlatformDefaultWidth = false
-                        )
-                    ) {
-                        LocationPickerScreen(
-                            initialQuery = location,
-                            onLocationSelected = { selectedPlace ->
-                                location = selectedPlace.name
-                                place = selectedPlace
-                                showLocationPicker = false
-                            },
-                            onBack = { showLocationPicker = false }
-                        )
-                    }
-                }
             }
 
             // Checklist / subtasks.
@@ -550,108 +327,27 @@ fun TaskDetailScreen(
                 )
             }
             items(subtasks, key = { it.id }) { subtask ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Checkbox(
-                        checked = subtask.isCompleted,
-                        onCheckedChange = { checked ->
-                            val updated = subtask.copy(isCompleted = checked)
-                            subtasks = subtasks.map { if (it.id == subtask.id) updated else it }
-                            if (taskId != null) {
-                                taskViewModel.updateSubtask(updated)
-                            }
-                        },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = SuccessColor,
-                            uncheckedColor = TaskColor,
-                            checkmarkColor = Color.White
-                        )
-                    )
-                    Text(
-                        text = subtask.title,
-                        modifier = Modifier.weight(1f),
-                        textDecoration = if (subtask.isCompleted) TextDecoration.LineThrough else null,
-                        color = if (subtask.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-                    )
-                    if (isEditing) {
-                        // A genuine standalone row action (not nested in a field), so it gets
-                        // the same bordered container as other icon buttons.
-                        NeoIconButton(
-                            onClick = {
-                                subtasks = subtasks.filter { it.id != subtask.id }
-                                if (taskId != null) {
-                                    taskViewModel.deleteSubtask(subtask)
-                                }
-                            },
-                            icon = Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.commonLabelRemove),
-                            contentColor = ErrorColor,
-                            size = AppTheme.iconSizeXLarge,
-                        )
-                    }
-                }
+                SubtaskRow(
+                    subtask = subtask,
+                    isEditing = isEditing,
+                    onCheckedChange = { checked ->
+                        val updated = subtask.copy(isCompleted = checked)
+                        subtasks = subtasks.map { if (it.id == subtask.id) updated else it }
+                        if (taskId != null) taskViewModel.updateSubtask(updated)
+                    },
+                    onRemove = {
+                        subtasks = subtasks.filter { it.id != subtask.id }
+                        if (taskId != null) taskViewModel.deleteSubtask(subtask)
+                    },
+                )
             }
-            item {
-                if (isEditing) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = AppTheme.spaceSmall)
-                    ) {
-                        Icon(
-                            Icons.Filled.SubdirectoryArrowRight,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.width(AppTheme.spaceMedium))
-                        OutlinedTextField(
-                            value = newSubtaskTitle,
-                            onValueChange = { newSubtaskTitle = it },
-                            modifier = Modifier.weight(1f),
-                            placeholder = { Text(stringResource(R.string.taskDetailsLabelSubtaskHint)) },
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(onDone = {
-                                val trimmed = newSubtaskTitle.trim()
-                                if (trimmed.isNotEmpty()) {
-                                    val newSubtask = SubtaskEntity(
-                                        id = UUID.randomUUID().toString(),
-                                        taskId = taskId ?: "",
-                                        title = trimmed
-                                    )
-                                    subtasks = subtasks + newSubtask
-                                    if (taskId != null) taskViewModel.addSubtask(newSubtask)
-                                    newSubtaskTitle = ""
-                                }
-                            }),
-                            // Bare IconButton, same reasoning as the location field's search
-                            // icon: this is a trailingIcon inside its own bordered field, not a
-                            // standalone control.
-                            trailingIcon = {
-                                IconButton(onClick = {
-                                    val trimmed = newSubtaskTitle.trim()
-                                    if (trimmed.isNotEmpty()) {
-                                        val newSubtask = SubtaskEntity(
-                                            id = UUID.randomUUID().toString(),
-                                            taskId = taskId ?: "",
-                                            title = trimmed
-                                        )
-                                        subtasks = subtasks + newSubtask
-                                        if (taskId != null) taskViewModel.addSubtask(newSubtask)
-                                        newSubtaskTitle = ""
-                                    }
-                                }) {
-                                    Icon(
-                                        Icons.Filled.AddCircle,
-                                        contentDescription = stringResource(R.string.commonLabelAdd),
-                                        tint = InfoColor
-                                    )
-                                }
-                            }
-                        )
-                    }
+            if (isEditing) {
+                item {
+                    NewSubtaskField(onAdd = { title ->
+                        val newSubtask = SubtaskEntity(id = UUID.randomUUID().toString(), taskId = taskId ?: "", title = title)
+                        subtasks = subtasks + newSubtask
+                        if (taskId != null) taskViewModel.addSubtask(newSubtask)
+                    })
                 }
             }
             item { Spacer(Modifier.height(AppTheme.space3XLarge)) }
@@ -719,175 +415,3 @@ fun TaskDetailScreen(
 }
 
 private enum class PickerTarget { DUE_DATE, CUSTOM_REMINDER }
-
-
-@Composable
-private fun SectionHeader(title: String, icon: ImageVector) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = AppTheme.spaceXLarge, bottom = AppTheme.spaceMedium)
-    ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(AppTheme.iconSizeSmall)
-        )
-        Spacer(Modifier.width(AppTheme.spaceSmall))
-        Text(
-            text = title.uppercase(),
-            fontSize = AppTheme.fsBodySmall,
-            fontWeight = AppTheme.fwBold,
-            letterSpacing = AppTheme.lsWide,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(Modifier.width(AppTheme.spaceSmall))
-        HorizontalDivider(modifier = Modifier.weight(1f))
-    }
-}
-
-
-/**
- * Segmented selector where the selected segment expands to show its label; the rest stay
- * icon-only. The outer track's [AppTheme.borderCard] frame, and the selected segment's own solid
- * fill plus hairline border, stay at full contrast in both edit and view mode - read-only is not a
- * reason to soften a border; only the track's background and tap-gating change with [isEditing].
- */
-@Composable
-private fun <T> AccordionSelector(
-    values: List<T>,
-    selectedValue: T,
-    isEditing: Boolean,
-    iconBuilder: @Composable (T, Boolean) -> Unit,
-    labelBuilder: (T) -> String,
-    onSelected: (T) -> Unit,
-    activeBgColor: Color = TaskColor,
-    activeTextColor: Color = Color.White,
-) {
-    val borderColor = MaterialTheme.colorScheme.outline
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(AppTheme.segmentedControlHeight)
-            .clip(AppTheme.brPill)
-            // The editable/read-only distinction is carried entirely by this fill: an editable
-            // control sits on the brighter `surface`, a read-only one recedes to `surfaceVariant`.
-            .background(
-                if (isEditing) {
-                    MaterialTheme.colorScheme.surface
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                }
-            )
-            .border(AppTheme.borderCard, borderColor, AppTheme.brPill)
-    ) {
-        values.forEachIndexed { index, value ->
-            val isSelected = value == selectedValue
-            val weight by animateFloatAsState(
-                targetValue = if (isSelected) 3f else 1f,
-                label = "accordionSegment"
-            )
-            val isLast = index == values.lastIndex
-            // A divider next to the selected segment would double up with that segment's own
-            // border, so only draw it between two unselected neighbors.
-            val nextIsSelected = !isLast && values[index + 1] == selectedValue
-            val drawsDivider = !isLast && !isSelected && !nextIsSelected
-            Row(
-                modifier = Modifier
-                    .weight(weight)
-                    .fillMaxHeight()
-                    .let { m ->
-                        if (drawsDivider) {
-                            m.drawBehind {
-                                drawLine(
-                                    color = borderColor,
-                                    start = Offset(size.width, 0f),
-                                    end = Offset(size.width, size.height),
-                                    strokeWidth = AppTheme.borderHairline.toPx()
-                                )
-                            }
-                        } else m
-                    }
-                    .selectable(selected = isSelected, enabled = isEditing, role = Role.RadioButton) {
-                        onSelected(value)
-                    }
-                    // Unselected segments show only an icon, so they need the label spoken.
-                    .then(
-                        if (isSelected) Modifier
-                        else Modifier.semantics { contentDescription = labelBuilder(value) }
-                    )
-                    .padding(AppTheme.segmentedSelectorInset)
-                    .then(
-                        if (isSelected) {
-                            Modifier
-                                .clip(AppTheme.brMedium)
-                                .background(activeBgColor, AppTheme.brMedium)
-                                .border(AppTheme.borderHairline, borderColor, AppTheme.brMedium)
-                        } else Modifier
-                    ),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                iconBuilder(value, isSelected)
-                AnimatedVisibility(visible = isSelected) {
-                    Text(
-                        text = labelBuilder(value),
-                        modifier = Modifier.padding(start = AppTheme.spaceSmall),
-                        fontWeight = FontWeight.Bold,
-                        color = activeTextColor,
-                        fontSize = AppTheme.fsSegmentLabel,
-                        letterSpacing = AppTheme.lsNarrow
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** Expandable details of the place picked for the task, read from the stored snapshot. */
-@Composable
-private fun PlaceDetailsSection(place: TaskPlace) {
-    StyledExpansionTile(
-        title = stringResource(R.string.taskDetailsLocationDetails),
-        titleColor = TaskColor,
-    ) {
-        Column(modifier = Modifier.padding(horizontal = AppTheme.spaceLarge)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Outlined.LocationOn,
-                    contentDescription = null,
-                    tint = TaskColor,
-                    modifier = Modifier.size(AppTheme.iconSizeMedium)
-                )
-                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                Text(place.name, fontWeight = FontWeight.Bold)
-            }
-            if (place.details.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-                Text(
-                    place.details,
-                    fontSize = AppTheme.fsBodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            if (place.country.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-                Text(
-                    place.country,
-                    fontSize = AppTheme.fsBodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            val latitude = place.latitude
-            val longitude = place.longitude
-            if (latitude != null && longitude != null) {
-                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
-                Text(
-                    String.format(java.util.Locale.ROOT, "%.5f, %.5f", latitude, longitude),
-                    fontSize = AppTheme.fsBodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}

@@ -47,7 +47,6 @@ import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
 
-
 /** A single flattened row in the widget's habit list: a stack header/footer or a habit entry. */
 private sealed interface HabitWidgetRow {
     data class StackHeader(val name: String, val completed: Int, val total: Int) : HabitWidgetRow
@@ -62,7 +61,6 @@ private sealed interface HabitWidgetRow {
 
     data object StackFooter : HabitWidgetRow
 }
-
 
 /** Home-screen widget showing today's due habits, including stacked-habit lock state. */
 class HabitWidget : GlanceAppWidget() {
@@ -88,6 +86,19 @@ class HabitWidget : GlanceAppWidget() {
         }
 
         val todayHabits = habitsWithCompletions.filter { HabitUtils.isHabitDueToday(it) }
+        val rows = buildRows(context, todayHabits, today)
+
+        provideContent {
+            GlanceTheme { WidgetContent(context, todayHabits.size, rows) }
+        }
+    }
+
+    /** Stacks first, each with a header and its habits in unlock order, then standalone habits. */
+    private fun buildRows(
+        context: Context,
+        todayHabits: List<HabitWithCompletions>,
+        today: LocalDate,
+    ): List<HabitWidgetRow> {
         val completionStatus =
             todayHabits.associate { it.habit.id to HabitUtils.isCompletedOn(it, today) }
 
@@ -96,7 +107,7 @@ class HabitWidget : GlanceAppWidget() {
             .groupBy { it.habit.stackName!!.trim() }
         val standalone = todayHabits.filter { it.habit.stackName?.trim().isNullOrEmpty() }
 
-        val rows = buildList {
+        return buildList {
             for ((stackName, stackHabitsList) in grouped) {
                 // Incomplete habits sort before completed ones within a stack, so completed items
                 // sink to the bottom as they're checked off; ties break on the stored stack order.
@@ -136,59 +147,58 @@ class HabitWidget : GlanceAppWidget() {
                 )
             }
         }
+    }
 
-        provideContent {
-            GlanceTheme {
-                val openHabitsTab = actionStartActivity(
-                    widgetNavIntent(context, BottomNavItem.Habits.route)
+    @Composable
+    private fun WidgetContent(context: Context, dueCount: Int, rows: List<HabitWidgetRow>) {
+        val openHabitsTab = actionStartActivity(
+            widgetNavIntent(context, BottomNavItem.Habits.route)
+        )
+        Column(
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .background(ImageProvider(R.drawable.widget_background))
+                .padding(12.dp)
+                .clickable(openHabitsTab),
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
+            ) {
+                Text(
+                    text = context.getString(R.string.widgetHabitsToday),
+                    style = TextStyle(
+                        color = ColorProvider(HabitColor),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    ),
+                    modifier = GlanceModifier.defaultWeight()
                 )
-                Column(
-                    modifier = GlanceModifier
-                        .fillMaxSize()
-                        .background(ImageProvider(R.drawable.widget_background))
-                        .padding(12.dp)
-                        .clickable(openHabitsTab),
-                ) {
-                    // Header
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
-                    ) {
-                        Text(
-                            text = context.getString(R.string.widgetHabitsToday),
-                            style = TextStyle(
-                                color = ColorProvider(HabitColor),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            ),
-                            modifier = GlanceModifier.defaultWeight()
-                        )
-                        Spacer(modifier = GlanceModifier.width(8.dp))
-                        Text(
-                            text = "${todayHabits.size}",
-                            style = TextStyle(
-                                color = ColorProvider(HabitColor),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                        )
-                    }
+                Spacer(modifier = GlanceModifier.width(8.dp))
+                Text(
+                    text = "$dueCount",
+                    style = TextStyle(
+                        color = ColorProvider(HabitColor),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                )
+            }
 
-                    if (rows.isEmpty()) {
-                        Box(
-                            modifier = GlanceModifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = context.getString(R.string.habitScreenEmpty),
-                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
-                            )
-                        }
-                    } else {
-                        LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                            itemsIndexed(rows) { _, row -> RenderRow(context, row, openHabitsTab) }
-                        }
-                    }
+            if (rows.isEmpty()) {
+                Box(
+                    modifier = GlanceModifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = context.getString(R.string.habitScreenEmpty),
+                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
+                    )
+                }
+            } else {
+                LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                    itemsIndexed(rows) { _, row -> RenderRow(context, row, openHabitsTab) }
                 }
             }
         }
@@ -314,7 +324,6 @@ class HabitWidget : GlanceAppWidget() {
             )
         }
     }
-
 
     private fun frequencySubtitle(context: Context, hwc: HabitWithCompletions): String =
         when (hwc.habit.frequency) {

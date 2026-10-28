@@ -20,13 +20,11 @@ import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.TaskRepository
-import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.util.habit.HabitUtils
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
 import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +42,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
 
-
 /** A logged distraction paired with the focus session it was recorded against. */
 data class DistractionWithSession(
     val distraction: DistractionEntity,
@@ -56,19 +53,17 @@ enum class ModeDeleteBlocker { HAS_SESSIONS, SESSION_RUNNING }
 
 /**
  * Drives focus mode selection, active session/phase navigation, and session logging, including
- * XP awards and auto-completion of the linked task, recurring task or habit once a session with a
- * finished focus phase is logged. A discarded session awards nothing.
+ * auto-completion of the linked task, recurring task or habit once a session with a finished
+ * focus phase is logged. A discarded session completes nothing.
  */
 class FocusViewModel(
     application: android.app.Application,
     private val focusRepository: FocusRepository,
-    private val userRepository: UserRepository,
     private val habitRepository: HabitRepository,
     private val taskRepository: TaskRepository,
     private val recurringTaskRepository: RecurringTaskRepository,
     private val settingsRepository: SettingsRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
-
     // Modes, sessions, and tags.
     val allModes: StateFlow<List<FocusModeEntity>> = focusRepository.allModes
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -78,7 +73,6 @@ class FocusViewModel(
 
     val allTags: StateFlow<List<FocusTagEntity>> = focusRepository.allTags
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
 
     // A single live query over the distractions table joined in memory with the sessions list.
     // Joining per session instead would open one Room flow PER session — hundreds of concurrent
@@ -102,7 +96,6 @@ class FocusViewModel(
         _currentModeId.value = id
     }
 
-
     private val _currentPhaseIndex = MutableStateFlow(0)
     val currentPhaseIndex = _currentPhaseIndex.asStateFlow()
     fun setCurrentPhaseIndex(index: Int) {
@@ -112,7 +105,6 @@ class FocusViewModel(
     fun resetPhaseIndex() {
         _currentPhaseIndex.value = 0
     }
-
 
     private val _awaitingContinue = MutableStateFlow(false)
     val awaitingContinue: StateFlow<Boolean> = _awaitingContinue.asStateFlow()
@@ -164,7 +156,7 @@ class FocusViewModel(
 
         viewModelScope.launch {
             FocusTimerManager.phaseCompleteEvent.collect { (isRestPhase, durationSeconds) ->
-                // XP and auto-complete wait for the session to be logged, so a discarded one pays nothing.
+                // Auto-complete waits for the session to be logged, so a discarded one completes nothing.
                 if (!isRestPhase) {
                     sessionAccumulatedFocusSeconds += durationSeconds
                     sessionFocusPhaseCompleted = true
@@ -257,7 +249,6 @@ class FocusViewModel(
             viewModelScope.launch {
                 focusRepository.insertSession(sessionToLog)
                 distractionsToLog.forEach { focusRepository.insertDistraction(it) }
-                awardFocusXp(sessionToLog.totalSecondsFocused / 60)
                 if (targetToComplete != null && settingsRepository.autoCompleteFocusFlow.first()) {
                     autoCompleteTarget(targetToComplete)
                 }
@@ -285,7 +276,7 @@ class FocusViewModel(
     private suspend fun autoCompleteTarget(target: FocusTargetSelection) {
         when (target.type) {
             FocusTargetType.TASK -> CompletionActions.completeTask(
-                getApplication(), taskRepository, userRepository, target.id
+                getApplication(), taskRepository, target.id
             )
 
             FocusTargetType.RECURRING_TASK -> {
@@ -296,7 +287,7 @@ class FocusViewModel(
                 if (entry.occurrences.any { it.completedAt.atZone(zone).toLocalDate() == today }) return
                 val task = entry.task
                 CompletionActions.completeRecurringOccurrence(
-                    getApplication(), recurringTaskRepository, userRepository, task
+                    getApplication(), recurringTaskRepository, task
                 )
             }
 
@@ -317,7 +308,6 @@ class FocusViewModel(
             habitRepository.insertCompletion(
                 HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
             )
-            userRepository.addXp(ExperienceEngine.XP_PER_HABIT)
         }
         ReminderScheduler.refreshHabitReminder(getApplication(), habitId)
         // Auto-completion bypasses HabitViewModel, so refresh the habit widget here too.
@@ -325,100 +315,14 @@ class FocusViewModel(
     }
 
     private suspend fun ensureSystemModes(modes: List<FocusModeEntity>) {
-        if (modes.none { it.id == FocusModeEntity.SYSTEM_STOPWATCH_ID }) {
+        val existing = modes.mapTo(HashSet()) { it.id }
+        for ((mode, phases) in SYSTEM_MODES) {
+            if (mode.id in existing) continue
             focusRepository.insertModeWithPhases(
-                FocusModeEntity(
-                    id = FocusModeEntity.SYSTEM_STOPWATCH_ID,
-                    name = "Stopwatch",
-                    type = FocusModeType.STOPWATCH,
-                    isSystem = true
-                ),
-                listOf(
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_STOPWATCH_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 0,
-                        orderIndex = 0
-                    )
-                ),
-            )
-        }
-        if (modes.none { it.id == FocusModeEntity.SYSTEM_FLEXIBLE_ID }) {
-            focusRepository.insertModeWithPhases(
-                FocusModeEntity(
-                    id = FocusModeEntity.SYSTEM_FLEXIBLE_ID,
-                    name = "Flexible",
-                    type = FocusModeType.FLEXIBLE,
-                    isSystem = true
-                ),
-                listOf(
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_FLEXIBLE_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = -1,
-                        orderIndex = 0
-                    )
-                ),
-            )
-        }
-        if (modes.none { it.id == FocusModeEntity.SYSTEM_POMODORO_ID }) {
-            focusRepository.insertModeWithPhases(
-                FocusModeEntity(
-                    id = FocusModeEntity.SYSTEM_POMODORO_ID,
-                    name = "Pomodoro Classic",
-                    type = FocusModeType.POMODORO,
-                    isSystem = true
-                ),
-                listOf(
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 25,
-                        orderIndex = 0
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.REST,
-                        durationMinutes = 5,
-                        orderIndex = 1
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 25,
-                        orderIndex = 2
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.REST,
-                        durationMinutes = 5,
-                        orderIndex = 3
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 25,
-                        orderIndex = 4
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.REST,
-                        durationMinutes = 5,
-                        orderIndex = 5
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.FOCUS,
-                        durationMinutes = 25,
-                        orderIndex = 6
-                    ),
-                    SessionPhaseEntity(
-                        modeId = FocusModeEntity.SYSTEM_POMODORO_ID,
-                        type = PhaseType.REST,
-                        durationMinutes = 15,
-                        orderIndex = 7
-                    ),
-                ),
+                mode,
+                phases.mapIndexed { index, (type, minutes) ->
+                    SessionPhaseEntity(modeId = mode.id, type = type, durationMinutes = minutes, orderIndex = index)
+                },
             )
         }
     }
@@ -499,10 +403,9 @@ class FocusViewModel(
     fun getMinutesFocusedToday(zone: ZoneId = ZoneId.systemDefault()): Int =
         getMinutesFocusedOnDay(LocalDate.now(), zone)
 
-
     /**
-     * Logs a manually backfilled session for a time range that already elapsed, and awards its
-     * XP. Never auto-completes [target]: backfilling only records time that was already spent.
+     * Logs a manually backfilled session for a time range that already elapsed. Never
+     * auto-completes [target]: backfilling only records time that was already spent.
      */
     fun logPastSession(
         mode: FocusModeEntity,
@@ -552,14 +455,13 @@ class FocusViewModel(
                     isCompleted = true,
                 ).withTarget(target)
             )
-            awardFocusXp((totalSeconds / 60).toInt())
         }
     }
 
     /**
      * Applies an edit to an already logged session: its focused time is re-derived from the new
-     * range and the XP it earned is corrected by the difference. Retargeting doesn't undo or
-     * redo any auto-completion the session triggered when it was recorded.
+     * range. Retargeting doesn't undo or redo any auto-completion the session triggered when it
+     * was recorded.
      */
     fun updateSession(
         session: FocusSessionEntity,
@@ -586,15 +488,13 @@ class FocusViewModel(
 
         viewModelScope.launch {
             focusRepository.updateSession(updated)
-            awardFocusXp(totalSeconds / 60 - session.totalSecondsFocused / 60)
         }
     }
 
-    /** Deletes a logged session (and its distractions, by cascade) and takes back the XP it earned. */
+    /** Deletes a logged session (and its distractions, by cascade). */
     fun deleteSession(session: FocusSessionEntity) {
         viewModelScope.launch {
             focusRepository.deleteSession(session)
-            awardFocusXp(-(session.totalSecondsFocused / 60))
         }
     }
 
@@ -605,12 +505,27 @@ class FocusViewModel(
         targetId = target?.id,
         targetLabel = target?.label,
     )
-
-    // Focus XP is paid per whole minute, so a session's XP can be handed out and taken back
-    // symmetrically: editing or deleting one reverses exactly what logging it awarded.
-    private suspend fun awardFocusXp(minutes: Int) {
-        if (minutes != 0) {
-            userRepository.addXp(minutes * ExperienceEngine.XP_PER_FOCUS_MINS)
-        }
-    }
 }
+
+/** Built-in modes with their phases as (type, minutes); 0 minutes is open-ended, -1 is user-set. */
+private val SYSTEM_MODES = listOf(
+    FocusModeEntity(
+        id = FocusModeEntity.SYSTEM_STOPWATCH_ID,
+        name = "Stopwatch",
+        type = FocusModeType.STOPWATCH,
+        isSystem = true,
+    ) to listOf(PhaseType.FOCUS to 0),
+    FocusModeEntity(
+        id = FocusModeEntity.SYSTEM_FLEXIBLE_ID,
+        name = "Flexible",
+        type = FocusModeType.FLEXIBLE,
+        isSystem = true,
+    ) to listOf(PhaseType.FOCUS to -1),
+    // Four 25-minute focus blocks; the last break is the long one.
+    FocusModeEntity(
+        id = FocusModeEntity.SYSTEM_POMODORO_ID,
+        name = "Pomodoro Classic",
+        type = FocusModeType.POMODORO,
+        isSystem = true,
+    ) to (1..4).flatMap { block -> listOf(PhaseType.FOCUS to 25, PhaseType.REST to if (block == 4) 15 else 5) },
+)

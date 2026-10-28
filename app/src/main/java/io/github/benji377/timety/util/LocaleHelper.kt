@@ -3,11 +3,8 @@ package io.github.benji377.timety.util
 import android.content.Context
 import java.util.Locale
 
-
 /** Applies a user-selected locale override to a [Context] for per-app language switching. */
 object LocaleHelper {
-
-
     /**
      * Returns a new [Context] configured with [code] as its locale. `"system"` (or a blank code)
      * is treated as "use the device locale", so the original [context] is returned unchanged.

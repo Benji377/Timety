@@ -26,7 +26,6 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 
-
 /** General settings: appearance, then language and date/time formatting. */
 @Composable
 internal fun GeneralSettings(

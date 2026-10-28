@@ -8,47 +8,35 @@ import androidx.core.content.pm.PackageInfoCompat
 import androidx.glance.appwidget.updateAll
 import androidx.room.withTransaction
 import io.github.benji377.timety.data.local.TimetyDatabase
-import io.github.benji377.timety.data.model.focus.DistractionEntity
-import io.github.benji377.timety.data.model.focus.DistractionType
-import io.github.benji377.timety.data.model.focus.FocusModeEntity
-import io.github.benji377.timety.data.model.focus.FocusModeType
-import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
-import io.github.benji377.timety.data.model.focus.FocusTargetType
-import io.github.benji377.timety.data.model.focus.PhaseType
-import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
-import io.github.benji377.timety.data.model.goal.GoalEntity
-import io.github.benji377.timety.data.model.goal.GoalEntryEntity
-import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
-import io.github.benji377.timety.data.model.habit.HabitEntity
-import io.github.benji377.timety.data.model.habit.HabitFrequency
-import io.github.benji377.timety.data.model.habit.QuickHabitEntity
-import io.github.benji377.timety.data.model.task.MonthlyMode
-import io.github.benji377.timety.data.model.task.Priority
-import io.github.benji377.timety.data.model.task.RecurrenceUnit
-import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
-import io.github.benji377.timety.data.model.task.RecurringTaskEntity
-import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
-import io.github.benji377.timety.data.model.task.TaskEntity
-import io.github.benji377.timety.data.model.task.TaskPlace
-import io.github.benji377.timety.data.model.task.TaskSize
-import io.github.benji377.timety.data.model.user.DayRating
-import io.github.benji377.timety.data.model.user.DayRatingEntity
-import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
-import io.github.benji377.timety.util.ProfileImageStore
-import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.services.backup.categoryFromBackup
+import io.github.benji377.timety.services.backup.dayRatingFromBackup
+import io.github.benji377.timety.services.backup.goalFromBackup
+import io.github.benji377.timety.services.backup.habitFromBackup
+import io.github.benji377.timety.services.backup.modeFromBackup
+import io.github.benji377.timety.services.backup.modeToBackupJson
+import io.github.benji377.timety.services.backup.newId
+import io.github.benji377.timety.services.backup.objects
+import io.github.benji377.timety.services.backup.profileFromBackup
+import io.github.benji377.timety.services.backup.quickHabitFromBackup
+import io.github.benji377.timety.services.backup.recurringTaskFromBackup
+import io.github.benji377.timety.services.backup.sessionFromBackup
+import io.github.benji377.timety.services.backup.sessionToBackupJson
+import io.github.benji377.timety.services.backup.tagFromBackup
+import io.github.benji377.timety.services.backup.taskFromBackup
+import io.github.benji377.timety.services.backup.toBackupJson
 import io.github.benji377.timety.widget.HabitWidget
 import io.github.benji377.timety.widget.TaskWidget
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.time.Instant
-
 
 /** The items whose reminders were scheduled before a restore replaced them. */
 data class ReplacedReminders(
@@ -78,9 +66,7 @@ class BackupService(
     private val userDao get() = database.userDao()
     private val dayRatingDao get() = database.dayRatingDao()
 
-
     fun suggestedFileName(): String = "Timety_Export_${System.currentTimeMillis()}.json"
-
 
     suspend fun exportToUri(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
@@ -91,12 +77,11 @@ class BackupService(
         }
     }
 
-
     suspend fun exportToShareUri(): Result<Uri> = withContext(Dispatchers.IO) {
         runCatching {
             val json = buildPayload().toString(2)
-            val dir = java.io.File(context.cacheDir, "shared").apply { mkdirs() }
-            val file = java.io.File(dir, suggestedFileName())
+            val dir = File(context.cacheDir, "shared").apply { mkdirs() }
+            val file = File(dir, suggestedFileName())
             file.writeText(json, Charsets.UTF_8)
             FileProvider.getUriForFile(
                 context,
@@ -105,7 +90,6 @@ class BackupService(
             )
         }
     }
-
 
     suspend fun importFromUri(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
@@ -144,7 +128,9 @@ class BackupService(
             }
             // The data is restored in one transaction, so a broken file changes nothing; settings
             // and alarms are only replaced once that has committed.
-            val preferences = json.optJSONObject("preferences")?.let { jsonToPreferencesMap(it) }
+            val preferences = json.optJSONObject("preferences")?.let { prefs ->
+                prefs.keys().asSequence().associateWith { prefs.get(it) }
+            }
             val replaced = scheduledReminders()
             database.withTransaction {
                 restorePayload(json)
@@ -165,703 +151,110 @@ class BackupService(
 
     private suspend fun buildPayload(): JSONObject {
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-        val appVersion = packageInfo.versionName ?: ""
-        val buildNumber = PackageInfoCompat.getLongVersionCode(packageInfo).toString()
-
+        val habitCompletions = habitDao.getAllCompletions().first().groupBy { it.habitId }
         return JSONObject().apply {
             put("payloadType", PAYLOAD_TYPE)
             put("schemaVersion", SCHEMA_VERSION)
-            put("appVersion", appVersion)
-            put("buildNumber", buildNumber)
+            put("appVersion", packageInfo.versionName ?: "")
+            put("buildNumber", PackageInfoCompat.getLongVersionCode(packageInfo).toString())
             put("exportedAt", Instant.now().toString())
-            put("preferences", preferencesToJson(settingsRepository.exportAll()))
-            put(
-                "userProfile",
-                userProfileToJson(userDao.getUserProfileSynchronous()) ?: JSONObject.NULL
-            )
-            put("tasks", tasksToJson())
-            put("taskCategories", taskCategoriesToJson())
-            put("recurringTasks", recurringTasksToJson())
-            put("habits", habitsToJson())
-            put("quickHabits", quickHabitsToJson())
-            put("goals", goalsToJson())
-            put("dayRatings", dayRatingsToJson())
+            put("preferences", JSONObject().apply {
+                settingsRepository.exportAll().forEach { (key, value) -> if (value != null) put(key, value) }
+            })
+            put("userProfile", userDao.getUserProfileSynchronous()?.toBackupJson() ?: JSONObject.NULL)
+            put("tasks", JSONArray(taskDao.getAllTasks().first().map { it.toBackupJson() }))
+            put("taskCategories", JSONArray(taskDao.getAllCategories().first().map { it.toBackupJson() }))
+            put("recurringTasks", JSONArray(recurringTaskDao.getAllWithOccurrences().first().map { it.toBackupJson() }))
+            put("habits", JSONArray(habitDao.getAllHabits().first().map {
+                HabitWithCompletions(it, habitCompletions[it.id].orEmpty()).toBackupJson()
+            }))
+            put("quickHabits", JSONArray(quickHabitDao.getAll().first().map { it.toBackupJson() }))
+            put("goals", JSONArray(goalDao.getAllGoalsWithEntries().first().map { it.toBackupJson() }))
+            put("dayRatings", JSONArray(dayRatingDao.getAll().first().map { it.toBackupJson() }))
             put("focus", focusToJson())
         }
     }
 
-    private fun preferencesToJson(map: Map<String, Any?>): JSONObject {
-        val obj = JSONObject()
-        for ((key, value) in map) {
-            when (value) {
-                null -> {}
-                else -> obj.put(key, value)
-            }
-        }
-        return obj
-    }
-
-    private suspend fun tasksToJson(): JSONArray {
-        val array = JSONArray()
-        val tasksWithSubtasks = taskDao.getAllTasks().first()
-        for (entry in tasksWithSubtasks) {
-            val task = entry.task
-            val taskObj = JSONObject().apply {
-                put("id", task.id)
-                put("title", task.title)
-                put("description", task.description)
-                put("dueDate", task.dueDate?.toString() ?: JSONObject.NULL)
-                put("location", task.location)
-                put("place", task.place?.toJson() ?: JSONObject.NULL)
-                put("priority", task.priority.name)
-                put("category", task.category)
-                put("size", task.size.name)
-                put("isCompleted", task.isCompleted)
-                put("completedAt", task.completedAt?.toString() ?: JSONObject.NULL)
-                put("createdAt", task.createdAt.toString())
-                put("reminders", JSONArray(task.reminders.map { it.toString() }))
-                put(
-                    "subtasks",
-                    JSONArray(entry.subtasks.map { subtask ->
-                        JSONObject().apply {
-                            put("id", subtask.id)
-                            put("title", subtask.title)
-                            put("isCompleted", subtask.isCompleted)
-                        }
-                    })
-                )
-            }
-            array.put(taskObj)
-        }
-        return array
-    }
-
-    private suspend fun taskCategoriesToJson(): JSONArray {
-        val array = JSONArray()
-        for (category in taskDao.getAllCategories().first()) {
-            array.put(
-                JSONObject().apply {
-                    put("id", category.id)
-                    put("name", category.name)
-                    put("colorValue", category.colorValue)
-                }
-            )
-        }
-        return array
-    }
-
-    private suspend fun recurringTasksToJson(): JSONArray {
-        val array = JSONArray()
-        for (entry in recurringTaskDao.getAllWithOccurrences().first()) {
-            val task = entry.task
-            array.put(
-                JSONObject().apply {
-                    put("id", task.id)
-                    put("title", task.title)
-                    put("description", task.description)
-                    put("category", task.category)
-                    put("dueDate", task.dueDate.toString())
-                    put("unit", task.unit.name)
-                    put("interval", task.interval)
-                    put("daysOfWeek", task.daysOfWeek ?: JSONObject.NULL)
-                    put("monthlyMode", task.monthlyMode.name)
-                    put("monthlyDay", task.monthlyDay ?: JSONObject.NULL)
-                    put("monthlyOrdinal", task.monthlyOrdinal ?: JSONObject.NULL)
-                    put("monthlyWeekday", task.monthlyWeekday ?: JSONObject.NULL)
-                    put("reminderOffsetsMinutes", JSONArray(task.reminderOffsetsMinutes))
-                    put("createdAt", task.createdAt.toString())
-                    put(
-                        "occurrences",
-                        JSONArray(entry.occurrences.map { it.completedAt.toString() })
-                    )
-                }
-            )
-        }
-        return array
-    }
-
-    private suspend fun habitsToJson(): JSONArray {
-        val array = JSONArray()
-        val habits = habitDao.getAllHabits().first()
-        val allCompletions = habitDao.getAllCompletions().first().groupBy { it.habitId }
-        for (habit in habits) {
-            val completions = allCompletions[habit.id].orEmpty()
-            val habitObj = JSONObject().apply {
-                put("id", habit.id)
-                put("name", habit.name)
-                put("frequency", habit.frequency.name)
-                put("targetDaysPerWeek", habit.targetCount ?: JSONObject.NULL)
-                put("targetWeekdays", habit.targetWeekdays ?: JSONObject.NULL)
-                put("reminderTimes", habit.reminderTimes ?: JSONObject.NULL)
-                put("createdAt", habit.createdAt.toString())
-                put("colorValue", habit.colorValue)
-                put("notes", habit.notes ?: JSONObject.NULL)
-                put("iconCodePoint", habit.iconCodePoint ?: JSONObject.NULL)
-                put("stackName", habit.stackName ?: JSONObject.NULL)
-                put("stackOrder", habit.stackOrder ?: JSONObject.NULL)
-                put("sortOrder", habit.sortOrder)
-                put("completions", JSONArray(completions.map { it.completionDate.toString() }))
-            }
-            array.put(habitObj)
-        }
-        return array
-    }
-
-    private suspend fun quickHabitsToJson(): JSONArray {
-        val array = JSONArray()
-        for (quickHabit in quickHabitDao.getAll().first()) {
-            array.put(
-                JSONObject().apply {
-                    put("id", quickHabit.id)
-                    put("name", quickHabit.name)
-                    put("intervalMinutes", quickHabit.intervalMinutes)
-                    put("startMinuteOfDay", quickHabit.startMinuteOfDay ?: JSONObject.NULL)
-                    put("endMinuteOfDay", quickHabit.endMinuteOfDay ?: JSONObject.NULL)
-                    put("targetWeekdays", quickHabit.targetWeekdays ?: JSONObject.NULL)
-                    put("isEnabled", quickHabit.isEnabled)
-                    put("createdAt", quickHabit.createdAt.toString())
-                }
-            )
-        }
-        return array
-    }
-
-    private suspend fun goalsToJson(): JSONArray {
-        val array = JSONArray()
-        for (goalWithEntries in goalDao.getAllGoalsWithEntries().first()) {
-            val goal = goalWithEntries.goal
-            array.put(
-                JSONObject().apply {
-                    put("id", goal.id)
-                    put("name", goal.name)
-                    put("description", goal.description)
-                    put("colorValue", goal.colorValue)
-                    put("iconCodePoint", goal.iconCodePoint ?: JSONObject.NULL)
-                    put("targetValue", goal.targetValue)
-                    put("unitLabel", goal.unitLabel)
-                    put("targetDate", goal.targetDate.toString())
-                    put("createdAt", goal.createdAt.toString())
-                    put("completedAt", goal.completedAt?.toString() ?: JSONObject.NULL)
-                    put(
-                        "entries",
-                        JSONArray(goalWithEntries.entries.map { entry ->
-                            JSONObject().apply {
-                                put("value", entry.value)
-                                put("timestamp", entry.timestamp.toString())
-                            }
-                        })
-                    )
-                }
-            )
-        }
-        return array
-    }
-
-    private suspend fun dayRatingsToJson(): JSONArray {
-        val array = JSONArray()
-        for (rating in dayRatingDao.getAll().first()) {
-            array.put(
-                JSONObject().apply {
-                    put("dayKey", rating.dayKey)
-                    put("rating", rating.rating)
-                    put("createdAt", rating.createdAt.toString())
-                }
-            )
-        }
-        return array
-    }
-
     private suspend fun focusToJson(): JSONObject {
-        val modes = focusDao.getAllModes().first()
-        val modesArray = JSONArray()
-        for (mode in modes) {
-            val phases = focusDao.getPhasesForMode(mode.id).first().sortedBy { it.orderIndex }
-            modesArray.put(
-                JSONObject().apply {
-                    put("id", mode.id)
-                    put("name", mode.name)
-                    put("type", mode.type.name)
-                    put("isSystem", mode.isSystem)
-                    put(
-                        "phases",
-                        JSONArray(phases.map { phase ->
-                            JSONObject().apply {
-                                put("type", phase.type.name)
-                                put("durationMinutes", phase.durationMinutes)
-                            }
-                        })
-                    )
-                }
-            )
+        val modes = focusDao.getAllModes().first().map { mode ->
+            modeToBackupJson(mode, focusDao.getPhasesForMode(mode.id).first())
         }
-
-        val tagsArray = JSONArray()
-        for (tag in focusDao.getAllTags().first()) {
-            tagsArray.put(
-                JSONObject().apply {
-                    put("id", tag.id)
-                    put("name", tag.name)
-                    put("colorValue", tag.colorValue)
-                }
-            )
-        }
-
-        val sessions = focusDao.getAllSessions().first()
         // One query for all distractions instead of one per session.
-        val distractionsBySession = focusDao.getAllDistractions().first()
-            .sortedBy { it.time }
-            .groupBy { it.sessionId }
-        val sessionsArray = JSONArray()
-        for (session in sessions) {
-            val distractions = distractionsBySession[session.id].orEmpty()
-            sessionsArray.put(
-                JSONObject().apply {
-                    put("id", session.id)
-                    put("modeId", session.modeId)
-                    put("startTime", session.startTime.toString())
-                    put("endTime", session.endTime?.toString() ?: JSONObject.NULL)
-                    put("totalSecondsFocused", session.totalSecondsFocused)
-                    put("isCompleted", session.isCompleted)
-                    put("tagId", session.tagId ?: JSONObject.NULL)
-                    put("targetType", session.targetType.name)
-                    put("targetId", session.targetId ?: JSONObject.NULL)
-                    put("targetLabel", session.targetLabel ?: JSONObject.NULL)
-                    put(
-                        "distractions",
-                        JSONArray(distractions.map { distraction ->
-                            JSONObject().apply {
-                                put("time", distraction.time.toString())
-                                put("type", distraction.type.name)
-                                put("note", distraction.note)
-                            }
-                        })
-                    )
-                }
-            )
+        val distractionsBySession = focusDao.getAllDistractions().first().groupBy { it.sessionId }
+        val sessions = focusDao.getAllSessions().first().map { session ->
+            sessionToBackupJson(session, distractionsBySession[session.id].orEmpty())
         }
-
         return JSONObject().apply {
-            put("modes", modesArray)
-            put("tags", tagsArray)
-            put("sessions", sessionsArray)
+            put("modes", JSONArray(modes))
+            put("tags", JSONArray(focusDao.getAllTags().first().map { it.toBackupJson() }))
+            put("sessions", JSONArray(sessions))
         }
     }
 
-    private fun userProfileToJson(profile: UserProfileEntity?): JSONObject? {
-        if (profile == null) return null
-        return JSONObject().apply {
-            put("name", profile.name)
-            put("profileImagePath", profile.profileImagePath ?: JSONObject.NULL)
-            put("accountCreated", profile.accountCreated.toString())
-            put("unlockedAchievements", JSONArray(profile.unlockedAchievements))
-            put("totalXp", profile.totalXp)
-        }
-    }
-
-    // Restore.
+    // Restore. Every table is cleared before its rows go in; missing arrays (older backups,
+    // features added later) restore as empty.
 
     private fun restorePayload(json: JSONObject) {
-        val userProfileJson = json.optJSONObject("userProfile")
-        userDao.insertUserProfile(userProfileFromJson(userProfileJson))
+        userDao.insertUserProfile(profileFromBackup(json.optJSONObject("userProfile")))
 
-        restoreTasks(json.optJSONArray("tasks") ?: JSONArray())
-        restoreTaskCategories(json.optJSONArray("taskCategories") ?: JSONArray())
-        // Optional key: older and legacy backups simply carry no recurring tasks.
-        restoreRecurringTasks(json.optJSONArray("recurringTasks") ?: JSONArray())
-        restoreHabits(json.optJSONArray("habits") ?: JSONArray())
-        restoreQuickHabits(json.optJSONArray("quickHabits") ?: JSONArray())
-        // Optional key: backups from before the goals feature simply carry none.
-        restoreGoals(json.optJSONArray("goals") ?: JSONArray())
-        restoreDayRatings(json.optJSONArray("dayRatings") ?: JSONArray())
+        taskDao.clearAll()
+        json.objects("tasks").map(::taskFromBackup).forEach { (task, subtasks) ->
+            taskDao.insertTask(task)
+            subtasks.forEach(taskDao::insertSubtask)
+        }
+        restoreTaskCategories(json.objects("taskCategories"))
+
+        recurringTaskDao.clearAll()
+        json.objects("recurringTasks").map(::recurringTaskFromBackup).forEach { (task, occurrences) ->
+            recurringTaskDao.insert(task)
+            occurrences.forEach(recurringTaskDao::insertOccurrence)
+        }
+
+        habitDao.clearAll()
+        json.objects("habits").map(::habitFromBackup).forEach { (habit, completions) ->
+            habitDao.insertHabit(habit)
+            completions.forEach(habitDao::insertCompletion)
+        }
+
+        quickHabitDao.clearAll()
+        json.objects("quickHabits").map(::quickHabitFromBackup).forEach(quickHabitDao::insert)
+
+        goalDao.clearAll()
+        json.objects("goals").map(::goalFromBackup).forEach { (goal, entries) ->
+            goalDao.insertGoal(goal)
+            entries.forEach(goalDao::insertEntry)
+        }
+
+        dayRatingDao.clearAll()
+        json.objects("dayRatings").mapNotNull(::dayRatingFromBackup).forEach(dayRatingDao::upsert)
+
         restoreFocus(json.optJSONObject("focus") ?: JSONObject())
     }
 
-    private fun jsonToPreferencesMap(obj: JSONObject): Map<String, Any?> {
-        val map = mutableMapOf<String, Any?>()
-        val keys = obj.keys()
-        while (keys.hasNext()) {
-            val key = keys.next()
-            map[key] = obj.get(key)
-        }
-        return map
-    }
-
-    private fun userProfileFromJson(json: JSONObject?): UserProfileEntity {
-        if (json == null) {
-            return UserProfileEntity(name = "Bobert", accountCreated = Instant.now())
-        }
-        return UserProfileEntity(
-            name = readString(json, "name") ?: "Bobert",
-            // Backups store only the path, not the image bytes, so a restored path is stale
-            // unless the file happens to exist on this device (same-device restore).
-            profileImagePath = ProfileImageStore.validOrNull(readString(json, "profileImagePath")),
-            accountCreated = readInstant(json, "accountCreated") ?: Instant.now(),
-            unlockedAchievements = readStringList(json, "unlockedAchievements"),
-            totalXp = json.optInt("totalXp", 0),
-        )
-    }
-
-    private fun restoreTasks(tasksJson: JSONArray) {
-        taskDao.clearAll()
-        for (i in 0 until tasksJson.length()) {
-            val taskJson = tasksJson.getJSONObject(i)
-            val taskId = readString(taskJson, "id") ?: Instant.now().toEpochMilli().toString()
-            taskDao.insertTask(
-                TaskEntity(
-                    id = taskId,
-                    title = readString(taskJson, "title") ?: "",
-                    description = readString(taskJson, "description") ?: "",
-                    dueDate = readInstant(taskJson, "dueDate"),
-                    location = readString(taskJson, "location") ?: "",
-                    place = taskJson.optJSONObject("place")?.let { TaskPlace.fromJson(it) },
-                    priority = enumOrDefault(readString(taskJson, "priority"), Priority.MEDIUM),
-                    category = readString(taskJson, "category") ?: "",
-                    size = enumOrDefault(readString(taskJson, "size"), TaskSize.MEDIUM),
-                    isCompleted = taskJson.optBoolean("isCompleted", false),
-                    completedAt = readInstant(taskJson, "completedAt"),
-                    createdAt = readInstant(taskJson, "createdAt") ?: Instant.now(),
-                    reminders = readInstantList(taskJson, "reminders"),
-                )
-            )
-            val subtasksJson = taskJson.optJSONArray("subtasks") ?: JSONArray()
-            for (j in 0 until subtasksJson.length()) {
-                val subtaskJson = subtasksJson.getJSONObject(j)
-                taskDao.insertSubtask(
-                    SubtaskEntity(
-                        id = readString(subtaskJson, "id") ?: "${taskId}_sub_$j",
-                        taskId = taskId,
-                        title = readString(subtaskJson, "title") ?: "",
-                        isCompleted = subtaskJson.optBoolean("isCompleted", false),
-                    )
-                )
-            }
-        }
-    }
-
-    /** Must run after [restoreTasks]: missing entries are derived from the restored tasks. */
-    private fun restoreTaskCategories(categoriesJson: JSONArray) {
+    /** Must run after the tasks are restored: missing categories are derived from them. */
+    private fun restoreTaskCategories(categories: List<JSONObject>) {
         taskDao.clearAllCategories()
-        for (i in 0 until categoriesJson.length()) {
-            val categoryJson = categoriesJson.getJSONObject(i)
-            val name = readString(categoryJson, "name")?.takeIf { it.isNotBlank() } ?: continue
-            taskDao.insertCategoryIfAbsent(
-                TaskCategoryEntity(
-                    id = readString(categoryJson, "id")
-                        ?: java.util.UUID.randomUUID().toString(),
-                    name = name,
-                    colorValue = categoryJson.optInt(
-                        "colorValue",
-                        TaskCategoryEntity.DEFAULT_COLOR_VALUE
-                    ),
-                )
-            )
-        }
-        // Legacy backups (and pre-category backups) carry no taskCategories array: fill the
-        // table from the category names on the restored tasks.
+        categories.mapNotNull(::categoryFromBackup).forEach(taskDao::insertCategoryIfAbsent)
+        // Backups from before categories carry none: fill the table from the restored tasks.
         for (name in taskDao.getDistinctTaskCategoryNames()) {
             taskDao.insertCategoryIfAbsent(
-                TaskCategoryEntity(
-                    id = java.util.UUID.randomUUID().toString(),
-                    name = name,
-                    colorValue = TaskCategoryEntity.DEFAULT_COLOR_VALUE,
-                )
+                TaskCategoryEntity(id = newId(), name = name, colorValue = TaskCategoryEntity.DEFAULT_COLOR_VALUE)
             )
         }
     }
-
-    private fun restoreRecurringTasks(recurringJson: JSONArray) {
-        recurringTaskDao.clearAll()
-        for (i in 0 until recurringJson.length()) {
-            val json = recurringJson.getJSONObject(i)
-            val id = readString(json, "id") ?: Instant.now().toEpochMilli().toString()
-            recurringTaskDao.insert(
-                RecurringTaskEntity(
-                    id = id,
-                    title = readString(json, "title") ?: "",
-                    description = readString(json, "description") ?: "",
-                    category = readString(json, "category") ?: "",
-                    dueDate = readInstant(json, "dueDate") ?: Instant.now(),
-                    unit = enumOrDefault(readString(json, "unit"), RecurrenceUnit.WEEK),
-                    interval = json.optInt("interval", 1).coerceAtLeast(1),
-                    daysOfWeek = readString(json, "daysOfWeek"),
-                    monthlyMode = enumOrDefault(
-                        readString(json, "monthlyMode"),
-                        MonthlyMode.DAY_OF_MONTH
-                    ),
-                    monthlyDay = readOptInt(json, "monthlyDay"),
-                    monthlyOrdinal = readOptInt(json, "monthlyOrdinal"),
-                    monthlyWeekday = readOptInt(json, "monthlyWeekday"),
-                    reminderOffsetsMinutes = readIntList(json, "reminderOffsetsMinutes"),
-                    createdAt = readInstant(json, "createdAt") ?: Instant.now(),
-                )
-            )
-            val occurrencesJson = json.optJSONArray("occurrences") ?: JSONArray()
-            for (j in 0 until occurrencesJson.length()) {
-                val instant = parseInstantFlexible(occurrencesJson.getString(j)) ?: continue
-                recurringTaskDao.insertOccurrence(
-                    RecurringOccurrenceEntity(recurringTaskId = id, completedAt = instant)
-                )
-            }
-        }
-    }
-
-    private fun restoreHabits(habitsJson: JSONArray) {
-        habitDao.clearAll()
-        for (i in 0 until habitsJson.length()) {
-            val habitJson = habitsJson.getJSONObject(i)
-            val habitId = readString(habitJson, "id") ?: Instant.now().toEpochMilli().toString()
-            habitDao.insertHabit(
-                HabitEntity(
-                    id = habitId,
-                    name = readString(habitJson, "name") ?: "",
-                    frequency = enumOrDefault(
-                        readString(habitJson, "frequency"),
-                        HabitFrequency.DAILY
-                    ),
-                    targetCount = if (habitJson.has("targetDaysPerWeek") && !habitJson.isNull(
-                            "targetDaysPerWeek"
-                        )
-                    ) habitJson.optInt("targetDaysPerWeek") else null,
-                    targetWeekdays = readString(habitJson, "targetWeekdays"),
-                    // Older backups carry a single `targetTimeMinutes` instead.
-                    reminderTimes = readString(habitJson, "reminderTimes")
-                        ?: if (habitJson.has("targetTimeMinutes") && !habitJson.isNull("targetTimeMinutes")) {
-                            HabitUtils.serializeReminderTimes(listOf(habitJson.optInt("targetTimeMinutes")))
-                        } else null,
-                    createdAt = readInstant(habitJson, "createdAt") ?: Instant.now(),
-                    colorValue = habitJson.optInt("colorValue", 0),
-                    notes = readString(habitJson, "notes"),
-                    iconCodePoint = if (habitJson.has("iconCodePoint") && !habitJson.isNull("iconCodePoint")) habitJson.optInt(
-                        "iconCodePoint"
-                    ) else null,
-                    stackName = readString(habitJson, "stackName"),
-                    stackOrder = if (habitJson.has("stackOrder") && !habitJson.isNull("stackOrder")) habitJson.optInt(
-                        "stackOrder"
-                    ) else null,
-                    sortOrder = habitJson.optInt("sortOrder", 0),
-                )
-            )
-            val completionsJson = habitJson.optJSONArray("completions") ?: JSONArray()
-            for (j in 0 until completionsJson.length()) {
-                val instant = parseInstantFlexible(completionsJson.getString(j)) ?: continue
-                habitDao.insertCompletion(
-                    HabitCompletionEntity(
-                        habitId = habitId,
-                        completionDate = instant
-                    )
-                )
-            }
-        }
-    }
-
-
-    private fun restoreQuickHabits(quickHabitsJson: JSONArray) {
-        quickHabitDao.clearAll()
-        for (i in 0 until quickHabitsJson.length()) {
-            val json = quickHabitsJson.getJSONObject(i)
-            val id = readString(json, "id") ?: Instant.now().toEpochMilli().toString()
-            quickHabitDao.insert(
-                QuickHabitEntity(
-                    id = id,
-                    name = readString(json, "name") ?: "",
-                    intervalMinutes = json.optInt("intervalMinutes", 60).coerceAtLeast(1),
-                    startMinuteOfDay = readOptInt(json, "startMinuteOfDay"),
-                    endMinuteOfDay = readOptInt(json, "endMinuteOfDay"),
-                    targetWeekdays = readString(json, "targetWeekdays"),
-                    isEnabled = json.optBoolean("isEnabled", true),
-                    createdAt = readInstant(json, "createdAt") ?: Instant.now(),
-                )
-            )
-        }
-    }
-
-
-    private fun restoreGoals(goalsJson: JSONArray) {
-        goalDao.clearAll()
-        for (i in 0 until goalsJson.length()) {
-            val goalJson = goalsJson.getJSONObject(i)
-            val goalId = readString(goalJson, "id") ?: Instant.now().toEpochMilli().toString()
-            goalDao.insertGoal(
-                GoalEntity(
-                    id = goalId,
-                    name = readString(goalJson, "name") ?: "",
-                    description = readString(goalJson, "description") ?: "",
-                    colorValue = goalJson.optInt("colorValue", 0),
-                    iconCodePoint = readOptInt(goalJson, "iconCodePoint"),
-                    targetValue = goalJson.optInt("targetValue", 1).coerceAtLeast(1),
-                    unitLabel = readString(goalJson, "unitLabel") ?: "",
-                    targetDate = readInstant(goalJson, "targetDate") ?: Instant.now(),
-                    createdAt = readInstant(goalJson, "createdAt") ?: Instant.now(),
-                    completedAt = readInstant(goalJson, "completedAt"),
-                )
-            )
-            val entriesJson = goalJson.optJSONArray("entries") ?: JSONArray()
-            for (j in 0 until entriesJson.length()) {
-                val entryJson = entriesJson.getJSONObject(j)
-                val timestamp = readInstant(entryJson, "timestamp") ?: continue
-                goalDao.insertEntry(
-                    GoalEntryEntity(
-                        goalId = goalId,
-                        value = entryJson.optInt("value", 1).coerceAtLeast(1),
-                        timestamp = timestamp,
-                    )
-                )
-            }
-        }
-    }
-
-
-    private fun restoreDayRatings(ratingsJson: JSONArray) {
-        dayRatingDao.clearAll()
-        for (i in 0 until ratingsJson.length()) {
-            val json = ratingsJson.getJSONObject(i)
-            val dayKey = readString(json, "dayKey") ?: continue
-            // Skip ratings outside the known scale rather than importing garbage.
-            val rating = DayRating.fromValue(json.optInt("rating")) ?: continue
-            dayRatingDao.upsert(
-                DayRatingEntity(
-                    dayKey = dayKey,
-                    rating = rating.value,
-                    createdAt = readInstant(json, "createdAt") ?: Instant.now(),
-                )
-            )
-        }
-    }
-
 
     private fun restoreFocus(focusJson: JSONObject) {
         focusDao.clearAllSessions()
         focusDao.clearAllModes()
         focusDao.clearAllTags()
-
-        val modesJson = focusJson.optJSONArray("modes") ?: JSONArray()
-        for (i in 0 until modesJson.length()) {
-            val modeJson = modesJson.getJSONObject(i)
-            val modeId = readString(modeJson, "id") ?: Instant.now().toEpochMilli().toString()
-            focusDao.insertMode(
-                FocusModeEntity(
-                    id = modeId,
-                    name = readString(modeJson, "name") ?: "",
-                    type = enumOrDefault(readString(modeJson, "type"), FocusModeType.STOPWATCH),
-                    isSystem = modeJson.optBoolean("isSystem", false),
-                )
-            )
-            val phasesJson = modeJson.optJSONArray("phases") ?: JSONArray()
-            val phases = (0 until phasesJson.length()).map { j ->
-                val phaseJson = phasesJson.getJSONObject(j)
-                SessionPhaseEntity(
-                    modeId = modeId,
-                    type = enumOrDefault(readString(phaseJson, "type"), PhaseType.FOCUS),
-                    durationMinutes = phaseJson.optInt("durationMinutes", 0),
-                    orderIndex = j,
-                )
-            }
+        focusJson.objects("modes").map(::modeFromBackup).forEach { (mode, phases) ->
+            focusDao.insertMode(mode)
             if (phases.isNotEmpty()) focusDao.insertPhases(phases)
         }
-
-        val tagsJson = focusJson.optJSONArray("tags") ?: JSONArray()
-        for (i in 0 until tagsJson.length()) {
-            val tagJson = tagsJson.getJSONObject(i)
-            focusDao.insertTag(
-                FocusTagEntity(
-                    id = readString(tagJson, "id") ?: Instant.now().toEpochMilli().toString(),
-                    name = readString(tagJson, "name") ?: "",
-                    colorValue = tagJson.optInt("colorValue", 0),
-                )
-            )
-        }
-
-        val sessionsJson = focusJson.optJSONArray("sessions") ?: JSONArray()
-        for (i in 0 until sessionsJson.length()) {
-            val sessionJson = sessionsJson.getJSONObject(i)
-            val sessionId = readString(sessionJson, "id") ?: Instant.now().toEpochMilli().toString()
-            focusDao.insertSession(
-                FocusSessionEntity(
-                    id = sessionId,
-                    modeId = readString(sessionJson, "modeId") ?: "",
-                    startTime = readInstant(sessionJson, "startTime") ?: Instant.now(),
-                    endTime = readInstant(sessionJson, "endTime"),
-                    totalSecondsFocused = sessionJson.optInt("totalSecondsFocused", 0),
-                    isCompleted = sessionJson.optBoolean("isCompleted", false),
-                    tagId = readString(sessionJson, "tagId"),
-                    targetType = enumOrDefault(
-                        readString(sessionJson, "targetType"),
-                        FocusTargetType.TAG
-                    ),
-                    targetId = readString(sessionJson, "targetId"),
-                    targetLabel = readString(sessionJson, "targetLabel"),
-                )
-            )
-            val distractionsJson = sessionJson.optJSONArray("distractions") ?: JSONArray()
-            for (j in 0 until distractionsJson.length()) {
-                val distractionJson = distractionsJson.getJSONObject(j)
-                focusDao.insertDistraction(
-                    DistractionEntity(
-                        sessionId = sessionId,
-                        time = readInstant(distractionJson, "time") ?: Instant.now(),
-                        type = enumOrDefault(
-                            readString(distractionJson, "type"),
-                            DistractionType.DISTRACTED
-                        ),
-                        note = readString(distractionJson, "note") ?: "",
-                    )
-                )
-            }
-        }
-    }
-
-    // JSON read helpers.
-
-    private fun readString(json: JSONObject, key: String): String? =
-        if (json.has(key) && !json.isNull(key)) json.optString(key) else null
-
-    private fun readOptInt(json: JSONObject, key: String): Int? =
-        if (json.has(key) && !json.isNull(key)) json.optInt(key) else null
-
-    private fun readInstant(json: JSONObject, key: String): Instant? {
-        val raw = readString(json, key) ?: return null
-        return parseInstantFlexible(raw)
-    }
-
-    private fun readIntList(json: JSONObject, key: String): List<Int> {
-        val array = json.optJSONArray(key) ?: return emptyList()
-        return (0 until array.length()).map { array.getInt(it) }
-    }
-
-    private fun readInstantList(json: JSONObject, key: String): List<Instant> {
-        val array = json.optJSONArray(key) ?: return emptyList()
-        return (0 until array.length()).mapNotNull { i ->
-            parseInstantFlexible(array.getString(i))
-        }
-    }
-
-
-    private fun parseInstantFlexible(raw: String): Instant? =
-        runCatching { Instant.parse(raw) }.getOrNull()
-            ?: runCatching { java.time.OffsetDateTime.parse(raw).toInstant() }.getOrNull()
-            ?: runCatching {
-                java.time.LocalDateTime.parse(raw)
-                    .atZone(java.time.ZoneId.systemDefault())
-                    .toInstant()
-            }.getOrNull()
-
-    private fun readStringList(json: JSONObject, key: String): List<String> {
-        val array = json.optJSONArray(key) ?: return emptyList()
-        return (0 until array.length()).map { array.getString(it) }
-    }
-
-    private inline fun <reified T : Enum<T>> enumOrDefault(name: String?, default: T): T {
-        if (name == null) return default
-        // To support importing from legacy app versions, try converting camelCase to UPPER_SNAKE_CASE.
-        val normalizedName = name.replace(Regex("([a-z])([A-Z]+)"), "$1_$2").uppercase()
-        return try {
-            enumValueOf<T>(normalizedName)
-        } catch (e: IllegalArgumentException) {
-            try {
-                enumValueOf<T>(name)
-            } catch (e2: IllegalArgumentException) {
-                default
-            }
+        focusJson.objects("tags").map(::tagFromBackup).forEach(focusDao::insertTag)
+        focusJson.objects("sessions").map(::sessionFromBackup).forEach { (session, distractions) ->
+            focusDao.insertSession(session)
+            distractions.forEach(focusDao::insertDistraction)
         }
     }
 

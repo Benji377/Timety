@@ -2,6 +2,7 @@ package io.github.benji377.timety.widget
 
 import android.content.Context
 import android.text.format.DateFormat
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,7 +52,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-
 /** One row of the task widget: a plain or recurring task with its tap route and check action. */
 private data class TaskWidgetRow(
     val id: String,
@@ -61,7 +61,6 @@ private data class TaskWidgetRow(
     val dueLabel: String,
     val isOverdue: Boolean,
 )
-
 
 /**
  * Home-screen widget mirroring the Home screen's task lists: everything due today or earlier,
@@ -121,70 +120,72 @@ class TaskWidget : GlanceAppWidget() {
             .map { it.second }
 
         provideContent {
-            GlanceTheme {
-                val openTasksTab = actionStartActivity(
-                    widgetNavIntent(context, BottomNavItem.Tasks.route)
-                )
-                Column(
-                    modifier = GlanceModifier
-                        .fillMaxSize()
-                        .background(ImageProvider(R.drawable.widget_background))
-                        .padding(12.dp)
-                        .clickable(openTasksTab),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
-                            .clickable(openTasksTab)
-                    ) {
-                        Text(
-                            text = context.getString(R.string.widgetTasksDue, dueSorted.size),
-                            style = TextStyle(
-                                color = ColorProvider(TaskColor),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            ),
-                        )
-                    }
+            GlanceTheme { WidgetContent(context, dueSorted, upcomingSorted) }
+        }
+    }
 
-                    if (dueSorted.isEmpty() && upcomingSorted.isEmpty()) {
-                        Box(
-                            modifier = GlanceModifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
+    @Composable
+    private fun WidgetContent(context: Context, due: List<TaskWidgetRow>, upcoming: List<TaskWidgetRow>) {
+        val openTasksTab = actionStartActivity(
+            widgetNavIntent(context, BottomNavItem.Tasks.route)
+        )
+        Column(
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .background(ImageProvider(R.drawable.widget_background))
+                .padding(12.dp)
+                .clickable(openTasksTab),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
+                    .clickable(openTasksTab)
+            ) {
+                Text(
+                    text = context.getString(R.string.widgetTasksDue, due.size),
+                    style = TextStyle(
+                        color = ColorProvider(TaskColor),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    ),
+                )
+            }
+
+            if (due.isEmpty() && upcoming.isEmpty()) {
+                Box(
+                    modifier = GlanceModifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = context.getString(R.string.widgetNoUrgentTasks),
+                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
+                    )
+                }
+            } else {
+                LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                    itemsIndexed(due) { _, row -> TaskRowItem(context, row) }
+                    if (upcoming.isNotEmpty()) {
+                        item {
                             Text(
-                                text = context.getString(R.string.widgetNoUrgentTasks),
-                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
+                                text = "${context.getString(R.string.commonTimeUpcoming)} (${upcoming.size})",
+                                style = TextStyle(
+                                    color = GlanceTheme.colors.onSurfaceVariant,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp
+                                ),
+                                modifier = GlanceModifier.padding(
+                                    top = 4.dp, bottom = 6.dp, start = 2.dp
+                                )
                             )
                         }
-                    } else {
-                        LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                            itemsIndexed(dueSorted) { _, row -> TaskRowItem(context, row) }
-                            if (upcomingSorted.isNotEmpty()) {
-                                item {
-                                    Text(
-                                        text = "${context.getString(R.string.commonTimeUpcoming)} (${upcomingSorted.size})",
-                                        style = TextStyle(
-                                            color = GlanceTheme.colors.onSurfaceVariant,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
-                                        ),
-                                        modifier = GlanceModifier.padding(
-                                            top = 4.dp, bottom = 6.dp, start = 2.dp
-                                        )
-                                    )
-                                }
-                                itemsIndexed(upcomingSorted) { _, row -> TaskRowItem(context, row) }
-                            }
-                        }
+                        itemsIndexed(upcoming) { _, row -> TaskRowItem(context, row) }
                     }
                 }
             }
         }
     }
 
-
-    @androidx.compose.runtime.Composable
+    @Composable
     private fun TaskRowItem(context: Context, row: TaskWidgetRow) {
         val detailRoute = if (row.isRecurring) {
             AppRoute.recurringTaskDetail(row.id)
@@ -253,7 +254,6 @@ class TaskWidget : GlanceAppWidget() {
         }
     }
 
-
     /** Time of day for tasks due today, a short date otherwise; empty when there is no due date. */
     private fun dueLabel(
         dueDate: Instant?,
@@ -269,7 +269,6 @@ class TaskWidget : GlanceAppWidget() {
             AppDateFormatUtils.formatShortDate(dueDay)
         }
     }
-
 
     private fun priorityColor(priority: Priority) = when (priority) {
         Priority.LOW -> TaskColor

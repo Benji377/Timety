@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 
-
 /** Snapshot of the focus timer's current state, exposed to the UI via [FocusTimerManager.timerState]. */
 data class TimerState(
     val isRunning: Boolean = false,
@@ -52,10 +51,8 @@ data class TimerState(
         }
 }
 
-
 /** Coarse running/paused flags; changes only on phase transitions, never per tick. */
 data class TimerFlags(val isRunning: Boolean = false, val isPaused: Boolean = false)
-
 
 /**
  * Owns the focus/stopwatch timer state machine. Ticks once per second while running and exposes
@@ -82,7 +79,6 @@ object FocusTimerManager {
 
     val phaseCompleteEvent =
         kotlinx.coroutines.flow.MutableSharedFlow<Pair<Boolean, Int>>(extraBufferCapacity = 1)
-
 
     /** Emitted by [stopEvent] when a session ends, carrying the elapsed time to bank. */
     data class StopInfo(
@@ -111,7 +107,6 @@ object FocusTimerManager {
     fun isPhaseChimeExpected(nowMs: Long): Boolean {
         return _timerState.value.isSessionActive || nowMs - lastSessionStoppedAtMs < CHIME_GRACE_MS
     }
-
 
     /**
      * Configures the timer for a new phase without starting it; call [startTimer] to begin ticking.

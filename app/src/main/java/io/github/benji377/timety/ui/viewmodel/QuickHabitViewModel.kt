@@ -14,7 +14,6 @@ class QuickHabitViewModel(
     private val application: android.app.Application,
     private val quickHabitRepository: QuickHabitRepository,
 ) : androidx.lifecycle.AndroidViewModel(application) {
-
     val quickHabits: StateFlow<List<QuickHabitEntity>> = quickHabitRepository.allQuickHabits
         .stateIn(
             scope = viewModelScope,

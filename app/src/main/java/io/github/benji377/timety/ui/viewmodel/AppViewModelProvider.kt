@@ -10,7 +10,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.TimetyApplication
 
-
 /**
  * Returns a [VM] scoped to the current activity rather than the current navigation destination,
  * so the same instance is shared across composables/screens.
@@ -34,72 +33,30 @@ object AppViewModelProvider {
             val container = application.container
 
             val viewModel = when {
-                modelClass.isAssignableFrom(TaskViewModel::class.java) -> {
-                    TaskViewModel(
-                        application,
-                        container.taskRepository,
-                        container.userRepository
-                    )
-                }
-
-                modelClass.isAssignableFrom(RecurringTaskViewModel::class.java) -> {
-                    RecurringTaskViewModel(
-                        application,
-                        container.recurringTaskRepository,
-                        container.userRepository
-                    )
-                }
-
-                modelClass.isAssignableFrom(HabitViewModel::class.java) -> {
-                    HabitViewModel(
-                        application,
-                        container.habitRepository,
-                        container.userRepository
-                    )
-                }
-
-                modelClass.isAssignableFrom(QuickHabitViewModel::class.java) -> {
-                    QuickHabitViewModel(
-                        application,
-                        container.quickHabitRepository
-                    )
-                }
-
-                modelClass.isAssignableFrom(GoalViewModel::class.java) -> {
-                    GoalViewModel(
-                        container.goalRepository,
-                        container.userRepository
-                    )
-                }
-
-                modelClass.isAssignableFrom(FocusViewModel::class.java) -> {
-                    FocusViewModel(
-                        application,
-                        container.focusRepository,
-                        container.userRepository,
-                        container.habitRepository,
-                        container.taskRepository,
-                        container.recurringTaskRepository,
-                        container.settingsRepository
-                    )
-                }
-
-                modelClass.isAssignableFrom(UserViewModel::class.java) -> {
+                modelClass.isAssignableFrom(TaskViewModel::class.java) ->
+                    TaskViewModel(application, container.taskRepository)
+                modelClass.isAssignableFrom(RecurringTaskViewModel::class.java) ->
+                    RecurringTaskViewModel(application, container.recurringTaskRepository)
+                modelClass.isAssignableFrom(HabitViewModel::class.java) ->
+                    HabitViewModel(application, container.habitRepository)
+                modelClass.isAssignableFrom(QuickHabitViewModel::class.java) ->
+                    QuickHabitViewModel(application, container.quickHabitRepository)
+                modelClass.isAssignableFrom(GoalViewModel::class.java) ->
+                    GoalViewModel(container.goalRepository)
+                modelClass.isAssignableFrom(FocusViewModel::class.java) -> FocusViewModel(
+                    application,
+                    container.focusRepository,
+                    container.habitRepository,
+                    container.taskRepository,
+                    container.recurringTaskRepository,
+                    container.settingsRepository,
+                )
+                modelClass.isAssignableFrom(UserViewModel::class.java) ->
                     UserViewModel(container.userRepository)
-                }
-
-                modelClass.isAssignableFrom(DayRatingViewModel::class.java) -> {
-                    DayRatingViewModel(container.dayRatingRepository)
-                }
-
-                modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
-                    SettingsViewModel(
-                        application,
-                        container.settingsRepository,
-                        container.backupService
-                    )
-                }
-
+                modelClass.isAssignableFrom(DayRatingViewModel::class.java) ->
+                    DayRatingViewModel(application, container.dayRatingRepository, container.settingsRepository)
+                modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
+                    SettingsViewModel(application, container.settingsRepository, container.backupService)
                 else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
             }
             return modelClass.cast(viewModel)!!

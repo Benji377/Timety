@@ -5,14 +5,12 @@ import android.net.Uri
 import java.io.File
 import java.io.IOException
 
-
 /**
  * Copies a picked profile image into app-internal storage so it stays readable across app
  * restarts. Photo-picker `content://` URIs only carry a session-scoped read grant, so persisting
  * the URI itself would leave the avatar unloadable after the process is recreated.
  */
 object ProfileImageStore {
-
     private const val DIRECTORY = "profile"
 
     /**

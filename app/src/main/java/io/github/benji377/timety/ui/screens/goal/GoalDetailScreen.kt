@@ -53,6 +53,7 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.datePickerMillis
@@ -74,8 +75,6 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.UUID
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Creates, views, or edits a goal. With a null [goalId] the screen starts in creation mode;
@@ -224,7 +223,7 @@ fun GoalDetailScreen(
         ) {
             // Goal name.
             item {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = name,
                     onValueChange = { name = it; if (it.isNotBlank()) nameError = false },
                     enabled = isEditing,
@@ -246,7 +245,7 @@ fun GoalDetailScreen(
             // Target value and unit.
             item {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = targetValueText,
                         onValueChange = { input ->
                             if (input.length <= 6 && input.all { it.isDigit() }) {
@@ -268,7 +267,7 @@ fun GoalDetailScreen(
                         modifier = Modifier.weight(1f),
                     )
                     Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = unitLabel,
                         onValueChange = { unitLabel = it; if (it.isNotBlank()) unitError = false },
                         enabled = isEditing,
@@ -291,7 +290,7 @@ fun GoalDetailScreen(
             // Deadline.
             item {
                 Box(modifier = Modifier.clickable(enabled = isEditing) { showDatePicker = true }) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = AppDateFormatUtils.formatDate(targetDate, dateFmt.dateFormatCode),
                         onValueChange = {},
                         readOnly = true,
@@ -343,7 +342,7 @@ fun GoalDetailScreen(
 
             // Description.
             item {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
                     enabled = isEditing,
@@ -445,9 +444,7 @@ fun GoalDetailScreen(
     }
 }
 
-
 private val GOAL_DETAIL_COLORS = listOf(GoalColor) + PickerPalette
-
 
 /** One logged increment: `+5 km`, its timestamp, and a delete affordance. */
 @Composable

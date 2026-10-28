@@ -26,7 +26,6 @@ enum class RecurringStatus {
 
 /** Schedule-anchored recurrence math for recurring tasks. Pure and unit-testable. */
 object RecurrenceUtils {
-
     /**
      * Buckets [task]'s next due date against [now]: before now = [RecurringStatus.OVERDUE],
      * later today = [RecurringStatus.DUE_TODAY], within [horizonDays] = [RecurringStatus.UPCOMING],

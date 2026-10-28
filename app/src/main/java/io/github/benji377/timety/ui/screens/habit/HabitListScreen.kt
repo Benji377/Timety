@@ -39,6 +39,7 @@ import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitBottomSheet
@@ -55,8 +56,6 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Lists the user's habits grouped into due-today, upcoming, and done sections for the current day.
@@ -142,7 +141,7 @@ fun HabitListScreen(
                         .padding(start = 8.dp, top = 8.dp, end = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = searchQuery,
                         onValueChange = {
                             searchQuery = it; if (it.isNotEmpty()) reorderMode = false

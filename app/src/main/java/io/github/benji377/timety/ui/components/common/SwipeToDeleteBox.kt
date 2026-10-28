@@ -28,7 +28,6 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import kotlinx.coroutines.launch
 
-
 /**
  * Wraps a list tile in end-to-start swipe-to-delete: the swipe reveals a red delete
  * background and opens a [ConfirmationDialog] rather than deleting outright, so the tile

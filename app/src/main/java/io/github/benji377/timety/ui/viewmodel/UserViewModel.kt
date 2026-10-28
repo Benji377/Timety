@@ -4,51 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.data.repository.UserRepository
-import io.github.benji377.timety.util.stats.ExperienceEngine
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
 
-/** Exposes the user's profile and derived level/XP state, creating a default profile on first launch. */
+/** Exposes the user's profile, creating a default profile on first launch. */
 class UserViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
-
     val userProfile: StateFlow<UserProfileEntity?> = userRepository.userProfile
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
-        )
-
-
-    val currentLevel: StateFlow<Int> = userProfile
-        .map { ExperienceEngine.calculateLevel(it?.totalXp ?: 0) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ExperienceEngine.calculateLevel(0)
-        )
-
-
-    val levelTitle: StateFlow<String> = currentLevel
-        .map { ExperienceEngine.getTitle(it) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ExperienceEngine.getTitle(ExperienceEngine.calculateLevel(0))
-        )
-
-
-    val levelProgress: StateFlow<Double> = userProfile
-        .map { ExperienceEngine.getLevelProgress(it?.totalXp ?: 0) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ExperienceEngine.getLevelProgress(0)
         )
 
     init {
@@ -66,8 +36,7 @@ class UserViewModel(
                 userRepository.insertUserProfile(
                     UserProfileEntity(
                         name = newName,
-                        accountCreated = Instant.now(),
-                        totalXp = 0
+                        accountCreated = Instant.now()
                     )
                 )
             }
@@ -84,8 +53,7 @@ class UserViewModel(
                     UserProfileEntity(
                         name = "Bobert",
                         profileImagePath = path,
-                        accountCreated = Instant.now(),
-                        totalXp = 0
+                        accountCreated = Instant.now()
                     )
                 )
             }

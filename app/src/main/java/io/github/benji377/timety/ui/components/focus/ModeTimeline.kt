@@ -34,7 +34,6 @@ import io.github.benji377.timety.ui.theme.PaperLight
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.hairlineBorder
 
-
 /** Horizontal row of connected dots showing a focus mode's phases and the currently active one. */
 @Composable
 fun ModeTimeline(
@@ -154,7 +153,6 @@ private fun ConnectorLine(
             .background(color, RectangleShape)
     )
 }
-
 
 /** Returns the localized display name for a system focus mode, or [mode]'s own name otherwise. */
 @Composable

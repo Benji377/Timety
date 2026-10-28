@@ -49,7 +49,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-
 /**
  * Card row for a single task: checkbox, title/description, optional subtask progress and due date,
  * and a size/priority trailing indicator. Border color reflects completion, overdue, and due-today

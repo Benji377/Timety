@@ -2,7 +2,6 @@ package io.github.benji377.timety.ui.components.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +22,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
-
 
 /**
  * Grid of circular color swatches with the selected one outlined, for the color pickers in the

@@ -25,7 +25,6 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
-
 /** Notification settings: background activity and the daily reminder times. */
 @Composable
 internal fun NotificationSettings(

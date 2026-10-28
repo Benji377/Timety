@@ -1,17 +1,20 @@
 package io.github.benji377.timety.ui.screens
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,11 +29,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Coffee
-import androidx.compose.material.icons.outlined.MilitaryTech
-import androidx.compose.material.icons.outlined.Repeat
-import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,13 +41,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -66,37 +69,37 @@ import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TextInputDialog
-import io.github.benji377.timety.ui.components.stats.StatCard
-import io.github.benji377.timety.ui.components.stats.StatCardStyle
-import io.github.benji377.timety.ui.components.user.StreakStatusBadge
-import io.github.benji377.timety.ui.components.user.UserStreakTimelineCard
-import io.github.benji377.timety.ui.components.user.UserXpBreakdownCard
+import io.github.benji377.timety.ui.components.mood.MoodCalendar
+import io.github.benji377.timety.ui.components.mood.MoodDistributionBar
+import io.github.benji377.timety.ui.components.mood.MoodPickerSheet
+import io.github.benji377.timety.ui.components.mood.RateTodayCard
 import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.HabitColor
-import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
-import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.hairlineBorder
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.WrapUpImageGenerator
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.DayRatingViewModel
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.util.ProfileImageStore
-import io.github.benji377.timety.util.stats.StreakCalculator
-import java.time.LocalDate
-import java.time.ZoneId
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.stats.MoodStats
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
- * Displays the user's profile: avatar, name, XP progress, streak timeline, and all-time stats,
- * with options to edit the name or share a "wrap-up" summary image.
+ * Displays the user's profile: avatar and name, a month calendar of day moods with an all-time
+ * mood split below it, and options to edit the profile or share a "wrap-up" summary image.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,6 +109,7 @@ fun ProfileScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    dayRatingViewModel: DayRatingViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = io.github.benji377.timety.ui.viewmodel.activityScopedViewModel()
 ) {
     val userProfile by userViewModel.userProfile.collectAsState()
@@ -113,30 +117,29 @@ fun ProfileScreen(
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
-    val currentLevel by userViewModel.currentLevel.collectAsState()
-    val levelTitle by userViewModel.levelTitle.collectAsState()
-    val levelProgress by userViewModel.levelProgress.collectAsState()
+    val moods by dayRatingViewModel.ratingsByDay.collectAsState()
+    val checkupTime by dayRatingViewModel.checkupTime.collectAsState()
+
+    // Ticks so the rate-today card appears at the checkup time and today rolls over at midnight.
+    val now by produceState(LocalDateTime.now()) {
+        while (true) {
+            delay(CLOCK_TICK_MS)
+            value = LocalDateTime.now()
+        }
+    }
+    val today = now.toLocalDate()
+    var shownMonth by rememberSaveable(stateSaver = LocalDateSaver) { mutableStateOf(today.withDayOfMonth(1)) }
+    var pickerDay by rememberSaveable(stateSaver = NullableLocalDateSaver) { mutableStateOf<LocalDate?>(null) }
 
     val userName = userProfile?.name ?: "User"
-    val totalXp = userProfile?.totalXp ?: 0
 
     // Recomputed only when the data changes, not on every recomposition of this screen.
     val stats = remember(tasks, habitsWithCompletions, recurringItems, sessions) {
         ProfileStats.of(tasks, habitsWithCompletions, recurringItems, sessions)
     }
-    val totalTasksDone = stats.totalTasksDone
-    val totalHabitsMet = stats.totalHabitsMet
-    val totalFocusMins = stats.totalFocusMins
-    val totalSessions = sessions.size
-    val currentStreakInfo = stats.currentStreak
-    val currentStreak = currentStreakInfo.length
-    val highestStreak = stats.bestStreak
 
     val context = LocalContext.current
-    val shareSubjectStr = stringResource(R.string.userShareSubject)
-    val shareTextStr = stringResource(R.string.userShareText)
-    val shareWrapUpTooltipStr = stringResource(R.string.userTooltipShareWrapUp)
-    val errorGenerateImageStr = stringResource(R.string.userErrorGenerateImage)
+    val dateFormatSettings = LocalDateFormatSettings.current
     var showEditNameDialog by remember { mutableStateOf(false) }
     var tempName by remember { mutableStateOf("") }
     var showShareWrapupDialog by remember { mutableStateOf(false) }
@@ -155,77 +158,51 @@ fun ProfileScreen(
     }
 
     if (showShareWrapupDialog) {
+        val since = userProfile?.accountCreated?.let {
+            AppDateFormatUtils.formatDate(it.atZone(ZoneId.systemDefault()).toLocalDate(), dateFormatSettings.dateFormatCode)
+        }
+        val preview by produceState<Bitmap?>(null, userName, since, stats) {
+            value = withContext(Dispatchers.Default) {
+                runCatching {
+                    WrapUpImageGenerator.render(
+                        context, userName, since, stats.totalTasksDone, stats.totalFocusMins, stats.totalHabitsMet
+                    )
+                }.getOrNull()
+            }
+        }
         NeoAlertDialog(
             onDismissRequest = { showShareWrapupDialog = false },
             title = { Text(stringResource(R.string.userTooltipShareWrapUp)) },
             text = {
-                Column {
-                    Text(stringResource(R.string.userShareSummary), fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("${stringResource(R.string.userStatTasksDone)}: $totalTasksDone")
-                    Text("${stringResource(R.string.userStatHabitsMet)}: $totalHabitsMet")
-                    Text("${stringResource(R.string.userStatFocusMins)}: $totalFocusMins")
-                    Text("${stringResource(R.string.userStatBestStreak)}: $highestStreak")
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .height(360.dp)
+                            .aspectRatio(WRAP_UP_ASPECT_RATIO),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        preview?.let {
+                            Image(
+                                bitmap = it.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(AppTheme.brMedium),
+                            )
+                        } ?: CircularProgressIndicator()
+                    }
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showShareWrapupDialog = false
-                    coroutineScope.launch(Dispatchers.IO) {
-                        try {
-                            val bytes =
-                                WrapUpImageGenerator.generate(
-                                    context,
-                                    userName,
-                                    currentLevel,
-                                    levelTitle,
-                                    highestStreak,
-                                    totalTasksDone,
-                                    totalFocusMins,
-                                    totalHabitsMet
-                                )
-                            val cachePath = File(context.cacheDir, "shared")
-                            cachePath.mkdirs()
-                            val file = File(cachePath, "wrapup.png")
-                            file.writeBytes(bytes)
-                            val uri = FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.fileprovider",
-                                file
-                            )
-
-                            withContext(Dispatchers.Main) {
-                                val intent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "image/png"
-                                    putExtra(Intent.EXTRA_STREAM, uri)
-                                    putExtra(
-                                        Intent.EXTRA_SUBJECT,
-                                        shareSubjectStr
-                                    )
-                                    putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        shareTextStr
-                                    )
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        intent,
-                                        shareWrapUpTooltipStr
-                                    )
-                                )
-                            }
-                        } catch (_: Exception) {
-                            withContext(Dispatchers.Main) {
-                                android.widget.Toast.makeText(
-                                    context,
-                                    errorGenerateImageStr,
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                TextButton(
+                    enabled = preview != null,
+                    onClick = {
+                        showShareWrapupDialog = false
+                        preview?.let { bitmap ->
+                            coroutineScope.launch { shareWrapUp(context, bitmap) }
                         }
-                    }
-                }) {
+                    },
+                ) {
                     Text(stringResource(R.string.commonLabelShare))
                 }
             },
@@ -234,6 +211,22 @@ fun ProfileScreen(
                     Text(stringResource(R.string.commonLabelClose))
                 }
             }
+        )
+    }
+
+    pickerDay?.let { day ->
+        MoodPickerSheet(
+            day = day,
+            current = moods[day],
+            onPick = {
+                dayRatingViewModel.setRating(day, it)
+                pickerDay = null
+            },
+            onClear = {
+                dayRatingViewModel.clearRating(day)
+                pickerDay = null
+            },
+            onDismiss = { pickerDay = null },
         )
     }
 
@@ -342,14 +335,9 @@ fun ProfileScreen(
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
 
-            // Name Section (streak flame sits left of the name)
+            // Name Section
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    StreakStatusBadge(
-                        isActive = currentStreak > 0,
-                        atRisk = currentStreakInfo.atRisk,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = userName,
                         style = MaterialTheme.typography.headlineLarge.copy(
@@ -371,123 +359,76 @@ fun ProfileScreen(
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
 
-            // XP Card
-            item {
-                UserXpBreakdownCard(
-                    currentLevel = currentLevel,
-                    levelTitle = levelTitle,
-                    totalXp = totalXp,
-                    levelProgress = levelProgress
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // Streak Timeline Card
-            item {
-                UserStreakTimelineCard(
-                    activityDates = stats.activityDates,
-                    taskDates = stats.taskDates,
-                    focusDates = stats.focusDates,
-                    habitDates = stats.habitDates,
-                    currentStreak = currentStreak
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // All-Time Statistics Section
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = stringResource(R.string.userStatsAllTimeTitle),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(bottom = 4.dp)
+            if (MoodStats.shouldPromptToday(today in moods, now.toLocalTime(), checkupTime)) {
+                item {
+                    RateTodayCard(
+                        onPick = { dayRatingViewModel.setRating(today, it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = AppTheme.spaceLarge),
                     )
-                    Text(
-                        text = stringResource(R.string.userStatsAllTimeSubtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        StatCard(
-                            title = stringResource(R.string.userStatTasksDone),
-                            value = totalTasksDone.toString(),
-                            icon = Icons.Outlined.CheckCircle,
-                            color = TaskColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatCard(
-                            title = stringResource(R.string.userStatHabitsMet),
-                            value = totalHabitsMet.toString(),
-                            icon = Icons.Outlined.Repeat,
-                            color = HabitColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        StatCard(
-                            title = stringResource(R.string.userStatFocusMins),
-                            value = totalFocusMins.toString(),
-                            icon = Icons.Outlined.Timer,
-                            color = FocusColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                        StatCard(
-                            title = stringResource(R.string.userStatSessions),
-                            value = totalSessions.toString(),
-                            icon = Icons.Outlined.Coffee,
-                            color = FocusColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        StatCard(
-                            title = stringResource(R.string.userStatBestStreak),
-                            value = highestStreak.toString(),
-                            icon = Icons.Outlined.MilitaryTech,
-                            color = WarningColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(40.dp)) }
+            item {
+                MoodCalendar(
+                    month = shownMonth,
+                    today = today,
+                    moods = moods,
+                    onMonthChange = { shownMonth = it },
+                    onDayClick = { pickerDay = it },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            item {
+                MoodDistributionBar(
+                    moods = moods.values,
+                    modifier = Modifier.padding(top = AppTheme.spaceXLarge, bottom = 40.dp),
+                )
+            }
         }
     }
 }
 
-/** Lifetime totals, streaks, and the activity dates behind the streak timeline. */
+private const val CLOCK_TICK_MS = 30_000L
+private const val WRAP_UP_ASPECT_RATIO = 1080f / 1920f
+
+/** Writes [bitmap] to the share cache and opens the system share sheet; toasts on failure. */
+private suspend fun shareWrapUp(context: Context, bitmap: Bitmap) {
+    val uri = withContext(Dispatchers.IO) {
+        runCatching {
+            val file = File(File(context.cacheDir, "shared").apply { mkdirs() }, "wrapup.png")
+            file.writeBytes(WrapUpImageGenerator.toPng(bitmap))
+            FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        }.getOrNull()
+    }
+    if (uri == null) {
+        Toast.makeText(context, R.string.userErrorGenerateImage, Toast.LENGTH_SHORT).show()
+        return
+    }
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/png"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.userShareSubject))
+        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.userShareText))
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, context.getString(R.string.userTooltipShareWrapUp)))
+}
+
+private val LocalDateSaver = Saver<LocalDate, Long>(save = { it.toEpochDay() }, restore = LocalDate::ofEpochDay)
+
+private val NullableLocalDateSaver = Saver<LocalDate?, Long>(
+    save = { it?.toEpochDay() },
+    restore = LocalDate::ofEpochDay,
+)
+
+/** Lifetime totals shown on the share wrap-up. */
 private data class ProfileStats(
     val totalTasksDone: Int,
     val totalHabitsMet: Int,
     val totalFocusMins: Int,
-    val taskDates: List<LocalDate>,
-    val habitDates: List<LocalDate>,
-    val focusDates: List<LocalDate>,
-    val activityDates: List<LocalDate>,
-    val currentStreak: StreakCalculator.CurrentStreak,
-    val bestStreak: Int,
 ) {
     companion object {
         fun of(
@@ -495,29 +436,11 @@ private data class ProfileStats(
             habits: List<HabitWithCompletions>,
             recurring: List<RecurringTaskWithOccurrences>,
             sessions: List<FocusSessionEntity>,
-        ): ProfileStats {
-            val zone = ZoneId.systemDefault()
-            // Completion dates across tasks, habits, and focus sessions feed the streak calculation.
-            val taskDates = tasks.mapNotNull { item ->
-                item.task.completedAt?.takeIf { item.task.isCompleted }?.atZone(zone)?.toLocalDate()
-            } + recurring.flatMap { item -> item.occurrences.map { it.completedAt.atZone(zone).toLocalDate() } }
-            val habitDates = habits.flatMap { item ->
-                item.completions.map { it.completionDate.atZone(zone).toLocalDate() }
-            }
-            val focusDates = sessions.map { it.startTime.atZone(zone).toLocalDate() }
-            val activityDates = (taskDates + habitDates + focusDates).distinct().sorted()
-            return ProfileStats(
-                // Each logged recurring occurrence counts as a completed task.
-                totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.occurrences.size },
-                totalHabitsMet = habits.sumOf { it.completions.size },
-                totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60,
-                taskDates = taskDates,
-                habitDates = habitDates,
-                focusDates = focusDates,
-                activityDates = activityDates,
-                currentStreak = StreakCalculator.currentStreak(activityDates),
-                bestStreak = StreakCalculator.calculateBestStreak(activityDates),
-            )
-        }
+        ): ProfileStats = ProfileStats(
+            // Each logged recurring occurrence counts as a completed task.
+            totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.occurrences.size },
+            totalHabitsMet = habits.sumOf { it.completions.size },
+            totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60,
+        )
     }
 }

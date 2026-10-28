@@ -22,14 +22,11 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-
 /** Builds and cancels the reminder notifications for tasks, habits, and daily/evening check-ins. */
 class ReminderScheduler private constructor(private val context: Context) {
-
     private val notificationService = NotificationService(context)
 
     // Tasks.
-
 
     /** Re-arms [task]'s reminders; one already showing stays, so a resync can't swallow it. */
     fun scheduleTaskReminders(task: TaskEntity) {
@@ -87,7 +84,6 @@ class ReminderScheduler private constructor(private val context: Context) {
 
     // Recurring tasks.
 
-
     /**
      * Schedules the reminders for a recurring task's *next* occurrence only; completing the
      * occurrence advances the due date and calls this again for the one after.
@@ -130,7 +126,6 @@ class ReminderScheduler private constructor(private val context: Context) {
         val baseId = NotificationService.recurringTaskReminderBaseId(id)
         for (i in 0 until TASK_ID_SLOTS) notificationService.cancelAlarm(baseId + i)
     }
-
 
     private fun buildReminderBody(
         title: String,
@@ -178,7 +173,6 @@ class ReminderScheduler private constructor(private val context: Context) {
 
     // Habits.
 
-
     /**
      * Arms [hwc]'s next reminder, its only pending one. Today's remaining times are skipped once
      * it no longer needs a reminder today; with no reminder left the habit's alarm is cancelled.
@@ -202,7 +196,6 @@ class ReminderScheduler private constructor(private val context: Context) {
 
     // Quick habits (interval reminders).
 
-
     /** Schedules (or reschedules) a quick habit's interval alarm; disabled quick habits are only cancelled. */
     fun scheduleQuickHabit(quickHabit: QuickHabitEntity) {
         if (!quickHabit.isEnabled) {
@@ -224,7 +217,6 @@ class ReminderScheduler private constructor(private val context: Context) {
 
     // Daily motivation / evening checkup.
 
-
     fun scheduleDailyMotivation(time: String) {
         val (hour, minute) = AppDateFormatUtils.parseHHmm(time, defaultHour = 0, defaultMinute = 0)
         val quotes = listOf(
@@ -240,7 +232,6 @@ class ReminderScheduler private constructor(private val context: Context) {
         )
     }
 
-
     fun scheduleEndOfDayCheckup(time: String) {
         val (hour, minute) = AppDateFormatUtils.parseHHmm(time, defaultHour = 0, defaultMinute = 0)
         notificationService.scheduleEndOfDayCheckup(
@@ -251,9 +242,7 @@ class ReminderScheduler private constructor(private val context: Context) {
         )
     }
 
-
     companion object {
-
         private const val TASK_ID_SLOTS = 11
 
         /** Builds a scheduler whose string resources are resolved in the app's configured locale. */
@@ -262,7 +251,6 @@ class ReminderScheduler private constructor(private val context: Context) {
             val code = SettingsRepository(appContext.dataStore).appLocaleCodeFlow.first()
             return ReminderScheduler(LocaleHelper.wrap(appContext, code))
         }
-
 
         /**
          * Re-arms [habitId]'s reminder from its stored state, after the habit or its completions
@@ -279,7 +267,6 @@ class ReminderScheduler private constructor(private val context: Context) {
             }
             scheduler.scheduleHabitReminder(hwc)
         }
-
 
         /** Re-arms every pending reminder and the midnight widget refresh; runs on each process start and system alarm reset. */
         suspend fun resyncAll(context: Context) {

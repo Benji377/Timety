@@ -44,8 +44,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,12 +68,13 @@ import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.FocusTargetType
-import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.services.FocusTimerService
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -96,11 +97,9 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import kotlin.math.roundToInt
-import io.github.benji377.timety.ui.components.common.NeoButton as Button
-
 
 // durationMinutes encodes special cases: 0 means a stopwatch phase with no fixed length, and -1
 // means a flexible phase whose length is set by the user via flexibleMinutes.
@@ -112,7 +111,6 @@ private fun secondsForPhase(
     -1 -> flexibleMinutes * 60
     else -> phase.durationMinutes * 60
 }
-
 
 /**
  * Test tags for the transport controls. Their icons swap with timer state and carry no content
@@ -510,7 +508,7 @@ fun FocusScreen(
 
                 Spacer(modifier = Modifier.width(32.dp))
 
-                Button(
+                NeoButton(
                     onClick = {
                         when {
                             isRunning -> requestStop()
@@ -717,62 +715,50 @@ private fun TimerGauge(
     val canDrag = isFlexibleMode && !isRunning && !isPaused
     val isStopwatchPhaseType = activeMode?.type == FocusModeType.STOPWATCH
 
-    var gaugeProgress = 1f
-    var isStopwatchAnim = false
-    var gaugeLabel = focusLabelDefault
-    var centerText = "25:00"
-    var isResting = false
-
-    if (activeMode != null && currentPhase != null) {
-        when {
-            canDrag -> {
-                gaugeProgress = flexibleMinutes / 120f
-                gaugeLabel = focusLabelSetTime
-                centerText = AppDateFormatUtils.formatDuration(flexibleMinutes * 60)
-            }
-
-            !isStopwatchPhaseType -> {
-                if (isRunning || isPaused) {
-                    val total =
-                        if (timerState.totalPhaseSeconds > 0) timerState.totalPhaseSeconds else 1
-                    gaugeProgress = (timerState.secondsRemaining.toFloat() / total).coerceIn(0f, 1f)
-                    centerText = timerState.centerText
-                    isResting = timerState.isRestPhase
-                    gaugeLabel = if (timerState.isRestPhase) focusLabelRest else focusLabelDefault
-                } else {
-                    val totalPhaseSeconds =
-                        if (currentPhase.durationMinutes > 0) currentPhase.durationMinutes * 60 else 25 * 60
-                    gaugeProgress = 1f
-                    centerText = AppDateFormatUtils.formatDuration(totalPhaseSeconds)
-                    isResting = currentPhase.type == PhaseType.REST
-                    gaugeLabel = if (isResting) focusLabelRest else focusLabelDefault
-                }
-            }
-
-            else -> {
-                isStopwatchAnim = isRunning
-                gaugeProgress = 0f
-                gaugeLabel = focusLabelStopwatch
-                centerText = if (isRunning || isPaused) {
-                    timerState.centerText
-                } else {
-                    "00:00"
-                }
-            }
+    val isActive = isRunning || isPaused
+    val display = when {
+        activeMode == null || currentPhase == null -> GaugeDisplay(1f, focusLabelDefault, "25:00")
+        canDrag -> GaugeDisplay(
+            flexibleMinutes / 120f,
+            focusLabelSetTime,
+            AppDateFormatUtils.formatDuration(flexibleMinutes * 60),
+        )
+        isStopwatchPhaseType -> GaugeDisplay(
+            0f,
+            focusLabelStopwatch,
+            if (isActive) timerState.centerText else "00:00",
+            pulses = isRunning,
+        )
+        isActive -> GaugeDisplay(
+            (timerState.secondsRemaining.toFloat() / timerState.totalPhaseSeconds.coerceAtLeast(1)).coerceIn(0f, 1f),
+            if (timerState.isRestPhase) focusLabelRest else focusLabelDefault,
+            timerState.centerText,
+            isResting = timerState.isRestPhase,
+        )
+        else -> {
+            val isRest = currentPhase.type == PhaseType.REST
+            val phaseSeconds = if (currentPhase.durationMinutes > 0) currentPhase.durationMinutes * 60 else 25 * 60
+            GaugeDisplay(
+                1f,
+                if (isRest) focusLabelRest else focusLabelDefault,
+                AppDateFormatUtils.formatDuration(phaseSeconds),
+                isResting = isRest,
+            )
         }
     }
+    val isResting = display.isResting
 
     val gaugeColor = if (isResting) WarningColor else FocusColor
     // Tags are identified by their color alone, so only the other target types get an icon.
     val bottomTextIcon = selectedTarget?.type?.takeIf { it != FocusTargetType.TAG }?.icon
 
     InteractiveGauge(
-        progress = gaugeProgress,
-        isStopwatch = isStopwatchAnim,
+        progress = display.progress,
+        isStopwatch = display.pulses,
         color = gaugeColor,
         labelColor = gaugeColor,
         centerTextColor = gaugeColor,
-        centerText = centerText,
+        centerText = display.centerText,
         bottomText = selectedTarget?.label ?: stringResource(R.string.focusTargetEmpty),
         bottomTextColor = selectedTarget?.color ?: FocusColor,
         bottomTextIcon = bottomTextIcon,
@@ -781,7 +767,7 @@ private fun TimerGauge(
             { onTargetTapped() }
         },
         isInteractive = canDrag,
-        label = gaugeLabel,
+        label = display.label,
         onChanged = { newProgress ->
             if (canDrag) {
                 var newMins = (newProgress * 120).roundToInt()
@@ -791,3 +777,12 @@ private fun TimerGauge(
         },
     )
 }
+
+/** What the dial shows: ring fill, label above the time, the time itself, and its accents. */
+private data class GaugeDisplay(
+    val progress: Float,
+    val label: String,
+    val centerText: String,
+    val isResting: Boolean = false,
+    val pulses: Boolean = false,
+)

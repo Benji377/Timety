@@ -18,7 +18,6 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
 
-
 /**
  * A settings subpage. The landing list and the nav graph are both built from [entries], so a new
  * page needs only an entry here and a branch in [SettingsPageScreen].

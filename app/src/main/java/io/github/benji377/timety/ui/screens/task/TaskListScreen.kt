@@ -51,6 +51,7 @@ import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoIconButton
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
@@ -72,8 +73,6 @@ import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.TaskFilterEngine
 import java.time.Instant
 import java.time.ZoneId
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /**
  * Shows all tasks grouped into overdue, due-today, upcoming, and completed sections, with search,
@@ -95,6 +94,13 @@ fun TaskListScreen(
     val completeRecurring =
         rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
     val toggleTaskCompletion = rememberTaskCompletionToggle(viewModel)
+    val rowActions = TaskRowActions(
+        onToggleCompleted = toggleTaskCompletion,
+        onOpenTask = onNavigateToTaskDetail,
+        onDeleteTask = viewModel::deleteTask,
+        onCompleteRecurring = completeRecurring,
+        onOpenRecurring = onNavigateToRecurringDetail,
+    )
 
     val isOverdueExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_OVERDUE)
         .collectAsState()
@@ -190,7 +196,7 @@ fun TaskListScreen(
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
+                NeoOutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.weight(1f),
@@ -318,13 +324,9 @@ fun TaskListScreen(
                                 },
                                 tasks = buckets.overdue,
                                 isOverdue = true,
-                                viewModel = viewModel,
-                                onToggleCompleted = toggleTaskCompletion,
-                                onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                actions = rowActions,
                                 recurringTasks = recurringOverdue,
                                 recurringStatus = RecurringStatus.OVERDUE,
-                                onCompleteRecurring = completeRecurring,
-                                onNavigateToRecurringDetail = onNavigateToRecurringDetail,
                             )
                         }
                         if (buckets.dueToday.isNotEmpty() || recurringToday.isNotEmpty()) {
@@ -337,14 +339,9 @@ fun TaskListScreen(
                                     settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_DUE_TODAY, it)
                                 },
                                 tasks = buckets.dueToday,
-                                isOverdue = false,
-                                viewModel = viewModel,
-                                onToggleCompleted = toggleTaskCompletion,
-                                onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                actions = rowActions,
                                 recurringTasks = recurringToday,
                                 recurringStatus = RecurringStatus.DUE_TODAY,
-                                onCompleteRecurring = completeRecurring,
-                                onNavigateToRecurringDetail = onNavigateToRecurringDetail,
                             )
                         }
                         if (buckets.todo.isNotEmpty() || recurringUpcoming.isNotEmpty()) {
@@ -357,14 +354,9 @@ fun TaskListScreen(
                                     settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_UPCOMING, it)
                                 },
                                 tasks = buckets.todo,
-                                isOverdue = false,
-                                viewModel = viewModel,
-                                onToggleCompleted = toggleTaskCompletion,
-                                onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                actions = rowActions,
                                 recurringTasks = recurringUpcoming,
                                 recurringStatus = RecurringStatus.UPCOMING,
-                                onCompleteRecurring = completeRecurring,
-                                onNavigateToRecurringDetail = onNavigateToRecurringDetail,
                             )
                         }
                         if (buckets.done.isNotEmpty()) {
@@ -377,10 +369,7 @@ fun TaskListScreen(
                                     settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_DONE, it)
                                 },
                                 tasks = buckets.done,
-                                isOverdue = false,
-                                viewModel = viewModel,
-                                onToggleCompleted = toggleTaskCompletion,
-                                onNavigateToTaskDetail = onNavigateToTaskDetail,
+                                actions = rowActions,
                             )
                         }
                     }
@@ -430,6 +419,15 @@ private data class TaskBuckets(
     }
 }
 
+/** What tapping, checking or deleting a row does; the same in every section. */
+private class TaskRowActions(
+    val onToggleCompleted: (TaskEntity) -> Unit,
+    val onOpenTask: (String?) -> Unit,
+    val onDeleteTask: (TaskEntity) -> Unit,
+    val onCompleteRecurring: (RecurringTaskEntity) -> Unit,
+    val onOpenRecurring: (String) -> Unit,
+)
+
 /** One collapsible section: a header item, then a lazy item per row while expanded. */
 private fun LazyListScope.taskSection(
     key: String,
@@ -438,14 +436,10 @@ private fun LazyListScope.taskSection(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     tasks: List<TaskWithSubtasks>,
-    isOverdue: Boolean,
-    viewModel: TaskViewModel,
-    onToggleCompleted: (TaskEntity) -> Unit,
-    onNavigateToTaskDetail: (String?) -> Unit,
+    actions: TaskRowActions,
+    isOverdue: Boolean = false,
     recurringTasks: List<RecurringTaskEntity> = emptyList(),
     recurringStatus: RecurringStatus = RecurringStatus.SCHEDULED,
-    onCompleteRecurring: (RecurringTaskEntity) -> Unit = {},
-    onNavigateToRecurringDetail: (String) -> Unit = {},
 ) {
     item(key = "$key-header") {
         ExpansionSection(
@@ -464,9 +458,9 @@ private fun LazyListScope.taskSection(
                 isOverdue = isOverdue,
                 subtasksCompleted = taskWithSubtasks.subtasks.count { it.isCompleted },
                 subtasksTotal = taskWithSubtasks.subtasks.size,
-                onToggleCompleted = { onToggleCompleted(taskEntity) },
-                onTap = { onNavigateToTaskDetail(taskEntity.id) },
-                onDelete = { viewModel.deleteTask(taskEntity) },
+                onToggleCompleted = { actions.onToggleCompleted(taskEntity) },
+                onTap = { actions.onOpenTask(taskEntity.id) },
+                onDelete = { actions.onDeleteTask(taskEntity) },
                 modifier = Modifier.animateItem(),
             )
         }
@@ -474,8 +468,8 @@ private fun LazyListScope.taskSection(
             RecurringTaskListTile(
                 task = recurringTask,
                 status = recurringStatus,
-                onComplete = { onCompleteRecurring(recurringTask) },
-                onTap = { onNavigateToRecurringDetail(recurringTask.id) },
+                onComplete = { actions.onCompleteRecurring(recurringTask) },
+                onTap = { actions.onOpenRecurring(recurringTask.id) },
                 modifier = Modifier.animateItem(),
             )
         }

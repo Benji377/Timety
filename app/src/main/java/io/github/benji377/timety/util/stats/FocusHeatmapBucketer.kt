@@ -41,7 +41,6 @@ data class HeatmapGrid(
 
 /** Buckets focus sessions into a [HeatmapGrid]. Pure and unit-testable. */
 object FocusHeatmapBucketer {
-
     private const val WEEKS_SHOWN = 53
 
     fun grid(

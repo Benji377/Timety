@@ -3,7 +3,6 @@ package io.github.benji377.timety.util.task
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSortOption
 
-
 /**
  * Immutable filter/sort configuration for a task list, applied via [process]. Works over any item
  * type `T` by taking a [selector] to the underlying [TaskEntity], so it can filter/sort either raw
@@ -15,14 +14,11 @@ data class TaskFilterEngine(
     val sortOption: TaskSortOption = TaskSortOption.DUE_DATE,
     val isAscending: Boolean = true,
 ) {
-
-
     /** Applies the category/search filters, then the configured sort, to [items]. */
     fun <T> process(items: List<T>, selector: (T) -> TaskEntity): List<T> {
         val filtered = applyFilters(items, selector)
         return applySorting(filtered, selector)
     }
-
 
     private fun <T> applyFilters(items: List<T>, selector: (T) -> TaskEntity): List<T> {
         return items.filter { item ->
@@ -38,7 +34,6 @@ data class TaskFilterEngine(
         }
     }
 
-
     private fun <T> applySorting(items: List<T>, selector: (T) -> TaskEntity): List<T> {
         val comparator = Comparator<T> { a, b ->
             val result = compareByOption(selector(a), selector(b))
@@ -47,7 +42,6 @@ data class TaskFilterEngine(
         return items.sortedWith(comparator)
     }
 
-
     private fun compareByOption(a: TaskEntity, b: TaskEntity): Int = when (sortOption) {
         TaskSortOption.ALPHABETICAL -> a.title.lowercase().compareTo(b.title.lowercase())
         TaskSortOption.CATEGORY -> a.category.lowercase().compareTo(b.category.lowercase())
@@ -55,7 +49,6 @@ data class TaskFilterEngine(
         TaskSortOption.SIZE -> a.size.ordinal.compareTo(b.size.ordinal)
         TaskSortOption.DUE_DATE -> compareDueDates(a, b)
     }
-
 
     /** Tasks without a due date sort after tasks with one. */
     private fun compareDueDates(a: TaskEntity, b: TaskEntity): Int {

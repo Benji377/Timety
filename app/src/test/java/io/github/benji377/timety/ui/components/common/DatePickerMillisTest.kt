@@ -8,7 +8,6 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 
 class DatePickerMillisTest {
-
     private fun utcMidnight(date: LocalDate) =
         date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 

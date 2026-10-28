@@ -26,12 +26,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import kotlinx.coroutines.launch
-import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField as OutlinedTextField
-
 
 /** Advanced settings: expert-only options, such as the location search API endpoint. */
 @Composable
@@ -61,7 +60,7 @@ internal fun AdvancedSettings(
             title = { Text(stringResource(R.string.settingsLabelLocationApi)) },
             text = {
                 Column {
-                    OutlinedTextField(
+                    NeoOutlinedTextField(
                         value = pendingLocationUrl,
                         onValueChange = {
                             pendingLocationUrl = it

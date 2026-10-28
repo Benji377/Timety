@@ -74,7 +74,6 @@ import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 
-
 /** Bottom sheet listing distraction event types; invokes [onEventSelected] when one is tapped. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,7 +116,6 @@ fun DistractionBottomSheet(
         }
     }
 }
-
 
 /** Tabs of [TargetSelectorBottomSheet]; recurring tasks share the Tasks tab with one-off tasks. */
 private enum class TargetTab(val labelRes: Int) {

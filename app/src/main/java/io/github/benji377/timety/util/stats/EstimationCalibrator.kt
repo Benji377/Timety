@@ -30,7 +30,6 @@ sealed interface CalibrationInsight {
  * estimates (S/M/L/XL) track actual focus time. Pure and unit-testable.
  */
 object EstimationCalibrator {
-
     // Below this, a bucket's spread isn't flagged even if proportionally large - too few
     // samples for variance to mean anything.
     private const val MIN_SAMPLES_FOR_SPREAD = 3

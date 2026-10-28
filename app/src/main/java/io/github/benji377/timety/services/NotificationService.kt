@@ -15,6 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.user.DayRating
+import io.github.benji377.timety.ui.components.mood.labelRes
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -27,13 +28,10 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-
 /** Creates notification channels and schedules/cancels the exact alarms that back task, habit, and general reminders. */
 class NotificationService(private val context: Context) {
-
     private val notificationManager = NotificationManagerCompat.from(context)
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
 
     fun ensureChannels() {
         val systemManager =
@@ -90,7 +88,6 @@ class NotificationService(private val context: Context) {
 
     // Tasks.
 
-
     fun scheduleTaskReminder(
         notificationId: Int,
         title: String,
@@ -110,7 +107,6 @@ class NotificationService(private val context: Context) {
 
     // Habits.
 
-
     /**
      * Arms [habitId]'s single pending reminder at [triggerAtMillis], replacing the one armed
      * before. The receiver arms the next one when it fires, like a quick habit's chain.
@@ -127,7 +123,6 @@ class NotificationService(private val context: Context) {
         )
         scheduleExact(triggerAtMillis, id, intent)
     }
-
 
     fun cancelHabitReminder(habitId: String) {
         cancelAlarm(habitReminderId(habitId))
@@ -151,7 +146,6 @@ class NotificationService(private val context: Context) {
     }
 
     // Quick habits (interval reminders).
-
 
     /**
      * Schedules the next occurrence of a quick habit as a single exact alarm; [rescheduleIfRepeating]
@@ -193,42 +187,27 @@ class NotificationService(private val context: Context) {
 
     fun cancelQuickHabit(id: String) = cancelAlarmAndNotification(quickHabitId(id))
 
-    // Daily motivation.
+    fun scheduleDailyMotivation(hour: Int, minute: Int, title: String, body: String) =
+        scheduleDaily(DAILY_MOTIVATION_ID, CHANNEL_MOTIVATION, hour, minute, title, body)
 
+    fun scheduleEndOfDayCheckup(hour: Int, minute: Int, title: String, body: String) =
+        scheduleDaily(END_OF_DAY_CHECKUP_ID, CHANNEL_EVENING, hour, minute, title, body)
 
-    fun scheduleDailyMotivation(hour: Int, minute: Int, title: String, body: String) {
-        val triggerAt = nextReminderMillis(hour, minute)
+    /** A notification at [hour]:[minute] every day, re-armed by [ReminderReceiver] when it fires. */
+    private fun scheduleDaily(id: Int, channelId: String, hour: Int, minute: Int, title: String, body: String) {
         val intent = reminderIntent(
-            notificationId = DAILY_MOTIVATION_ID,
+            notificationId = id,
             title = title,
             body = body,
-            channelId = CHANNEL_MOTIVATION,
+            channelId = channelId,
             repeat = Repeat.DAILY,
             hour = hour,
             minute = minute,
         )
-        scheduleExact(triggerAt, DAILY_MOTIVATION_ID, intent)
-    }
-
-    // End of day checkup.
-
-
-    fun scheduleEndOfDayCheckup(hour: Int, minute: Int, title: String, body: String) {
-        val triggerAt = nextReminderMillis(hour, minute)
-        val intent = reminderIntent(
-            notificationId = END_OF_DAY_CHECKUP_ID,
-            title = title,
-            body = body,
-            channelId = CHANNEL_EVENING,
-            repeat = Repeat.DAILY,
-            hour = hour,
-            minute = minute,
-        )
-        scheduleExact(triggerAt, END_OF_DAY_CHECKUP_ID, intent)
+        scheduleExact(nextReminderMillis(hour, minute), id, intent)
     }
 
     // Cancel.
-
 
     fun cancelNotification(notificationId: Int) = cancelAlarmAndNotification(notificationId)
 
@@ -250,9 +229,10 @@ class NotificationService(private val context: Context) {
     }
 
     /**
-     * Shows the end-of-day checkup with one-tap Bad/OK/Great rating actions handled by
-     * [DayRatingReceiver]. The rated day is captured at post time, so a tap after midnight still
-     * rates the evening's day. [localized] resolves the action labels in the app locale.
+     * Shows the end-of-day checkup. Unless [withRatingActions] is false (today is already rated),
+     * it carries one-tap Bad/OK/Great actions handled by [DayRatingReceiver]. The rated day is
+     * captured at post time, so a tap after midnight still rates the evening's day. [localized]
+     * resolves the action labels in the app locale.
      */
     internal fun showEndOfDayNotification(
         id: Int,
@@ -261,6 +241,7 @@ class NotificationService(private val context: Context) {
         localized: Context,
         lines: List<String> = emptyList(),
         overflowText: String? = null,
+        withRatingActions: Boolean = true,
     ) {
         val dayKey = AppDateUtils.dayKey(LocalDate.now())
         val builder = reminderNotification(id, CHANNEL_EVENING, title, body)
@@ -271,7 +252,7 @@ class NotificationService(private val context: Context) {
             overflowText?.let { inbox.setSummaryText(it) }
             builder.setStyle(inbox)
         }
-        DayRating.entries.forEach { rating ->
+        if (withRatingActions) DayRating.entries.forEach { rating ->
             val actionIntent = Intent(context, DayRatingReceiver::class.java).apply {
                 putExtra(DayRatingReceiver.EXTRA_DAY_KEY, dayKey)
                 putExtra(DayRatingReceiver.EXTRA_RATING, rating.value)
@@ -283,17 +264,10 @@ class NotificationService(private val context: Context) {
                 actionIntent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
-            builder.addAction(0, dayRatingActionLabel(localized, rating), pendingAction)
+            builder.addAction(0, localized.getString(rating.labelRes), pendingAction)
         }
         notifySafely(id, builder.build())
     }
-
-    private fun dayRatingActionLabel(localized: Context, rating: DayRating): String =
-        when (rating) {
-            DayRating.BAD -> localized.getString(R.string.dayRatingBad)
-            DayRating.OK -> localized.getString(R.string.dayRatingOk)
-            DayRating.GREAT -> localized.getString(R.string.dayRatingGreat)
-        }
 
     private fun reminderNotification(
         id: Int,
@@ -329,7 +303,6 @@ class NotificationService(private val context: Context) {
             // Notification permission not granted; the alarm still fired, just silently.
         }
     }
-
 
     private fun channelAccentColor(channelId: String): Int = when (channelId) {
         CHANNEL_TASKS -> TaskColor
@@ -430,7 +403,6 @@ class NotificationService(private val context: Context) {
         putExtra(EXTRA_WEEKDAYS, weekdaysCsv)
     }
 
-
     private fun nextReminderMillis(
         hour: Int,
         minute: Int,
@@ -491,7 +463,6 @@ class NotificationService(private val context: Context) {
         internal const val EXTRA_START_MIN = "startMinuteOfDay"
         internal const val EXTRA_END_MIN = "endMinuteOfDay"
         internal const val EXTRA_WEEKDAYS = "allowedWeekdays"
-
 
         /** Deterministic notification/request-code ID of a habit's single pending reminder. */
         fun habitReminderId(habitId: String): Int = legacyHabitReminderId(habitId, null, 0)

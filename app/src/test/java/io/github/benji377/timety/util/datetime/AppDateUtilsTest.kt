@@ -6,7 +6,6 @@ import java.time.LocalDate
 import java.util.Locale
 
 class AppDateUtilsTest {
-
     @Test
     fun dayKey_isZeroPaddedIsoDate() {
         assertEquals("2026-03-07", AppDateUtils.dayKey(LocalDate.of(2026, 3, 7)))

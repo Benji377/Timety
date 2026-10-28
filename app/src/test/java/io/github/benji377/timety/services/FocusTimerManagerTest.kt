@@ -11,9 +11,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-
 class FocusTimerManagerTest {
-
     @Before
     fun resetSingleton() {
         // FocusTimerManager is a singleton; make sure no state leaks between tests.

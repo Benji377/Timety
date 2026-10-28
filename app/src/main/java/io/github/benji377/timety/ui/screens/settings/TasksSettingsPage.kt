@@ -23,7 +23,6 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 
-
 /** Task settings: the Home upcoming-task window and task categories. */
 @Composable
 internal fun TasksSettings(

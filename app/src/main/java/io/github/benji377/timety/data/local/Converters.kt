@@ -46,17 +46,6 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromStringList(strings: List<String>?): String {
-        return strings?.joinToString("|||") ?: ""
-    }
-
-    @TypeConverter
-    fun toStringList(data: String?): List<String> {
-        if (data.isNullOrBlank()) return emptyList()
-        return data.split("|||")
-    }
-
-    @TypeConverter
     fun fromTaskPlace(place: TaskPlace?): String? {
         return place?.toJson()?.toString()
     }

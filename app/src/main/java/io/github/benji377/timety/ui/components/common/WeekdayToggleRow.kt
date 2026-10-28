@@ -27,7 +27,6 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.task.weekdayShortName
 import io.github.benji377.timety.ui.theme.AppTheme
 
-
 /**
  * Multi-select weekday picker in the [NeoSegmentedSelector] style, with single-letter segments
  * that never wrap. [selected] holds ISO weekday numbers (1 = Monday).
@@ -104,7 +103,6 @@ fun WeekdayToggleRow(
         }
     }
 }
-
 
 @Composable
 @ReadOnlyComposable

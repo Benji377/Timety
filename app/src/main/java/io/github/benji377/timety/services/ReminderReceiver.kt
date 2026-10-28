@@ -7,12 +7,13 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.LocaleHelper
+import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.reminder.EveningSummary
 import io.github.benji377.timety.util.reminder.EveningSummaryBuilder
 import kotlinx.coroutines.flow.first
 import java.time.Instant
-
+import java.time.LocalDate
 
 /** Handles a fired reminder alarm by showing its notification and re-arming it if it repeats. */
 class ReminderReceiver : BroadcastReceiver() {
@@ -39,42 +40,7 @@ class ReminderReceiver : BroadcastReceiver() {
 
         if (channelId == NotificationService.CHANNEL_EVENING) {
             launchAsync {
-                val localized = localizedContext(appContext)
-                val summary = eveningSummary(appContext)
-                when {
-                    summary == null -> notificationService.showEndOfDayNotification(
-                        notificationId, title, body, localized,
-                    )
-
-                    summary.isAllDone -> notificationService.showEndOfDayNotification(
-                        notificationId,
-                        title,
-                        localized.getString(R.string.notificationEveningAllDone),
-                        localized,
-                    )
-
-                    else -> {
-                        val preview = summary.preview(EVENING_MAX_LINES)
-                        notificationService.showEndOfDayNotification(
-                            notificationId,
-                            title,
-                            localized.resources.getQuantityString(
-                                R.plurals.nNotificationEveningOpen, summary.total, summary.total,
-                            ),
-                            localized,
-                            lines = preview.items.map {
-                                localized.getString(
-                                    if (it.isTask) R.string.notificationEveningLineTask
-                                    else R.string.notificationEveningLineHabit,
-                                    it.name,
-                                )
-                            },
-                            overflowText = preview.hiddenCount.takeIf { it > 0 }?.let {
-                                localized.getString(R.string.notificationEveningMore, it)
-                            },
-                        )
-                    }
-                }
+                showEvening(appContext, notificationService, notificationId, title, body)
                 notificationService.rescheduleIfRepeating(intent)
             }
             return
@@ -109,6 +75,41 @@ class ReminderReceiver : BroadcastReceiver() {
         notificationService.rescheduleIfRepeating(intent)
     }
 
+    /** The evening check-in: what is still open today, with rating buttons while today is unrated. */
+    private suspend fun showEvening(
+        context: Context,
+        notificationService: NotificationService,
+        notificationId: Int,
+        title: String,
+        fallbackBody: String,
+    ) {
+        val localized = localizedContext(context)
+        val summary = eveningSummary(context)
+        val preview = summary?.takeUnless { it.isAllDone }?.preview(EVENING_MAX_LINES)
+        val body = when {
+            summary == null -> fallbackBody
+            summary.isAllDone -> localized.getString(R.string.notificationEveningAllDone)
+            else -> localized.resources.getQuantityString(
+                R.plurals.nNotificationEveningOpen, summary.total, summary.total,
+            )
+        }
+        notificationService.showEndOfDayNotification(
+            notificationId,
+            title,
+            body,
+            localized,
+            lines = preview?.items.orEmpty().map {
+                localized.getString(
+                    if (it.isTask) R.string.notificationEveningLineTask else R.string.notificationEveningLineHabit,
+                    it.name,
+                )
+            },
+            overflowText = preview?.hiddenCount?.takeIf { it > 0 }?.let {
+                localized.getString(R.string.notificationEveningMore, it)
+            },
+            withRatingActions = !isTodayRated(context),
+        )
+    }
 
     private suspend fun quickHabitIsActive(context: Context, id: String): Boolean {
         val app = context.applicationContext as? TimetyApplication ?: return true
@@ -124,6 +125,10 @@ class ReminderReceiver : BroadcastReceiver() {
         return HabitWithCompletions(habit, repository.getCompletionsForHabit(habitId).first())
     }
 
+    private suspend fun isTodayRated(context: Context): Boolean {
+        val app = context.applicationContext as? TimetyApplication ?: return false
+        return app.container.dayRatingRepository.get(AppDateUtils.dayKey(LocalDate.now())) != null
+    }
 
     /** What is still open today, or null when the app container isn't available. */
     private suspend fun eveningSummary(context: Context): EveningSummary? {
@@ -141,7 +146,6 @@ class ReminderReceiver : BroadcastReceiver() {
         )
     }
 
-
     /** [context] wrapped in the user's chosen app locale; the plain context if unavailable. */
     private suspend fun localizedContext(context: Context): Context {
         val app = context.applicationContext as? TimetyApplication ?: return context
@@ -151,7 +155,6 @@ class ReminderReceiver : BroadcastReceiver() {
         )
     }
 
-
     private suspend fun motivationBody(context: Context, fallback: String): String {
         val app = context.applicationContext as? TimetyApplication ?: return fallback
         val localized = localizedContext(app)
@@ -160,10 +163,9 @@ class ReminderReceiver : BroadcastReceiver() {
             localized.getString(R.string.notificationQuote2),
             localized.getString(R.string.notificationQuote3),
         )
-        val quote = quotes[java.time.LocalDate.now().dayOfMonth % quotes.size]
+        val quote = quotes[LocalDate.now().dayOfMonth % quotes.size]
         return quote + todaysHabitsSuffix(app, localized)
     }
-
 
     private suspend fun todaysHabitsSuffix(app: TimetyApplication, context: Context): String {
         val habits = app.container.habitRepository.allHabits.first()

@@ -19,7 +19,7 @@ class HabitRepository(
     // ToggleHabitCompletionAction: this repository is a process-wide singleton (see
     // AppContainer), so a shared lock here also covers the app-vs-widget race, not just
     // concurrent taps within one entry point. Two unsynchronized toggles would otherwise both
-    // read "not completed" and insert a duplicate completion plus double XP.
+    // read "not completed" and insert a duplicate completion.
     val completionMutex = Mutex()
 
     suspend fun getHabitById(id: String): HabitEntity? = withContext(Dispatchers.IO) {

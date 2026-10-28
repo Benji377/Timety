@@ -62,7 +62,6 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import kotlin.math.roundToInt
 
-
 /** Top bar with a back button over a scrolling column; the frame shared by every settings page. */
 @Composable
 internal fun SettingsPageScaffold(
