@@ -68,6 +68,7 @@ import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.QuickHabitViewModel
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.habit.QuickHabitScheduling
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -265,8 +266,9 @@ private fun QuickHabitEditDialog(
     var selectedWeekdays by remember {
         mutableStateOf(HabitUtils.parseWeekdays(initial?.targetWeekdays))
     }
+    // New quick habits start with daytime hours, so they don't nag through the night.
     var allDay by remember {
-        mutableStateOf(initial?.startMinuteOfDay == null || initial.endMinuteOfDay == null)
+        mutableStateOf(initial != null && (initial.startMinuteOfDay == null || initial.endMinuteOfDay == null))
     }
     var startMinute by remember { mutableIntStateOf(initial?.startMinuteOfDay ?: (8 * 60)) }
     var endMinute by remember { mutableIntStateOf(initial?.endMinuteOfDay ?: (20 * 60)) }
@@ -278,8 +280,13 @@ private fun QuickHabitEditDialog(
     val everyDayLabel = stringResource(R.string.quickHabitEveryDay)
     val specificDaysLabel = stringResource(R.string.quickHabitSpecificDays)
 
+    // A longer interval than the active hours would only ever fire once, at the window start.
+    val intervalTooLong = intervalMinutes > QuickHabitScheduling.windowLengthMinutes(
+        if (allDay) null else startMinute,
+        if (allDay) null else endMinute,
+    )
     val canSave = name.isNotBlank() &&
-            intervalValue != null && intervalValue >= 1 &&
+            intervalValue != null && intervalValue >= 1 && !intervalTooLong &&
             (!specificDays || selectedWeekdays.isNotEmpty())
 
     NeoAlertDialog(
@@ -315,7 +322,7 @@ private fun QuickHabitEditDialog(
                             if (new.length <= 4 && new.all(Char::isDigit)) intervalText = new
                         },
                         singleLine = true,
-                        isError = intervalValue == null || intervalValue < 1,
+                        isError = intervalValue == null || intervalValue < 1 || intervalTooLong,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.width(96.dp),
                     )
@@ -327,6 +334,14 @@ private fun QuickHabitEditDialog(
                         labelBuilder = { isHours -> if (isHours) hoursLabel else minutesLabel },
                         modifier = Modifier.weight(1f),
                         activeBgColor = HabitColor,
+                    )
+                }
+                if (intervalTooLong) {
+                    Text(
+                        stringResource(R.string.quickHabitIntervalTooLong),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = AppTheme.spaceSmall),
                     )
                 }
                 QuickHabitSectionDivider()

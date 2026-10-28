@@ -695,6 +695,7 @@
     <string name="quickHabitNameHint">e.g. Drink water</string>
     <string name="quickHabitIntervalLabel">Repeat every</string>
     <string name="quickHabitIntervalSubtitle">How often you get reminded</string>
+    <string name="quickHabitIntervalTooLong">Longer than the active hours, so it would only remind you once a day. Pick a shorter interval or longer hours.</string>
     <string name="quickHabitUnitMinutes">Minutes</string>
     <string name="quickHabitUnitHours">Hours</string>
     <string name="quickHabitAllDayLabel">All day</string>
