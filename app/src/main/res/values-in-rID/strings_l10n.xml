@@ -113,7 +113,7 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Tap a day to inspect its sessions</string>
     <string name="focusStatsSectionClockTitle">Daily Focus Rhythm</string>
-    <string name="focusSessionDeleteContent">This removes the session for good and takes back the XP it earned.</string>
+    <string name="focusSessionDeleteContent">This removes the session for good.</string>
     <string name="focusSessionDeleteTitle">Delete Session?</string>
     <string name="focusSessionDeletedSnackbar">Session deleted</string>
     <string name="focusSessionEditTitle">Edit Session</string>
@@ -519,6 +519,9 @@
     <string name="exactAlarmPromptBody">Without \"Alarms &amp; reminders\" access, Android may delay quick habit and task reminders by several minutes, especially while your phone is idle. Enable it now for on-time reminders.</string>
     <string name="exactAlarmPromptConfirm">Open Settings</string>
     <string name="exactAlarmPromptDismiss">Not now</string>
+    <string name="exactAlarmPromptNever">Don\'t ask again</string>
+    <string name="settingsLabelExactAlarms">Precise reminder timing</string>
+    <string name="settingsLabelExactAlarmsSubtitle">Off: Android may delay reminders by several minutes. Tap to allow \"Alarms &amp; reminders\".</string>
     <string name="notificationQuote1">Conquer your day!</string>
     <string name="notificationQuote2">Small steps lead to big results. Keep going!</string>
     <string name="notificationQuote3">What\'s on the agenda today? Let\'s make it happen.</string>
@@ -536,6 +539,7 @@
     <string name="categoryEditTitle">Edit Category</string>
     <string name="categoryEmpty">No categories yet. Tap the button above to add one.</string>
     <string name="categoryNameLabel">Category Name</string>
+    <string name="categoryNameTaken">A category with this name already exists</string>
     <string name="categoryTaskCountZero">No tasks</string>
     <plurals name="categoryTaskCount">
         <item quantity="other">%d tasks</item>
@@ -670,6 +674,7 @@
     <string name="quickHabitNameHint">e.g. Drink water</string>
     <string name="quickHabitIntervalLabel">Repeat every</string>
     <string name="quickHabitIntervalSubtitle">How often you get reminded</string>
+    <string name="quickHabitIntervalTooLong">Longer than the active hours, so it would only remind you once a day. Pick a shorter interval or longer hours.</string>
     <string name="quickHabitUnitMinutes">Minutes</string>
     <string name="quickHabitUnitHours">Hours</string>
     <string name="quickHabitAllDayLabel">All day</string>
