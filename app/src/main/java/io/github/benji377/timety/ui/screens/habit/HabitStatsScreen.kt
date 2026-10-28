@@ -64,6 +64,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.UserColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.quantityString
+import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.util.datetime.AppDateUtils
@@ -84,6 +85,7 @@ fun HabitStatsScreen(
 ) {
     val habits by viewModel.habitsWithCompletions.collectAsState()
     var focusedDate by remember { mutableStateOf(LocalDate.now()) }
+    val today by rememberToday()
 
     Scaffold { paddingValues ->
         if (habits.isEmpty()) {
@@ -115,8 +117,7 @@ fun HabitStatsScreen(
             }
             // Streaks scan every completion, so they're computed once per data change rather
             // than on each recomposition or week shift.
-            val streaksByHabit = remember(habits) {
-                val today = LocalDate.now()
+            val streaksByHabit = remember(habits, today) {
                 habits.associate { hwc ->
                     hwc.habit.id to HabitStreaks.streaks(hwc.habit, completionDates(hwc), today)
                 }

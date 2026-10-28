@@ -75,6 +75,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.quantityString
+import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
@@ -160,7 +161,7 @@ private fun OverviewStatsScreen(
     val sessions by focusViewModel.allSessions.collectAsState()
 
     val zone = remember { ZoneId.systemDefault() }
-    val now = remember { LocalDate.now() }
+    val now by rememberToday()
 
     // Completed recurring occurrences count as tasks done on their completion day.
     val tasksPerDay = remember(tasks, recurringItems) {

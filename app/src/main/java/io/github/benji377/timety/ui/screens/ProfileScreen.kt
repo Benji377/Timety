@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -117,7 +118,8 @@ fun ProfileScreen(
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
-    val moods by dayRatingViewModel.ratingsByDay.collectAsState()
+    val loadedMoods by dayRatingViewModel.ratingsByDay.collectAsState()
+    val moods = loadedMoods.orEmpty()
     val checkupTime by dayRatingViewModel.checkupTime.collectAsState()
 
     // Ticks so the rate-today card appears at the checkup time and today rolls over at midnight.
@@ -161,15 +163,23 @@ fun ProfileScreen(
         val since = userProfile?.accountCreated?.let {
             AppDateFormatUtils.formatDate(it.atZone(ZoneId.systemDefault()).toLocalDate(), dateFormatSettings.dateFormatCode)
         }
-        val preview by produceState<Bitmap?>(null, userName, since, stats) {
+        // Null while rendering; a failed render closes the dialog instead of spinning forever.
+        val rendered by produceState<Result<Bitmap>?>(null, userName, since, stats) {
             value = withContext(Dispatchers.Default) {
                 runCatching {
                     WrapUpImageGenerator.render(
                         context, userName, since, stats.totalTasksDone, stats.totalFocusMins, stats.totalHabitsMet
                     )
-                }.getOrNull()
+                }
             }
         }
+        LaunchedEffect(rendered) {
+            if (rendered?.isFailure == true) {
+                showShareWrapupDialog = false
+                Toast.makeText(context, R.string.userErrorGenerateImage, Toast.LENGTH_SHORT).show()
+            }
+        }
+        val preview = rendered?.getOrNull()
         NeoAlertDialog(
             onDismissRequest = { showShareWrapupDialog = false },
             title = { Text(stringResource(R.string.userTooltipShareWrapUp)) },
@@ -359,7 +369,11 @@ fun ProfileScreen(
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
 
-            if (MoodStats.shouldPromptToday(today in moods, now.toLocalTime(), checkupTime)) {
+            // Waits for both to load, or the card flashes up for a day that is already rated.
+            val promptToday = loadedMoods != null && checkupTime?.let {
+                MoodStats.shouldPromptToday(today in moods, now.toLocalTime(), it)
+            } == true
+            if (promptToday) {
                 item {
                     RateTodayCard(
                         onPick = { dayRatingViewModel.setRating(today, it) },
@@ -381,7 +395,7 @@ fun ProfileScreen(
                 )
             }
 
-            item {
+            if (loadedMoods != null) item {
                 MoodDistributionBar(
                     moods = moods.values,
                     modifier = Modifier.padding(top = AppTheme.spaceXLarge, bottom = 40.dp),
@@ -440,7 +454,8 @@ private data class ProfileStats(
             // Each logged recurring occurrence counts as a completed task.
             totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.occurrences.size },
             totalHabitsMet = habits.sumOf { it.completions.size },
-            totalFocusMins = sessions.sumOf { it.totalSecondsFocused } / 60,
+            // Whole minutes per session, the way the Focus stats count them.
+            totalFocusMins = sessions.sumOf { it.totalSecondsFocused / 60 },
         )
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +63,13 @@ fun FocusStatsScreen(
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
     var selectedTagFilterId by remember { mutableStateOf<String?>(null) }
     var editingSession by remember { mutableStateOf<FocusSessionEntity?>(null) }
+
+    // A tag that no longer has sessions (deleted or retargeted away) hides its chip and the "All"
+    // chip with it, so drop the filter instead of leaving the screen stuck on an empty selection.
+    LaunchedEffect(sessions, tags, selectedTagFilterId) {
+        val id = selectedTagFilterId ?: return@LaunchedEffect
+        if (tags.none { it.id == id } || sessions.none { it.tagId == id }) selectedTagFilterId = null
+    }
 
     if (sessions.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

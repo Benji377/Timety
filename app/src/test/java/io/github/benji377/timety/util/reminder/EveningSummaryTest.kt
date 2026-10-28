@@ -10,6 +10,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 class EveningSummaryTest {
@@ -45,6 +46,7 @@ class EveningSummaryTest {
             ),
             recurringTasks = emptyList(),
             now = now,
+            zone = ZoneOffset.UTC,
         )
         assertTrue(summary.isAllDone)
     }
@@ -59,10 +61,27 @@ class EveningSummaryTest {
             ),
             recurringTasks = emptyList(),
             now = now,
+            zone = ZoneOffset.UTC,
         )
         assertEquals(listOf("Old", "Recent"), summary.taskTitles)
         assertEquals(listOf("Read"), summary.habitNames)
         assertEquals(3, summary.total)
+    }
+
+    @Test
+    fun countsTasksDueLaterTodayButNotTomorrow() {
+        val summary = EveningSummaryBuilder.build(
+            habits = emptyList(),
+            tasks = listOf(
+                task("Tonight", now.plus(4, ChronoUnit.HOURS)),
+                task("Midnight", Instant.parse("2026-10-07T00:00:00Z")),
+            ),
+            recurringTasks = emptyList(),
+            now = now,
+            zone = ZoneOffset.UTC,
+        )
+        assertEquals(listOf("Tonight"), summary.taskTitles)
+        assertFalse(summary.isAllDone)
     }
 
     @Test

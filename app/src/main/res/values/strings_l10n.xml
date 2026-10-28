@@ -114,7 +114,7 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Tap a day to inspect its sessions</string>
     <string name="focusStatsSectionClockTitle">Daily Focus Rhythm</string>
-    <string name="focusSessionDeleteContent">This removes the session for good and takes back the XP it earned.</string>
+    <string name="focusSessionDeleteContent">This removes the session for good.</string>
     <string name="focusSessionDeleteTitle">Delete Session?</string>
     <string name="focusSessionDeletedSnackbar">Session deleted</string>
     <string name="focusSessionEditTitle">Edit Session</string>

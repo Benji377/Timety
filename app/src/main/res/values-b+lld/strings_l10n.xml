@@ -118,7 +118,6 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Clica n di per cialé si sescions</string>
     <string name="focusStatsSectionClockTitle">Ritm de focus al di</string>
-    <string name="focusSessionDeleteContent">Chësc scancelea la sescion per dalbon y tol demez i XP che la à dé.</string>
     <string name="focusSessionDeleteTitle">Scancelé la sescion?</string>
     <string name="focusSessionDeletedSnackbar">Sescion scanceleda</string>
     <string name="focusSessionEditTitle">Mudé la sescion</string>

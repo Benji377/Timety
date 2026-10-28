@@ -175,7 +175,7 @@ class ReminderReceiver : BroadcastReceiver() {
 
         val todaysHabits = habits
             .map { HabitWithCompletions(it, completionsByHabit[it.id].orEmpty()) }
-            .filter { HabitUtils.isHabitDueToday(it) }
+            .filter { HabitUtils.needsReminderToday(it) }
             .map { it.habit.name }
         if (todaysHabits.isEmpty()) return ""
 

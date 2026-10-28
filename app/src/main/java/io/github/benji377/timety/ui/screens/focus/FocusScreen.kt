@@ -90,6 +90,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
@@ -151,6 +152,9 @@ fun FocusScreen(
     val allModes by focusViewModel.allModes.collectAsState()
     val modeId by focusViewModel.currentModeId.collectAsState()
     val activeMode = allModes.find { it.id == modeId } ?: allModes.firstOrNull()
+    // Also the notification's label, so system modes show in the app language there too.
+    val activeModeName =
+        if (activeMode != null) localizedFocusModeName(activeMode) else stringResource(R.string.focusModeSelect)
     var activePhases by remember { mutableStateOf<List<SessionPhaseEntity>>(emptyList()) }
     val phaseIndex by focusViewModel.currentPhaseIndex.collectAsState()
     val awaitingContinue by focusViewModel.awaitingContinue.collectAsState()
@@ -241,7 +245,7 @@ fun FocusScreen(
         focusViewModel.setAwaitingContinue(false)
         focusViewModel.setActiveSessionMode(activeMode.id)
         FocusTimerManager.setMode(
-            name = activeMode.name,
+            name = activeModeName,
             totalPhaseSeconds = secondsForPhase(phase, flexibleMinutes),
             isRestPhase = phase.type == PhaseType.REST,
             isStopwatch = activeMode.type == FocusModeType.STOPWATCH,
@@ -255,7 +259,7 @@ fun FocusScreen(
         val phase = activePhases.getOrNull(phaseIndex) ?: return
         focusViewModel.setActiveSessionMode(mode.id)
         FocusTimerManager.setMode(
-            name = mode.name,
+            name = activeModeName,
             totalPhaseSeconds = secondsForPhase(phase, flexibleMinutes),
             isRestPhase = phase.type == PhaseType.REST,
             isStopwatch = mode.type == FocusModeType.STOPWATCH,
@@ -295,11 +299,10 @@ fun FocusScreen(
     // Derived display state for the gauge, mode label, and control locking below.
     val currentPhase = activePhases.getOrNull(phaseIndex)
 
-    val focusMinsToday = remember(allSessions) { focusViewModel.getMinutesFocusedToday() }
-    val focusTargetToday = dailyFocusTarget.minutesOn(LocalDate.now())
+    val today by rememberToday()
+    val focusMinsToday = remember(allSessions, today) { focusViewModel.getMinutesFocusedToday() }
+    val focusTargetToday = dailyFocusTarget.minutesOn(today)
 
-    val activeModeName =
-        if (activeMode != null) localizedFocusModeName(activeMode) else stringResource(R.string.focusModeSelect)
     val habitLockedMsg = stringResource(R.string.focusSnackbarHabitLocked)
 
     // Also locked while awaiting the next phase: the session's phase cursor refers to the

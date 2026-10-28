@@ -569,8 +569,9 @@ fun RecurringTaskDetailScreen(
                 val instant = date.atTime(hour, minute).atZone(zone).toInstant()
                 when (target) {
                     RecurringPickerTarget.DUE_DATE -> dueDate = instant
+                    // The date picker allows today, so a later time today is clamped to now.
                     RecurringPickerTarget.PAST_OCCURRENCE ->
-                        recurringTaskId?.let { viewModel.addPastOccurrence(it, instant) }
+                        recurringTaskId?.let { viewModel.addPastOccurrence(it, minOf(instant, Instant.now())) }
                 }
                 pickerTarget = null
             },

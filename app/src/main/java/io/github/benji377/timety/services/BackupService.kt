@@ -71,7 +71,8 @@ class BackupService(
     suspend fun exportToUri(uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val json = buildPayload().toString(2)
-            context.contentResolver.openOutputStream(uri)?.use { out ->
+            // "wt" truncates: plain "w" can leave an old, longer file's tail behind the new JSON.
+            context.contentResolver.openOutputStream(uri, "wt")?.use { out ->
                 out.write(json.toByteArray(Charsets.UTF_8))
             } ?: error("Unable to open output stream for $uri")
         }
