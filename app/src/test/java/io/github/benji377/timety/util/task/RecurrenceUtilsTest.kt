@@ -193,4 +193,40 @@ class RecurrenceUtilsTest {
             RecurrenceUtils.statusOf(t, at(2026, 7, 9, 12), horizonDays = 7, zone = zone)
         )
     }
+
+    @Test
+    fun yearly_feb29_returnsToThe29thInLeapYears() {
+        // Stored day 29: clamped to Feb 28 in 2029, then back on Feb 29 in 2032.
+        val t = task(at(2028, 2, 29), RecurrenceUnit.YEAR, monthlyDay = 29)
+        val next = RecurrenceUtils.nextDueDate(t, at(2028, 3, 1), zone)
+        assertEquals(at(2029, 2, 28), next)
+        val afterClamp = t.copy(dueDate = next)
+        assertEquals(at(2030, 2, 28), RecurrenceUtils.nextDueDate(afterClamp, at(2029, 3, 1), zone))
+        val beforeLeap = t.copy(dueDate = at(2031, 2, 28))
+        assertEquals(at(2032, 2, 29), RecurrenceUtils.nextDueDate(beforeLeap, at(2031, 3, 1), zone))
+    }
+
+    @Test
+    fun yearly_withoutStoredDay_keepsTheDueDatesDay() {
+        val t = task(at(2026, 7, 9), RecurrenceUnit.YEAR)
+        assertEquals(at(2027, 7, 9), RecurrenceUtils.nextDueDate(t, at(2026, 7, 10), zone))
+    }
+
+    @Test
+    fun storedTimeOfDay_survivesADaylightSavingGap() {
+        // Berlin skips 02:00-03:00 on 2027-03-28, so a 02:30 task resolves to 03:30 that day; the
+        // stored time puts the next occurrence back at 02:30.
+        val berlin = ZoneId.of("Europe/Berlin")
+        val gapDay = LocalDateTime.of(2027, 3, 28, 2, 30).atZone(berlin).toInstant()
+        assertEquals(3, gapDay.atZone(berlin).hour)
+        val t = task(gapDay, RecurrenceUnit.DAY).copy(timeOfDayMinutes = 2 * 60 + 30)
+        val next = RecurrenceUtils.nextDueDate(t, gapDay, berlin).atZone(berlin)
+        assertEquals(LocalDateTime.of(2027, 3, 29, 2, 30), next.toLocalDateTime())
+    }
+
+    @Test
+    fun withoutStoredTimeOfDay_theDueDatesTimeIsKept() {
+        val t = task(at(2026, 7, 9, h = 18), RecurrenceUnit.DAY)
+        assertEquals(at(2026, 7, 10, h = 18), RecurrenceUtils.nextDueDate(t, at(2026, 7, 9, h = 19), zone))
+    }
 }

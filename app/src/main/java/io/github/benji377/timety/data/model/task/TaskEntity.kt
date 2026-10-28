@@ -49,6 +49,9 @@ data class TaskCategoryEntity(
         // Matches ui.theme.TaskColor; used when a category is created without an explicit color
         // (task form quick-add, legacy backup import).
         const val DEFAULT_COLOR_VALUE = 0xFF2563EB.toInt()
+
+        /** Whether two category names read as the same one: trimmed, ignoring case. */
+        fun isSameName(a: String, b: String): Boolean = a.trim().equals(b.trim(), ignoreCase = true)
     }
 }
 

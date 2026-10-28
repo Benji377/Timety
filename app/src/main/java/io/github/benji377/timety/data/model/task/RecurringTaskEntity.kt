@@ -40,10 +40,11 @@ enum class MonthlyMode {
  * - MONTH + [MonthlyMode.DAY_OF_MONTH]: every [interval] months on day [monthlyDay].
  * - MONTH + [MonthlyMode.NTH_WEEKDAY]: every [interval] months on the [monthlyOrdinal]th
  *   [monthlyWeekday] (ordinal [LAST_ORDINAL] = last).
- * - YEAR: every [interval] years on the due date's month/day.
+ * - YEAR: every [interval] years on the due date's month, on day [monthlyDay].
  *
- * The intended day/ordinal is stored rather than re-derived from [dueDate], so "on day 31"
- * survives being clamped to a shorter month. The time of day always comes from [dueDate].
+ * The intended day/ordinal and time of day are stored rather than re-derived from [dueDate], so
+ * "on day 31" survives being clamped to a shorter month, Feb 29 comes back in leap years, and a
+ * time inside a daylight-saving gap isn't shifted for good.
  */
 @Entity(tableName = "recurring_tasks")
 data class RecurringTaskEntity(
@@ -53,14 +54,16 @@ data class RecurringTaskEntity(
     val description: String = "",
     /** Category name, like [TaskEntity.category]; feeds the stats breakdown and list filters. */
     val category: String = "",
-    /** The next occurrence; advanced on completion. Also the anchor for week/time-of-day math. */
+    /** The next occurrence; advanced on completion. Also the anchor for week math. */
     val dueDate: Instant,
+    /** Local time of day in minutes after midnight. Null = the due date's time of day. */
+    val timeOfDayMinutes: Int? = null,
     val unit: RecurrenceUnit,
     val interval: Int = 1,
     /** ISO weekday numbers as `"[1,5]"` (1 = Monday), for WEEK. Empty/null = the due date's weekday. */
     val daysOfWeek: String? = null,
     val monthlyMode: MonthlyMode = MonthlyMode.DAY_OF_MONTH,
-    /** 1..31, for MONTH + DAY_OF_MONTH. Null = the due date's day. */
+    /** 1..31, for MONTH + DAY_OF_MONTH and for YEAR. Null = the due date's day. */
     val monthlyDay: Int? = null,
     /** 1..4 or [LAST_ORDINAL], for MONTH + NTH_WEEKDAY. Null = derived from the due date. */
     val monthlyOrdinal: Int? = null,
@@ -93,7 +96,12 @@ data class RecurringOccurrenceEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val recurringTaskId: String,
-    val completedAt: Instant
+    val completedAt: Instant,
+    /**
+     * The task's due date before this completion advanced it, so unchecking can put it back.
+     * Null for backdated entries and restored backups, which never moved the due date.
+     */
+    val previousDueDate: Instant? = null,
 )
 
 /** A recurring task paired with its completion records, for a Room `@Relation` query. */

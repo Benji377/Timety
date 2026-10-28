@@ -203,13 +203,13 @@ class BackupService(
             taskDao.insertTask(task)
             subtasks.forEach(taskDao::insertSubtask)
         }
-        restoreTaskCategories(json.objects("taskCategories"))
 
         recurringTaskDao.clearAll()
         json.objects("recurringTasks").map(::recurringTaskFromBackup).forEach { (task, occurrences) ->
             recurringTaskDao.insert(task)
             occurrences.forEach(recurringTaskDao::insertOccurrence)
         }
+        restoreTaskCategories(json.objects("taskCategories"))
 
         habitDao.clearAll()
         json.objects("habits").map(::habitFromBackup).forEach { (habit, completions) ->
@@ -232,7 +232,7 @@ class BackupService(
         restoreFocus(json.optJSONObject("focus") ?: JSONObject())
     }
 
-    /** Must run after the tasks are restored: missing categories are derived from them. */
+    /** Must run after the tasks and recurring tasks are restored: missing categories are derived from them. */
     private fun restoreTaskCategories(categories: List<JSONObject>) {
         taskDao.clearAllCategories()
         categories.mapNotNull(::categoryFromBackup).forEach(taskDao::insertCategoryIfAbsent)

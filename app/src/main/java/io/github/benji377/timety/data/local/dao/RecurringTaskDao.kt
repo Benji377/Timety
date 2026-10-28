@@ -50,4 +50,11 @@ interface RecurringTaskDao {
 
     @Query("DELETE FROM recurring_occurrences WHERE id = :id")
     fun deleteOccurrenceById(id: Long)
+
+    /** The newest occurrence that advanced the task's due date, or null if none did. */
+    @Query(
+        "SELECT MAX(id) FROM recurring_occurrences " +
+                "WHERE recurringTaskId = :taskId AND previousDueDate IS NOT NULL"
+    )
+    fun getLatestAdvancingOccurrenceId(taskId: String): Long?
 }

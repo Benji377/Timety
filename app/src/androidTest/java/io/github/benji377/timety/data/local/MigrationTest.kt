@@ -150,7 +150,7 @@ class MigrationTest {
     }
 
     @Test
-    fun migrate5To6_dropsXpColumnsAndKeepsProfile() {
+    fun migrate5To6_dropsXpColumnsAndKeepsProfile_andAddsRecurringColumns() {
         val dbName = "migration-test-5-6"
 
         helper.createDatabase(dbName, 5).apply {
@@ -158,6 +158,12 @@ class MigrationTest {
                 "INSERT INTO user_profile (id, name, profileImagePath, accountCreated, " +
                     "unlockedAchievements, totalXp) VALUES (1, 'Benji', '/avatar.jpg', 42, 'a|||b', 900)"
             )
+            execSQL(
+                "INSERT INTO recurring_tasks (id, title, description, category, dueDate, unit, interval, " +
+                    "monthlyMode, reminderOffsetsMinutes, createdAt) " +
+                    "VALUES ('r1', 'Rent', '', '', 1000, 'MONTH', 1, 'DAY_OF_MONTH', '[]', 1)"
+            )
+            execSQL("INSERT INTO recurring_occurrences (id, recurringTaskId, completedAt) VALUES (7, 'r1', 500)")
             close()
         }
 
@@ -169,6 +175,19 @@ class MigrationTest {
             assertEquals("Benji", cursor.getString(0))
             assertEquals("/avatar.jpg", cursor.getString(1))
             assertEquals(42L, cursor.getLong(2))
+        }
+        // Existing recurring rows keep their data; the new columns start empty.
+        db.query("SELECT dueDate, timeOfDayMinutes FROM recurring_tasks WHERE id = 'r1'").use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals(1000L, cursor.getLong(0))
+            assertTrue(cursor.isNull(1))
+        }
+        db.query("SELECT completedAt, previousDueDate FROM recurring_occurrences WHERE id = 7").use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals(500L, cursor.getLong(0))
+            assertTrue(cursor.isNull(1))
         }
         db.close()
     }

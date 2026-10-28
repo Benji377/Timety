@@ -223,7 +223,7 @@ fun CalendarScreen(
                                 onTaskClick = { task -> onNavigateToTask(task.task.id) },
                                 onCompleteRecurring = completeRecurring,
                                 onUncheckRecurring = { occurrence ->
-                                    recurringViewModel.deleteOccurrence(occurrence)
+                                    recurringViewModel.uncheckOccurrence(occurrence)
                                 },
                                 onRecurringClick = { task -> onNavigateToRecurring(task.id) },
                             )
