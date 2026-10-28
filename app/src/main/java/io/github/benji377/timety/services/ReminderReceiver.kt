@@ -3,6 +3,7 @@ package io.github.benji377.timety.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
@@ -11,6 +12,7 @@ import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.reminder.EveningSummary
 import io.github.benji377.timety.util.reminder.EveningSummaryBuilder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import java.time.Instant
 import java.time.LocalDate
@@ -29,19 +31,21 @@ class ReminderReceiver : BroadcastReceiver() {
         val appContext = context.applicationContext
         val notificationService = NotificationService(appContext)
 
+        // The daily alarms re-arm before reading the database, so a failed read still leaves
+        // tomorrow's alarm in place.
         if (channelId == NotificationService.CHANNEL_MOTIVATION) {
+            notificationService.rescheduleIfRepeating(intent)
             launchAsync {
                 val finalBody = motivationBody(appContext, fallback = body)
                 notificationService.showNotification(notificationId, channelId, title, finalBody)
-                notificationService.rescheduleIfRepeating(intent)
             }
             return
         }
 
         if (channelId == NotificationService.CHANNEL_EVENING) {
+            notificationService.rescheduleIfRepeating(intent)
             launchAsync {
                 showEvening(appContext, notificationService, notificationId, title, body)
-                notificationService.rescheduleIfRepeating(intent)
             }
             return
         }
@@ -111,10 +115,18 @@ class ReminderReceiver : BroadcastReceiver() {
         )
     }
 
+    /** Whether the quick habit still exists and is enabled; a failed read keeps the chain going. */
     private suspend fun quickHabitIsActive(context: Context, id: String): Boolean {
         val app = context.applicationContext as? TimetyApplication ?: return true
-        return app.container.quickHabitRepository.allQuickHabits.first()
-            .any { it.id == id && it.isEnabled }
+        return try {
+            app.container.quickHabitRepository.allQuickHabits.first()
+                .any { it.id == id && it.isEnabled }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Couldn't read quick habit $id; keeping its reminders", e)
+            true
+        }
     }
 
     /** [habitId] with its completions, or null if the habit no longer exists. */
@@ -188,6 +200,8 @@ class ReminderReceiver : BroadcastReceiver() {
     }
 
     private companion object {
+        const val TAG = "ReminderReceiver"
+
         /** InboxStyle shows at most five lines; the rest collapse into a "+N more" footer. */
         const val EVENING_MAX_LINES = 5
     }

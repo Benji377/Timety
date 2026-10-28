@@ -41,26 +41,26 @@ class RecurringTaskViewModel(
     }
 
     fun addTask(task: RecurringTaskEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             recurringTaskRepository.insertTask(task)
             scheduleReminders(task)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 
     fun updateTask(task: RecurringTaskEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             recurringTaskRepository.updateTask(task)
             scheduleReminders(task)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 
     fun deleteTask(task: RecurringTaskEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             recurringTaskRepository.deleteTask(task)
             ReminderScheduler.create(application).cancelRecurringTaskReminders(task.id)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 

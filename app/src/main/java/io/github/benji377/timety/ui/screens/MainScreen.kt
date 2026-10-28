@@ -1,11 +1,7 @@
 package io.github.benji377.timety.ui.screens
 
 import android.Manifest
-import android.app.AlarmManager
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -22,7 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,8 +32,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import io.github.benji377.timety.R
-import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.ExactAlarmPromptDialog
 import io.github.benji377.timety.ui.components.common.NeoNavigationBar
 import io.github.benji377.timety.ui.components.focus.FocusTagsWidget
 import io.github.benji377.timety.ui.navigation.AppRoute
@@ -62,6 +57,7 @@ import io.github.benji377.timety.ui.screens.task.TaskListScreen
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import io.github.benji377.timety.util.reminder.ExactAlarmAccess
 
 /**
  * Root screen hosting the navigation graph and bottom navigation bar for the app's main sections.
@@ -86,30 +82,29 @@ fun MainScreen(
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         val context = LocalContext.current
-        var showExactAlarmPrompt by remember { mutableStateOf(false) }
+        // Saveable, so "once per launch" means per app start, not again after every rotation.
+        var exactAlarmPromptChecked by rememberSaveable { mutableStateOf(false) }
+        var showExactAlarmPrompt by rememberSaveable { mutableStateOf(false) }
         LaunchedEffect(Unit) {
-            val alarmManager = context.getSystemService(AlarmManager::class.java)
-            if (settingsViewModel.consumeExactAlarmPromptDue() && alarmManager?.canScheduleExactAlarms() == false) {
+            if (exactAlarmPromptChecked) return@LaunchedEffect
+            exactAlarmPromptChecked = true
+            if (ExactAlarmAccess.isMissing(context) && settingsViewModel.isExactAlarmPromptAllowed()) {
                 showExactAlarmPrompt = true
             }
         }
-        ConfirmationDialog(
-            visible = showExactAlarmPrompt,
-            title = stringResource(R.string.exactAlarmPromptTitle),
-            content = stringResource(R.string.exactAlarmPromptBody),
-            confirmLabel = stringResource(R.string.exactAlarmPromptConfirm),
-            dismissLabel = stringResource(R.string.exactAlarmPromptDismiss),
-            onConfirm = {
-                showExactAlarmPrompt = false
-                context.startActivity(
-                    Intent(
-                        Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-                        Uri.fromParts("package", context.packageName, null)
-                    )
-                )
-            },
-            onDismiss = { showExactAlarmPrompt = false },
-        )
+        if (showExactAlarmPrompt) {
+            ExactAlarmPromptDialog(
+                onOpenSettings = {
+                    showExactAlarmPrompt = false
+                    context.startActivity(ExactAlarmAccess.settingsIntent(context))
+                },
+                onDismiss = { showExactAlarmPrompt = false },
+                onNever = {
+                    showExactAlarmPrompt = false
+                    settingsViewModel.declineExactAlarmPrompt()
+                },
+            )
+        }
     }
 
     val navController = rememberNavController()

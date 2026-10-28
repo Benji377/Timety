@@ -56,26 +56,26 @@ class HabitViewModel(
     }
 
     fun addHabit(habit: HabitEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             habitRepository.insertHabit(habit)
             refreshHabitReminder(habit.id)
-            updateWidgets()
+            HabitWidget().updateAll(application)
         }
     }
 
     fun updateHabit(habit: HabitEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             habitRepository.updateHabit(habit)
             refreshHabitReminder(habit.id)
-            updateWidgets()
+            HabitWidget().updateAll(application)
         }
     }
 
     fun deleteHabit(habit: HabitEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             habitRepository.deleteHabit(habit)
             cancelHabitReminder(habit.id)
-            updateWidgets()
+            HabitWidget().updateAll(application)
         }
     }
 

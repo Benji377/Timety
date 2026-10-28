@@ -39,27 +39,27 @@ class TaskViewModel(
     }
 
     fun addTask(task: TaskEntity, subtasks: List<SubtaskEntity>) {
-        viewModelScope.launch {
+        launchToCompletion {
             taskRepository.insertTask(task)
             subtasks.forEach { taskRepository.insertSubtask(it) }
             scheduleTaskReminders(task)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 
     fun updateTask(task: TaskEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             taskRepository.updateTask(task)
             scheduleTaskReminders(task)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 
     fun deleteTask(task: TaskEntity) {
-        viewModelScope.launch {
+        launchToCompletion {
             taskRepository.deleteTask(task)
             cancelTaskReminders(task.id)
-            updateWidgets()
+            TaskWidget().updateAll(application)
         }
     }
 

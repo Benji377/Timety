@@ -218,12 +218,14 @@ class SettingsViewModel(
         ReminderScheduler.resyncAll(application)
     }
 
-    /** True (once) the first time this is called; marks the exact-alarm prompt as shown regardless of the outcome. */
-    suspend fun consumeExactAlarmPromptDue(): Boolean {
-        val alreadyShown = repository.exactAlarmPromptShownFlow.first()
-        repository.saveExactAlarmPromptShown(true)
-        return !alreadyShown
-    }
+    /**
+     * Whether the exact-alarm prompt may show at launch: until the user grants the permission
+     * (checked by the caller) or picks "Don't ask again". "Not now" asks again next launch.
+     */
+    suspend fun isExactAlarmPromptAllowed(): Boolean = !repository.exactAlarmPromptDeclinedFlow.first()
+
+    fun declineExactAlarmPrompt() =
+        viewModelScope.launch { repository.saveExactAlarmPromptDeclined(true) }
 
     /** Checks that [url] is a reachable Photon-compatible geocoding endpoint before it is saved. */
     suspend fun validateLocationApiEndpoint(url: String): Boolean {
