@@ -1,0 +1,138 @@
+package io.github.benji377.timety.ui.components.common
+
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.zIndex
+import kotlin.math.roundToInt
+
+/**
+ * Renders [items] in a plain [Column]. While [isReorderEnabled], each item drags to swap past its
+ * neighbors, and [onOrderChanged] fires with the new order on drag end. A drag starts immediately,
+ * or after a long-press when [dragAfterLongPress] (so taps and list scrolling keep working). While
+ * disabled it is a pure passthrough with no gesture handling attached.
+ *
+ * Tile heights vary (notes, progress bars), so each is tracked live via [onGloballyPositioned]
+ * rather than assumed uniform.
+ */
+@Composable
+fun <T> DraggableReorderColumn(
+    items: List<T>,
+    key: (T) -> String,
+    isReorderEnabled: Boolean,
+    onOrderChanged: (List<T>) -> Unit,
+    modifier: Modifier = Modifier,
+    dragAfterLongPress: Boolean = false,
+    itemContent: @Composable (item: T, isBeingDragged: Boolean) -> Unit,
+) {
+    if (!isReorderEnabled) {
+        Column(modifier) {
+            items.forEach { item -> itemContent(item, false) }
+        }
+        return
+    }
+
+    val currentItems by rememberUpdatedState(items)
+    var localOrder by remember { mutableStateOf(items) }
+    LaunchedEffect(items) { localOrder = items }
+
+    val itemHeights = remember { mutableStateMapOf<String, Int>() }
+    var draggingKey by remember { mutableStateOf<String?>(null) }
+    var dragOffsetPx by remember { mutableFloatStateOf(0f) }
+    val haptics = LocalHapticFeedback.current
+
+    Column(modifier) {
+        localOrder.forEach { item ->
+            val itemKey = key(item)
+            key(itemKey) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onGloballyPositioned { itemHeights[itemKey] = it.size.height }
+                        .zIndex(if (itemKey == draggingKey) 1f else 0f)
+                        .offset {
+                            IntOffset(
+                                0,
+                                if (itemKey == draggingKey) dragOffsetPx.roundToInt() else 0
+                            )
+                        }
+                        .pointerInput(itemKey, dragAfterLongPress) {
+                            val onDragStart: (Offset) -> Unit = {
+                                if (dragAfterLongPress) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                }
+                                draggingKey = itemKey
+                                dragOffsetPx = 0f
+                            }
+                            val onDrag: (PointerInputChange, Offset) -> Unit = drag@{ change, dragAmount ->
+                                change.consume()
+                                dragOffsetPx += dragAmount.y
+
+                                var idx = localOrder.indexOfFirst { key(it) == itemKey }
+                                if (idx == -1) return@drag
+
+                                while (dragOffsetPx > 0 && idx < localOrder.lastIndex) {
+                                    val belowHeight =
+                                        itemHeights[key(localOrder[idx + 1])] ?: break
+                                    if (dragOffsetPx <= belowHeight / 2f) break
+                                    localOrder = localOrder.toMutableList().apply {
+                                        add(idx, removeAt(idx + 1))
+                                    }
+                                    dragOffsetPx -= belowHeight
+                                    idx++
+                                }
+                                while (dragOffsetPx < 0 && idx > 0) {
+                                    val aboveHeight =
+                                        itemHeights[key(localOrder[idx - 1])] ?: break
+                                    if (dragOffsetPx >= -aboveHeight / 2f) break
+                                    localOrder = localOrder.toMutableList().apply {
+                                        add(idx, removeAt(idx - 1))
+                                    }
+                                    dragOffsetPx += aboveHeight
+                                    idx--
+                                }
+                            }
+                            val onDragEnd: () -> Unit = {
+                                onOrderChanged(localOrder)
+                                draggingKey = null
+                                dragOffsetPx = 0f
+                            }
+                            val onDragCancel: () -> Unit = {
+                                localOrder = currentItems
+                                draggingKey = null
+                                dragOffsetPx = 0f
+                            }
+                            if (dragAfterLongPress) {
+                                detectDragGesturesAfterLongPress(onDragStart, onDragEnd, onDragCancel, onDrag)
+                            } else {
+                                detectDragGestures(onDragStart, onDragEnd, onDragCancel, onDrag)
+                            }
+                        },
+                ) {
+                    itemContent(item, itemKey == draggingKey)
+                }
+            }
+        }
+    }
+}

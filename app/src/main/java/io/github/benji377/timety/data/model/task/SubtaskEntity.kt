@@ -17,11 +17,12 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("taskId")]
 )
-/** A checklist item belonging to a task. */
+/** A checklist item belonging to a task, shown in ascending [sortOrder]. */
 data class SubtaskEntity(
     @PrimaryKey
     val id: String,
     val taskId: String,
     val title: String,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val sortOrder: Int = 0
 ) : java.io.Serializable

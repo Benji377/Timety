@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.BarChart
@@ -45,6 +44,7 @@ import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -326,25 +326,48 @@ fun TaskDetailScreen(
                     Icons.Filled.Checklist
                 )
             }
-            items(subtasks, key = { it.id }) { subtask ->
-                SubtaskRow(
-                    subtask = subtask,
-                    isEditing = isEditing,
-                    onCheckedChange = { checked ->
-                        val updated = subtask.copy(isCompleted = checked)
-                        subtasks = subtasks.map { if (it.id == subtask.id) updated else it }
-                        if (taskId != null) taskViewModel.updateSubtask(updated)
+            item {
+                // Hold a row to drag it; a lone subtask has nothing to reorder.
+                val canReorder = subtasks.size > 1
+                DraggableReorderColumn(
+                    items = subtasks,
+                    key = { it.id },
+                    isReorderEnabled = canReorder,
+                    dragAfterLongPress = true,
+                    onOrderChanged = { ordered ->
+                        val renumbered = ordered.mapIndexed { index, subtask -> subtask.copy(sortOrder = index) }
+                        if (renumbered != subtasks) {
+                            subtasks = renumbered
+                            if (taskId != null) taskViewModel.updateSubtasks(renumbered)
+                        }
                     },
-                    onRemove = {
-                        subtasks = subtasks.filter { it.id != subtask.id }
-                        if (taskId != null) taskViewModel.deleteSubtask(subtask)
-                    },
-                )
+                ) { subtask, isDragged ->
+                    SubtaskRow(
+                        subtask = subtask,
+                        isEditing = isEditing,
+                        onCheckedChange = { checked ->
+                            val updated = subtask.copy(isCompleted = checked)
+                            subtasks = subtasks.map { if (it.id == subtask.id) updated else it }
+                            if (taskId != null) taskViewModel.updateSubtask(updated)
+                        },
+                        onRemove = {
+                            subtasks = subtasks.filter { it.id != subtask.id }
+                            if (taskId != null) taskViewModel.deleteSubtask(subtask)
+                        },
+                        showDragHandle = canReorder,
+                        isDragged = isDragged,
+                    )
+                }
             }
             if (isEditing) {
                 item {
                     NewSubtaskField(onAdd = { title ->
-                        val newSubtask = SubtaskEntity(id = UUID.randomUUID().toString(), taskId = taskId ?: "", title = title)
+                        val newSubtask = SubtaskEntity(
+                            id = UUID.randomUUID().toString(),
+                            taskId = taskId ?: "",
+                            title = title,
+                            sortOrder = (subtasks.maxOfOrNull { it.sortOrder } ?: -1) + 1,
+                        )
                         subtasks = subtasks + newSubtask
                         if (taskId != null) taskViewModel.addSubtask(newSubtask)
                     })

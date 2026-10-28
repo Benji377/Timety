@@ -33,7 +33,8 @@ internal fun TaskWithSubtasks.toBackupJson(): JSONObject = JSONObject().apply {
     put("completedAt", orNull(task.completedAt?.toString()))
     put("createdAt", task.createdAt.toString())
     put("reminders", JSONArray(task.reminders.map { it.toString() }))
-    put("subtasks", JSONArray(subtasks.map { subtask ->
+    // Array order is the subtask order.
+    put("subtasks", JSONArray(subtasks.sortedBy { it.sortOrder }.map { subtask ->
         JSONObject().apply {
             put("id", subtask.id)
             put("title", subtask.title)
@@ -65,6 +66,7 @@ internal fun taskFromBackup(json: JSONObject): TaskWithSubtasks {
             taskId = id,
             title = subtask.stringOrNull("title") ?: "",
             isCompleted = subtask.optBoolean("isCompleted", false),
+            sortOrder = index,
         )
     }
     return TaskWithSubtasks(task, subtasks)

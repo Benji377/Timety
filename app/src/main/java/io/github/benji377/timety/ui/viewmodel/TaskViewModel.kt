@@ -134,6 +134,12 @@ class TaskViewModel(
         }
     }
 
+    fun updateSubtasks(subtasks: List<SubtaskEntity>) {
+        viewModelScope.launch {
+            taskRepository.updateSubtasks(subtasks)
+        }
+    }
+
     fun deleteSubtask(subtask: SubtaskEntity) {
         viewModelScope.launch {
             taskRepository.deleteSubtask(subtask)

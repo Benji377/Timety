@@ -84,3 +84,7 @@ data class TaskWithSubtasks(
     )
     val subtasks: List<SubtaskEntity>
 )
+
+/** Room returns `@Relation` rows unordered, so readers that show or export subtasks sort them here. */
+fun TaskWithSubtasks.withSortedSubtasks(): TaskWithSubtasks =
+    copy(subtasks = subtasks.sortedBy { it.sortOrder })
