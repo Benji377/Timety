@@ -114,6 +114,7 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Tocca un giorno per ispezionare le sue sessioni</string>
     <string name="focusStatsSectionClockTitle">Ritmo di focus giornaliero</string>
+    <string name="focusSessionDeleteContent">La sessione verrà eliminata definitivamente.</string>
     <string name="focusSessionDeleteTitle">Eliminare la sessione?</string>
     <string name="focusSessionDeletedSnackbar">Sessione eliminata</string>
     <string name="focusSessionEditTitle">Modifica sessione</string>
@@ -204,12 +205,18 @@
         <item quantity="one">Obiettivo: 1 giorno a settimana</item>
         <item quantity="other">Obiettivo: %d giorni a settimana</item>
     </plurals>
+    <plurals name="habitDetailLabelGoalMonth">
+        <item quantity="one">Obiettivo: 1 giorno al mese</item>
+        <item quantity="other">Obiettivo: %d giorni al mese</item>
+    </plurals>
     <string name="habitDetailLabelIcon">Seleziona un\'icona</string>
     <string name="habitDetailLabelName">Nome dell\'abitudine</string>
     <string name="habitDetailLabelNameHint">es., Leggere 10 pagine, Allenamento…</string>
     <string name="habitDetailLabelNameRequest">Inserisci un nome</string>
     <string name="habitDetailLabelNotes">Note</string>
     <string name="habitDetailLabelNotesHint">Perché stai sviluppando questa abitudine?</string>
+    <string name="habitDetailLabelPeriodMonth">Al mese</string>
+    <string name="habitDetailLabelPeriodWeek">A settimana</string>
     <string name="habitDetailLabelReminder">Orario promemoria</string>
     <string name="habitDetailReminderAddTime">Aggiungi orario</string>
     <string name="habitDetailReminderSheetHint">I promemoria vengono saltati nei giorni in cui questa abitudine è già completata o non è prevista.</string>
@@ -226,6 +233,7 @@
     <string name="habitDetailTitleNew">Nuova abitudine</string>
     <string name="habitFreqDaily">Giornaliera</string>
     <string name="habitFreqFlexible">%1$d / %2$d questa settimana</string>
+    <string name="habitFreqFlexibleMonth">%1$d / %2$d questo mese</string>
     <string name="habitFreqWeekly">Settimanale: %1$s</string>
     <string name="habitHistoryCompletedAt">Completato alle %1$s</string>
     <string name="habitHistoryEmpty">Nessuna cronologia ancora.</string>
@@ -238,6 +246,7 @@
     <string name="habitHistoryTimePrompt">A che ora hai completato questa abitudine?</string>
     <string name="habitHistoryTitle">Cronologia dell\'abitudine</string>
     <string name="habitLabelFreqDaily">Abitudine giornaliera</string>
+    <string name="habitLabelFreqMonthly">Abitudine mensile</string>
     <string name="habitLabelFreqWeekly">Abitudine settimanale</string>
     <string name="habitMarkPastCompletionTooltip">Segna completamento passato</string>
     <string name="habitScreenEmpty">Ancora nessuna abitudine! Tocca + per creare una routine</string>
@@ -277,6 +286,7 @@
     <string name="taskDetailsReminderOptionDay">1 giorno prima</string>
     <string name="taskDetailsReminderOptionHalfHour">30 minuti prima</string>
     <string name="taskDetailsReminderOptionHour">1 ora prima</string>
+    <string name="taskDetailsReminderOptionWeek">1 settimana prima</string>
     <string name="taskDetailsReminderOptionOnce">Puntuale</string>
     <string name="taskDetailsSectionChecklist">Lista di controllo</string>
     <string name="taskDetailsSectionInfo">Info attività</string>
@@ -462,7 +472,7 @@
     <string name="userShareSubject">Il mio riepilogo Timety</string>
     <string name="userShareText">Domina il tuo tempo con Timety!</string>
     <string name="userTooltipEditAvatar">Modifica avatar</string>
-    <string name="userTooltipShareWrapUp">Condividi riepilogo settimanale</string>
+    <string name="userTooltipShareWrapUp">Condividi riepilogo</string>
     <string name="backupActionSaveDevice">Salva sul dispositivo</string>
     <string name="backupActionSaveDeviceSubtitle">Scegli una cartella locale</string>
     <string name="backupActionShareCloud">Condividi / Carica in cloud</string>
@@ -482,6 +492,12 @@
     <string name="dayRatingBad">Pessimo</string>
     <string name="dayRatingOk">OK</string>
     <string name="dayRatingGreat">Ottimo</string>
+    <string name="moodRateTodayTitle">Com\'è andata la tua giornata?</string>
+    <string name="moodRateTodayBody">Tocca una faccina per aggiungere oggi al tuo calendario dell\'umore.</string>
+    <string name="moodPickerTitle">Com\'è andato il %1$s?</string>
+    <string name="moodDayNotRated">Non valutato</string>
+    <string name="moodDistributionTitle">Umore complessivo</string>
+    <string name="moodDistributionEmpty">Valuta un giorno per vedere come si distribuiscono i tuoi stati d\'animo.</string>
     <string name="notificationChannelFocusDesc">Notifica persistente per sessioni di focus attive</string>
     <string name="notificationChannelFocusName">Timer di focus attivo</string>
     <string name="notificationChannelHabitsDesc">Promemoria con orari specifici per le tue abitudini</string>
@@ -509,6 +525,9 @@
     <string name="exactAlarmPromptBody">Senza l\'accesso a «Sveglie e promemoria», Android può ritardare di diversi minuti i promemoria rapidi delle abitudini e delle attività, soprattutto quando il telefono è inattivo. Attivalo ora per promemoria puntuali.</string>
     <string name="exactAlarmPromptConfirm">Apri Impostazioni</string>
     <string name="exactAlarmPromptDismiss">Non ora</string>
+    <string name="exactAlarmPromptNever">Non chiedere più</string>
+    <string name="settingsLabelExactAlarms">Promemoria puntuali</string>
+    <string name="settingsLabelExactAlarmsSubtitle">Disattivato: Android può ritardare i promemoria di diversi minuti. Tocca per consentire «Sveglie e promemoria».</string>
     <string name="notificationQuote1">Conquista la tua giornata!</string>
     <string name="notificationQuote2">Piccoli passi portano a grandi risultati. Continua così!</string>
     <string name="notificationQuote3">Qual è il programma di oggi? Mettiamoci all\'opera.</string>
@@ -518,6 +537,7 @@
     <string name="wrapUpStatFocusLabel">Minuti concentrati</string>
     <string name="wrapUpStatHabitsLabel">Abitudini create</string>
     <string name="wrapUpStatTasksLabel">Attività completate</string>
+    <string name="wrapUpUsingSince">Su Timety dal %1$s</string>
     <string name="categoryAddLabel">Aggiungi categoria</string>
     <string name="categoryColorLabel">Colore</string>
     <string name="categoryDeleteContent">Sei sicuro di voler eliminare \"%1$s\"? Le attività con questa categoria rimarranno senza categoria.</string>
@@ -525,6 +545,7 @@
     <string name="categoryEditTitle">Modifica categoria</string>
     <string name="categoryEmpty">Ancora nessuna categoria. Premi il pulsante qui sopra per aggiungerne una.</string>
     <string name="categoryNameLabel">Nome della categoria</string>
+    <string name="categoryNameTaken">Esiste già una categoria con questo nome</string>
     <string name="categoryTaskCountZero">Nessuna attività</string>
     <plurals name="categoryTaskCount">
         <item quantity="one">1 attività</item>
@@ -598,6 +619,8 @@
     <string name="targetSheetGoalsEmpty">Nessun obiettivo attivo</string>
     <string name="recurrenceLabel">Ripeti</string>
     <string name="recurrenceEveryLabel">Ogni</string>
+    <string name="recurrenceEveryRequest">Inserisci almeno 1</string>
+    <string name="recurrenceDaily">Giornaliera</string>
     <string name="recurrenceWeekly">Settimanale</string>
     <string name="recurrenceMonthly">Mensile</string>
     <string name="recurrenceYearly">Annuale</string>
@@ -645,6 +668,10 @@
     <string name="recurringTaskDeleteTitle">Eliminare l\'attività ricorrente?</string>
     <string name="recurringTaskDeleteContent">Questo elimina anche la sua cronologia di completamento. Questa azione non può essere annullata.</string>
     <string name="recurringTaskCompletedSnackbar">Completato! Successivo: %1$s</string>
+    <plurals name="recurrenceEveryDays">
+        <item quantity="one">Ogni giorno</item>
+        <item quantity="other">Ogni %d giorni</item>
+    </plurals>
     <plurals name="recurrenceEveryWeeks">
         <item quantity="one">Ogni settimana</item>
         <item quantity="other">Ogni %d settimane</item>
@@ -668,6 +695,7 @@
     <string name="quickHabitNameHint">ad esempio Bevi acqua</string>
     <string name="quickHabitIntervalLabel">Ripeti ogni</string>
     <string name="quickHabitIntervalSubtitle">Ogni quanto ricevi un promemoria</string>
+    <string name="quickHabitIntervalTooLong">Più lungo delle ore attive, quindi ti ricorderebbe solo una volta al giorno. Scegli un intervallo più breve o allunga le ore attive.</string>
     <string name="quickHabitUnitMinutes">Minuti</string>
     <string name="quickHabitUnitHours">Ore</string>
     <string name="quickHabitAllDayLabel">Tutto il giorno</string>
