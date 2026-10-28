@@ -118,7 +118,7 @@
     </plurals>
     <string name="focusStatsSectionClockSubtitle">Clica n di per cialé si sescions</string>
     <string name="focusStatsSectionClockTitle">Ritm de focus al di</string>
-    <string name="focusSessionDeleteContent">Chësc scancelea la sescion per dalbon y tol demez i XP che la à dé.</string>
+    <string name="focusSessionDeleteContent">This removes the session for good.</string>
     <string name="focusSessionDeleteTitle">Scancelé la sescion?</string>
     <string name="focusSessionDeletedSnackbar">Sescion scanceleda</string>
     <string name="focusSessionEditTitle">Mudé la sescion</string>
@@ -549,6 +549,9 @@
     <string name="exactAlarmPromptBody">Zënza l azess a «Alarmes &amp; lezic» pòl Android ntardivé i lezic de plu menuc, dantaldut canche l telefon ne vën nia adurà. Ativëia l śën per lezic a l\'ora.</string>
     <string name="exactAlarmPromptConfirm">Daurì i mpustazions</string>
     <string name="exactAlarmPromptDismiss">Nia śën</string>
+    <string name="exactAlarmPromptNever">Don\'t ask again</string>
+    <string name="settingsLabelExactAlarms">Precise reminder timing</string>
+    <string name="settingsLabelExactAlarmsSubtitle">Off: Android may delay reminders by several minutes. Tap to allow \"Alarms &amp; reminders\".</string>
     <string name="notificationQuote1">Dumineia ti di!</string>
     <string name="notificationQuote2">Pici vares porta a grandi resultac. Tira inant!</string>
     <string name="notificationQuote3">Cie ies\'l in dro ncuei? Lajons taché.</string>
@@ -566,6 +569,7 @@
     <string name="categoryEditTitle">Mudé categoria</string>
     <string name="categoryEmpty">Mo deguna categories. Clica sun l buton dassëura per njunté una.</string>
     <string name="categoryNameLabel">Inuem dla categoria</string>
+    <string name="categoryNameTaken">A category with this name already exists</string>
     <string name="categoryTaskCountZero">Deguna ncëries</string>
     <plurals name="categoryTaskCount">
         <item quantity="zero">1 ncëria</item>
@@ -775,6 +779,7 @@
     <string name="quickHabitNameHint">ej. Bever ega</string>
     <string name="quickHabitIntervalLabel">Repeté uni</string>
     <string name="quickHabitIntervalSubtitle">Tan suvënz che te vëniel lecurdà</string>
+    <string name="quickHabitIntervalTooLong">Longer than the active hours, so it would only remind you once a day. Pick a shorter interval or longer hours.</string>
     <string name="quickHabitUnitMinutes">Menuc</string>
     <string name="quickHabitUnitHours">Ëures</string>
     <string name="quickHabitAllDayLabel">Dut l di</string>
