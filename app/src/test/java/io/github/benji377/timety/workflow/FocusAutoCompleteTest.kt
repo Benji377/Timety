@@ -205,6 +205,54 @@ class FocusAutoCompleteTest {
     }
 
     @Test
+    fun sessionIsLoggedWithTheTimersStartAndEnd_acrossMidnight() {
+        startSession(FocusTargetSelection.of(FocusTargetType.TAG, "default_tag", "None"))
+        val startedAt = Instant.parse("2026-10-20T23:00:00Z")
+        val endedAt = Instant.parse("2026-10-21T02:00:00Z")
+
+        FocusTimerManager.stopEvent.tryEmit(
+            FocusTimerManager.StopInfo(
+                elapsedFocusSeconds = 3 * 3600,
+                wasRestPhase = false,
+                discard = false,
+                startedAt = startedAt,
+                endedAt = endedAt,
+            )
+        )
+        assertTrue(
+            "the session keeps the timer's own start and end",
+            awaitTrue {
+                container.focusRepository.allSessions.value().singleOrNull()
+                    ?.let { it.startTime == startedAt && it.endTime == endedAt } == true
+            },
+        )
+    }
+
+    @Test
+    fun deletedTargets_fallBackToTheFirstTag() {
+        val task = TaskEntity(id = "task-gone", title = "Gone soon", createdAt = now)
+        runBlocking { container.taskRepository.insertTask(task) }
+        focusViewModel.setSelectedTarget(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title))
+        settle()
+        assertEquals(task.id, focusViewModel.selectedTarget.value?.id)
+
+        runBlocking { container.taskRepository.deleteTask(task) }
+        assertTrue(
+            "a deleted task is no longer the target",
+            awaitTrue { focusViewModel.selectedTarget.value?.type == FocusTargetType.TAG },
+        )
+
+        focusViewModel.createTag("Deep work", 0)
+        assertTrue("a new tag is selected", awaitTrue { focusViewModel.selectedTarget.value?.label == "Deep work" })
+        val tag = container.focusRepository.allTags.value().single { it.name == "Deep work" }
+        focusViewModel.deleteTag(tag)
+        assertTrue(
+            "a deleted tag is no longer the target",
+            awaitTrue { focusViewModel.selectedTarget.value.let { it != null && it.id != tag.id } },
+        )
+    }
+
+    @Test
     fun theRunningSessionsMode_cannotBeDeleted() {
         startSession(FocusTargetSelection.of(FocusTargetType.TAG, "default_tag", "None"))
         var blocker: ModeDeleteBlocker? = null

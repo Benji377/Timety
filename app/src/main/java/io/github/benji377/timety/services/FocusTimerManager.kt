@@ -80,11 +80,17 @@ object FocusTimerManager {
     val phaseCompleteEvent =
         kotlinx.coroutines.flow.MutableSharedFlow<Pair<Boolean, Int>>(extraBufferCapacity = 1)
 
-    /** Emitted by [stopEvent] when a session ends, carrying the elapsed time to bank. */
+    /**
+     * Emitted by [stopEvent] when a session ends, carrying the elapsed time to bank. [startedAt] is
+     * when the session first started ticking and [endedAt] the last moment it was ticking, so a
+     * session left paused or waiting between phases doesn't stretch to the time Stop was pressed.
+     */
     data class StopInfo(
         val elapsedFocusSeconds: Int,
         val wasRestPhase: Boolean,
         val discard: Boolean,
+        val startedAt: Instant? = null,
+        val endedAt: Instant? = null,
     )
 
     val stopEvent = kotlinx.coroutines.flow.MutableSharedFlow<StopInfo>(extraBufferCapacity = 1)
@@ -96,6 +102,10 @@ object FocusTimerManager {
     private var currentPhaseTotalSeconds: Int = 0
     private var accumulatedElapsed: Int = 0
     private var stopwatchLimitSeconds: Int = 0
+    private var sessionStartedAt: Instant? = null
+
+    // When ticking last stopped (pause or phase end); null while ticking.
+    private var lastActiveAt: Instant? = null
 
     @Volatile
     private var lastSessionStoppedAtMs: Long = 0L
@@ -127,10 +137,12 @@ object FocusTimerManager {
         // that FocusTimerService's observer treats as "session over" - it then kills itself
         // in a race with the incoming ACTION_START, losing the foreground notification and
         // the phase-end sound alarm for the rest of the session.
+        // A paused phase keeps its length: the countdown and the banked time are both measured
+        // against it, so swapping it on resume would log time that never passed.
         _timerState.update {
             it.copy(
                 modeName = name,
-                totalPhaseSeconds = totalPhaseSeconds,
+                totalPhaseSeconds = if (resuming) it.totalPhaseSeconds else totalPhaseSeconds,
                 secondsRemaining = if (resuming) it.secondsRemaining else totalPhaseSeconds,
                 isRestPhase = isRestPhase,
                 isStopwatch = isStopwatch,
@@ -149,6 +161,8 @@ object FocusTimerManager {
         // Must be read before the state update below clears the paused flag, otherwise the
         // resume branch is unreachable and the countdown silently swallows the pause duration.
         val resuming = _timerState.value.isPaused
+        if (!_timerState.value.isSessionActive) sessionStartedAt = Instant.now()
+        lastActiveAt = null
 
         _timerState.update {
             it.copy(
@@ -179,6 +193,7 @@ object FocusTimerManager {
     /** Pauses ticking, preserving the elapsed time so [startTimer] can resume from it. */
     fun pauseTimer() {
         job?.cancel()
+        if (_timerState.value.isRunning) lastActiveAt = Instant.now()
         _timerState.update { it.copy(isRunning = false, isPaused = true) }
     }
 
@@ -187,6 +202,10 @@ object FocusTimerManager {
         job?.cancel()
         val state = _timerState.value
         val wasActive = state.isSessionActive
+        val startedAt = sessionStartedAt
+        val endedAt = if (state.isRunning) Instant.now() else lastActiveAt ?: Instant.now()
+        sessionStartedAt = null
+        lastActiveAt = null
         val elapsed = when {
             state.isAwaitingContinue -> 0 // Already banked via phaseCompleteEvent.
             state.isStopwatch -> state.elapsedSeconds
@@ -205,7 +224,7 @@ object FocusTimerManager {
         }
         if (wasActive) {
             lastSessionStoppedAtMs = System.currentTimeMillis()
-            stopEvent.tryEmit(StopInfo(elapsed, state.isRestPhase, discard))
+            stopEvent.tryEmit(StopInfo(elapsed, state.isRestPhase, discard, startedAt, endedAt))
         }
     }
 
@@ -227,6 +246,7 @@ object FocusTimerManager {
             val remaining = (currentPhaseTotalSeconds - totalElapsed).coerceAtLeast(0)
             if (remaining <= 0) {
                 job?.cancel()
+                lastActiveAt = now
                 val isRestPhase = _timerState.value.isRestPhase
                 val duration = _timerState.value.totalPhaseSeconds
 

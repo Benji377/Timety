@@ -175,7 +175,8 @@ fun FocusScreen(
         onDispose { view.keepScreenOn = false }
     }
 
-    var flexibleMinutes by remember { mutableIntStateOf(25) }
+    // Saveable so the Flexible length survives a tab switch mid-session.
+    var flexibleMinutes by rememberSaveable { mutableIntStateOf(25) }
 
     var showTargetSelection by remember { mutableStateOf(false) }
     var showTimeMachine by remember { mutableStateOf(false) }

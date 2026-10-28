@@ -10,6 +10,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.time.Instant
 
 class FocusTimerManagerTest {
     @Before
@@ -203,6 +204,52 @@ class FocusTimerManagerTest {
         FocusTimerManager.stopEvent.subscriptionCount.first { it > 0 }
         FocusTimerManager.stopTimer()
         assertEquals(0, withTimeout(5000) { stopInfo.await() }.elapsedFocusSeconds)
+    }
+
+    @Test
+    fun resumingKeepsThePausedPhaseLength() = runBlocking {
+        // The screen re-sends the mode on resume; a different length (e.g. the Flexible picker
+        // reset to its default) must not change the phase or the time it banks.
+        FocusTimerManager.setMode("Flexible", 600, isRestPhase = false)
+        FocusTimerManager.startTimer()
+        Thread.sleep(1200)
+        FocusTimerManager.pauseTimer()
+        val paused = FocusTimerManager.timerState.value
+
+        FocusTimerManager.setMode("Flexible", 1500, isRestPhase = false)
+        val resumed = FocusTimerManager.timerState.value
+        assertEquals(600, resumed.totalPhaseSeconds)
+        assertEquals(paused.secondsRemaining, resumed.secondsRemaining)
+
+        FocusTimerManager.startTimer()
+        val stopInfo = async(Dispatchers.Default) { FocusTimerManager.stopEvent.first() }
+        FocusTimerManager.stopEvent.subscriptionCount.first { it > 0 }
+        FocusTimerManager.stopTimer()
+        val info = withTimeout(5000) { stopInfo.await() }
+        assertTrue("expected 1..4 elapsed, got ${info.elapsedFocusSeconds}", info.elapsedFocusSeconds in 1..4)
+    }
+
+    @Test
+    fun stopReportsTheRealStartAndTheLastActiveMoment() = runBlocking {
+        val before = Instant.now()
+        FocusTimerManager.setMode("Focus", 300, isRestPhase = false)
+        FocusTimerManager.startTimer()
+        Thread.sleep(1100)
+        FocusTimerManager.pauseTimer()
+        val pausedAt = Instant.now()
+        // Left paused before Stop: the pause must not stretch the logged span.
+        Thread.sleep(1500)
+
+        val stopInfo = async(Dispatchers.Default) { FocusTimerManager.stopEvent.first() }
+        FocusTimerManager.stopEvent.subscriptionCount.first { it > 0 }
+        FocusTimerManager.stopTimer()
+        val info = withTimeout(5000) { stopInfo.await() }
+
+        val startedAt = info.startedAt!!
+        val endedAt = info.endedAt!!
+        assertTrue("started $startedAt, expected around $before", !startedAt.isBefore(before) && startedAt.isBefore(pausedAt))
+        assertTrue("ended $endedAt, expected by $pausedAt", !endedAt.isAfter(pausedAt))
+        assertTrue(endedAt.isAfter(startedAt))
     }
 
     @Test

@@ -32,7 +32,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -119,10 +121,6 @@ class FocusViewModel(
         _selectedTarget.value = target
     }
 
-    fun clearSelectedTarget() {
-        val defaultTag = allTags.value.firstOrNull()
-        _selectedTarget.value = defaultTag?.let { FocusTargetSelection.tag(it) }
-    }
 
     private var currentSessionId: String = UUID.randomUUID().toString()
     fun resetCurrentSession() {
@@ -152,6 +150,40 @@ class FocusViewModel(
         }
         viewModelScope.launch {
             focusRepository.allModes.collect { modes -> ensureSystemModes(modes) }
+        }
+
+        // Keeps the selected target pointing at something that exists: a deleted tag, task or habit
+        // (also one a restore replaced) falls back to the first tag, and a renamed tag shows its new
+        // name. Left alone mid-session, which logs against the target it began with. Goals aren't
+        // checked: a session only records its time against one and never completes it.
+        viewModelScope.launch {
+            val sessionActive = FocusTimerManager.timerState.map { it.isSessionActive }.distinctUntilChanged()
+            combine(
+                combine(
+                    focusRepository.allTags,
+                    taskRepository.allTasks,
+                    habitRepository.allHabits,
+                    recurringTaskRepository.allRecurringTasks,
+                ) { tags, tasks, habits, recurring ->
+                    tags to buildMap {
+                        put(FocusTargetType.TASK, tasks.mapTo(HashSet()) { it.task.id })
+                        put(FocusTargetType.HABIT, habits.mapTo(HashSet()) { it.id })
+                        put(FocusTargetType.RECURRING_TASK, recurring.mapTo(HashSet()) { it.task.id })
+                    }
+                },
+                sessionActive,
+            ) { (tags, idsByType), active -> Triple(tags, idsByType, active) }
+                .collect { (tags, idsByType, active) ->
+                    val current = _selectedTarget.value ?: return@collect
+                    if (active) return@collect
+                    val revalidated = when (current.type) {
+                        FocusTargetType.TAG ->
+                            tags.firstOrNull { it.id == current.id }?.let { FocusTargetSelection.tag(it) }
+                        FocusTargetType.GOAL -> current
+                        else -> current.takeIf { idsByType[current.type]?.contains(current.id) == true }
+                    }
+                    _selectedTarget.value = revalidated ?: tags.firstOrNull()?.let { FocusTargetSelection.tag(it) }
+                }
         }
 
         viewModelScope.launch {
@@ -197,7 +229,7 @@ class FocusViewModel(
                     discardSession()
                 } else {
                     addPartialPhaseTime(info.elapsedFocusSeconds, info.wasRestPhase)
-                    completeSessionAndLog()
+                    completeSessionAndLog(info.startedAt, info.endedAt)
                 }
             }
         }
@@ -229,7 +261,11 @@ class FocusViewModel(
         }
     }
 
-    fun completeSessionAndLog() {
+    /**
+     * Logs the session spanning [startedAt] to [endedAt], as reported by the timer. Without them it
+     * falls back to a span ending now, derived from the banked focus time.
+     */
+    fun completeSessionAndLog(startedAt: Instant? = null, endedAt: Instant? = null) {
         val modeId = activeSessionModeId
         // Sessions under a minute round down to "0m" everywhere in the UI and only add noise
         // to the stats and calendar, so they are dropped instead of logged.
@@ -237,9 +273,9 @@ class FocusViewModel(
             val sessionToLog = FocusSessionEntity(
                 id = currentSessionId,
                 modeId = modeId,
-                startTime = sessionStartTime ?: Instant.now()
+                startTime = startedAt ?: sessionStartTime ?: Instant.now()
                     .minusSeconds(sessionAccumulatedFocusSeconds.toLong()),
-                endTime = Instant.now(),
+                endTime = endedAt ?: Instant.now(),
                 totalSecondsFocused = sessionAccumulatedFocusSeconds,
                 isCompleted = true,
             ).withTarget(selectedTarget.value)
@@ -386,10 +422,8 @@ class FocusViewModel(
 
     fun deleteTag(tag: FocusTagEntity) {
         viewModelScope.launch {
+            // Moving the selection off a deleted tag is left to the revalidation in init.
             focusRepository.deleteTag(tag)
-            if (_selectedTarget.value?.type == FocusTargetType.TAG && _selectedTarget.value?.id == tag.id) {
-                clearSelectedTarget()
-            }
         }
     }
 
