@@ -5,8 +5,10 @@ import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.data.model.task.withSortedSubtasks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 /** Repository for tasks, task categories, and subtasks, wrapping [TaskDao] with IO dispatching. */
@@ -14,12 +16,13 @@ class TaskRepository(
     private val taskDao: TaskDao
 ) {
     val allTasks: Flow<List<TaskWithSubtasks>> =
-        taskDao.getAllTasks()
+        taskDao.getAllTasks().map { tasks -> tasks.map { it.withSortedSubtasks() } }
 
     val allCategories: Flow<List<TaskCategoryEntity>> =
         taskDao.getAllCategories()
 
-    fun observeTask(id: String): Flow<TaskWithSubtasks?> = taskDao.observeTaskWithSubtasks(id)
+    fun observeTask(id: String): Flow<TaskWithSubtasks?> =
+        taskDao.observeTaskWithSubtasks(id).map { it?.withSortedSubtasks() }
 
     suspend fun getOpenTasksDueBefore(deadline: java.time.Instant): List<TaskEntity> =
         withContext(Dispatchers.IO) {
@@ -65,6 +68,10 @@ class TaskRepository(
 
     suspend fun updateSubtask(subtask: SubtaskEntity) = withContext(Dispatchers.IO) {
         taskDao.updateSubtask(subtask)
+    }
+
+    suspend fun updateSubtasks(subtasks: List<SubtaskEntity>) = withContext(Dispatchers.IO) {
+        taskDao.updateSubtasks(subtasks)
     }
 
     suspend fun deleteSubtask(subtask: SubtaskEntity) = withContext(Dispatchers.IO) {

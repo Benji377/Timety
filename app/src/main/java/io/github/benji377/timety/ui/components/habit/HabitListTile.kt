@@ -58,7 +58,8 @@ import kotlinx.coroutines.launch
  *
  * When [isReorderMode] is true, swipe-to-delete and tap/toggle are all suppressed and a drag
  * handle is shown instead, so the tile is purely a draggable row (dragging itself is handled by
- * the caller wrapping this tile, e.g. [DraggableReorderColumn]).
+ * the caller wrapping this tile, e.g.
+ * [io.github.benji377.timety.ui.components.common.DraggableReorderColumn]).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

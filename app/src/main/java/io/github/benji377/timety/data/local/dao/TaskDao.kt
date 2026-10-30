@@ -98,6 +98,9 @@ interface TaskDao {
     @Update
     fun updateSubtask(subtask: SubtaskEntity)
 
+    @Update
+    fun updateSubtasks(subtasks: List<SubtaskEntity>)
+
     @Delete
     fun deleteSubtask(subtask: SubtaskEntity)
 }

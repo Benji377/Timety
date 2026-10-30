@@ -191,4 +191,39 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate5To6_numbersSubtasksPerTaskInInsertionOrder() {
+        val dbName = "migration-test-5-6-subtasks"
+
+        helper.createDatabase(dbName, 5).apply {
+            listOf("t1", "t2").forEach { id ->
+                execSQL(
+                    "INSERT INTO tasks (id, title, description, location, priority, category, size, " +
+                        "isCompleted, createdAt, reminders) " +
+                        "VALUES ('$id', 'Task', '', '', 'MEDIUM', '', 'MEDIUM', 0, 0, '')"
+                )
+            }
+            // Interleaved across tasks so numbering must restart per task.
+            listOf("s1" to "t1", "s2" to "t2", "s3" to "t1", "s4" to "t1", "s5" to "t2").forEach { (id, taskId) ->
+                execSQL(
+                    "INSERT INTO subtasks (id, taskId, title, isCompleted) VALUES ('$id', '$taskId', '$id', 0)"
+                )
+            }
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 6, true, MIGRATION_5_6)
+
+        db.query("SELECT id, sortOrder FROM subtasks ORDER BY taskId, sortOrder").use { cursor ->
+            val rows = buildList {
+                while (cursor.moveToNext()) add(cursor.getString(0) to cursor.getInt(1))
+            }
+            assertEquals(
+                listOf("s1" to 0, "s3" to 1, "s4" to 2, "s2" to 0, "s5" to 1),
+                rows,
+            )
+        }
+        db.close()
+    }
 }

@@ -255,6 +255,22 @@ class BackupRoundTripTest {
         assertTrue("legacyHabitAlarmsCleared" !in exported)
     }
 
+    @Test
+    fun backupThenRestore_keepsReorderedSubtaskOrder() = runBlocking {
+        val task = TaskEntity(id = "task-1", title = "Pack", createdAt = now)
+        source.taskRepository.insertTask(task)
+        // Inserted out of display order, as after a drag-reorder.
+        source.taskRepository.insertSubtask(SubtaskEntity("a", task.id, "Shoes", sortOrder = 2))
+        source.taskRepository.insertSubtask(SubtaskEntity("b", task.id, "Passport", sortOrder = 0))
+        source.taskRepository.insertSubtask(SubtaskEntity("c", task.id, "Charger", sortOrder = 5))
+
+        target.backupService.importFromUri(exportFrom(source)).getOrThrow()
+
+        val restored = target.taskRepository.allTasks.first().single().subtasks
+        assertEquals(listOf("b", "a", "c"), restored.map { it.id })
+        assertEquals(listOf(0, 1, 2), restored.map { it.sortOrder })
+    }
+
     private fun Uri.readText(): String =
         context.contentResolver.openInputStream(this)!!.use { it.reader().readText() }
 

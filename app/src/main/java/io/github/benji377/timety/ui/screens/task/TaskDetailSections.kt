@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Search
@@ -462,14 +463,32 @@ internal fun LocationField(
     }
 }
 
+/** Checklist row; [showDragHandle] hints that the row can be held and dragged to reorder. */
 @Composable
 internal fun SubtaskRow(
     subtask: SubtaskEntity,
     isEditing: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     onRemove: () -> Unit,
+    showDragHandle: Boolean = false,
+    isDragged: Boolean = false,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(AppTheme.brMedium)
+            .background(
+                if (isDragged) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent
+            )
+    ) {
+        if (showDragHandle) {
+            Icon(
+                imageVector = Icons.Filled.DragHandle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Checkbox(
             checked = subtask.isCompleted,
             onCheckedChange = onCheckedChange,
