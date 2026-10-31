@@ -70,6 +70,36 @@
     <string name="focusDialogSessionResetTitle">Reset sesi fokus?</string>
     <string name="focusDialogSessionStopContent">Timer lagi dijeda. Mau stop dan simpan sesi ini? Kalau nggak, batal aja dan lanjut lagi.</string>
     <string name="focusDialogSessionStopTitle">Stop Focus Session?</string>
+    <string name="focusHistoryTitle">Focus history</string>
+    <string name="focusHistorySearchHint">Search sessions</string>
+    <string name="focusHistorySearchClear">Clear search</string>
+    <string name="focusHistoryChipDate">Date</string>
+    <string name="focusHistoryChipTags">Tags</string>
+    <string name="focusHistoryChipTagsCount">Tags (%1$d)</string>
+    <string name="focusHistoryChipTarget">Target</string>
+    <string name="focusHistoryChipMode">Mode</string>
+    <string name="focusHistorySortTitle">Sort by</string>
+    <string name="focusHistorySortNewest">Newest first</string>
+    <string name="focusHistorySortOldest">Oldest first</string>
+    <string name="focusHistorySortLongest">Longest first</string>
+    <string name="focusHistoryDateAllTime">All time</string>
+    <string name="focusHistoryDateLast7Days">Last 7 days</string>
+    <string name="focusHistoryDateLast30Days">Last 30 days</string>
+    <string name="focusHistoryDateThisYear">This year</string>
+    <string name="focusHistoryDateRange">%1$s - %2$s</string>
+    <string name="focusHistoryDateHint">Pick a day, or tap a second day for a range. Underlined days have sessions.</string>
+    <string name="focusHistoryDateClear">Clear</string>
+    <string name="focusHistoryDateApply">Apply</string>
+    <string name="focusHistoryToday">Today</string>
+    <string name="focusHistoryEmpty">No focus sessions yet</string>
+    <string name="focusHistoryNoResults">No sessions match these filters</string>
+    <string name="focusHistoryClearFilters">Clear filters</string>
+    <plurals name="focusHistorySummary">
+        <item quantity="other">%1$d sessions, %2$s</item>
+    </plurals>
+    <plurals name="focusHistoryDistractions">
+        <item quantity="other">%1$d distractions</item>
+    </plurals>
     <string name="focusLabelDefault">Fokus</string>
     <string name="focusLabelRest">Istirahat</string>
     <string name="focusLabelSetTime">Atur waktu</string>
@@ -305,6 +335,7 @@
     <string name="calendarLabelFocusOngoing">Ongoing</string>
     <string name="calendarLabelSelect">Select a day to view details</string>
     <string name="calendarMonthlyReportTitle">Monthly Report</string>
+    <string name="calendarYearlyReportTitle">Yearly Report</string>
     <string name="calendarReportComparedHint">Changes are compared with %1$s.</string>
     <string name="calendarReportFocusSessions">Focus sessions</string>
     <string name="calendarReportFocusTime">Focus time</string>
@@ -322,6 +353,96 @@
     <string name="calendarWeekSummaryDescription">Tasks completed: %1$d, habit check-ins: %2$d, focus time: %3$s</string>
     <string name="calendarWeeklyReportTitle">Weekly Report</string>
     <string name="statsLabelProductivity">Productivity Synergy</string>
+    <string name="statsPageTime">Time</string>
+    <string name="statsPeriodWeek">Week</string>
+    <string name="statsPeriodMonth">Month</string>
+    <string name="statsPeriodYear">Year</string>
+    <string name="statsSectionToday">Today</string>
+    <string name="statsSectionThisWeek">This week</string>
+    <string name="statsSynergyHint">Last 7 days. Drag or tap a day for its numbers.</string>
+    <string name="statsTileTasksDone">Tasks done</string>
+    <string name="statsTileFocus">Focus</string>
+    <string name="statsTileFocusGoal">Focus goal</string>
+    <string name="statsCompareRunningWeek">%1$s vs the same days last week</string>
+    <string name="statsCompareRunningMonth">%1$s vs the same days last month</string>
+    <string name="statsCompareRunningYear">%1$s vs the same days last year</string>
+    <string name="statsCompareFinishedWeek">%1$s vs the week before</string>
+    <string name="statsCompareFinishedMonth">%1$s vs the month before</string>
+    <string name="statsCompareFinishedYear">%1$s vs the year before</string>
+    <string name="statsRowTime">%1$s focus</string>
+    <string name="statsRowTimeMore">%1$s focus, %2$d%% more</string>
+    <string name="statsRowTimeLess">%1$s focus, %2$d%% less</string>
+    <string name="statsRowTasksDue">%1$s, %2$d%% by due date</string>
+    <string name="statsRowHabits">%1$d%% of expected check-ins</string>
+    <string name="statsPagePatterns">Patterns</string>
+    <string name="statsRowGoals">%1$d on pace, %2$d behind</string>
+    <string name="statsRowGoalsNone">No active goals</string>
+    <string name="statsRowPatternsNone">Not enough data yet</string>
+    <string name="statsHabitsRateCaption">of expected check-ins</string>
+    <string name="statsYourHabits">Your habits</string>
+    <string name="statsHabitRow">%1$d of %2$d. Streak %3$s, best %4$d.</string>
+    <string name="statsHabitRowNoRate">Streak %1$s, best %2$d.</string>
+    <plurals name="statsCheckIns">
+        <item quantity="other">%1$d check-ins</item>
+    </plurals>
+    <plurals name="statsStreakDays">
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="statsStreakWeeks">
+        <item quantity="other">%1$d weeks</item>
+    </plurals>
+    <plurals name="statsStreakMonths">
+        <item quantity="other">%1$d months</item>
+    </plurals>
+    <string name="statsGoalsActive">Active</string>
+    <string name="statsGoalsBehind">Behind</string>
+    <string name="statsGoalsCompleted">Completed</string>
+    <string name="statsGoalsPaceHint">The mark shows where a steady pace would put you today.</string>
+    <string name="statsGoalAhead">Ahead.</string>
+    <string name="statsGoalOnPace">On pace.</string>
+    <string name="statsGoalBehind">Behind.</string>
+    <string name="statsGoalOverdue">Overdue.</string>
+    <string name="statsGoalDue">Due %1$s.</string>
+    <string name="statsGoalWasDue">Was due %1$s.</string>
+    <string name="statsGoalProjected">At this pace, finished around %1$s.</string>
+    <string name="statsGoalProgress">%1$d / %2$d %3$s</string>
+    <string name="statsGoalFinishedOnDeadline">Finished %1$s, on the deadline</string>
+    <plurals name="statsGoalFinishedEarly">
+        <item quantity="other">Finished %1$s, %2$d days early</item>
+    </plurals>
+    <plurals name="statsGoalFinishedLate">
+        <item quantity="other">Finished %1$s, %2$d days late</item>
+    </plurals>
+    <string name="statsPatternsWindow">Based on the last %1$d weeks</string>
+    <string name="statsPatternsEmpty">Patterns appear here once the last %1$d weeks hold enough data.</string>
+    <string name="statsPatternPeakLabel">Peak focus time</string>
+    <string name="statsPatternPeakValue">%1$s, %2$s</string>
+    <string name="statsPatternBusiestLabel">Busiest day for tasks</string>
+    <string name="statsPatternDistractedLabel">Typically distracted after</string>
+    <string name="statsRowPeak">Peak focus: %1$s</string>
+    <string name="statsPatternsGrid">When you focus</string>
+    <string name="statsPatternsGridHint">A stronger color means more minutes</string>
+    <string name="statsPatternsByWeekday">By weekday</string>
+    <string name="statsPatternsByWeekdayHint">Average per day</string>
+    <string name="statsPatternsHabitTiming">When you check in habits</string>
+    <string name="statsPatternsByMood">Focus by mood</string>
+    <string name="statsPatternsByMoodHint">Average on %1$d rated days</string>
+    <string name="statsBarReadout">%1$s: %2$s</string>
+    <string name="statsTasksBarReadout">%1$s: %2$d completed, %3$d created</string>
+    <string name="statsAvgSession">Avg session</string>
+    <string name="statsDaysGoalMet">Days goal met</string>
+    <string name="statsDistractions">Distractions</string>
+    <string name="statsByTag">By tag</string>
+    <string name="statsByTagSessionsHint">A session with two tags counts under both.</string>
+    <string name="statsByTagTasksHint">A task with two tags counts under both.</string>
+    <string name="statsByTarget">By target</string>
+    <string name="statsDoneByDue">Done by due date</string>
+    <string name="statsTimeToFinish">Typical time to finish</string>
+    <string name="statsCalibrationHint">All time. Average focus time by task size, counting only tasks used as a focus target</string>
+    <string name="statsDaysValue">%1$s d</string>
+    <plurals name="statsTasksDone">
+        <item quantity="other">%1$d done</item>
+    </plurals>
     <string name="statsTitle">Insights &amp; Statistics</string>
     <string name="settingsDialogUnitDays">days</string>
     <string name="settingsLabelBuiltBy">Built by Benji377</string>
@@ -388,7 +509,10 @@
     <string name="settingsPageAboutSummary">Version, support and source code</string>
     <string name="settingsPageAdvancedSummary">Expert options such as the location search API</string>
     <string name="settingsPageDataBackupSummary">Export and restore backups</string>
+    <string name="settingsPageFocusSummary">Daily goal, timer limits and Do Not Disturb</string>
+    <string name="settingsPageGeneralSummary">Theme, greeting, language, formats and tags</string>
     <string name="settingsPageNotificationsSummary">Reminder times and background activity</string>
+    <string name="settingsPageTasksSummary">Upcoming task window</string>
     <string name="settingsSectionAbout">About</string>
     <string name="settingsSectionAdvanced">Advanced</string>
     <string name="settingsSectionAppearance">Appearance</string>
@@ -474,6 +598,17 @@
     <string name="wrapUpStatHabitsLabel">Habits Built</string>
     <string name="wrapUpStatTasksLabel">Tasks Completed</string>
     <string name="wrapUpUsingSince">Using Timety since %1$s</string>
+    <string name="tagFilterNoMatch">Nothing matches these tags</string>
+    <string name="tagNameTaken">A tag with this name already exists</string>
+    <string name="tagPickerChoose">Choose tags</string>
+    <string name="tagsEmpty">No tags yet. Tap the button above to add one.</string>
+    <string name="tagUsageCountZero">Not used yet</string>
+    <plurals name="tagUsageCount">
+        <item quantity="other">Used on %d items</item>
+    </plurals>
+    <plurals name="tagDeleteContent">
+        <item quantity="other">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+    </plurals>
     <plurals name="settingsTagsCount">
         <item quantity="other">%d tags</item>
     </plurals>
