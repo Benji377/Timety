@@ -1,12 +1,8 @@
 package io.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,507 +10,320 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TrackChanges
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
-import io.github.benji377.timety.ui.components.common.NeoTabRow
+import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.stats.LegendDot
 import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.components.stats.StatCard
-import io.github.benji377.timety.ui.screens.focus.FocusStatsScreen
-import io.github.benji377.timety.ui.screens.habit.HabitStatsScreen
-import io.github.benji377.timety.ui.screens.task.TaskStatsScreen
+import io.github.benji377.timety.ui.components.stats.StatCardStyle
+import io.github.benji377.timety.ui.components.stats.SynergyChart
+import io.github.benji377.timety.ui.screens.stats.StatsPage
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
-import io.github.benji377.timety.ui.theme.hairlineBorder
-import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.habit.HabitRates
+import io.github.benji377.timety.util.stats.FocusPeriodStats
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
-import java.time.LocalDate
+import io.github.benji377.timety.util.stats.PeriodSummary
+import io.github.benji377.timety.util.stats.ReportPeriod
+import io.github.benji377.timety.util.stats.TaskTiming
 import java.time.ZoneId
-import kotlin.math.roundToInt
-import java.time.format.TextStyle as JavaTextStyle
+import java.time.ZonedDateTime
+import kotlin.math.abs
+
+private const val DAYS_PER_WEEK = 7
 
 /**
- * Tab-based statistics screen: an overview tab plus dedicated tabs for tasks, focus, and habits.
+ * The statistics overview: today's numbers, the synergy graph and one line per page for this week.
+ * Tiles and lines open the page with the details.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit,
+    onOpenPage: (StatsPage) -> Unit,
+    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    focusViewModel: FocusViewModel = activityScopedViewModel(),
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabs = listOf(
-        stringResource(R.string.statsTabOverview),
-        stringResource(R.string.statsTabTasks),
-        stringResource(R.string.statsTabFocus),
-        stringResource(R.string.statsTabHabits)
-    )
+    val tasks by taskViewModel.allTasks.collectAsState()
+    val recurring by recurringViewModel.allRecurringTasks.collectAsState()
+    val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
+    val sessions by focusViewModel.allSessions.collectAsState()
+    val habits by habitViewModel.habitsWithCompletions.collectAsState()
+    val zone = remember { ZoneId.systemDefault() }
+    val today by rememberToday()
 
-    val activeColor = when (selectedTabIndex) {
-        0 -> WarningColor
-        1 -> TaskColor
-        2 -> FocusColor
-        3 -> HabitColor
-        else -> MaterialTheme.colorScheme.primary
+    // Completed recurring occurrences count as tasks done on their completion day.
+    val tasksPerDay = remember(tasks, recurring) {
+        val completions = tasks.mapNotNull { item ->
+            item.task.completedAt?.takeIf { item.task.isCompleted }
+        } + recurring.flatMap { item -> item.occurrences.map { it.completedAt } }
+        completions.groupingBy { it.atZone(zone).toLocalDate() }.eachCount()
+    }
+    val focusMinutesByDay = remember(sessions) { FocusSessionDayStats.minutesByDay(sessions, zone) }
+    val tasksToday = tasksPerDay[today] ?: 0
+    val focusToday = focusMinutesByDay[today] ?: 0
+    // Goes past 100% like the Home card. Null on days without a target, shown as "-".
+    val goalPercent = dailyFocusTarget.minutesOn(today)?.let { target ->
+        focusToday * 100 / target
+    }
+
+    val last7Days = remember(today) { (6L downTo 0L).map { today.minusDays(it) } }
+    val weekStart = ReportPeriod.WEEK.startOf(today)
+    val weekDays = remember(weekStart, today) {
+        (0L until DAYS_PER_WEEK).map { weekStart.plusDays(it) }.filterNot { it.isAfter(today) }
+    }
+    val week = weekStart..ReportPeriod.WEEK.endOf(weekStart)
+
+    val habitRate = remember(habits, week, today) {
+        HabitRates.total(
+            habits.map { item ->
+                val dates = item.completions.map { it.completionDate.atZone(zone).toLocalDate() }
+                HabitRates.of(item.habit, dates, week, today, zone)
+            }
+        )
+    }
+    val checkInsPerDay = remember(habits) {
+        habits.flatMap { it.completions }
+            .groupingBy { it.completionDate.atZone(zone).toLocalDate() }
+            .eachCount()
+    }
+
+    val taskEntities = remember(tasks) { tasks.map { it.task } }
+    val thisWeek = remember(taskEntities, recurring, sessions, week) {
+        PeriodSummary.of(week, taskEntities, recurring, emptyList(), sessions, zone)
+    }
+    val lastWeek = remember(taskEntities, recurring, sessions, week, today) {
+        PeriodSummary.of(
+            range = ReportPeriod.WEEK.comparisonRange(weekStart, today),
+            tasks = taskEntities,
+            recurring = recurring,
+            habitCompletions = emptyList(),
+            sessions = sessions,
+            zone = zone,
+            until = ReportPeriod.WEEK.comparisonCutoff(weekStart, ZonedDateTime.now(zone)),
+        )
+    }
+    val dueRate = remember(taskEntities, recurring, week) {
+        TaskTiming.dueDateRate(taskEntities, recurring, week, zone)
     }
 
     Scaffold(
         topBar = {
             NeoTopBar(
                 title = stringResource(R.string.statsTitle),
-                navigationIcon = {
-                    BackNavigationIcon(onClick = onNavigateBack)
-                }
+                navigationIcon = { BackNavigationIcon(onClick = onNavigateBack) },
             )
-        }
+        },
     ) { padding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding),
+            contentPadding = PaddingValues(AppTheme.spaceLarge),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.spaceXLarge),
         ) {
-            NeoTabRow(
-                tabs = tabs,
-                selectedIndex = selectedTabIndex,
-                onTabSelected = { selectedTabIndex = it },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                activeColor = activeColor
-            )
-
-            Box(modifier = Modifier.fillMaxSize()) {
-                when (selectedTabIndex) {
-                    0 -> OverviewStatsScreen()
-                    1 -> TaskStatsScreen()
-                    2 -> FocusStatsScreen()
-                    3 -> HabitStatsScreen()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun OverviewStatsScreen(
-    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    focusViewModel: FocusViewModel = activityScopedViewModel(),
-    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-) {
-    val tasks by taskViewModel.allTasks.collectAsState()
-    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
-    val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
-    // Collected so the KPI/chart recompute whenever new sessions are logged.
-    val sessions by focusViewModel.allSessions.collectAsState()
-
-    val zone = remember { ZoneId.systemDefault() }
-    val now by rememberToday()
-
-    // Completed recurring occurrences count as tasks done on their completion day.
-    val tasksPerDay = remember(tasks, recurringItems) {
-        val map = mutableMapOf<LocalDate, Int>()
-        tasks.forEach { t ->
-            val completedAt = t.task.completedAt
-            if (t.task.isCompleted && completedAt != null) {
-                val day = completedAt.atZone(zone).toLocalDate()
-                map[day] = (map[day] ?: 0) + 1
-            }
-        }
-        recurringItems.flatMap { it.occurrences }.forEach { occurrence ->
-            val day = occurrence.completedAt.atZone(zone).toLocalDate()
-            map[day] = (map[day] ?: 0) + 1
-        }
-        map
-    }
-
-    // Split across days so a midnight-crossing session feeds each day it touched, not just its
-    // start day - consistent with the focus heatmap and daily goal. Computed once per change and
-    // shared by today's total and the week chart.
-    val focusMinutesByDay = remember(sessions) { FocusSessionDayStats.minutesByDay(sessions, zone) }
-
-    val tasksCompletedToday = tasksPerDay[now] ?: 0
-    val focusMinsToday = focusMinutesByDay[now] ?: 0
-    // Null on days without a target, shown as "-".
-    val goalPercent = dailyFocusTarget.minutesOn(now)?.let { target ->
-        ((focusMinsToday.toDouble() / target).coerceIn(0.0, 1.0) * 100).toInt()
-    }
-
-    val last7Days = remember(now) { (0..6).map { now.minusDays((6 - it).toLong()) } }
-    val dailyFocus = remember(last7Days, focusMinutesByDay) {
-        last7Days.map { day -> focusMinutesByDay[day] ?: 0 }
-    }
-    val dailyTasks = remember(last7Days, tasksPerDay) {
-        last7Days.map { day -> tasksPerDay[day] ?: 0 }
-    }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        item {
-            SectionHeader(stringResource(R.string.statsLabelSummary))
-            Spacer(Modifier.height(16.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                StatCard(
-                    title = stringResource(R.string.statsLabelTasksDone),
-                    value = "$tasksCompletedToday",
-                    icon = Icons.Filled.TaskAlt,
-                    color = TaskColor,
-                    modifier = Modifier.weight(1f)
-                )
-                StatCard(
-                    title = stringResource(R.string.statsLabelFocus),
-                    value = "${focusMinsToday}m",
-                    icon = Icons.Filled.Timer,
-                    color = FocusColor,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-
-            StatCard(
-                title = stringResource(R.string.statsLabelFocusGoal),
-                value = goalPercent?.let { "$it%" } ?: "-",
-                icon = Icons.Filled.TrackChanges,
-                color = WarningColor,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(40.dp))
-
-            SectionHeader(
-                stringResource(R.string.statsLabelProductivity),
-                stringResource(R.string.statsLabelSynergy)
-            )
-            Spacer(Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                LegendDot(FocusColor)
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = stringResource(R.string.statsLabelFocusMins),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.width(24.dp))
-                LegendDot(TaskColor)
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = stringResource(R.string.statsLabelTasksDone),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Spacer(Modifier.height(24.dp))
-
-            SynergyChart(
-                last7Days = last7Days,
-                dailyFocus = dailyFocus,
-                dailyTasks = dailyTasks,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-            )
-            Spacer(Modifier.height(40.dp))
-        }
-    }
-}
-
-// Draws the 7-day focus-minutes vs. tasks-completed trend as two smoothed lines with a
-// drag-to-inspect tooltip.
-@Composable
-private fun SynergyChart(
-    last7Days: List<LocalDate>,
-    dailyFocus: List<Int>,
-    dailyTasks: List<Int>,
-    modifier: Modifier = Modifier,
-) {
-    val density = LocalDensity.current
-    val locale = LocalLocale.current.platformLocale
-    val textMeasurer = rememberTextMeasurer()
-    var canvasSize by remember { mutableStateOf(IntSize.Zero) }
-    var selectedIndex by remember { mutableStateOf<Int?>(null) }
-
-    val maxFocus =
-        remember(dailyFocus) { (dailyFocus.maxOrNull() ?: 0).toDouble().coerceAtLeast(1.0) }
-    val maxTasks =
-        remember(dailyTasks) { (dailyTasks.maxOrNull() ?: 0).toDouble().coerceAtLeast(1.0) }
-    val focusValues = remember(dailyFocus, maxFocus) { dailyFocus.map { (it / maxFocus) * 10.0 } }
-    val taskValues = remember(dailyTasks, maxTasks) { dailyTasks.map { (it / maxTasks) * 10.0 } }
-
-    val leftReservedPx = with(density) { 30.dp.toPx() }
-    val bottomReservedPx = with(density) { 40.dp.toPx() }
-
-    val todayColor = MaterialTheme.colorScheme.primary
-    val axisTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-
-    Box(modifier = modifier) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .onSizeChanged { canvasSize = it }
-                .pointerInput(canvasSize) {
-                    if (canvasSize.width == 0) return@pointerInput
-                    val plotWidthPx = canvasSize.width - leftReservedPx
-                    if (plotWidthPx <= 0f) return@pointerInput
-
-                    fun updateSelection(x: Float) {
-                        val fraction = ((x - leftReservedPx) / plotWidthPx).coerceIn(0f, 1f)
-                        selectedIndex = (fraction * 6).roundToInt().coerceIn(0, 6)
-                    }
-
-                    awaitEachGesture {
-                        val down = awaitFirstDown()
-                        updateSelection(down.position.x)
-                        do {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull()
-                            if (change != null && change.pressed) {
-                                updateSelection(change.position.x)
-                                change.consume()
-                            }
-                        } while (event.changes.any { it.pressed })
-                        selectedIndex = null
-                    }
-                }
-        ) {
-            val plotWidth = size.width - leftReservedPx
-            val plotHeight = size.height - bottomReservedPx
-            if (plotWidth <= 0f || plotHeight <= 0f) return@Canvas
-
-            fun pointFor(values: List<Double>, index: Int): Offset {
-                val x = leftReservedPx + (index / 6f) * plotWidth
-                val y = plotHeight - ((values[index] / 11.0) * plotHeight).toFloat()
-                return Offset(x, y)
-            }
-
-            // Y-axis labels (0, 5, 10).
-            listOf(0, 5, 10).forEach { v ->
-                val y = plotHeight - (v / 11f) * plotHeight
-                val layout = textMeasurer.measure(
-                    text = "$v",
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = axisTextColor,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Right
-                    )
-                )
-                drawText(
-                    textLayoutResult = layout,
-                    topLeft = Offset(
-                        leftReservedPx - 8.dp.toPx() - layout.size.width,
-                        y - layout.size.height / 2f
-                    )
-                )
-            }
-
-            // X-axis weekday labels; today is bold + primary-colored.
-            last7Days.forEachIndexed { index, day ->
-                val isToday = index == 6
-                val label = day.dayOfWeek.getDisplayName(JavaTextStyle.SHORT, locale)
-                val layout = textMeasurer.measure(
-                    text = label,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        // Bold on every label, not just today's - no light/thin type weight
-                        // anywhere; today is distinguished by color alone.
-                        color = if (isToday) todayColor else axisTextColor,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-                val x = leftReservedPx + (index / 6f) * plotWidth
-                drawText(
-                    textLayoutResult = layout,
-                    topLeft = Offset(x - layout.size.width / 2f, plotHeight + 12.dp.toPx())
-                )
-            }
-
-            // Series: smoothed line + area fill below it.
-            fun drawSeries(values: List<Double>, color: Color) {
-                val points = values.indices.map { pointFor(values, it) }
-                val linePath = Path().apply {
-                    moveTo(points[0].x, points[0].y)
-                    for (i in 1 until points.size) {
-                        val p0 = points[i - 1]
-                        val p1 = points[i]
-                        val midX = (p0.x + p1.x) / 2f
-                        cubicTo(midX, p0.y, midX, p1.y, p1.x, p1.y)
-                    }
-                }
-                val areaPath = Path().apply {
-                    addPath(linePath)
-                    lineTo(points.last().x, plotHeight)
-                    lineTo(points.first().x, plotHeight)
-                    close()
-                }
-                drawPath(areaPath, color = color.copy(alpha = 0.1f))
-                drawPath(
-                    linePath,
-                    color = color,
-                    style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
-                )
-                // Per-point dots marking each day's value along the line.
-                points.forEach { point ->
-                    drawCircle(color = color, radius = 4.dp.toPx(), center = point)
-                }
-            }
-
-            drawSeries(focusValues, FocusColor)
-            drawSeries(taskValues, TaskColor)
-
-            // Touched-day indicator dots, enlarged to stand out from the regular dots.
-            selectedIndex?.let { idx ->
-                drawCircle(
-                    color = FocusColor,
-                    radius = 6.dp.toPx(),
-                    center = pointFor(focusValues, idx)
-                )
-                drawCircle(
-                    color = TaskColor,
-                    radius = 6.dp.toPx(),
-                    center = pointFor(taskValues, idx)
-                )
-            }
-        }
-
-        selectedIndex?.let { idx ->
-            val plotWidth = canvasSize.width - leftReservedPx
-            val plotHeight = canvasSize.height - bottomReservedPx
-            if (plotWidth > 0f && plotHeight > 0f) {
-                val focusY = plotHeight - ((focusValues[idx] / 11.0) * plotHeight).toFloat()
-                val taskY = plotHeight - ((taskValues[idx] / 11.0) * plotHeight).toFloat()
-                val topY = minOf(focusY, taskY)
-                val x = leftReservedPx + (idx / 6f) * plotWidth
-                val tooltipWidthPx = with(density) { 120.dp.toPx() }
-                val tooltipHeightPx = with(density) { 56.dp.toPx() }
-                val offsetX = (x - tooltipWidthPx / 2f)
-                    .coerceIn(0f, (canvasSize.width - tooltipWidthPx).coerceAtLeast(0f))
-                val offsetY =
-                    (topY - tooltipHeightPx - with(density) { 8.dp.toPx() }).coerceAtLeast(0f)
-
-                Column(
-                    modifier = Modifier
-                        .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                        .width(120.dp)
-                        .clip(AppTheme.brMedium)
-                        // Chrome, not chart data: a solid surface fill + outline border, matching
-                        // every other tooltip/badge in the app instead of a translucent scrim.
-                        .background(MaterialTheme.colorScheme.surface)
-                        .border(
-                            AppTheme.hairlineStroke,
-                            AppTheme.brMedium,
+            item(key = "today") {
+                Column {
+                    SectionHeader(stringResource(R.string.statsSectionToday))
+                    Spacer(Modifier.height(AppTheme.spaceMedium))
+                    Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
+                        StatCard(
+                            title = stringResource(R.string.statsTileTasksDone),
+                            value = "$tasksToday",
+                            icon = Icons.Filled.TaskAlt,
+                            color = TaskColor,
+                            style = StatCardStyle.COMPACT_VERTICAL,
+                            onClick = { onOpenPage(StatsPage.TASKS) },
+                            modifier = Modifier.weight(1f),
                         )
-                        .padding(8.dp)
-                ) {
-                    // Which series a row belongs to is carried by a bordered color dot rather than
-                    // by tinting the text: against the solid surface fill the saturated series
-                    // colors drop below a readable contrast ratio, and TaskColor blue in dark mode
-                    // is the worst of them. The dot keeps the series encoding at full saturation
-                    // while the numbers themselves stay on onSurface.
-                    TooltipRow(
-                        markerColor = FocusColor,
-                        text = quantityString(
-                            R.plurals.nMinutesCount,
-                            dailyFocus[idx],
-                            zeroRes = R.string.nMinutesCountZero,
-                            dailyFocus[idx]
-                        ),
+                        StatCard(
+                            title = stringResource(R.string.statsTileFocus),
+                            value = AppDateFormatUtils.formatMinutesCompact(focusToday),
+                            icon = Icons.Filled.Timer,
+                            color = FocusColor,
+                            style = StatCardStyle.COMPACT_VERTICAL,
+                            onClick = { onOpenPage(StatsPage.TIME) },
+                            modifier = Modifier.weight(1f),
+                        )
+                        StatCard(
+                            title = stringResource(R.string.statsTileFocusGoal),
+                            value = goalPercent?.let { "$it%" } ?: "-",
+                            icon = Icons.Filled.TrackChanges,
+                            color = WarningColor,
+                            style = StatCardStyle.COMPACT_VERTICAL,
+                            onClick = { onOpenPage(StatsPage.TIME) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+            }
+            item(key = "synergy") {
+                NeoCard(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(AppTheme.spaceLarge)) {
+                        SectionHeader(
+                            stringResource(R.string.statsLabelProductivity),
+                            stringResource(R.string.statsSynergyHint),
+                        )
+                        Spacer(Modifier.height(AppTheme.spaceMedium))
+                        SynergyChart(
+                            days = last7Days,
+                            dailyFocus = last7Days.map { focusMinutesByDay[it] ?: 0 },
+                            dailyTasks = last7Days.map { tasksPerDay[it] ?: 0 },
+                        )
+                    }
+                }
+            }
+            item(key = "week") {
+                Column {
+                    SectionHeader(stringResource(R.string.statsSectionThisWeek))
+                    Spacer(Modifier.height(AppTheme.spaceSmall))
+                    OverviewRow(
+                        title = stringResource(StatsPage.TIME.titleRes),
+                        summary = timeSummary(thisWeek.focusMinutes, lastWeek.focusMinutes),
+                        sparkline = weekDays.map { focusMinutesByDay[it] ?: 0 },
+                        sparklineColor = FocusColor,
+                        onClick = { onOpenPage(StatsPage.TIME) },
                     )
-                    TooltipRow(
-                        markerColor = TaskColor,
-                        text = quantityString(
-                            R.plurals.nTasksCount,
-                            dailyTasks[idx],
-                            zeroRes = R.string.nTasksCountZero,
-                            dailyTasks[idx]
-                        ),
+                    HorizontalDivider()
+                    OverviewRow(
+                        title = stringResource(StatsPage.TASKS.titleRes),
+                        summary = tasksSummary(thisWeek.tasksCompleted, dueRate.percent),
+                        sparkline = weekDays.map { tasksPerDay[it] ?: 0 },
+                        sparklineColor = TaskColor,
+                        onClick = { onOpenPage(StatsPage.TASKS) },
+                    )
+                    HorizontalDivider()
+                    OverviewRow(
+                        title = stringResource(StatsPage.HABITS.titleRes),
+                        summary = habitRate.percent?.let { stringResource(R.string.statsRowHabits, it) },
+                        sparkline = weekDays.map { checkInsPerDay[it] ?: 0 },
+                        sparklineColor = HabitColor,
+                        onClick = { onOpenPage(StatsPage.HABITS) },
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun timeSummary(minutes: Int, previousMinutes: Int): String {
+    val time = AppDateFormatUtils.formatMinutesCompact(minutes)
+    val change = FocusPeriodStats.percentChange(minutes, previousMinutes)
+    return when {
+        change == null || change == 0 -> stringResource(R.string.statsRowTime, time)
+        change > 0 -> stringResource(R.string.statsRowTimeMore, time, change)
+        else -> stringResource(R.string.statsRowTimeLess, time, abs(change))
+    }
+}
+
+@Composable
+private fun tasksSummary(done: Int, dueDatePercent: Int?): String {
+    val doneText = pluralStringResource(R.plurals.statsTasksDone, done, done)
+    return dueDatePercent?.let { stringResource(R.string.statsRowTasksDue, doneText, it) } ?: doneText
+}
+
+@Composable
+private fun OverviewRow(
+    title: String,
+    onClick: () -> Unit,
+    summary: String? = null,
+    sparkline: List<Int>? = null,
+    sparklineColor: Color = Color.Unspecified,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clickable(onClick = onClick)
+            .padding(vertical = AppTheme.spaceSmall),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.Bold)
+            if (summary != null) {
+                Text(
+                    summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        // One day is a single point and draws no line.
+        if (sparkline != null && sparkline.size > 1) {
+            Spacer(Modifier.width(AppTheme.spaceMedium))
+            Sparkline(sparkline, sparklineColor)
+        }
+        Spacer(Modifier.width(AppTheme.spaceSmall))
+        Icon(
+            Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
 /**
- * One line of the [SynergyChart] scrub tooltip: a bordered [markerColor] dot identifying the series,
- * followed by [text] in the neutral on-surface color.
+ * A small unlabelled line of this week's [values] so far, on a whole week's width so that days
+ * still to come aren't drawn as a drop to zero. The text beside it has the numbers.
  */
 @Composable
-private fun TooltipRow(markerColor: Color, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(AppTheme.spaceSmall)
-                .background(markerColor, CircleShape)
-                .hairlineBorder()
-        )
-        Spacer(modifier = Modifier.width(AppTheme.spaceXSmall))
-        Text(
-            text = text,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+private fun Sparkline(values: List<Int>, color: Color) {
+    Canvas(modifier = Modifier.size(width = 56.dp, height = 24.dp)) {
+        val max = (values.maxOrNull() ?: 0).coerceAtLeast(1).toFloat()
+        val stroke = 2.dp.toPx()
+        val points = values.mapIndexed { index, value ->
+            Offset(
+                index.toFloat() / (DAYS_PER_WEEK - 1) * size.width,
+                size.height - stroke - value / max * (size.height - 2 * stroke),
+            )
+        }
+        points.zipWithNext { from, to ->
+            drawLine(color, from, to, strokeWidth = stroke, cap = StrokeCap.Round)
+        }
     }
 }

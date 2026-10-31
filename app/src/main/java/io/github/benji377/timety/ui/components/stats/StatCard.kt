@@ -36,6 +36,7 @@ fun StatCard(
     color: Color,
     modifier: Modifier = Modifier,
     style: StatCardStyle = StatCardStyle.KPI,
+    onClick: (() -> Unit)? = null,
 ) {
     val sized = when (style) {
         StatCardStyle.COMPACT_VERTICAL -> modifier.size(width = 105.dp, height = 90.dp)
@@ -51,6 +52,7 @@ fun StatCard(
         // (a solid accent fill would fight the accent-colored icon/value
         // text for contrast).
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        onClick = onClick,
     ) {
         when (style) {
             StatCardStyle.KPI -> KpiContent(title, value, icon, color)

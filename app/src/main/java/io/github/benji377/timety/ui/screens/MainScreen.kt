@@ -49,6 +49,8 @@ import io.github.benji377.timety.ui.screens.habit.QuickHabitsScreen
 import io.github.benji377.timety.ui.screens.settings.SettingsPage
 import io.github.benji377.timety.ui.screens.settings.SettingsPageScreen
 import io.github.benji377.timety.ui.screens.settings.SettingsScreen
+import io.github.benji377.timety.ui.screens.stats.StatsPage
+import io.github.benji377.timety.ui.screens.stats.StatsPageScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTasksScreen
 import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
@@ -278,8 +280,17 @@ fun MainScreen(
             }
             composable(AppRoute.STATISTICS.route) {
                 StatisticsScreen(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() },
+                    onOpenPage = { page -> navController.navigate(page.route) },
                 )
+            }
+            StatsPage.entries.forEach { page ->
+                composable(page.route) {
+                    StatsPageScreen(
+                        page = page,
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() },
+                    )
+                }
             }
             composable(AppRoute.SETTINGS.route) {
                 SettingsScreen(

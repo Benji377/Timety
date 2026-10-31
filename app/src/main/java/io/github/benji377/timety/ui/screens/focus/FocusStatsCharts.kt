@@ -1,48 +1,25 @@
 package io.github.benji377.timety.ui.screens.focus
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.color
-import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.util.stats.FocusSessionDayStats
-import io.github.benji377.timety.util.stats.StatsUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -123,91 +100,6 @@ internal fun FocusClockChart(
                     center.y - (radius - strokeWidth / 2f)
                 ),
             )
-        }
-    }
-}
-
-@Composable
-internal fun VolumeBarChart(
-    sessions: List<FocusSessionEntity>,
-    startOfWeek: LocalDate,
-    isCurrentRealWeek: Boolean,
-    zone: ZoneId
-) {
-    // A midnight-crossing session is credited to each day it spanned, so its bar height matches the
-    // heatmap and the daily goal instead of stacking the whole session onto its start day.
-    val dailyMins = IntArray(7)
-    FocusSessionDayStats.minutesByDay(sessions, zone).forEach { (day, minutes) ->
-        val offset = java.time.temporal.ChronoUnit.DAYS.between(startOfWeek, day)
-        if (offset in 0..6) dailyMins[offset.toInt()] += minutes
-    }
-    val maxY = StatsUtils.maxValue(dailyMins.toList(), minimum = 60.0)
-    val denom = (maxY * 1.2).toFloat().coerceAtLeast(1f)
-    val todayIndex = if (isCurrentRealWeek) LocalDate.now().dayOfWeek.value - 1 else -1
-
-    val days = listOf(
-        stringResource(R.string.commonWeekdayMon),
-        stringResource(R.string.commonWeekdayTue),
-        stringResource(R.string.commonWeekdayWed),
-        stringResource(R.string.commonWeekdayThu),
-        stringResource(R.string.commonWeekdayFri),
-        stringResource(R.string.commonWeekdaySat),
-        stringResource(R.string.commonWeekdaySun),
-    )
-
-    Row(
-        modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        for (i in 0 until 7) {
-            val isToday = i == todayIndex
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.BottomCenter
-                ) {
-                    val h = (dailyMins[i] / denom).coerceIn(0f, 1f)
-                    // Flat, solid bar for every day - fading the non-today bars was a soft alpha
-                    // fill standing in for a boolean emphasis, not an encoded data value, so it's
-                    // gone. Today still needs a solid affordance beyond the label (bold text alone
-                    // is too weak a signal at this bar size), so today's bar gets a solid outline
-                    // border instead - a solid differentiator, not restored alpha.
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight(h)
-                            .width(16.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(FocusColor)
-                            .then(
-                                if (isToday) {
-                                    Modifier.border(
-                                        AppTheme.borderHairline,
-                                        MaterialTheme.colorScheme.outline,
-                                        RoundedCornerShape(4.dp),
-                                    )
-                                } else {
-                                    Modifier
-                                }
-                            ),
-                    )
-                }
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                Text(
-                    days[i],
-                    fontSize = AppTheme.fsBodySmall,
-                    fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isToday) FocusColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
         }
     }
 }
