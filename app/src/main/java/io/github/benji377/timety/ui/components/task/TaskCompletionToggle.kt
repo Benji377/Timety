@@ -51,7 +51,7 @@ fun rememberTaskCompletionToggle(
             // Sessions logged this way are attributed to the task, so there is no target to pick.
             fixedTargetLabel = task.title,
             onDismiss = { pendingTask = null },
-            onSave = { mode, start, end, _ ->
+            onSave = { mode, start, end, _, _ ->
                 focusViewModel.logSessionForTask(mode, start, end, task.id, task.title)
                 pendingTask = null
                 scope.launch { snackbarHostState.showSnackbar(loggedMessage) }

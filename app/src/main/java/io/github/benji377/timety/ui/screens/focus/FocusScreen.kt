@@ -51,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
@@ -78,7 +77,7 @@ import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.TextInputDialog
+import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.focus.ModeTimeline
@@ -88,7 +87,6 @@ import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
@@ -160,6 +158,7 @@ fun FocusScreen(
     val awaitingContinue by focusViewModel.awaitingContinue.collectAsState()
 
     val selectedTarget by focusViewModel.selectedTarget.collectAsState()
+    val selectedTagIds by focusViewModel.selectedTagIds.collectAsState()
     val allSessions by focusViewModel.allSessions.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
@@ -181,7 +180,6 @@ fun FocusScreen(
     var showTargetSelection by remember { mutableStateOf(false) }
     var showTimeMachine by remember { mutableStateOf(false) }
     var showDistraction by remember { mutableStateOf(false) }
-    var showCreateTagDialog by remember { mutableStateOf(false) }
     var showStopConfirmation by remember { mutableStateOf(false) }
     var showResetConfirmation by remember { mutableStateOf(false) }
 
@@ -486,6 +484,17 @@ fun FocusScreen(
                 awaitingContinue = awaitingContinue,
             )
 
+            // Fixed for the whole session, like the target.
+            TagPicker(
+                selectedIds = selectedTagIds,
+                onSelectionChange = { focusViewModel.setSelectedTagIds(it) },
+                isEditing = !modeSelectionLocked,
+                modifier = Modifier.padding(
+                    horizontal = AppTheme.spaceLarge,
+                    vertical = AppTheme.spaceSmall
+                ),
+            )
+
             Spacer(modifier = Modifier.weight(1f))
 
             // Play/pause controls.
@@ -600,9 +609,8 @@ fun FocusScreen(
         TargetSelectorBottomSheet(
             onDismissRequest = { showTargetSelection = false },
             selected = selectedTarget,
-            onTargetSelected = { focusViewModel.setSelectedTarget(it) },
-            onCreateNewTag = { showCreateTagDialog = true },
-            focusViewModel = focusViewModel,
+            onTargetSelected = { target, tagIds -> focusViewModel.setSelectedTarget(target, tagIds) },
+            onClear = { focusViewModel.clearSelectedTarget() },
         )
     }
 
@@ -626,9 +634,10 @@ fun FocusScreen(
             title = stringResource(R.string.dialogTimeMachineTitle),
             modes = allModes,
             initialTarget = selectedTarget,
+            initialTagIds = selectedTagIds,
             onDismiss = { showTimeMachine = false },
-            onSave = { mode, start, end, target ->
-                focusViewModel.logPastSession(mode, start, end, target)
+            onSave = { mode, start, end, target, tagIds ->
+                focusViewModel.logPastSession(mode, start, end, target, tagIds)
                 showTimeMachine = false
                 scope.launch {
                     snackbarHostState.showSnackbar(dialogTimeMachineSuccessStr)
@@ -636,18 +645,6 @@ fun FocusScreen(
             },
         )
     }
-
-    TextInputDialog(
-        visible = showCreateTagDialog,
-        title = stringResource(R.string.focusTagsDialogTitleAdd),
-        labelText = stringResource(R.string.focusTagsDialogLabelName),
-        hintText = stringResource(R.string.focusTagsDialogLabelHint),
-        onConfirm = { name ->
-            focusViewModel.createTag(name, TaskColor.toArgb())
-            showCreateTagDialog = false
-        },
-        onDismiss = { showCreateTagDialog = false },
-    )
 
     ConfirmationDialog(
         visible = showStopConfirmation,
@@ -753,8 +750,7 @@ private fun TimerGauge(
     val isResting = display.isResting
 
     val gaugeColor = if (isResting) WarningColor else FocusColor
-    // Tags are identified by their color alone, so only the other target types get an icon.
-    val bottomTextIcon = selectedTarget?.type?.takeIf { it != FocusTargetType.TAG }?.icon
+    val bottomTextIcon = selectedTarget?.type?.icon
 
     InteractiveGauge(
         progress = display.progress,

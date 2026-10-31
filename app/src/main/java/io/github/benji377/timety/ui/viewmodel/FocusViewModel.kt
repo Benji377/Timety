@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.viewmodel
 
-import androidx.compose.ui.graphics.toArgb
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.focus.DistractionEntity
@@ -15,15 +14,16 @@ import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.FocusRepository
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.SettingsRepository
+import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.FocusTimerManager
 import io.github.benji377.timety.services.ReminderScheduler
-import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
 import io.github.benji377.timety.widget.HabitWidget
@@ -64,7 +64,8 @@ class FocusViewModel(
     private val habitRepository: HabitRepository,
     private val taskRepository: TaskRepository,
     private val recurringTaskRepository: RecurringTaskRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val tagRepository: TagRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
     // Modes, sessions, and tags.
     val allModes: StateFlow<List<FocusModeEntity>> = focusRepository.allModes
@@ -117,10 +118,23 @@ class FocusViewModel(
     private val _selectedTarget = MutableStateFlow<FocusTargetSelection?>(null)
     val selectedTarget: StateFlow<FocusTargetSelection?> = _selectedTarget.asStateFlow()
 
-    fun setSelectedTarget(target: FocusTargetSelection) {
+    private val _selectedTagIds = MutableStateFlow<Set<String>>(emptySet())
+    val selectedTagIds: StateFlow<Set<String>> = _selectedTagIds.asStateFlow()
+
+    /** Links the next session to [target], with the item's [tagIds] as its tags. */
+    fun setSelectedTarget(target: FocusTargetSelection, tagIds: Set<String>) {
         _selectedTarget.value = target
+        _selectedTagIds.value = tagIds
     }
 
+    /** Unlinks the next session from its item. Its tags stay, so it can still be logged under them. */
+    fun clearSelectedTarget() {
+        _selectedTarget.value = null
+    }
+
+    fun setSelectedTagIds(tagIds: Set<String>) {
+        _selectedTagIds.value = tagIds
+    }
 
     private var currentSessionId: String = UUID.randomUUID().toString()
     fun resetCurrentSession() {
@@ -128,62 +142,47 @@ class FocusViewModel(
     }
 
     init {
-        // Seed the default tag and the three built-in system modes on first run, and default the
-        // selected target to the first tag. This collects the *raw* repository flows (not the
-        // `stateIn`-wrapped `allTags`/`allModes` above) so the check only sees genuine Room
-        // emissions - `stateIn`'s synthetic `emptyList()` initial value would otherwise look like
-        // "no tags yet" on every launch and stomp a user-renamed default tag.
-        viewModelScope.launch {
-            focusRepository.allTags.collect { tags ->
-                if (tags.isEmpty()) {
-                    focusRepository.insertTag(
-                        FocusTagEntity(
-                            id = "default_tag",
-                            name = "None",
-                            colorValue = FocusColor.toArgb()
-                        )
-                    )
-                } else if (_selectedTarget.value == null) {
-                    _selectedTarget.value = FocusTargetSelection.tag(tags.first())
-                }
-            }
-        }
+        // Seed the three built-in system modes on first run.
         viewModelScope.launch {
             focusRepository.allModes.collect { modes -> ensureSystemModes(modes) }
         }
 
-        // Keeps the selected target pointing at something that exists: a deleted tag, task or habit
-        // (also one a restore replaced) falls back to the first tag, and a renamed tag shows its new
-        // name. Left alone mid-session, which logs against the target it began with. Goals aren't
-        // checked: a session only records its time against one and never completes it.
+        // Keeps the selected target pointing at something that exists: a deleted task or habit (also
+        // one a restore replaced) clears it. Left alone mid-session, which logs against the target it
+        // began with. Goals aren't checked: a session only records its time against one and never
+        // completes it.
         viewModelScope.launch {
             val sessionActive = FocusTimerManager.timerState.map { it.isSessionActive }.distinctUntilChanged()
             combine(
                 combine(
-                    focusRepository.allTags,
                     taskRepository.allTasks,
                     habitRepository.allHabits,
                     recurringTaskRepository.allRecurringTasks,
-                ) { tags, tasks, habits, recurring ->
-                    tags to buildMap {
+                ) { tasks, habits, recurring ->
+                    buildMap {
                         put(FocusTargetType.TASK, tasks.mapTo(HashSet()) { it.task.id })
                         put(FocusTargetType.HABIT, habits.mapTo(HashSet()) { it.id })
                         put(FocusTargetType.RECURRING_TASK, recurring.mapTo(HashSet()) { it.task.id })
                     }
                 },
                 sessionActive,
-            ) { (tags, idsByType), active -> Triple(tags, idsByType, active) }
-                .collect { (tags, idsByType, active) ->
+            ) { idsByType, active -> idsByType to active }
+                .collect { (idsByType, active) ->
                     val current = _selectedTarget.value ?: return@collect
-                    if (active) return@collect
-                    val revalidated = when (current.type) {
-                        FocusTargetType.TAG ->
-                            tags.firstOrNull { it.id == current.id }?.let { FocusTargetSelection.tag(it) }
-                        FocusTargetType.GOAL -> current
-                        else -> current.takeIf { idsByType[current.type]?.contains(current.id) == true }
-                    }
-                    _selectedTarget.value = revalidated ?: tags.firstOrNull()?.let { FocusTargetSelection.tag(it) }
+                    if (active || current.type == FocusTargetType.GOAL) return@collect
+                    if (idsByType[current.type]?.contains(current.id) != true) _selectedTarget.value = null
                 }
+        }
+
+        // Drops deleted tags from the selection. Only removals count: a tag just created and
+        // selected may be newer than the list being handled here.
+        viewModelScope.launch {
+            var knownIds = emptySet<String>()
+            tagRepository.allTags.collect { tags ->
+                val ids = tags.mapTo(HashSet()) { it.id }
+                _selectedTagIds.value -= knownIds - ids
+                knownIds = ids
+            }
         }
 
         viewModelScope.launch {
@@ -279,11 +278,13 @@ class FocusViewModel(
                 totalSecondsFocused = sessionAccumulatedFocusSeconds,
                 isCompleted = true,
             ).withTarget(selectedTarget.value)
+            val tagIdsToLog = selectedTagIds.value
             val distractionsToLog = pendingDistractions.toList()
             val targetToComplete = selectedTarget.value?.takeIf { sessionFocusPhaseCompleted }
 
             viewModelScope.launch {
                 focusRepository.insertSession(sessionToLog)
+                tagRepository.setItemTags(TaggedItemType.SESSION, sessionToLog.id, tagIdsToLog)
                 distractionsToLog.forEach { focusRepository.insertDistraction(it) }
                 if (targetToComplete != null && settingsRepository.autoCompleteFocusFlow.first()) {
                     autoCompleteTarget(targetToComplete)
@@ -401,32 +402,6 @@ class FocusViewModel(
         }
     }
 
-    // Tags.
-    fun createTag(name: String, colorValue: Int) {
-        viewModelScope.launch {
-            val tag = FocusTagEntity(
-                id = UUID.randomUUID().toString(),
-                name = name,
-                colorValue = colorValue
-            )
-            focusRepository.insertTag(tag)
-            _selectedTarget.value = FocusTargetSelection.tag(tag)
-        }
-    }
-
-    fun updateTag(id: String, name: String, colorValue: Int) {
-        viewModelScope.launch {
-            focusRepository.insertTag(FocusTagEntity(id = id, name = name, colorValue = colorValue))
-        }
-    }
-
-    fun deleteTag(tag: FocusTagEntity) {
-        viewModelScope.launch {
-            // Moving the selection off a deleted tag is left to the revalidation in init.
-            focusRepository.deleteTag(tag)
-        }
-    }
-
     // Stats helpers.
 
     fun getMinutesFocusedOnDay(day: LocalDate, zone: ZoneId = ZoneId.systemDefault()): Int =
@@ -445,14 +420,15 @@ class FocusViewModel(
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        target: FocusTargetSelection?
+        target: FocusTargetSelection?,
+        tagIds: Set<String>
     ) {
-        logBackfilledSession(mode, startTime, endTime, target)
+        viewModelScope.launch { logBackfilledSession(mode, startTime, endTime, target, tagIds) }
     }
 
     /**
-     * Logs a backfilled session attributed to the given task, used when the user attaches the time
-     * they spent while checking the task off.
+     * Logs a backfilled session attributed to the given task with a copy of its tags, used when the
+     * user attaches the time they spent while checking the task off.
      */
     fun logSessionForTask(
         mode: FocusModeEntity,
@@ -461,35 +437,38 @@ class FocusViewModel(
         taskId: String,
         taskTitle: String
     ) {
-        logBackfilledSession(
-            mode,
-            startTime,
-            endTime,
-            FocusTargetSelection.of(FocusTargetType.TASK, taskId, taskTitle),
-        )
+        viewModelScope.launch {
+            logBackfilledSession(
+                mode,
+                startTime,
+                endTime,
+                FocusTargetSelection.of(FocusTargetType.TASK, taskId, taskTitle),
+                tagRepository.tagsByItem(TaggedItemType.TASK).first()[taskId].orEmpty()
+                    .mapTo(HashSet()) { it.id },
+            )
+        }
     }
 
-    private fun logBackfilledSession(
+    private suspend fun logBackfilledSession(
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        target: FocusTargetSelection?
+        target: FocusTargetSelection?,
+        tagIds: Set<String>
     ) {
         val totalSeconds = endTime.epochSecond - startTime.epochSecond
         if (totalSeconds <= 0) return
 
-        viewModelScope.launch {
-            focusRepository.insertSession(
-                FocusSessionEntity(
-                    id = UUID.randomUUID().toString(),
-                    modeId = mode.id,
-                    startTime = startTime,
-                    endTime = endTime,
-                    totalSecondsFocused = totalSeconds.toInt(),
-                    isCompleted = true,
-                ).withTarget(target)
-            )
-        }
+        val session = FocusSessionEntity(
+            id = UUID.randomUUID().toString(),
+            modeId = mode.id,
+            startTime = startTime,
+            endTime = endTime,
+            totalSecondsFocused = totalSeconds.toInt(),
+            isCompleted = true,
+        ).withTarget(target)
+        focusRepository.insertSession(session)
+        tagRepository.setItemTags(TaggedItemType.SESSION, session.id, tagIds)
     }
 
     /**
@@ -502,7 +481,8 @@ class FocusViewModel(
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        target: FocusTargetSelection?
+        target: FocusTargetSelection?,
+        tagIds: Set<String>
     ) {
         val span = (endTime.epochSecond - startTime.epochSecond).toInt()
         if (span <= 0) return
@@ -522,6 +502,7 @@ class FocusViewModel(
 
         viewModelScope.launch {
             focusRepository.updateSession(updated)
+            tagRepository.setItemTags(TaggedItemType.SESSION, updated.id, tagIds)
         }
     }
 
@@ -532,9 +513,8 @@ class FocusViewModel(
         }
     }
 
-    // tagId mirrors targetId for tag targets only; the stats tag filter and the calendar read it.
     private fun FocusSessionEntity.withTarget(target: FocusTargetSelection?) = copy(
-        tagId = target?.takeIf { it.type == FocusTargetType.TAG }?.id,
+        tagId = null,
         targetType = target?.type ?: FocusTargetType.TAG,
         targetId = target?.id,
         targetLabel = target?.label,

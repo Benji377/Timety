@@ -29,8 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTargetType
-import io.github.benji377.timety.data.model.focus.color
+import io.github.benji377.timety.data.model.focus.displayName
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
@@ -39,6 +38,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
@@ -53,9 +53,11 @@ import java.time.ZoneId
 @Composable
 fun FocusStatsScreen(
     focusViewModel: FocusViewModel = activityScopedViewModel(),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val sessions by focusViewModel.allSessions.collectAsState()
     val tags by focusViewModel.allTags.collectAsState()
+    val sessionTags by tagViewModel.sessionTags.collectAsState()
     val modes by focusViewModel.allModes.collectAsState()
     val distractions by focusViewModel.allDistractions.collectAsState()
 
@@ -79,7 +81,6 @@ fun FocusStatsScreen(
     }
 
     val zone = ZoneId.systemDefault()
-    val tagById = remember(tags) { tags.associateBy { it.id } }
     val modeById = remember(modes) { modes.associateBy { it.id } }
 
     val filteredSessions = remember(sessions, selectedTagFilterId) {
@@ -101,22 +102,11 @@ fun FocusStatsScreen(
     val clockSessions = clockMinutesBySession.map { it.first }
     val clockTotalMins = clockMinutesBySession.sumOf { it.second }
 
-    val defaultTargetEmpty = stringResource(R.string.focusTargetEmpty)
     val defaultTargetUntagged = stringResource(R.string.focusTargetUntagged)
     val defaultModeLabel = stringResource(R.string.focusLabelDefault)
 
-    fun resolveTargetName(session: FocusSessionEntity): String = when (session.targetType) {
-        FocusTargetType.TASK, FocusTargetType.RECURRING_TASK, FocusTargetType.HABIT,
-        FocusTargetType.GOAL ->
-            session.targetLabel?.trim()?.takeIf { it.isNotEmpty() } ?: defaultTargetEmpty
-
-        FocusTargetType.TAG ->
-            if (session.tagId != null) {
-                tagById[session.tagId]?.name ?: session.targetLabel ?: defaultTargetUntagged
-            } else {
-                session.targetLabel?.trim()?.takeIf { it.isNotEmpty() } ?: defaultTargetUntagged
-            }
-    }
+    fun resolveTargetName(session: FocusSessionEntity): String =
+        session.displayName(sessionTags[session.id].orEmpty()) ?: defaultTargetUntagged
 
     val selectedDayDistractions = remember(distractions, selectedTagFilterId, selectedDay) {
         distractions.filter { entry ->
@@ -222,7 +212,7 @@ fun FocusStatsScreen(
                             session.modeId.let { id ->
                                 modeById[id]?.let { localizedFocusModeName(it) } ?: defaultModeLabel
                             },
-                            tagById,
+                            sessionTags[session.id].orEmpty(),
                             onEdit = { editingSession = session },
                         )
                         if (index != sortedSessions.lastIndex) HorizontalDivider(

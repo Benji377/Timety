@@ -34,7 +34,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.benji377.timety.ui.components.common.ExactAlarmPromptDialog
 import io.github.benji377.timety.ui.components.common.NeoNavigationBar
-import io.github.benji377.timety.ui.components.focus.FocusTagsWidget
 import io.github.benji377.timety.ui.navigation.AppRoute
 import io.github.benji377.timety.ui.navigation.BottomNavItem
 import io.github.benji377.timety.ui.navigation.BottomNavItems
@@ -287,14 +286,8 @@ fun MainScreen(
                         page = page,
                         onNavigateBack = dropUnlessResumed { navController.popBackStack() },
                         onNavigateToTags = { navController.navigate(AppRoute.TAGS.route) },
-                        onNavigateToFocusTags = { navController.navigate(AppRoute.FOCUS_TAGS.route) }
                     )
                 }
-            }
-            composable(AppRoute.FOCUS_TAGS.route) {
-                FocusTagsWidget(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
             }
             composable(AppRoute.TAGS.route) {
                 TagsScreen(

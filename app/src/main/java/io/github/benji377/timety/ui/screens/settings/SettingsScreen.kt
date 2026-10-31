@@ -37,7 +37,6 @@ fun SettingsPageScreen(
     page: SettingsPage,
     onNavigateBack: () -> Unit,
     onNavigateToTags: () -> Unit,
-    onNavigateToFocusTags: () -> Unit,
 ) {
     SettingsPageScaffold(
         title = stringResource(page.titleRes),
@@ -45,7 +44,7 @@ fun SettingsPageScreen(
     ) {
         when (page) {
             SettingsPage.GENERAL -> GeneralSettings(onNavigateToTags = onNavigateToTags)
-            SettingsPage.FOCUS -> FocusSettings(onNavigateToTags = onNavigateToFocusTags)
+            SettingsPage.FOCUS -> FocusSettings()
             SettingsPage.TASKS -> TasksSettings()
             SettingsPage.NOTIFICATIONS -> NotificationSettings()
             SettingsPage.DATA_BACKUP -> DataBackupSettings()

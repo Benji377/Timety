@@ -50,11 +50,14 @@ import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
+import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import kotlinx.coroutines.launch
 import java.time.Duration
@@ -72,15 +75,15 @@ private const val MIN_SESSION_MINUTES = 1
 private const val MAX_SESSION_MINUTES = 24 * 60
 
 /**
- * Dialog for logging or editing a focus session: pick a mode, a target, a start date and time, and
- * a duration, then call [onSave] with the end derived as start + duration. The duration is capped
+ * Dialog for logging or editing a focus session: pick a mode, a target, a start date and time,
+ * tags, and a duration, then call [onSave] with the end derived as start + duration. The duration is capped
  * at 24 hours, which is why there is no end-time field - an editable end let a mistyped date log a
  * multi-day session that broke the statistics page. A session may still span midnight (e.g. 10pm
  * to 2am); it just cannot run longer than a day.
  *
  * The same dialog covers the three surfaces that need it. Passing [fixedTargetLabel] replaces the
- * target picker with a read-only row, for a session logged straight against a just-completed
- * task; passing [onDelete] adds a Delete action, for sessions that are already logged.
+ * target and tag pickers with a read-only row, for a session logged straight against a
+ * just-completed task, which copies that task's tags; passing [onDelete] adds a Delete action, for sessions that are already logged.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,10 +96,12 @@ fun SessionEditorDialog(
         startTime: Instant,
         endTime: Instant,
         target: FocusTargetSelection?,
+        tagIds: Set<String>,
     ) -> Unit,
     icon: ImageVector = Icons.Filled.History,
     initialModeId: String? = null,
     initialTarget: FocusTargetSelection? = null,
+    initialTagIds: Set<String> = emptySet(),
     initialStartTime: Instant? = null,
     initialEndTime: Instant? = null,
     fixedTargetLabel: String? = null,
@@ -107,6 +112,8 @@ fun SessionEditorDialog(
     var selectedModeId by remember(initialModeId) { mutableStateOf(initialModeId) }
     val selectedMode = modes.firstOrNull { it.id == selectedModeId } ?: modes.firstOrNull()
     var selectedTarget by remember { mutableStateOf(initialTarget) }
+    // Null until the user changes them, so tags still loading show up once they arrive.
+    var pickedTagIds by remember { mutableStateOf<Set<String>?>(null) }
     // Proposed times are truncated to the minute: the pickers only offer whole minutes, so a
     // proposal carrying seconds would make an untouched field and an edited one disagree by up
     // to a minute in the logged duration.
@@ -194,6 +201,12 @@ fun SessionEditorDialog(
                     )
                 } else {
                     TargetRow(target = selectedTarget, onClick = { showTargetSheet = true })
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    TagPicker(
+                        selectedIds = pickedTagIds ?: initialTagIds,
+                        onSelectionChange = { pickedTagIds = it },
+                        isEditing = true,
+                    )
                 }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
@@ -236,7 +249,7 @@ fun SessionEditorDialog(
         confirmButton = {
             NeoButton(onClick = {
                 val mode = selectedMode ?: return@NeoButton
-                onSave(mode, startDateTime, initialEndTime?.takeIf { timesUntouched } ?: endDateTime, selectedTarget)
+                onSave(mode, startDateTime, initialEndTime?.takeIf { timesUntouched } ?: endDateTime, selectedTarget, pickedTagIds ?: initialTagIds)
             }) { Text(stringResource(R.string.commonLabelSave)) }
         },
     )
@@ -245,7 +258,11 @@ fun SessionEditorDialog(
         TargetSelectorBottomSheet(
             onDismissRequest = { showTargetSheet = false },
             selected = selectedTarget,
-            onTargetSelected = { selectedTarget = it },
+            onTargetSelected = { target, tagIds ->
+                selectedTarget = target
+                pickedTagIds = tagIds
+            },
+            onClear = { selectedTarget = null },
         )
     }
 
@@ -298,9 +315,10 @@ fun EditSessionDialog(
     session: FocusSessionEntity,
     focusViewModel: FocusViewModel,
     onDismiss: () -> Unit,
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val modes by focusViewModel.allModes.collectAsState()
-    val tags by focusViewModel.allTags.collectAsState()
+    val sessionTags by tagViewModel.sessionTags.collectAsState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = LocalSnackbarHostState.current
     val updatedMessage = stringResource(R.string.focusSessionUpdatedSnackbar)
@@ -311,7 +329,8 @@ fun EditSessionDialog(
         icon = Icons.Filled.Edit,
         modes = modes,
         initialModeId = session.modeId,
-        initialTarget = remember(session) { FocusTargetSelection.fromSession(session, tags) },
+        initialTarget = remember(session) { FocusTargetSelection.fromSession(session) },
+        initialTagIds = sessionTags[session.id].orEmpty().mapTo(LinkedHashSet()) { it.id },
         initialStartTime = session.startTime,
         // A session left open-ended has no end to prefill; the editor then proposes a duration
         // running up to now - exactly the correction the user opened it for.
@@ -322,8 +341,8 @@ fun EditSessionDialog(
             scope.launch { snackbarHostState.showSnackbar(deletedMessage) }
         },
         onDismiss = onDismiss,
-        onSave = { mode, start, end, target ->
-            focusViewModel.updateSession(session, mode, start, end, target)
+        onSave = { mode, start, end, target, tagIds ->
+            focusViewModel.updateSession(session, mode, start, end, target, tagIds)
             onDismiss()
             scope.launch { snackbarHostState.showSnackbar(updatedMessage) }
         },

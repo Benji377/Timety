@@ -74,6 +74,7 @@ class TestViewModels(
                             container.taskRepository,
                             container.recurringTaskRepository,
                             container.settingsRepository,
+                            container.tagRepository,
                         )
 
                     modelClass.isAssignableFrom(UserViewModel::class.java) ->

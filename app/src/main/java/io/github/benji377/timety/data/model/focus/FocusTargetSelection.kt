@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.GoalColor
@@ -27,8 +28,8 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
 /**
- * UI-facing selection of what a focus session targets, carrying a display label and color
- * alongside the underlying id.
+ * The task, recurring task, habit or goal a focus session is linked to, carrying a display label
+ * and color alongside the underlying id. A session with no linked item has no selection.
  */
 data class FocusTargetSelection(
     val type: FocusTargetType,
@@ -39,14 +40,7 @@ data class FocusTargetSelection(
     val color: Color get() = Color(colorValue)
 
     companion object {
-        fun tag(tag: FocusTagEntity) = FocusTargetSelection(
-            type = FocusTargetType.TAG,
-            id = tag.id,
-            label = tag.name,
-            colorValue = tag.colorValue,
-        )
-
-        /** A non-tag target, shown in its type's [FocusTargetType.color]. */
+        /** A target shown in its type's [FocusTargetType.color]. */
         fun of(type: FocusTargetType, id: String, label: String) = FocusTargetSelection(
             type = type,
             id = id,
@@ -54,19 +48,22 @@ data class FocusTargetSelection(
             colorValue = type.color.toArgb(),
         )
 
-        /**
-         * The target a logged [session] is attributed to, or null when it has none. Tag sessions
-         * take the live tag's name and color, falling back to the stored label.
-         */
-        fun fromSession(session: FocusSessionEntity, tags: List<FocusTagEntity>): FocusTargetSelection? {
-            val id = session.targetId ?: session.tagId ?: return null
-            val label = session.targetLabel.orEmpty()
-            if (session.targetType != FocusTargetType.TAG) return of(session.targetType, id, label)
-            return tags.firstOrNull { it.id == id }?.let { tag(it) }
-                ?: FocusTargetSelection(FocusTargetType.TAG, id, label, FocusColor.toArgb())
+        /** The item a logged [session] is linked to, or null when it has none. */
+        fun fromSession(session: FocusSessionEntity): FocusTargetSelection? {
+            val id = session.targetId ?: return null
+            if (session.targetType == FocusTargetType.TAG) return null
+            return of(session.targetType, id, session.targetLabel.orEmpty())
         }
     }
 }
+
+/**
+ * What a logged session is called: its linked item's name, otherwise its [tags]' names, or null
+ * when it has neither.
+ */
+fun FocusSessionEntity.displayName(tags: List<TagEntity>): String? =
+    targetLabel?.trim()?.takeIf { it.isNotEmpty() && targetType != FocusTargetType.TAG }
+        ?: tags.joinToString(", ") { it.name }.ifEmpty { null }
 
 /** Icon shown next to a focus target of this type. */
 val FocusTargetType.icon: ImageVector
@@ -78,7 +75,7 @@ val FocusTargetType.icon: ImageVector
         FocusTargetType.GOAL -> Icons.Filled.Flag
     }
 
-/** Accent color of this target type; tags use their own color instead where one is known. */
+/** Accent color of this target type; [FocusTargetType.TAG] means no linked item. */
 val FocusTargetType.color: Color
     get() = when (this) {
         FocusTargetType.TAG -> FocusColor

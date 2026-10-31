@@ -37,6 +37,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.color
+import io.github.benji377.timety.data.model.focus.displayName
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
@@ -53,6 +54,8 @@ import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
@@ -238,10 +241,11 @@ private fun RecurringMarkerIcon() {
 @Composable
 internal fun FocusSessionsAccordion(
     sessions: List<FocusSessionEntity>,
-    focusViewModel: FocusViewModel
+    focusViewModel: FocusViewModel,
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val modes by focusViewModel.allModes.collectAsState()
-    val tags by focusViewModel.allTags.collectAsState()
+    val sessionTags by tagViewModel.sessionTags.collectAsState()
     val zone = ZoneId.systemDefault()
     val use24Hour =
         LocalDateFormatSettings.current.use24HourFormat
@@ -263,7 +267,7 @@ internal fun FocusSessionsAccordion(
         } else {
             sessions.forEach { session ->
                 val mode = modes.firstOrNull { it.id == session.modeId } ?: modes.firstOrNull()
-                val tag = session.tagId?.let { tagId -> tags.firstOrNull { it.id == tagId } }
+                val tags = sessionTags[session.id].orEmpty()
 
                 var timeString =
                     AppDateFormatUtils.formatTime(
@@ -308,17 +312,13 @@ internal fun FocusSessionsAccordion(
                             // Solid fallback instead of an alpha-faded tint -
                             // untagged sessions get the same neutral solid used for muted text
                             // elsewhere on this screen.
-                            tint = tag?.let { Color(it.colorValue) }
-                                ?: session.targetType.takeIf { it != FocusTargetType.TAG }?.color
+                            tint = session.targetType.takeIf { it != FocusTargetType.TAG }?.color
+                                ?: tags.firstOrNull()?.let { Color(it.colorValue) }
                                 ?: MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            // Sessions linked to anything but a tag carry no tag, so name them by
-                            // the target they were logged against rather than calling them untagged.
-                            val title = tag?.name
-                                ?: session.targetLabel?.trim()?.takeIf { it.isNotEmpty() }
-                                ?: untaggedLabel
+                            val title = session.displayName(tags) ?: untaggedLabel
                             Text(text = title, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(4.dp))
                             if (mode != null) {
