@@ -153,7 +153,7 @@ fun StatsPatternsScreen(
         contentPadding = PaddingValues(AppTheme.spaceLarge),
         verticalArrangement = Arrangement.spacedBy(AppTheme.space2XLarge),
     ) {
-        item(key = "statements") {
+        item(key = "highlights") {
             Column {
                 Text(
                     stringResource(R.string.statsPatternsWindow, FocusPatterns.WINDOW_WEEKS.toInt()),

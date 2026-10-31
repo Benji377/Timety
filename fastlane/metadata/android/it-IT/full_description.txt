@@ -7,7 +7,7 @@
   <li><b>Obiettivi:</b> Definisci obiettivi a lungo termine con una scadenza e monitora i tuoi progressi.</li>
   <li><b>Motore di Focus:</b> Un robusto sistema di cronometro e timer progettato per il deep work. Include il supporto per tag, modalità personalizzate e fasi di pausa brevi/lunghe.</li>
   <li><b>Monitoraggio delle abitudini:</b> Costruisci routine durature con frequenze flessibili (giornaliere, giorni specifici della settimana o obiettivi settimanali flessibili).</li>
-  <li><b>Analisi dettagliate:</b> Visualizza la tua produttività con grafici interattivi, metriche di velocità settimanali e analisi delle abitudini in base all'ora del giorno.</li>
+  <li><b>Analisi dettagliate:</b> Controlla la tua giornata a colpo d'occhio ed esplora tempo, attività, abitudini, obiettivi e schemi per settimana, mese o anno.</li>
   <li><b>Notifiche intelligenti:</b> Promemoria locali per le attività, orari specifici per le abitudini e motivazione quotidiana dinamica.</li>
   <li><b>Calendario unificato:</b> Una vista calendario personalizzata a micro-punti per vedere a colpo d'occhio le tue attività, le sessioni di focus e le abitudini.</li>
   <li><b>Calendario dell'umore:</b> Valuta ogni giornata dal check-in serale o dal tuo profilo e vedi a colpo d'occhio un mese di umori e la tua distribuzione complessiva.</li>

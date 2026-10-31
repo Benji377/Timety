@@ -7,7 +7,7 @@
   <li><b>Goals:</b> Define longer-term goals with a deadline and track your progress towards them.</li>
   <li><b>Focus Engine:</b> A robust stopwatch and timer system tailored for deep work. Includes support for tags, custom modes, and short/long break phases.</li>
   <li><b>Habit Tracker:</b> Build lasting routines with flexible frequencies (daily, specific weekdays, or flexible weekly goals).</li>
-  <li><b>Rich Analytics:</b> Visualize your productivity with interactive charts, weekly velocity metrics, and time-of-day habit analysis.</li>
+  <li><b>Rich Analytics:</b> See your day at a glance, then explore your time, tasks, habits, goals, and patterns by week, month, or year.</li>
   <li><b>Smart Notifications:</b> Local reminders for tasks, specific habit times, and dynamic daily motivation.</li>
   <li><b>Unified Calendar:</b> A custom micro-dot calendar view to see your tasks, focus sessions, and habits at a glance.</li>
   <li><b>Mood Calendar:</b> Rate each day from the evening check-in or your profile, and see a month of moods and your all-time split at a glance.</li>
