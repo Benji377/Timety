@@ -38,6 +38,9 @@ object FocusPatterns {
     const val WINDOW_WEEKS = 12L
     const val HOURS_PER_SLOT = 4
 
+    /** Fewer check-ins than this in the window say nothing about when habits get done. */
+    const val MIN_CHECK_INS = 10
+
     private const val DAYS_PER_WEEK = 7L
     private const val HOURS_PER_DAY = 24
     private const val SECONDS_PER_MINUTE = 60L

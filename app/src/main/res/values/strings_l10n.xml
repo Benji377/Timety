@@ -425,6 +425,65 @@
     <string name="statsRowTimeLess">%1$s focus, %2$d%% less</string>
     <string name="statsRowTasksDue">%1$s, %2$d%% by due date</string>
     <string name="statsRowHabits">%1$d%% of expected check-ins</string>
+    <string name="statsPagePatterns">Patterns</string>
+    <string name="statsRowGoals">%1$d on pace, %2$d behind</string>
+    <string name="statsRowGoalsNone">No active goals</string>
+    <string name="statsRowPatternsNone">Not enough data yet</string>
+    <string name="statsHabitsRateCaption">of expected check-ins</string>
+    <string name="statsYourHabits">Your habits</string>
+    <string name="statsHabitRow">%1$d of %2$d. Streak %3$s, best %4$d.</string>
+    <string name="statsHabitRowNoRate">Streak %1$s, best %2$d.</string>
+    <plurals name="statsCheckIns">
+        <item quantity="one">%1$d check-in</item>
+        <item quantity="other">%1$d check-ins</item>
+    </plurals>
+    <plurals name="statsStreakDays">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="statsStreakWeeks">
+        <item quantity="one">%1$d week</item>
+        <item quantity="other">%1$d weeks</item>
+    </plurals>
+    <plurals name="statsStreakMonths">
+        <item quantity="one">%1$d month</item>
+        <item quantity="other">%1$d months</item>
+    </plurals>
+    <string name="statsGoalsActive">Active</string>
+    <string name="statsGoalsBehind">Behind</string>
+    <string name="statsGoalsCompleted">Completed</string>
+    <string name="statsGoalsPaceHint">The mark shows where a steady pace would put you today.</string>
+    <string name="statsGoalAhead">Ahead.</string>
+    <string name="statsGoalOnPace">On pace.</string>
+    <string name="statsGoalBehind">Behind.</string>
+    <string name="statsGoalOverdue">Overdue.</string>
+    <string name="statsGoalDue">Due %1$s.</string>
+    <string name="statsGoalWasDue">Was due %1$s.</string>
+    <string name="statsGoalProjected">At this pace, finished around %1$s.</string>
+    <string name="statsGoalProgress">%1$d / %2$d %3$s</string>
+    <string name="statsGoalFinishedOnDeadline">Finished %1$s, on the deadline</string>
+    <plurals name="statsGoalFinishedEarly">
+        <item quantity="one">Finished %1$s, %2$d day early</item>
+        <item quantity="other">Finished %1$s, %2$d days early</item>
+    </plurals>
+    <plurals name="statsGoalFinishedLate">
+        <item quantity="one">Finished %1$s, %2$d day late</item>
+        <item quantity="other">Finished %1$s, %2$d days late</item>
+    </plurals>
+    <string name="statsPatternsWindow">Based on the last %1$d weeks</string>
+    <string name="statsPatternsEmpty">Patterns appear here once the last %1$d weeks hold enough data.</string>
+    <string name="statsPatternPeakLabel">Peak focus time</string>
+    <string name="statsPatternPeakValue">%1$s, %2$s</string>
+    <string name="statsPatternBusiestLabel">Busiest day for tasks</string>
+    <string name="statsPatternDistractedLabel">Typically distracted after</string>
+    <string name="statsRowPeak">Peak focus: %1$s</string>
+    <string name="statsPatternsGrid">When you focus</string>
+    <string name="statsPatternsGridHint">A stronger color means more minutes</string>
+    <string name="statsPatternsByWeekday">By weekday</string>
+    <string name="statsPatternsByWeekdayHint">Average per day</string>
+    <string name="statsPatternsHabitTiming">When you check in habits</string>
+    <string name="statsPatternsByMood">Focus by mood</string>
+    <string name="statsPatternsByMoodHint">Average on %1$d rated days</string>
     <string name="statsBarReadout">%1$s: %2$s</string>
     <string name="statsTasksBarReadout">%1$s: %2$d completed, %3$d created</string>
     <string name="statsAvgSession">Avg session</string>

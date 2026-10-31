@@ -12,7 +12,6 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.navigation.AppRoute
-import io.github.benji377.timety.ui.screens.habit.HabitStatsScreen
 
 /**
  * A page opened from the statistics overview. The nav graph is built from [entries], so a new page
@@ -21,7 +20,9 @@ import io.github.benji377.timety.ui.screens.habit.HabitStatsScreen
 enum class StatsPage(private val routeSegment: String, @param:StringRes val titleRes: Int) {
     TIME("time", R.string.statsPageTime),
     TASKS("tasks", R.string.globalLabelTasks),
-    HABITS("habits", R.string.globalLabelHabits);
+    HABITS("habits", R.string.globalLabelHabits),
+    GOALS("goals", R.string.globalLabelGoals),
+    PATTERNS("patterns", R.string.statsPagePatterns);
 
     /** Nav route of this page, nested under [AppRoute.STATISTICS]. */
     val route: String get() = "${AppRoute.STATISTICS.route}/$routeSegment"
@@ -29,7 +30,12 @@ enum class StatsPage(private val routeSegment: String, @param:StringRes val titl
 
 /** The top bar and content of [page]. */
 @Composable
-fun StatsPageScreen(page: StatsPage, onNavigateBack: () -> Unit) {
+fun StatsPageScreen(
+    page: StatsPage,
+    onNavigateBack: () -> Unit,
+    onOpenHabit: (String) -> Unit,
+    onOpenGoal: (String) -> Unit,
+) {
     Scaffold(
         topBar = {
             NeoTopBar(
@@ -46,7 +52,9 @@ fun StatsPageScreen(page: StatsPage, onNavigateBack: () -> Unit) {
             when (page) {
                 StatsPage.TIME -> StatsTimeScreen()
                 StatsPage.TASKS -> StatsTasksScreen()
-                StatsPage.HABITS -> HabitStatsScreen()
+                StatsPage.HABITS -> StatsHabitsScreen(onOpenHabit)
+                StatsPage.GOALS -> StatsGoalsScreen(onOpenGoal)
+                StatsPage.PATTERNS -> StatsPatternsScreen()
             }
         }
     }

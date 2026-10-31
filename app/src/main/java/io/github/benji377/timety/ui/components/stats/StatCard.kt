@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,7 +41,8 @@ fun StatCard(
     onClick: (() -> Unit)? = null,
 ) {
     val sized = when (style) {
-        StatCardStyle.COMPACT_VERTICAL -> modifier.size(width = 105.dp, height = 90.dp)
+        // Grows with the font size so a two-line title is never cut off.
+        StatCardStyle.COMPACT_VERTICAL -> modifier.heightIn(min = 90.dp)
         StatCardStyle.COMPACT_HEADER -> modifier.size(width = 140.dp, height = 100.dp)
         StatCardStyle.KPI -> modifier
     }
@@ -80,7 +83,7 @@ private fun KpiContent(title: String, value: String, icon: ImageVector, color: C
 private fun CompactVerticalContent(title: String, value: String, icon: ImageVector, color: Color) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(AppTheme.spaceSmall),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -89,7 +92,7 @@ private fun CompactVerticalContent(title: String, value: String, icon: ImageVect
             icon,
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(AppTheme.iconSizeSmall)
+            modifier = Modifier.size(AppTheme.iconSizeLarge)
         )
         Spacer(Modifier.height(4.dp))
         Text(

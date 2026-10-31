@@ -30,10 +30,10 @@ fun TagBreakdownBars(breakdown: TagBreakdown, valueText: @Composable (Int) -> St
     val max = breakdown.maxValue.coerceAtLeast(1).toFloat()
     Column {
         breakdown.totals.forEach { total ->
-            TagBar(total.tag.name, Color(total.tag.colorValue), valueText(total.value), total.value / max)
+            BreakdownBar(total.tag.name, Color(total.tag.colorValue), valueText(total.value), total.value / max)
         }
         if (breakdown.untagged > 0) {
-            TagBar(
+            BreakdownBar(
                 stringResource(R.string.focusTargetUntagged),
                 MaterialTheme.colorScheme.outline,
                 valueText(breakdown.untagged),
@@ -43,8 +43,9 @@ fun TagBreakdownBars(breakdown: TagBreakdown, valueText: @Composable (Int) -> St
     }
 }
 
+/** A labelled value above a bar filled to [fraction]. */
 @Composable
-private fun TagBar(label: String, color: Color, value: String, fraction: Float) {
+fun BreakdownBar(label: String, color: Color, value: String, fraction: Float) {
     Column(modifier = Modifier.padding(bottom = AppTheme.spaceMedium)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(

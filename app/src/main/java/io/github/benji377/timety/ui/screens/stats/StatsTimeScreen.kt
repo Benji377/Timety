@@ -3,11 +3,14 @@ package io.github.benji377.timety.ui.screens.stats
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Timer
@@ -24,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.stats.PeriodBar
@@ -80,8 +84,13 @@ fun StatsTimeScreen(
     val zone = remember { ZoneId.systemDefault() }
 
     if (sessions.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.focusStatsEmpty))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(AppTheme.spaceLarge),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(stringResource(R.string.focusStatsEmpty), textAlign = TextAlign.Center)
         }
         return
     }
@@ -187,14 +196,19 @@ fun StatsTimeScreen(
                 }
             }
             item(key = "cards") {
-                Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
+                Row(
+                    modifier = Modifier.height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
+                ) {
                     StatCard(
                         title = stringResource(R.string.statsAvgSession),
                         value = averageSession?.let(AppDateFormatUtils::formatMinutesCompact) ?: "-",
                         icon = Icons.Filled.Timer,
                         color = FocusColor,
                         style = StatCardStyle.COMPACT_VERTICAL,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                     )
                     if (goalDays.total > 0) {
                         StatCard(
@@ -203,7 +217,9 @@ fun StatsTimeScreen(
                             icon = Icons.Filled.TrackChanges,
                             color = WarningColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                         )
                     }
                     StatCard(
@@ -212,7 +228,9 @@ fun StatsTimeScreen(
                         icon = Icons.Filled.WarningAmber,
                         color = WarningColor,
                         style = StatCardStyle.COMPACT_VERTICAL,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                     )
                 }
             }

@@ -4,9 +4,11 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +50,8 @@ import io.github.benji377.timety.ui.components.stats.StatCard
 import io.github.benji377.timety.ui.components.stats.StatCardStyle
 import io.github.benji377.timety.ui.components.stats.SynergyChart
 import io.github.benji377.timety.ui.screens.stats.StatsPage
+import io.github.benji377.timety.ui.screens.stats.focusPeakValue
+import io.github.benji377.timety.ui.screens.stats.isBehind
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -56,6 +60,7 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.GoalViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
@@ -63,13 +68,16 @@ import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitRates
+import io.github.benji377.timety.util.stats.FocusPatterns
 import io.github.benji377.timety.util.stats.FocusPeriodStats
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
+import io.github.benji377.timety.util.stats.GoalPace
 import io.github.benji377.timety.util.stats.PeriodSummary
 import io.github.benji377.timety.util.stats.ReportPeriod
 import io.github.benji377.timety.util.stats.TaskTiming
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.TextStyle
 import kotlin.math.abs
 
 private const val DAYS_PER_WEEK = 7
@@ -87,12 +95,14 @@ fun StatisticsScreen(
     focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    goalViewModel: GoalViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurring by recurringViewModel.allRecurringTasks.collectAsState()
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
     val habits by habitViewModel.habitsWithCompletions.collectAsState()
+    val goals by goalViewModel.goalsWithEntries.collectAsState()
     val zone = remember { ZoneId.systemDefault() }
     val today by rememberToday()
 
@@ -130,6 +140,15 @@ fun StatisticsScreen(
         habits.flatMap { it.completions }
             .groupingBy { it.completionDate.atZone(zone).toLocalDate() }
             .eachCount()
+    }
+
+    val activePaces = remember(goals, today) {
+        goals.filter { it.goal.completedAt == null }
+            .map { GoalPace.of(it.goal, it.progress, today, zone) }
+    }
+    val goalsBehind = activePaces.count { it.status.isBehind }
+    val focusPeak = remember(sessions, today) {
+        FocusPatterns.focusPeak(sessions, FocusPatterns.window(today), zone)
     }
 
     val taskEntities = remember(tasks) { tasks.map { it.task } }
@@ -170,7 +189,10 @@ fun StatisticsScreen(
                 Column {
                     SectionHeader(stringResource(R.string.statsSectionToday))
                     Spacer(Modifier.height(AppTheme.spaceMedium))
-                    Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)) {
+                    Row(
+                        modifier = Modifier.height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
+                    ) {
                         StatCard(
                             title = stringResource(R.string.statsTileTasksDone),
                             value = "$tasksToday",
@@ -178,7 +200,9 @@ fun StatisticsScreen(
                             color = TaskColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
                             onClick = { onOpenPage(StatsPage.TASKS) },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                         )
                         StatCard(
                             title = stringResource(R.string.statsTileFocus),
@@ -187,7 +211,9 @@ fun StatisticsScreen(
                             color = FocusColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
                             onClick = { onOpenPage(StatsPage.TIME) },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                         )
                         StatCard(
                             title = stringResource(R.string.statsTileFocusGoal),
@@ -196,7 +222,9 @@ fun StatisticsScreen(
                             color = WarningColor,
                             style = StatCardStyle.COMPACT_VERTICAL,
                             onClick = { onOpenPage(StatsPage.TIME) },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
                         )
                     }
                 }
@@ -243,6 +271,25 @@ fun StatisticsScreen(
                         sparkline = weekDays.map { checkInsPerDay[it] ?: 0 },
                         sparklineColor = HabitColor,
                         onClick = { onOpenPage(StatsPage.HABITS) },
+                    )
+                    HorizontalDivider()
+                    OverviewRow(
+                        title = stringResource(StatsPage.GOALS.titleRes),
+                        summary = if (activePaces.isEmpty()) {
+                            stringResource(R.string.statsRowGoalsNone)
+                        } else {
+                            stringResource(R.string.statsRowGoals, activePaces.size - goalsBehind, goalsBehind)
+                        },
+                        onClick = { onOpenPage(StatsPage.GOALS) },
+                    )
+                    HorizontalDivider()
+                    OverviewRow(
+                        title = stringResource(StatsPage.PATTERNS.titleRes),
+                        summary = focusPeak?.let {
+                            stringResource(R.string.statsRowPeak, focusPeakValue(it, TextStyle.SHORT))
+                        }
+                            ?: stringResource(R.string.statsRowPatternsNone),
+                        onClick = { onOpenPage(StatsPage.PATTERNS) },
                     )
                 }
             }

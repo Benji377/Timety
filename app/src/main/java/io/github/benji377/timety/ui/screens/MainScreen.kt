@@ -289,6 +289,8 @@ fun MainScreen(
                     StatsPageScreen(
                         page = page,
                         onNavigateBack = dropUnlessResumed { navController.popBackStack() },
+                        onOpenHabit = { id -> navController.navigate(AppRoute.habitDetail(id)) },
+                        onOpenGoal = { id -> navController.navigate(AppRoute.goalDetail(id)) },
                     )
                 }
             }

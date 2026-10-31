@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -96,8 +97,13 @@ fun StatsTasksScreen(
     val zone = remember { ZoneId.systemDefault() }
 
     if (allTasks.isEmpty() && allRecurring.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.taskStatsEmpty))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(AppTheme.spaceLarge),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(stringResource(R.string.taskStatsEmpty), textAlign = TextAlign.Center)
         }
         return
     }
