@@ -344,6 +344,7 @@
     <string name="calendarLabelFocusOngoing">Ongoing</string>
     <string name="calendarLabelSelect">Select a day to view details</string>
     <string name="calendarMonthlyReportTitle">Monthly Report</string>
+    <string name="calendarYearlyReportTitle">Yearly Report</string>
     <string name="calendarReportComparedHint">Changes are compared with %1$s.</string>
     <string name="calendarReportFocusSessions">Focus sessions</string>
     <string name="calendarReportFocusTime">Focus time</string>

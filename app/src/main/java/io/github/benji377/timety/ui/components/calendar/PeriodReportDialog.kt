@@ -63,6 +63,7 @@ fun PeriodReportDialog(
                         when (period) {
                             ReportPeriod.WEEK -> R.string.calendarWeeklyReportTitle
                             ReportPeriod.MONTH -> R.string.calendarMonthlyReportTitle
+                            ReportPeriod.YEAR -> R.string.calendarYearlyReportTitle
                         }
                     )
                 )
@@ -70,6 +71,7 @@ fun PeriodReportDialog(
                     when (period) {
                         ReportPeriod.WEEK -> formatRange(start..period.endOf(start))
                         ReportPeriod.MONTH -> AppDateFormatUtils.formatMonthYear(start)
+                        ReportPeriod.YEAR -> start.year.toString()
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
