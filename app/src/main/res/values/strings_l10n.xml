@@ -552,7 +552,6 @@
         <item quantity="other">%d tasks</item>
     </plurals>
     <string name="categoryTitle">Categories</string>
-    <string name="targetSheetClear">Remove link</string>
     <string name="tagNameTaken">A tag with this name already exists</string>
     <string name="tagPickerChoose">Choose tags</string>
     <string name="tagsEmpty">No tags yet. Tap the button above to add one.</string>

@@ -77,7 +77,6 @@ import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.focus.ModeTimeline
@@ -158,7 +157,6 @@ fun FocusScreen(
     val awaitingContinue by focusViewModel.awaitingContinue.collectAsState()
 
     val selectedTarget by focusViewModel.selectedTarget.collectAsState()
-    val selectedTagIds by focusViewModel.selectedTagIds.collectAsState()
     val allSessions by focusViewModel.allSessions.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
@@ -484,17 +482,6 @@ fun FocusScreen(
                 awaitingContinue = awaitingContinue,
             )
 
-            // Fixed for the whole session, like the target.
-            TagPicker(
-                selectedIds = selectedTagIds,
-                onSelectionChange = { focusViewModel.setSelectedTagIds(it) },
-                isEditing = !modeSelectionLocked,
-                modifier = Modifier.padding(
-                    horizontal = AppTheme.spaceLarge,
-                    vertical = AppTheme.spaceSmall
-                ),
-            )
-
             Spacer(modifier = Modifier.weight(1f))
 
             // Play/pause controls.
@@ -609,8 +596,7 @@ fun FocusScreen(
         TargetSelectorBottomSheet(
             onDismissRequest = { showTargetSelection = false },
             selected = selectedTarget,
-            onTargetSelected = { target, tagIds -> focusViewModel.setSelectedTarget(target, tagIds) },
-            onClear = { focusViewModel.clearSelectedTarget() },
+            onTargetSelected = { focusViewModel.setSelectedTarget(it) },
         )
     }
 
@@ -634,10 +620,9 @@ fun FocusScreen(
             title = stringResource(R.string.dialogTimeMachineTitle),
             modes = allModes,
             initialTarget = selectedTarget,
-            initialTagIds = selectedTagIds,
             onDismiss = { showTimeMachine = false },
-            onSave = { mode, start, end, target, tagIds ->
-                focusViewModel.logPastSession(mode, start, end, target, tagIds)
+            onSave = { mode, start, end, target ->
+                focusViewModel.logPastSession(mode, start, end, target)
                 showTimeMachine = false
                 scope.launch {
                     snackbarHostState.showSnackbar(dialogTimeMachineSuccessStr)
@@ -750,7 +735,8 @@ private fun TimerGauge(
     val isResting = display.isResting
 
     val gaugeColor = if (isResting) WarningColor else FocusColor
-    val bottomTextIcon = selectedTarget?.type?.icon
+    // Tags are identified by their color alone, so only the other target types get an icon.
+    val bottomTextIcon = selectedTarget?.type?.takeIf { it != FocusTargetType.TAG }?.icon
 
     InteractiveGauge(
         progress = display.progress,

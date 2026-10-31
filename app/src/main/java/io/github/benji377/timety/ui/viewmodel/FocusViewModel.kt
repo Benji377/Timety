@@ -118,22 +118,21 @@ class FocusViewModel(
     private val _selectedTarget = MutableStateFlow<FocusTargetSelection?>(null)
     val selectedTarget: StateFlow<FocusTargetSelection?> = _selectedTarget.asStateFlow()
 
-    private val _selectedTagIds = MutableStateFlow<Set<String>>(emptySet())
-    val selectedTagIds: StateFlow<Set<String>> = _selectedTagIds.asStateFlow()
-
-    /** Links the next session to [target], with the item's [tagIds] as its tags. */
-    fun setSelectedTarget(target: FocusTargetSelection, tagIds: Set<String>) {
+    fun setSelectedTarget(target: FocusTargetSelection?) {
         _selectedTarget.value = target
-        _selectedTagIds.value = tagIds
     }
 
-    /** Unlinks the next session from its item. Its tags stay, so it can still be logged under them. */
-    fun clearSelectedTarget() {
-        _selectedTarget.value = null
-    }
-
-    fun setSelectedTagIds(tagIds: Set<String>) {
-        _selectedTagIds.value = tagIds
+    /** The tags a session logged against [target] gets: the tag itself, or a copy of the item's. */
+    private suspend fun tagIdsFor(target: FocusTargetSelection?): Set<String> {
+        val itemType = when (target?.type) {
+            null -> return emptySet()
+            FocusTargetType.TAG -> return setOf(target.id)
+            FocusTargetType.TASK -> TaggedItemType.TASK
+            FocusTargetType.RECURRING_TASK -> TaggedItemType.RECURRING_TASK
+            FocusTargetType.HABIT -> TaggedItemType.HABIT
+            FocusTargetType.GOAL -> TaggedItemType.GOAL
+        }
+        return tagRepository.tagsByItem(itemType).first()[target.id].orEmpty().mapTo(HashSet()) { it.id }
     }
 
     private var currentSessionId: String = UUID.randomUUID().toString()
@@ -147,42 +146,37 @@ class FocusViewModel(
             focusRepository.allModes.collect { modes -> ensureSystemModes(modes) }
         }
 
-        // Keeps the selected target pointing at something that exists: a deleted task or habit (also
-        // one a restore replaced) clears it. Left alone mid-session, which logs against the target it
-        // began with. Goals aren't checked: a session only records its time against one and never
-        // completes it.
+        // Keeps the selected target pointing at something that exists: a deleted tag, task or habit
+        // (also one a restore replaced) clears it, and a renamed tag shows its new name. Left alone
+        // mid-session, which logs against the target it began with. Goals aren't checked: a session
+        // only records its time against one and never completes it.
         viewModelScope.launch {
             val sessionActive = FocusTimerManager.timerState.map { it.isSessionActive }.distinctUntilChanged()
             combine(
                 combine(
+                    tagRepository.allTags,
                     taskRepository.allTasks,
                     habitRepository.allHabits,
                     recurringTaskRepository.allRecurringTasks,
-                ) { tasks, habits, recurring ->
-                    buildMap {
+                ) { tags, tasks, habits, recurring ->
+                    tags to buildMap {
                         put(FocusTargetType.TASK, tasks.mapTo(HashSet()) { it.task.id })
                         put(FocusTargetType.HABIT, habits.mapTo(HashSet()) { it.id })
                         put(FocusTargetType.RECURRING_TASK, recurring.mapTo(HashSet()) { it.task.id })
                     }
                 },
                 sessionActive,
-            ) { idsByType, active -> idsByType to active }
-                .collect { (idsByType, active) ->
+            ) { (tags, idsByType), active -> Triple(tags, idsByType, active) }
+                .collect { (tags, idsByType, active) ->
                     val current = _selectedTarget.value ?: return@collect
-                    if (active || current.type == FocusTargetType.GOAL) return@collect
-                    if (idsByType[current.type]?.contains(current.id) != true) _selectedTarget.value = null
+                    if (active) return@collect
+                    _selectedTarget.value = when (current.type) {
+                        FocusTargetType.TAG ->
+                            tags.firstOrNull { it.id == current.id }?.let { FocusTargetSelection.tag(it) }
+                        FocusTargetType.GOAL -> current
+                        else -> current.takeIf { idsByType[current.type]?.contains(current.id) == true }
+                    }
                 }
-        }
-
-        // Drops deleted tags from the selection. Only removals count: a tag just created and
-        // selected may be newer than the list being handled here.
-        viewModelScope.launch {
-            var knownIds = emptySet<String>()
-            tagRepository.allTags.collect { tags ->
-                val ids = tags.mapTo(HashSet()) { it.id }
-                _selectedTagIds.value -= knownIds - ids
-                knownIds = ids
-            }
         }
 
         viewModelScope.launch {
@@ -278,13 +272,13 @@ class FocusViewModel(
                 totalSecondsFocused = sessionAccumulatedFocusSeconds,
                 isCompleted = true,
             ).withTarget(selectedTarget.value)
-            val tagIdsToLog = selectedTagIds.value
+            val targetToLog = selectedTarget.value
             val distractionsToLog = pendingDistractions.toList()
             val targetToComplete = selectedTarget.value?.takeIf { sessionFocusPhaseCompleted }
 
             viewModelScope.launch {
                 focusRepository.insertSession(sessionToLog)
-                tagRepository.setItemTags(TaggedItemType.SESSION, sessionToLog.id, tagIdsToLog)
+                tagRepository.setItemTags(TaggedItemType.SESSION, sessionToLog.id, tagIdsFor(targetToLog))
                 distractionsToLog.forEach { focusRepository.insertDistraction(it) }
                 if (targetToComplete != null && settingsRepository.autoCompleteFocusFlow.first()) {
                     autoCompleteTarget(targetToComplete)
@@ -420,10 +414,9 @@ class FocusViewModel(
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        target: FocusTargetSelection?,
-        tagIds: Set<String>
+        target: FocusTargetSelection?
     ) {
-        viewModelScope.launch { logBackfilledSession(mode, startTime, endTime, target, tagIds) }
+        logBackfilledSession(mode, startTime, endTime, target)
     }
 
     /**
@@ -437,24 +430,19 @@ class FocusViewModel(
         taskId: String,
         taskTitle: String
     ) {
-        viewModelScope.launch {
-            logBackfilledSession(
-                mode,
-                startTime,
-                endTime,
-                FocusTargetSelection.of(FocusTargetType.TASK, taskId, taskTitle),
-                tagRepository.tagsByItem(TaggedItemType.TASK).first()[taskId].orEmpty()
-                    .mapTo(HashSet()) { it.id },
-            )
-        }
+        logBackfilledSession(
+            mode,
+            startTime,
+            endTime,
+            FocusTargetSelection.of(FocusTargetType.TASK, taskId, taskTitle),
+        )
     }
 
-    private suspend fun logBackfilledSession(
+    private fun logBackfilledSession(
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        target: FocusTargetSelection?,
-        tagIds: Set<String>
+        target: FocusTargetSelection?
     ) {
         val totalSeconds = endTime.epochSecond - startTime.epochSecond
         if (totalSeconds <= 0) return
@@ -467,13 +455,16 @@ class FocusViewModel(
             totalSecondsFocused = totalSeconds.toInt(),
             isCompleted = true,
         ).withTarget(target)
-        focusRepository.insertSession(session)
-        tagRepository.setItemTags(TaggedItemType.SESSION, session.id, tagIds)
+        viewModelScope.launch {
+            focusRepository.insertSession(session)
+            tagRepository.setItemTags(TaggedItemType.SESSION, session.id, tagIdsFor(target))
+        }
     }
 
     /**
      * Applies an edit to an already logged session: its focused time is re-derived from the new
-     * range. Retargeting doesn't undo or redo any auto-completion the session triggered when it
+     * range. A session keeps the tags it was logged with until it is retargeted, so retagging an
+     * item later doesn't rewrite its history. Retargeting doesn't undo or redo any auto-completion the session triggered when it
      * was recorded.
      */
     fun updateSession(
@@ -481,8 +472,7 @@ class FocusViewModel(
         mode: FocusModeEntity,
         startTime: Instant,
         endTime: Instant,
-        target: FocusTargetSelection?,
-        tagIds: Set<String>
+        target: FocusTargetSelection?
     ) {
         val span = (endTime.epochSecond - startTime.epochSecond).toInt()
         if (span <= 0) return
@@ -502,7 +492,9 @@ class FocusViewModel(
 
         viewModelScope.launch {
             focusRepository.updateSession(updated)
-            tagRepository.setItemTags(TaggedItemType.SESSION, updated.id, tagIds)
+            val sameItem = target != null && target.type != FocusTargetType.TAG &&
+                target.type == session.targetType && target.id == session.targetId
+            if (!sameItem) tagRepository.setItemTags(TaggedItemType.SESSION, updated.id, tagIdsFor(target))
         }
     }
 
@@ -513,12 +505,16 @@ class FocusViewModel(
         }
     }
 
-    private fun FocusSessionEntity.withTarget(target: FocusTargetSelection?) = copy(
-        tagId = null,
-        targetType = target?.type ?: FocusTargetType.TAG,
-        targetId = target?.id,
-        targetLabel = target?.label,
-    )
+    // A tag target lives in session_tags alone, so a rename can't leave a stale label behind.
+    private fun FocusSessionEntity.withTarget(target: FocusTargetSelection?): FocusSessionEntity {
+        val item = target?.takeIf { it.type != FocusTargetType.TAG }
+        return copy(
+            tagId = null,
+            targetType = item?.type ?: FocusTargetType.TAG,
+            targetId = item?.id,
+            targetLabel = item?.label,
+        )
+    }
 }
 
 /** Built-in modes with their phases as (type, minutes); 0 minutes is open-ended, -1 is user-set. */

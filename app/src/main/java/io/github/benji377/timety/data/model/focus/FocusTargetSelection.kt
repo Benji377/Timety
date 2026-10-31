@@ -28,8 +28,8 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 
 /**
- * The task, recurring task, habit or goal a focus session is linked to, carrying a display label
- * and color alongside the underlying id. A session with no linked item has no selection.
+ * The one thing a focus session is logged against, a tag or an item, carrying a display label and
+ * color alongside the underlying id. A session logged against nothing has no selection.
  */
 data class FocusTargetSelection(
     val type: FocusTargetType,
@@ -40,7 +40,14 @@ data class FocusTargetSelection(
     val color: Color get() = Color(colorValue)
 
     companion object {
-        /** A target shown in its type's [FocusTargetType.color]. */
+        fun tag(tag: TagEntity) = FocusTargetSelection(
+            type = FocusTargetType.TAG,
+            id = tag.id,
+            label = tag.name,
+            colorValue = tag.colorValue,
+        )
+
+        /** An item target, shown in its type's [FocusTargetType.color]. */
         fun of(type: FocusTargetType, id: String, label: String) = FocusTargetSelection(
             type = type,
             id = id,
@@ -48,10 +55,10 @@ data class FocusTargetSelection(
             colorValue = type.color.toArgb(),
         )
 
-        /** The item a logged [session] is linked to, or null when it has none. */
-        fun fromSession(session: FocusSessionEntity): FocusTargetSelection? {
+        /** What a logged [session] with these [tags] is logged against, or null when nothing. */
+        fun fromSession(session: FocusSessionEntity, tags: List<TagEntity>): FocusTargetSelection? {
+            if (session.targetType == FocusTargetType.TAG) return tags.firstOrNull()?.let { tag(it) }
             val id = session.targetId ?: return null
-            if (session.targetType == FocusTargetType.TAG) return null
             return of(session.targetType, id, session.targetLabel.orEmpty())
         }
     }
@@ -75,7 +82,7 @@ val FocusTargetType.icon: ImageVector
         FocusTargetType.GOAL -> Icons.Filled.Flag
     }
 
-/** Accent color of this target type; [FocusTargetType.TAG] means no linked item. */
+/** Accent color of this target type; tags use their own color instead where one is known. */
 val FocusTargetType.color: Color
     get() = when (this) {
         FocusTargetType.TAG -> FocusColor

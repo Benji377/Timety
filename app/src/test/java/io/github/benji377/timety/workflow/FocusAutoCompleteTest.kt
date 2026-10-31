@@ -13,6 +13,8 @@ import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.data.model.focus.displayName
 import io.github.benji377.timety.data.model.goal.GoalEntity
+import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
@@ -232,7 +234,7 @@ class FocusAutoCompleteTest {
     }
 
     @Test
-    fun deletedItemsClearTheTarget_andDeletedTagsLeaveTheSelection() {
+    fun deletedTargetsClear_andARenamedTagShowsItsNewName() {
         val task = TaskEntity(id = "task-gone", title = "Gone soon", createdAt = now)
         val tag = TagEntity("tag-gone", "Gone too", 0)
         runBlocking {
@@ -240,20 +242,23 @@ class FocusAutoCompleteTest {
             container.tagRepository.getOrCreateTag(tag)
         }
         settle()
-        focusViewModel.setSelectedTarget(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title), setOf(tag.id))
+        focusViewModel.setSelectedTarget(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title))
         settle()
         assertEquals(task.id, focusViewModel.selectedTarget.value?.id)
 
         runBlocking { container.taskRepository.deleteTask(task) }
         assertTrue("a deleted task is no longer the target", awaitTrue { focusViewModel.selectedTarget.value == null })
-        assertEquals("the tags outlive the target", setOf(tag.id), focusViewModel.selectedTagIds.value)
+
+        focusViewModel.setSelectedTarget(FocusTargetSelection.tag(tag))
+        runBlocking { container.tagRepository.updateTag(tag.copy(name = "Renamed")) }
+        assertTrue("a renamed tag updates", awaitTrue { focusViewModel.selectedTarget.value?.label == "Renamed" })
 
         runBlocking { container.tagRepository.deleteTag(tag) }
-        assertTrue("a deleted tag leaves the selection", awaitTrue { focusViewModel.selectedTagIds.value.isEmpty() })
+        assertTrue("a deleted tag is no longer the target", awaitTrue { focusViewModel.selectedTarget.value == null })
     }
 
     @Test
-    fun session_keepsItsOwnCopyOfTheTags_whenTheItemIsRetaggedLater() {
+    fun itemSession_copiesTheItemsTags_andKeepsThemWhenTheItemIsRetaggedOrTheSessionEdited() {
         val task = TaskEntity(id = "task-tags", title = "Standup", createdAt = now)
         val work = TagEntity("work", "Work", 0)
         val meeting = TagEntity("meeting", "Meeting", 0)
@@ -261,15 +266,18 @@ class FocusAutoCompleteTest {
             container.taskRepository.insertTask(task)
             container.tagRepository.getOrCreateTag(work)
             container.tagRepository.getOrCreateTag(meeting)
-            container.tagRepository.setItemTags(TaggedItemType.TASK, task.id, setOf(work.id))
+            container.tagRepository.setItemTags(TaggedItemType.TASK, task.id, setOf(work.id, meeting.id))
         }
-        startSession(FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title), setOf(work.id, meeting.id))
+        val target = FocusTargetSelection.of(FocusTargetType.TASK, task.id, task.title)
+        startSession(target)
         logTwoMinutes()
 
         val session = awaitSingleSession()
         assertTrue("the session has both tags", awaitTrue { sessionTagIds(session.id) == setOf(work.id, meeting.id) })
+        assertEquals("Standup", session.displayName(emptyList()))
 
         runBlocking { container.tagRepository.setItemTags(TaggedItemType.TASK, task.id, emptySet()) }
+        focusViewModel.updateSession(session, mode, session.startTime, session.endTime!!, target)
         settle()
         assertEquals(setOf(work.id, meeting.id), sessionTagIds(session.id))
     }
@@ -282,38 +290,51 @@ class FocusAutoCompleteTest {
         val session = awaitSingleSession()
         assertEquals(FocusTargetType.TAG, session.targetType)
         assertNull(session.targetId)
+        settle()
         assertEquals(emptySet<String>(), sessionTagIds(session.id))
     }
 
     @Test
-    fun taggedSessionWithoutAnItem_hasNoTargetToEdit_andIsNamedAfterItsTags() {
+    fun tagSession_isStoredAsThatTagAlone_andEditsBackToIt() {
         val work = TagEntity("work", "Work", 0)
         runBlocking { container.tagRepository.getOrCreateTag(work) }
-        startSession(null, setOf(work.id))
+        settle()
+        startSession(FocusTargetSelection.tag(work))
         logTwoMinutes()
 
         val session = awaitSingleSession()
-        assertNull(FocusTargetSelection.fromSession(session))
+        assertTrue(awaitTrue { sessionTagIds(session.id) == setOf(work.id) })
+        assertEquals(FocusTargetType.TAG, session.targetType)
+        assertNull("a tag lives in session_tags only", session.targetId)
+        assertNull(session.targetLabel)
         assertEquals("Work", session.displayName(listOf(work)))
-        assertNull(session.displayName(emptyList()))
+        assertEquals(FocusTargetSelection.tag(work), FocusTargetSelection.fromSession(session, listOf(work)))
+        assertNull(FocusTargetSelection.fromSession(session, emptyList()))
     }
 
     @Test
-    fun retaggingALoggedSession_replacesItsTags() {
+    fun retargetingALoggedSession_replacesItsTags() {
         val work = TagEntity("work", "Work", 0)
         val uni = TagEntity("uni", "University", 0)
+        val habit = HabitEntity(id = "habit-1", name = "Read", colorValue = 0, iconCodePoint = 0, frequency = HabitFrequency.DAILY, createdAt = now)
         runBlocking {
             container.tagRepository.getOrCreateTag(work)
             container.tagRepository.getOrCreateTag(uni)
+            container.habitRepository.insertHabit(habit)
+            container.tagRepository.setItemTags(TaggedItemType.HABIT, habit.id, setOf(uni.id))
         }
-        startSession(null, setOf(work.id))
+        settle()
+        startSession(FocusTargetSelection.tag(work))
         logTwoMinutes()
         val session = awaitSingleSession()
         assertTrue(awaitTrue { sessionTagIds(session.id) == setOf(work.id) })
 
-        focusViewModel.updateSession(session, mode, session.startTime, session.endTime!!, null, setOf(uni.id))
+        val end = session.endTime!!
+        focusViewModel.updateSession(session, mode, session.startTime, end, FocusTargetSelection.of(FocusTargetType.HABIT, habit.id, habit.name))
+        assertTrue("the new item's tags replace them", awaitTrue { sessionTagIds(session.id) == setOf(uni.id) })
 
-        assertTrue("the tags are replaced", awaitTrue { sessionTagIds(session.id) == setOf(uni.id) })
+        focusViewModel.updateSession(session, mode, session.startTime, end, null)
+        assertTrue("no target means untagged", awaitTrue { sessionTagIds(session.id).isEmpty() })
     }
 
     @Test
@@ -346,9 +367,8 @@ class FocusAutoCompleteTest {
         )
     }
 
-    private fun startSession(target: FocusTargetSelection?, tagIds: Set<String> = emptySet()) {
-        if (target != null) focusViewModel.setSelectedTarget(target, tagIds)
-        focusViewModel.setSelectedTagIds(tagIds)
+    private fun startSession(target: FocusTargetSelection?) {
+        focusViewModel.setSelectedTarget(target)
         focusViewModel.setActiveSessionMode(mode.id)
     }
 

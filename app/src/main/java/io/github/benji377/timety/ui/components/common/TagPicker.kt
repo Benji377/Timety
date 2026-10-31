@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -132,10 +133,11 @@ fun TagPicker(
                 )
             }
             if (isEditing) {
-                NeoFilterChip(
-                    selected = false,
+                NeoIconButton(
                     onClick = { showSheet = true },
-                    label = stringResource(R.string.tagPickerChoose),
+                    icon = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.tagPickerChoose),
+                    size = 40.dp,
                 )
             }
         }
