@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.screens.focus
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.displayName
+import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
@@ -43,6 +44,7 @@ import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
+import io.github.benji377.timety.util.tag.TagFilter
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -56,22 +58,19 @@ fun FocusStatsScreen(
     tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val sessions by focusViewModel.allSessions.collectAsState()
-    val tags by focusViewModel.allTags.collectAsState()
     val sessionTags by tagViewModel.sessionTags.collectAsState()
     val modes by focusViewModel.allModes.collectAsState()
     val distractions by focusViewModel.allDistractions.collectAsState()
 
     var focusedWeek by remember { mutableStateOf(LocalDate.now()) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
-    var selectedTagFilterId by remember { mutableStateOf<String?>(null) }
+    var selectedTagIds by remember { mutableStateOf(emptySet<String>()) }
     var editingSession by remember { mutableStateOf<FocusSessionEntity?>(null) }
 
-    // A tag that no longer has sessions (deleted or retargeted away) hides its chip and the "All"
-    // chip with it, so drop the filter instead of leaving the screen stuck on an empty selection.
-    LaunchedEffect(sessions, tags, selectedTagFilterId) {
-        val id = selectedTagFilterId ?: return@LaunchedEffect
-        if (tags.none { it.id == id } || sessions.none { it.tagId == id }) selectedTagFilterId = null
+    val usedTags = remember(sessions, sessionTags) {
+        TagFilter.usedTags(sessions.map { it.id }, sessionTags)
     }
+    val activeTagIds = TagFilter.activeIds(selectedTagIds, usedTags)
 
     if (sessions.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -83,8 +82,8 @@ fun FocusStatsScreen(
     val zone = ZoneId.systemDefault()
     val modeById = remember(modes) { modes.associateBy { it.id } }
 
-    val filteredSessions = remember(sessions, selectedTagFilterId) {
-        if (selectedTagFilterId == null) sessions else sessions.filter { it.tagId == selectedTagFilterId }
+    val filteredSessions = remember(sessions, activeTagIds, sessionTags) {
+        TagFilter.filter(sessions, activeTagIds, sessionTags) { it.id }
     }
 
     val startOfWeek = AppDateUtils.startOfWeekMonday(focusedWeek)
@@ -108,9 +107,9 @@ fun FocusStatsScreen(
     fun resolveTargetName(session: FocusSessionEntity): String =
         session.displayName(sessionTags[session.id].orEmpty()) ?: defaultTargetUntagged
 
-    val selectedDayDistractions = remember(distractions, selectedTagFilterId, selectedDay) {
+    val selectedDayDistractions = remember(distractions, activeTagIds, sessionTags, selectedDay) {
         distractions.filter { entry ->
-            (selectedTagFilterId == null || entry.session.tagId == selectedTagFilterId) &&
+            TagFilter.matches(sessionTags[entry.session.id].orEmpty(), activeTagIds) &&
                     AppDateUtils.isSameDay(
                         entry.distraction.time.atZone(zone).toLocalDate(),
                         selectedDay
@@ -137,12 +136,12 @@ fun FocusStatsScreen(
             Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
 
             TagFilterRow(
-                sessions = sessions,
-                tags = tags,
-                selectedTagId = selectedTagFilterId,
-                onSelect = { selectedTagFilterId = it },
+                tags = usedTags,
+                selectedIds = activeTagIds,
+                onSelectionChange = { selectedTagIds = it },
+                contentPadding = PaddingValues(0.dp),
             )
-            if (sessions.any { it.tagId != null }) Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
+            if (usedTags.isNotEmpty()) Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
 
             SectionHeader(
                 stringResource(R.string.focusStatsSectionClockTitle),

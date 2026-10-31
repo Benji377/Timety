@@ -24,8 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.ui.components.common.NeoListTile
+import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -54,6 +56,7 @@ fun RecurringTaskListTile(
     onComplete: () -> Unit,
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
+    tags: List<TagEntity> = emptyList(),
     margin: PaddingValues = AppTheme.listTileScreenMargin,
 ) {
     val dateFmt = LocalDateFormatSettings.current
@@ -111,6 +114,10 @@ fun RecurringTaskListTile(
                         color = borderColor,
                         fontWeight = AppTheme.fwMedium,
                     )
+                }
+                if (tags.isNotEmpty()) {
+                    Spacer(Modifier.height(AppTheme.spaceXSmall))
+                    TagChips(tags)
                 }
             }
             Spacer(Modifier.width(AppTheme.spaceLarge))

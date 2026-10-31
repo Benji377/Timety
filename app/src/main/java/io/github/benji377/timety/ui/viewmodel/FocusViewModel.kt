@@ -7,7 +7,6 @@ import io.github.benji377.timety.data.model.focus.DistractionType
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
@@ -67,14 +66,11 @@ class FocusViewModel(
     private val settingsRepository: SettingsRepository,
     private val tagRepository: TagRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
-    // Modes, sessions, and tags.
+    // Modes and sessions.
     val allModes: StateFlow<List<FocusModeEntity>> = focusRepository.allModes
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val allSessions: StateFlow<List<FocusSessionEntity>> = focusRepository.allSessions
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    val allTags: StateFlow<List<FocusTagEntity>> = focusRepository.allTags
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // A single live query over the distractions table joined in memory with the sessions list.

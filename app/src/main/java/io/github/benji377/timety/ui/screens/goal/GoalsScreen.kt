@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.goal.GoalWithEntries
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
@@ -56,6 +57,8 @@ import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.TagChips
+import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.GoalColor
@@ -63,9 +66,12 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.goal.GoalUtils
 import io.github.benji377.timety.util.habit.HabitIcons
+import io.github.benji377.timety.util.tag.TagFilter
 import java.time.Instant
 import java.time.ZoneId
 
@@ -79,9 +85,15 @@ fun GoalsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToGoalDetail: (String?) -> Unit,
     viewModel: GoalViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val goals by viewModel.goalsWithEntries.collectAsState()
-    val (completed, active) = goals.partition { it.goal.completedAt != null }
+    val goalTags by tagViewModel.goalTags.collectAsState()
+    var selectedTagIds by remember { mutableStateOf(emptySet<String>()) }
+    val usedTags = remember(goals, goalTags) { TagFilter.usedTags(goals.map { it.goal.id }, goalTags) }
+    val activeTagIds = TagFilter.activeIds(selectedTagIds, usedTags)
+    val visibleGoals = TagFilter.filter(goals, activeTagIds, goalTags) { it.goal.id }
+    val (completed, active) = visibleGoals.partition { it.goal.completedAt != null }
     var entryDialogFor by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
@@ -114,7 +126,16 @@ fun GoalsScreen(
                 }
             }
 
-            if (goals.isEmpty()) {
+            item {
+                TagFilterRow(
+                    tags = usedTags,
+                    selectedIds = activeTagIds,
+                    onSelectionChange = { selectedTagIds = it },
+                    contentPadding = PaddingValues(horizontal = AppTheme.spaceLarge),
+                )
+            }
+
+            if (visibleGoals.isEmpty()) {
                 item {
                     Box(
                         modifier = Modifier
@@ -123,7 +144,7 @@ fun GoalsScreen(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            stringResource(R.string.goalsEmpty),
+                            stringResource(if (goals.isEmpty()) R.string.goalsEmpty else R.string.tagFilterNoMatch),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -133,6 +154,7 @@ fun GoalsScreen(
             items(active, key = { it.goal.id }) { goalWithEntries ->
                 GoalCard(
                     goalWithEntries = goalWithEntries,
+                    tags = goalTags[goalWithEntries.goal.id].orEmpty(),
                     onTap = { onNavigateToGoalDetail(goalWithEntries.goal.id) },
                     onLogProgress = { entryDialogFor = goalWithEntries.goal.id },
                     modifier = Modifier.padding(
@@ -153,6 +175,7 @@ fun GoalsScreen(
                             completed.forEach { goalWithEntries ->
                                 GoalCard(
                                     goalWithEntries = goalWithEntries,
+                                    tags = goalTags[goalWithEntries.goal.id].orEmpty(),
                                     onTap = { onNavigateToGoalDetail(goalWithEntries.goal.id) },
                                     onLogProgress = null,
                                     modifier = Modifier.padding(vertical = AppTheme.spaceSmall),
@@ -188,6 +211,7 @@ fun GoalsScreen(
 @Composable
 private fun GoalCard(
     goalWithEntries: GoalWithEntries,
+    tags: List<TagEntity>,
     onTap: () -> Unit,
     onLogProgress: (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -267,6 +291,10 @@ private fun GoalCard(
                     )
                 } else {
                     PaceSummaryRow(goalWithEntries)
+                }
+                if (tags.isNotEmpty()) {
+                    Spacer(Modifier.height(AppTheme.spaceSmall))
+                    TagChips(tags)
                 }
             }
             if (onLogProgress != null) {

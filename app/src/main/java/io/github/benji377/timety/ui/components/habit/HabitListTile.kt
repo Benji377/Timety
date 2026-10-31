@@ -39,10 +39,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
+import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -68,6 +70,7 @@ fun HabitListTile(
     habit: HabitEntity,
     isCompleted: Boolean,
     subtitleText: String,
+    tags: List<TagEntity> = emptyList(),
     progressValue: Float? = null,
     isStacked: Boolean = false,
     isLocked: Boolean = false,
@@ -112,6 +115,7 @@ fun HabitListTile(
                         isLocked = isLocked,
                         isReorderMode = isReorderMode,
                         subtitleText = subtitleText,
+                        tags = tags,
                         progressValue = progressValue,
                         onToggleCompleted = onToggleCompleted,
                         onTap = onTap,
@@ -142,6 +146,7 @@ fun HabitListTile(
                     isLocked = isLocked,
                     isReorderMode = isReorderMode,
                     subtitleText = subtitleText,
+                    tags = tags,
                     progressValue = progressValue,
                     onToggleCompleted = onToggleCompleted,
                     onTap = onTap,
@@ -181,6 +186,7 @@ private fun HabitTileContent(
     isLocked: Boolean,
     isReorderMode: Boolean,
     subtitleText: String,
+    tags: List<TagEntity>,
     progressValue: Float?,
     onToggleCompleted: () -> Unit,
     onTap: () -> Unit,
@@ -270,6 +276,11 @@ private fun HabitTileContent(
                 fontSize = AppTheme.fsLabel,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
+            if (tags.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                TagChips(tags)
+            }
 
             if (progressValue != null && !isCompleted) {
                 Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))

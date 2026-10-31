@@ -153,6 +153,7 @@ fun TargetSelectorBottomSheet(
     goalViewModel: GoalViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val tags by tagViewModel.allTags.collectAsState()
+    val taskTags by tagViewModel.taskTags.collectAsState()
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurringTasks by recurringTaskViewModel.allRecurringTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
@@ -205,7 +206,7 @@ fun TargetSelectorBottomSheet(
                             { showCreateTag = true },
                         )
 
-                        TargetTab.TASKS -> TaskTab(recurringTasks, tasks, selected, select)
+                        TargetTab.TASKS -> TaskTab(recurringTasks, tasks, taskTags, selected, select)
                         TargetTab.HABITS -> HabitTab(habitsWithCompletions, selected) {
                             select(FocusTargetSelection.of(FocusTargetType.HABIT, it.id, it.name))
                         }
@@ -298,6 +299,7 @@ private fun SectionLabel(text: String) {
 private fun TaskTab(
     recurringTasks: List<RecurringTaskWithOccurrences>,
     tasks: List<TaskWithSubtasks>,
+    taskTags: Map<String, List<TagEntity>>,
     selected: FocusTargetSelection?,
     onSelected: (FocusTargetSelection) -> Unit,
 ) {
@@ -371,7 +373,7 @@ private fun TaskTab(
                 },
                 supportingContent = {
                     Text(
-                        task.category.ifBlank {
+                        taskTags[task.id].orEmpty().joinToString(", ") { it.name }.ifBlank {
                             if (task.isCompleted) stringResource(R.string.taskLabelCompleted) else stringResource(
                                 R.string.globalLabelTask
                             )

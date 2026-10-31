@@ -26,8 +26,7 @@ enum class TaskSortOption {
     DUE_DATE,
     PRIORITY,
     SIZE,
-    ALPHABETICAL,
-    CATEGORY
+    ALPHABETICAL
 }
 
 /**
