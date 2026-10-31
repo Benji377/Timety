@@ -136,6 +136,9 @@
     <string name="focusStatsSectionSessionsTitle">Sescions de focus</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Sescions cun etichetes, liejedes a ncëries y abitudins</string>
     <string name="focusStatsSectionTargetBreakdownTitle">Focus aldò dl travert</string>
+    <string name="focusStatsSectionTagTimeEmpty">No focus time in this week</string>
+    <string name="focusStatsSectionTagTimeSubtitle">Selected week. Sessions with several tags count under each</string>
+    <string name="focusStatsSectionTagTimeTitle">Time by Tag</string>
     <string name="focusStatsSectionVolumeSubtitle">Menuc de focus de ndut al di</string>
     <string name="focusStatsSectionVolumeTitle">Volum de focus de l\'ena</string>
     <string name="focusTagsDialogContentDelete">T\'es segur de ulëi scancelé \"%1$s\"?</string>
@@ -345,6 +348,9 @@
     <string name="taskStatsCompleted">Finada</string>
     <string name="taskStatsCompletedDaily">Ncëries finedes de ndut al di</string>
     <string name="taskStatsCreated">Creeda</string>
+    <string name="taskStatsTagsEmpty">No tags used yet</string>
+    <string name="taskStatsTagsSubtitle">All time. Tasks with several tags count under each</string>
+    <string name="taskStatsTagsTitle">Tasks by Tag</string>
     <string name="taskStatsEmpty">Niamò degun dac da mustré</string>
     <string name="taskStatsProductivity">Produtività</string>
     <string name="taskStatsVelocity">Velozità dla ncëries</string>
@@ -451,7 +457,10 @@
     <string name="settingsPageAboutSummary">Verscion, sustëni y còdesc sursënt</string>
     <string name="settingsPageAdvancedSummary">Opzions per esperc coche l\'API per crì luelg</string>
     <string name="settingsPageDataBackupSummary">Esporté y ristabilì copies de segurëza</string>
+    <string name="settingsPageFocusSummary">Daily goal, timer limits and Do Not Disturb</string>
+    <string name="settingsPageGeneralSummary">Theme, greeting, language, formats and tags</string>
     <string name="settingsPageNotificationsSummary">Ëures di lezic y atività tl background</string>
+    <string name="settingsPageTasksSummary">Upcoming task window</string>
     <string name="settingsSectionAbout">Nfurmazions</string>
     <string name="settingsSectionAdvanced">Avanzà</string>
     <string name="settingsSectionAppearance">Ududa</string>
@@ -542,6 +551,27 @@
     <string name="wrapUpStatHabitsLabel">Abitudins fates</string>
     <string name="wrapUpStatTasksLabel">Ncëries finedes</string>
     <string name="wrapUpUsingSince">Adurvé Timety da %1$s inant</string>
+    <string name="tagFilterNoMatch">Nothing matches these tags</string>
+    <string name="tagNameTaken">A tag with this name already exists</string>
+    <string name="tagPickerChoose">Choose tags</string>
+    <string name="tagsEmpty">No tags yet. Tap the button above to add one.</string>
+    <string name="tagUsageCountZero">Not used yet</string>
+    <plurals name="tagUsageCount">
+        <item quantity="zero">Used on %d items</item>
+        <item quantity="one">Used on 1 item</item>
+        <item quantity="two">Used on %d items</item>
+        <item quantity="few">Used on %d items</item>
+        <item quantity="many">Used on %d items</item>
+        <item quantity="other">Used on %d items</item>
+    </plurals>
+    <plurals name="tagDeleteContent">
+        <item quantity="zero">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+        <item quantity="one">Delete \"%1$s\"? It is removed from 1 item. If that is a focus session, its time becomes untagged.</item>
+        <item quantity="two">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+        <item quantity="few">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+        <item quantity="many">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+        <item quantity="other">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+    </plurals>
     <plurals name="settingsTagsCount">
         <item quantity="zero">%d etichetes</item>
         <item quantity="one">%d eticheta</item>
