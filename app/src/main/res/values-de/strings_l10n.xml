@@ -132,6 +132,9 @@
     <string name="focusStatsSectionSessionsTitle">Fokus-Sitzungen</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Sitzungen mit Tags, Aufgaben- und Gewohnheits-Sitzungen</string>
     <string name="focusStatsSectionTargetBreakdownTitle">Fokus nach Zieltyp</string>
+    <string name="focusStatsSectionTagTimeEmpty">No focus time in this week</string>
+    <string name="focusStatsSectionTagTimeSubtitle">Selected week. Sessions with several tags count under each</string>
+    <string name="focusStatsSectionTagTimeTitle">Time by Tag</string>
     <string name="focusStatsSectionVolumeSubtitle">Gesamte Fokus-Minuten pro Tag</string>
     <string name="focusStatsSectionVolumeTitle">Wöchentliches Fokus-Volumen</string>
     <string name="focusTagsDialogContentDelete">Bist du sicher, dass du \"%1$s\" löschen möchtest?</string>
@@ -325,6 +328,9 @@
     <string name="taskStatsCompleted">Erledigt</string>
     <string name="taskStatsCompletedDaily">Gesamte erledigte Aufgaben pro Tag</string>
     <string name="taskStatsCreated">Erstellt</string>
+    <string name="taskStatsTagsEmpty">No tags used yet</string>
+    <string name="taskStatsTagsSubtitle">All time. Tasks with several tags count under each</string>
+    <string name="taskStatsTagsTitle">Tasks by Tag</string>
     <string name="taskStatsEmpty">Noch keine Daten anzuzeigen</string>
     <string name="taskStatsProductivity">Produktivität</string>
     <string name="taskStatsVelocity">Aufgaben-Geschwindigkeit</string>
@@ -431,7 +437,10 @@
     <string name="settingsPageAboutSummary">Version, Support und Quellcode</string>
     <string name="settingsPageAdvancedSummary">Expertenoptionen wie die Ortssuche-API</string>
     <string name="settingsPageDataBackupSummary">Backups exportieren und wiederherstellen</string>
+    <string name="settingsPageFocusSummary">Daily goal, timer limits and Do Not Disturb</string>
+    <string name="settingsPageGeneralSummary">Theme, greeting, language, formats and tags</string>
     <string name="settingsPageNotificationsSummary">Erinnerungszeiten und Hintergrundaktivität</string>
+    <string name="settingsPageTasksSummary">Upcoming task window</string>
     <string name="settingsSectionAbout">Über</string>
     <string name="settingsSectionAdvanced">Erweitert</string>
     <string name="settingsSectionAppearance">Erscheinungsbild</string>
@@ -518,6 +527,19 @@
     <string name="wrapUpStatHabitsLabel">Gewohnheiten aufgebaut</string>
     <string name="wrapUpStatTasksLabel">Aufgaben erledigt</string>
     <string name="wrapUpUsingSince">Nutzt Timety seit %1$s</string>
+    <string name="tagFilterNoMatch">Nothing matches these tags</string>
+    <string name="tagNameTaken">A tag with this name already exists</string>
+    <string name="tagPickerChoose">Choose tags</string>
+    <string name="tagsEmpty">No tags yet. Tap the button above to add one.</string>
+    <string name="tagUsageCountZero">Not used yet</string>
+    <plurals name="tagUsageCount">
+        <item quantity="one">Used on 1 item</item>
+        <item quantity="other">Used on %d items</item>
+    </plurals>
+    <plurals name="tagDeleteContent">
+        <item quantity="one">Delete \"%1$s\"? It is removed from 1 item. If that is a focus session, its time becomes untagged.</item>
+        <item quantity="other">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+    </plurals>
     <plurals name="settingsTagsCount">
         <item quantity="one">%d tag</item>
         <item quantity="other">%d tags</item>
