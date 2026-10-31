@@ -5,25 +5,11 @@ import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
-/** Small calendar-date helpers used for week boundaries, range checks, and day comparisons. */
+/** Small calendar-date helpers for week boundaries and day keys. */
 object AppDateUtils {
-    /** Compares only the calendar date, ignoring time and zone; `null` never matches. */
-    fun isSameDay(a: LocalDate?, b: LocalDate?): Boolean {
-        if (a == null || b == null) return false
-        return a.year == b.year && a.monthValue == b.monthValue && a.dayOfMonth == b.dayOfMonth
-    }
-
     /** Returns the Monday that starts the week containing [date]. */
     fun startOfWeekMonday(date: LocalDate): LocalDate {
         return date.minusDays((date.dayOfWeek.value - DayOfWeek.MONDAY.value).toLong())
-    }
-
-    fun isWithinInclusive(
-        value: LocalDate,
-        startInclusive: LocalDate,
-        endInclusive: LocalDate
-    ): Boolean {
-        return !value.isBefore(startInclusive) && !value.isAfter(endInclusive)
     }
 
     /**

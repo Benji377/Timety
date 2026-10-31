@@ -14,6 +14,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.testutil.awaitTrue
+import io.github.benji377.timety.testutil.dismissExactAlarmPrompt
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
@@ -51,7 +52,7 @@ class MoodCalendarTest {
     fun openProfile() {
         // A midnight checkup makes the prompt card show at any time of day.
         runBlocking { container.settingsRepository.saveEndOfDayCheckupTime("00:00") }
-        dismissExactAlarmPrompt()
+        compose.dismissExactAlarmPrompt()
         compose.onNodeWithText(str(R.string.navigationProfile)).performClick()
         compose.waitForIdle()
     }
@@ -71,18 +72,5 @@ class MoodCalendarTest {
         compose.onNodeWithText(str(R.string.commonLabelRemove)).performClick()
         assertTrue("removing should delete today's mood", awaitTrue { todaysRating() == null })
         cardShown(true)
-    }
-
-    private fun dismissExactAlarmPrompt() {
-        val dismissLabel = str(R.string.exactAlarmPromptDismiss)
-        val appeared = runCatching {
-            compose.waitUntil(timeoutMillis = 3_000) {
-                compose.onAllNodesWithText(dismissLabel).fetchSemanticsNodes().isNotEmpty()
-            }
-        }.isSuccess
-        if (appeared) {
-            compose.onNodeWithText(dismissLabel).performClick()
-            compose.waitForIdle()
-        }
     }
 }

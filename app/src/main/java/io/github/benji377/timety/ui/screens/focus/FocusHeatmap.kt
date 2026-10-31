@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
-import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.color
 import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -43,20 +42,17 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.stats.FocusHeatmapBucketer
+import io.github.benji377.timety.util.stats.HeatmapGrid
 import io.github.benji377.timety.util.stats.HeatmapDay
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
-import java.time.LocalDate
 import java.util.Locale
 
 // Trailing-365-day contribution grid, GitHub-style: 53 Monday-start week columns of 7 day cells,
 // a fixed weekday gutter on the left, 3-letter month labels on top, and a Less→More legend below.
 @Composable
-internal fun FocusHeatmap(sessions: List<FocusSessionEntity>) {
+internal fun FocusHeatmap(grid: HeatmapGrid) {
     val locale = remember { Locale.getDefault() }
-    val today = remember { LocalDate.now() }
-    val grid = remember(sessions) { FocusHeatmapBucketer.grid(sessions, today = today) }
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = LocalSnackbarHostState.current

@@ -18,6 +18,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.data.model.focus.DailyFocusTarget
 import io.github.benji377.timety.testutil.awaitTrue
+import io.github.benji377.timety.testutil.dismissExactAlarmPrompt
 import io.github.benji377.timety.ui.screens.settings.SettingsPage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -54,7 +55,7 @@ class SettingsNavigationTest {
             settings.saveDailyGoalMins(30)
             settings.saveDailyGoalWeekdays(DailyFocusTarget.ALL_WEEKDAYS)
         }
-        dismissExactAlarmPrompt()
+        compose.dismissExactAlarmPrompt()
     }
 
     @After
@@ -146,20 +147,5 @@ class SettingsNavigationTest {
     private fun pressBack() {
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         compose.waitForIdle()
-    }
-
-    // The exact-alarm prompt shows once on a fresh install and would swallow the first tap.
-    // It does not appear when the permission is already granted, so a timeout is not a failure.
-    private fun dismissExactAlarmPrompt() {
-        val dismissLabel = str(R.string.exactAlarmPromptDismiss)
-        val appeared = runCatching {
-            compose.waitUntil(timeoutMillis = 3_000) {
-                compose.onAllNodesWithText(dismissLabel).fetchSemanticsNodes().isNotEmpty()
-            }
-        }.isSuccess
-        if (appeared) {
-            compose.onNodeWithText(dismissLabel).performClick()
-            compose.waitForIdle()
-        }
     }
 }

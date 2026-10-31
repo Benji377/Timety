@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.DashboardCustomize
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MoreTime
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlayCircleFilled
@@ -127,6 +128,7 @@ object FocusScreenTags {
 @Composable
 fun FocusScreen(
     onNavigateToModes: () -> Unit,
+    onNavigateToHistory: () -> Unit,
     onNavigateToFocusSettings: () -> Unit = {},
     focusViewModel: FocusViewModel = activityScopedViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -343,6 +345,12 @@ fun FocusScreen(
                 title = stringResource(R.string.focusTitle),
                 actions = {
                     NeoIconButton(
+                        onClick = onNavigateToHistory,
+                        icon = Icons.Filled.History,
+                        contentDescription = stringResource(R.string.focusHistoryTitle),
+                    )
+                    Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                    NeoIconButton(
                         onClick = onNavigateToModes,
                         icon = Icons.Filled.DashboardCustomize,
                         contentDescription = stringResource(R.string.focusModesTitle),
@@ -453,7 +461,7 @@ fun FocusScreen(
 
                 NeoIconButton(
                     onClick = { showTimeMachine = true },
-                    icon = Icons.Filled.History,
+                    icon = Icons.Filled.MoreTime,
                     contentDescription = stringResource(R.string.commonTooltipTimeMachine),
                     enabled = !isRunning && !isPaused,
                     contentColor = FocusColor,

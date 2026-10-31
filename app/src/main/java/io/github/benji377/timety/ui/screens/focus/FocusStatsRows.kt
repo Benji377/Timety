@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,7 @@ import io.github.benji377.timety.data.model.focus.color
 import io.github.benji377.timety.data.model.focus.icon
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.components.common.AccentBadge
+import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
@@ -44,6 +46,9 @@ internal fun SessionRow(
     modeName: String,
     tags: List<TagEntity>,
     onEdit: () -> Unit,
+    showDate: Boolean = true,
+    showTags: Boolean = false,
+    distractionCount: Int = 0,
 ) {
     val icon = session.targetType.icon
     val color = session.targetType.takeIf { it != FocusTargetType.TAG }?.color
@@ -72,11 +77,29 @@ internal fun SessionRow(
         Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
         Column(modifier = Modifier.weight(1f)) {
             Text(targetName, fontWeight = FontWeight.SemiBold, color = color)
+            val details = listOfNotNull(
+                dateStr.takeIf { showDate },
+                timeStr,
+                AppDateFormatUtils.formatMinutesCompact(mins),
+                modeName,
+                if (distractionCount > 0) {
+                    pluralStringResource(
+                        R.plurals.focusHistoryDistractions,
+                        distractionCount,
+                        distractionCount,
+                    )
+                } else {
+                    null
+                },
+            )
             Text(
-                "$dateStr | $timeStr | ${AppDateFormatUtils.formatMinutesCompact(mins)} | $modeName",
+                details.joinToString(" | "),
                 fontSize = AppTheme.fsBodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (showTags && session.targetType != FocusTargetType.TAG) {
+                TagChips(tags, modifier = Modifier.padding(top = AppTheme.spaceXSmall))
+            }
         }
         Icon(
             Icons.Filled.Edit,

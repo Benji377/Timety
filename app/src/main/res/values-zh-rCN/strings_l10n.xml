@@ -8,13 +8,9 @@
     <string name="globalLabelTasks">任务</string>
     <string name="commonButtonGotIt">明白了</string>
     <string name="commonDaytimeAfternoon">下午</string>
-    <string name="commonDaytimeAfternoonRange">中午12点 - 下午5点</string>
     <string name="commonDaytimeEvening">傍晚</string>
-    <string name="commonDaytimeEveningRange">下午5点 - 晚上9点</string>
     <string name="commonDaytimeMorning">早上</string>
-    <string name="commonDaytimeMorningRange">凌晨5点 - 中午12点</string>
     <string name="commonDaytimeNight">晚上</string>
-    <string name="commonDaytimeNightRange">晚上9点 - 凌晨5点</string>
     <string name="commonLabelAdd">添加</string>
     <string name="commonLabelCancel">取消</string>
     <string name="commonLabelConfirm">确认</string>
@@ -111,28 +107,17 @@
     <plurals name="focusStatsSectionClockSessions">
         <item quantity="other">已完成 %1$d 个专注时段</item>
     </plurals>
-    <string name="focusStatsSectionClockSubtitle">轻触某日，即可查看该日所有专注时段</string>
-    <string name="focusStatsSectionClockTitle">每日专注节奏</string>
     <string name="focusSessionDeleteContent">此操作将永久删除该专注记录。</string>
     <string name="focusSessionDeleteTitle">删除专注记录？</string>
     <string name="focusSessionDeletedSnackbar">专注记录已删除</string>
     <string name="focusSessionEditTitle">编辑专注记录</string>
     <string name="focusSessionEditorTarget">归属于</string>
     <string name="focusSessionUpdatedSnackbar">专注记录已更新</string>
-    <string name="focusStatsSectionDistractionsEmpty">此日无分心记录</string>
-    <string name="focusStatsSectionDistractionsSubtitle">所选日期，分心记录由新至旧</string>
-    <string name="focusStatsSectionDistractionsTitle">分心</string>
     <string name="focusStatsHeatmapLess">更少</string>
     <string name="focusStatsHeatmapMore">更多</string>
     <string name="focusStatsSectionHeatmapSubtitle">过去一年中每日专注分钟数</string>
     <string name="focusStatsSectionHeatmapTitle">专注时长贡献</string>
     <string name="focusStatsSectionSessionsEmpty">此日无专注记录</string>
-    <string name="focusStatsSectionSessionsSubtitle">选定日期下，每段专注均显示具体目标与专注模式</string>
-    <string name="focusStatsSectionSessionsTitle">专注记录</string>
-    <string name="focusStatsSectionTargetBreakdownSubtitle">标签专注 · 任务专注 · 习惯专注</string>
-    <string name="focusStatsSectionTargetBreakdownTitle">按目标类型查看专注</string>
-    <string name="focusStatsSectionVolumeSubtitle">每日专注总分钟数</string>
-    <string name="focusStatsSectionVolumeTitle">每周专注总量</string>
     <string name="focusTagsDialogContentDelete">您确定要删除 \"%1$s\" 吗？</string>
     <string name="focusTagsDialogTitleDelete">删除标签？</string>
     <string name="focusTagsLabelAdd">添加新标签</string>
@@ -240,16 +225,7 @@
     <string name="habitLabelFreqWeekly">每周习惯</string>
     <string name="habitMarkPastCompletionTooltip">标记过去完成记录</string>
     <string name="habitScreenEmpty">目前还没有习惯！点击 + 来建立你的例程</string>
-    <string name="habitStatsLabelActive">进行中的习惯</string>
-    <string name="habitStatsLabelBest">最佳：%1$d</string>
-    <string name="habitStatsLabelBestStreak">最长连续天数</string>
-    <string name="habitStatsLabelCompletionsDaily">每日习惯完成总数</string>
-    <string name="habitStatsLabelCompletionsDistribution">按时段分布的习惯完成情况</string>
-    <string name="habitStatsLabelCompletionsTime">您通常在何时建立习惯？</string>
-    <string name="habitStatsLabelCurrentStreak">当前连续天数</string>
     <string name="habitStatsLabelEmpty">创建并完成习惯，即可解锁数据洞察！</string>
-    <string name="habitStatsLabelTotal">总完成次数</string>
-    <string name="habitStatsLabelVelocity">每周完成速度</string>
     <string name="habitsListTitle">我的习惯</string>
     <string name="habitsSheetEmpty">暂无习惯</string>
     <string name="taskDeleteContent">确定要删除此任务吗？</string>
@@ -315,14 +291,10 @@
     <string name="taskStatsCalibrationEmpty">还没有带专注时间的任务</string>
     <string name="taskStatsCalibrationHighSpread">您的 %1$s 类任务耗时差异较大</string>
     <string name="taskStatsCalibrationOrderingViolation">您的 %1$s 类任务比 %2$s 类任务耗时更短</string>
-    <string name="taskStatsCalibrationSubtitle">按任务大小划分的平均专注时间，仅统计作为专注目标的任务</string>
     <string name="taskStatsCalibrationTitle">预估校准</string>
     <string name="taskStatsCompleted">已完成</string>
-    <string name="taskStatsCompletedDaily">每日完成任务总数</string>
     <string name="taskStatsCreated">已创建</string>
     <string name="taskStatsEmpty">暂无数据可显示</string>
-    <string name="taskStatsProductivity">生产力</string>
-    <string name="taskStatsVelocity">任务完成速度</string>
     <string name="calendarHeaderFri">五</string>
     <string name="calendarHeaderMon">一</string>
     <string name="calendarHeaderSat">六</string>
@@ -349,17 +321,7 @@
     <string name="calendarTooltipToday">回到今天</string>
     <string name="calendarWeekSummaryDescription">已完成任务：%1$d，习惯打卡：%2$d，专注时长：%3$s</string>
     <string name="calendarWeeklyReportTitle">每周报告</string>
-    <string name="statsLabelFocus">专注时长</string>
-    <string name="statsLabelFocusGoal">每日专注目标</string>
-    <string name="statsLabelFocusMins">专注分钟数</string>
     <string name="statsLabelProductivity">生产力协同</string>
-    <string name="statsLabelSummary">今日概览</string>
-    <string name="statsLabelSynergy">专注时长与任务完成情况（最近 7 天）</string>
-    <string name="statsLabelTasksDone">已完成任务</string>
-    <string name="statsTabFocus">专注</string>
-    <string name="statsTabHabits">习惯</string>
-    <string name="statsTabOverview">概览</string>
-    <string name="statsTabTasks">任务</string>
     <string name="statsTitle">数据洞察 &amp; 与统计</string>
     <string name="settingsDialogUnitDays">天</string>
     <string name="settingsLabelBuiltBy">由 Benji377 开发</string>
@@ -529,8 +491,6 @@
     <string name="locationPickerStartTyping">输入关键词搜索位置</string>
     <string name="locationPickerTitle">搜索位置</string>
     <string name="locationPickerUnknown">未知位置</string>
-    <string name="weekNavPastWeek">上周</string>
-    <string name="weekNavThisWeek">本周</string>
     <string name="widgetHabitsToday">今日习惯</string>
     <string name="widgetTasksDue">待办任务 (%1$d)</string>
     <string name="widgetNoUrgentTasks">暂无紧急任务</string>
@@ -546,14 +506,6 @@
     <string name="nTasksCountZero">暂无任务</string>
     <plurals name="nTasksCount">
         <item quantity="other">%d 个任务</item>
-    </plurals>
-    <string name="nHabitsCountZero">暂无完成记录</string>
-    <plurals name="nHabitsCount">
-        <item quantity="other">%d 次完成</item>
-    </plurals>
-    <string name="nMinutesCountZero">暂无分钟数</string>
-    <plurals name="nMinutesCount">
-        <item quantity="other">%d 分钟</item>
     </plurals>
     <string name="distractionDistracted">分心了</string>
     <string name="distractionHydrated">喝水</string>

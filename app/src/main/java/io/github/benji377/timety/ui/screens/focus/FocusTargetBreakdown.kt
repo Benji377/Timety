@@ -38,6 +38,9 @@ import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ChartTeal
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.stats.FocusPeriodStats
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.math.roundToInt
 
 private data class TargetTypeStat(
@@ -47,7 +50,8 @@ private data class TargetTypeStat(
     val minutes: Int
 )
 
-private val FocusTargetType.pluralLabelRes: Int
+/** The string naming sessions of this target type as a group. */
+internal val FocusTargetType.pluralLabelRes: Int
     get() = when (this) {
         FocusTargetType.TAG -> R.string.globalLabelTags
         FocusTargetType.TASK -> R.string.globalLabelTasks
@@ -61,21 +65,26 @@ private val FocusTargetType.pluralLabelRes: Int
 private val FocusTargetType.chartColor: Color
     get() = if (this == FocusTargetType.RECURRING_TASK) ChartTeal else color
 
+/** Minutes per target type within [range], as shares of a whole, since a session has one target. */
 @Composable
 internal fun TargetBreakdownSection(
     sessions: List<FocusSessionEntity>,
     sessionTags: Map<String, List<TagEntity>>,
+    range: ClosedRange<LocalDate>,
+    zone: ZoneId,
 ) {
     // TAG also covers sessions with nothing selected, which get their own row instead of counting
     // as tagged.
     val (noTarget, targeted) = remember(sessions, sessionTags) {
         sessions.partition { it.targetType == FocusTargetType.TAG && sessionTags[it.id].isNullOrEmpty() }
     }
-    val totals = remember(targeted) {
+    val totals = remember(targeted, range) {
         targeted.groupBy { it.targetType }
-            .mapValues { (_, typed) -> typed.sumOf { it.totalSecondsFocused / 60 } }
+            .mapValues { (_, typed) -> typed.sumOf { FocusPeriodStats.minutesIn(it, range, zone) } }
     }
-    val noTargetMinutes = remember(noTarget) { noTarget.sumOf { it.totalSecondsFocused / 60 } }
+    val noTargetMinutes = remember(noTarget, range) {
+        noTarget.sumOf { FocusPeriodStats.minutesIn(it, range, zone) }
+    }
 
     val stats = FocusTargetType.entries.map { type ->
         TargetTypeStat(
@@ -93,14 +102,12 @@ internal fun TargetBreakdownSection(
         ) else null
     )
     val totalMinutes = stats.sumOf { it.minutes }
+    if (totalMinutes == 0) return
 
     Column {
         Row(verticalAlignment = Alignment.Top) {
             Box(modifier = Modifier.weight(1f)) {
-                SectionHeader(
-                    stringResource(R.string.focusStatsSectionTargetBreakdownTitle),
-                    stringResource(R.string.focusStatsSectionTargetBreakdownSubtitle),
-                )
+                SectionHeader(stringResource(R.string.statsByTarget))
             }
             Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
             Text(
@@ -130,7 +137,7 @@ internal fun TargetBreakdownSection(
             }
         }
         Spacer(modifier = Modifier.height(18.dp))
-        stats.forEach { stat ->
+        stats.filter { it.minutes > 0 }.forEach { stat ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

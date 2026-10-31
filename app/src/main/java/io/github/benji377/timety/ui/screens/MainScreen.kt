@@ -38,6 +38,7 @@ import io.github.benji377.timety.ui.navigation.AppRoute
 import io.github.benji377.timety.ui.navigation.BottomNavItem
 import io.github.benji377.timety.ui.navigation.BottomNavItems
 import io.github.benji377.timety.ui.navigation.BottomNavRoutes
+import io.github.benji377.timety.ui.screens.focus.FocusHistoryScreen
 import io.github.benji377.timety.ui.screens.focus.FocusModesScreen
 import io.github.benji377.timety.ui.screens.focus.FocusScreen
 import io.github.benji377.timety.ui.screens.goal.GoalDetailScreen
@@ -48,6 +49,8 @@ import io.github.benji377.timety.ui.screens.habit.QuickHabitsScreen
 import io.github.benji377.timety.ui.screens.settings.SettingsPage
 import io.github.benji377.timety.ui.screens.settings.SettingsPageScreen
 import io.github.benji377.timety.ui.screens.settings.SettingsScreen
+import io.github.benji377.timety.ui.screens.stats.StatsPage
+import io.github.benji377.timety.ui.screens.stats.StatsPageScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTasksScreen
 import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
@@ -220,7 +223,13 @@ fun MainScreen(
             composable(BottomNavItem.Focus.route) {
                 FocusScreen(
                     onNavigateToModes = { navController.navigate(AppRoute.FOCUS_MODES.route) },
+                    onNavigateToHistory = { navController.navigate(AppRoute.FOCUS_HISTORY.route) },
                     onNavigateToFocusSettings = { navController.navigate(SettingsPage.FOCUS.route) }
+                )
+            }
+            composable(AppRoute.FOCUS_HISTORY.route) {
+                FocusHistoryScreen(
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
             composable(AppRoute.FOCUS_MODES.route) {
@@ -271,8 +280,19 @@ fun MainScreen(
             }
             composable(AppRoute.STATISTICS.route) {
                 StatisticsScreen(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    onNavigateBack = dropUnlessResumed { navController.popBackStack() },
+                    onOpenPage = { page -> navController.navigate(page.route) },
                 )
+            }
+            StatsPage.entries.forEach { page ->
+                composable(page.route) {
+                    StatsPageScreen(
+                        page = page,
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() },
+                        onOpenHabit = { id -> navController.navigate(AppRoute.habitDetail(id)) },
+                        onOpenGoal = { id -> navController.navigate(AppRoute.goalDetail(id)) },
+                    )
+                }
             }
             composable(AppRoute.SETTINGS.route) {
                 SettingsScreen(
