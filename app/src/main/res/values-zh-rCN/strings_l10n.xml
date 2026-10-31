@@ -131,6 +131,9 @@
     <string name="focusStatsSectionSessionsTitle">专注记录</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">标签专注 · 任务专注 · 习惯专注</string>
     <string name="focusStatsSectionTargetBreakdownTitle">按目标类型查看专注</string>
+    <string name="focusStatsSectionTagTimeEmpty">No focus time in this week</string>
+    <string name="focusStatsSectionTagTimeSubtitle">Selected week. Sessions with several tags count under each</string>
+    <string name="focusStatsSectionTagTimeTitle">Time by Tag</string>
     <string name="focusStatsSectionVolumeSubtitle">每日专注总分钟数</string>
     <string name="focusStatsSectionVolumeTitle">每周专注总量</string>
     <string name="focusTagsDialogContentDelete">您确定要删除 \"%1$s\" 吗？</string>
@@ -320,6 +323,9 @@
     <string name="taskStatsCompleted">已完成</string>
     <string name="taskStatsCompletedDaily">每日完成任务总数</string>
     <string name="taskStatsCreated">已创建</string>
+    <string name="taskStatsTagsEmpty">No tags used yet</string>
+    <string name="taskStatsTagsSubtitle">All time. Tasks with several tags count under each</string>
+    <string name="taskStatsTagsTitle">Tasks by Tag</string>
     <string name="taskStatsEmpty">暂无数据可显示</string>
     <string name="taskStatsProductivity">生产力</string>
     <string name="taskStatsVelocity">任务完成速度</string>
@@ -426,7 +432,10 @@
     <string name="settingsPageAboutSummary">版本、支持与源代码</string>
     <string name="settingsPageAdvancedSummary">专家选项，例如位置搜索 API</string>
     <string name="settingsPageDataBackupSummary">导出与恢复备份</string>
+    <string name="settingsPageFocusSummary">Daily goal, timer limits and Do Not Disturb</string>
+    <string name="settingsPageGeneralSummary">Theme, greeting, language, formats and tags</string>
     <string name="settingsPageNotificationsSummary">提醒时间与后台活动</string>
+    <string name="settingsPageTasksSummary">Upcoming task window</string>
     <string name="settingsSectionAbout">关于</string>
     <string name="settingsSectionAdvanced">高级</string>
     <string name="settingsSectionAppearance">外观</string>
@@ -512,6 +521,17 @@
     <string name="wrapUpStatHabitsLabel">习惯完成数</string>
     <string name="wrapUpStatTasksLabel">完成任务数</string>
     <string name="wrapUpUsingSince">自 %1$s 起使用 Timety</string>
+    <string name="tagFilterNoMatch">Nothing matches these tags</string>
+    <string name="tagNameTaken">A tag with this name already exists</string>
+    <string name="tagPickerChoose">Choose tags</string>
+    <string name="tagsEmpty">No tags yet. Tap the button above to add one.</string>
+    <string name="tagUsageCountZero">Not used yet</string>
+    <plurals name="tagUsageCount">
+        <item quantity="other">Used on %d items</item>
+    </plurals>
+    <plurals name="tagDeleteContent">
+        <item quantity="other">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+    </plurals>
     <plurals name="settingsTagsCount">
         <item quantity="other">%d 个标签</item>
     </plurals>
