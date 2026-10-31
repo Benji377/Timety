@@ -3,9 +3,11 @@ package io.github.benji377.timety.ui.viewmodel
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.task.SubtaskEntity
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
+import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.widget.TaskWidget
@@ -20,7 +22,8 @@ import java.util.UUID
 /** Exposes tasks, subtasks, and categories, and applies reminder/widget side effects for changes to them. */
 class TaskViewModel(
     private val application: android.app.Application,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val tagRepository: TagRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
     val allTasks: StateFlow<List<TaskWithSubtasks>> = taskRepository.allTasks
         .stateIn(
@@ -38,18 +41,21 @@ class TaskViewModel(
         }
     }
 
-    fun addTask(task: TaskEntity, subtasks: List<SubtaskEntity>) {
+    fun addTask(task: TaskEntity, subtasks: List<SubtaskEntity>, tagIds: Set<String> = emptySet()) {
         launchToCompletion {
             taskRepository.insertTask(task)
             subtasks.forEach { taskRepository.insertSubtask(it) }
+            tagRepository.setItemTags(TaggedItemType.TASK, task.id, tagIds)
             scheduleTaskReminders(task)
             TaskWidget().updateAll(application)
         }
     }
 
-    fun updateTask(task: TaskEntity) {
+    /** Saves an edited task; null [tagIds] leaves its tags as they are. */
+    fun updateTask(task: TaskEntity, tagIds: Set<String>? = null) {
         launchToCompletion {
             taskRepository.updateTask(task)
+            tagIds?.let { tagRepository.setItemTags(TaggedItemType.TASK, task.id, it) }
             scheduleTaskReminders(task)
             TaskWidget().updateAll(application)
         }

@@ -51,7 +51,6 @@ import io.github.benji377.timety.ui.screens.settings.SettingsPageScreen
 import io.github.benji377.timety.ui.screens.settings.SettingsScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTasksScreen
-import io.github.benji377.timety.ui.screens.task.TaskCategoriesScreen
 import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.TaskListScreen
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -287,8 +286,8 @@ fun MainScreen(
                     SettingsPageScreen(
                         page = page,
                         onNavigateBack = dropUnlessResumed { navController.popBackStack() },
-                        onNavigateToTags = { navController.navigate(AppRoute.FOCUS_TAGS.route) },
-                        onNavigateToCategories = { navController.navigate(AppRoute.TASK_CATEGORIES.route) }
+                        onNavigateToTags = { navController.navigate(AppRoute.TAGS.route) },
+                        onNavigateToFocusTags = { navController.navigate(AppRoute.FOCUS_TAGS.route) }
                     )
                 }
             }
@@ -297,8 +296,8 @@ fun MainScreen(
                     onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }
-            composable(AppRoute.TASK_CATEGORIES.route) {
-                TaskCategoriesScreen(
+            composable(AppRoute.TAGS.route) {
+                TagsScreen(
                     onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }

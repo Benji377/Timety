@@ -34,15 +34,15 @@ object AppViewModelProvider {
 
             val viewModel = when {
                 modelClass.isAssignableFrom(TaskViewModel::class.java) ->
-                    TaskViewModel(application, container.taskRepository)
+                    TaskViewModel(application, container.taskRepository, container.tagRepository)
                 modelClass.isAssignableFrom(RecurringTaskViewModel::class.java) ->
-                    RecurringTaskViewModel(application, container.recurringTaskRepository)
+                    RecurringTaskViewModel(application, container.recurringTaskRepository, container.tagRepository)
                 modelClass.isAssignableFrom(HabitViewModel::class.java) ->
-                    HabitViewModel(application, container.habitRepository)
+                    HabitViewModel(application, container.habitRepository, container.tagRepository)
                 modelClass.isAssignableFrom(QuickHabitViewModel::class.java) ->
                     QuickHabitViewModel(application, container.quickHabitRepository)
                 modelClass.isAssignableFrom(GoalViewModel::class.java) ->
-                    GoalViewModel(container.goalRepository)
+                    GoalViewModel(container.goalRepository, container.tagRepository)
                 modelClass.isAssignableFrom(FocusViewModel::class.java) -> FocusViewModel(
                     application,
                     container.focusRepository,

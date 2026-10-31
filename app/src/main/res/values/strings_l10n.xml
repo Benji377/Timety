@@ -552,6 +552,18 @@
         <item quantity="other">%d tasks</item>
     </plurals>
     <string name="categoryTitle">Categories</string>
+    <string name="tagNameTaken">A tag with this name already exists</string>
+    <string name="tagPickerChoose">Choose tags</string>
+    <string name="tagsEmpty">No tags yet. Tap the button above to add one.</string>
+    <string name="tagUsageCountZero">Not used yet</string>
+    <plurals name="tagUsageCount">
+        <item quantity="one">Used on 1 item</item>
+        <item quantity="other">Used on %d items</item>
+    </plurals>
+    <plurals name="tagDeleteContent">
+        <item quantity="one">Delete \"%1$s\"? It is removed from 1 item. If that is a focus session, its time becomes untagged.</item>
+        <item quantity="other">Delete \"%1$s\"? It is removed from %2$d items, including any focus sessions, whose time becomes untagged.</item>
+    </plurals>
     <plurals name="settingsTagsCount">
         <item quantity="one">%d tag</item>
         <item quantity="other">%d tags</item>

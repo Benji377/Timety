@@ -7,6 +7,7 @@ import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.TagRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -35,6 +36,16 @@ class TagViewModel(
     val habitTags = tagsOf(TaggedItemType.HABIT)
     val goalTags = tagsOf(TaggedItemType.GOAL)
     val sessionTags = tagsOf(TaggedItemType.SESSION)
+
+    /** How many items of any type use each tag, by tag id. Unused tags have no entry. */
+    val usageCounts: StateFlow<Map<String, Int>> =
+        combine(TaggedItemType.entries.map { tagRepository.tagsByItem(it) }) { byType ->
+            byType.flatMap { it.values }.flatten().groupingBy { it.id }.eachCount()
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
 
     /** Creates a tag and hands it to [onCreated]; a tag with the same name is reused instead. */
     fun createTag(name: String, colorValue: Int, onCreated: (TagEntity) -> Unit = {}) {

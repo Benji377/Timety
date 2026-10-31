@@ -40,6 +40,9 @@ interface TagDao {
     @Query("DELETE FROM tags")
     fun clearAllTags()
 
+    @Query("SELECT id FROM tags WHERE id IN (:ids)")
+    fun getExistingTagIds(ids: Collection<String>): List<String>
+
     // An existing tag with the same name wins, keeping its color.
     @Transaction
     fun getOrCreateTag(tag: TagEntity): TagEntity =
@@ -113,9 +116,10 @@ interface TagDao {
     @Query("DELETE FROM session_tags WHERE sessionId = :id")
     fun clearSessionTags(id: String)
 
-    /** Replaces the tags on one item. */
+    /** Replaces the tags on one item, skipping any tag deleted while a form still held it. */
     @Transaction
-    fun setItemTags(type: TaggedItemType, itemId: String, tagIds: Collection<String>) {
+    fun setItemTags(type: TaggedItemType, itemId: String, ids: Collection<String>) {
+        val tagIds = getExistingTagIds(ids)
         when (type) {
             TaggedItemType.TASK -> {
                 clearTaskTags(itemId)

@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.screens.settings
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Language
@@ -23,14 +24,19 @@ import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 
-/** General settings: appearance, then language and date/time formatting. */
+/** General settings: appearance, language and date/time formatting, then tags. */
 @Composable
 internal fun GeneralSettings(
+    onNavigateToTags: () -> Unit,
     settingsViewModel: SettingsViewModel = activityScopedViewModel(),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
+    val tagCount = tagViewModel.allTags.collectAsState().value.size
     val themePref by settingsViewModel.themePref.collectAsState()
     val showHomeGreeting by settingsViewModel.showHomeGreeting.collectAsState()
     val appLocaleCode by settingsViewModel.appLocaleCode.collectAsState()
@@ -107,6 +113,16 @@ internal fun GeneralSettings(
         currentLabel = currentDateFormatLabel,
         options = dateFormatOptions,
         onSelect = { settingsViewModel.setDateFormat(it) }
+    )
+
+    SettingsGroupDivider()
+
+    NavSettingsItem(
+        title = stringResource(R.string.globalLabelTags),
+        subtitle = quantityString(R.plurals.settingsTagsCount, tagCount, 0, tagCount),
+        icon = Icons.AutoMirrored.Outlined.Label,
+        iconTint = TaskColor,
+        onClick = onNavigateToTags
     )
 }
 

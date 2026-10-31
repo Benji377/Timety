@@ -1,7 +1,5 @@
-package io.github.benji377.timety.ui.screens.task
+package io.github.benji377.timety.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,58 +29,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
-import io.github.benji377.timety.ui.components.common.NamedColorEditDialog
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.TagDot
+import io.github.benji377.timety.ui.components.common.TagEditDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
-import io.github.benji377.timety.ui.theme.PickerPalette
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.quantityString
-import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
-import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
-import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 
-/**
- * Lists task categories with per-category task counts (recurring tasks included) and lets the user
- * add, edit, or delete them. Names must be unique, ignoring case and surrounding spaces.
- */
+/** Lists every tag with how many items use it, with actions to create, edit, and delete them. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskCategoriesScreen(
+fun TagsScreen(
     onNavigateBack: () -> Unit,
-    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
-    val tasks by taskViewModel.allTasks.collectAsState()
-    val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
-    val categories by taskViewModel.allCategories.collectAsState()
-    val nameTakenMessage = stringResource(R.string.categoryNameTaken)
-    // The category being edited may keep its own name (or change only its case).
-    fun isNameTaken(name: String, except: TaskCategoryEntity?) = categories.any {
-        it.id != except?.id && TaskCategoryEntity.isSameName(it.name, name)
-    }
-
-    var categoryDialogTarget by remember { mutableStateOf<TaskCategoryEntity?>(null) }
+    val tags by tagViewModel.allTags.collectAsState()
+    val usageCounts by tagViewModel.usageCounts.collectAsState()
+    var editingTag by remember { mutableStateOf<TagEntity?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var categoryPendingDelete by remember { mutableStateOf<TaskCategoryEntity?>(null) }
+    var tagPendingDelete by remember { mutableStateOf<TagEntity?>(null) }
 
     Scaffold(
         topBar = {
             NeoTopBar(
-                title = stringResource(R.string.categoryTitle),
+                title = stringResource(R.string.globalLabelTags),
                 navigationIcon = {
                     BackNavigationIcon(onClick = onNavigateBack)
                 }
@@ -105,13 +88,13 @@ fun TaskCategoriesScreen(
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                    Text(stringResource(R.string.categoryAddLabel))
+                    Text(stringResource(R.string.focusTagsLabelAdd))
                 }
             }
-            if (categories.isEmpty()) {
+            if (tags.isEmpty()) {
                 item {
                     Text(
-                        text = stringResource(R.string.categoryEmpty),
+                        text = stringResource(R.string.tagsEmpty),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(AppTheme.spaceLarge),
@@ -120,9 +103,8 @@ fun TaskCategoriesScreen(
                     )
                 }
             } else {
-                items(categories, key = { it.id }) { category ->
-                    val taskCount = tasks.count { it.task.category == category.name } +
-                        recurringItems.count { it.task.category == category.name }
+                items(tags, key = { it.id }) { tag ->
+                    val count = usageCounts[tag.id] ?: 0
                     NeoListTile(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -137,34 +119,29 @@ fun TaskCategoriesScreen(
                                 .padding(AppTheme.spaceMedium),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(AppTheme.brMedium)
-                                    .background(Color(category.colorValue)),
-                            )
+                            TagDot(tag.colorValue, Modifier.size(40.dp))
                             Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(category.name)
+                                Text(tag.name)
                                 Text(
                                     quantityString(
-                                        R.plurals.categoryTaskCount,
-                                        taskCount,
-                                        zeroRes = R.string.categoryTaskCountZero,
-                                        taskCount
+                                        R.plurals.tagUsageCount,
+                                        count,
+                                        zeroRes = R.string.tagUsageCountZero,
+                                        count
                                     ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             NeoIconButton(
-                                onClick = { categoryDialogTarget = category },
+                                onClick = { editingTag = tag },
                                 icon = Icons.Filled.Edit,
-                                contentDescription = stringResource(R.string.categoryEditTitle),
+                                contentDescription = stringResource(R.string.focusTagsLabelEdit),
                             )
                             Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                             NeoIconButton(
-                                onClick = { categoryPendingDelete = category },
+                                onClick = { tagPendingDelete = tag },
                                 icon = Icons.Filled.Delete,
                                 contentDescription = stringResource(R.string.commonLabelDelete),
                                 contentColor = ErrorColor,
@@ -177,55 +154,46 @@ fun TaskCategoriesScreen(
     }
 
     if (showAddDialog) {
-        NamedColorEditDialog(
-            title = stringResource(R.string.categoryAddLabel),
-            nameLabel = stringResource(R.string.categoryNameLabel),
-            colorLabel = stringResource(R.string.categoryColorLabel),
-            confirmLabel = stringResource(R.string.categoryAddLabel),
-            initialName = "",
-            initialColor = TaskColor,
-            colors = CATEGORY_COLORS,
+        TagEditDialog(
+            tag = null,
+            allTags = tags,
             onConfirm = { name, colorValue ->
-                taskViewModel.createCategory(name, colorValue)
+                tagViewModel.createTag(name, colorValue)
                 showAddDialog = false
             },
             onDismiss = { showAddDialog = false },
-            isNameTaken = { isNameTaken(it, except = null) },
-            nameTakenMessage = nameTakenMessage,
         )
     }
-    categoryDialogTarget?.let { category ->
-        NamedColorEditDialog(
-            title = stringResource(R.string.categoryEditTitle),
-            nameLabel = stringResource(R.string.categoryNameLabel),
-            colorLabel = stringResource(R.string.categoryColorLabel),
-            confirmLabel = stringResource(R.string.commonLabelSave),
-            initialName = category.name,
-            initialColor = Color(category.colorValue),
-            colors = CATEGORY_COLORS,
+    editingTag?.let { tag ->
+        TagEditDialog(
+            tag = tag,
+            allTags = tags,
             onConfirm = { name, colorValue ->
-                taskViewModel.updateCategory(category, name, colorValue)
-                categoryDialogTarget = null
+                tagViewModel.updateTag(tag.copy(name = name, colorValue = colorValue))
+                editingTag = null
             },
-            onDismiss = { categoryDialogTarget = null },
-            isNameTaken = { isNameTaken(it, except = category) },
-            nameTakenMessage = nameTakenMessage,
+            onDismiss = { editingTag = null },
         )
     }
 
-    val deleteTarget = categoryPendingDelete
+    val deleteTarget = tagPendingDelete
+    val deleteCount = deleteTarget?.let { usageCounts[it.id] } ?: 0
     ConfirmationDialog(
         visible = deleteTarget != null,
-        title = stringResource(R.string.categoryDeleteTitle),
-        content = stringResource(R.string.categoryDeleteContent, deleteTarget?.name ?: ""),
+        title = stringResource(R.string.focusTagsDialogTitleDelete),
+        content = quantityString(
+            R.plurals.tagDeleteContent,
+            deleteCount,
+            R.string.focusTagsDialogContentDelete,
+            deleteTarget?.name.orEmpty(),
+            deleteCount,
+        ),
         confirmLabel = stringResource(R.string.commonLabelDelete),
         confirmColor = ErrorColor,
         onConfirm = {
-            deleteTarget?.let { taskViewModel.deleteCategory(it) }
-            categoryPendingDelete = null
+            deleteTarget?.let { tagViewModel.deleteTag(it) }
+            tagPendingDelete = null
         },
-        onDismiss = { categoryPendingDelete = null }
+        onDismiss = { tagPendingDelete = null },
     )
 }
-
-private val CATEGORY_COLORS = listOf(TaskColor) + PickerPalette
