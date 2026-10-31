@@ -52,6 +52,14 @@ data class DistractionWithSession(
 /** Why a focus mode can't be deleted right now. */
 enum class ModeDeleteBlocker { HAS_SESSIONS, SESSION_RUNNING }
 
+/** The repositories of what a focus session can link to, and of the tags it copies from them. */
+class FocusLinkRepositories(
+    val habits: HabitRepository,
+    val tasks: TaskRepository,
+    val recurringTasks: RecurringTaskRepository,
+    val tags: TagRepository,
+)
+
 /**
  * Drives focus mode selection, active session/phase navigation, and session logging, including
  * auto-completion of the linked task, recurring task or habit once a session with a finished
@@ -60,12 +68,14 @@ enum class ModeDeleteBlocker { HAS_SESSIONS, SESSION_RUNNING }
 class FocusViewModel(
     application: android.app.Application,
     private val focusRepository: FocusRepository,
-    private val habitRepository: HabitRepository,
-    private val taskRepository: TaskRepository,
-    private val recurringTaskRepository: RecurringTaskRepository,
     private val settingsRepository: SettingsRepository,
-    private val tagRepository: TagRepository
+    links: FocusLinkRepositories,
 ) : androidx.lifecycle.AndroidViewModel(application) {
+    private val habitRepository = links.habits
+    private val taskRepository = links.tasks
+    private val recurringTaskRepository = links.recurringTasks
+    private val tagRepository = links.tags
+
     // Modes and sessions.
     val allModes: StateFlow<List<FocusModeEntity>> = focusRepository.allModes
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

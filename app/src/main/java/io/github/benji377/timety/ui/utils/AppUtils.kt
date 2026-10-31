@@ -1,7 +1,6 @@
 package io.github.benji377.timety.ui.utils
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle

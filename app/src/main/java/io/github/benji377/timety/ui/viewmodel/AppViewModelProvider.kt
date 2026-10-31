@@ -46,11 +46,13 @@ object AppViewModelProvider {
                 modelClass.isAssignableFrom(FocusViewModel::class.java) -> FocusViewModel(
                     application,
                     container.focusRepository,
-                    container.habitRepository,
-                    container.taskRepository,
-                    container.recurringTaskRepository,
                     container.settingsRepository,
-                    container.tagRepository,
+                    FocusLinkRepositories(
+                        container.habitRepository,
+                        container.taskRepository,
+                        container.recurringTaskRepository,
+                        container.tagRepository,
+                    ),
                 )
                 modelClass.isAssignableFrom(UserViewModel::class.java) ->
                     UserViewModel(container.userRepository)

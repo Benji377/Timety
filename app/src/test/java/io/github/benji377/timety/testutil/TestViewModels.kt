@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.CreationExtras
 import io.github.benji377.timety.ui.viewmodel.DayRatingViewModel
+import io.github.benji377.timety.ui.viewmodel.FocusLinkRepositories
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
@@ -70,11 +71,13 @@ class TestViewModels(
                         FocusViewModel(
                             application,
                             container.focusRepository,
-                            container.habitRepository,
-                            container.taskRepository,
-                            container.recurringTaskRepository,
                             container.settingsRepository,
-                            container.tagRepository,
+                            FocusLinkRepositories(
+                                container.habitRepository,
+                                container.taskRepository,
+                                container.recurringTaskRepository,
+                                container.tagRepository,
+                            ),
                         )
 
                     modelClass.isAssignableFrom(UserViewModel::class.java) ->
