@@ -226,4 +226,72 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate5To6_mergesCategoriesAndFocusTagsIntoGlobalTags() {
+        val dbName = "migration-test-5-6-tags"
+
+        helper.createDatabase(dbName, 5).apply {
+            execSQL("INSERT INTO task_categories (id, name, colorValue) VALUES ('c1', 'Work', 1)")
+            execSQL("INSERT INTO focus_tags (id, name, colorValue) VALUES ('f1', 'work', 2)")
+            execSQL("INSERT INTO focus_tags (id, name, colorValue) VALUES ('f2', 'Study', 3)")
+            execSQL("INSERT INTO focus_tags (id, name, colorValue) VALUES ('default_tag', 'None', 4)")
+            execSQL(
+                "INSERT INTO tasks (id, title, description, location, priority, category, size, " +
+                    "isCompleted, createdAt, reminders) " +
+                    "VALUES ('t1', 'Report', '', '', 'MEDIUM', 'Work', 'MEDIUM', 0, 0, '')"
+            )
+            execSQL(
+                "INSERT INTO tasks (id, title, description, location, priority, category, size, " +
+                    "isCompleted, createdAt, reminders) " +
+                    "VALUES ('t2', 'Fence', '', '', 'MEDIUM', 'Garden', 'MEDIUM', 0, 0, '')"
+            )
+            execSQL(
+                "INSERT INTO recurring_tasks (id, title, description, category, dueDate, unit, interval, " +
+                    "monthlyMode, reminderOffsetsMinutes, createdAt) " +
+                    "VALUES ('r1', 'Rent', '', 'work', 1000, 'MONTH', 1, 'DAY_OF_MONTH', '[]', 1)"
+            )
+            execSQL("INSERT INTO focus_modes (id, name, type, isSystem) VALUES ('m1', 'Timer', 'CUSTOM', 0)")
+            listOf(
+                "('s1', 'f1', 'TAG', 'f1', 'work')",
+                "('s2', 'f2', 'TAG', 'f2', 'Study')",
+                "('s3', 'default_tag', 'TAG', 'default_tag', 'None')",
+                "('s4', NULL, 'TASK', 't1', 'Report')",
+                "('s5', NULL, 'TASK', 'deleted', 'Old')",
+                "('s6', 'gone', 'TAG', 'gone', 'Reading')",
+            ).forEach { row ->
+                execSQL(
+                    "INSERT INTO focus_sessions (id, tagId, targetType, targetId, targetLabel, modeId, " +
+                        "startTime, totalSecondsFocused, isCompleted) " +
+                        "SELECT * FROM (VALUES $row) JOIN (SELECT 'm1', 0, 60, 1)"
+                )
+            }
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 6, true, MIGRATION_5_6)
+
+        val tags = db.query("SELECT id, name, colorValue FROM tags ORDER BY name").use { cursor ->
+            buildMap {
+                while (cursor.moveToNext()) put(cursor.getString(1), cursor.getString(0) to cursor.getInt(2))
+            }
+        }
+        assertEquals(setOf("Garden", "Reading", "Study", "Work"), tags.keys)
+        assertEquals("c1" to 1, tags["Work"])
+        assertEquals("f2" to 3, tags["Study"])
+
+        fun attached(table: String, column: String) =
+            db.query("SELECT $column, tags.name FROM $table JOIN tags ON tags.id = tagId").use { cursor ->
+                buildMap {
+                    while (cursor.moveToNext()) put(cursor.getString(0), cursor.getString(1))
+                }
+            }
+        assertEquals(mapOf("t1" to "Work", "t2" to "Garden"), attached("task_tags", "taskId"))
+        assertEquals(mapOf("r1" to "Work"), attached("recurring_task_tags", "recurringTaskId"))
+        assertEquals(
+            mapOf("s1" to "Work", "s2" to "Study", "s4" to "Work", "s6" to "Reading"),
+            attached("session_tags", "sessionId"),
+        )
+        db.close()
+    }
 }

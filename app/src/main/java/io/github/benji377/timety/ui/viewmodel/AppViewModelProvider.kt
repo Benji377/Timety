@@ -55,6 +55,8 @@ object AppViewModelProvider {
                     UserViewModel(container.userRepository)
                 modelClass.isAssignableFrom(DayRatingViewModel::class.java) ->
                     DayRatingViewModel(application, container.dayRatingRepository, container.settingsRepository)
+                modelClass.isAssignableFrom(TagViewModel::class.java) ->
+                    TagViewModel(container.tagRepository)
                 modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
                     SettingsViewModel(application, container.settingsRepository, container.backupService)
                 else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

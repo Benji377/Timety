@@ -2,6 +2,10 @@ package io.github.benji377.timety.data.local
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.tag.LegacySession
+import io.github.benji377.timety.data.model.tag.LegacyTag
+import io.github.benji377.timety.data.model.tag.mergeLegacyTags
 
 /**
  * Room migrations. The 2.0.0 release shipped schema version 1; every schema change from here on
@@ -136,8 +140,8 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
 
 /**
  * Drops `user_profile.unlockedAchievements` and `user_profile.totalXp` (SQLite on API 26 cannot
- * drop a column, so the table is rebuilt), and adds the recurring-task columns and
- * `subtasks.sortOrder`.
+ * drop a column, so the table is rebuilt), adds the recurring-task columns and
+ * `subtasks.sortOrder`, and creates the global tags from the task categories and focus tags.
  */
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -161,8 +165,104 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
             "UPDATE `subtasks` SET `sortOrder` = (SELECT COUNT(*) FROM `subtasks` AS `s` " +
                     "WHERE `s`.`taskId` = `subtasks`.`taskId` AND `s`.`rowid` < `subtasks`.`rowid`)"
         )
+
+        createGlobalTags(db)
     }
 }
+
+/** Creates the tag tables and fills them from the task categories and focus tags. */
+private fun createGlobalTags(db: SupportSQLiteDatabase) {
+    db.execSQL(
+        "CREATE TABLE `tags` (`id` TEXT NOT NULL, `name` TEXT NOT NULL COLLATE NOCASE, " +
+                "`colorValue` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+    )
+    db.execSQL("CREATE UNIQUE INDEX `index_tags_name` ON `tags` (`name`)")
+    createTagJoinTable(db, "task_tags", "taskId", "tasks")
+    createTagJoinTable(db, "recurring_task_tags", "recurringTaskId", "recurring_tasks")
+    createTagJoinTable(db, "habit_tags", "habitId", "habits")
+    createTagJoinTable(db, "goal_tags", "goalId", "goals")
+    createTagJoinTable(db, "session_tags", "sessionId", "focus_sessions")
+
+    val taskCategories = readCategoriesById(db, "tasks")
+    val recurringCategories = readCategoriesById(db, "recurring_tasks")
+    val focusTags = readLegacyTags(db, "focus_tags")
+    val sessions = readLegacySessions(db)
+
+    val merged = mergeLegacyTags(
+        categories = readLegacyTags(db, "task_categories"),
+        focusTags = focusTags,
+        usedNames = taskCategories.values + recurringCategories.values +
+                sessions.values.mapNotNull { it.deletedTagLabel(focusTags) },
+    )
+    merged.tags.forEach { tag ->
+        db.execSQL(
+            "INSERT INTO `tags` (`id`, `name`, `colorValue`) VALUES (?, ?, ?)",
+            arrayOf<Any>(tag.id, tag.name, tag.colorValue)
+        )
+    }
+
+    fun attach(table: String, column: String, itemId: String, tagId: String) = db.execSQL(
+        "INSERT OR IGNORE INTO `$table` (`$column`, `tagId`) VALUES (?, ?)",
+        arrayOf<Any>(itemId, tagId)
+    )
+    taskCategories.forEach { (id, category) ->
+        merged.idForName(category)?.let { attach("task_tags", "taskId", id, it) }
+    }
+    recurringCategories.forEach { (id, category) ->
+        merged.idForName(category)?.let { attach("recurring_task_tags", "recurringTaskId", id, it) }
+    }
+    sessions.forEach { (id, session) ->
+        val tagId = merged.idForSession(session) { type, targetId ->
+            if (type == FocusTargetType.TASK) taskCategories[targetId] else recurringCategories[targetId]
+        }
+        tagId?.let { attach("session_tags", "sessionId", id, it) }
+    }
+}
+
+private fun createTagJoinTable(db: SupportSQLiteDatabase, table: String, column: String, parent: String) {
+    db.execSQL(
+        "CREATE TABLE `$table` (`$column` TEXT NOT NULL, `tagId` TEXT NOT NULL, " +
+                "PRIMARY KEY(`$column`, `tagId`), " +
+                "FOREIGN KEY(`$column`) REFERENCES `$parent`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                "FOREIGN KEY(`tagId`) REFERENCES `tags`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)"
+    )
+    db.execSQL("CREATE INDEX `index_${table}_tagId` ON `$table` (`tagId`)")
+}
+
+private fun readLegacyTags(db: SupportSQLiteDatabase, table: String): List<LegacyTag> =
+    db.query("SELECT `id`, `name`, `colorValue` FROM `$table`").use { cursor ->
+        buildList {
+            while (cursor.moveToNext()) {
+                add(LegacyTag(cursor.getString(0), cursor.getString(1), cursor.getInt(2)))
+            }
+        }
+    }
+
+/** The non-empty category of every row in [table], by row id. */
+private fun readCategoriesById(db: SupportSQLiteDatabase, table: String): Map<String, String> =
+    db.query("SELECT `id`, `category` FROM `$table` WHERE `category` != ''").use { cursor ->
+        buildMap {
+            while (cursor.moveToNext()) put(cursor.getString(0), cursor.getString(1))
+        }
+    }
+
+private fun readLegacySessions(db: SupportSQLiteDatabase): Map<String, LegacySession> =
+    db.query("SELECT `id`, `targetType`, `targetId`, `tagId`, `targetLabel` FROM `focus_sessions`").use { cursor ->
+        buildMap {
+            while (cursor.moveToNext()) {
+                val type = cursor.getString(1)
+                put(
+                    cursor.getString(0),
+                    LegacySession(
+                        targetType = FocusTargetType.entries.firstOrNull { it.name == type } ?: FocusTargetType.TAG,
+                        targetId = cursor.getString(2),
+                        tagId = cursor.getString(3),
+                        targetLabel = cursor.getString(4),
+                    )
+                )
+            }
+        }
+    }
 
 /** All migrations, in order, to register on the Room builder. */
 val ALL_MIGRATIONS =

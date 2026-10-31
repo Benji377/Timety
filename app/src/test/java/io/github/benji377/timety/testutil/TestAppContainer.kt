@@ -13,6 +13,7 @@ import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.QuickHabitRepository
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.SettingsRepository
+import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.di.AppContainer
@@ -57,6 +58,7 @@ class TestAppContainer(context: Context) : AppContainer {
     override val focusRepository = FocusRepository(database.focusDao())
     override val userRepository = UserRepository(database.userDao())
     override val dayRatingRepository = DayRatingRepository(database.dayRatingDao())
+    override val tagRepository = TagRepository(database.tagDao())
     override val settingsRepository = SettingsRepository(testDataStore)
     // Restoring into a test database must not touch the real app's alarms or widgets.
     override val backupService = BackupService(context, database, settingsRepository, afterRestore = {})

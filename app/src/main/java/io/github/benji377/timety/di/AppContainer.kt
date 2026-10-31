@@ -11,6 +11,7 @@ import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.QuickHabitRepository
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.SettingsRepository
+import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.data.repository.dataStore
@@ -29,6 +30,7 @@ interface AppContainer {
     val focusRepository: FocusRepository
     val userRepository: UserRepository
     val dayRatingRepository: DayRatingRepository
+    val tagRepository: TagRepository
     val settingsRepository: SettingsRepository
     val backupService: BackupService
 }
@@ -73,6 +75,10 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val dayRatingRepository: DayRatingRepository by lazy {
         DayRatingRepository(database.dayRatingDao())
+    }
+
+    override val tagRepository: TagRepository by lazy {
+        TagRepository(database.tagDao())
     }
 
     override val settingsRepository: SettingsRepository by lazy {
