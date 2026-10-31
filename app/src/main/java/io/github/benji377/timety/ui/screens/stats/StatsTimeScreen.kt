@@ -1,41 +1,30 @@
 package io.github.benji377.timety.ui.screens.stats
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.stats.PeriodBar
 import io.github.benji377.timety.ui.components.stats.PeriodBarChart
 import io.github.benji377.timety.ui.components.stats.SectionHeader
-import io.github.benji377.timety.ui.components.stats.StatCard
-import io.github.benji377.timety.ui.components.stats.StatCardStyle
-import io.github.benji377.timety.ui.components.stats.StatsPeriodControls
+import io.github.benji377.timety.ui.components.stats.StatTile
+import io.github.benji377.timety.ui.components.stats.StatTileRow
+import io.github.benji377.timety.ui.components.stats.StatsEmptyState
+import io.github.benji377.timety.ui.components.stats.StatsPeriodPage
+import io.github.benji377.timety.ui.components.stats.StatsTotal
 import io.github.benji377.timety.ui.components.stats.TagBreakdownBars
 import io.github.benji377.timety.ui.components.stats.bucketAxisLabel
 import io.github.benji377.timety.ui.components.stats.comparisonText
@@ -53,6 +42,7 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.stats.FocusHeatmapBucketer
 import io.github.benji377.timety.util.stats.FocusPeriodStats
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
 import io.github.benji377.timety.util.stats.PeriodBuckets
@@ -84,14 +74,7 @@ fun StatsTimeScreen(
     val zone = remember { ZoneId.systemDefault() }
 
     if (sessions.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(AppTheme.spaceLarge),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(stringResource(R.string.focusStatsEmpty), textAlign = TextAlign.Center)
-        }
+        StatsEmptyState(stringResource(R.string.focusStatsEmpty))
         return
     }
 
@@ -109,15 +92,8 @@ fun StatsTimeScreen(
     val total = bucketMinutes.sum()
 
     val previousMinutes = remember(filtered, state.period, state.start, today) {
-        PeriodSummary.of(
-            range = state.period.comparisonRange(state.start, today),
-            tasks = emptyList(),
-            recurring = emptyList(),
-            habitCompletions = emptyList(),
-            sessions = filtered,
-            zone = zone,
-            until = state.period.comparisonCutoff(state.start, ZonedDateTime.now(zone)),
-        ).focusMinutes
+        PeriodSummary.comparison(state.period, state.start, ZonedDateTime.now(zone), sessions = filtered)
+            .focusMinutes
     }
     val change = FocusPeriodStats.percentChange(total, previousMinutes)
     val averageSession = remember(filtered, range) {
@@ -141,6 +117,8 @@ fun StatsTimeScreen(
     val tagMinutes = remember(filtered, sessionTags, range) {
         TagStats.minutesByTag(filtered, sessionTags, range.start, range.endInclusive, zone)
     }
+    // Held here because a lazy item forgets what it remembers when scrolled out of view.
+    val heatmap = remember(filtered, today) { FocusHeatmapBucketer.grid(filtered, today, zone) }
     val bars = buckets.indices.map { index ->
         val bucket = buckets[index]
         PeriodBar(
@@ -154,106 +132,76 @@ fun StatsTimeScreen(
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        StatsPeriodControls(
-            state = state,
-            today = today,
-            tags = usedTags,
-            activeTagIds = activeTagIds,
-            accentColor = FocusColor,
-        )
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(AppTheme.spaceLarge),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.space2XLarge),
-        ) {
-            item(key = "total") {
-                Column {
-                    Text(
-                        AppDateFormatUtils.formatMinutesCompact(total),
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Black,
-                    )
-                    if (change != null) {
-                        Text(
-                            comparisonText(
-                                state.period,
-                                state.start,
-                                today,
-                                (if (change >= 0) "+" else "") + "$change%",
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Spacer(Modifier.height(AppTheme.spaceLarge))
-                    PeriodBarChart(
-                        bars = bars,
-                        seriesColors = listOf(FocusColor),
-                        currentIndex = currentBucketIndex(buckets, today),
-                        resetKey = state.period to state.start,
-                    )
-                }
+    StatsPeriodPage(
+        state = state,
+        today = today,
+        tags = usedTags,
+        activeTagIds = activeTagIds,
+        accentColor = FocusColor,
+    ) {
+        item(key = "total") {
+            Column {
+                StatsTotal(
+                    AppDateFormatUtils.formatMinutesCompact(total),
+                    comparison = change?.let { comparisonText(state.period, state.start, today, it, "%") },
+                )
+                Spacer(Modifier.height(AppTheme.spaceLarge))
+                PeriodBarChart(
+                    bars = bars,
+                    seriesColors = listOf(FocusColor),
+                    currentIndex = currentBucketIndex(buckets, today),
+                    resetKey = state.period to state.start,
+                )
             }
-            item(key = "cards") {
-                Row(
-                    modifier = Modifier.height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
-                ) {
-                    StatCard(
-                        title = stringResource(R.string.statsAvgSession),
-                        value = averageSession?.let(AppDateFormatUtils::formatMinutesCompact) ?: "-",
-                        icon = Icons.Filled.Timer,
-                        color = FocusColor,
-                        style = StatCardStyle.COMPACT_VERTICAL,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                    )
-                    if (goalDays.total > 0) {
-                        StatCard(
-                            title = stringResource(R.string.statsDaysGoalMet),
-                            value = "${goalDays.met} / ${goalDays.total}",
-                            icon = Icons.Filled.TrackChanges,
-                            color = WarningColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        )
-                    }
-                    StatCard(
-                        title = stringResource(R.string.statsDistractions),
-                        value = "$distractionCount",
-                        icon = Icons.Filled.WarningAmber,
-                        color = WarningColor,
-                        style = StatCardStyle.COMPACT_VERTICAL,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                    )
-                }
-            }
-            if (!tagMinutes.isEmpty) {
-                item(key = "tags") {
-                    Column {
-                        SectionHeader(
-                            stringResource(R.string.statsByTag),
-                            stringResource(R.string.statsByTagSessionsHint),
-                        )
-                        Spacer(Modifier.height(AppTheme.spaceLarge))
-                        TagBreakdownBars(tagMinutes) { AppDateFormatUtils.formatMinutesCompact(it) }
-                    }
-                }
-            }
-            item(key = "targets") { TargetBreakdownSection(filtered, sessionTags, range, zone) }
-            item(key = "heatmap") { FocusHeatmap(filtered) }
         }
+        item(key = "cards") {
+            StatTileRow(
+                listOfNotNull(
+                    StatTile(
+                        stringResource(R.string.statsAvgSession),
+                        averageSession?.let(AppDateFormatUtils::formatMinutesCompact) ?: "-",
+                        Icons.Filled.Timer,
+                        FocusColor,
+                    ),
+                    if (goalDays.total > 0) {
+                        StatTile(
+                            stringResource(R.string.statsDaysGoalMet),
+                            "${goalDays.met} / ${goalDays.total}",
+                            Icons.Filled.TrackChanges,
+                            WarningColor,
+                        )
+                    } else {
+                        null
+                    },
+                    StatTile(
+                        stringResource(R.string.statsDistractions),
+                        "$distractionCount",
+                        Icons.Filled.WarningAmber,
+                        WarningColor,
+                    ),
+                )
+            )
+        }
+        if (!tagMinutes.isEmpty) {
+            item(key = "tags") {
+                Column {
+                    SectionHeader(
+                        stringResource(R.string.statsByTag),
+                        stringResource(R.string.statsByTagSessionsHint),
+                    )
+                    Spacer(Modifier.height(AppTheme.spaceLarge))
+                    TagBreakdownBars(tagMinutes) { AppDateFormatUtils.formatMinutesCompact(it) }
+                }
+            }
+        }
+        item(key = "targets") { TargetBreakdownSection(filtered, sessionTags, range, zone) }
+        item(key = "heatmap") { FocusHeatmap(heatmap) }
     }
 }
 
 /** What a bar of [period] covers, for the line above the chart. */
 @Composable
+@ReadOnlyComposable
 internal fun bucketTitle(period: ReportPeriod, bucket: ClosedRange<LocalDate>): String =
     when (period) {
         ReportPeriod.WEEK -> AppDateFormatUtils.formatWeekdayDay(bucket.start)

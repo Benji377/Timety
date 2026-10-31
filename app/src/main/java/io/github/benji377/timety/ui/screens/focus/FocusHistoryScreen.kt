@@ -32,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,10 +77,10 @@ import io.github.benji377.timety.util.stats.FocusHistoryQuery
 import io.github.benji377.timety.util.stats.FocusHistorySort
 import io.github.benji377.timety.util.stats.FocusHistorySummary
 import io.github.benji377.timety.util.tag.TagFilter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private enum class HistorySheet {
     DATE,
@@ -429,6 +430,7 @@ private fun HistoryChip(label: String, active: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
+@ReadOnlyComposable
 private fun dateChipLabel(dates: ClosedRange<LocalDate>?, today: LocalDate): String {
     val preset = FocusHistoryDatePreset.entries.find { it.range(today) == dates }
     return when {
@@ -444,6 +446,7 @@ private fun dateChipLabel(dates: ClosedRange<LocalDate>?, today: LocalDate): Str
 }
 
 @Composable
+@ReadOnlyComposable
 private fun tagChipLabel(selected: Set<String>, tags: List<TagEntity>): String = when (selected.size) {
     0 -> stringResource(R.string.focusHistoryChipTags)
     1 -> tags.first { it.id in selected }.name

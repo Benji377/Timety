@@ -1,37 +1,30 @@
 package io.github.benji377.timety.ui.screens
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -46,8 +39,9 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.stats.SectionHeader
-import io.github.benji377.timety.ui.components.stats.StatCard
-import io.github.benji377.timety.ui.components.stats.StatCardStyle
+import io.github.benji377.timety.ui.components.stats.StatTile
+import io.github.benji377.timety.ui.components.stats.StatTileRow
+import io.github.benji377.timety.ui.components.stats.StatsNavRow
 import io.github.benji377.timety.ui.components.stats.SynergyChart
 import io.github.benji377.timety.ui.screens.stats.StatsPage
 import io.github.benji377.timety.ui.screens.stats.focusPeakValue
@@ -106,12 +100,11 @@ fun StatisticsScreen(
     val zone = remember { ZoneId.systemDefault() }
     val today by rememberToday()
 
-    // Completed recurring occurrences count as tasks done on their completion day.
-    val tasksPerDay = remember(tasks, recurring) {
-        val completions = tasks.mapNotNull { item ->
-            item.task.completedAt?.takeIf { item.task.isCompleted }
-        } + recurring.flatMap { item -> item.occurrences.map { it.completedAt } }
-        completions.groupingBy { it.atZone(zone).toLocalDate() }.eachCount()
+    val taskEntities = remember(tasks) { tasks.map { it.task } }
+    val tasksPerDay = remember(taskEntities, recurring) {
+        TaskTiming.completions(taskEntities, recurring)
+            .groupingBy { it.atZone(zone).toLocalDate() }
+            .eachCount()
     }
     val focusMinutesByDay = remember(sessions) { FocusSessionDayStats.minutesByDay(sessions, zone) }
     val tasksToday = tasksPerDay[today] ?: 0
@@ -128,14 +121,7 @@ fun StatisticsScreen(
     }
     val week = weekStart..ReportPeriod.WEEK.endOf(weekStart)
 
-    val habitRate = remember(habits, week, today) {
-        HabitRates.total(
-            habits.map { item ->
-                val dates = item.completions.map { it.completionDate.atZone(zone).toLocalDate() }
-                HabitRates.of(item.habit, dates, week, today, zone)
-            }
-        )
-    }
+    val habitRate = remember(habits, week, today) { HabitRates.total(habits, week, today, zone) }
     val checkInsPerDay = remember(habits) {
         habits.flatMap { it.completions }
             .groupingBy { it.completionDate.atZone(zone).toLocalDate() }
@@ -151,19 +137,17 @@ fun StatisticsScreen(
         FocusPatterns.focusPeak(sessions, FocusPatterns.window(today), zone)
     }
 
-    val taskEntities = remember(tasks) { tasks.map { it.task } }
     val thisWeek = remember(taskEntities, recurring, sessions, week) {
         PeriodSummary.of(week, taskEntities, recurring, emptyList(), sessions, zone)
     }
-    val lastWeek = remember(taskEntities, recurring, sessions, week, today) {
-        PeriodSummary.of(
-            range = ReportPeriod.WEEK.comparisonRange(weekStart, today),
+    val lastWeek = remember(taskEntities, recurring, sessions, weekStart, today) {
+        PeriodSummary.comparison(
+            ReportPeriod.WEEK,
+            weekStart,
+            ZonedDateTime.now(zone),
             tasks = taskEntities,
             recurring = recurring,
-            habitCompletions = emptyList(),
             sessions = sessions,
-            zone = zone,
-            until = ReportPeriod.WEEK.comparisonCutoff(weekStart, ZonedDateTime.now(zone)),
         )
     }
     val dueRate = remember(taskEntities, recurring, week) {
@@ -189,44 +173,31 @@ fun StatisticsScreen(
                 Column {
                     SectionHeader(stringResource(R.string.statsSectionToday))
                     Spacer(Modifier.height(AppTheme.spaceMedium))
-                    Row(
-                        modifier = Modifier.height(IntrinsicSize.Min),
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
-                    ) {
-                        StatCard(
-                            title = stringResource(R.string.statsTileTasksDone),
-                            value = "$tasksToday",
-                            icon = Icons.Filled.TaskAlt,
-                            color = TaskColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            onClick = { onOpenPage(StatsPage.TASKS) },
-                            modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
+                    StatTileRow(
+                        listOf(
+                            StatTile(
+                                stringResource(R.string.statsTileTasksDone),
+                                "$tasksToday",
+                                Icons.Filled.TaskAlt,
+                                TaskColor,
+                                onClick = { onOpenPage(StatsPage.TASKS) },
+                            ),
+                            StatTile(
+                                stringResource(R.string.statsTileFocus),
+                                AppDateFormatUtils.formatMinutesCompact(focusToday),
+                                Icons.Filled.Timer,
+                                FocusColor,
+                                onClick = { onOpenPage(StatsPage.TIME) },
+                            ),
+                            StatTile(
+                                stringResource(R.string.statsTileFocusGoal),
+                                goalPercent?.let { "$it%" } ?: "-",
+                                Icons.Filled.TrackChanges,
+                                WarningColor,
+                                onClick = { onOpenPage(StatsPage.TIME) },
+                            ),
                         )
-                        StatCard(
-                            title = stringResource(R.string.statsTileFocus),
-                            value = AppDateFormatUtils.formatMinutesCompact(focusToday),
-                            icon = Icons.Filled.Timer,
-                            color = FocusColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            onClick = { onOpenPage(StatsPage.TIME) },
-                            modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        )
-                        StatCard(
-                            title = stringResource(R.string.statsTileFocusGoal),
-                            value = goalPercent?.let { "$it%" } ?: "-",
-                            icon = Icons.Filled.TrackChanges,
-                            color = WarningColor,
-                            style = StatCardStyle.COMPACT_VERTICAL,
-                            onClick = { onOpenPage(StatsPage.TIME) },
-                            modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        )
-                    }
+                    )
                 }
             }
             item(key = "synergy") {
@@ -298,6 +269,7 @@ fun StatisticsScreen(
 }
 
 @Composable
+@ReadOnlyComposable
 private fun timeSummary(minutes: Int, previousMinutes: Int): String {
     val time = AppDateFormatUtils.formatMinutesCompact(minutes)
     val change = FocusPeriodStats.percentChange(minutes, previousMinutes)
@@ -309,6 +281,7 @@ private fun timeSummary(minutes: Int, previousMinutes: Int): String {
 }
 
 @Composable
+@ReadOnlyComposable
 private fun tasksSummary(done: Int, dueDatePercent: Int?): String {
     val doneText = pluralStringResource(R.plurals.statsTasksDone, done, done)
     return dueDatePercent?.let { stringResource(R.string.statsRowTasksDue, doneText, it) } ?: doneText
@@ -322,14 +295,7 @@ private fun OverviewRow(
     sparkline: List<Int>? = null,
     sparklineColor: Color = Color.Unspecified,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .clickable(onClick = onClick)
-            .padding(vertical = AppTheme.spaceSmall),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    StatsNavRow(onClick) {
         Column(modifier = Modifier.weight(1f)) {
             Text(title, fontWeight = FontWeight.Bold)
             if (summary != null) {
@@ -346,11 +312,6 @@ private fun OverviewRow(
             Sparkline(sparkline, sparklineColor)
         }
         Spacer(Modifier.width(AppTheme.spaceSmall))
-        Icon(
-            Icons.Filled.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }
 

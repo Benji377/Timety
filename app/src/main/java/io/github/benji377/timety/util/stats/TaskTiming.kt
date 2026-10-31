@@ -15,6 +15,11 @@ data class DueDateRate(val onTime: Int, val total: Int) {
 
 /** When tasks get done relative to their due date and creation. */
 object TaskTiming {
+    /** When tasks got done: each completed one-off task and each logged recurring completion. */
+    fun completions(tasks: List<TaskEntity>, recurring: List<RecurringTaskWithOccurrences>): List<Instant> =
+        tasks.mapNotNull { task -> task.completedAt.takeIf { task.isCompleted } } +
+            recurring.flatMap { item -> item.occurrences.map { it.completedAt } }
+
     private const val SECONDS_PER_DAY = 86_400.0
 
     /**

@@ -1,7 +1,9 @@
 package io.github.benji377.timety.util.habit
 
+import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -159,5 +161,19 @@ class HabitRatesTest {
         val total = HabitRates.total(listOf(HabitRate(6, 7), HabitRate(1, 1), HabitRate(0, 0)))
         assertEquals(HabitRate(7, 8), total)
         assertEquals(88, total.percent)
+    }
+
+    @Test
+    fun total_ofHabits_addsTheirRatesFromTheirCompletions() {
+        val daily = HabitWithCompletions(
+            habit(HabitFrequency.DAILY),
+            listOf(
+                HabitCompletionEntity(habitId = "h", completionDate = monday.atTime(9, 0).toInstant(zone)),
+                HabitCompletionEntity(habitId = "h", completionDate = monday.plusDays(1).atTime(9, 0).toInstant(zone)),
+            ),
+        )
+        val idle = HabitWithCompletions(habit(HabitFrequency.DAILY), emptyList())
+        assertEquals(HabitRate(2, 14), HabitRates.total(listOf(daily, idle), week, afterwards, zone))
+        assertEquals(listOf(monday, monday.plusDays(1)), HabitRates.completionDays(daily, zone))
     }
 }

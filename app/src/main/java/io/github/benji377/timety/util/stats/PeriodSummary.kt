@@ -61,10 +61,14 @@ enum class ReportPeriod {
     fun comparisonRange(start: LocalDate, today: LocalDate): ClosedRange<LocalDate> {
         val previousStart = previousStart(start)
         val previousEnd = endOf(previousStart)
-        if (today.isBefore(start) || today.isAfter(endOf(start))) return previousStart..previousEnd
+        if (!isRunning(start, today)) return previousStart..previousEnd
         // March 31 has no February counterpart, so the comparison stops at February's end.
         return previousStart..minOf(matchingDay(start, today), previousEnd)
     }
+
+    /** Whether the period starting on [start] holds [today]. */
+    fun isRunning(start: LocalDate, today: LocalDate): Boolean =
+        !today.isBefore(start) && !today.isAfter(endOf(start))
 
     /**
      * The moment in the [comparisonRange] that matches [now], so its last day counts only up to
@@ -72,7 +76,7 @@ enum class ReportPeriod {
      */
     fun comparisonCutoff(start: LocalDate, now: ZonedDateTime): Instant? {
         val today = now.toLocalDate()
-        if (today.isBefore(start) || today.isAfter(endOf(start))) return null
+        if (!isRunning(start, today)) return null
         val day = matchingDay(start, today)
         if (day.isAfter(endOf(previousStart(start)))) return null
         return day.atTime(now.toLocalTime()).atZone(now.zone).toInstant()
@@ -92,6 +96,24 @@ data class PeriodSummary(
     val focusMinutes: Int,
 ) {
     companion object {
+        /** What [period] starting on [start] is compared against as of [now]; see [ReportPeriod.comparisonRange]. */
+        fun comparison(
+            period: ReportPeriod,
+            start: LocalDate,
+            now: ZonedDateTime,
+            tasks: List<TaskEntity> = emptyList(),
+            recurring: List<RecurringTaskWithOccurrences> = emptyList(),
+            sessions: List<FocusSessionEntity> = emptyList(),
+        ): PeriodSummary = of(
+            range = period.comparisonRange(start, now.toLocalDate()),
+            tasks = tasks,
+            recurring = recurring,
+            habitCompletions = emptyList(),
+            sessions = sessions,
+            zone = now.zone,
+            until = period.comparisonCutoff(start, now),
+        )
+
         /**
          * Summarizes [range], both ends inclusive, or only up to [until] when given. Recurring
          * tasks count once for their next due date and once per logged completion, never twice

@@ -121,4 +121,16 @@ class TaskTimingTest {
         val tasks = listOf(task(at(monday), createdAt = at(monday.plusDays(1))))
         assertEquals(0.0, TaskTiming.medianDaysToFinish(tasks, week, zone)!!, 0.001)
     }
+
+    @Test
+    fun completions_listsCompletedTasksAndRecurringOccurrencesOnly() {
+        val done = at(monday)
+        val logged = at(monday.plusDays(1))
+        val reopened = task(completedAt = at(monday)).copy(isCompleted = false)
+        val result = TaskTiming.completions(
+            listOf(task(done), task(completedAt = null), reopened),
+            listOf(recurring(logged to null)),
+        )
+        assertEquals(listOf(done, logged), result)
+    }
 }

@@ -3,16 +3,15 @@ package io.github.benji377.timety.ui.screens.stats
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.HourglassBottom
@@ -31,7 +30,6 @@ import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,12 +37,14 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.ui.components.common.AccentBadge
-import io.github.benji377.timety.ui.components.stats.LegendDot
+import io.github.benji377.timety.ui.components.stats.LegendLabel
 import io.github.benji377.timety.ui.components.stats.PeriodBar
 import io.github.benji377.timety.ui.components.stats.PeriodBarChart
 import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.components.stats.StatCard
-import io.github.benji377.timety.ui.components.stats.StatsPeriodControls
+import io.github.benji377.timety.ui.components.stats.StatsEmptyState
+import io.github.benji377.timety.ui.components.stats.StatsPeriodPage
+import io.github.benji377.timety.ui.components.stats.StatsTotal
 import io.github.benji377.timety.ui.components.stats.TagBreakdownBars
 import io.github.benji377.timety.ui.components.stats.bucketAxisLabel
 import io.github.benji377.timety.ui.components.stats.comparisonText
@@ -97,14 +97,7 @@ fun StatsTasksScreen(
     val zone = remember { ZoneId.systemDefault() }
 
     if (allTasks.isEmpty() && allRecurring.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(AppTheme.spaceLarge),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(stringResource(R.string.taskStatsEmpty), textAlign = TextAlign.Center)
-        }
+        StatsEmptyState(stringResource(R.string.taskStatsEmpty))
         return
     }
 
@@ -120,10 +113,7 @@ fun StatsTasksScreen(
         TagFilter.filter(allRecurring, activeTagIds, tagsById) { it.task.id }
     }
     val range = state.range
-    val completions = remember(tasks, recurring) {
-        tasks.mapNotNull { if (it.isCompleted) it.completedAt else null } +
-            recurring.flatMap { item -> item.occurrences.map { it.completedAt } }
-    }
+    val completions = remember(tasks, recurring) { TaskTiming.completions(tasks, recurring) }
     val created = remember(tasks, recurring) {
         tasks.map { it.createdAt } + recurring.map { it.task.createdAt }
     }
@@ -133,14 +123,12 @@ fun StatsTasksScreen(
     val done = bucketsCompleted.sum()
 
     val previousDone = remember(tasks, recurring, state.period, state.start, today) {
-        PeriodSummary.of(
-            range = state.period.comparisonRange(state.start, today),
+        PeriodSummary.comparison(
+            state.period,
+            state.start,
+            ZonedDateTime.now(zone),
             tasks = tasks,
             recurring = recurring,
-            habitCompletions = emptyList(),
-            sessions = emptyList(),
-            zone = zone,
-            until = state.period.comparisonCutoff(state.start, ZonedDateTime.now(zone)),
         ).tasksCompleted
     }
     val dueRate = remember(tasks, recurring, range) { TaskTiming.dueDateRate(tasks, recurring, range, zone) }
@@ -171,106 +159,85 @@ fun StatsTasksScreen(
             values = listOf(bucketsCompleted[index], bucketsCreated[index]),
         )
     }
-    val deltaDone = done - previousDone
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        StatsPeriodControls(
-            state = state,
-            today = today,
-            tags = usedTags,
-            activeTagIds = activeTagIds,
-            accentColor = TaskColor,
-        )
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(AppTheme.spaceLarge),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.space2XLarge),
-        ) {
-            item(key = "total") {
+    StatsPeriodPage(
+        state = state,
+        today = today,
+        tags = usedTags,
+        activeTagIds = activeTagIds,
+        accentColor = TaskColor,
+    ) {
+        item(key = "total") {
+            Column {
+                StatsTotal(
+                    pluralStringResource(R.plurals.statsTasksDone, done, done),
+                    comparison = if (previousDone > 0) {
+                        comparisonText(state.period, state.start, today, done - previousDone)
+                    } else {
+                        null
+                    },
+                )
+                Spacer(Modifier.height(AppTheme.spaceLarge))
+                PeriodBarChart(
+                    bars = bars,
+                    seriesColors = listOf(SuccessColor, WarningColor),
+                    currentIndex = currentBucketIndex(buckets, today),
+                    resetKey = state.period to state.start,
+                )
+                Spacer(Modifier.height(AppTheme.spaceSmall))
+                Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge)) {
+                    LegendLabel(SuccessColor, stringResource(R.string.taskStatsCompleted))
+                    LegendLabel(WarningColor, stringResource(R.string.taskStatsCreated))
+                }
+            }
+        }
+        item(key = "cards") {
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium),
+            ) {
+                StatCard(
+                    title = stringResource(R.string.statsDoneByDue),
+                    value = dueRate.percent?.let { "$it%" } ?: "-",
+                    icon = Icons.Filled.EventAvailable,
+                    color = SuccessColor,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                )
+                StatCard(
+                    title = stringResource(R.string.statsTimeToFinish),
+                    value = medianDays?.let {
+                        stringResource(R.string.statsDaysValue, String.format(LocalLocale.current.platformLocale, "%.1f", it))
+                    } ?: "-",
+                    icon = Icons.Filled.HourglassBottom,
+                    color = TaskColor,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                )
+            }
+        }
+        if (!tagCounts.isEmpty) {
+            item(key = "tags") {
                 Column {
-                    Text(
-                        pluralStringResource(R.plurals.statsTasksDone, done, done),
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Black,
-                    )
-                    Text(
-                        comparisonText(
-                            state.period,
-                            state.start,
-                            today,
-                            (if (deltaDone >= 0) "+" else "") + "$deltaDone",
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    SectionHeader(
+                        stringResource(R.string.statsByTag),
+                        stringResource(R.string.statsByTagTasksHint),
                     )
                     Spacer(Modifier.height(AppTheme.spaceLarge))
-                    PeriodBarChart(
-                        bars = bars,
-                        seriesColors = listOf(SuccessColor, WarningColor),
-                        currentIndex = currentBucketIndex(buckets, today),
-                        resetKey = state.period to state.start,
-                    )
-                    Spacer(Modifier.height(AppTheme.spaceSmall))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        LegendDot(SuccessColor)
-                        Spacer(Modifier.width(AppTheme.spaceXSmall))
-                        Text(
-                            stringResource(R.string.taskStatsCompleted),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.width(AppTheme.spaceLarge))
-                        LegendDot(WarningColor)
-                        Spacer(Modifier.width(AppTheme.spaceXSmall))
-                        Text(
-                            stringResource(R.string.taskStatsCreated),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    TagBreakdownBars(tagCounts) { count ->
+                        quantityString(
+                            R.plurals.nTasksCount,
+                            count,
+                            zeroRes = R.string.nTasksCountZero,
+                            count,
                         )
                     }
                 }
             }
-            item(key = "cards") {
-                Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
-                    StatCard(
-                        title = stringResource(R.string.statsDoneByDue),
-                        value = dueRate.percent?.let { "$it%" } ?: "-",
-                        icon = Icons.Filled.EventAvailable,
-                        color = SuccessColor,
-                        modifier = Modifier.weight(1f),
-                    )
-                    StatCard(
-                        title = stringResource(R.string.statsTimeToFinish),
-                        value = medianDays?.let {
-                            stringResource(R.string.statsDaysValue, String.format(LocalLocale.current.platformLocale, "%.1f", it))
-                        } ?: "-",
-                        icon = Icons.Filled.HourglassBottom,
-                        color = TaskColor,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-            if (!tagCounts.isEmpty) {
-                item(key = "tags") {
-                    Column {
-                        SectionHeader(
-                            stringResource(R.string.statsByTag),
-                            stringResource(R.string.statsByTagTasksHint),
-                        )
-                        Spacer(Modifier.height(AppTheme.spaceLarge))
-                        TagBreakdownBars(tagCounts) { count ->
-                            quantityString(
-                                R.plurals.nTasksCount,
-                                count,
-                                zeroRes = R.string.nTasksCountZero,
-                                count,
-                            )
-                        }
-                    }
-                }
-            }
-            item(key = "calibration") { EstimationCalibrationCard(tasks, sessions) }
         }
+        item(key = "calibration") { EstimationCalibrationCard(tasks, sessions) }
     }
 }
 

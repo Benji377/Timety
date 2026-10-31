@@ -162,18 +162,25 @@ fun PeriodNavigator(
 
 /**
  * A line saying what [delta] compares against: the same days of the previous period while this one
- * is running, otherwise the whole previous period.
+ * is running, otherwise the whole previous period. [suffix] follows the signed number.
  */
 @Composable
 @ReadOnlyComposable
-fun comparisonText(period: ReportPeriod, start: LocalDate, today: LocalDate, delta: String): String {
-    val running = !today.isBefore(start) && !today.isAfter(period.endOf(start))
+fun comparisonText(
+    period: ReportPeriod,
+    start: LocalDate,
+    today: LocalDate,
+    delta: Int,
+    suffix: String = "",
+): String {
+    val running = period.isRunning(start, today)
     val res = when (period) {
         ReportPeriod.WEEK -> if (running) R.string.statsCompareRunningWeek else R.string.statsCompareFinishedWeek
         ReportPeriod.MONTH -> if (running) R.string.statsCompareRunningMonth else R.string.statsCompareFinishedMonth
         ReportPeriod.YEAR -> if (running) R.string.statsCompareRunningYear else R.string.statsCompareFinishedYear
     }
-    return stringResource(res, delta)
+    val sign = if (delta >= 0) "+" else ""
+    return stringResource(res, "$sign$delta$suffix")
 }
 
 @Composable
@@ -187,6 +194,7 @@ private fun periodLabel(period: ReportPeriod): String = stringResource(
 )
 
 @Composable
+@ReadOnlyComposable
 private fun periodTitle(period: ReportPeriod, start: LocalDate, today: LocalDate): String =
     when (period) {
         ReportPeriod.WEEK -> {

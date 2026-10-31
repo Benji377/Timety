@@ -39,7 +39,6 @@ object AppTheme {
 
     // Font weights
     val fwLight = FontWeight.W300
-    val fwNormal = FontWeight.Normal
     val fwMedium = FontWeight.W500
     val fwBold = FontWeight.Bold
     val fwExtraBold = FontWeight.W900

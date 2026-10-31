@@ -7,26 +7,30 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.tag.TagEntity
-import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.data.model.tag.TagEntity
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -35,18 +39,19 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.data.repository.ThemeMode
 import io.github.benji377.timety.di.AppContainer
 import io.github.benji377.timety.ui.screens.settings.SettingsPage
+import io.github.benji377.timety.ui.screens.stats.StatsPage
 import io.github.benji377.timety.ui.theme.HabitColor
+import java.io.File
+import java.io.FileOutputStream
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
-import java.io.File
-import java.io.FileOutputStream
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 
 @RunWith(AndroidJUnit4::class)
 class ScreenshotTest {
@@ -89,6 +94,14 @@ class ScreenshotTest {
             .performClick()
         composeTestRule.waitForIdle()
         takeScreenshot("07_stats_screen")
+        StatsPage.entries.forEach { page ->
+            val title = str(page.titleRes)
+            composeTestRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText(title))
+            composeTestRule.onNodeWithText(title).performClick()
+            composeTestRule.waitForIdle()
+            checkTappablesAreLabeled(title)
+            pressBack()
+        }
         pressBack()
 
         // Calendar (calendar icon in the Home app bar)
@@ -102,6 +115,12 @@ class ScreenshotTest {
         composeTestRule.onNodeWithText(str(R.string.navigationFocus)).performClick()
         composeTestRule.waitForIdle()
         takeScreenshot("02_focus_screen")
+
+        // Focus history (history icon in the Focus app bar)
+        composeTestRule.onNodeWithContentDescription(str(R.string.focusHistoryTitle)).performClick()
+        composeTestRule.waitForIdle()
+        checkTappablesAreLabeled(str(R.string.focusHistoryTitle))
+        pressBack()
 
         // Focus modes (manage-modes icon in the Focus app bar)
         composeTestRule.onNodeWithContentDescription(str(R.string.focusModesTitle)).performClick()
@@ -125,8 +144,9 @@ class ScreenshotTest {
         composeTestRule.waitForIdle()
         takeScreenshot("04_habits_screen")
 
-        // Habit detail (first habit of the morning stack)
-        composeTestRule.onNodeWithText("MORNING ROUTINE").performClick()
+        // Habit detail. The half-done morning stack shows under both Due today and Done, and
+        // Drink Water is the habit already done.
+        composeTestRule.onAllNodesWithText("MORNING ROUTINE").onLast().performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("Drink Water").performClick()
         composeTestRule.waitForIdle()

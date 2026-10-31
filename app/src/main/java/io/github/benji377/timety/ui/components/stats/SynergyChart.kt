@@ -92,22 +92,14 @@ fun SynergyChart(
                 .height(190.dp)
                 .pointerInput(days.size) {
                     val padding = sidePadding.toPx()
-                    fun select(x: Float) {
-                        val fraction = (x - padding) / (size.width - 2 * padding)
-                        selected = (fraction * days.lastIndex).roundToInt().coerceIn(days.indices)
-                    }
-                    detectTapGestures { select(it.x) }
+                    detectTapGestures { selected = dayIndexAt(it.x, size.width, padding, days.size) }
                 }
                 // Only sideways drags, so a vertical swipe over the chart still scrolls the page.
                 .pointerInput(days.size) {
                     val padding = sidePadding.toPx()
-                    fun select(x: Float) {
-                        val fraction = (x - padding) / (size.width - 2 * padding)
-                        selected = (fraction * days.lastIndex).roundToInt().coerceIn(days.indices)
-                    }
                     detectHorizontalDragGestures { change, _ ->
                         change.consume()
-                        select(change.position.x)
+                        selected = dayIndexAt(change.position.x, size.width, padding, days.size)
                     }
                 },
         ) {
@@ -141,6 +133,12 @@ fun SynergyChart(
             drawSeries(dailyTasks, TaskColor, selected, plotHeight, ::xOf)
         }
     }
+}
+
+/** The day nearest to [x] on a chart [width] wide, with [padding] on both sides of its [dayCount] days. */
+internal fun dayIndexAt(x: Float, width: Int, padding: Float, dayCount: Int): Int {
+    val fraction = (x - padding) / (width - 2 * padding)
+    return (fraction * (dayCount - 1)).roundToInt().coerceIn(0, dayCount - 1)
 }
 
 private fun DrawScope.drawSeries(

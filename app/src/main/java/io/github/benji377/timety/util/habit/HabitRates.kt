@@ -2,6 +2,7 @@ package io.github.benji377.timety.util.habit
 
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import java.time.LocalDate
 import java.time.ZoneId
@@ -21,6 +22,18 @@ data class HabitRate(val done: Int, val expected: Int) {
 object HabitRates {
     private const val DAYS_PER_WEEK = 7
     private const val ROUNDING_TOLERANCE = 1e-9
+
+    /** The days [item] was checked in on. */
+    fun completionDays(item: HabitWithCompletions, zone: ZoneId): List<LocalDate> =
+        item.completions.map { it.completionDate.atZone(zone).toLocalDate() }
+
+    /** The combined rate of [habits] in [range]. */
+    fun total(
+        habits: List<HabitWithCompletions>,
+        range: ClosedRange<LocalDate>,
+        today: LocalDate,
+        zone: ZoneId,
+    ): HabitRate = total(habits.map { of(it.habit, completionDays(it, zone), range, today, zone) })
 
     /** The rate of [habit] in [range], given the days in [completions]. */
     fun of(

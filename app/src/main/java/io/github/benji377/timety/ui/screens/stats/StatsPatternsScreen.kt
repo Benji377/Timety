@@ -44,8 +44,9 @@ import io.github.benji377.timety.ui.components.mood.MoodsBestFirst
 import io.github.benji377.timety.ui.components.mood.color
 import io.github.benji377.timety.ui.components.mood.labelRes
 import io.github.benji377.timety.ui.components.stats.BreakdownBar
-import io.github.benji377.timety.ui.components.stats.LegendDot
+import io.github.benji377.timety.ui.components.stats.LegendLabel
 import io.github.benji377.timety.ui.components.stats.SectionHeader
+import io.github.benji377.timety.ui.components.stats.StatsEmptyState
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -65,6 +66,7 @@ import io.github.benji377.timety.util.stats.DayPart
 import io.github.benji377.timety.util.stats.FocusPatterns
 import io.github.benji377.timety.util.stats.FocusPeak
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
+import io.github.benji377.timety.util.stats.TaskTiming
 import java.time.DayOfWeek
 import java.time.ZoneId
 import java.time.format.TextStyle
@@ -100,8 +102,7 @@ fun StatsPatternsScreen(
         FocusPatterns.averageMinutesByWeekday(minutesByDay, window)
     }
     val busiestDay = remember(tasks, recurring, window) {
-        val completions = tasks.mapNotNull { item -> item.task.completedAt?.takeIf { item.task.isCompleted } } +
-            recurring.flatMap { item -> item.occurrences.map { it.completedAt } }
+        val completions = TaskTiming.completions(tasks.map { it.task }, recurring)
         FocusPatterns.busiestTaskWeekday(completions, window, zone)
     }
     val distractionMinute = remember(distractions, window) {
@@ -134,17 +135,7 @@ fun StatsPatternsScreen(
     )
 
     if (highlights.isEmpty() && checkInParts == null && moodFocus == null) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(AppTheme.spaceLarge),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                stringResource(R.string.statsPatternsEmpty, FocusPatterns.WINDOW_WEEKS.toInt()),
-                textAlign = TextAlign.Center,
-            )
-        }
+        StatsEmptyState(stringResource(R.string.statsPatternsEmpty, FocusPatterns.WINDOW_WEEKS.toInt()))
         return
     }
 
@@ -245,6 +236,7 @@ private fun HighlightRow(label: String, value: String) {
 
 /** When focus peaks, as a weekday in [weekdayStyle] and a part of the day; also on the overview. */
 @Composable
+@ReadOnlyComposable
 internal fun focusPeakValue(peak: FocusPeak, weekdayStyle: TextStyle): String = stringResource(
     R.string.statsPatternPeakValue,
     peak.weekday.getDisplayName(weekdayStyle, LocalLocale.current.platformLocale),
@@ -345,15 +337,10 @@ private fun HabitTiming(parts: Map<DayPart, Int>) {
             verticalArrangement = Arrangement.spacedBy(AppTheme.spaceXSmall),
         ) {
             DayPart.entries.forEach { part ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    LegendDot(part.chartColor, size = AppTheme.spaceSmall)
-                    Spacer(Modifier.width(AppTheme.spaceXSmall))
-                    Text(
-                        "${dayPartLabel(part)} ${((parts[part] ?: 0) * 100f / total).roundToInt()}%",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                LegendLabel(
+                    part.chartColor,
+                    "${dayPartLabel(part)} ${((parts[part] ?: 0) * 100f / total).roundToInt()}%",
+                )
             }
         }
     }
