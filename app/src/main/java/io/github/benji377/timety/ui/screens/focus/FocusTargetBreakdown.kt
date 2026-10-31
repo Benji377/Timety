@@ -47,7 +47,8 @@ private data class TargetTypeStat(
     val minutes: Int
 )
 
-private val FocusTargetType.pluralLabelRes: Int
+/** The string naming sessions of this target type as a group. */
+internal val FocusTargetType.pluralLabelRes: Int
     get() = when (this) {
         FocusTargetType.TAG -> R.string.globalLabelTags
         FocusTargetType.TASK -> R.string.globalLabelTasks

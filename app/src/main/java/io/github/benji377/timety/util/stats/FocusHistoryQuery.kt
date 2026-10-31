@@ -15,6 +15,22 @@ enum class FocusHistorySort {
     LONGEST,
 }
 
+/** Quick date ranges of the focus history list. */
+enum class FocusHistoryDatePreset {
+    ALL_TIME,
+    LAST_7_DAYS,
+    LAST_30_DAYS,
+    THIS_YEAR;
+
+    /** The days this preset covers as of [today]; null means no limit. */
+    fun range(today: LocalDate): ClosedRange<LocalDate>? = when (this) {
+        ALL_TIME -> null
+        LAST_7_DAYS -> today.minusDays(6)..today
+        LAST_30_DAYS -> today.minusDays(29)..today
+        THIS_YEAR -> ReportPeriod.YEAR.startOf(today)..today
+    }
+}
+
 /** What the focus history list is narrowed to; every property left empty matches everything. */
 data class FocusHistoryFilter(
     val dates: ClosedRange<LocalDate>? = null,

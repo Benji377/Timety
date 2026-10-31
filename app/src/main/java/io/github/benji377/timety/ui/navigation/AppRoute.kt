@@ -5,6 +5,7 @@ enum class AppRoute(val route: String) {
     CALENDAR("calendar"),
     STATISTICS("statistics"),
     FOCUS_MODES("focus_modes"),
+    FOCUS_HISTORY("focus_history"),
     SETTINGS("settings"),
     TAGS("tags"),
     QUICK_HABITS("quick_habits"),

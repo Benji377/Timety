@@ -185,6 +185,14 @@ class FocusHistoryQueryTest {
     }
 
     @Test
+    fun datePresets_coverTheirDaysEndingToday() {
+        assertEquals(null, FocusHistoryDatePreset.ALL_TIME.range(oct31))
+        assertEquals(oct31.minusDays(6)..oct31, FocusHistoryDatePreset.LAST_7_DAYS.range(oct31))
+        assertEquals(oct31.minusDays(29)..oct31, FocusHistoryDatePreset.LAST_30_DAYS.range(oct31))
+        assertEquals(LocalDate.of(2026, 1, 1)..oct31, FocusHistoryDatePreset.THIS_YEAR.range(oct31))
+    }
+
+    @Test
     fun daysWithSessions_includesEveryDayTouched() {
         assertEquals(
             setOf(oct29, oct30, oct31),
