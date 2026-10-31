@@ -35,6 +35,7 @@ import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.stats.SectionHeader
+import io.github.benji377.timety.ui.components.stats.TagBreakdownBars
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.utils.quantityString
@@ -44,13 +45,15 @@ import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
+import io.github.benji377.timety.util.stats.TagStats
 import io.github.benji377.timety.util.tag.TagFilter
 import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * Focus session statistics: a 24-hour clock of the selected day's sessions, a session list,
- * distraction log, weekly volume chart, and an all-time breakdown by target type.
+ * Focus session statistics: a year heatmap, a 24-hour clock of the selected day's sessions, a
+ * session list, distraction log, weekly volume and time per tag, and an all-time breakdown by
+ * target type. The tag filter applies to all of them.
  */
 @Composable
 fun FocusStatsScreen(
@@ -123,7 +126,15 @@ fun FocusStatsScreen(
             .padding(AppTheme.spaceLarge)
     ) {
         item {
-            FocusHeatmap(sessions)
+            TagFilterRow(
+                tags = usedTags,
+                selectedIds = activeTagIds,
+                onSelectionChange = { selectedTagIds = it },
+                contentPadding = PaddingValues(0.dp),
+            )
+            if (usedTags.isNotEmpty()) Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
+
+            FocusHeatmap(filteredSessions)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
             WeekNavigator(
@@ -134,14 +145,6 @@ fun FocusStatsScreen(
                 },
             )
             Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
-
-            TagFilterRow(
-                tags = usedTags,
-                selectedIds = activeTagIds,
-                onSelectionChange = { selectedTagIds = it },
-                contentPadding = PaddingValues(0.dp),
-            )
-            if (usedTags.isNotEmpty()) Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
 
             SectionHeader(
                 stringResource(R.string.focusStatsSectionClockTitle),
@@ -260,10 +263,29 @@ fun FocusStatsScreen(
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
-            // Deliberately unfiltered: this section is an all-time summary. Sessions linked to
-            // anything but a tag carry no tagId, so applying the tag filter here would
-            // zero out their bars and make the breakdown look broken.
-            TargetBreakdownSection(sessions)
+            SectionHeader(
+                stringResource(R.string.focusStatsSectionTagTimeTitle),
+                stringResource(R.string.focusStatsSectionTagTimeSubtitle),
+            )
+            Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+            val tagMinutes = remember(filteredSessions, sessionTags, startOfWeek) {
+                TagStats.minutesByTag(filteredSessions, sessionTags, startOfWeek, endOfWeek, zone)
+            }
+            if (tagMinutes.isEmpty) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = AppTheme.spaceXLarge),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(R.string.focusStatsSectionTagTimeEmpty))
+                }
+            } else {
+                TagBreakdownBars(tagMinutes) { AppDateFormatUtils.formatMinutesCompact(it) }
+            }
+            Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
+
+            TargetBreakdownSection(filteredSessions, sessionTags)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
         }
     }

@@ -33,6 +33,7 @@ import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.color
 import io.github.benji377.timety.data.model.focus.icon
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.components.stats.SectionHeader
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ChartTeal
@@ -61,11 +62,20 @@ private val FocusTargetType.chartColor: Color
     get() = if (this == FocusTargetType.RECURRING_TASK) ChartTeal else color
 
 @Composable
-internal fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
-    val totals = remember(sessions) {
-        sessions.groupBy { it.targetType }
+internal fun TargetBreakdownSection(
+    sessions: List<FocusSessionEntity>,
+    sessionTags: Map<String, List<TagEntity>>,
+) {
+    // TAG also covers sessions with nothing selected, which get their own row instead of counting
+    // as tagged.
+    val (noTarget, targeted) = remember(sessions, sessionTags) {
+        sessions.partition { it.targetType == FocusTargetType.TAG && sessionTags[it.id].isNullOrEmpty() }
+    }
+    val totals = remember(targeted) {
+        targeted.groupBy { it.targetType }
             .mapValues { (_, typed) -> typed.sumOf { it.totalSecondsFocused / 60 } }
     }
+    val noTargetMinutes = remember(noTarget) { noTarget.sumOf { it.totalSecondsFocused / 60 } }
 
     val stats = FocusTargetType.entries.map { type ->
         TargetTypeStat(
@@ -74,7 +84,14 @@ internal fun TargetBreakdownSection(sessions: List<FocusSessionEntity>) {
             type.icon,
             totals[type] ?: 0
         )
-    }
+    } + listOfNotNull(
+        if (noTargetMinutes > 0) TargetTypeStat(
+            stringResource(R.string.focusTargetEmpty),
+            MaterialTheme.colorScheme.outline,
+            FocusTargetType.TAG.icon,
+            noTargetMinutes,
+        ) else null
+    )
     val totalMinutes = stats.sumOf { it.minutes }
 
     Column {

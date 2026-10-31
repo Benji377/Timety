@@ -52,8 +52,6 @@ import java.util.Locale
 
 // Trailing-365-day contribution grid, GitHub-style: 53 Monday-start week columns of 7 day cells,
 // a fixed weekday gutter on the left, 3-letter month labels on top, and a Less→More legend below.
-// Deliberately fed the unfiltered session list (like TargetBreakdownSection) - it's a whole-year
-// overview, not scoped to the tag filter.
 @Composable
 internal fun FocusHeatmap(sessions: List<FocusSessionEntity>) {
     val locale = remember { Locale.getDefault() }

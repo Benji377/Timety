@@ -132,6 +132,9 @@
     <string name="focusStatsSectionSessionsTitle">Focus Sessions</string>
     <string name="focusStatsSectionTargetBreakdownSubtitle">Tagged sessions, task-linked sessions, and habit-linked sessions</string>
     <string name="focusStatsSectionTargetBreakdownTitle">Focus by Target Type</string>
+    <string name="focusStatsSectionTagTimeEmpty">No focus time in this week</string>
+    <string name="focusStatsSectionTagTimeSubtitle">Selected week. Sessions with several tags count under each</string>
+    <string name="focusStatsSectionTagTimeTitle">Time by Tag</string>
     <string name="focusStatsSectionVolumeSubtitle">Total focus minutes per day</string>
     <string name="focusStatsSectionVolumeTitle">Weekly Focus Volume</string>
     <string name="focusTagsDialogContentDelete">Are you sure you want to delete \"%1$s\"?</string>
@@ -338,6 +341,9 @@
     <string name="taskStatsCompleted">Completed</string>
     <string name="taskStatsCompletedDaily">Total tasks completed per day</string>
     <string name="taskStatsCreated">Created</string>
+    <string name="taskStatsTagsEmpty">No tags used yet</string>
+    <string name="taskStatsTagsSubtitle">All time. Tasks with several tags count under each</string>
+    <string name="taskStatsTagsTitle">Tasks by Tag</string>
     <string name="taskStatsDistribution">All-Time Distribution</string>
     <string name="taskStatsDistributionSubtitle">Task categories across your whole workspace</string>
     <string name="taskStatsEmpty">No data to display yet</string>
