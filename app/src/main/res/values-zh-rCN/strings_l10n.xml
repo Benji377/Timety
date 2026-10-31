@@ -70,6 +70,36 @@
     <string name="focusDialogSessionResetTitle">重置专注计时吗？</string>
     <string name="focusDialogSessionStopContent">计时器已暂停。确认以保存当前记录，或者取消以继续计时。</string>
     <string name="focusDialogSessionStopTitle">结束专注计时吗？</string>
+    <string name="focusHistoryTitle">专注历史</string>
+    <string name="focusHistorySearchHint">搜索专注记录</string>
+    <string name="focusHistorySearchClear">清除搜索</string>
+    <string name="focusHistoryChipDate">日期</string>
+    <string name="focusHistoryChipTags">标签</string>
+    <string name="focusHistoryChipTagsCount">标签 (%1$d)</string>
+    <string name="focusHistoryChipTarget">目标</string>
+    <string name="focusHistoryChipMode">模式</string>
+    <string name="focusHistorySortTitle">排序方式</string>
+    <string name="focusHistorySortNewest">最新优先</string>
+    <string name="focusHistorySortOldest">最早优先</string>
+    <string name="focusHistorySortLongest">最长优先</string>
+    <string name="focusHistoryDateAllTime">全部时间</string>
+    <string name="focusHistoryDateLast7Days">最近 7 天</string>
+    <string name="focusHistoryDateLast30Days">最近 30 天</string>
+    <string name="focusHistoryDateThisYear">今年</string>
+    <string name="focusHistoryDateRange">%1$s - %2$s</string>
+    <string name="focusHistoryDateHint">选择一天，或再点一天以选择范围。带下划线的日期有专注记录。</string>
+    <string name="focusHistoryDateClear">清除</string>
+    <string name="focusHistoryDateApply">应用</string>
+    <string name="focusHistoryToday">今天</string>
+    <string name="focusHistoryEmpty">暂无专注记录</string>
+    <string name="focusHistoryNoResults">没有符合这些筛选条件的专注记录</string>
+    <string name="focusHistoryClearFilters">清除筛选</string>
+    <plurals name="focusHistorySummary">
+        <item quantity="other">%1$d 次专注，%2$s</item>
+    </plurals>
+    <plurals name="focusHistoryDistractions">
+        <item quantity="other">%1$d 次分心</item>
+    </plurals>
     <string name="focusLabelDefault">专注</string>
     <string name="focusLabelRest">休息</string>
     <string name="focusLabelSetTime">设置时间</string>
@@ -305,6 +335,7 @@
     <string name="calendarLabelFocusOngoing">进行中</string>
     <string name="calendarLabelSelect">点击日期查看详情</string>
     <string name="calendarMonthlyReportTitle">每月报告</string>
+    <string name="calendarYearlyReportTitle">每年报告</string>
     <string name="calendarReportComparedHint">变化对比的是 %1$s。</string>
     <string name="calendarReportFocusSessions">专注时段</string>
     <string name="calendarReportFocusTime">专注时长</string>
@@ -322,6 +353,96 @@
     <string name="calendarWeekSummaryDescription">已完成任务：%1$d，习惯打卡：%2$d，专注时长：%3$s</string>
     <string name="calendarWeeklyReportTitle">每周报告</string>
     <string name="statsLabelProductivity">生产力协同</string>
+    <string name="statsPageTime">时间</string>
+    <string name="statsPeriodWeek">周</string>
+    <string name="statsPeriodMonth">月</string>
+    <string name="statsPeriodYear">年</string>
+    <string name="statsSectionToday">今天</string>
+    <string name="statsSectionThisWeek">本周</string>
+    <string name="statsSynergyHint">最近 7 天。拖动或点击某一天可查看其数据。</string>
+    <string name="statsTileTasksDone">已完成任务</string>
+    <string name="statsTileFocus">专注</string>
+    <string name="statsTileFocusGoal">专注目标</string>
+    <string name="statsCompareRunningWeek">与上周同期相比 %1$s</string>
+    <string name="statsCompareRunningMonth">与上月同期相比 %1$s</string>
+    <string name="statsCompareRunningYear">与去年同期相比 %1$s</string>
+    <string name="statsCompareFinishedWeek">与前一周相比 %1$s</string>
+    <string name="statsCompareFinishedMonth">与前一个月相比 %1$s</string>
+    <string name="statsCompareFinishedYear">与前一年相比 %1$s</string>
+    <string name="statsRowTime">专注 %1$s</string>
+    <string name="statsRowTimeMore">专注 %1$s，增加 %2$d%%</string>
+    <string name="statsRowTimeLess">专注 %1$s，减少 %2$d%%</string>
+    <string name="statsRowTasksDue">%1$s，%2$d%% 按期完成</string>
+    <string name="statsRowHabits">预期打卡的 %1$d%%</string>
+    <string name="statsPagePatterns">规律</string>
+    <string name="statsRowGoals">%1$d 个进度正常，%2$d 个落后</string>
+    <string name="statsRowGoalsNone">没有进行中的目标</string>
+    <string name="statsRowPatternsNone">数据尚不足</string>
+    <string name="statsHabitsRateCaption">预期打卡</string>
+    <string name="statsYourHabits">你的习惯</string>
+    <string name="statsHabitRow">%1$d / %2$d。连续 %3$s，最佳 %4$d。</string>
+    <string name="statsHabitRowNoRate">连续 %1$s，最佳 %2$d。</string>
+    <plurals name="statsCheckIns">
+        <item quantity="other">%1$d 次打卡</item>
+    </plurals>
+    <plurals name="statsStreakDays">
+        <item quantity="other">%1$d 天</item>
+    </plurals>
+    <plurals name="statsStreakWeeks">
+        <item quantity="other">%1$d 周</item>
+    </plurals>
+    <plurals name="statsStreakMonths">
+        <item quantity="other">%1$d 个月</item>
+    </plurals>
+    <string name="statsGoalsActive">进行中</string>
+    <string name="statsGoalsBehind">落后</string>
+    <string name="statsGoalsCompleted">已完成</string>
+    <string name="statsGoalsPaceHint">标记显示按稳定进度今天应达到的位置。</string>
+    <string name="statsGoalAhead">超前。</string>
+    <string name="statsGoalOnPace">进度正常。</string>
+    <string name="statsGoalBehind">落后。</string>
+    <string name="statsGoalOverdue">已逾期。</string>
+    <string name="statsGoalDue">截止日期：%1$s。</string>
+    <string name="statsGoalWasDue">原定截止日期：%1$s。</string>
+    <string name="statsGoalProjected">按此进度，预计在 %1$s 前后完成。</string>
+    <string name="statsGoalProgress">%1$d / %2$d %3$s</string>
+    <string name="statsGoalFinishedOnDeadline">于 %1$s 完成，正好在截止日期</string>
+    <plurals name="statsGoalFinishedEarly">
+        <item quantity="other">于 %1$s 完成，提前 %2$d 天</item>
+    </plurals>
+    <plurals name="statsGoalFinishedLate">
+        <item quantity="other">于 %1$s 完成，晚了 %2$d 天</item>
+    </plurals>
+    <string name="statsPatternsWindow">基于最近 %1$d 周</string>
+    <string name="statsPatternsEmpty">最近 %1$d 周的数据充足后，规律将显示在这里。</string>
+    <string name="statsPatternPeakLabel">专注高峰时段</string>
+    <string name="statsPatternPeakValue">%1$s，%2$s</string>
+    <string name="statsPatternBusiestLabel">任务最多的一天</string>
+    <string name="statsPatternDistractedLabel">通常分心于</string>
+    <string name="statsRowPeak">专注高峰：%1$s</string>
+    <string name="statsPatternsGrid">你何时专注</string>
+    <string name="statsPatternsGridHint">颜色越深表示分钟数越多</string>
+    <string name="statsPatternsByWeekday">按星期</string>
+    <string name="statsPatternsByWeekdayHint">每日平均</string>
+    <string name="statsPatternsHabitTiming">你何时打卡习惯</string>
+    <string name="statsPatternsByMood">按心情查看专注</string>
+    <string name="statsPatternsByMoodHint">%1$d 个已评分日的平均值</string>
+    <string name="statsBarReadout">%1$s：%2$s</string>
+    <string name="statsTasksBarReadout">%1$s：完成 %2$d 个，新建 %3$d 个</string>
+    <string name="statsAvgSession">平均专注时长</string>
+    <string name="statsDaysGoalMet">达标天数</string>
+    <string name="statsDistractions">分心</string>
+    <string name="statsByTag">按标签</string>
+    <string name="statsByTagSessionsHint">带两个标签的专注记录会同时计入这两个标签。</string>
+    <string name="statsByTagTasksHint">带两个标签的任务会同时计入这两个标签。</string>
+    <string name="statsByTarget">按目标</string>
+    <string name="statsDoneByDue">按期完成</string>
+    <string name="statsTimeToFinish">典型完成时间</string>
+    <string name="statsCalibrationHint">全部时间。按任务大小统计的平均专注时间，仅计入用作专注目标的任务</string>
+    <string name="statsDaysValue">%1$s 天</string>
+    <plurals name="statsTasksDone">
+        <item quantity="other">已完成 %1$d 个</item>
+    </plurals>
     <string name="statsTitle">数据洞察 &amp; 与统计</string>
     <string name="settingsDialogUnitDays">天</string>
     <string name="settingsLabelBuiltBy">由 Benji377 开发</string>
@@ -388,7 +509,10 @@
     <string name="settingsPageAboutSummary">版本、支持与源代码</string>
     <string name="settingsPageAdvancedSummary">专家选项，例如位置搜索 API</string>
     <string name="settingsPageDataBackupSummary">导出与恢复备份</string>
+    <string name="settingsPageFocusSummary">每日目标、计时限制与勿扰模式</string>
+    <string name="settingsPageGeneralSummary">主题、问候语、语言、格式与标签</string>
     <string name="settingsPageNotificationsSummary">提醒时间与后台活动</string>
+    <string name="settingsPageTasksSummary">即将到来的任务时间范围</string>
     <string name="settingsSectionAbout">关于</string>
     <string name="settingsSectionAdvanced">高级</string>
     <string name="settingsSectionAppearance">外观</string>
@@ -474,6 +598,17 @@
     <string name="wrapUpStatHabitsLabel">习惯完成数</string>
     <string name="wrapUpStatTasksLabel">完成任务数</string>
     <string name="wrapUpUsingSince">自 %1$s 起使用 Timety</string>
+    <string name="tagFilterNoMatch">没有符合这些标签的内容</string>
+    <string name="tagNameTaken">已存在同名标签</string>
+    <string name="tagPickerChoose">选择标签</string>
+    <string name="tagsEmpty">暂无标签。点击上方按钮添加一个。</string>
+    <string name="tagUsageCountZero">尚未使用</string>
+    <plurals name="tagUsageCount">
+        <item quantity="other">用于 %d 个项目</item>
+    </plurals>
+    <plurals name="tagDeleteContent">
+        <item quantity="other">删除“%1$s”？它将从 %2$d 个项目中移除，其中的专注记录时间将变为未标记。</item>
+    </plurals>
     <plurals name="settingsTagsCount">
         <item quantity="other">%d 个标签</item>
     </plurals>
