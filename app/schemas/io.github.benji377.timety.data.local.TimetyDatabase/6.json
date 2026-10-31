@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "0e07f7b12e923a459dde5b6af98f69d8",
+    "identityHash": "ede0061ec6cbae71b819c3cdb8234d10",
     "entities": [
       {
         "tableName": "tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `dueDate` INTEGER, `location` TEXT NOT NULL, `priority` TEXT NOT NULL, `category` TEXT NOT NULL, `size` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, `completedAt` INTEGER, `createdAt` INTEGER NOT NULL, `reminders` TEXT NOT NULL, `place` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `dueDate` INTEGER, `location` TEXT NOT NULL, `priority` TEXT NOT NULL, `size` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, `completedAt` INTEGER, `createdAt` INTEGER NOT NULL, `reminders` TEXT NOT NULL, `place` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -40,12 +40,6 @@
           {
             "fieldPath": "priority",
             "columnName": "priority",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "category",
-            "columnName": "category",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -158,49 +152,8 @@
         ]
       },
       {
-        "tableName": "task_categories",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `colorValue` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "colorValue",
-            "columnName": "colorValue",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_task_categories_name",
-            "unique": true,
-            "columnNames": [
-              "name"
-            ],
-            "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_task_categories_name` ON `${TABLE_NAME}` (`name`)"
-          }
-        ]
-      },
-      {
         "tableName": "recurring_tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `category` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -217,12 +170,6 @@
           {
             "fieldPath": "description",
             "columnName": "description",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "category",
-            "columnName": "category",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -458,7 +405,7 @@
       },
       {
         "tableName": "focus_sessions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `modeId` TEXT NOT NULL, `startTime` INTEGER NOT NULL, `endTime` INTEGER, `totalSecondsFocused` INTEGER NOT NULL, `isCompleted` INTEGER NOT NULL, `tagId` TEXT, `targetType` TEXT NOT NULL, `targetId` TEXT, `targetLabel` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`modeId`) REFERENCES `focus_modes`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `modeId` TEXT NOT NULL, `startTime` INTEGER NOT NULL, `endTime` INTEGER, `totalSecondsFocused` INTEGER NOT NULL, `isCompleted` INTEGER NOT NULL, `targetType` TEXT NOT NULL, `targetId` TEXT, `targetLabel` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`modeId`) REFERENCES `focus_modes`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT )",
         "fields": [
           {
             "fieldPath": "id",
@@ -494,11 +441,6 @@
             "columnName": "isCompleted",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "tagId",
-            "columnName": "tagId",
-            "affinity": "TEXT"
           },
           {
             "fieldPath": "targetType",
@@ -613,36 +555,6 @@
             ]
           }
         ]
-      },
-      {
-        "tableName": "focus_tags",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `colorValue` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "colorValue",
-            "columnName": "colorValue",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        }
       },
       {
         "tableName": "habits",
@@ -1377,7 +1289,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0e07f7b12e923a459dde5b6af98f69d8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ede0061ec6cbae71b819c3cdb8234d10')"
     ]
   }
 }

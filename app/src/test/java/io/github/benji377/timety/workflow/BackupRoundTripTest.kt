@@ -9,7 +9,6 @@ import io.github.benji377.timety.data.model.focus.DistractionType
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
@@ -39,6 +38,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -135,7 +135,6 @@ class BackupRoundTripTest {
             seeded.phase.copy(id = 0),
             target.focusRepository.getPhasesForMode(seeded.mode.id).first().single().copy(id = 0),
         )
-        assertEquals("focus tag", seeded.tag, target.focusRepository.allTags.first().single())
         assertEquals(
             "focus sessions",
             listOf(seeded.session, seeded.goalSession),
@@ -324,6 +323,20 @@ class BackupRoundTripTest {
         val full = JSONObject(exportFrom(source).readText())
         full.remove("tags")
         full.put("schemaVersion", 1)
+        full.getJSONArray("tasks").getJSONObject(0).put("category", "Work")
+        full.getJSONArray("recurringTasks").getJSONObject(0).put("category", "Home")
+        full.put("taskCategories", JSONArray().put(legacyTag("c1", "Work")))
+        val focus = full.getJSONObject("focus")
+        focus.put("tags", JSONArray().put(legacyTag("tag-1", "Study")))
+        val sessions = focus.getJSONArray("sessions")
+        sessions.put(
+            JSONObject(sessions.getJSONObject(0).toString())
+                .put("id", "session-3")
+                .put("tagId", "tag-1")
+                .put("targetType", FocusTargetType.TAG.name)
+                .put("targetId", "tag-1")
+                .put("targetLabel", "Study")
+        )
 
         target.backupService.importFromJson(full).getOrThrow()
 
@@ -337,7 +350,27 @@ class BackupRoundTripTest {
         // A session on a task takes the task's category; a session on a goal has no tag.
         assertEquals(listOf("Work"), tagNames(TaggedItemType.SESSION, "session-1"))
         assertEquals(emptyList<String>(), tagNames(TaggedItemType.SESSION, "session-2"))
+        // A tag session keeps its tag, but the tag is no longer its target.
+        assertEquals(listOf("Study"), tagNames(TaggedItemType.SESSION, "session-3"))
+        val tagSession = target.focusRepository.allSessions.first().single { it.id == "session-3" }
+        assertEquals(null, tagSession.targetId)
+        assertEquals(null, tagSession.targetLabel)
     }
+
+    @Test
+    fun export_leavesOutCategoriesAndFocusTags() = runBlocking {
+        seedOneOfEverything(source)
+        val full = JSONObject(exportFrom(source).readText())
+
+        assertFalse(full.has("taskCategories"))
+        assertFalse(full.getJSONObject("focus").has("tags"))
+        assertFalse(full.getJSONArray("tasks").getJSONObject(0).has("category"))
+        assertFalse(full.getJSONArray("recurringTasks").getJSONObject(0).has("category"))
+        assertFalse(full.getJSONObject("focus").getJSONArray("sessions").getJSONObject(0).has("tagId"))
+    }
+
+    private fun legacyTag(id: String, name: String) =
+        JSONObject().put("id", id).put("name", name).put("colorValue", 0xFFFF0000.toInt())
 
     private fun Uri.readText(): String =
         context.contentResolver.openInputStream(this)!!.use { it.reader().readText() }
@@ -398,7 +431,6 @@ class BackupRoundTripTest {
                 longitude = 11.35478,
             ),
             priority = Priority.VERY_HIGH,
-            category = "Work",
             size = TaskSize.LARGE,
             isCompleted = true,
             completedAt = now,
@@ -413,7 +445,6 @@ class BackupRoundTripTest {
             id = "recurring-1",
             title = "Pay rent",
             description = "Standing order",
-            category = "Home",
             dueDate = now.plus(5, ChronoUnit.DAYS),
             unit = RecurrenceUnit.MONTH,
             interval = 2,
@@ -461,9 +492,6 @@ class BackupRoundTripTest {
         )
         container.focusRepository.insertModeWithPhases(mode, listOf(phase))
 
-        val tag = FocusTagEntity("tag-1", "Study", 0xFFFF0000.toInt())
-        container.focusRepository.insertTag(tag)
-
         val session = FocusSessionEntity(
             id = "session-1",
             modeId = mode.id,
@@ -471,7 +499,6 @@ class BackupRoundTripTest {
             endTime = now,
             totalSecondsFocused = 1500,
             isCompleted = true,
-            tagId = tag.id,
             targetType = FocusTargetType.TASK,
             targetId = task.id,
             targetLabel = task.title,
@@ -504,7 +531,7 @@ class BackupRoundTripTest {
 
         return Seeded(
             habit, habitCompletion, quickHabit, task, subtask, recurringTask, occurrence,
-            goal, goalEntry, dayRating, profile, mode, phase, tag, session, goalSession,
+            goal, goalEntry, dayRating, profile, mode, phase, session, goalSession,
             distraction,
         )
     }
@@ -523,7 +550,6 @@ class BackupRoundTripTest {
         val profile: UserProfileEntity,
         val mode: FocusModeEntity,
         val phase: SessionPhaseEntity,
-        val tag: FocusTagEntity,
         val session: FocusSessionEntity,
         val goalSession: FocusSessionEntity,
         val distraction: DistractionEntity,

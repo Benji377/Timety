@@ -2,7 +2,6 @@ package io.github.benji377.timety.data.repository
 
 import io.github.benji377.timety.data.local.dao.TaskDao
 import io.github.benji377.timety.data.model.task.SubtaskEntity
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.data.model.task.withSortedSubtasks
@@ -11,15 +10,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-/** Repository for tasks, task categories, and subtasks, wrapping [TaskDao] with IO dispatching. */
+/** Repository for tasks and subtasks, wrapping [TaskDao] with IO dispatching. */
 class TaskRepository(
     private val taskDao: TaskDao
 ) {
     val allTasks: Flow<List<TaskWithSubtasks>> =
         taskDao.getAllTasks().map { tasks -> tasks.map { it.withSortedSubtasks() } }
-
-    val allCategories: Flow<List<TaskCategoryEntity>> =
-        taskDao.getAllCategories()
 
     fun observeTask(id: String): Flow<TaskWithSubtasks?> =
         taskDao.observeTaskWithSubtasks(id).map { it?.withSortedSubtasks() }
@@ -47,19 +43,6 @@ class TaskRepository(
 
     suspend fun clearAll() = withContext(Dispatchers.IO) {
         taskDao.clearAll()
-    }
-
-    suspend fun createCategory(category: TaskCategoryEntity) = withContext(Dispatchers.IO) {
-        taskDao.insertCategoryIfAbsent(category)
-    }
-
-    suspend fun updateCategory(oldName: String, updated: TaskCategoryEntity) =
-        withContext(Dispatchers.IO) {
-            taskDao.updateCategoryAndTasks(oldName, updated)
-        }
-
-    suspend fun deleteCategory(category: TaskCategoryEntity) = withContext(Dispatchers.IO) {
-        taskDao.deleteCategoryAndClearTasks(category)
     }
 
     suspend fun insertSubtask(subtask: SubtaskEntity) = withContext(Dispatchers.IO) {

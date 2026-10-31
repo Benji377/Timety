@@ -134,17 +134,12 @@
     <string name="focusStatsSectionVolumeSubtitle">每日专注总分钟数</string>
     <string name="focusStatsSectionVolumeTitle">每周专注总量</string>
     <string name="focusTagsDialogContentDelete">您确定要删除 \"%1$s\" 吗？</string>
-    <string name="focusTagsDialogLabelHint">标签名称（例如阅读）</string>
-    <string name="focusTagsDialogLabelName">标签名称</string>
-    <string name="focusTagsDialogTitleAdd">添加新标签</string>
     <string name="focusTagsDialogTitleDelete">删除标签？</string>
     <string name="focusTagsLabelAdd">添加新标签</string>
-    <string name="focusTagsLabelAll">所有标签</string>
     <string name="focusTagsLabelColor">选择颜色</string>
     <string name="focusTagsLabelEdit">编辑标签</string>
     <string name="focusTagsLabelEmpty">暂无标签</string>
     <string name="focusTagsLabelName">标签名称</string>
-    <string name="focusTagsTitle">专注标签</string>
     <string name="focusTargetEmpty">无目标</string>
     <string name="focusTargetUntagged">未标记</string>
     <string name="focusTitle">专注</string>
@@ -261,11 +256,6 @@
     <string name="taskDeleteTitle">删除任务</string>
     <string name="taskFocusLogSnackbar">已关联专注记录</string>
     <string name="taskFocusLogTitle">记录专注时间</string>
-    <string name="taskDetailsLabelCategory">分类</string>
-    <string name="taskDetailsLabelCategoryAddNew">添加新分类</string>
-    <string name="taskDetailsLabelCategoryEmpty">无</string>
-    <string name="taskDetailsLabelCategoryNewName">新分类名称</string>
-    <string name="taskDetailsLabelCategorySelect">选择分类</string>
     <string name="taskDetailsLabelDescription">描述</string>
     <string name="taskDetailsLabelDueDate">截止：%1$s %2$s</string>
     <string name="taskDetailsLabelDueDateSet">设置截止日期</string>
@@ -303,7 +293,6 @@
     <string name="taskListSectionUpcoming">待办</string>
     <string name="taskListSortAlphabetical">按字母顺序</string>
     <string name="taskListSortAscending">升序</string>
-    <string name="taskListSortCategory">按分类</string>
     <string name="taskListSortDescending">降序</string>
     <string name="taskListSortDueDate">按截止日期</string>
     <string name="taskListSortPriority">按优先级</string>
@@ -328,13 +317,9 @@
     <string name="taskStatsCalibrationOrderingViolation">您的 %1$s 类任务比 %2$s 类任务耗时更短</string>
     <string name="taskStatsCalibrationSubtitle">按任务大小划分的平均专注时间，仅统计作为专注目标的任务</string>
     <string name="taskStatsCalibrationTitle">预估校准</string>
-    <string name="taskStatsCategoryUncategorized">未分类</string>
-    <string name="taskStatsCategoryUnused">未使用任何分类</string>
     <string name="taskStatsCompleted">已完成</string>
     <string name="taskStatsCompletedDaily">每日完成任务总数</string>
     <string name="taskStatsCreated">已创建</string>
-    <string name="taskStatsDistribution">历史分布</string>
-    <string name="taskStatsDistributionSubtitle">您工作区中的任务分类分布</string>
     <string name="taskStatsEmpty">暂无数据可显示</string>
     <string name="taskStatsProductivity">生产力</string>
     <string name="taskStatsVelocity">任务完成速度</string>
@@ -378,7 +363,6 @@
     <string name="statsTitle">数据洞察 &amp; 与统计</string>
     <string name="settingsDialogUnitDays">天</string>
     <string name="settingsLabelBuiltBy">由 Benji377 开发</string>
-    <string name="settingsLabelCategories">任务分类</string>
     <string name="settingsDndPermissionDialogContent">Timety 需要“勿扰模式”权限，以便在专注时段静音通知。点击后将跳转到系统设置进行授权。</string>
     <string name="settingsDndPermissionDialogTitle">允许“勿扰模式”访问</string>
     <string name="settingsLabelAutoDnd">自动勿扰模式</string>
@@ -428,7 +412,6 @@
     <string name="settingsLabelShowGreetingSubtitle">主屏幕顶部的问候语与激励语</string>
     <string name="settingsLabelSourceCode">源代码</string>
     <string name="settingsLabelSourceCodeSubtitle">GitHub 仓库</string>
-    <string name="settingsLabelTags">专注标签</string>
     <string name="settingsLabelTheme">应用主题</string>
     <string name="settingsLabelThemeDark">深色</string>
     <string name="settingsLabelThemeLight">浅色</string>
@@ -443,10 +426,7 @@
     <string name="settingsPageAboutSummary">版本、支持与源代码</string>
     <string name="settingsPageAdvancedSummary">专家选项，例如位置搜索 API</string>
     <string name="settingsPageDataBackupSummary">导出与恢复备份</string>
-    <string name="settingsPageFocusSummary">每日目标、计时上限、标签与勿扰模式</string>
-    <string name="settingsPageGeneralSummary">主题、问候语、语言与格式</string>
     <string name="settingsPageNotificationsSummary">提醒时间与后台活动</string>
-    <string name="settingsPageTasksSummary">即将到来的任务范围与分类</string>
     <string name="settingsSectionAbout">关于</string>
     <string name="settingsSectionAdvanced">高级</string>
     <string name="settingsSectionAppearance">外观</string>
@@ -532,24 +512,8 @@
     <string name="wrapUpStatHabitsLabel">习惯完成数</string>
     <string name="wrapUpStatTasksLabel">完成任务数</string>
     <string name="wrapUpUsingSince">自 %1$s 起使用 Timety</string>
-    <string name="categoryAddLabel">添加分类</string>
-    <string name="categoryColorLabel">颜色</string>
-    <string name="categoryDeleteContent">确定要删除 \"%1$s\" 吗？该分类下的任务将变为未分类。</string>
-    <string name="categoryDeleteTitle">删除分类？</string>
-    <string name="categoryEditTitle">编辑分类</string>
-    <string name="categoryEmpty">暂无分类。点击上方按钮添加。</string>
-    <string name="categoryNameLabel">分类名称</string>
-    <string name="categoryNameTaken">已存在同名分类</string>
-    <string name="categoryTaskCountZero">暂无任务</string>
-    <plurals name="categoryTaskCount">
-        <item quantity="other">%d 个任务</item>
-    </plurals>
-    <string name="categoryTitle">分类</string>
     <plurals name="settingsTagsCount">
         <item quantity="other">%d 个标签</item>
-    </plurals>
-    <plurals name="settingsCategoriesCount">
-        <item quantity="other">%d 个分类</item>
     </plurals>
     <string name="dialogTimeMachineDuration">时长</string>
     <string name="dialogTimeMachineEnds">结束于 %1$s</string>

@@ -505,7 +505,6 @@ class FocusViewModel(
     private fun FocusSessionEntity.withTarget(target: FocusTargetSelection?): FocusSessionEntity {
         val item = target?.takeIf { it.type != FocusTargetType.TAG }
         return copy(
-            tagId = null,
             targetType = item?.type ?: FocusTargetType.TAG,
             targetId = item?.id,
             targetLabel = item?.label,

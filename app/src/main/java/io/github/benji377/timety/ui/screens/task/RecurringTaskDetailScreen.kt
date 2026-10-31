@@ -201,7 +201,6 @@ fun RecurringTaskDetailScreen(
             id = recurringTaskId ?: newItemId,
             title = trimmedTitle,
             description = description.trim(),
-            category = existingTask?.category ?: "",
             dueDate = due,
             timeOfDayMinutes = dueTimeMinutes ?: due.atZone(zone).let { it.hour * 60 + it.minute },
             unit = unit,

@@ -19,7 +19,8 @@ import androidx.test.rule.GrantPermissionRule
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
+import io.github.benji377.timety.data.model.tag.TagEntity
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
@@ -278,7 +279,6 @@ class ScreenshotTest {
                 location = "Home office",
                 priority = Priority.HIGH,
                 size = TaskSize.LARGE,
-                category = "Work",
                 createdAt = at(-2, 0),
             )
         )
@@ -301,7 +301,6 @@ class ScreenshotTest {
                 location = "Inbox",
                 priority = Priority.VERY_HIGH,
                 size = TaskSize.SMALL,
-                category = "Communication",
                 createdAt = at(-1, 0),
                 reminders = listOf(at(0, 9, 30)),
             )
@@ -313,7 +312,6 @@ class ScreenshotTest {
                 description = "Collect highlights and blockers for Friday.",
                 dueDate = at(2, 0),
                 location = "Meeting room",
-                category = "Work",
                 createdAt = at(0, 0),
             )
         )
@@ -326,7 +324,6 @@ class ScreenshotTest {
                 location = "Laptop",
                 priority = Priority.LOW,
                 size = TaskSize.SMALL,
-                category = "Personal",
                 isCompleted = true,
                 completedAt = at(0, -20),
                 createdAt = at(-4, 0),
@@ -382,11 +379,6 @@ class ScreenshotTest {
             },
         )
 
-        val deepWorkTagId = "tag_deep_work"
-        focus.insertTag(
-            FocusTagEntity(id = deepWorkTagId, name = "Deep Work", colorValue = 0xFF3F51B5.toInt())
-        )
-
         fun pastSession(id: String, modeId: String, start: Instant, end: Instant) =
             FocusSessionEntity(
                 id = id,
@@ -395,10 +387,7 @@ class ScreenshotTest {
                 endTime = end,
                 totalSecondsFocused = (end.epochSecond - start.epochSecond).toInt(),
                 isCompleted = true,
-                tagId = deepWorkTagId,
                 targetType = FocusTargetType.TAG,
-                targetId = deepWorkTagId,
-                targetLabel = "Deep Work",
             )
         focus.insertSession(
             pastSession("session_1", FocusModeEntity.SYSTEM_FLEXIBLE_ID, at(0, 8, 15), at(0, 9, 0))
@@ -411,6 +400,21 @@ class ScreenshotTest {
         )
 
         // --- User profile ---
+        // --- Tags ---
+        val tags = container.tagRepository
+        val work = tags.getOrCreateTag(TagEntity("tag_work", "Work", 0xFF2563EB.toInt()))
+        val communication =
+            tags.getOrCreateTag(TagEntity("tag_communication", "Communication", 0xFF0D9488.toInt()))
+        val personal = tags.getOrCreateTag(TagEntity("tag_personal", "Personal", 0xFFEA580C.toInt()))
+        val deepWork = tags.getOrCreateTag(TagEntity("tag_deep_work", "Deep Work", 0xFF3F51B5.toInt()))
+        tags.setItemTags(TaggedItemType.TASK, "task_proposal", setOf(work.id))
+        tags.setItemTags(TaggedItemType.TASK, "task_client", setOf(communication.id))
+        tags.setItemTags(TaggedItemType.TASK, "task_retro", setOf(work.id))
+        tags.setItemTags(TaggedItemType.TASK, "task_backup", setOf(personal.id))
+        listOf("session_1", "session_2", "session_3").forEach {
+            tags.setItemTags(TaggedItemType.SESSION, it, setOf(deepWork.id))
+        }
+
         container.userRepository.insertUserProfile(
             UserProfileEntity(name = "Bobert", accountCreated = Instant.now())
         )

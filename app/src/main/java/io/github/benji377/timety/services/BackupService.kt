@@ -11,22 +11,18 @@ import androidx.room.withTransaction
 import io.github.benji377.timety.data.local.TimetyDatabase
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.tag.TaggedItemType
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.repository.SettingsRepository
-import io.github.benji377.timety.services.backup.categoryFromBackup
 import io.github.benji377.timety.services.backup.dayRatingFromBackup
 import io.github.benji377.timety.services.backup.goalFromBackup
 import io.github.benji377.timety.services.backup.habitFromBackup
 import io.github.benji377.timety.services.backup.modeFromBackup
 import io.github.benji377.timety.services.backup.modeToBackupJson
-import io.github.benji377.timety.services.backup.newId
 import io.github.benji377.timety.services.backup.objects
 import io.github.benji377.timety.services.backup.profileFromBackup
 import io.github.benji377.timety.services.backup.quickHabitFromBackup
 import io.github.benji377.timety.services.backup.recurringTaskFromBackup
 import io.github.benji377.timety.services.backup.sessionFromBackup
 import io.github.benji377.timety.services.backup.sessionToBackupJson
-import io.github.benji377.timety.services.backup.tagFromBackup
 import io.github.benji377.timety.services.backup.tagsFromBackup
 import io.github.benji377.timety.services.backup.taskFromBackup
 import io.github.benji377.timety.services.backup.toBackupJson
@@ -182,7 +178,6 @@ class BackupService(
             put("tasks", JSONArray(taskDao.getAllTasks().first().map {
                 it.toBackupJson().withTagIds(taskTags, it.task.id)
             }))
-            put("taskCategories", JSONArray(taskDao.getAllCategories().first().map { it.toBackupJson() }))
             val recurringTags = tagIdsByItem(TaggedItemType.RECURRING_TASK)
             put("recurringTasks", JSONArray(recurringTaskDao.getAllWithOccurrences().first().map {
                 it.toBackupJson().withTagIds(recurringTags, it.task.id)
@@ -221,7 +216,6 @@ class BackupService(
         }
         return JSONObject().apply {
             put("modes", JSONArray(modes))
-            put("tags", JSONArray(focusDao.getAllTags().first().map { it.toBackupJson() }))
             put("sessions", JSONArray(sessions))
         }
     }
@@ -257,7 +251,6 @@ class BackupService(
             recurringTaskDao.insert(task)
             occurrences.forEach(recurringTaskDao::insertOccurrence)
         }
-        restoreTaskCategories(json.objects("taskCategories"))
 
         habitDao.clearAll()
         val habitJson = LinkedHashMap<String, JSONObject>()
@@ -307,28 +300,14 @@ class BackupService(
         }
     }
 
-    /** Must run after the tasks and recurring tasks are restored: missing categories are derived from them. */
-    private fun restoreTaskCategories(categories: List<JSONObject>) {
-        taskDao.clearAllCategories()
-        categories.mapNotNull(::categoryFromBackup).forEach(taskDao::insertCategoryIfAbsent)
-        // Backups from before categories carry none: fill the table from the restored tasks.
-        for (name in taskDao.getDistinctTaskCategoryNames()) {
-            taskDao.insertCategoryIfAbsent(
-                TaskCategoryEntity(id = newId(), name = name, colorValue = TaskCategoryEntity.DEFAULT_COLOR_VALUE)
-            )
-        }
-    }
-
     /** Returns each restored session's JSON by its id. */
     private fun restoreFocus(focusJson: JSONObject): Map<String, JSONObject> {
         focusDao.clearAllSessions()
         focusDao.clearAllModes()
-        focusDao.clearAllTags()
         focusJson.objects("modes").map(::modeFromBackup).forEach { (mode, phases) ->
             focusDao.insertMode(mode)
             if (phases.isNotEmpty()) focusDao.insertPhases(phases)
         }
-        focusJson.objects("tags").map(::tagFromBackup).forEach(focusDao::insertTag)
         val sessionJson = LinkedHashMap<String, JSONObject>()
         focusJson.objects("sessions").forEach { item ->
             val (session, distractions) = sessionFromBackup(item)

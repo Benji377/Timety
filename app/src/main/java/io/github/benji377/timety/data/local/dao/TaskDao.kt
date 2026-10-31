@@ -8,12 +8,11 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import io.github.benji377.timety.data.model.task.SubtaskEntity
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import kotlinx.coroutines.flow.Flow
 
-/** Data access object for tasks, task categories, and subtasks. */
+/** Data access object for tasks and subtasks. */
 @Dao
 interface TaskDao {
     @Transaction
@@ -44,52 +43,6 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks")
     fun clearAll(): Int
-
-    // Categories
-    @Query("SELECT * FROM task_categories ORDER BY name COLLATE NOCASE ASC")
-    fun getAllCategories(): Flow<List<TaskCategoryEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertCategory(category: TaskCategoryEntity)
-
-    // Creation path: an existing category with the same name wins, keeping its color.
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertCategoryIfAbsent(category: TaskCategoryEntity)
-
-    @Delete
-    fun deleteCategory(category: TaskCategoryEntity)
-
-    @Query("DELETE FROM task_categories")
-    fun clearAllCategories()
-
-    // Tasks and recurring tasks share one set of categories.
-    @Query(
-        "SELECT category FROM tasks WHERE category != '' " +
-                "UNION SELECT category FROM recurring_tasks WHERE category != ''"
-    )
-    fun getDistinctTaskCategoryNames(): List<String>
-
-    @Query("UPDATE tasks SET category = :newName WHERE category = :oldName")
-    fun renameTaskCategory(oldName: String, newName: String)
-
-    @Query("UPDATE recurring_tasks SET category = :newName WHERE category = :oldName")
-    fun renameRecurringTaskCategory(oldName: String, newName: String)
-
-    @Transaction
-    fun updateCategoryAndTasks(oldName: String, updated: TaskCategoryEntity) {
-        insertCategory(updated)
-        if (updated.name != oldName) {
-            renameTaskCategory(oldName, updated.name)
-            renameRecurringTaskCategory(oldName, updated.name)
-        }
-    }
-
-    @Transaction
-    fun deleteCategoryAndClearTasks(category: TaskCategoryEntity) {
-        deleteCategory(category)
-        renameTaskCategory(category.name, "")
-        renameRecurringTaskCategory(category.name, "")
-    }
 
     // Subtasks
     @Insert(onConflict = OnConflictStrategy.REPLACE)

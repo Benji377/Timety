@@ -139,17 +139,12 @@
     <string name="focusStatsSectionVolumeSubtitle">Menuc de focus de ndut al di</string>
     <string name="focusStatsSectionVolumeTitle">Volum de focus de l\'ena</string>
     <string name="focusTagsDialogContentDelete">T\'es segur de ulëi scancelé \"%1$s\"?</string>
-    <string name="focusTagsDialogLabelHint">Inuem eticheta (ej. Lejer)</string>
-    <string name="focusTagsDialogLabelName">Inuem eticheta</string>
-    <string name="focusTagsDialogTitleAdd">Njunté nueva eticheta</string>
     <string name="focusTagsDialogTitleDelete">Scancelé eticheta?</string>
     <string name="focusTagsLabelAdd">Njunté nueva eticheta</string>
-    <string name="focusTagsLabelAll">Duta la etichetes</string>
     <string name="focusTagsLabelColor">Cëria ora n culëur</string>
     <string name="focusTagsLabelEdit">Mudé eticheta</string>
     <string name="focusTagsLabelEmpty">Niamò deguna etichetes</string>
     <string name="focusTagsLabelName">Inuem eticheta</string>
-    <string name="focusTagsTitle">Etichetes de focus</string>
     <string name="focusTargetEmpty">Degun travert</string>
     <string name="focusTargetUntagged">Zënza eticheta</string>
     <string name="focusTitle">Focus</string>
@@ -286,11 +281,6 @@
     <string name="taskDeleteTitle">Scancelé ncëria</string>
     <string name="taskFocusLogSnackbar">Sescion de focus liejeda</string>
     <string name="taskFocusLogTitle">Registré tëmp de focus</string>
-    <string name="taskDetailsLabelCategory">Categoria</string>
-    <string name="taskDetailsLabelCategoryAddNew">Njunté nueva categoria</string>
-    <string name="taskDetailsLabelCategoryEmpty">Deguna</string>
-    <string name="taskDetailsLabelCategoryNewName">Inuem dla nueva categoria</string>
-    <string name="taskDetailsLabelCategorySelect">Cëria categoria</string>
     <string name="taskDetailsLabelDescription">Descrizion</string>
     <string name="taskDetailsLabelDueDate">Scadënza: %1$s dala %2$s</string>
     <string name="taskDetailsLabelDueDateSet">Met data de scadenza</string>
@@ -328,7 +318,6 @@
     <string name="taskListSectionUpcoming">Da fé</string>
     <string name="taskListSortAlphabetical">Alfabetich</string>
     <string name="taskListSortAscending">Crescënt</string>
-    <string name="taskListSortCategory">Categoria</string>
     <string name="taskListSortDescending">Mënder</string>
     <string name="taskListSortDueDate">Data de scadënza</string>
     <string name="taskListSortPriority">Priorità</string>
@@ -353,13 +342,9 @@
     <string name="taskStatsCalibrationOrderingViolation">Ti ncëries %1$s tol manco tëmp che %2$s</string>
     <string name="taskStatsCalibrationSubtitle">Tëmp de focus mesan per grandëza de ncëria</string>
     <string name="taskStatsCalibrationTitle">Calibrazion dla stima</string>
-    <string name="taskStatsCategoryUncategorized">Zënza categoria</string>
-    <string name="taskStatsCategoryUnused">Deguna categories nuzedes</string>
     <string name="taskStatsCompleted">Finada</string>
     <string name="taskStatsCompletedDaily">Ncëries finedes de ndut al di</string>
     <string name="taskStatsCreated">Creeda</string>
-    <string name="taskStatsDistribution">Sparnidura dl tëmp de ndut</string>
-    <string name="taskStatsDistributionSubtitle">Categories de ncëries te dut to lëur</string>
     <string name="taskStatsEmpty">Niamò degun dac da mustré</string>
     <string name="taskStatsProductivity">Produtività</string>
     <string name="taskStatsVelocity">Velozità dla ncëries</string>
@@ -403,7 +388,6 @@
     <string name="statsTitle">Dac y Statistiches</string>
     <string name="settingsDialogUnitDays">dis</string>
     <string name="settingsLabelBuiltBy">Fat da Benji377</string>
-    <string name="settingsLabelCategories">Categories ncëries</string>
     <string name="settingsDndPermissionDialogContent">Timety adrova l\'azess \'No sturber\' per chieté la nutificazions.</string>
     <string name="settingsDndPermissionDialogTitle">Zedi l\'azess \'No sturber\'</string>
     <string name="settingsLabelAutoDnd">No sturber automatich</string>
@@ -453,7 +437,6 @@
     <string name="settingsLabelShowGreetingSubtitle">Salut y mutivazion suinsom dl vidrel Cësa</string>
     <string name="settingsLabelSourceCode">Còdesc Sursënt</string>
     <string name="settingsLabelSourceCodeSubtitle">GitHub Repository</string>
-    <string name="settingsLabelTags">Etichetes de focus</string>
     <string name="settingsLabelTheme">Tema</string>
     <string name="settingsLabelThemeDark">Scur</string>
     <string name="settingsLabelThemeLight">Tler</string>
@@ -468,10 +451,7 @@
     <string name="settingsPageAboutSummary">Verscion, sustëni y còdesc sursënt</string>
     <string name="settingsPageAdvancedSummary">Opzions per esperc coche l\'API per crì luelg</string>
     <string name="settingsPageDataBackupSummary">Esporté y ristabilì copies de segurëza</string>
-    <string name="settingsPageFocusSummary">Travert dl di, lemic dl timer, etichetes y No sturber</string>
-    <string name="settingsPageGeneralSummary">Tema, salut, lingaz y formac</string>
     <string name="settingsPageNotificationsSummary">Ëures di lezic y atività tl background</string>
-    <string name="settingsPageTasksSummary">Fënestra dla ncëries proscimes y categories</string>
     <string name="settingsSectionAbout">Nfurmazions</string>
     <string name="settingsSectionAdvanced">Avanzà</string>
     <string name="settingsSectionAppearance">Ududa</string>
@@ -562,24 +542,6 @@
     <string name="wrapUpStatHabitsLabel">Abitudins fates</string>
     <string name="wrapUpStatTasksLabel">Ncëries finedes</string>
     <string name="wrapUpUsingSince">Adurvé Timety da %1$s inant</string>
-    <string name="categoryAddLabel">Njunté nueva categoria</string>
-    <string name="categoryColorLabel">Culëur</string>
-    <string name="categoryDeleteContent">T\'es segur de ulëi scancelé \"%1$s\"? La ncëries cun chësta categoria restarà zënza.</string>
-    <string name="categoryDeleteTitle">Scancelé la categoria?</string>
-    <string name="categoryEditTitle">Mudé categoria</string>
-    <string name="categoryEmpty">Mo deguna categories. Clica sun l buton dassëura per njunté una.</string>
-    <string name="categoryNameLabel">Inuem dla categoria</string>
-    <string name="categoryNameTaken">Na categoria cun chësc inuem esist bele</string>
-    <string name="categoryTaskCountZero">Deguna ncëries</string>
-    <plurals name="categoryTaskCount">
-        <item quantity="zero">1 ncëria</item>
-        <item quantity="one">1 ncëria</item>
-        <item quantity="two">%d ncëries</item>
-        <item quantity="few">%d ncëries</item>
-        <item quantity="many">%d ncëries</item>
-        <item quantity="other">%d ncëries</item>
-    </plurals>
-    <string name="categoryTitle">Categuries</string>
     <plurals name="settingsTagsCount">
         <item quantity="zero">%d etichetes</item>
         <item quantity="one">%d eticheta</item>
@@ -587,14 +549,6 @@
         <item quantity="few">%d etichetes</item>
         <item quantity="many">%d etichetes</item>
         <item quantity="other">%d etichetes</item>
-    </plurals>
-    <plurals name="settingsCategoriesCount">
-        <item quantity="zero">%d categuries</item>
-        <item quantity="one">%d categuria</item>
-        <item quantity="two">%d categuries</item>
-        <item quantity="few">%d categuries</item>
-        <item quantity="many">%d categuries</item>
-        <item quantity="other">%d categuries</item>
     </plurals>
     <string name="dialogTimeMachineDuration">Durata</string>
     <string name="dialogTimeMachineEnds">Fina %1$s</string>

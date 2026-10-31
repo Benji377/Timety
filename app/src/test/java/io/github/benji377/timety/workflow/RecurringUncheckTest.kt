@@ -6,7 +6,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.testutil.TestAppContainer
 import kotlinx.coroutines.flow.first
@@ -35,7 +34,6 @@ class RecurringUncheckTest {
     private val task = RecurringTaskEntity(
         id = "recurring-u",
         title = "Water the plants",
-        category = "Home",
         dueDate = due,
         unit = RecurrenceUnit.DAY,
         createdAt = due,
@@ -115,17 +113,5 @@ class RecurringUncheckTest {
         uncheck(occurrence)
         uncheck(occurrence)
         assertEquals(due, stored().dueDate)
-    }
-
-    @Test
-    fun renamingOrDeletingACategory_updatesRecurringTasksToo() = runBlocking {
-        val category = TaskCategoryEntity(id = "c1", name = "Home", colorValue = 0)
-        container.taskRepository.createCategory(category)
-
-        container.taskRepository.updateCategory("Home", category.copy(name = "House"))
-        assertEquals("House", stored().category)
-
-        container.taskRepository.deleteCategory(category.copy(name = "House"))
-        assertEquals("", stored().category)
     }
 }

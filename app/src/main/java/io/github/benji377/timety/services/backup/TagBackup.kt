@@ -18,6 +18,16 @@ internal fun TagEntity.toBackupJson(): JSONObject = JSONObject().apply {
     put("colorValue", colorValue)
 }
 
+/** Null for a tag without a name, which can't be shown or picked. */
+private fun tagFromBackup(json: JSONObject): TagEntity? {
+    val name = json.stringOrNull("name")?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+    return TagEntity(
+        id = json.stringOrNull("id") ?: newId(),
+        name = name,
+        colorValue = json.optInt("colorValue", TagEntity.DEFAULT_COLOR_VALUE),
+    )
+}
+
 /** The tags to restore, and the tag ids of each item by item type and item id. */
 internal class RestoredTags(
     val tags: List<TagEntity>,
@@ -37,11 +47,7 @@ private fun currentTags(
     json: JSONObject,
     items: Map<TaggedItemType, Map<String, JSONObject>>,
 ): RestoredTags {
-    val tags = mergeLegacyTags(
-        categories = json.objects("tags").map(::legacyTagFromBackup),
-        focusTags = emptyList(),
-        usedNames = emptyList(),
-    ).tags
+    val tags = json.objects("tags").mapNotNull(::tagFromBackup).distinctBy { it.name.lowercase() }
     val knownIds = tags.mapTo(HashSet()) { it.id }
     return RestoredTags(
         tags = tags,

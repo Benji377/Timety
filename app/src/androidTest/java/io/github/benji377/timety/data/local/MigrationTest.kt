@@ -266,10 +266,38 @@ class MigrationTest {
                         "SELECT * FROM (VALUES $row) JOIN (SELECT 'm1', 0, 60, 1)"
                 )
             }
+            execSQL("INSERT INTO subtasks (id, taskId, title, isCompleted) VALUES ('st1', 't1', 'Draft', 1)")
+            execSQL("INSERT INTO recurring_occurrences (recurringTaskId, completedAt) VALUES ('r1', 500)")
+            execSQL("INSERT INTO distractions (sessionId, time, type, note) VALUES ('s4', 700, 'SNACK', 'Tea')")
             close()
         }
 
         val db = helper.runMigrationsAndValidate(dbName, 6, true, MIGRATION_5_6)
+
+        fun strings(sql: String) = db.query(sql).use { cursor ->
+            buildList { while (cursor.moveToNext()) add(cursor.getString(0)) }
+        }
+        // Everything hanging off the rebuilt tables survives.
+        assertEquals(listOf("Report", "Fence"), strings("SELECT title FROM tasks ORDER BY rowid"))
+        assertEquals(listOf("t1"), strings("SELECT taskId FROM subtasks WHERE id = 'st1'"))
+        assertEquals(listOf("r1"), strings("SELECT recurringTaskId FROM recurring_occurrences"))
+        assertEquals(listOf("s4"), strings("SELECT sessionId FROM distractions WHERE note = 'Tea'"))
+        // Tag sessions lose their target; item sessions keep theirs.
+        assertEquals(
+            listOf("s4", "s5"),
+            strings("SELECT id FROM focus_sessions WHERE targetId IS NOT NULL ORDER BY id"),
+        )
+        assertEquals(
+            listOf("Old", "Report"),
+            strings("SELECT targetLabel FROM focus_sessions WHERE targetLabel IS NOT NULL ORDER BY targetLabel"),
+        )
+        assertEquals(
+            emptyList<String>(),
+            strings(
+                "SELECT name FROM sqlite_master WHERE name IN ('task_categories', 'focus_tags') " +
+                    "OR name LIKE '%_backup' OR name LIKE '%_new'"
+            ),
+        )
 
         val tags = db.query("SELECT id, name, colorValue FROM tags ORDER BY name").use { cursor ->
             buildMap {
@@ -292,6 +320,26 @@ class MigrationTest {
             mapOf("s1" to "Work", "s2" to "Study", "s4" to "Work", "s6" to "Reading"),
             attached("session_tags", "sessionId"),
         )
+        db.close()
+    }
+
+    @Test
+    fun migrate5To6_keepsARenamedDefaultTag() {
+        val dbName = "migration-test-5-6-renamed-default"
+
+        helper.createDatabase(dbName, 5).apply {
+            execSQL("INSERT INTO focus_tags (id, name, colorValue) VALUES ('default_tag', 'Study', 4)")
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 6, true, MIGRATION_5_6)
+
+        db.query("SELECT id, name FROM tags").use { cursor ->
+            assertEquals(1, cursor.count)
+            cursor.moveToFirst()
+            assertEquals("default_tag", cursor.getString(0))
+            assertEquals("Study", cursor.getString(1))
+        }
         db.close()
     }
 }

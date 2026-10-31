@@ -58,6 +58,5 @@ val PickerPalette = listOf(
     Color(0xFF607D8B), // blue grey
 )
 
-// Extra hues for categorical charts once the core section palette runs out.
+// Extra hue for charts whose adjacent segments need to stay distinct from the section palette.
 val ChartTeal = Color(0xFF009688)
-val ChartDeepOrange = Color(0xFFFF5722)

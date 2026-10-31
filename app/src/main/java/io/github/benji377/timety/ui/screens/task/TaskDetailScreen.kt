@@ -185,7 +185,6 @@ fun TaskDetailScreen(
                                 priority = priority,
                                 size = size,
                                 dueDate = dueDate,
-                                category = existingTask?.category ?: "",
                                 reminders = reminders,
                                 isCompleted = existingTask?.isCompleted ?: false,
                                 completedAt = existingTask?.completedAt,

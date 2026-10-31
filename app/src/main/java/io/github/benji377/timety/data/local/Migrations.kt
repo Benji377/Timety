@@ -141,7 +141,7 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
 /**
  * Drops `user_profile.unlockedAchievements` and `user_profile.totalXp` (SQLite on API 26 cannot
  * drop a column, so the table is rebuilt), adds the recurring-task columns and
- * `subtasks.sortOrder`, and creates the global tags from the task categories and focus tags.
+ * `subtasks.sortOrder`, and replaces the task categories and focus tags with global tags.
  */
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -170,8 +170,19 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
     }
 }
 
-/** Creates the tag tables and fills them from the task categories and focus tags. */
+/**
+ * Reads the task categories and focus tags, removes them, then creates the tag tables and fills
+ * them. The join tables come after the rebuilt tables, so they never need parking.
+ */
 private fun createGlobalTags(db: SupportSQLiteDatabase) {
+    val taskCategories = readCategoriesById(db, "tasks")
+    val recurringCategories = readCategoriesById(db, "recurring_tasks")
+    val categories = readLegacyTags(db, "task_categories")
+    val focusTags = readLegacyTags(db, "focus_tags")
+    val sessions = readLegacySessions(db)
+
+    dropCategoriesAndFocusTags(db)
+
     db.execSQL(
         "CREATE TABLE `tags` (`id` TEXT NOT NULL, `name` TEXT NOT NULL COLLATE NOCASE, " +
                 "`colorValue` INTEGER NOT NULL, PRIMARY KEY(`id`))"
@@ -183,13 +194,8 @@ private fun createGlobalTags(db: SupportSQLiteDatabase) {
     createTagJoinTable(db, "goal_tags", "goalId", "goals")
     createTagJoinTable(db, "session_tags", "sessionId", "focus_sessions")
 
-    val taskCategories = readCategoriesById(db, "tasks")
-    val recurringCategories = readCategoriesById(db, "recurring_tasks")
-    val focusTags = readLegacyTags(db, "focus_tags")
-    val sessions = readLegacySessions(db)
-
     val merged = mergeLegacyTags(
-        categories = readLegacyTags(db, "task_categories"),
+        categories = categories,
         focusTags = focusTags,
         usedNames = taskCategories.values + recurringCategories.values +
                 sessions.values.mapNotNull { it.deletedTagLabel(focusTags) },
@@ -217,6 +223,82 @@ private fun createGlobalTags(db: SupportSQLiteDatabase) {
         }
         tagId?.let { attach("session_tags", "sessionId", id, it) }
     }
+}
+
+/**
+ * Removes `tasks.category`, `recurring_tasks.category` and `focus_sessions.tagId` (SQLite on API 26
+ * cannot drop a column), and the tables they pointed to. A tag session's target was its focus tag,
+ * so those lose it: only items are targets now.
+ */
+private fun dropCategoriesAndFocusTags(db: SupportSQLiteDatabase) {
+    rebuildTable(
+        db,
+        table = "tasks",
+        child = "subtasks",
+        definition = "`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, " +
+                "`dueDate` INTEGER, `location` TEXT NOT NULL, `priority` TEXT NOT NULL, " +
+                "`size` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, `completedAt` INTEGER, " +
+                "`createdAt` INTEGER NOT NULL, `reminders` TEXT NOT NULL, `place` TEXT, " +
+                "PRIMARY KEY(`id`)",
+        columns = "`id`, `title`, `description`, `dueDate`, `location`, `priority`, `size`, " +
+                "`isCompleted`, `completedAt`, `createdAt`, `reminders`, `place`",
+    )
+    rebuildTable(
+        db,
+        table = "recurring_tasks",
+        child = "recurring_occurrences",
+        definition = "`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, " +
+                "`dueDate` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, " +
+                "`interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, " +
+                "`monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, " +
+                "`reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`id`)",
+        columns = "`id`, `title`, `description`, `dueDate`, `timeOfDayMinutes`, `unit`, `interval`, " +
+                "`daysOfWeek`, `monthlyMode`, `monthlyDay`, `monthlyOrdinal`, `monthlyWeekday`, " +
+                "`reminderOffsetsMinutes`, `createdAt`",
+    )
+    rebuildTable(
+        db,
+        table = "focus_sessions",
+        child = "distractions",
+        definition = "`id` TEXT NOT NULL, `modeId` TEXT NOT NULL, `startTime` INTEGER NOT NULL, " +
+                "`endTime` INTEGER, `totalSecondsFocused` INTEGER NOT NULL, " +
+                "`isCompleted` INTEGER NOT NULL, `targetType` TEXT NOT NULL, `targetId` TEXT, " +
+                "`targetLabel` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`modeId`) REFERENCES " +
+                "`focus_modes`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT",
+        columns = "`id`, `modeId`, `startTime`, `endTime`, `totalSecondsFocused`, `isCompleted`, " +
+                "`targetType`, `targetId`, `targetLabel`",
+        indexSql = "CREATE INDEX `index_focus_sessions_modeId` ON `focus_sessions` (`modeId`)",
+    )
+    db.execSQL(
+        "UPDATE `focus_sessions` SET `targetId` = NULL, `targetLabel` = NULL " +
+                "WHERE `targetType` = '${FocusTargetType.TAG.name}'"
+    )
+    db.execSQL("DROP TABLE `task_categories`")
+    db.execSQL("DROP TABLE `focus_tags`")
+}
+
+/**
+ * Replaces [table] with one holding only [columns]. Dropping it cascades to [child], so those rows
+ * are parked in a temporary table and restored afterwards.
+ */
+private fun rebuildTable(
+    db: SupportSQLiteDatabase,
+    table: String,
+    child: String,
+    definition: String,
+    columns: String,
+    indexSql: String? = null,
+) {
+    db.execSQL("CREATE TABLE `${child}_backup` AS SELECT * FROM `$child`")
+    db.execSQL("CREATE TABLE `${table}_new` ($definition)")
+    db.execSQL("INSERT INTO `${table}_new` ($columns) SELECT $columns FROM `$table`")
+    db.execSQL("DROP TABLE `$table`")
+    db.execSQL("ALTER TABLE `${table}_new` RENAME TO `$table`")
+    indexSql?.let(db::execSQL)
+    db.execSQL("DELETE FROM `$child`")
+    db.execSQL("INSERT INTO `$child` SELECT * FROM `${child}_backup`")
+    db.execSQL("DROP TABLE `${child}_backup`")
 }
 
 private fun createTagJoinTable(db: SupportSQLiteDatabase, table: String, column: String, parent: String) {
