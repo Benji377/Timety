@@ -24,6 +24,11 @@ internal fun JSONObject.intList(key: String): List<Int> {
     return (0 until array.length()).map { array.getInt(it) }
 }
 
+internal fun JSONObject.stringList(key: String): List<String> {
+    val array = optJSONArray(key) ?: return emptyList()
+    return (0 until array.length()).map { array.getString(it) }
+}
+
 /** The array's timestamps, skipping any that don't parse. */
 internal fun JSONObject.instantList(key: String): List<Instant> {
     val array = optJSONArray(key) ?: return emptyList()

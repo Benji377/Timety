@@ -19,6 +19,8 @@ import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
+import io.github.benji377.timety.data.model.tag.TagEntity
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
@@ -269,6 +271,72 @@ class BackupRoundTripTest {
         val restored = target.taskRepository.allTasks.first().single().subtasks
         assertEquals(listOf("b", "a", "c"), restored.map { it.id })
         assertEquals(listOf(0, 1, 2), restored.map { it.sortOrder })
+    }
+
+    @Test
+    fun backupThenRestore_keepsTagsOnEveryItemType() = runBlocking {
+        seedOneOfEverything(source)
+        val work = TagEntity("tag-work", "Work", 1)
+        val meeting = TagEntity("tag-meeting", "meeting", 2)
+        source.tagRepository.getOrCreateTag(work)
+        source.tagRepository.getOrCreateTag(meeting)
+        val attached = mapOf(
+            TaggedItemType.TASK to "task-1",
+            TaggedItemType.RECURRING_TASK to "recurring-1",
+            TaggedItemType.HABIT to "habit-1",
+            TaggedItemType.GOAL to "goal-1",
+            TaggedItemType.SESSION to "session-1",
+        )
+        attached.forEach { (type, id) ->
+            source.tagRepository.setItemTags(type, id, listOf(work.id, meeting.id))
+        }
+
+        target.backupService.importFromUri(exportFrom(source)).getOrThrow()
+
+        assertEquals(setOf(work, meeting), target.tagRepository.allTags.first().toSet())
+        attached.forEach { (type, id) ->
+            assertEquals(
+                type.name,
+                setOf(work, meeting),
+                target.tagRepository.tagsByItem(type).first()[id].orEmpty().toSet(),
+            )
+        }
+    }
+
+    @Test
+    fun restore_skipsAttachmentsToTagsTheBackupDoesNotHave() = runBlocking {
+        seedOneOfEverything(source)
+        source.tagRepository.getOrCreateTag(TagEntity("tag-work", "Work", 1))
+        val full = JSONObject(exportFrom(source).readText())
+        full.getJSONArray("tasks").getJSONObject(0)
+            .put("tagIds", JSONArray(listOf("tag-work", "missing")))
+
+        target.backupService.importFromJson(full).getOrThrow()
+
+        val tags = target.tagRepository.tagsByItem(TaggedItemType.TASK).first()["task-1"].orEmpty()
+        assertEquals(listOf("tag-work"), tags.map { it.id })
+    }
+
+    /** A backup from before global tags has categories and focus tags, which get merged. */
+    @Test
+    fun restoreOldBackup_mergesCategoriesAndFocusTagsIntoTags() = runBlocking {
+        seedOneOfEverything(source)
+        val full = JSONObject(exportFrom(source).readText())
+        full.remove("tags")
+        full.put("schemaVersion", 1)
+
+        target.backupService.importFromJson(full).getOrThrow()
+
+        val names = target.tagRepository.allTags.first().map { it.name }.toSet()
+        assertEquals(setOf("Home", "Study", "Work"), names)
+        fun tagNames(type: TaggedItemType, id: String) = runBlocking {
+            target.tagRepository.tagsByItem(type).first()[id].orEmpty().map { it.name }
+        }
+        assertEquals(listOf("Work"), tagNames(TaggedItemType.TASK, "task-1"))
+        assertEquals(listOf("Home"), tagNames(TaggedItemType.RECURRING_TASK, "recurring-1"))
+        // A session on a task takes the task's category; a session on a goal has no tag.
+        assertEquals(listOf("Work"), tagNames(TaggedItemType.SESSION, "session-1"))
+        assertEquals(emptyList<String>(), tagNames(TaggedItemType.SESSION, "session-2"))
     }
 
     private fun Uri.readText(): String =
