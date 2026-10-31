@@ -26,9 +26,10 @@ import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.DistractionUIType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
+import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.color
 import io.github.benji377.timety.data.model.focus.icon
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
@@ -41,11 +42,12 @@ internal fun SessionRow(
     session: FocusSessionEntity,
     targetName: String,
     modeName: String,
-    tagById: Map<String, FocusTagEntity>,
+    tags: List<TagEntity>,
     onEdit: () -> Unit,
 ) {
     val icon = session.targetType.icon
-    val color = session.tagId?.let { tagById[it] }?.let { Color(it.colorValue) }
+    val color = session.targetType.takeIf { it != FocusTargetType.TAG }?.color
+        ?: tags.firstOrNull()?.let { Color(it.colorValue) }
         ?: session.targetType.color
     val dfs = LocalDateFormatSettings.current
     val dateStr = AppDateFormatUtils.formatDate(

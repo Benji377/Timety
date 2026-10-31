@@ -48,12 +48,14 @@ import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.task.CategoryPicker
+import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.task.CustomReminderIssue
 import io.github.benji377.timety.util.task.ReminderUtils
 import kotlinx.coroutines.flow.flowOf
@@ -65,7 +67,7 @@ import java.time.ZoneOffset
 import java.util.UUID
 
 /**
- * Shows a single task for viewing, creating, or editing: title, category, description, priority,
+ * Shows a single task for viewing, creating, or editing: title, tags, description, priority,
  * effort size, due date and reminders, location, and a subtask checklist. Pass a null [taskId] to
  * create a new task; an existing one opens in read-only mode with an edit toggle.
  */
@@ -77,12 +79,13 @@ import java.util.UUID
 fun TaskDetailScreen(
     taskId: String? = null,
     onNavigateBack: () -> Unit,
-    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val existingTaskWithSubtasks by remember(taskId) {
         taskId?.let { taskViewModel.observeTask(it) } ?: flowOf(null)
     }.collectAsState(initial = null)
-    val allCategories by taskViewModel.allCategories.collectAsState()
+    val taskTags by tagViewModel.taskTags.collectAsState()
     val isNewTask = taskId == null
     val existingTask = existingTaskWithSubtasks?.task
 
@@ -104,7 +107,8 @@ fun TaskDetailScreen(
     }
     var size by rememberSaveable(formTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
     var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
-    var category by rememberSaveable(formTask) { mutableStateOf(existingTask?.category ?: "") }
+    // Null until the user changes them, so a save doesn't overwrite tags still loading.
+    var pickedTagIds by rememberSaveable(formTask) { mutableStateOf<Set<String>?>(null) }
     var reminders by rememberSaveable(formTask) {
         mutableStateOf(
             existingTask?.reminders ?: emptyList()
@@ -116,8 +120,6 @@ fun TaskDetailScreen(
         )
     }
 
-    var isAddingNewCategory by remember { mutableStateOf(false) }
-    var newCategoryText by remember { mutableStateOf("") }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -183,7 +185,6 @@ fun TaskDetailScreen(
                                 priority = priority,
                                 size = size,
                                 dueDate = dueDate,
-                                category = category,
                                 reminders = reminders,
                                 isCompleted = existingTask?.isCompleted ?: false,
                                 completedAt = existingTask?.completedAt,
@@ -192,10 +193,10 @@ fun TaskDetailScreen(
                             if (isNewTask) {
                                 val subtasksToSave =
                                     subtasks.map { it.copy(taskId = taskToSave.id) }
-                                taskViewModel.addTask(taskToSave, subtasksToSave)
+                                taskViewModel.addTask(taskToSave, subtasksToSave, pickedTagIds.orEmpty())
                                 onNavigateBack()
                             } else {
-                                taskViewModel.updateTask(taskToSave)
+                                taskViewModel.updateTask(taskToSave, pickedTagIds)
                                 isEditing = false
                             }
                         },
@@ -210,7 +211,7 @@ fun TaskDetailScreen(
                 .padding(paddingValues)
                 .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall)
         ) {
-            // The basics: title, category, description.
+            // The basics: title, tags, description.
             item {
                 SectionHeader(
                     stringResource(R.string.taskDetailsSectionInfo),
@@ -229,16 +230,11 @@ fun TaskDetailScreen(
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
 
-                CategoryPicker(
-                    category = category,
-                    onCategoryChange = { category = it },
+                TagPicker(
+                    selectedIds = pickedTagIds
+                        ?: taskTags[taskId].orEmpty().mapTo(LinkedHashSet()) { it.id },
+                    onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
-                    isAddingNewCategory = isAddingNewCategory,
-                    onIsAddingNewCategoryChange = { isAddingNewCategory = it },
-                    newCategoryText = newCategoryText,
-                    onNewCategoryTextChange = { newCategoryText = it },
-                    existingCategories = allCategories,
-                    onCreateCategory = { taskViewModel.createCategory(it) }
                 )
 
                 Spacer(Modifier.height(AppTheme.spaceLarge))

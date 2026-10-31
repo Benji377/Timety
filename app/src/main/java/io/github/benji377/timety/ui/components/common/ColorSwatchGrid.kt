@@ -25,7 +25,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
  * Grid of circular color swatches with the selected one outlined, for the color pickers in the
- * category, focus-tag, and habit editors. Callers size the grid via [modifier].
+ * tag and habit editors. Callers size the grid via [modifier].
  */
 @Composable
 fun ColorSwatchGrid(

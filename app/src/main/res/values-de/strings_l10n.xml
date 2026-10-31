@@ -135,17 +135,12 @@
     <string name="focusStatsSectionVolumeSubtitle">Gesamte Fokus-Minuten pro Tag</string>
     <string name="focusStatsSectionVolumeTitle">Wöchentliches Fokus-Volumen</string>
     <string name="focusTagsDialogContentDelete">Bist du sicher, dass du \"%1$s\" löschen möchtest?</string>
-    <string name="focusTagsDialogLabelHint">Tag-Name (z.B. Lesen)</string>
-    <string name="focusTagsDialogLabelName">Tag-Name</string>
-    <string name="focusTagsDialogTitleAdd">Neuen Tag hinzufügen</string>
     <string name="focusTagsDialogTitleDelete">Tag löschen?</string>
     <string name="focusTagsLabelAdd">Neuen Tag hinzufügen</string>
-    <string name="focusTagsLabelAll">Alle Tags</string>
     <string name="focusTagsLabelColor">Wähle eine Farbe</string>
     <string name="focusTagsLabelEdit">Tag bearbeiten</string>
     <string name="focusTagsLabelEmpty">Noch keine Tags</string>
     <string name="focusTagsLabelName">Tag-Name</string>
-    <string name="focusTagsTitle">Fokus-Tags</string>
     <string name="focusTargetEmpty">Kein Ziel</string>
     <string name="focusTargetUntagged">Ohne Tag</string>
     <string name="focusTitle">Fokus</string>
@@ -266,11 +261,6 @@
     <string name="taskDeleteTitle">Aufgabe löschen</string>
     <string name="taskFocusLogSnackbar">Fokus-Sitzung zugeordnet</string>
     <string name="taskFocusLogTitle">Fokuszeit eintragen</string>
-    <string name="taskDetailsLabelCategory">Kategorie</string>
-    <string name="taskDetailsLabelCategoryAddNew">Neue Kategorie hinzufügen</string>
-    <string name="taskDetailsLabelCategoryEmpty">Keine</string>
-    <string name="taskDetailsLabelCategoryNewName">Neuer Kategoriename</string>
-    <string name="taskDetailsLabelCategorySelect">Kategorie wählen</string>
     <string name="taskDetailsLabelDescription">Beschreibung</string>
     <string name="taskDetailsLabelDueDate">Fällig: %1$s um %2$s</string>
     <string name="taskDetailsLabelDueDateSet">Fälligkeitsdatum festlegen</string>
@@ -308,7 +298,6 @@
     <string name="taskListSectionUpcoming">Zu tun</string>
     <string name="taskListSortAlphabetical">Alphabetisch</string>
     <string name="taskListSortAscending">Aufsteigend</string>
-    <string name="taskListSortCategory">Kategorie</string>
     <string name="taskListSortDescending">Absteigend</string>
     <string name="taskListSortDueDate">Fälligkeitsdatum</string>
     <string name="taskListSortPriority">Priorität</string>
@@ -333,13 +322,9 @@
     <string name="taskStatsCalibrationOrderingViolation">Deine %1$s Aufgaben dauern weniger lange als %2$s</string>
     <string name="taskStatsCalibrationSubtitle">Durchschnittliche Fokuszeit nach Aufgabengröße, nur für Aufgaben, die als Fokus-Ziel genutzt wurden</string>
     <string name="taskStatsCalibrationTitle">Schätzungskalibrierung</string>
-    <string name="taskStatsCategoryUncategorized">Ohne Kategorie</string>
-    <string name="taskStatsCategoryUnused">Keine Kategorien verwendet</string>
     <string name="taskStatsCompleted">Erledigt</string>
     <string name="taskStatsCompletedDaily">Gesamte erledigte Aufgaben pro Tag</string>
     <string name="taskStatsCreated">Erstellt</string>
-    <string name="taskStatsDistribution">Verteilung (Allzeit)</string>
-    <string name="taskStatsDistributionSubtitle">Aufgabenkategorien im gesamten Arbeitsbereich</string>
     <string name="taskStatsEmpty">Noch keine Daten anzuzeigen</string>
     <string name="taskStatsProductivity">Produktivität</string>
     <string name="taskStatsVelocity">Aufgaben-Geschwindigkeit</string>
@@ -383,7 +368,6 @@
     <string name="statsTitle">Einblicke &amp; Statistiken</string>
     <string name="settingsDialogUnitDays">Tage</string>
     <string name="settingsLabelBuiltBy">Entwickelt von Benji377</string>
-    <string name="settingsLabelCategories">Aufgaben-Kategorien</string>
     <string name="settingsDndPermissionDialogContent">Timety benötigt Zugriff auf „Bitte nicht stören“, um Benachrichtigungen während Fokus-Sitzungen stummzuschalten. Du wirst zu den Systemeinstellungen weitergeleitet, um den Zugriff zu erteilen.</string>
     <string name="settingsDndPermissionDialogTitle">Zugriff auf \'Bitte nicht stören\' zulassen</string>
     <string name="settingsLabelAutoDnd">Automatisches \'Bitte nicht stören\'</string>
@@ -433,7 +417,6 @@
     <string name="settingsLabelShowGreetingSubtitle">Begrüßung und Motivation oben auf dem Startbildschirm</string>
     <string name="settingsLabelSourceCode">Quellcode</string>
     <string name="settingsLabelSourceCodeSubtitle">GitHub-Repository</string>
-    <string name="settingsLabelTags">Fokus-Tags</string>
     <string name="settingsLabelTheme">App-Design</string>
     <string name="settingsLabelThemeDark">Dunkel</string>
     <string name="settingsLabelThemeLight">Hell</string>
@@ -448,10 +431,7 @@
     <string name="settingsPageAboutSummary">Version, Support und Quellcode</string>
     <string name="settingsPageAdvancedSummary">Expertenoptionen wie die Ortssuche-API</string>
     <string name="settingsPageDataBackupSummary">Backups exportieren und wiederherstellen</string>
-    <string name="settingsPageFocusSummary">Tagesziel, Timer-Limits, Tags und Bitte nicht stören</string>
-    <string name="settingsPageGeneralSummary">Design, Begrüßung, Sprache und Formate</string>
     <string name="settingsPageNotificationsSummary">Erinnerungszeiten und Hintergrundaktivität</string>
-    <string name="settingsPageTasksSummary">Fenster für anstehende Aufgaben und Kategorien</string>
     <string name="settingsSectionAbout">Über</string>
     <string name="settingsSectionAdvanced">Erweitert</string>
     <string name="settingsSectionAppearance">Erscheinungsbild</string>
@@ -538,27 +518,9 @@
     <string name="wrapUpStatHabitsLabel">Gewohnheiten aufgebaut</string>
     <string name="wrapUpStatTasksLabel">Aufgaben erledigt</string>
     <string name="wrapUpUsingSince">Nutzt Timety seit %1$s</string>
-    <string name="categoryAddLabel">Kategorie hinzufügen</string>
-    <string name="categoryColorLabel">Farbe</string>
-    <string name="categoryDeleteContent">Bist du sicher, dass du \"%1$s\" löschen möchtest? Aufgaben mit dieser Kategorie werden kategorielos.</string>
-    <string name="categoryDeleteTitle">Kategorie löschen?</string>
-    <string name="categoryEditTitle">Kategorie bearbeiten</string>
-    <string name="categoryEmpty">Noch keine Kategorien. Tippe auf den Button oben, um eine hinzuzufügen.</string>
-    <string name="categoryNameLabel">Kategoriename</string>
-    <string name="categoryNameTaken">Eine Kategorie mit diesem Namen existiert bereits</string>
-    <string name="categoryTaskCountZero">Keine Aufgaben</string>
-    <plurals name="categoryTaskCount">
-        <item quantity="one">1 Aufgabe</item>
-        <item quantity="other">%d Aufgaben</item>
-    </plurals>
-    <string name="categoryTitle">Kategorien</string>
     <plurals name="settingsTagsCount">
         <item quantity="one">%d tag</item>
         <item quantity="other">%d tags</item>
-    </plurals>
-    <plurals name="settingsCategoriesCount">
-        <item quantity="one">%d Kategorie</item>
-        <item quantity="other">%d Kategorien</item>
     </plurals>
     <string name="dialogTimeMachineDuration">Dauer</string>
     <string name="dialogTimeMachineEnds">Endet %1$s</string>

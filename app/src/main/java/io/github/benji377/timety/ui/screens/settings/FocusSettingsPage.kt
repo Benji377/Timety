@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.LinearScale
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.TrackChanges
-import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.runtime.Composable
@@ -33,18 +32,14 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
-import io.github.benji377.timety.ui.utils.quantityString
-import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 
-/** Focus settings: sessions (goal, limits, tags), linked tasks and habits, and Do Not Disturb. */
+/** Focus settings: sessions (goal, limits), linked tasks and habits, and Do Not Disturb. */
 @Composable
 internal fun FocusSettings(
-    onNavigateToTags: () -> Unit,
     settingsViewModel: SettingsViewModel = activityScopedViewModel(),
-    focusViewModel: FocusViewModel = activityScopedViewModel(),
 ) {
     val context = LocalContext.current
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
@@ -55,7 +50,6 @@ internal fun FocusSettings(
     val askFocusOnTaskComplete by settingsViewModel.askFocusOnTaskComplete.collectAsState()
     val autoDndEnabled by settingsViewModel.autoDndEnabled.collectAsState()
     val autoDndLiftDuringBreaks by settingsViewModel.autoDndLiftDuringBreaks.collectAsState()
-    val focusTags by focusViewModel.allTags.collectAsState()
 
     val focusGoalTitle = stringResource(R.string.settingsLabelFocusGoal)
     val focusStopwatchTitle = stringResource(R.string.settingsLabelFocusStopwatch)
@@ -165,13 +159,6 @@ internal fun FocusSettings(
         iconTint = FocusColor,
         checked = keepScreenOnDuringFocus,
         onCheckedChange = { settingsViewModel.setKeepScreenOnDuringFocus(it) }
-    )
-    NavSettingsItem(
-        title = stringResource(R.string.settingsLabelTags),
-        subtitle = quantityString(R.plurals.settingsTagsCount, focusTags.size, 0, focusTags.size),
-        icon = Icons.Outlined.LocalOffer,
-        iconTint = FocusColor,
-        onClick = onNavigateToTags
     )
 
     SettingsGroupDivider()

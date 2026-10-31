@@ -59,6 +59,7 @@ import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
+import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.components.task.ReminderEntry
 import io.github.benji377.timety.ui.components.task.ReminderField
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -71,6 +72,8 @@ import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitIcons
@@ -90,9 +93,11 @@ import java.util.UUID
 fun HabitDetailScreen(
     habitId: String? = null,
     onNavigateBack: () -> Unit,
-    habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val allHabits by habitViewModel.allHabits.collectAsState()
+    val habitTags by tagViewModel.habitTags.collectAsState()
     val existingHabit = habitId?.let { id -> allHabits.find { it.id == id } }
     val isNewHabit = habitId == null
 
@@ -106,6 +111,8 @@ fun HabitDetailScreen(
     var nameError by remember { mutableStateOf(false) }
     var notes by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.notes ?: "") }
     var stackName by rememberSaveable(formHabit) { mutableStateOf(existingHabit?.stackName ?: "") }
+    // Null until the user changes them, so a save doesn't overwrite tags still loading.
+    var pickedTagIds by rememberSaveable(formHabit) { mutableStateOf<Set<String>?>(null) }
 
     var frequency by rememberSaveable(formHabit) {
         mutableStateOf(
@@ -217,10 +224,10 @@ fun HabitDetailScreen(
         )
 
         if (isNewHabit) {
-            habitViewModel.addHabit(habitToSave)
+            habitViewModel.addHabit(habitToSave, pickedTagIds.orEmpty())
             onNavigateBack()
         } else {
-            habitViewModel.updateHabit(habitToSave)
+            habitViewModel.updateHabit(habitToSave, pickedTagIds)
             isEditing = false
         }
     }
@@ -330,6 +337,16 @@ fun HabitDetailScreen(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+            }
+
+            item {
+                TagPicker(
+                    selectedIds = pickedTagIds
+                        ?: habitTags[habitId].orEmpty().mapTo(LinkedHashSet()) { it.id },
+                    onSelectionChange = { pickedTagIds = it },
+                    isEditing = isEditing,
+                )
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 

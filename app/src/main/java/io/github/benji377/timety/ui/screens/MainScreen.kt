@@ -34,7 +34,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.benji377.timety.ui.components.common.ExactAlarmPromptDialog
 import io.github.benji377.timety.ui.components.common.NeoNavigationBar
-import io.github.benji377.timety.ui.components.focus.FocusTagsWidget
 import io.github.benji377.timety.ui.navigation.AppRoute
 import io.github.benji377.timety.ui.navigation.BottomNavItem
 import io.github.benji377.timety.ui.navigation.BottomNavItems
@@ -51,7 +50,6 @@ import io.github.benji377.timety.ui.screens.settings.SettingsPageScreen
 import io.github.benji377.timety.ui.screens.settings.SettingsScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTasksScreen
-import io.github.benji377.timety.ui.screens.task.TaskCategoriesScreen
 import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.TaskListScreen
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -287,18 +285,12 @@ fun MainScreen(
                     SettingsPageScreen(
                         page = page,
                         onNavigateBack = dropUnlessResumed { navController.popBackStack() },
-                        onNavigateToTags = { navController.navigate(AppRoute.FOCUS_TAGS.route) },
-                        onNavigateToCategories = { navController.navigate(AppRoute.TASK_CATEGORIES.route) }
+                        onNavigateToTags = { navController.navigate(AppRoute.TAGS.route) },
                     )
                 }
             }
-            composable(AppRoute.FOCUS_TAGS.route) {
-                FocusTagsWidget(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
-            }
-            composable(AppRoute.TASK_CATEGORIES.route) {
-                TaskCategoriesScreen(
+            composable(AppRoute.TAGS.route) {
+                TagsScreen(
                     onNavigateBack = dropUnlessResumed { navController.popBackStack() }
                 )
             }

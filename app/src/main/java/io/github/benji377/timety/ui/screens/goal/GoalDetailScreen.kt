@@ -58,6 +58,7 @@ import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.datePickerMillis
 import io.github.benji377.timety.ui.components.common.detailFieldColors
+import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.GoalColor
@@ -66,6 +67,8 @@ import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitIcons
@@ -86,9 +89,11 @@ import java.util.UUID
 fun GoalDetailScreen(
     goalId: String? = null,
     onNavigateBack: () -> Unit,
-    goalViewModel: GoalViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    goalViewModel: GoalViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val goalsWithEntries by goalViewModel.goalsWithEntries.collectAsState()
+    val goalTags by tagViewModel.goalTags.collectAsState()
     val existingGoalWithEntries = goalId?.let { id -> goalsWithEntries.find { it.goal.id == id } }
     val existingGoal = existingGoalWithEntries?.goal
     val isNewGoal = goalId == null
@@ -119,6 +124,8 @@ fun GoalDetailScreen(
                     .atZone(ZoneId.systemDefault()).toInstant()
         )
     }
+    // Null until the user changes them, so a save doesn't overwrite tags still loading.
+    var pickedTagIds by rememberSaveable(formGoalId) { mutableStateOf<Set<String>?>(null) }
     var selectedIconIndex by rememberSaveable(formGoalId) { mutableStateOf(existingGoal?.iconCodePoint) }
     var selectedColor by rememberSaveable(formGoalId, stateSaver = ColorSaver) {
         mutableStateOf(existingGoal?.colorValue?.let { Color(it) } ?: GoalColor)
@@ -162,10 +169,10 @@ fun GoalDetailScreen(
         )
 
         if (isNewGoal) {
-            goalViewModel.addGoal(goalToSave)
+            goalViewModel.addGoal(goalToSave, pickedTagIds.orEmpty())
             onNavigateBack()
         } else {
-            goalViewModel.updateGoal(goalToSave)
+            goalViewModel.updateGoal(goalToSave, pickedTagIds)
             isEditing = false
         }
     }
@@ -302,6 +309,16 @@ fun GoalDetailScreen(
                         colors = detailFieldColors(isEditing),
                     )
                 }
+                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+            }
+
+            item {
+                TagPicker(
+                    selectedIds = pickedTagIds
+                        ?: goalTags[goalId].orEmpty().mapTo(LinkedHashSet()) { it.id },
+                    onSelectionChange = { pickedTagIds = it },
+                    isEditing = isEditing,
+                )
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 

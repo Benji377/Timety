@@ -33,10 +33,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
 import io.github.benji377.timety.ui.components.common.SwipeToDeleteBox
+import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -73,6 +75,7 @@ fun TaskListTile(
     showTrailing: Boolean = true,
     subtasksCompleted: Int = 0,
     subtasksTotal: Int = 0,
+    tags: List<TagEntity> = emptyList(),
     use24HourFormat: Boolean = LocalDateFormatSettings.current.use24HourFormat,
     dateFormatCode: String = LocalDateFormatSettings.current.dateFormatCode,
     margin: PaddingValues = AppTheme.listTileScreenMargin,
@@ -179,6 +182,11 @@ fun TaskListTile(
                                 fontWeight = AppTheme.fwMedium,
                             )
                         }
+                    }
+
+                    if (tags.isNotEmpty()) {
+                        Spacer(Modifier.height(AppTheme.spaceXSmall))
+                        TagChips(tags)
                     }
                 }
                 if (showTrailing) {

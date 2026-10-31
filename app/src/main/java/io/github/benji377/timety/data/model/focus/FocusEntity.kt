@@ -81,15 +81,6 @@ enum class FocusTargetType(val value: Int) {
     GOAL(4)
 }
 
-/** A user-defined label for categorizing focus sessions. */
-@Entity(tableName = "focus_tags")
-data class FocusTagEntity(
-    @PrimaryKey
-    val id: String,
-    val name: String,
-    val colorValue: Int
-)
-
 /** A single recorded focus session, including its timing, completion state, and target. */
 @Entity(
     tableName = "focus_sessions",
@@ -111,7 +102,6 @@ data class FocusSessionEntity(
     val endTime: Instant? = null,
     val totalSecondsFocused: Int = 0,
     val isCompleted: Boolean = false,
-    val tagId: String? = null,
     val targetType: FocusTargetType = FocusTargetType.TAG,
     val targetId: String? = null,
     val targetLabel: String? = null

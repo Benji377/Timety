@@ -9,22 +9,27 @@ import io.github.benji377.timety.data.local.dao.GoalDao
 import io.github.benji377.timety.data.local.dao.HabitDao
 import io.github.benji377.timety.data.local.dao.QuickHabitDao
 import io.github.benji377.timety.data.local.dao.RecurringTaskDao
+import io.github.benji377.timety.data.local.dao.TagDao
 import io.github.benji377.timety.data.local.dao.TaskDao
 import io.github.benji377.timety.data.local.dao.UserDao
 import io.github.benji377.timety.data.model.focus.DistractionEntity
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
+import io.github.benji377.timety.data.model.tag.GoalTagEntity
+import io.github.benji377.timety.data.model.tag.HabitTagEntity
+import io.github.benji377.timety.data.model.tag.RecurringTaskTagEntity
+import io.github.benji377.timety.data.model.tag.SessionTagEntity
+import io.github.benji377.timety.data.model.tag.TagEntity
+import io.github.benji377.timety.data.model.tag.TaskTagEntity
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
@@ -33,21 +38,25 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
     entities = [
         TaskEntity::class,
         SubtaskEntity::class,
-        TaskCategoryEntity::class,
         RecurringTaskEntity::class,
         RecurringOccurrenceEntity::class,
         FocusModeEntity::class,
         SessionPhaseEntity::class,
         FocusSessionEntity::class,
         DistractionEntity::class,
-        FocusTagEntity::class,
         HabitEntity::class,
         HabitCompletionEntity::class,
         QuickHabitEntity::class,
         GoalEntity::class,
         GoalEntryEntity::class,
         UserProfileEntity::class,
-        DayRatingEntity::class
+        DayRatingEntity::class,
+        TagEntity::class,
+        TaskTagEntity::class,
+        RecurringTaskTagEntity::class,
+        HabitTagEntity::class,
+        GoalTagEntity::class,
+        SessionTagEntity::class
     ],
     version = 6,
     exportSchema = true
@@ -63,4 +72,5 @@ abstract class TimetyDatabase : RoomDatabase() {
     abstract fun focusDao(): FocusDao
     abstract fun userDao(): UserDao
     abstract fun dayRatingDao(): DayRatingDao
+    abstract fun tagDao(): TagDao
 }

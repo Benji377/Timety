@@ -10,22 +10,20 @@ import androidx.glance.appwidget.updateAll
 import androidx.room.withTransaction
 import io.github.benji377.timety.data.local.TimetyDatabase
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.SettingsRepository
-import io.github.benji377.timety.services.backup.categoryFromBackup
 import io.github.benji377.timety.services.backup.dayRatingFromBackup
 import io.github.benji377.timety.services.backup.goalFromBackup
 import io.github.benji377.timety.services.backup.habitFromBackup
 import io.github.benji377.timety.services.backup.modeFromBackup
 import io.github.benji377.timety.services.backup.modeToBackupJson
-import io.github.benji377.timety.services.backup.newId
 import io.github.benji377.timety.services.backup.objects
 import io.github.benji377.timety.services.backup.profileFromBackup
 import io.github.benji377.timety.services.backup.quickHabitFromBackup
 import io.github.benji377.timety.services.backup.recurringTaskFromBackup
 import io.github.benji377.timety.services.backup.sessionFromBackup
 import io.github.benji377.timety.services.backup.sessionToBackupJson
-import io.github.benji377.timety.services.backup.tagFromBackup
+import io.github.benji377.timety.services.backup.tagsFromBackup
 import io.github.benji377.timety.services.backup.taskFromBackup
 import io.github.benji377.timety.services.backup.toBackupJson
 import io.github.benji377.timety.util.ProfileImageStore
@@ -68,6 +66,7 @@ class BackupService(
     private val focusDao get() = database.focusDao()
     private val userDao get() = database.userDao()
     private val dayRatingDao get() = database.dayRatingDao()
+    private val tagDao get() = database.tagDao()
 
     fun suggestedFileName(): String = "Timety_Export_${System.currentTimeMillis()}.json"
 
@@ -174,18 +173,35 @@ class BackupService(
                 settingsRepository.exportAll().forEach { (key, value) -> if (value != null) put(key, value) }
             })
             put("userProfile", userDao.getUserProfileSynchronous()?.toBackupJson() ?: JSONObject.NULL)
-            put("tasks", JSONArray(taskDao.getAllTasks().first().map { it.toBackupJson() }))
-            put("taskCategories", JSONArray(taskDao.getAllCategories().first().map { it.toBackupJson() }))
-            put("recurringTasks", JSONArray(recurringTaskDao.getAllWithOccurrences().first().map { it.toBackupJson() }))
+            put("tags", JSONArray(tagDao.getAllTags().first().map { it.toBackupJson() }))
+            val taskTags = tagIdsByItem(TaggedItemType.TASK)
+            put("tasks", JSONArray(taskDao.getAllTasks().first().map {
+                it.toBackupJson().withTagIds(taskTags, it.task.id)
+            }))
+            val recurringTags = tagIdsByItem(TaggedItemType.RECURRING_TASK)
+            put("recurringTasks", JSONArray(recurringTaskDao.getAllWithOccurrences().first().map {
+                it.toBackupJson().withTagIds(recurringTags, it.task.id)
+            }))
+            val habitTags = tagIdsByItem(TaggedItemType.HABIT)
             put("habits", JSONArray(habitDao.getAllHabits().first().map {
                 HabitWithCompletions(it, habitCompletions[it.id].orEmpty()).toBackupJson()
+                    .withTagIds(habitTags, it.id)
             }))
             put("quickHabits", JSONArray(quickHabitDao.getAll().first().map { it.toBackupJson() }))
-            put("goals", JSONArray(goalDao.getAllGoalsWithEntries().first().map { it.toBackupJson() }))
+            val goalTags = tagIdsByItem(TaggedItemType.GOAL)
+            put("goals", JSONArray(goalDao.getAllGoalsWithEntries().first().map {
+                it.toBackupJson().withTagIds(goalTags, it.goal.id)
+            }))
             put("dayRatings", JSONArray(dayRatingDao.getAll().first().map { it.toBackupJson() }))
             put("focus", focusToJson())
         }
     }
+
+    private suspend fun tagIdsByItem(type: TaggedItemType): Map<String, List<String>> =
+        tagDao.getItemTags(type).first().groupBy({ it.itemId }, { it.tag.id })
+
+    private fun JSONObject.withTagIds(tagIds: Map<String, List<String>>, itemId: String): JSONObject =
+        put("tagIds", JSONArray(tagIds[itemId].orEmpty()))
 
     private suspend fun focusToJson(): JSONObject {
         val modes = focusDao.getAllModes().first().map { mode ->
@@ -193,12 +209,13 @@ class BackupService(
         }
         // One query for all distractions instead of one per session.
         val distractionsBySession = focusDao.getAllDistractions().first().groupBy { it.sessionId }
+        val sessionTags = tagIdsByItem(TaggedItemType.SESSION)
         val sessions = focusDao.getAllSessions().first().map { session ->
             sessionToBackupJson(session, distractionsBySession[session.id].orEmpty())
+                .withTagIds(sessionTags, session.id)
         }
         return JSONObject().apply {
             put("modes", JSONArray(modes))
-            put("tags", JSONArray(focusDao.getAllTags().first().map { it.toBackupJson() }))
             put("sessions", JSONArray(sessions))
         }
     }
@@ -218,20 +235,28 @@ class BackupService(
         )
 
         taskDao.clearAll()
-        json.objects("tasks").map(::taskFromBackup).forEach { (task, subtasks) ->
+        val taskJson = LinkedHashMap<String, JSONObject>()
+        json.objects("tasks").forEach { item ->
+            val (task, subtasks) = taskFromBackup(item)
+            taskJson[task.id] = item
             taskDao.insertTask(task)
             subtasks.forEach(taskDao::insertSubtask)
         }
 
         recurringTaskDao.clearAll()
-        json.objects("recurringTasks").map(::recurringTaskFromBackup).forEach { (task, occurrences) ->
+        val recurringJson = LinkedHashMap<String, JSONObject>()
+        json.objects("recurringTasks").forEach { item ->
+            val (task, occurrences) = recurringTaskFromBackup(item)
+            recurringJson[task.id] = item
             recurringTaskDao.insert(task)
             occurrences.forEach(recurringTaskDao::insertOccurrence)
         }
-        restoreTaskCategories(json.objects("taskCategories"))
 
         habitDao.clearAll()
-        json.objects("habits").map(::habitFromBackup).forEach { (habit, completions) ->
+        val habitJson = LinkedHashMap<String, JSONObject>()
+        json.objects("habits").forEach { item ->
+            val (habit, completions) = habitFromBackup(item)
+            habitJson[habit.id] = item
             habitDao.insertHabit(habit)
             completions.forEach(habitDao::insertCompletion)
         }
@@ -240,7 +265,10 @@ class BackupService(
         json.objects("quickHabits").map(::quickHabitFromBackup).forEach(quickHabitDao::insert)
 
         goalDao.clearAll()
-        json.objects("goals").map(::goalFromBackup).forEach { (goal, entries) ->
+        val goalJson = LinkedHashMap<String, JSONObject>()
+        json.objects("goals").forEach { item ->
+            val (goal, entries) = goalFromBackup(item)
+            goalJson[goal.id] = item
             goalDao.insertGoal(goal)
             entries.forEach(goalDao::insertEntry)
         }
@@ -248,44 +276,56 @@ class BackupService(
         dayRatingDao.clearAll()
         json.objects("dayRatings").mapNotNull(::dayRatingFromBackup).forEach(dayRatingDao::upsert)
 
-        restoreFocus(json.optJSONObject("focus") ?: JSONObject())
+        val sessionJson = restoreFocus(json.optJSONObject("focus") ?: JSONObject())
+
+        restoreTags(
+            json,
+            mapOf(
+                TaggedItemType.TASK to taskJson,
+                TaggedItemType.RECURRING_TASK to recurringJson,
+                TaggedItemType.HABIT to habitJson,
+                TaggedItemType.GOAL to goalJson,
+                TaggedItemType.SESSION to sessionJson,
+            ),
+        )
     }
 
-    /** Must run after the tasks and recurring tasks are restored: missing categories are derived from them. */
-    private fun restoreTaskCategories(categories: List<JSONObject>) {
-        taskDao.clearAllCategories()
-        categories.mapNotNull(::categoryFromBackup).forEach(taskDao::insertCategoryIfAbsent)
-        // Backups from before categories carry none: fill the table from the restored tasks.
-        for (name in taskDao.getDistinctTaskCategoryNames()) {
-            taskDao.insertCategoryIfAbsent(
-                TaskCategoryEntity(id = newId(), name = name, colorValue = TaskCategoryEntity.DEFAULT_COLOR_VALUE)
-            )
+    /** Must run after every tagged item is restored: attachments reference them. */
+    private fun restoreTags(json: JSONObject, items: Map<TaggedItemType, Map<String, JSONObject>>) {
+        val restored = tagsFromBackup(json, items)
+        tagDao.clearAllTags()
+        restored.tags.forEach(tagDao::insertTag)
+        restored.attachments.forEach { (type, byItem) ->
+            byItem.forEach { (itemId, tagIds) -> tagDao.setItemTags(type, itemId, tagIds) }
         }
     }
 
-    private fun restoreFocus(focusJson: JSONObject) {
+    /** Returns each restored session's JSON by its id. */
+    private fun restoreFocus(focusJson: JSONObject): Map<String, JSONObject> {
         focusDao.clearAllSessions()
         focusDao.clearAllModes()
-        focusDao.clearAllTags()
         focusJson.objects("modes").map(::modeFromBackup).forEach { (mode, phases) ->
             focusDao.insertMode(mode)
             if (phases.isNotEmpty()) focusDao.insertPhases(phases)
         }
-        focusJson.objects("tags").map(::tagFromBackup).forEach(focusDao::insertTag)
-        focusJson.objects("sessions").map(::sessionFromBackup).forEach { (session, distractions) ->
+        val sessionJson = LinkedHashMap<String, JSONObject>()
+        focusJson.objects("sessions").forEach { item ->
+            val (session, distractions) = sessionFromBackup(item)
+            sessionJson[session.id] = item
             focusDao.insertSession(session)
             distractions.forEach(focusDao::insertDistraction)
         }
+        return sessionJson
     }
 
     companion object {
         private const val TAG = "BackupService"
-        private const val SCHEMA_VERSION = 1
+        private const val SCHEMA_VERSION = 2
         private const val PAYLOAD_TYPE = "user_data"
 
         /** Top-level keys that identify a payload (including legacy ones) as a Timety backup. */
         private val KNOWN_DATA_KEYS = listOf(
-            "tasks", "taskCategories", "recurringTasks", "habits", "quickHabits",
+            "tags", "tasks", "taskCategories", "recurringTasks", "habits", "quickHabits",
             "goals", "dayRatings", "focus", "userProfile", "preferences",
         )
     }

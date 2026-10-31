@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WarningAmber
@@ -35,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,11 +44,8 @@ import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.stats.LegendDot
 import io.github.benji377.timety.ui.components.stats.SectionHeader
+import io.github.benji377.timety.ui.components.stats.TagBreakdownBars
 import io.github.benji377.timety.ui.theme.AppTheme
-import io.github.benji377.timety.ui.theme.ChartDeepOrange
-import io.github.benji377.timety.ui.theme.ChartTeal
-import io.github.benji377.timety.ui.theme.ErrorColor
-import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
@@ -60,6 +55,7 @@ import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -68,24 +64,28 @@ import io.github.benji377.timety.util.stats.CalibrationBucket
 import io.github.benji377.timety.util.stats.CalibrationInsight
 import io.github.benji377.timety.util.stats.EstimationCalibrator
 import io.github.benji377.timety.util.stats.StatsUtils
+import io.github.benji377.timety.util.stats.TagBreakdown
+import io.github.benji377.timety.util.stats.TagStats
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import kotlin.math.roundToInt
 
 /**
- * Shows weekly task velocity and productivity charts plus an all-time category breakdown for the
- * selected week.
+ * Shows weekly task velocity and productivity charts for the selected week, plus all-time counts
+ * per tag.
  */
 @Composable
 fun TaskStatsScreen(
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     recurringViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     focusViewModel: FocusViewModel = activityScopedViewModel(),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
+    val taskTags by tagViewModel.taskTags.collectAsState()
+    val recurringTags by tagViewModel.recurringTaskTags.collectAsState()
     var focusedDate by remember { mutableStateOf(LocalDate.now()) }
 
     // Recurring tasks feed the charts too: templates count as created once, each logged
@@ -178,8 +178,16 @@ fun TaskStatsScreen(
             }
             item { Spacer(modifier = Modifier.height(40.dp)) }
 
-            // Category breakdown, all time.
-            item { CategoryBreakdownCard(tasks, recurringItems.map { it.task.category }) }
+            // Tag counts, all time.
+            item {
+                val breakdown = remember(tasks, recurringItems, taskTags, recurringTags) {
+                    TagStats.countsByTag(
+                        tasks.map { it.task.id } + recurringItems.map { it.task.id },
+                        taskTags + recurringTags,
+                    )
+                }
+                TagBreakdownCard(breakdown)
+            }
             item { Spacer(modifier = Modifier.height(40.dp)) }
 
             // Estimation calibration, all time.
@@ -353,109 +361,29 @@ private fun SimpleBarChart(
 }
 
 @Composable
-private fun CategoryBreakdownCard(
-    tasks: List<TaskWithSubtasks>,
-    recurringCategories: List<String>,
-) {
-    val uncategorized = stringResource(R.string.taskStatsCategoryUncategorized)
-    val categoryCounts = remember(tasks, recurringCategories) {
-        val counts = LinkedHashMap<String, Int>()
-        (tasks.map { it.task.category } + recurringCategories).forEach {
-            val cat = it.ifBlank { uncategorized }
-            counts[cat] = (counts[cat] ?: 0) + 1
-        }
-        counts
-    }
-
-    if (categoryCounts.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(stringResource(R.string.taskStatsCategoryUnused))
-        }
-        return
-    }
-
-    val totalTasks = categoryCounts.values.sum()
-    val entries = categoryCounts.entries.sortedByDescending { it.value }
-    val colors = listOf(
-        TaskColor,
-        ErrorColor,
-        SuccessColor,
-        WarningColor,
-        HabitColor,
-        MaterialTheme.colorScheme.primary,
-        ChartTeal,
-        ChartDeepOrange
-    )
-
+private fun TagBreakdownCard(breakdown: TagBreakdown) {
     Column {
         SectionHeader(
-            stringResource(R.string.taskStatsDistribution),
-            stringResource(R.string.taskStatsDistributionSubtitle)
+            stringResource(R.string.taskStatsTagsTitle),
+            stringResource(R.string.taskStatsTagsSubtitle),
         )
         Spacer(modifier = Modifier.height(18.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(16.dp)
-                .clip(RoundedCornerShape(999.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            entries.forEachIndexed { index, entry ->
-                Box(
-                    modifier = Modifier
-                        .weight(entry.value.toFloat())
-                        .fillMaxHeight()
-                        .background(colors[index % colors.size])
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(18.dp))
-
-        entries.forEachIndexed { index, entry ->
-            val color = colors[index % colors.size]
-            val percent = ((entry.value.toFloat() / totalTasks) * 100).roundToInt()
-            Row(
+        if (breakdown.totals.isEmpty()) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(14.dp)
-                        .background(color, CircleShape)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    entry.key,
-                    modifier = Modifier.weight(1f),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    quantityString(
-                        R.plurals.nTasksCount,
-                        entry.value,
-                        zeroRes = R.string.nTasksCountZero,
-                        entry.value
-                    ),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    "$percent%",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                Text(stringResource(R.string.taskStatsTagsEmpty))
+            }
+        } else {
+            TagBreakdownBars(breakdown) { count ->
+                quantityString(
+                    R.plurals.nTasksCount,
+                    count,
+                    zeroRes = R.string.nTasksCountZero,
+                    count
                 )
             }
         }

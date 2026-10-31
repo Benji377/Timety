@@ -37,16 +37,15 @@ fun SettingsPageScreen(
     page: SettingsPage,
     onNavigateBack: () -> Unit,
     onNavigateToTags: () -> Unit,
-    onNavigateToCategories: () -> Unit,
 ) {
     SettingsPageScaffold(
         title = stringResource(page.titleRes),
         onNavigateBack = onNavigateBack,
     ) {
         when (page) {
-            SettingsPage.GENERAL -> GeneralSettings()
-            SettingsPage.FOCUS -> FocusSettings(onNavigateToTags = onNavigateToTags)
-            SettingsPage.TASKS -> TasksSettings(onNavigateToCategories = onNavigateToCategories)
+            SettingsPage.GENERAL -> GeneralSettings(onNavigateToTags = onNavigateToTags)
+            SettingsPage.FOCUS -> FocusSettings()
+            SettingsPage.TASKS -> TasksSettings()
             SettingsPage.NOTIFICATIONS -> NotificationSettings()
             SettingsPage.DATA_BACKUP -> DataBackupSettings()
             SettingsPage.ADVANCED -> AdvancedSettings()

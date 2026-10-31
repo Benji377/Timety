@@ -51,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
@@ -78,7 +77,6 @@ import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.focus.DistractionBottomSheet
 import io.github.benji377.timety.ui.components.focus.InteractiveGauge
 import io.github.benji377.timety.ui.components.focus.ModeTimeline
@@ -88,7 +86,6 @@ import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
@@ -181,7 +178,6 @@ fun FocusScreen(
     var showTargetSelection by remember { mutableStateOf(false) }
     var showTimeMachine by remember { mutableStateOf(false) }
     var showDistraction by remember { mutableStateOf(false) }
-    var showCreateTagDialog by remember { mutableStateOf(false) }
     var showStopConfirmation by remember { mutableStateOf(false) }
     var showResetConfirmation by remember { mutableStateOf(false) }
 
@@ -601,8 +597,6 @@ fun FocusScreen(
             onDismissRequest = { showTargetSelection = false },
             selected = selectedTarget,
             onTargetSelected = { focusViewModel.setSelectedTarget(it) },
-            onCreateNewTag = { showCreateTagDialog = true },
-            focusViewModel = focusViewModel,
         )
     }
 
@@ -636,18 +630,6 @@ fun FocusScreen(
             },
         )
     }
-
-    TextInputDialog(
-        visible = showCreateTagDialog,
-        title = stringResource(R.string.focusTagsDialogTitleAdd),
-        labelText = stringResource(R.string.focusTagsDialogLabelName),
-        hintText = stringResource(R.string.focusTagsDialogLabelHint),
-        onConfirm = { name ->
-            focusViewModel.createTag(name, TaskColor.toArgb())
-            showCreateTagDialog = false
-        },
-        onDismiss = { showCreateTagDialog = false },
-    )
 
     ConfirmationDialog(
         visible = showStopConfirmation,

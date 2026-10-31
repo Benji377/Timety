@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
+import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.RecurringCompletionUndo
 import io.github.benji377.timety.services.ReminderScheduler
@@ -20,7 +22,8 @@ import java.time.Instant
 /** Exposes recurring tasks with their occurrence logs, and applies reminder side effects. */
 class RecurringTaskViewModel(
     private val application: android.app.Application,
-    private val recurringTaskRepository: RecurringTaskRepository
+    private val recurringTaskRepository: RecurringTaskRepository,
+    private val tagRepository: TagRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
     val allRecurringTasks: StateFlow<List<RecurringTaskWithOccurrences>> =
         recurringTaskRepository.allRecurringTasks
@@ -40,17 +43,20 @@ class RecurringTaskViewModel(
         }
     }
 
-    fun addTask(task: RecurringTaskEntity) {
+    fun addTask(task: RecurringTaskEntity, tagIds: Set<String> = emptySet()) {
         launchToCompletion {
             recurringTaskRepository.insertTask(task)
+            tagRepository.setItemTags(TaggedItemType.RECURRING_TASK, task.id, tagIds)
             scheduleReminders(task)
             TaskWidget().updateAll(application)
         }
     }
 
-    fun updateTask(task: RecurringTaskEntity) {
+    /** Saves an edited task; null [tagIds] leaves its tags as they are. */
+    fun updateTask(task: RecurringTaskEntity, tagIds: Set<String>? = null) {
         launchToCompletion {
             recurringTaskRepository.updateTask(task)
+            tagIds?.let { tagRepository.setItemTags(TaggedItemType.RECURRING_TASK, task.id, it) }
             scheduleReminders(task)
             TaskWidget().updateAll(application)
         }

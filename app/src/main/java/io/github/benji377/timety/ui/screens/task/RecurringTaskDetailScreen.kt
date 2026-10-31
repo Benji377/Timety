@@ -67,7 +67,7 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.detailFieldColors
-import io.github.benji377.timety.ui.components.task.CategoryPicker
+import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.components.task.ReminderEntry
 import io.github.benji377.timety.ui.components.task.ReminderField
 import io.github.benji377.timety.ui.components.task.recurrenceOrdinalName
@@ -83,7 +83,8 @@ import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
-import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.task.RecurrenceUtils
@@ -113,13 +114,13 @@ fun RecurringTaskDetailScreen(
     recurringTaskId: String? = null,
     onNavigateBack: () -> Unit,
     viewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val existingState = remember(recurringTaskId) {
         recurringTaskId?.let { viewModel.observeTask(it) } ?: flowOf(null)
     }.collectAsState(initial = null)
     val existing = existingState.value
-    val allCategories by taskViewModel.allCategories.collectAsState()
+    val recurringTags by tagViewModel.recurringTaskTags.collectAsState()
     val existingTask = existing?.task
     val isNew = recurringTaskId == null
     val zone = ZoneId.systemDefault()
@@ -133,9 +134,8 @@ fun RecurringTaskDetailScreen(
     val formTask = rememberFormSource(existingTask, isEditing)
     var title by rememberSaveable(formTask) { mutableStateOf(existingTask?.title ?: "") }
     var description by rememberSaveable(formTask) { mutableStateOf(existingTask?.description ?: "") }
-    var category by rememberSaveable(formTask) { mutableStateOf(existingTask?.category ?: "") }
-    var isAddingNewCategory by remember { mutableStateOf(false) }
-    var newCategoryText by remember { mutableStateOf("") }
+    // Null until the user changes them, so a save doesn't overwrite tags still loading.
+    var pickedTagIds by rememberSaveable(formTask) { mutableStateOf<Set<String>?>(null) }
     var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
     // The picked time, kept apart from dueDate: a time inside a DST gap resolves to a later instant.
     var dueTimeMinutes by rememberSaveable(formTask) { mutableStateOf(existingTask?.timeOfDayMinutes) }
@@ -201,7 +201,6 @@ fun RecurringTaskDetailScreen(
             id = recurringTaskId ?: newItemId,
             title = trimmedTitle,
             description = description.trim(),
-            category = category,
             dueDate = due,
             timeOfDayMinutes = dueTimeMinutes ?: due.atZone(zone).let { it.hour * 60 + it.minute },
             unit = unit,
@@ -235,10 +234,10 @@ fun RecurringTaskDetailScreen(
             createdAt = existingTask?.createdAt ?: Instant.now(),
         )
         if (isNew) {
-            viewModel.addTask(taskToSave)
+            viewModel.addTask(taskToSave, pickedTagIds.orEmpty())
             onNavigateBack()
         } else {
-            viewModel.updateTask(taskToSave)
+            viewModel.updateTask(taskToSave, pickedTagIds)
             isEditing = false
         }
     }
@@ -286,16 +285,11 @@ fun RecurringTaskDetailScreen(
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
-                CategoryPicker(
-                    category = category,
-                    onCategoryChange = { category = it },
+                TagPicker(
+                    selectedIds = pickedTagIds
+                        ?: recurringTags[recurringTaskId].orEmpty().mapTo(LinkedHashSet()) { it.id },
+                    onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
-                    isAddingNewCategory = isAddingNewCategory,
-                    onIsAddingNewCategoryChange = { isAddingNewCategory = it },
-                    newCategoryText = newCategoryText,
-                    onNewCategoryTextChange = { newCategoryText = it },
-                    existingCategories = allCategories,
-                    onCreateCategory = { taskViewModel.createCategory(it) }
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
                 NeoOutlinedTextField(

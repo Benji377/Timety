@@ -102,7 +102,7 @@ fun TextInputDialog(
 }
 
 /**
- * Dialog for creating or editing a named, colored item (focus tag, task category): a name
+ * Dialog for creating or editing a named, colored item (a tag): a name
  * field plus a [ColorSwatchGrid]. Confirms only if the trimmed name is non-empty and
  * [isNameTaken] rejects it, in which case the field shows [nameTakenMessage].
  */

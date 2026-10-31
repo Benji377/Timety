@@ -55,6 +55,8 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import kotlinx.coroutines.launch
 import java.time.Duration
@@ -72,8 +74,9 @@ private const val MIN_SESSION_MINUTES = 1
 private const val MAX_SESSION_MINUTES = 24 * 60
 
 /**
- * Dialog for logging or editing a focus session: pick a mode, a target, a start date and time, and
- * a duration, then call [onSave] with the end derived as start + duration. The duration is capped
+ * Dialog for logging or editing a focus session: pick a mode, a tag or item target, a start date
+ * and time,
+ * and a duration, then call [onSave] with the end derived as start + duration. The duration is capped
  * at 24 hours, which is why there is no end-time field - an editable end let a mistyped date log a
  * multi-day session that broke the statistics page. A session may still span midnight (e.g. 10pm
  * to 2am); it just cannot run longer than a day.
@@ -298,9 +301,10 @@ fun EditSessionDialog(
     session: FocusSessionEntity,
     focusViewModel: FocusViewModel,
     onDismiss: () -> Unit,
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val modes by focusViewModel.allModes.collectAsState()
-    val tags by focusViewModel.allTags.collectAsState()
+    val sessionTags by tagViewModel.sessionTags.collectAsState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = LocalSnackbarHostState.current
     val updatedMessage = stringResource(R.string.focusSessionUpdatedSnackbar)
@@ -311,7 +315,9 @@ fun EditSessionDialog(
         icon = Icons.Filled.Edit,
         modes = modes,
         initialModeId = session.modeId,
-        initialTarget = remember(session) { FocusTargetSelection.fromSession(session, tags) },
+        initialTarget = remember(session) {
+            FocusTargetSelection.fromSession(session, sessionTags[session.id].orEmpty())
+        },
         initialStartTime = session.startTime,
         // A session left open-ended has no end to prefill; the editor then proposes a duration
         // running up to now - exactly the correction the user opened it for.

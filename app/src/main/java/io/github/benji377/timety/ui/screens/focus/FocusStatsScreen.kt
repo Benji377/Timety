@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.screens.focus
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,47 +29,51 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTargetType
-import io.github.benji377.timety.data.model.focus.color
+import io.github.benji377.timety.data.model.focus.displayName
+import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.common.WeekNavigator
 import io.github.benji377.timety.ui.components.focus.EditSessionDialog
 import io.github.benji377.timety.ui.components.focus.localizedFocusModeName
 import io.github.benji377.timety.ui.components.stats.SectionHeader
+import io.github.benji377.timety.ui.components.stats.TagBreakdownBars
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.stats.FocusSessionDayStats
+import io.github.benji377.timety.util.stats.TagStats
+import io.github.benji377.timety.util.tag.TagFilter
 import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * Focus session statistics: a 24-hour clock of the selected day's sessions, a session list,
- * distraction log, weekly volume chart, and an all-time breakdown by target type.
+ * Focus session statistics: a year heatmap, a 24-hour clock of the selected day's sessions, a
+ * session list, distraction log, weekly volume and time per tag, and an all-time breakdown by
+ * target type. The tag filter applies to all of them.
  */
 @Composable
 fun FocusStatsScreen(
     focusViewModel: FocusViewModel = activityScopedViewModel(),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val sessions by focusViewModel.allSessions.collectAsState()
-    val tags by focusViewModel.allTags.collectAsState()
+    val sessionTags by tagViewModel.sessionTags.collectAsState()
     val modes by focusViewModel.allModes.collectAsState()
     val distractions by focusViewModel.allDistractions.collectAsState()
 
     var focusedWeek by remember { mutableStateOf(LocalDate.now()) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
-    var selectedTagFilterId by remember { mutableStateOf<String?>(null) }
+    var selectedTagIds by remember { mutableStateOf(emptySet<String>()) }
     var editingSession by remember { mutableStateOf<FocusSessionEntity?>(null) }
 
-    // A tag that no longer has sessions (deleted or retargeted away) hides its chip and the "All"
-    // chip with it, so drop the filter instead of leaving the screen stuck on an empty selection.
-    LaunchedEffect(sessions, tags, selectedTagFilterId) {
-        val id = selectedTagFilterId ?: return@LaunchedEffect
-        if (tags.none { it.id == id } || sessions.none { it.tagId == id }) selectedTagFilterId = null
+    val usedTags = remember(sessions, sessionTags) {
+        TagFilter.usedTags(sessions.map { it.id }, sessionTags)
     }
+    val activeTagIds = TagFilter.activeIds(selectedTagIds, usedTags)
 
     if (sessions.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -79,11 +83,10 @@ fun FocusStatsScreen(
     }
 
     val zone = ZoneId.systemDefault()
-    val tagById = remember(tags) { tags.associateBy { it.id } }
     val modeById = remember(modes) { modes.associateBy { it.id } }
 
-    val filteredSessions = remember(sessions, selectedTagFilterId) {
-        if (selectedTagFilterId == null) sessions else sessions.filter { it.tagId == selectedTagFilterId }
+    val filteredSessions = remember(sessions, activeTagIds, sessionTags) {
+        TagFilter.filter(sessions, activeTagIds, sessionTags) { it.id }
     }
 
     val startOfWeek = AppDateUtils.startOfWeekMonday(focusedWeek)
@@ -101,26 +104,15 @@ fun FocusStatsScreen(
     val clockSessions = clockMinutesBySession.map { it.first }
     val clockTotalMins = clockMinutesBySession.sumOf { it.second }
 
-    val defaultTargetEmpty = stringResource(R.string.focusTargetEmpty)
     val defaultTargetUntagged = stringResource(R.string.focusTargetUntagged)
     val defaultModeLabel = stringResource(R.string.focusLabelDefault)
 
-    fun resolveTargetName(session: FocusSessionEntity): String = when (session.targetType) {
-        FocusTargetType.TASK, FocusTargetType.RECURRING_TASK, FocusTargetType.HABIT,
-        FocusTargetType.GOAL ->
-            session.targetLabel?.trim()?.takeIf { it.isNotEmpty() } ?: defaultTargetEmpty
+    fun resolveTargetName(session: FocusSessionEntity): String =
+        session.displayName(sessionTags[session.id].orEmpty()) ?: defaultTargetUntagged
 
-        FocusTargetType.TAG ->
-            if (session.tagId != null) {
-                tagById[session.tagId]?.name ?: session.targetLabel ?: defaultTargetUntagged
-            } else {
-                session.targetLabel?.trim()?.takeIf { it.isNotEmpty() } ?: defaultTargetUntagged
-            }
-    }
-
-    val selectedDayDistractions = remember(distractions, selectedTagFilterId, selectedDay) {
+    val selectedDayDistractions = remember(distractions, activeTagIds, sessionTags, selectedDay) {
         distractions.filter { entry ->
-            (selectedTagFilterId == null || entry.session.tagId == selectedTagFilterId) &&
+            TagFilter.matches(sessionTags[entry.session.id].orEmpty(), activeTagIds) &&
                     AppDateUtils.isSameDay(
                         entry.distraction.time.atZone(zone).toLocalDate(),
                         selectedDay
@@ -134,7 +126,15 @@ fun FocusStatsScreen(
             .padding(AppTheme.spaceLarge)
     ) {
         item {
-            FocusHeatmap(sessions)
+            TagFilterRow(
+                tags = usedTags,
+                selectedIds = activeTagIds,
+                onSelectionChange = { selectedTagIds = it },
+                contentPadding = PaddingValues(0.dp),
+            )
+            if (usedTags.isNotEmpty()) Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
+
+            FocusHeatmap(filteredSessions)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
             WeekNavigator(
@@ -145,14 +145,6 @@ fun FocusStatsScreen(
                 },
             )
             Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
-
-            TagFilterRow(
-                sessions = sessions,
-                tags = tags,
-                selectedTagId = selectedTagFilterId,
-                onSelect = { selectedTagFilterId = it },
-            )
-            if (sessions.any { it.tagId != null }) Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
 
             SectionHeader(
                 stringResource(R.string.focusStatsSectionClockTitle),
@@ -222,7 +214,7 @@ fun FocusStatsScreen(
                             session.modeId.let { id ->
                                 modeById[id]?.let { localizedFocusModeName(it) } ?: defaultModeLabel
                             },
-                            tagById,
+                            sessionTags[session.id].orEmpty(),
                             onEdit = { editingSession = session },
                         )
                         if (index != sortedSessions.lastIndex) HorizontalDivider(
@@ -271,10 +263,29 @@ fun FocusStatsScreen(
             }
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
 
-            // Deliberately unfiltered: this section is an all-time summary. Sessions linked to
-            // anything but a tag carry no tagId, so applying the tag filter here would
-            // zero out their bars and make the breakdown look broken.
-            TargetBreakdownSection(sessions)
+            SectionHeader(
+                stringResource(R.string.focusStatsSectionTagTimeTitle),
+                stringResource(R.string.focusStatsSectionTagTimeSubtitle),
+            )
+            Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+            val tagMinutes = remember(filteredSessions, sessionTags, startOfWeek) {
+                TagStats.minutesByTag(filteredSessions, sessionTags, startOfWeek, endOfWeek, zone)
+            }
+            if (tagMinutes.isEmpty) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = AppTheme.spaceXLarge),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(R.string.focusStatsSectionTagTimeEmpty))
+                }
+            } else {
+                TagBreakdownBars(tagMinutes) { AppDateFormatUtils.formatMinutesCompact(it) }
+            }
+            Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
+
+            TargetBreakdownSection(filteredSessions, sessionTags)
             Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
         }
     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,19 +24,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.TagChips
+import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.task.recurrenceCadenceLabel
 import io.github.benji377.timety.ui.components.task.recurringStatusColor
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -47,7 +53,10 @@ import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.tag.TagFilter
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
 import java.time.Instant
@@ -63,8 +72,18 @@ fun RecurringTasksScreen(
     onNavigateToDetail: (String?) -> Unit,
     viewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val recurringTasks by viewModel.allRecurringTasks.collectAsState()
+    val taskTags by tagViewModel.recurringTaskTags.collectAsState()
+    var selectedTagIds by remember { mutableStateOf(emptySet<String>()) }
+    val usedTags = remember(recurringTasks, taskTags) {
+        TagFilter.usedTags(recurringTasks.map { it.task.id }, taskTags)
+    }
+    val activeTagIds = TagFilter.activeIds(selectedTagIds, usedTags)
+    val visibleTasks = remember(recurringTasks, taskTags, activeTagIds) {
+        TagFilter.filter(recurringTasks, activeTagIds, taskTags) { it.task.id }
+    }
     val horizonDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val completeTask = rememberRecurringCompleter(viewModel, snackbarHostState)
@@ -109,9 +128,30 @@ fun RecurringTasksScreen(
                     bottom = AppTheme.space3XLarge,
                 ),
             ) {
-                items(recurringTasks, key = { it.task.id }) { item ->
+                item(key = "tag-filter") {
+                    TagFilterRow(
+                        tags = usedTags,
+                        selectedIds = activeTagIds,
+                        onSelectionChange = { selectedTagIds = it },
+                        modifier = Modifier.padding(bottom = AppTheme.spaceSmall),
+                    )
+                }
+                if (visibleTasks.isEmpty()) {
+                    item(key = "no-match") {
+                        Text(
+                            text = stringResource(R.string.tagFilterNoMatch),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(AppTheme.spaceLarge),
+                        )
+                    }
+                }
+                items(visibleTasks, key = { it.task.id }) { item ->
                     RecurringTaskCard(
                         item = item,
+                        tags = taskTags[item.task.id].orEmpty(),
                         status = RecurrenceUtils.statusOf(item.task, Instant.now(), horizonDays),
                         onClick = { onNavigateToDetail(item.task.id) },
                         onComplete = { completeTask(item.task) },
@@ -125,6 +165,7 @@ fun RecurringTasksScreen(
 @Composable
 private fun RecurringTaskCard(
     item: RecurringTaskWithOccurrences,
+    tags: List<TagEntity>,
     status: RecurringStatus,
     onClick: () -> Unit,
     onComplete: () -> Unit,
@@ -193,6 +234,10 @@ private fun RecurringTaskCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (tags.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                    TagChips(tags)
+                }
             }
             // Quick-complete only makes sense for actionable occurrences; far-future ones are
             // completed early through the detail page instead.

@@ -35,12 +35,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitBottomSheet
 import io.github.benji377.timety.ui.components.habit.HabitListTile
@@ -52,7 +54,10 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.tag.TagFilter
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -68,8 +73,10 @@ fun HabitListScreen(
     onNavigateToHabitDetail: (String?) -> Unit,
     onNavigateToQuickHabits: () -> Unit = {},
     onNavigateToGoals: () -> Unit = {},
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val habitsWithCompletions by viewModel.habitsWithCompletions.collectAsState()
+    val habitTags by tagViewModel.habitTags.collectAsState()
     val use24HourFormat by settingsViewModel.use24HourFormat.collectAsState()
     val isDueTodayExpanded by settingsViewModel.accordionExpanded(AccordionKey.HABITS_DUE_TODAY)
         .collectAsState()
@@ -80,11 +87,17 @@ fun HabitListScreen(
     var historySheetFor by remember { mutableStateOf<HabitWithCompletions?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var reorderMode by remember { mutableStateOf(false) }
+    var selectedTagIds by remember { mutableStateOf(emptySet<String>()) }
+    val usedTags = remember(habitsWithCompletions, habitTags) {
+        TagFilter.usedTags(habitsWithCompletions.map { it.habit.id }, habitTags)
+    }
+    val activeTagIds = TagFilter.activeIds(selectedTagIds, usedTags)
 
     // Habits have no description field (unlike tasks), so search matches name and notes.
-    val filteredHabits = remember(habitsWithCompletions, searchQuery) {
-        if (searchQuery.isBlank()) habitsWithCompletions
-        else habitsWithCompletions.filter { hwc ->
+    val filteredHabits = remember(habitsWithCompletions, searchQuery, activeTagIds, habitTags) {
+        val tagged = TagFilter.filter(habitsWithCompletions, activeTagIds, habitTags) { it.habit.id }
+        if (searchQuery.isBlank()) tagged
+        else tagged.filter { hwc ->
             hwc.habit.name.lowercase().contains(searchQuery.lowercase()) ||
                     hwc.habit.notes?.lowercase()?.contains(searchQuery.lowercase()) == true
         }
@@ -156,12 +169,25 @@ fun HabitListScreen(
                     NeoIconButton(
                         onClick = {
                             reorderMode = !reorderMode
-                            if (reorderMode) searchQuery = ""
+                            if (reorderMode) {
+                                searchQuery = ""
+                                selectedTagIds = emptySet()
+                            }
                         },
                         icon = Icons.Filled.DragHandle,
                         contentDescription = stringResource(R.string.habitListReorderToggleTooltip),
                         contentColor = if (reorderMode) HabitColor
                         else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                // Hidden while reordering: a filtered list can't be reordered.
+                if (!reorderMode) {
+                    TagFilterRow(
+                        tags = usedTags,
+                        selectedIds = activeTagIds,
+                        onSelectionChange = { selectedTagIds = it },
+                        modifier = Modifier.padding(top = AppTheme.spaceSmall),
                     )
                 }
 
@@ -228,6 +254,7 @@ fun HabitListScreen(
                                             isReorderMode = isReorderMode,
                                             viewModel = viewModel,
                                             use24HourFormat = use24HourFormat,
+                                            tags = habitTags[habit.habit.id].orEmpty(),
                                             onNavigateToHabitDetail = onNavigateToHabitDetail,
                                             onOpenHistory = { historySheetFor = habit },
                                         )
@@ -269,6 +296,7 @@ fun HabitListScreen(
                                             isReorderMode = isReorderMode,
                                             viewModel = viewModel,
                                             use24HourFormat = use24HourFormat,
+                                            tags = habitTags[habit.habit.id].orEmpty(),
                                             onNavigateToHabitDetail = onNavigateToHabitDetail,
                                             onOpenHistory = { historySheetFor = habit },
                                         )
@@ -310,6 +338,7 @@ fun HabitListScreen(
                                             isReorderMode = isReorderMode,
                                             viewModel = viewModel,
                                             use24HourFormat = use24HourFormat,
+                                            tags = habitTags[habit.habit.id].orEmpty(),
                                             onNavigateToHabitDetail = onNavigateToHabitDetail,
                                             onOpenHistory = { historySheetFor = habit },
                                         )
@@ -349,6 +378,7 @@ private fun HabitTileWrapper(
     isReorderMode: Boolean,
     viewModel: HabitViewModel,
     use24HourFormat: Boolean,
+    tags: List<TagEntity>,
     onNavigateToHabitDetail: (String?) -> Unit,
     onOpenHistory: () -> Unit,
 ) {
@@ -380,6 +410,7 @@ private fun HabitTileWrapper(
         isLocked = isLocked,
         isReorderMode = isReorderMode,
         subtitleText = subtitleText,
+        tags = tags,
         progressValue = progressValue,
         onToggleCompleted = { viewModel.toggleCompletionToday(habit.id) },
         onMarkPastCompletion = onOpenHistory,

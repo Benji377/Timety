@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.screens.task
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,8 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -29,12 +28,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskSortOption
@@ -49,10 +51,10 @@ import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoFab
-import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.task.RecurringTaskListTile
 import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -63,20 +65,23 @@ import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
-import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.util.tag.TagFilter
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.TaskFilterEngine
+import kotlinx.coroutines.flow.drop
 import java.time.Instant
 import java.time.ZoneId
 
 /**
  * Shows all tasks grouped into overdue, due-today, upcoming, and completed sections, with search,
- * category filtering, and sorting controls.
+ * tag filtering, and sorting controls.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,8 +92,11 @@ fun TaskListScreen(
     onNavigateToTaskDetail: (String?) -> Unit,
     onNavigateToRecurring: () -> Unit = {},
     onNavigateToRecurringDetail: (String) -> Unit = {},
+    tagViewModel: TagViewModel = activityScopedViewModel(),
 ) {
     val tasks by viewModel.allTasks.collectAsState()
+    val taskTags by tagViewModel.taskTags.collectAsState()
+    val recurringTags by tagViewModel.recurringTaskTags.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
     val horizonDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val completeRecurring =
@@ -101,6 +109,7 @@ fun TaskListScreen(
         onCompleteRecurring = completeRecurring,
         onOpenRecurring = onNavigateToRecurringDetail,
     )
+    val rowContext = TaskRowContext(rowActions, taskTags, recurringTags)
 
     val isOverdueExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_OVERDUE)
         .collectAsState()
@@ -112,17 +121,18 @@ fun TaskListScreen(
         .collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
-    var selectedCategoryFilter by remember { mutableStateOf<String?>(null) }
+    var selectedTagIds by remember { mutableStateOf(emptySet<String>()) }
     var sortOption by remember { mutableStateOf(TaskSortOption.DUE_DATE) }
     var isAscending by remember { mutableStateOf(true) }
     var sortMenuExpanded by remember { mutableStateOf(false) }
 
-    // Filter pills come from the tasks themselves (not the task_categories table) so
-    // only categories that actually match something are offered; untrimmed so each
-    // pill matches TaskFilterEngine's exact category comparison.
-    val allCategories = remember(tasks, recurringItems) {
-        (tasks.map { it.task.category } + recurringItems.map { it.task.category })
-            .filter { it.isNotBlank() }.distinct().sorted()
+    // A changed result starts from the top. Otherwise the list stays anchored on its first visible
+    // row, leaving sections that reappear above it (like Overdue) scrolled out of view.
+    val listState = rememberLazyListState()
+    LaunchedEffect(listState) {
+        snapshotFlow { selectedTagIds to searchQuery }
+            .drop(1)
+            .collect { listState.requestScrollToItem(0) }
     }
 
     // Recurring tasks join the list only while actionable (overdue, due today, or within the
@@ -134,30 +144,34 @@ fun TaskListScreen(
             .groupBy { RecurrenceUtils.statusOf(it, now, horizonDays) }
             .filterKeys { it != RecurringStatus.SCHEDULED }
     }
-    val filteredRecurring = remember(actionableRecurring, searchQuery, selectedCategoryFilter) {
+
+    // Pills come from what this list can show, so each one matches something on its own.
+    val usedTags = remember(tasks, actionableRecurring, taskTags, recurringTags) {
+        (TagFilter.usedTags(tasks.map { it.task.id }, taskTags) +
+                TagFilter.usedTags(actionableRecurring.values.flatten().map { it.id }, recurringTags))
+            .distinctBy { it.id }
+            .sortedBy { it.name.lowercase() }
+    }
+    val activeTagIds = TagFilter.activeIds(selectedTagIds, usedTags)
+
+    val filteredRecurring = remember(actionableRecurring, searchQuery, activeTagIds, recurringTags) {
         actionableRecurring.mapValues { (_, grouped) ->
             grouped.filter { task ->
-                (selectedCategoryFilter.isNullOrEmpty() || task.category == selectedCategoryFilter) &&
+                TagFilter.matches(recurringTags[task.id].orEmpty(), activeTagIds) &&
                         (searchQuery.isEmpty() ||
                                 task.title.lowercase().contains(searchQuery.lowercase()) ||
                                 task.description.lowercase().contains(searchQuery.lowercase()))
             }
         }
     }
-    val categoryEntities by viewModel.allCategories.collectAsState()
-    val categoryColors = remember(categoryEntities) {
-        categoryEntities.associate { it.name to it.colorValue }
-    }
-
     val processedTasks =
-        remember(tasks, searchQuery, selectedCategoryFilter, sortOption, isAscending) {
+        remember(tasks, searchQuery, activeTagIds, taskTags, sortOption, isAscending) {
             val engine = TaskFilterEngine(
                 searchQuery = searchQuery,
-                categoryFilter = selectedCategoryFilter,
                 sortOption = sortOption,
                 isAscending = isAscending
             )
-            engine.process(tasks) { it.task }
+            engine.process(TagFilter.filter(tasks, activeTagIds, taskTags) { it.task.id }) { it.task }
         }
 
     Scaffold(
@@ -241,38 +255,13 @@ fun TaskListScreen(
                 )
             }
 
-            // Category filter pills.
-            if (allCategories.isNotEmpty()) {
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(vertical = AppTheme.spaceSmall),
-                    contentPadding = PaddingValues(horizontal = AppTheme.spaceSmall),
-                    horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall)
-                ) {
-                    item {
-                        NeoFilterChip(
-                            selected = selectedCategoryFilter == null,
-                            onClick = { selectedCategoryFilter = null },
-                            label = stringResource(R.string.taskListFilterAll)
-                        )
-                    }
-                    items(allCategories, key = { it }) { category ->
-                        val isSelected = selectedCategoryFilter == category
-                        NeoFilterChip(
-                            selected = isSelected,
-                            onClick = {
-                                selectedCategoryFilter = if (isSelected) null else category
-                            },
-                            label = category,
-                            leadingIcon = {
-                                categoryColors[category]?.let { AppUtils.CategoryDot(it) }
-                            }
-                        )
-                    }
-                }
-            }
+            // Tag filter pills.
+            TagFilterRow(
+                tags = usedTags,
+                selectedIds = activeTagIds,
+                onSelectionChange = { selectedTagIds = it },
+                modifier = Modifier.padding(vertical = AppTheme.spaceSmall),
+            )
 
             // Scrollable task list.
             Box(
@@ -310,6 +299,7 @@ fun TaskListScreen(
                     // Rows are lazy items rather than a Column inside one item, so an expanded
                     // section with hundreds of completed tasks only composes what's on screen.
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
@@ -324,7 +314,7 @@ fun TaskListScreen(
                                 },
                                 tasks = buckets.overdue,
                                 isOverdue = true,
-                                actions = rowActions,
+                                row = rowContext,
                                 recurringTasks = recurringOverdue,
                                 recurringStatus = RecurringStatus.OVERDUE,
                             )
@@ -339,7 +329,7 @@ fun TaskListScreen(
                                     settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_DUE_TODAY, it)
                                 },
                                 tasks = buckets.dueToday,
-                                actions = rowActions,
+                                row = rowContext,
                                 recurringTasks = recurringToday,
                                 recurringStatus = RecurringStatus.DUE_TODAY,
                             )
@@ -354,7 +344,7 @@ fun TaskListScreen(
                                     settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_UPCOMING, it)
                                 },
                                 tasks = buckets.todo,
-                                actions = rowActions,
+                                row = rowContext,
                                 recurringTasks = recurringUpcoming,
                                 recurringStatus = RecurringStatus.UPCOMING,
                             )
@@ -369,7 +359,7 @@ fun TaskListScreen(
                                     settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_DONE, it)
                                 },
                                 tasks = buckets.done,
-                                actions = rowActions,
+                                row = rowContext,
                             )
                         }
                     }
@@ -386,7 +376,6 @@ private fun sortOptionLabel(option: TaskSortOption): String = when (option) {
     TaskSortOption.PRIORITY -> stringResource(R.string.taskListSortPriority)
     TaskSortOption.SIZE -> stringResource(R.string.taskListSortSize)
     TaskSortOption.ALPHABETICAL -> stringResource(R.string.taskListSortAlphabetical)
-    TaskSortOption.CATEGORY -> stringResource(R.string.taskListSortCategory)
 }
 
 /** The task list's sections; completed tasks go to [done] whatever their due date. */
@@ -428,6 +417,13 @@ private class TaskRowActions(
     val onOpenRecurring: (String) -> Unit,
 )
 
+/** What every section's rows share: their [actions] and the tags they show. */
+private class TaskRowContext(
+    val actions: TaskRowActions,
+    val taskTags: Map<String, List<TagEntity>>,
+    val recurringTags: Map<String, List<TagEntity>>,
+)
+
 /** One collapsible section: a header item, then a lazy item per row while expanded. */
 private fun LazyListScope.taskSection(
     key: String,
@@ -436,7 +432,7 @@ private fun LazyListScope.taskSection(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     tasks: List<TaskWithSubtasks>,
-    actions: TaskRowActions,
+    row: TaskRowContext,
     isOverdue: Boolean = false,
     recurringTasks: List<RecurringTaskEntity> = emptyList(),
     recurringStatus: RecurringStatus = RecurringStatus.SCHEDULED,
@@ -458,9 +454,10 @@ private fun LazyListScope.taskSection(
                 isOverdue = isOverdue,
                 subtasksCompleted = taskWithSubtasks.subtasks.count { it.isCompleted },
                 subtasksTotal = taskWithSubtasks.subtasks.size,
-                onToggleCompleted = { actions.onToggleCompleted(taskEntity) },
-                onTap = { actions.onOpenTask(taskEntity.id) },
-                onDelete = { actions.onDeleteTask(taskEntity) },
+                onToggleCompleted = { row.actions.onToggleCompleted(taskEntity) },
+                onTap = { row.actions.onOpenTask(taskEntity.id) },
+                onDelete = { row.actions.onDeleteTask(taskEntity) },
+                tags = row.taskTags[taskEntity.id].orEmpty(),
                 modifier = Modifier.animateItem(),
             )
         }
@@ -468,8 +465,9 @@ private fun LazyListScope.taskSection(
             RecurringTaskListTile(
                 task = recurringTask,
                 status = recurringStatus,
-                onComplete = { actions.onCompleteRecurring(recurringTask) },
-                onTap = { actions.onOpenRecurring(recurringTask.id) },
+                onComplete = { row.actions.onCompleteRecurring(recurringTask) },
+                onTap = { row.actions.onOpenRecurring(recurringTask.id) },
+                tags = row.recurringTags[recurringTask.id].orEmpty(),
                 modifier = Modifier.animateItem(),
             )
         }

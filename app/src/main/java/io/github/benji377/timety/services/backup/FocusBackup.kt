@@ -5,7 +5,6 @@ import io.github.benji377.timety.data.model.focus.DistractionType
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusModeType
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
@@ -49,18 +48,6 @@ internal fun modeFromBackup(json: JSONObject): Pair<FocusModeEntity, List<Sessio
     return mode to phases
 }
 
-internal fun FocusTagEntity.toBackupJson(): JSONObject = JSONObject().apply {
-    put("id", id)
-    put("name", name)
-    put("colorValue", colorValue)
-}
-
-internal fun tagFromBackup(json: JSONObject) = FocusTagEntity(
-    id = json.stringOrNull("id") ?: newId(),
-    name = json.stringOrNull("name") ?: "",
-    colorValue = json.optInt("colorValue", 0),
-)
-
 internal fun sessionToBackupJson(session: FocusSessionEntity, distractions: List<DistractionEntity>): JSONObject =
     JSONObject().apply {
         put("id", session.id)
@@ -69,7 +56,6 @@ internal fun sessionToBackupJson(session: FocusSessionEntity, distractions: List
         put("endTime", orNull(session.endTime?.toString()))
         put("totalSecondsFocused", session.totalSecondsFocused)
         put("isCompleted", session.isCompleted)
-        put("tagId", orNull(session.tagId))
         put("targetType", session.targetType.name)
         put("targetId", orNull(session.targetId))
         put("targetLabel", orNull(session.targetLabel))
@@ -84,6 +70,9 @@ internal fun sessionToBackupJson(session: FocusSessionEntity, distractions: List
 
 internal fun sessionFromBackup(json: JSONObject): Pair<FocusSessionEntity, List<DistractionEntity>> {
     val id = json.stringOrNull("id") ?: newId()
+    val targetType = json.enumOr("targetType", FocusTargetType.TAG)
+    // Older backups store the focus tag as a tag session's target; only items are targets now.
+    val hasItem = targetType != FocusTargetType.TAG
     val session = FocusSessionEntity(
         id = id,
         modeId = json.stringOrNull("modeId") ?: "",
@@ -91,10 +80,9 @@ internal fun sessionFromBackup(json: JSONObject): Pair<FocusSessionEntity, List<
         endTime = json.instantOrNull("endTime"),
         totalSecondsFocused = json.optInt("totalSecondsFocused", 0),
         isCompleted = json.optBoolean("isCompleted", false),
-        tagId = json.stringOrNull("tagId"),
-        targetType = json.enumOr("targetType", FocusTargetType.TAG),
-        targetId = json.stringOrNull("targetId"),
-        targetLabel = json.stringOrNull("targetLabel"),
+        targetType = targetType,
+        targetId = json.stringOrNull("targetId")?.takeIf { hasItem },
+        targetLabel = json.stringOrNull("targetLabel")?.takeIf { hasItem },
     )
     val distractions = json.objects("distractions").map { distraction ->
         DistractionEntity(

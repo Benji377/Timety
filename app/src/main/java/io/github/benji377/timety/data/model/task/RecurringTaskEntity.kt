@@ -52,8 +52,6 @@ data class RecurringTaskEntity(
     val id: String,
     val title: String,
     val description: String = "",
-    /** Category name, like [TaskEntity.category]; feeds the stats breakdown and list filters. */
-    val category: String = "",
     /** The next occurrence; advanced on completion. Also the anchor for week math. */
     val dueDate: Instant,
     /** Local time of day in minutes after midnight. Null = the due date's time of day. */

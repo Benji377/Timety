@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.HabitRepository
+import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +24,8 @@ import java.time.ZoneId
 /** Exposes habits and their completions, and applies reminder/widget side effects for changes to them. */
 class HabitViewModel(
     private val application: android.app.Application,
-    private val habitRepository: HabitRepository
+    private val habitRepository: HabitRepository,
+    private val tagRepository: TagRepository
 ) : androidx.lifecycle.AndroidViewModel(application) {
     val allHabits: StateFlow<List<HabitEntity>> = habitRepository.allHabits
         .stateIn(
@@ -55,17 +58,20 @@ class HabitViewModel(
         }
     }
 
-    fun addHabit(habit: HabitEntity) {
+    fun addHabit(habit: HabitEntity, tagIds: Set<String> = emptySet()) {
         launchToCompletion {
             habitRepository.insertHabit(habit)
+            tagRepository.setItemTags(TaggedItemType.HABIT, habit.id, tagIds)
             refreshHabitReminder(habit.id)
             HabitWidget().updateAll(application)
         }
     }
 
-    fun updateHabit(habit: HabitEntity) {
+    /** Saves an edited habit; null [tagIds] leaves its tags as they are. */
+    fun updateHabit(habit: HabitEntity, tagIds: Set<String>? = null) {
         launchToCompletion {
             habitRepository.updateHabit(habit)
+            tagIds?.let { tagRepository.setItemTags(TaggedItemType.HABIT, habit.id, it) }
             refreshHabitReminder(habit.id)
             HabitWidget().updateAll(application)
         }

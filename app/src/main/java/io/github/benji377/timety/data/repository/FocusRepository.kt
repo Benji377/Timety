@@ -4,7 +4,6 @@ import io.github.benji377.timety.data.local.dao.FocusDao
 import io.github.benji377.timety.data.model.focus.DistractionEntity
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +15,6 @@ class FocusRepository(
 ) {
     val allModes: Flow<List<FocusModeEntity>> = focusDao.getAllModes()
     val allSessions: Flow<List<FocusSessionEntity>> = focusDao.getAllSessions()
-    val allTags: Flow<List<FocusTagEntity>> = focusDao.getAllTags()
     val allDistractions: Flow<List<DistractionEntity>> = focusDao.getAllDistractions()
 
     suspend fun insertModeWithPhases(mode: FocusModeEntity, phases: List<SessionPhaseEntity>) =
@@ -53,17 +51,8 @@ class FocusRepository(
         focusDao.insertDistraction(distraction)
     }
 
-    suspend fun insertTag(tag: FocusTagEntity) = withContext(Dispatchers.IO) {
-        focusDao.insertTag(tag)
-    }
-
     suspend fun clearAll() = withContext(Dispatchers.IO) {
         focusDao.clearAllSessions()
         focusDao.clearAllModes()
-        focusDao.clearAllTags()
-    }
-
-    suspend fun deleteTag(tag: FocusTagEntity) = withContext(Dispatchers.IO) {
-        focusDao.deleteTag(tag)
     }
 }

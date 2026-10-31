@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.components.focus
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,12 +11,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.outlined.Lock
@@ -38,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.focus.DistractionUIType
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetSelection
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.icon
@@ -55,18 +52,21 @@ import io.github.benji377.timety.data.model.goal.GoalWithEntries
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.NeoTabRow
+import io.github.benji377.timety.ui.components.common.TagDot
+import io.github.benji377.timety.ui.components.common.TagEditDialog
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
-import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -135,32 +135,34 @@ private enum class TargetTab(val labelRes: Int) {
 }
 
 /**
- * Bottom sheet for picking the target of a focus session: a tag, a task or recurring task, a
- * habit, or an active goal, presented as tabs. Opens on the tab of [selected]. Passing null for
- * [onCreateNewTag] hides the "add tag" row.
+ * Bottom sheet for picking the one thing a focus session is logged against: a tag, a task or
+ * recurring task, a habit, or an active goal, presented as tabs. Opens on the tab of [selected].
+ * Picks null for "no target".
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TargetSelectorBottomSheet(
     onDismissRequest: () -> Unit,
     selected: FocusTargetSelection?,
-    onTargetSelected: (FocusTargetSelection) -> Unit,
-    onCreateNewTag: (() -> Unit)? = null,
+    onTargetSelected: (FocusTargetSelection?) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-    focusViewModel: FocusViewModel = activityScopedViewModel(),
+    tagViewModel: TagViewModel = activityScopedViewModel(),
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     recurringTaskViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     goalViewModel: GoalViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    val tags by focusViewModel.allTags.collectAsState()
+    val tags by tagViewModel.allTags.collectAsState()
+    val taskTags by tagViewModel.taskTags.collectAsState()
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurringTasks by recurringTaskViewModel.allRecurringTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
     val goals by goalViewModel.goalsWithEntries.collectAsState()
     var tab by remember { mutableStateOf(TargetTab.of(selected?.type)) }
 
-    val select: (FocusTargetSelection) -> Unit = {
+    var showCreateTag by remember { mutableStateOf(false) }
+
+    val select: (FocusTargetSelection?) -> Unit = {
         onTargetSelected(it)
         onDismissRequest()
     }
@@ -187,21 +189,24 @@ fun TargetSelectorBottomSheet(
                     selectedIndex = tab.ordinal,
                     onTabSelected = { tab = TargetTab.entries[it] }
                 )
+                if (selected != null) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Filled.Close, contentDescription = null) },
+                        headlineContent = { Text(stringResource(R.string.focusTargetEmpty)) },
+                        modifier = Modifier.clickable { select(null) },
+                    )
+                    HorizontalDivider()
+                }
                 Box(modifier = Modifier.fillMaxSize()) {
                     when (tab) {
                         TargetTab.TAGS -> TagTab(
                             tags,
                             selected,
                             { select(FocusTargetSelection.tag(it)) },
-                            onCreateNewTag?.let { create ->
-                                {
-                                    onDismissRequest()
-                                    create()
-                                }
-                            },
+                            { showCreateTag = true },
                         )
 
-                        TargetTab.TASKS -> TaskTab(recurringTasks, tasks, selected, select)
+                        TargetTab.TASKS -> TaskTab(recurringTasks, tasks, taskTags, selected, select)
                         TargetTab.HABITS -> HabitTab(habitsWithCompletions, selected) {
                             select(FocusTargetSelection.of(FocusTargetType.HABIT, it.id, it.name))
                         }
@@ -211,6 +216,56 @@ fun TargetSelectorBottomSheet(
                 }
             }
         }
+    }
+
+    if (showCreateTag) {
+        TagEditDialog(
+            tag = null,
+            allTags = tags,
+            onConfirm = { name, colorValue ->
+                tagViewModel.createTag(name, colorValue) { select(FocusTargetSelection.tag(it)) }
+                showCreateTag = false
+            },
+            onDismiss = { showCreateTag = false },
+        )
+    }
+}
+
+@Composable
+private fun TagTab(
+    tags: List<TagEntity>,
+    selected: FocusTargetSelection?,
+    onTagSelected: (TagEntity) -> Unit,
+    onCreateNewTag: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (tags.isEmpty()) {
+            EmptyState(stringResource(R.string.focusTagsLabelEmpty), Modifier.weight(1f))
+        } else {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(tags, key = { it.id }) { tag ->
+                    val isSelected = selected.isTarget(FocusTargetType.TAG, tag.id)
+                    ListItem(
+                        leadingContent = { TagDot(tag.colorValue, Modifier.size(24.dp)) },
+                        headlineContent = {
+                            Text(
+                                tag.name,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        trailingContent = { SelectedMark(isSelected) },
+                        modifier = Modifier.clickable { onTagSelected(tag) },
+                    )
+                    HorizontalDivider()
+                }
+            }
+        }
+        HorizontalDivider()
+        ListItem(
+            leadingContent = { Icon(Icons.Filled.AddCircleOutline, contentDescription = null) },
+            headlineContent = { Text(stringResource(R.string.focusTagsLabelAdd)) },
+            modifier = Modifier.clickable { onCreateNewTag() },
+        )
     }
 }
 
@@ -241,56 +296,10 @@ private fun SectionLabel(text: String) {
 }
 
 @Composable
-private fun TagTab(
-    tags: List<FocusTagEntity>,
-    selected: FocusTargetSelection?,
-    onTagSelected: (FocusTagEntity) -> Unit,
-    onCreateNewTag: (() -> Unit)?,
-) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        if (tags.isEmpty()) {
-            EmptyState(stringResource(R.string.focusTagsLabelEmpty), Modifier.weight(1f))
-        } else {
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(tags, key = { it.id }) { tag ->
-                    val isSelected = selected.isTarget(FocusTargetType.TAG, tag.id)
-                    ListItem(
-                        leadingContent = {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(tag.colorValue)),
-                            )
-                        },
-                        headlineContent = {
-                            Text(
-                                tag.name,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        trailingContent = { SelectedMark(isSelected) },
-                        modifier = Modifier.clickable { onTagSelected(tag) },
-                    )
-                    HorizontalDivider()
-                }
-            }
-        }
-        if (onCreateNewTag != null) {
-            HorizontalDivider()
-            ListItem(
-                leadingContent = { Icon(Icons.Filled.AddCircleOutline, contentDescription = null) },
-                headlineContent = { Text(stringResource(R.string.focusTagsLabelAdd)) },
-                modifier = Modifier.clickable { onCreateNewTag() },
-            )
-        }
-    }
-}
-
-@Composable
 private fun TaskTab(
     recurringTasks: List<RecurringTaskWithOccurrences>,
     tasks: List<TaskWithSubtasks>,
+    taskTags: Map<String, List<TagEntity>>,
     selected: FocusTargetSelection?,
     onSelected: (FocusTargetSelection) -> Unit,
 ) {
@@ -364,7 +373,7 @@ private fun TaskTab(
                 },
                 supportingContent = {
                     Text(
-                        task.category.ifBlank {
+                        taskTags[task.id].orEmpty().joinToString(", ") { it.name }.ifBlank {
                             if (task.isCompleted) stringResource(R.string.taskLabelCompleted) else stringResource(
                                 R.string.globalLabelTask
                             )

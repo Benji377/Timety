@@ -10,7 +10,6 @@ import androidx.room.Upsert
 import io.github.benji377.timety.data.model.focus.DistractionEntity
 import io.github.benji377.timety.data.model.focus.FocusModeEntity
 import io.github.benji377.timety.data.model.focus.FocusSessionEntity
-import io.github.benji377.timety.data.model.focus.FocusTagEntity
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -62,22 +61,9 @@ interface FocusDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertDistraction(distraction: DistractionEntity)
 
-    // Tags
-    @Query("SELECT * FROM focus_tags")
-    fun getAllTags(): Flow<List<FocusTagEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertTag(tag: FocusTagEntity)
-
-    @Delete
-    fun deleteTag(tag: FocusTagEntity)
-
     @Query("DELETE FROM focus_sessions")
     fun clearAllSessions()
 
     @Query("DELETE FROM focus_modes")
     fun clearAllModes()
-
-    @Query("DELETE FROM focus_tags")
-    fun clearAllTags()
 }

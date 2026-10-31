@@ -2,6 +2,10 @@ package io.github.benji377.timety.data.local
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.tag.LegacySession
+import io.github.benji377.timety.data.model.tag.LegacyTag
+import io.github.benji377.timety.data.model.tag.mergeLegacyTags
 
 /**
  * Room migrations. The 2.0.0 release shipped schema version 1; every schema change from here on
@@ -136,8 +140,8 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
 
 /**
  * Drops `user_profile.unlockedAchievements` and `user_profile.totalXp` (SQLite on API 26 cannot
- * drop a column, so the table is rebuilt), and adds the recurring-task columns and
- * `subtasks.sortOrder`.
+ * drop a column, so the table is rebuilt), adds the recurring-task columns and
+ * `subtasks.sortOrder`, and replaces the task categories and focus tags with global tags.
  */
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -161,8 +165,186 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
             "UPDATE `subtasks` SET `sortOrder` = (SELECT COUNT(*) FROM `subtasks` AS `s` " +
                     "WHERE `s`.`taskId` = `subtasks`.`taskId` AND `s`.`rowid` < `subtasks`.`rowid`)"
         )
+
+        createGlobalTags(db)
     }
 }
+
+/**
+ * Reads the task categories and focus tags, removes them, then creates the tag tables and fills
+ * them. The join tables come after the rebuilt tables, so they never need parking.
+ */
+private fun createGlobalTags(db: SupportSQLiteDatabase) {
+    val taskCategories = readCategoriesById(db, "tasks")
+    val recurringCategories = readCategoriesById(db, "recurring_tasks")
+    val categories = readLegacyTags(db, "task_categories")
+    val focusTags = readLegacyTags(db, "focus_tags")
+    val sessions = readLegacySessions(db)
+
+    dropCategoriesAndFocusTags(db)
+
+    db.execSQL(
+        "CREATE TABLE `tags` (`id` TEXT NOT NULL, `name` TEXT NOT NULL COLLATE NOCASE, " +
+                "`colorValue` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+    )
+    db.execSQL("CREATE UNIQUE INDEX `index_tags_name` ON `tags` (`name`)")
+    createTagJoinTable(db, "task_tags", "taskId", "tasks")
+    createTagJoinTable(db, "recurring_task_tags", "recurringTaskId", "recurring_tasks")
+    createTagJoinTable(db, "habit_tags", "habitId", "habits")
+    createTagJoinTable(db, "goal_tags", "goalId", "goals")
+    createTagJoinTable(db, "session_tags", "sessionId", "focus_sessions")
+
+    val merged = mergeLegacyTags(
+        categories = categories,
+        focusTags = focusTags,
+        usedNames = taskCategories.values + recurringCategories.values +
+                sessions.values.mapNotNull { it.deletedTagLabel(focusTags) },
+    )
+    merged.tags.forEach { tag ->
+        db.execSQL(
+            "INSERT INTO `tags` (`id`, `name`, `colorValue`) VALUES (?, ?, ?)",
+            arrayOf<Any>(tag.id, tag.name, tag.colorValue)
+        )
+    }
+
+    fun attach(table: String, column: String, itemId: String, tagId: String) = db.execSQL(
+        "INSERT OR IGNORE INTO `$table` (`$column`, `tagId`) VALUES (?, ?)",
+        arrayOf<Any>(itemId, tagId)
+    )
+    taskCategories.forEach { (id, category) ->
+        merged.idForName(category)?.let { attach("task_tags", "taskId", id, it) }
+    }
+    recurringCategories.forEach { (id, category) ->
+        merged.idForName(category)?.let { attach("recurring_task_tags", "recurringTaskId", id, it) }
+    }
+    sessions.forEach { (id, session) ->
+        val tagId = merged.idForSession(session) { type, targetId ->
+            if (type == FocusTargetType.TASK) taskCategories[targetId] else recurringCategories[targetId]
+        }
+        tagId?.let { attach("session_tags", "sessionId", id, it) }
+    }
+}
+
+/**
+ * Removes `tasks.category`, `recurring_tasks.category` and `focus_sessions.tagId` (SQLite on API 26
+ * cannot drop a column), and the tables they pointed to. A tag session's target was its focus tag,
+ * so those lose it: only items are targets now.
+ */
+private fun dropCategoriesAndFocusTags(db: SupportSQLiteDatabase) {
+    rebuildTable(
+        db,
+        table = "tasks",
+        child = "subtasks",
+        definition = "`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, " +
+                "`dueDate` INTEGER, `location` TEXT NOT NULL, `priority` TEXT NOT NULL, " +
+                "`size` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, `completedAt` INTEGER, " +
+                "`createdAt` INTEGER NOT NULL, `reminders` TEXT NOT NULL, `place` TEXT, " +
+                "PRIMARY KEY(`id`)",
+        columns = "`id`, `title`, `description`, `dueDate`, `location`, `priority`, `size`, " +
+                "`isCompleted`, `completedAt`, `createdAt`, `reminders`, `place`",
+    )
+    rebuildTable(
+        db,
+        table = "recurring_tasks",
+        child = "recurring_occurrences",
+        definition = "`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, " +
+                "`dueDate` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, " +
+                "`interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, " +
+                "`monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, " +
+                "`reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`id`)",
+        columns = "`id`, `title`, `description`, `dueDate`, `timeOfDayMinutes`, `unit`, `interval`, " +
+                "`daysOfWeek`, `monthlyMode`, `monthlyDay`, `monthlyOrdinal`, `monthlyWeekday`, " +
+                "`reminderOffsetsMinutes`, `createdAt`",
+    )
+    rebuildTable(
+        db,
+        table = "focus_sessions",
+        child = "distractions",
+        definition = "`id` TEXT NOT NULL, `modeId` TEXT NOT NULL, `startTime` INTEGER NOT NULL, " +
+                "`endTime` INTEGER, `totalSecondsFocused` INTEGER NOT NULL, " +
+                "`isCompleted` INTEGER NOT NULL, `targetType` TEXT NOT NULL, `targetId` TEXT, " +
+                "`targetLabel` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`modeId`) REFERENCES " +
+                "`focus_modes`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT",
+        columns = "`id`, `modeId`, `startTime`, `endTime`, `totalSecondsFocused`, `isCompleted`, " +
+                "`targetType`, `targetId`, `targetLabel`",
+        indexSql = "CREATE INDEX `index_focus_sessions_modeId` ON `focus_sessions` (`modeId`)",
+    )
+    db.execSQL(
+        "UPDATE `focus_sessions` SET `targetId` = NULL, `targetLabel` = NULL " +
+                "WHERE `targetType` = '${FocusTargetType.TAG.name}'"
+    )
+    db.execSQL("DROP TABLE `task_categories`")
+    db.execSQL("DROP TABLE `focus_tags`")
+}
+
+/**
+ * Replaces [table] with one holding only [columns]. Dropping it cascades to [child], so those rows
+ * are parked in a temporary table and restored afterwards.
+ */
+private fun rebuildTable(
+    db: SupportSQLiteDatabase,
+    table: String,
+    child: String,
+    definition: String,
+    columns: String,
+    indexSql: String? = null,
+) {
+    db.execSQL("CREATE TABLE `${child}_backup` AS SELECT * FROM `$child`")
+    db.execSQL("CREATE TABLE `${table}_new` ($definition)")
+    db.execSQL("INSERT INTO `${table}_new` ($columns) SELECT $columns FROM `$table`")
+    db.execSQL("DROP TABLE `$table`")
+    db.execSQL("ALTER TABLE `${table}_new` RENAME TO `$table`")
+    indexSql?.let(db::execSQL)
+    db.execSQL("DELETE FROM `$child`")
+    db.execSQL("INSERT INTO `$child` SELECT * FROM `${child}_backup`")
+    db.execSQL("DROP TABLE `${child}_backup`")
+}
+
+private fun createTagJoinTable(db: SupportSQLiteDatabase, table: String, column: String, parent: String) {
+    db.execSQL(
+        "CREATE TABLE `$table` (`$column` TEXT NOT NULL, `tagId` TEXT NOT NULL, " +
+                "PRIMARY KEY(`$column`, `tagId`), " +
+                "FOREIGN KEY(`$column`) REFERENCES `$parent`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                "FOREIGN KEY(`tagId`) REFERENCES `tags`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)"
+    )
+    db.execSQL("CREATE INDEX `index_${table}_tagId` ON `$table` (`tagId`)")
+}
+
+private fun readLegacyTags(db: SupportSQLiteDatabase, table: String): List<LegacyTag> =
+    db.query("SELECT `id`, `name`, `colorValue` FROM `$table`").use { cursor ->
+        buildList {
+            while (cursor.moveToNext()) {
+                add(LegacyTag(cursor.getString(0), cursor.getString(1), cursor.getInt(2)))
+            }
+        }
+    }
+
+/** The non-empty category of every row in [table], by row id. */
+private fun readCategoriesById(db: SupportSQLiteDatabase, table: String): Map<String, String> =
+    db.query("SELECT `id`, `category` FROM `$table` WHERE `category` != ''").use { cursor ->
+        buildMap {
+            while (cursor.moveToNext()) put(cursor.getString(0), cursor.getString(1))
+        }
+    }
+
+private fun readLegacySessions(db: SupportSQLiteDatabase): Map<String, LegacySession> =
+    db.query("SELECT `id`, `targetType`, `targetId`, `tagId`, `targetLabel` FROM `focus_sessions`").use { cursor ->
+        buildMap {
+            while (cursor.moveToNext()) {
+                val type = cursor.getString(1)
+                put(
+                    cursor.getString(0),
+                    LegacySession(
+                        targetType = FocusTargetType.entries.firstOrNull { it.name == type } ?: FocusTargetType.TAG,
+                        targetId = cursor.getString(2),
+                        tagId = cursor.getString(3),
+                        targetLabel = cursor.getString(4),
+                    )
+                )
+            }
+        }
+    }
 
 /** All migrations, in order, to register on the Room builder. */
 val ALL_MIGRATIONS =

@@ -1,7 +1,6 @@
 package io.github.benji377.timety.data.model.task
 
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.Instant
 
@@ -26,36 +25,10 @@ enum class TaskSortOption {
     DUE_DATE,
     PRIORITY,
     SIZE,
-    ALPHABETICAL,
-    CATEGORY
+    ALPHABETICAL
 }
 
-/**
- * A user-defined category used to group tasks, identified by a unique name and display color.
- * Tasks reference categories by [name] ([TaskEntity.category]), not by id, so renaming a category
- * must also update every task's stored name (see `TaskDao.updateCategoryAndTasks`).
- */
-@Entity(
-    tableName = "task_categories",
-    indices = [Index(value = ["name"], unique = true)]
-)
-data class TaskCategoryEntity(
-    @PrimaryKey
-    val id: String,
-    val name: String,
-    val colorValue: Int
-) {
-    companion object {
-        // Matches ui.theme.TaskColor; used when a category is created without an explicit color
-        // (task form quick-add, legacy backup import).
-        const val DEFAULT_COLOR_VALUE = 0xFF2563EB.toInt()
-
-        /** Whether two category names read as the same one: trimmed, ignoring case. */
-        fun isSameName(a: String, b: String): Boolean = a.trim().equals(b.trim(), ignoreCase = true)
-    }
-}
-
-/** A single task with its scheduling, categorization, and completion state. */
+/** A single task with its scheduling and completion state. */
 @Entity(tableName = "tasks")
 data class TaskEntity(
     @PrimaryKey
@@ -65,7 +38,6 @@ data class TaskEntity(
     val dueDate: Instant? = null,
     val location: String = "",
     val priority: Priority = Priority.MEDIUM,
-    val category: String = "",
     val size: TaskSize = TaskSize.MEDIUM,
     val isCompleted: Boolean = false,
     val completedAt: Instant? = null,

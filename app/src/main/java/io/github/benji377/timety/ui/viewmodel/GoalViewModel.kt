@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
 import io.github.benji377.timety.data.model.goal.GoalWithEntries
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.GoalRepository
+import io.github.benji377.timety.data.repository.TagRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -16,7 +18,8 @@ import java.time.Instant
 
 /** Exposes goals with their progress entries, and owns their completion transitions. */
 class GoalViewModel(
-    private val goalRepository: GoalRepository
+    private val goalRepository: GoalRepository,
+    private val tagRepository: TagRepository
 ) : ViewModel() {
     val goalsWithEntries: StateFlow<List<GoalWithEntries>> = goalRepository.allGoalsWithEntries
         .stateIn(
@@ -25,16 +28,21 @@ class GoalViewModel(
             initialValue = emptyList()
         )
 
-    fun addGoal(goal: GoalEntity) {
-        viewModelScope.launch {
+    fun addGoal(goal: GoalEntity, tagIds: Set<String> = emptySet()) {
+        launchToCompletion {
             goalRepository.insertGoal(goal)
+            tagRepository.setItemTags(TaggedItemType.GOAL, goal.id, tagIds)
         }
     }
 
-    /** Saves an edited goal; a changed target can flip completion, so the state is re-synced. */
-    fun updateGoal(goal: GoalEntity) {
+    /**
+     * Saves an edited goal; a changed target can flip completion, so the state is re-synced. Null
+     * [tagIds] leaves its tags as they are.
+     */
+    fun updateGoal(goal: GoalEntity, tagIds: Set<String>? = null) {
         viewModelScope.launch {
             goalRepository.updateGoal(goal)
+            tagIds?.let { tagRepository.setItemTags(TaggedItemType.GOAL, goal.id, it) }
             syncCompletionState(goal.id)
         }
     }

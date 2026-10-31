@@ -7,7 +7,6 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.SubtaskEntity
-import io.github.benji377.timety.data.model.task.TaskCategoryEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
@@ -17,7 +16,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
 
-// Backup JSON for tasks, their categories, and recurring tasks.
+// Backup JSON for tasks and recurring tasks.
 
 internal fun TaskWithSubtasks.toBackupJson(): JSONObject = JSONObject().apply {
     put("id", task.id)
@@ -27,7 +26,6 @@ internal fun TaskWithSubtasks.toBackupJson(): JSONObject = JSONObject().apply {
     put("location", task.location)
     put("place", orNull(task.place?.toJson()))
     put("priority", task.priority.name)
-    put("category", task.category)
     put("size", task.size.name)
     put("isCompleted", task.isCompleted)
     put("completedAt", orNull(task.completedAt?.toString()))
@@ -53,7 +51,6 @@ internal fun taskFromBackup(json: JSONObject): TaskWithSubtasks {
         location = json.stringOrNull("location") ?: "",
         place = json.optJSONObject("place")?.let { TaskPlace.fromJson(it) },
         priority = json.enumOr("priority", Priority.MEDIUM),
-        category = json.stringOrNull("category") ?: "",
         size = json.enumOr("size", TaskSize.MEDIUM),
         isCompleted = json.optBoolean("isCompleted", false),
         completedAt = json.instantOrNull("completedAt"),
@@ -72,27 +69,10 @@ internal fun taskFromBackup(json: JSONObject): TaskWithSubtasks {
     return TaskWithSubtasks(task, subtasks)
 }
 
-internal fun TaskCategoryEntity.toBackupJson(): JSONObject = JSONObject().apply {
-    put("id", id)
-    put("name", name)
-    put("colorValue", colorValue)
-}
-
-/** Null for a category without a name, which can't be shown or picked. */
-internal fun categoryFromBackup(json: JSONObject): TaskCategoryEntity? {
-    val name = json.stringOrNull("name")?.takeIf { it.isNotBlank() } ?: return null
-    return TaskCategoryEntity(
-        id = json.stringOrNull("id") ?: newId(),
-        name = name,
-        colorValue = json.optInt("colorValue", TaskCategoryEntity.DEFAULT_COLOR_VALUE),
-    )
-}
-
 internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObject().apply {
     put("id", task.id)
     put("title", task.title)
     put("description", task.description)
-    put("category", task.category)
     put("dueDate", task.dueDate.toString())
     put("timeOfDayMinutes", orNull(task.timeOfDayMinutes))
     put("unit", task.unit.name)
@@ -113,7 +93,6 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
         id = id,
         title = json.stringOrNull("title") ?: "",
         description = json.stringOrNull("description") ?: "",
-        category = json.stringOrNull("category") ?: "",
         dueDate = json.instantOrNull("dueDate") ?: Instant.now(),
         timeOfDayMinutes = json.intOrNull("timeOfDayMinutes")?.takeIf { it in 0 until MINUTES_PER_DAY },
         unit = json.enumOr("unit", RecurrenceUnit.WEEK),
