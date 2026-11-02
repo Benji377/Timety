@@ -483,6 +483,8 @@
     <string name="settingsLabelFocusStopwatchSubtitle">Prevents accidentally leaving timer on</string>
     <string name="settingsLabelImportData">Import JSON Data</string>
     <string name="settingsLabelImportDataSubtitle">Restore data from a JSON export file</string>
+    <string name="settingsLabelBlockScreenCapture">Block Screenshots</string>
+    <string name="settingsLabelBlockScreenCaptureSubtitle">Blocks screenshots and screen recordings, and hides the app in recent apps</string>
     <string name="settingsLabelKeepScreenOn">Keep Screen On</string>
     <string name="settingsLabelKeepScreenOnSubtitle">Prevents the screen from sleeping during an active session</string>
     <string name="settingsLabelLanguage">Language</string>
