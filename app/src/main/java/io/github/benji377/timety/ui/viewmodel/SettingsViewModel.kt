@@ -104,6 +104,11 @@ class SettingsViewModel(
         SharingStarted.WhileSubscribed(5000),
         "system"
     )
+    val blockScreenCapture = repository.blockScreenCaptureFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        false
+    )
     val keepScreenOnDuringFocus = repository.keepScreenOnDuringFocusFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -194,6 +199,9 @@ class SettingsViewModel(
         repository.saveAppLocaleCode(code)
         resyncNotifications()
     }
+
+    fun setBlockScreenCapture(block: Boolean) =
+        viewModelScope.launch { repository.saveBlockScreenCapture(block) }
 
     fun setKeepScreenOnDuringFocus(keepOn: Boolean) =
         viewModelScope.launch { repository.saveKeepScreenOnDuringFocus(keepOn) }

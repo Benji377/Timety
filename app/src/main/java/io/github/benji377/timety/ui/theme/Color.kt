@@ -11,11 +11,11 @@ val UserColor = Color(0xFFDC2626)
 val WarningAccent = Color(0xFFF59E0B)
 
 val InkLight = Color(0xFF111111)
-val InkDark = Color(0xFFF5F5F5)
+val InkDark = Color(0xFFE6E6E6)
 val PaperLight = Color(0xFFFFF8EF)
 val PaperAltLight = Color(0xFFF6EEDB)
-val PaperDark = Color(0xFF151515)
-val PaperAltDark = Color(0xFF202020)
+val PaperDark = Color(0xFF000000)
+val PaperAltDark = Color(0xFF0E0E0E)
 
 // Hairline border/divider colors. Muted rather than ink-black: at the flat design's single 1dp
 // stroke weight a full-contrast border reads as a hard outline around every element, which is the
@@ -37,7 +37,7 @@ val GaugeBgDark = PaperDark
 val GaugeLabelDark = Color(0xFFD4D4D4)
 
 // Surface helper colors used by the dark scheme
-val SurfaceAltDark = Color(0xFF2A2A2A)
+val SurfaceAltDark = Color(0xFF1C1C1C)
 
 // Material accent choices offered by color pickers (habit color, focus tag color).
 // Pickers prepend their section's own accent as the first/default choice.

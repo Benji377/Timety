@@ -75,6 +75,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val KEEP_SCREEN_ON_DURING_FOCUS = booleanPreferencesKey("keepScreenOnDuringFocus")
         val AUTO_DND_ENABLED = booleanPreferencesKey("autoDndEnabled")
         val AUTO_DND_LIFT_DURING_BREAKS = booleanPreferencesKey("autoDndLiftDuringBreaks")
+        val BLOCK_SCREEN_CAPTURE = booleanPreferencesKey("blockScreenCapture")
 
         // Not backed up: whether the user chose "Don't ask again" on the exact-alarm prompt. A
         // device-level answer, like the permission itself. Replaces "exactAlarmPromptShown",
@@ -93,6 +94,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         private val RESTORABLE_BOOLEAN_KEYS = listOf(
             USE_24_HOUR_FORMAT, AUTO_COMPLETE_FOCUS, ASK_FOCUS_ON_TASK_COMPLETE, SHOW_HOME_GREETING,
             KEEP_SCREEN_ON_DURING_FOCUS, AUTO_DND_ENABLED, AUTO_DND_LIFT_DURING_BREAKS,
+            BLOCK_SCREEN_CAPTURE,
         )
         private val RESTORABLE_INT_KEYS = listOf(
             DAILY_GOAL_MINS, MAX_STOPWATCH_MINS, MAX_NODE_MINS, UPCOMING_TASKS_HORIZON,
@@ -136,6 +138,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     // Per-app locale: "system" (follow OS) or one of "en"/"de"/"it"/"lld"/"zh-CN".
     val appLocaleCodeFlow: Flow<String> = dataStore.data.map { it[APP_LOCALE_CODE] ?: "system" }
+    val blockScreenCaptureFlow: Flow<Boolean> =
+        dataStore.data.map { it[BLOCK_SCREEN_CAPTURE] ?: false }
 
     val keepScreenOnDuringFocusFlow: Flow<Boolean> =
         dataStore.data.map { it[KEEP_SCREEN_ON_DURING_FOCUS] ?: false }
@@ -231,6 +235,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun saveAppLocaleCode(code: String) {
         dataStore.edit { it[APP_LOCALE_CODE] = code }
+    }
+
+    suspend fun saveBlockScreenCapture(block: Boolean) {
+        dataStore.edit { it[BLOCK_SCREEN_CAPTURE] = block }
     }
 
     suspend fun saveKeepScreenOnDuringFocus(keepOn: Boolean) {

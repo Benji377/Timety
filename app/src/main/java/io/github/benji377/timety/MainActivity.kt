@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -74,6 +75,13 @@ class MainActivity : ComponentActivity() {
         // Only a fresh launch carries a request; a rebuild (rotation, language change) would replay it.
         if (savedInstanceState == null) navTarget.value = intent?.navTargetExtra()
 
+        // Read before the first frame, so a capture or the recents preview can't catch the content
+        // while the setting loads.
+        applyScreenCaptureBlock(runBlocking { settings.blockScreenCaptureFlow.first() })
+        lifecycleScope.launch {
+            settings.blockScreenCaptureFlow.collect { applyScreenCaptureBlock(it) }
+        }
+
         // Recreate the Activity when the selected language changes.
         lifecycleScope.launch {
             settings.appLocaleCodeFlow.collect { code ->
@@ -114,6 +122,14 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun applyScreenCaptureBlock(block: Boolean) {
+        if (block) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +39,7 @@ internal fun AdvancedSettings(
     settingsViewModel: SettingsViewModel = activityScopedViewModel(),
 ) {
     val locationApiEndpoint by settingsViewModel.locationApiEndpoint.collectAsState()
+    val blockScreenCapture by settingsViewModel.blockScreenCapture.collectAsState()
     val locationInvalidStr = stringResource(R.string.settingsLocationApiInvalid)
     val scope = rememberCoroutineScope()
 
@@ -138,5 +140,13 @@ internal fun AdvancedSettings(
             locationError = null
             showLocationDialog = true
         }
+    )
+    SwitchSettingsItem(
+        title = stringResource(R.string.settingsLabelBlockScreenCapture),
+        subtitle = stringResource(R.string.settingsLabelBlockScreenCaptureSubtitle),
+        icon = Icons.Filled.Security,
+        iconTint = TaskColor,
+        checked = blockScreenCapture,
+        onCheckedChange = { settingsViewModel.setBlockScreenCapture(it) }
     )
 }
