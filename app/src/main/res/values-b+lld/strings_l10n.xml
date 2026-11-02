@@ -553,6 +553,8 @@
     <string name="settingsLabelFocusStopwatchSubtitle">Schiva de lascé l timer pià per śbal</string>
     <string name="settingsLabelImportData">Mpurter dac JSON</string>
     <string name="settingsLabelImportDataSubtitle">Ritorna dac dal file de esportazion JSON</string>
+    <string name="settingsLabelBlockScreenCapture">Block Screenshots</string>
+    <string name="settingsLabelBlockScreenCaptureSubtitle">Blocks screenshots and screen recordings, and hides the app in recent apps</string>
     <string name="settingsLabelKeepScreenOn">Tëni l\'ëur inant</string>
     <string name="settingsLabelKeepScreenOnSubtitle">Tën zeruchi che l\'ëur se destuda</string>
     <string name="settingsLabelLanguage">Lingaz</string>
