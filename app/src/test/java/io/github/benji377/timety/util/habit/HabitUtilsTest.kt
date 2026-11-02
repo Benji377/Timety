@@ -243,4 +243,48 @@ class HabitUtilsTest {
         val noDays = reminding(frequency = HabitFrequency.WEEKLY_EXACT, weekdays = emptySet())
         assertEquals(null, HabitUtils.nextReminderAt(noDays, noon))
     }
+
+    private fun stacked(id: String, stack: String, stackOrder: Int, sortOrder: Int) =
+        habit(id).copy(stackName = stack, stackOrder = stackOrder, sortOrder = sortOrder)
+
+    @Test
+    fun stackNamesInOrder_usesEachStacksLowestMember() {
+        val habits = listOf(
+            stacked("a1", "Morning", 0, 7),
+            stacked("b1", "Evening", 0, 3),
+            stacked("a2", " Morning ", 1, 9),
+            habit("solo").copy(sortOrder = 0),
+        )
+        assertEquals(listOf("Evening", "Morning"), HabitUtils.stackNamesInOrder(habits))
+    }
+
+    @Test
+    fun renumberStacks_movesWholeStacksAndKeepsMembersTogether() {
+        val habits = listOf(
+            stacked("a2", "A", 1, 1),
+            stacked("a1", "A", 0, 0),
+            stacked("b1", "B", 0, 2),
+        )
+        val result = HabitUtils.renumberStacks(habits, listOf("B", "A"))
+        assertEquals(listOf("b1", "a1", "a2"), result.map { it.id })
+        assertEquals(listOf(0, 1, 2), result.map { it.sortOrder })
+    }
+
+    @Test
+    fun renumberStacks_leavesStacksOutsideTheSectionInPlace() {
+        val habits = listOf(
+            stacked("a", "A", 0, 0),
+            stacked("b", "B", 0, 1),
+            stacked("c", "C", 0, 2),
+        )
+        val result = HabitUtils.renumberStacks(habits, listOf("C", "A"))
+        assertEquals(listOf("c", "b", "a"), result.map { it.id })
+    }
+
+    @Test
+    fun renumberStacks_ignoresStandaloneHabits() {
+        val habits = listOf(stacked("a", "A", 0, 0), habit("solo").copy(sortOrder = 5))
+        val result = HabitUtils.renumberStacks(habits, listOf("A"))
+        assertEquals(listOf("a"), result.map { it.id })
+    }
 }

@@ -198,4 +198,41 @@ object HabitUtils {
 
     fun getStackCompletionCount(stackHabits: List<HabitWithCompletions>, date: LocalDate): Int =
         stackHabits.count { isCompletedOn(it, date) }
+
+    /** Names of the stacks in [habits], ordered by each stack's lowest member sort order. */
+    fun stackNamesInOrder(habits: List<HabitEntity>): List<String> =
+        stacksByName(habits).entries
+            .sortedBy { (_, members) -> members.minOf { it.sortOrder } }
+            .map { it.key }
+
+    /**
+     * Applies a drag of whole stacks: [newVisibleOrder] is the new order of the stacks visible in
+     * one list section, and any other stack keeps its place. Returns every stacked habit, with sort
+     * orders renumbered so that each stack's members stay next to each other.
+     */
+    fun renumberStacks(habits: List<HabitEntity>, newVisibleOrder: List<String>): List<HabitEntity> {
+        val stacks = stacksByName(habits)
+        var nextSortOrder = 0
+        return spliceOrder(stackNamesInOrder(habits), { it }, newVisibleOrder)
+            .flatMap { name -> stacks.getValue(name).sortedBy { it.stackOrder ?: Int.MAX_VALUE } }
+            .map { it.copy(sortOrder = nextSortOrder++) }
+    }
+
+    private fun stacksByName(habits: List<HabitEntity>): Map<String, List<HabitEntity>> =
+        habits.filter { !it.stackName.isNullOrBlank() }.groupBy { it.stackName!!.trim() }
+}
+
+/**
+ * Replaces the subsequence of [fullOrdered] identified by [key] matching an item in
+ * [newVisibleOrder] with [newVisibleOrder]'s order, leaving every other item's position
+ * untouched. Used to commit a drag-reorder of a visible subset back into its full domain list.
+ */
+internal fun <T> spliceOrder(
+    fullOrdered: List<T>,
+    key: (T) -> String,
+    newVisibleOrder: List<T>
+): List<T> {
+    val visibleIds = newVisibleOrder.map(key).toSet()
+    val iterator = newVisibleOrder.iterator()
+    return fullOrdered.map { if (key(it) in visibleIds) iterator.next() else it }
 }

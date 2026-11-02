@@ -9,6 +9,8 @@ import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.services.ReminderScheduler
+import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.habit.spliceOrder
 import io.github.benji377.timety.widget.HabitWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -127,6 +129,15 @@ class HabitViewModel(
         }
     }
 
+    /** Commits a drag-reorder of the whole stacks visible in one list section. */
+    fun commitStacksReorder(newSectionOrder: List<String>) {
+        viewModelScope.launch {
+            val habits = habitsWithCompletions.value.map { it.habit }
+            habitRepository.updateHabits(HabitUtils.renumberStacks(habits, newSectionOrder))
+            updateWidgets()
+        }
+    }
+
     /** Fresh-from-DB completions for [habitId]; [habitsWithCompletions] may not have emitted yet. */
     private suspend fun completionsOf(habitId: String): List<HabitCompletionEntity>? {
         habitRepository.getHabitById(habitId) ?: return null
@@ -191,19 +202,4 @@ class HabitViewModel(
             updateWidgets()
         }
     }
-}
-
-/**
- * Replaces the subsequence of [fullOrdered] identified by [key] matching an item in
- * [newVisibleOrder] with [newVisibleOrder]'s order, leaving every other item's position
- * untouched. Used to commit a drag-reorder of a visible subset back into its full domain list.
- */
-private fun <T> spliceOrder(
-    fullOrdered: List<T>,
-    key: (T) -> String,
-    newVisibleOrder: List<T>
-): List<T> {
-    val visibleIds = newVisibleOrder.map(key).toSet()
-    val iterator = newVisibleOrder.iterator()
-    return fullOrdered.map { if (key(it) in visibleIds) iterator.next() else it }
 }
