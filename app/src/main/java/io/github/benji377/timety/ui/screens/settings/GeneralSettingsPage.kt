@@ -56,6 +56,7 @@ internal fun GeneralSettings(
         stringResource(R.string.settingsLabelLanguageSystem) to "system",
         "English" to "en",
         "Deutsch" to "de",
+        "Bahasa Indonesia" to "id",
         "Italiano" to "it",
         "Ladin" to "lld",
         "Русский" to "ru",
@@ -133,6 +134,7 @@ private fun LanguageFlag(localeCode: String) {
     val flagName = when (localeCode) {
         "en" -> "gb"
         "de" -> "de"
+        "id" -> "id"
         "it" -> "it"
         "lld" -> "lld"
         "ru" -> "ru"
