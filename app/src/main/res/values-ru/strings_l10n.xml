@@ -783,19 +783,19 @@
         <item quantity="other">Каждые %d дня</item>
     </plurals>
     <plurals name="recurrenceEveryWeeks">
-        <item quantity="one">Каждую неделю</item>
+        <item quantity="one">Каждую %d неделю</item>
         <item quantity="few">Каждые %d недели</item>
         <item quantity="many">Каждые %d недель</item>
         <item quantity="other">Каждые %d недели</item>
     </plurals>
     <plurals name="recurrenceEveryMonths">
-        <item quantity="one">Каждый месяц</item>
+        <item quantity="one">Каждый %d месяц</item>
         <item quantity="few">Каждые %d месяца</item>
         <item quantity="many">Каждые %d месяцев</item>
         <item quantity="other">Каждые %d месяца</item>
     </plurals>
     <plurals name="recurrenceEveryYears">
-        <item quantity="one">Каждый год</item>
+        <item quantity="one">Каждый %d год</item>
         <item quantity="few">Каждые %d года</item>
         <item quantity="many">Каждые %d лет</item>
         <item quantity="other">Каждые %d года</item>
