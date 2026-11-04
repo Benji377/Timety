@@ -4,6 +4,7 @@ files:
     languages_mapping:
       android_code:
         lld: b+lld
+        ru: ru
         de: de
         it: it
         zh-CN: zh-rCN

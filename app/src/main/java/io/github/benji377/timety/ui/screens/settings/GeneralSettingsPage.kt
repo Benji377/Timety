@@ -58,6 +58,7 @@ internal fun GeneralSettings(
         "Deutsch" to "de",
         "Italiano" to "it",
         "Ladin" to "lld",
+        "Русский" to "ru",
         "Chinese" to "zh-CN"
     )
     val currentLanguageLabel = languageOptions.firstOrNull { it.second == appLocaleCode }?.first
@@ -134,6 +135,7 @@ private fun LanguageFlag(localeCode: String) {
         "de" -> "de"
         "it" -> "it"
         "lld" -> "lld"
+        "ru" -> "ru"
         "zh-CN" -> "zh"
         else -> null
     }
