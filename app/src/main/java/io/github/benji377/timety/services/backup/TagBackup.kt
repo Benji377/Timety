@@ -1,12 +1,12 @@
 package io.github.benji377.timety.services.backup
 
+import io.github.benji377.timety.data.local.LegacySession
+import io.github.benji377.timety.data.local.LegacyTag
+import io.github.benji377.timety.data.local.MergedTags
+import io.github.benji377.timety.data.local.mergeLegacyTags
 import io.github.benji377.timety.data.model.focus.FocusTargetType
-import io.github.benji377.timety.data.model.tag.LegacySession
-import io.github.benji377.timety.data.model.tag.LegacyTag
-import io.github.benji377.timety.data.model.tag.MergedTags
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.tag.TaggedItemType
-import io.github.benji377.timety.data.model.tag.mergeLegacyTags
 import org.json.JSONObject
 
 // Backup JSON for tags. Items list their tags in a "tagIds" array; older backups instead have

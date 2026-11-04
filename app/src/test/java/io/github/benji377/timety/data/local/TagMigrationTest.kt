@@ -1,11 +1,12 @@
-package io.github.benji377.timety.data.model.tag
+package io.github.benji377.timety.data.local
 
 import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.tag.TagEntity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-class LegacyTagsTest {
+class TagMigrationTest {
     private val noCategory: (FocusTargetType, String) -> String? = { _, _ -> null }
 
     private fun merge(

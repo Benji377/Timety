@@ -3,9 +3,6 @@ package io.github.benji377.timety.data.local
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import io.github.benji377.timety.data.model.focus.FocusTargetType
-import io.github.benji377.timety.data.model.tag.LegacySession
-import io.github.benji377.timety.data.model.tag.LegacyTag
-import io.github.benji377.timety.data.model.tag.mergeLegacyTags
 
 /**
  * Room migrations. The 2.0.0 release shipped schema version 1; every schema change from here on

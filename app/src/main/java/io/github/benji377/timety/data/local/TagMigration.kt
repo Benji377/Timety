@@ -1,6 +1,7 @@
-package io.github.benji377.timety.data.model.tag
+package io.github.benji377.timety.data.local
 
 import io.github.benji377.timety.data.model.focus.FocusTargetType
+import io.github.benji377.timety.data.model.tag.TagEntity
 import java.util.UUID
 
 // Id and name of the placeholder focus tag older versions seeded when no tag existed.
