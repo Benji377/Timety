@@ -497,6 +497,8 @@
     <string name="settingsLabelFocusStopwatchSubtitle">Verhindert, dass der Timer versehentlich an bleibt</string>
     <string name="settingsLabelImportData">JSON-Daten importieren</string>
     <string name="settingsLabelImportDataSubtitle">Stelle Daten aus einer JSON-Exportdatei wieder her</string>
+    <string name="settingsLabelBlockScreenCapture">Screenshots blockieren</string>
+    <string name="settingsLabelBlockScreenCaptureSubtitle">Blockiert Screenshots und Bildschirmaufnahmen und verbirgt die App in den zuletzt verwendeten Apps</string>
     <string name="settingsLabelKeepScreenOn">Bildschirm anlassen</string>
     <string name="settingsLabelKeepScreenOnSubtitle">Verhindert, dass der Bildschirm während einer aktiven Sitzung in den Ruhezustand wechselt</string>
     <string name="settingsLabelLanguage">Sprache</string>
