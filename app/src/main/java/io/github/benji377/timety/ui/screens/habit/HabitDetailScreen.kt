@@ -197,7 +197,13 @@ fun HabitDetailScreen(
         }
         val wasStandalone = existingHabit != null && existingHabit.stackName.isNullOrBlank()
         val computedSortOrder = when {
-            trimmedStackName != null -> existingHabit?.sortOrder ?: 0
+            // The sort order of a stack's members places the whole stack: joining keeps the stack
+            // where it is, and a new stack goes last.
+            trimmedStackName != null && stayedInSameStack -> existingHabit?.sortOrder ?: 0
+            trimmedStackName != null -> allHabits.filter { it.stackName?.trim() == trimmedStackName }
+                .minOfOrNull { it.sortOrder }
+                ?: ((allHabits.filter { !it.stackName.isNullOrBlank() }
+                    .maxOfOrNull { it.sortOrder } ?: -1) + 1)
             wasStandalone -> existingHabit.sortOrder
             else -> (allHabits.filter { it.stackName.isNullOrBlank() }
                 .maxOfOrNull { it.sortOrder } ?: -1) + 1
