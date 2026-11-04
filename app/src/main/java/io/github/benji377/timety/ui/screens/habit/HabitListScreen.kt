@@ -240,6 +240,7 @@ fun HabitListScreen(
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },
+                                        onStacksReordered = viewModel::commitStacksReorder,
                                         onStackReordered = { stackName, newOrder ->
                                             viewModel.commitStackReorder(
                                                 stackName,
@@ -282,6 +283,7 @@ fun HabitListScreen(
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },
+                                        onStacksReordered = viewModel::commitStacksReorder,
                                         onStackReordered = { stackName, newOrder ->
                                             viewModel.commitStackReorder(
                                                 stackName,
@@ -324,6 +326,7 @@ fun HabitListScreen(
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },
+                                        onStacksReordered = viewModel::commitStacksReorder,
                                         onStackReordered = { stackName, newOrder ->
                                             viewModel.commitStackReorder(
                                                 stackName,

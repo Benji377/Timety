@@ -40,9 +40,9 @@ import java.time.LocalDate
  * with a completion count, and rendering the rest standalone. Each habit is rendered via
  * [habitBuilder], which also receives whether the habit is locked (a stacked habit becomes
  * unlockable only once the previous one in the stack is completed) and whether reorder mode is
- * active. While [isReorderMode] is true, both standalone habits and each stack's members become
- * drag-reorderable (via [DraggableReorderColumn]); [onStandaloneReordered]/[onStackReordered]
- * commit the result.
+ * active. While [isReorderMode] is true, standalone habits, whole stacks and each stack's members
+ * become drag-reorderable (via [DraggableReorderColumn]); [onStandaloneReordered],
+ * [onStacksReordered] and [onStackReordered] commit the result.
  */
 @Composable
 fun GroupedHabitsSection(
@@ -52,20 +52,31 @@ fun GroupedHabitsSection(
     isReorderMode: Boolean = false,
     onStandaloneReordered: (List<HabitWithCompletions>) -> Unit = {},
     onStackReordered: (stackName: String, newOrder: List<HabitWithCompletions>) -> Unit = { _, _ -> },
+    onStacksReordered: (stackNames: List<String>) -> Unit = {},
     habitBuilder: @Composable (habit: HabitWithCompletions, isDone: Boolean, isStacked: Boolean, isLocked: Boolean, isReorderMode: Boolean) -> Unit,
 ) {
-    val grouped = remember(habits) {
-        habits.filter { !it.habit.stackName.isNullOrBlank() }
-            .groupBy { it.habit.stackName!!.trim() }
-    }
     val standalone = remember(habits) { habits.filter { it.habit.stackName.isNullOrBlank() } }
     // Indexed once so each stack is a lookup rather than a scan of every habit.
     val globalStacks = remember(allHabitsForStacks) {
         allHabitsForStacks.groupBy { it.habit.stackName?.trim() }
     }
+    // Ordered by the whole stack, so a stack keeps its place while some members are in another section.
+    val stacks = remember(habits, allHabitsForStacks) {
+        val visible = habits.filter { !it.habit.stackName.isNullOrBlank() }
+            .groupBy { it.habit.stackName!!.trim() }
+        val order = HabitUtils.stackNamesInOrder(allHabitsForStacks.map { it.habit })
+        visible.toList().sortedBy { (name, _) -> order.indexOf(name) }
+    }
+    // Held here because reorder mode swaps the composables below, which would reset their state.
+    var expandedStacks by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
     Column {
-        grouped.forEach { (stackName, stackHabitsList) ->
+        DraggableReorderColumn(
+            items = stacks,
+            key = { (stackName, _) -> stackName },
+            isReorderEnabled = isReorderMode,
+            onOrderChanged = { newOrder -> onStacksReordered(newOrder.map { (name, _) -> name }) },
+        ) { (stackName, stackHabitsList), _ ->
             val sortedStackHabits = remember(stackHabitsList) {
                 stackHabitsList.sortedBy { it.habit.stackOrder ?: 99 }
             }
@@ -73,8 +84,7 @@ fun GroupedHabitsSection(
             val globalStack = globalStacks[stackName].orEmpty()
             val completedCount = HabitUtils.getStackCompletionCount(globalStack, targetDate)
             val allDone = HabitUtils.isStackFullyCompleted(globalStack, targetDate)
-
-            var isExpanded by rememberSaveable(stackName) { mutableStateOf(false) }
+            val isExpanded = stackName in expandedStacks
 
             // Give the stack header the same solid-fill, hairline-bordered card treatment as every
             // other tile, rather than the alpha-faded gray pill it used to be: fills in this app
@@ -92,7 +102,10 @@ fun GroupedHabitsSection(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { isExpanded = !isExpanded }
+                            .clickable {
+                                expandedStacks = if (isExpanded) expandedStacks - stackName
+                                else expandedStacks + stackName
+                            }
                             .padding(AppTheme.spaceMedium),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
