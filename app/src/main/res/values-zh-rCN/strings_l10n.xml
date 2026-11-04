@@ -483,8 +483,8 @@
     <string name="settingsLabelFocusStopwatchSubtitle">防止忘记关闭计时器</string>
     <string name="settingsLabelImportData">导入 JSON 数据</string>
     <string name="settingsLabelImportDataSubtitle">从 JSON 导出文件恢复数据</string>
-    <string name="settingsLabelBlockScreenCapture">Block Screenshots</string>
-    <string name="settingsLabelBlockScreenCaptureSubtitle">Blocks screenshots and screen recordings, and hides the app in recent apps</string>
+    <string name="settingsLabelBlockScreenCapture">禁止截屏</string>
+    <string name="settingsLabelBlockScreenCaptureSubtitle">禁止截屏和录屏，并在最近任务中隐藏应用内容</string>
     <string name="settingsLabelKeepScreenOn">保持屏幕常亮</string>
     <string name="settingsLabelKeepScreenOnSubtitle">专注进行时防止屏幕休眠</string>
     <string name="settingsLabelLanguage">语言</string>
