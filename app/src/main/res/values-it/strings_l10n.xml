@@ -497,6 +497,8 @@
     <string name="settingsLabelFocusStopwatchSubtitle">Evita di lasciare accidentalmente il timer acceso</string>
     <string name="settingsLabelImportData">Importa dati JSON</string>
     <string name="settingsLabelImportDataSubtitle">Ripristina i dati da un file di esportazione JSON</string>
+    <string name="settingsLabelBlockScreenCapture">Blocca screenshot</string>
+    <string name="settingsLabelBlockScreenCaptureSubtitle">Blocca screenshot e registrazioni dello schermo e nasconde l\'app nelle app recenti</string>
     <string name="settingsLabelKeepScreenOn">Mantieni lo schermo acceso</string>
     <string name="settingsLabelKeepScreenOnSubtitle">Impedisce allo schermo di spegnersi durante una sessione attiva</string>
     <string name="settingsLabelLanguage">Lingua</string>
