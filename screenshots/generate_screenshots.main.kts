@@ -22,7 +22,7 @@ fun runCommand(vararg cmd: String, workingDir: File? = null): String {
 
 fun main() {
     val projectDir = File("..").absoluteFile.normalize()
-    val outputDir = File(projectDir, "screenshots/output")
+    val outputDir = File(projectDir, "fastlane/metadata/android/en-US/images/phoneScreenshots")
 
     if (!outputDir.exists()) {
         outputDir.mkdirs()
