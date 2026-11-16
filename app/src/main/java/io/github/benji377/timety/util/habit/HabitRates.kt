@@ -23,9 +23,16 @@ object HabitRates {
     private const val DAYS_PER_WEEK = 7
     private const val ROUNDING_TOLERANCE = 1e-9
 
-    /** The days [item] was checked in on. */
-    fun completionDays(item: HabitWithCompletions, zone: ZoneId): List<LocalDate> =
-        item.completions.map { it.completionDate.atZone(zone).toLocalDate() }
+    /** The days [item] reached its daily target on, once each. */
+    fun completionDays(item: HabitWithCompletions, zone: ZoneId): List<LocalDate> {
+        val target = item.habit.timesPerDay.coerceAtLeast(1)
+        return item.completions
+            .groupingBy { it.completionDate.atZone(zone).toLocalDate() }
+            .eachCount()
+            .filterValues { it >= target }
+            .keys
+            .sorted()
+    }
 
     /** The combined rate of [habits] in [range]. */
     fun total(

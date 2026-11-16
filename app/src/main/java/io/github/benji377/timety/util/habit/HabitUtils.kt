@@ -5,6 +5,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
@@ -39,6 +40,9 @@ object HabitUtils {
     /** The highest target of a monthly flexible habit, reachable even in February. */
     const val MAX_TARGET_PER_MONTH = 28
 
+    /** The most check-ins a day can ask for; more frequent nudges are what quick habits are for. */
+    const val MAX_TIMES_PER_DAY = 10
+
     /** Parses a stored `"[480,1200]"` reminder list into sorted, distinct minutes from midnight. */
     fun parseReminderTimes(raw: String?): List<Int> {
         if (raw.isNullOrBlank()) return emptyList()
@@ -57,13 +61,38 @@ object HabitUtils {
             ?.sorted()
             ?.joinToString(separator = ",", prefix = "[", postfix = "]")
 
+    /** How many times [hwc] was checked in on [date]. */
+    fun countOn(hwc: HabitWithCompletions, date: LocalDate, zone: ZoneId = ZoneId.systemDefault()): Int =
+        completionsOn(hwc.completions, date, zone).size
+
+    /** Whether [hwc] reached its daily target on [date]. */
+    fun isCompletedOn(hwc: HabitWithCompletions, date: LocalDate, zone: ZoneId = ZoneId.systemDefault()): Boolean =
+        countOn(hwc, date, zone) >= hwc.habit.timesPerDay.coerceAtLeast(1)
+
+    /**
+     * The check-in a tap on [date] removes: that day's latest once the target is met. Null means
+     * the tap adds one.
+     */
+    fun completionToRemoveOnTap(
+        habit: HabitEntity,
+        completions: List<HabitCompletionEntity>,
+        date: LocalDate,
+        zone: ZoneId = ZoneId.systemDefault(),
+    ): HabitCompletionEntity? {
+        val onDay = completionsOn(completions, date, zone)
+        return if (onDay.size >= habit.timesPerDay.coerceAtLeast(1)) onDay.maxBy { it.completionDate } else null
+    }
+
     // Compares instants against the day's bounds, computed once, rather than converting every
     // completion to a local date: these run per habit tile on every recomposition.
-    fun isCompletedOn(hwc: HabitWithCompletions, date: LocalDate): Boolean {
-        val zone = ZoneId.systemDefault()
+    private fun completionsOn(
+        completions: List<HabitCompletionEntity>,
+        date: LocalDate,
+        zone: ZoneId,
+    ): List<HabitCompletionEntity> {
         val start = date.atStartOfDay(zone).toInstant()
         val end = date.plusDays(1).atStartOfDay(zone).toInstant()
-        return hwc.completions.any { !it.completionDate.isBefore(start) && it.completionDate.isBefore(end) }
+        return completions.filter { !it.completionDate.isBefore(start) && it.completionDate.isBefore(end) }
     }
 
     /**

@@ -176,4 +176,16 @@ class HabitRatesTest {
         assertEquals(HabitRate(2, 14), HabitRates.total(listOf(daily, idle), week, afterwards, zone))
         assertEquals(listOf(monday, monday.plusDays(1)), HabitRates.completionDays(daily, zone))
     }
+
+    @Test
+    fun completionDays_keepsOnlyDaysThatReachedTheTargetOnce() {
+        val monday = LocalDate.of(2026, 10, 26)
+        fun at(day: LocalDate, hour: Int) =
+            HabitCompletionEntity(habitId = "h", completionDate = day.atTime(hour, 0).atZone(zone).toInstant())
+        val twice = HabitWithCompletions(
+            habit(HabitFrequency.DAILY).copy(timesPerDay = 2),
+            listOf(at(monday, 8), at(monday, 20), at(monday.plusDays(1), 8)),
+        )
+        assertEquals(listOf(monday), HabitRates.completionDays(twice, zone))
+    }
 }

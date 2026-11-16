@@ -16,6 +16,9 @@ enum class HabitFrequency(val value: Int) {
 
     /** Whether the habit has a target count per week or month instead of fixed days. */
     val isFlexible: Boolean get() = this == WEEKLY_FLEXIBLE || this == MONTHLY_FLEXIBLE
+
+    /** Whether a day can ask for more than one check-in; flexible targets count days instead. */
+    val allowsTimesPerDay: Boolean get() = !isFlexible
 }
 
 /** A user-defined habit with its recurrence rule, display, and optional stack placement. */
@@ -29,6 +32,8 @@ data class HabitEntity(
     @ColumnInfo(name = "targetDaysPerWeek")
     val targetCount: Int? = null,
     val targetWeekdays: String? = null, // Stored as a JSON string, e.g. "[1,3,5]".
+    // Check-ins a day needs to count as done; above 1 only for daily and specific-day habits.
+    val timesPerDay: Int = 1,
     val reminderTimes: String? = null, // Minutes from midnight as a JSON string, e.g. "[480,1200]".
     val createdAt: Instant,
     val colorValue: Int,

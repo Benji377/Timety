@@ -144,41 +144,26 @@ class HabitViewModel(
         return habitRepository.getCompletionsForHabit(habitId).first()
     }
 
-    /** Toggles today's completion for [habitId]. */
+    /** One check-in tap on [habitId] today; see [HabitRepository.tapCheckIn]. */
     fun toggleCompletionToday(habitId: String) {
         viewModelScope.launch {
-            habitRepository.completionMutex.withLock {
-                val completions = completionsOf(habitId) ?: return@launch
-                val today = LocalDate.now()
-                val todayCompletion = completions.find {
-                    it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == today
-                }
-                if (todayCompletion != null) {
-                    habitRepository.deleteCompletion(todayCompletion)
-                } else {
-                    habitRepository.insertCompletion(
-                        HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
-                    )
-                }
-            }
+            habitRepository.tapCheckIn(habitId) ?: return@launch
             // Done drops today's remaining reminders; undone brings them back.
             refreshHabitReminder(habitId)
             updateWidgets()
         }
     }
 
-    /** Marks [habitId] complete on [date], unless it is already marked complete that day. */
+    /** Adds a check-in to [habitId] on [date], unless that day already reached its target. */
     fun markCompletionOnDate(habitId: String, date: Instant) {
         viewModelScope.launch {
+            val habit = habitRepository.getHabitById(habitId) ?: return@launch
             habitRepository.completionMutex.withLock {
                 val completions = completionsOf(habitId) ?: return@launch
                 val targetDay = date.atZone(ZoneId.systemDefault()).toLocalDate()
                 // Habits can't be completed ahead of time; the screens disable future days too.
                 if (targetDay.isAfter(LocalDate.now())) return@launch
-                val alreadyCompleted = completions.any {
-                    it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == targetDay
-                }
-                if (alreadyCompleted) return@launch
+                if (HabitUtils.isCompletedOn(HabitWithCompletions(habit, completions), targetDay)) return@launch
                 habitRepository.insertCompletion(
                     HabitCompletionEntity(habitId = habitId, completionDate = date)
                 )
@@ -188,14 +173,14 @@ class HabitViewModel(
         }
     }
 
-    /** Removes [habitId]'s completion on [date], if any. */
+    /** Removes [habitId]'s latest check-in on [date], if any. */
     fun unmarkCompletionOnDate(habitId: String, date: LocalDate) {
         viewModelScope.launch {
             habitRepository.completionMutex.withLock {
                 val completions = completionsOf(habitId) ?: return@launch
-                val completion = completions.find {
-                    it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date
-                } ?: return@launch
+                val completion = completions
+                    .filter { it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == date }
+                    .maxByOrNull { it.completionDate } ?: return@launch
                 habitRepository.deleteCompletion(completion)
             }
             refreshHabitReminder(habitId)

@@ -45,7 +45,7 @@ interface HabitDao {
     fun getCompletionsForHabit(habitId: String): Flow<List<HabitCompletionEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertCompletion(completion: HabitCompletionEntity)
+    fun insertCompletion(completion: HabitCompletionEntity): Long
 
     @Delete
     fun deleteCompletion(completion: HabitCompletionEntity)

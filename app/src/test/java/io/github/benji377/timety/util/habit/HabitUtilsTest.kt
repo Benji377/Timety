@@ -287,4 +287,36 @@ class HabitUtilsTest {
         val result = HabitUtils.renumberStacks(habits, listOf("A"))
         assertEquals(listOf("a"), result.map { it.id })
     }
+
+    private fun checkIns(date: LocalDate, vararg hours: Long) = hours.mapIndexed { i, h ->
+        HabitCompletionEntity(
+            id = i + 1L,
+            habitId = "h1",
+            completionDate = date.atStartOfDay(ZoneId.systemDefault()).plusHours(h).toInstant(),
+        )
+    }
+
+    @Test
+    fun timesPerDay_countsADayDoneOnlyAtTheTarget() {
+        val day = LocalDate.of(2026, 11, 16)
+        val twice = habit().copy(timesPerDay = 2)
+        val once = HabitWithCompletions(twice, checkIns(day, 8))
+        assertEquals(1, HabitUtils.countOn(once, day))
+        assertFalse(HabitUtils.isCompletedOn(once, day))
+        assertTrue(HabitUtils.isCompletedOn(HabitWithCompletions(twice, checkIns(day, 8, 20)), day))
+        assertFalse(HabitUtils.isCompletedOn(HabitWithCompletions(twice, checkIns(day, 8, 20)), day.plusDays(1)))
+    }
+
+    @Test
+    fun tap_addsBelowTheTargetAndRemovesTheLatestAtIt() {
+        val day = LocalDate.of(2026, 11, 16)
+        val thrice = habit().copy(timesPerDay = 3)
+        assertEquals(null, HabitUtils.completionToRemoveOnTap(thrice, checkIns(day, 8, 13), day))
+        val full = checkIns(day, 8, 20, 13)
+        assertEquals(full[1], HabitUtils.completionToRemoveOnTap(thrice, full, day))
+        // A once-a-day habit toggles as before.
+        assertEquals(null, HabitUtils.completionToRemoveOnTap(habit(), emptyList(), day))
+        val single = checkIns(day, 9)
+        assertEquals(single[0], HabitUtils.completionToRemoveOnTap(habit(), single, day))
+    }
 }

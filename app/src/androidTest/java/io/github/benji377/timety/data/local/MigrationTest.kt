@@ -344,7 +344,7 @@ class MigrationTest {
     }
 
     @Test
-    fun migrate6To7_marksExistingDueDatesAsTimed() {
+    fun migrate6To7_marksDueDatesTimedAndHabitsOnceADay() {
         val dbName = "migration-test-6-7"
 
         helper.createDatabase(dbName, 6).apply {
@@ -358,6 +358,10 @@ class MigrationTest {
                     "monthlyMode, reminderOffsetsMinutes, createdAt) " +
                     "VALUES ('r1', 'Bins', '', 1000, 'WEEK', 1, 'DAY_OF_MONTH', '[]', 0)"
             )
+            execSQL(
+                "INSERT INTO habits (id, name, frequency, createdAt, colorValue, sortOrder) " +
+                    "VALUES ('h1', 'Read', 'DAILY', 0, 123, 0)"
+            )
             close()
         }
 
@@ -368,6 +372,10 @@ class MigrationTest {
                 cursor.moveToFirst()
                 assertEquals(1, cursor.getInt(0))
             }
+        }
+        db.query("SELECT timesPerDay FROM habits WHERE id = 'h1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(1, cursor.getInt(0))
         }
         db.close()
     }
