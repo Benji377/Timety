@@ -23,6 +23,7 @@ internal fun TaskWithSubtasks.toBackupJson(): JSONObject = JSONObject().apply {
     put("title", task.title)
     put("description", task.description)
     put("dueDate", orNull(task.dueDate?.toString()))
+    put("hasDueTime", task.hasDueTime)
     put("location", task.location)
     put("place", orNull(task.place?.toJson()))
     put("priority", task.priority.name)
@@ -48,6 +49,7 @@ internal fun taskFromBackup(json: JSONObject): TaskWithSubtasks {
         title = json.stringOrNull("title") ?: "",
         description = json.stringOrNull("description") ?: "",
         dueDate = json.instantOrNull("dueDate"),
+        hasDueTime = json.optBoolean("hasDueTime", true),
         location = json.stringOrNull("location") ?: "",
         place = json.optJSONObject("place")?.let { TaskPlace.fromJson(it) },
         priority = json.enumOr("priority", Priority.MEDIUM),
@@ -74,6 +76,7 @@ internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObjec
     put("title", task.title)
     put("description", task.description)
     put("dueDate", task.dueDate.toString())
+    put("hasDueTime", task.hasDueTime)
     put("timeOfDayMinutes", orNull(task.timeOfDayMinutes))
     put("unit", task.unit.name)
     put("interval", task.interval)
@@ -94,6 +97,7 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
         title = json.stringOrNull("title") ?: "",
         description = json.stringOrNull("description") ?: "",
         dueDate = json.instantOrNull("dueDate") ?: Instant.now(),
+        hasDueTime = json.optBoolean("hasDueTime", true),
         timeOfDayMinutes = json.intOrNull("timeOfDayMinutes")?.takeIf { it in 0 until MINUTES_PER_DAY },
         unit = json.enumOr("unit", RecurrenceUnit.WEEK),
         interval = json.optInt("interval", 1).coerceAtLeast(1),

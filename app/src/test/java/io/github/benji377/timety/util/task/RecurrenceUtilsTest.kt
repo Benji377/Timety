@@ -229,4 +229,24 @@ class RecurrenceUtilsTest {
         val t = task(at(2026, 7, 9, h = 18), RecurrenceUnit.DAY)
         assertEquals(at(2026, 7, 10, h = 18), RecurrenceUtils.nextDueDate(t, at(2026, 7, 9, h = 19), zone))
     }
+
+    @Test
+    fun dateOnly_staysAtStartOfDay() {
+        val t = task(at(2026, 7, 9, h = 0), RecurrenceUnit.DAY).copy(hasDueTime = false)
+        assertEquals(at(2026, 7, 10, h = 0), RecurrenceUtils.nextDueDate(t, at(2026, 7, 9, 12), zone))
+    }
+
+    @Test
+    fun dateOnly_overdueCatchUpLandsOnTodayWhileItLasts() {
+        // Today's occurrence is still on time until midnight, so it's the next one.
+        val t = task(at(2026, 7, 6, h = 0), RecurrenceUnit.DAY).copy(hasDueTime = false)
+        assertEquals(at(2026, 7, 9, h = 0), RecurrenceUtils.nextDueDate(t, at(2026, 7, 9, 15), zone))
+    }
+
+    @Test
+    fun dateOnly_dueTodayIsNotOverdueInTheEvening() {
+        val t = task(at(2026, 7, 9, h = 0), RecurrenceUnit.DAY).copy(hasDueTime = false)
+        assertEquals(RecurringStatus.DUE_TODAY, RecurrenceUtils.statusOf(t, at(2026, 7, 9, 22), 7, zone))
+        assertEquals(RecurringStatus.OVERDUE, RecurrenceUtils.statusOf(t, at(2026, 7, 10, 1), 7, zone))
+    }
 }

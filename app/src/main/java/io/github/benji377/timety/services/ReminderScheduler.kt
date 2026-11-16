@@ -14,6 +14,7 @@ import io.github.benji377.timety.util.LocaleHelper
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.task.due
 import io.github.benji377.timety.widget.MidnightWidgetRefresh
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
@@ -41,6 +42,7 @@ class ReminderScheduler private constructor(private val context: Context) {
 
         val now = Instant.now()
         val baseId = task.id.hashCode()
+        val anchor = task.due?.reminderAnchor()
         var slot = 0
 
         task.reminders.forEach { reminder ->
@@ -52,7 +54,7 @@ class ReminderScheduler private constructor(private val context: Context) {
                         task.title,
                         task.description,
                         reminder,
-                        dueDate = task.dueDate
+                        dueDate = anchor
                     ),
                     scheduledTime = reminder,
                 )
@@ -60,17 +62,17 @@ class ReminderScheduler private constructor(private val context: Context) {
             }
         }
 
-        if (task.reminders.isEmpty() && task.dueDate != null && task.dueDate.isAfter(now)) {
+        if (task.reminders.isEmpty() && anchor != null && anchor.isAfter(now)) {
             notificationService.scheduleTaskReminder(
                 notificationId = baseId,
                 title = context.getString(R.string.taskReminderTitle, task.title),
                 body = buildReminderBody(
                     task.title,
                     task.description,
-                    task.dueDate,
+                    anchor,
                     exactDueDate = true
                 ),
-                scheduledTime = task.dueDate,
+                scheduledTime = anchor,
             )
         }
     }
@@ -98,10 +100,11 @@ class ReminderScheduler private constructor(private val context: Context) {
         val baseId = NotificationService.recurringTaskReminderBaseId(task.id)
         // No offsets configured = a single reminder at the due time, like plain tasks.
         val offsets = task.reminderOffsetsMinutes.ifEmpty { listOf(0) }.distinct().sorted()
+        val anchor = task.due.reminderAnchor()
         var slot = 0
 
         offsets.forEach { minutesBefore ->
-            val reminder = task.dueDate.minus(minutesBefore.toLong(), ChronoUnit.MINUTES)
+            val reminder = anchor.minus(minutesBefore.toLong(), ChronoUnit.MINUTES)
             if (reminder.isAfter(now) && slot < TASK_ID_SLOTS) {
                 notificationService.scheduleTaskReminder(
                     notificationId = baseId + slot,
@@ -110,7 +113,7 @@ class ReminderScheduler private constructor(private val context: Context) {
                         task.title,
                         task.description,
                         reminder,
-                        dueDate = task.dueDate,
+                        dueDate = anchor,
                         exactDueDate = minutesBefore == 0,
                     ),
                     scheduledTime = reminder,

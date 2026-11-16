@@ -28,7 +28,7 @@ enum class RecurringStatus {
 /** Schedule-anchored recurrence math for recurring tasks. Pure and unit-testable. */
 object RecurrenceUtils {
     /**
-     * Buckets [task]'s next due date against [now]: before now = [RecurringStatus.OVERDUE],
+     * Buckets [task]'s next due date against [now]: past its deadline = [RecurringStatus.OVERDUE],
      * later today = [RecurringStatus.DUE_TODAY], within [horizonDays] = [RecurringStatus.UPCOMING],
      * beyond = [RecurringStatus.SCHEDULED].
      */
@@ -41,7 +41,7 @@ object RecurrenceUtils {
         val today = now.atZone(zone).toLocalDate()
         val dueDay = task.dueDate.atZone(zone).toLocalDate()
         return when {
-            task.dueDate.isBefore(now) -> RecurringStatus.OVERDUE
+            task.due.isOverdue(now, zone) -> RecurringStatus.OVERDUE
             dueDay == today -> RecurringStatus.DUE_TODAY
             !dueDay.isAfter(today.plusDays(horizonDays.toLong())) -> RecurringStatus.UPCOMING
             else -> RecurringStatus.SCHEDULED
@@ -49,10 +49,10 @@ object RecurrenceUtils {
     }
 
     /**
-     * The next due date strictly after both [task]'s current due date and [now]: it walks the
-     * task's occurrence dates forward and skips everything not in the future, so completing a
-     * long-overdue task jumps straight to the next real occurrence instead of firing every missed
-     * one. The time of day is the task's stored one, else the current due date's.
+     * The next due date after [task]'s current one that isn't overdue at [now]: it walks the
+     * task's occurrence dates forward and skips every past one, so completing a long-overdue task
+     * jumps straight to the next real occurrence instead of firing every missed one. The time of
+     * day is the task's stored one, else the current due date's; a date-only task stays date-only.
      */
     fun nextDueDate(
         task: RecurringTaskEntity,
@@ -64,16 +64,16 @@ object RecurrenceUtils {
         // The stored time keeps a due time inside a DST gap (02:30 resolved to 03:30 on the
         // spring-forward day) from sticking at the shifted time on every later occurrence.
         val time = task.timeOfDayMinutes?.let { LocalTime.of(it / 60, it % 60) } ?: zonedDue.toLocalTime()
+        val timeMinutes = if (task.hasDueTime) time.hour * 60 + time.minute else null
         var date = anchor
         var guard = 0
         while (guard < MAX_STEPS) {
             date = nextOccurrenceDate(date, task, anchor)
-            // atZone resolves DST-gap local times instead of throwing.
-            val instant = date.atTime(time).atZone(zone).toInstant()
-            if (instant.isAfter(now)) return instant
+            val due = Due.of(date, timeMinutes, zone)
+            if (!due.isOverdue(now, zone)) return due.at
             guard++
         }
-        return date.atTime(time).atZone(zone).toInstant()
+        return Due.of(date, timeMinutes, zone).at
     }
 
     /** The first occurrence date strictly after [after], with week/month cycles aligned to [anchor]. */

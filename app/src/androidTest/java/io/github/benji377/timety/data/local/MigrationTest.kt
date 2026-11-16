@@ -342,4 +342,33 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate6To7_marksExistingDueDatesAsTimed() {
+        val dbName = "migration-test-6-7"
+
+        helper.createDatabase(dbName, 6).apply {
+            execSQL(
+                "INSERT INTO tasks (id, title, description, dueDate, location, priority, size, " +
+                    "isCompleted, createdAt, reminders) " +
+                    "VALUES ('t1', 'Call', '', 1000, '', 'MEDIUM', 'MEDIUM', 0, 0, '[]')"
+            )
+            execSQL(
+                "INSERT INTO recurring_tasks (id, title, description, dueDate, unit, interval, " +
+                    "monthlyMode, reminderOffsetsMinutes, createdAt) " +
+                    "VALUES ('r1', 'Bins', '', 1000, 'WEEK', 1, 'DAY_OF_MONTH', '[]', 0)"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 7, true, MIGRATION_6_7)
+
+        listOf("tasks" to "t1", "recurring_tasks" to "r1").forEach { (table, id) ->
+            db.query("SELECT hasDueTime FROM $table WHERE id = '$id'").use { cursor ->
+                cursor.moveToFirst()
+                assertEquals(1, cursor.getInt(0))
+            }
+        }
+        db.close()
+    }
 }

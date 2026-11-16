@@ -2,7 +2,6 @@ package io.github.benji377.timety.ui.screens.task
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -20,8 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,13 +57,14 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.NeoButton
+import io.github.benji377.timety.ui.components.common.NeoDatePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
+import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.components.task.ReminderEntry
 import io.github.benji377.timety.ui.components.task.ReminderField
@@ -87,6 +85,7 @@ import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.task.Due
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
@@ -101,7 +100,7 @@ import java.util.UUID
 /** Which monthly anchoring the user picked; mapped to [MonthlyMode] plus ordinal on save. */
 private enum class MonthlyChoice { DAY_OF_MONTH, NTH_WEEKDAY, LAST_WEEKDAY }
 
-private enum class RecurringPickerTarget { DUE_DATE, PAST_OCCURRENCE }
+private enum class RecurringPickerTarget { DUE_DATE, DUE_TIME, PAST_OCCURRENCE }
 
 /**
  * Creates, views, or edits a recurring task: title, description, next due date, the recurrence
@@ -139,6 +138,8 @@ fun RecurringTaskDetailScreen(
     var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
     // The picked time, kept apart from dueDate: a time inside a DST gap resolves to a later instant.
     var dueTimeMinutes by rememberSaveable(formTask) { mutableStateOf(existingTask?.timeOfDayMinutes) }
+    var hasDueTime by rememberSaveable(formTask) { mutableStateOf(existingTask?.hasDueTime ?: false) }
+    val due = dueDate?.let { Due(it, hasDueTime) }
     var unit by rememberSaveable(formTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
     // Required, with no default: a new task starts empty so the cadence is always a deliberate choice.
     var intervalText by rememberSaveable(formTask) {
@@ -162,8 +163,20 @@ fun RecurringTaskDetailScreen(
     }
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    // Date-then-time picker flow; a non-null target keeps the dialog open.
+    // A non-null target keeps its picker dialog open.
     var pickerTarget by remember { mutableStateOf<RecurringPickerTarget?>(null) }
+
+    fun changeDue(date: LocalDate, timeMinutes: Int?) {
+        dueDate = Due.of(date, timeMinutes, zone).at
+        dueTimeMinutes = timeMinutes
+        hasDueTime = timeMinutes != null
+        // A date-only due offers whole-day presets only.
+        if (timeMinutes == null) {
+            reminderOffsets = reminderOffsets.filter { minutes ->
+                ReminderPreset.entries.none { it.minutes == minutes && !it.isWholeDays }
+            }
+        }
+    }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -202,7 +215,10 @@ fun RecurringTaskDetailScreen(
             title = trimmedTitle,
             description = description.trim(),
             dueDate = due,
-            timeOfDayMinutes = dueTimeMinutes ?: due.atZone(zone).let { it.hour * 60 + it.minute },
+            hasDueTime = hasDueTime,
+            timeOfDayMinutes = if (hasDueTime) {
+                dueTimeMinutes ?: due.atZone(zone).let { it.hour * 60 + it.minute }
+            } else null,
             unit = unit,
             interval = interval,
             daysOfWeek = if (unit == RecurrenceUnit.WEEK) {
@@ -307,27 +323,15 @@ fun RecurringTaskDetailScreen(
 
             // Next due date (also the anchor for the recurrence rule and time of day).
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(enabled = isEditing) {
-                            pickerTarget = RecurringPickerTarget.DUE_DATE
-                        }
-                ) {
-                    NeoOutlinedTextField(
-                        value = dueDate?.let {
-                            "${AppDateFormatUtils.formatDate(it, dateFmt.dateFormatCode)} " +
-                                    AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
-                        } ?: "",
-                        onValueChange = {},
-                        enabled = false,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.recurringTaskLabelNextDue) + " *") },
-                        leadingIcon = { Icon(Icons.Filled.Event, null) },
-                        trailingIcon = { if (isEditing) Icon(Icons.Filled.Edit, null) },
-                        colors = detailFieldColors(isEditing),
-                    )
-                }
+                DueDateTimeFields(
+                    due = due,
+                    isEditing = isEditing,
+                    dateLabel = stringResource(R.string.recurringTaskLabelNextDue) + " *",
+                    onPickDate = { pickerTarget = RecurringPickerTarget.DUE_DATE },
+                    onPickTime = { pickerTarget = RecurringPickerTarget.DUE_TIME },
+                    onClearTime = { due?.let { changeDue(it.date(zone), null) } },
+                    onClearDate = null,
+                )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
             }
 
@@ -437,12 +441,13 @@ fun RecurringTaskDetailScreen(
 
             // Reminder offsets, re-applied to every occurrence.
             item {
+                val presets = due?.presets ?: ReminderPreset.entries
                 val entries = reminderOffsets.sorted().map { minutes ->
-                    val preset = ReminderPreset.entries.firstOrNull { it.minutes == minutes }
+                    val preset = presets.firstOrNull { it.minutes == minutes }
                     ReminderEntry(
                         key = minutes.toLong(),
                         preset = preset,
-                        label = if (preset != null) reminderPresetLabel(preset)
+                        label = if (preset != null) reminderPresetLabel(preset, hasDueTime)
                         else stringResource(R.string.recurringTaskReminderMinutesBefore, minutes),
                     )
                 }
@@ -453,6 +458,8 @@ fun RecurringTaskDetailScreen(
                     warning = if (reminderOffsets.size >= ReminderUtils.MAX_REMINDERS) {
                         stringResource(R.string.reminderWarnLimit, ReminderUtils.MAX_REMINDERS)
                     } else null,
+                    presets = presets,
+                    hasTime = due?.hasTime ?: true,
                     canAddPreset = { reminderOffsets.size < ReminderUtils.MAX_REMINDERS },
                     onTogglePreset = { preset ->
                         reminderOffsets = if (preset.minutes in reminderOffsets) {
@@ -542,7 +549,7 @@ fun RecurringTaskDetailScreen(
         onDismiss = { showDeleteConfirm = false }
     )
 
-    // Date and time picker dialog (date first, then time).
+    // Date, time, and past-occurrence pickers.
     pickerTarget?.let { target ->
         // Due dates can't be in the past; backfilled occurrences can't be in the future.
         val todayUtcMillis =
@@ -550,39 +557,54 @@ fun RecurringTaskDetailScreen(
         val selectableDates = remember(target, todayUtcMillis) {
             object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                    when (target) {
-                        RecurringPickerTarget.DUE_DATE -> utcTimeMillis >= todayUtcMillis
-                        RecurringPickerTarget.PAST_OCCURRENCE -> utcTimeMillis <= todayUtcMillis
-                    }
+                    if (target == RecurringPickerTarget.PAST_OCCURRENCE) utcTimeMillis <= todayUtcMillis
+                    else utcTimeMillis >= todayUtcMillis
             }
         }
-        val initialTime = dueDate?.atZone(zone)
-        NeoDateTimePickerDialog(
-            initialDate = (if (target == RecurringPickerTarget.DUE_DATE) dueDate else null) ?: Instant.now(),
-            initialHour = dueTimeMinutes?.div(60) ?: initialTime?.hour ?: 12,
-            initialMinute = dueTimeMinutes?.rem(60) ?: initialTime?.minute ?: 0,
-            timeTitle = stringResource(
-                if (target == RecurringPickerTarget.DUE_DATE) R.string.recurringTaskLabelNextDue
-                else R.string.recurringTaskHistoryAddPast
-            ),
-            selectableDates = selectableDates,
-            onConfirm = { date, hour, minute ->
-                val instant = date.atTime(hour, minute).atZone(zone).toInstant()
-                when (target) {
-                    RecurringPickerTarget.DUE_DATE -> {
-                        dueDate = instant
-                        dueTimeMinutes = hour * 60 + minute
-                    }
-                    // The date picker allows today, so a later time today is clamped to now.
-                    RecurringPickerTarget.PAST_OCCURRENCE ->
-                        recurringTaskId?.let { viewModel.addPastOccurrence(it, minOf(instant, Instant.now())) }
-                }
-                pickerTarget = null
-            },
-            onDismiss = { pickerTarget = null },
-        )
+        val dueTime = if (hasDueTime) {
+            dueTimeMinutes ?: dueDate?.atZone(zone)?.let { it.hour * 60 + it.minute }
+        } else null
+        when (target) {
+            RecurringPickerTarget.DUE_DATE -> NeoDatePickerDialog(
+                initialDate = dueDate ?: Instant.now(),
+                selectableDates = selectableDates,
+                onConfirm = { date ->
+                    changeDue(date, dueTime)
+                    pickerTarget = null
+                },
+                onDismiss = { pickerTarget = null },
+            )
+
+            RecurringPickerTarget.DUE_TIME -> NeoTimePickerDialog(
+                initialHour = dueTime?.div(60) ?: DEFAULT_PICKER_HOUR,
+                initialMinute = dueTime?.rem(60) ?: 0,
+                title = { Text(stringResource(R.string.taskDetailsLabelDueTime)) },
+                onConfirm = { hour, minute ->
+                    due?.let { changeDue(it.date(zone), hour * 60 + minute) }
+                    pickerTarget = null
+                },
+                onDismiss = { pickerTarget = null },
+            )
+
+            // The date picker allows today, so a later time today is clamped to now.
+            RecurringPickerTarget.PAST_OCCURRENCE -> NeoDateTimePickerDialog(
+                initialDate = Instant.now(),
+                initialHour = DEFAULT_PICKER_HOUR,
+                initialMinute = 0,
+                timeTitle = stringResource(R.string.recurringTaskHistoryAddPast),
+                selectableDates = selectableDates,
+                onConfirm = { date, hour, minute ->
+                    val instant = date.atTime(hour, minute).atZone(zone).toInstant()
+                    recurringTaskId?.let { viewModel.addPastOccurrence(it, minOf(instant, Instant.now())) }
+                    pickerTarget = null
+                },
+                onDismiss = { pickerTarget = null },
+            )
+        }
     }
 }
+
+private const val DEFAULT_PICKER_HOUR = 12
 
 @Composable
 private fun MonthlyChoiceOption(

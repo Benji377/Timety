@@ -73,6 +73,7 @@ fun ReminderField(
     onAddCustom: (() -> Unit)?,
     customEnabled: Boolean = true,
     presets: List<ReminderPreset> = ReminderPreset.entries,
+    hasTime: Boolean = true,
     customLabel: String = stringResource(R.string.taskDetailsReminderOptionCustom),
     hint: String = stringResource(R.string.reminderSheetHint),
 ) {
@@ -170,7 +171,7 @@ fun ReminderField(
                         NeoFilterChip(
                             selected = selected,
                             onClick = { onTogglePreset(preset) },
-                            label = reminderPresetLabel(preset),
+                            label = reminderPresetLabel(preset, hasTime),
                             enabled = enabled,
                             modifier = Modifier.alpha(if (enabled) 1f else 0.4f),
                         )
@@ -209,11 +210,13 @@ fun ReminderField(
     }
 }
 
-/** The user-facing label for a reminder preset. */
+/** The user-facing label for a reminder preset; [hasTime] = false for a date-only due. */
 @Composable
 @ReadOnlyComposable
-fun reminderPresetLabel(preset: ReminderPreset): String = when (preset) {
-    ReminderPreset.ON_TIME -> stringResource(R.string.taskDetailsReminderOptionOnce)
+fun reminderPresetLabel(preset: ReminderPreset, hasTime: Boolean = true): String = when (preset) {
+    ReminderPreset.ON_TIME -> stringResource(
+        if (hasTime) R.string.taskDetailsReminderOptionOnce else R.string.taskDetailsReminderOptionOnTheDay
+    )
     ReminderPreset.MINUTES_30 -> stringResource(R.string.taskDetailsReminderOptionHalfHour)
     ReminderPreset.HOUR_1 -> stringResource(R.string.taskDetailsReminderOptionHour)
     ReminderPreset.DAY_1 -> stringResource(R.string.taskDetailsReminderOptionDay)

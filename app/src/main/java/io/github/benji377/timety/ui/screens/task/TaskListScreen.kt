@@ -75,6 +75,7 @@ import io.github.benji377.timety.util.tag.TagFilter
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.TaskFilterEngine
+import io.github.benji377.timety.util.task.due
 import kotlinx.coroutines.flow.drop
 import java.time.Instant
 import java.time.ZoneId
@@ -398,7 +399,7 @@ private data class TaskBuckets(
                 val task = item.task
                 when {
                     task.isCompleted -> done.add(item)
-                    task.dueDate != null && task.dueDate.isBefore(now) -> overdue.add(item)
+                    task.due?.isOverdue(now, zone) == true -> overdue.add(item)
                     task.dueDate != null && task.dueDate.atZone(zone).toLocalDate() == today -> dueToday.add(item)
                     else -> todo.add(item)
                 }

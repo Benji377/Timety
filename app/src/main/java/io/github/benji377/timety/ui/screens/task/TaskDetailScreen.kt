@@ -45,8 +45,10 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
+import io.github.benji377.timety.ui.components.common.NeoDatePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -57,6 +59,7 @@ import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.task.CustomReminderIssue
+import io.github.benji377.timety.util.task.Due
 import io.github.benji377.timety.util.task.ReminderUtils
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
@@ -107,6 +110,8 @@ fun TaskDetailScreen(
     }
     var size by rememberSaveable(formTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
     var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
+    var hasDueTime by rememberSaveable(formTask) { mutableStateOf(existingTask?.hasDueTime ?: true) }
+    val due = dueDate?.let { Due(it, hasDueTime) }
     // Null until the user changes them, so a save doesn't overwrite tags still loading.
     var pickedTagIds by rememberSaveable(formTask) { mutableStateOf<Set<String>?>(null) }
     var reminders by rememberSaveable(formTask) {
@@ -130,7 +135,7 @@ fun TaskDetailScreen(
     val reminderInPastMsg = stringResource(R.string.reminderCustomInPast)
     val remindersShiftedMsg = stringResource(R.string.reminderShifted)
 
-    // Date-then-time picker flow; a non-null target keeps the dialog open.
+    // A non-null target keeps its picker dialog open.
     var pickerTarget by remember { mutableStateOf<PickerTarget?>(null) }
 
     fun addReminder(reminder: Instant) {
@@ -138,17 +143,19 @@ fun TaskDetailScreen(
     }
 
     // Preset reminders follow the due date; see ReminderUtils.shiftWithDueDate.
-    fun changeDueDate(newDue: Instant) {
-        val shift = ReminderUtils.shiftWithDueDate(reminders, dueDate, newDue, Instant.now())
-        dueDate = newDue
+    fun changeDue(newDue: Due) {
+        val shift = ReminderUtils.shiftWithDueDate(reminders, due, newDue, Instant.now())
+        dueDate = newDue.at
+        hasDueTime = newDue.hasTime
         reminders = shift.reminders
         if (shift.changed) scope.launch { snackbarHostState.showSnackbar(remindersShiftedMsg) }
     }
 
     // Presets lose their reference point without a due date.
     fun clearDueDate() {
-        dueDate?.let { reminders = ReminderUtils.withoutPresets(reminders, it) }
+        due?.let { reminders = ReminderUtils.withoutPresets(reminders, it) }
         dueDate = null
+        hasDueTime = true
     }
 
     val appBarTitle = when {
@@ -185,6 +192,7 @@ fun TaskDetailScreen(
                                 priority = priority,
                                 size = size,
                                 dueDate = dueDate,
+                                hasDueTime = hasDueTime,
                                 reminders = reminders,
                                 isCompleted = existingTask?.isCompleted ?: false,
                                 completedAt = existingTask?.completedAt,
@@ -275,16 +283,19 @@ fun TaskDetailScreen(
                 )
             }
             item {
-                DueDateField(
-                    dueDate = dueDate,
+                DueDateTimeFields(
+                    due = due,
                     isEditing = isEditing,
-                    onPick = { pickerTarget = PickerTarget.DUE_DATE },
-                    onClear = ::clearDueDate,
+                    dateLabel = stringResource(R.string.taskDetailsLabelDueDateSet),
+                    onPickDate = { pickerTarget = PickerTarget.DUE_DATE },
+                    onPickTime = { pickerTarget = PickerTarget.DUE_TIME },
+                    onClearTime = { due?.let { changeDue(Due.of(it.date(), null)) } },
+                    onClearDate = ::clearDueDate,
                 )
                 Spacer(Modifier.height(AppTheme.spaceMedium))
                 TaskReminderField(
                     reminders = reminders,
-                    dueDate = dueDate,
+                    due = due,
                     isEditing = isEditing,
                     onRemindersChange = { reminders = it },
                     onAddCustom = { pickerTarget = PickerTarget.CUSTOM_REMINDER },
@@ -388,49 +399,66 @@ fun TaskDetailScreen(
         onDismiss = { showDeleteConfirm = false }
     )
 
-    // Date and time picker dialog.
+    // Date, time, and custom reminder pickers.
     pickerTarget?.let { target ->
         // Due dates can't be before today; a custom reminder must fall between today and the due date.
         val zone = ZoneId.systemDefault()
         val todayUtcMillis =
             LocalDate.now(zone).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-        val dueUtcMillis = dueDate?.atZone(zone)?.toLocalDate()
-            ?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+        val dueUtcMillis = due?.date(zone)?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
         val selectableDates = remember(target, dueUtcMillis, todayUtcMillis) {
             object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean = when (target) {
-                    PickerTarget.DUE_DATE -> utcTimeMillis >= todayUtcMillis
-                    PickerTarget.CUSTOM_REMINDER ->
-                        utcTimeMillis >= todayUtcMillis &&
-                                (dueUtcMillis == null || utcTimeMillis <= dueUtcMillis)
-                }
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                    utcTimeMillis >= todayUtcMillis &&
+                            (target == PickerTarget.DUE_DATE || dueUtcMillis == null || utcTimeMillis <= dueUtcMillis)
             }
         }
-        NeoDateTimePickerDialog(
-            initialDate = (if (target == PickerTarget.DUE_DATE) dueDate else null) ?: Instant.now(),
-            initialHour = 12,
-            initialMinute = 0,
-            timeTitle = stringResource(R.string.taskDetailsLabelDueDateSet),
-            selectableDates = selectableDates,
-            onConfirm = { date, hour, minute ->
-                val instant = date.atTime(hour, minute).atZone(zone).toInstant()
-                when (target) {
-                    PickerTarget.DUE_DATE -> changeDueDate(instant)
-                    PickerTarget.CUSTOM_REMINDER -> when (
-                        ReminderUtils.customIssue(instant, dueDate, Instant.now())
-                    ) {
+        val dueTime = due?.takeIf { it.hasTime }?.at?.atZone(zone)
+        when (target) {
+            PickerTarget.DUE_DATE -> NeoDatePickerDialog(
+                initialDate = dueDate ?: Instant.now(),
+                selectableDates = selectableDates,
+                onConfirm = { date ->
+                    changeDue(Due.of(date, dueTime?.let { it.hour * 60 + it.minute }, zone))
+                    pickerTarget = null
+                },
+                onDismiss = { pickerTarget = null },
+            )
+
+            PickerTarget.DUE_TIME -> NeoTimePickerDialog(
+                initialHour = dueTime?.hour ?: DEFAULT_PICKER_HOUR,
+                initialMinute = dueTime?.minute ?: 0,
+                title = { Text(stringResource(R.string.taskDetailsLabelDueTime)) },
+                onConfirm = { hour, minute ->
+                    due?.let { changeDue(Due.of(it.date(zone), hour * 60 + minute, zone)) }
+                    pickerTarget = null
+                },
+                onDismiss = { pickerTarget = null },
+            )
+
+            PickerTarget.CUSTOM_REMINDER -> NeoDateTimePickerDialog(
+                initialDate = Instant.now(),
+                initialHour = DEFAULT_PICKER_HOUR,
+                initialMinute = 0,
+                timeTitle = stringResource(R.string.taskDetailsReminderOptionCustom),
+                selectableDates = selectableDates,
+                onConfirm = { date, hour, minute ->
+                    val instant = date.atTime(hour, minute).atZone(zone).toInstant()
+                    when (ReminderUtils.customIssue(instant, due, Instant.now(), zone)) {
                         null -> addReminder(instant)
                         CustomReminderIssue.IN_PAST ->
                             scope.launch { snackbarHostState.showSnackbar(reminderInPastMsg) }
                         CustomReminderIssue.AFTER_DUE ->
                             scope.launch { snackbarHostState.showSnackbar(reminderTooLateMsg) }
                     }
-                }
-                pickerTarget = null
-            },
-            onDismiss = { pickerTarget = null },
-        )
+                    pickerTarget = null
+                },
+                onDismiss = { pickerTarget = null },
+            )
+        }
     }
 }
 
-private enum class PickerTarget { DUE_DATE, CUSTOM_REMINDER }
+private const val DEFAULT_PICKER_HOUR = 12
+
+private enum class PickerTarget { DUE_DATE, DUE_TIME, CUSTOM_REMINDER }

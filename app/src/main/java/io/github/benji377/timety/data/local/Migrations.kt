@@ -343,6 +343,14 @@ private fun readLegacySessions(db: SupportSQLiteDatabase): Map<String, LegacySes
         }
     }
 
+/** Adds `hasDueTime` to tasks and recurring tasks; existing due dates all have a time. */
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `tasks` ADD COLUMN `hasDueTime` INTEGER NOT NULL DEFAULT 1")
+        db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `hasDueTime` INTEGER NOT NULL DEFAULT 1")
+    }
+}
+
 /** All migrations, in order, to register on the Room builder. */
 val ALL_MIGRATIONS =
-    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)

@@ -1,5 +1,6 @@
 package io.github.benji377.timety.util.datetime
 
+import io.github.benji377.timety.util.task.Due
 import java.text.DecimalFormatSymbols
 import java.time.Instant
 import java.time.LocalDate
@@ -123,6 +124,17 @@ object AppDateFormatUtils {
         val (hour, minute) = parseHHmm(hhmm)
         return formatTimeOfDay(hour, minute, use24Hour, locale)
     }
+
+    /** The due date, with its time when it has one. */
+    fun formatDue(
+        due: Due,
+        dateFormatCode: String,
+        use24Hour: Boolean,
+        zone: ZoneId = ZoneId.systemDefault(),
+        locale: Locale = Locale.getDefault()
+    ): String =
+        if (due.hasTime) formatDateTime(due.at, dateFormatCode, use24Hour, zone, locale)
+        else formatDate(due.at, dateFormatCode, zone, locale)
 
     fun formatDateTime(
         instant: Instant,

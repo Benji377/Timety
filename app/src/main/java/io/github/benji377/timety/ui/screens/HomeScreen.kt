@@ -66,6 +66,7 @@ import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
+import io.github.benji377.timety.util.task.due
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -291,8 +292,7 @@ fun HomeScreen(
                                     urgentTasks.forEach { task ->
                                         TaskListTile(
                                             task = task.task,
-                                            isOverdue = task.task.dueDate != null &&
-                                                    task.task.dueDate.isBefore(Instant.now()),
+                                            isOverdue = task.task.due?.isOverdue(Instant.now()) == true,
                                             enableDismissible = false,
                                             showDescription = false,
                                             subtasksCompleted = task.subtasks.count { it.isCompleted },

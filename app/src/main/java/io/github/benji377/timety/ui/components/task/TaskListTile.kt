@@ -47,7 +47,7 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import java.time.Instant
+import io.github.benji377.timety.util.task.Due
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -172,10 +172,10 @@ fun TaskListTile(
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                text = formatDueDateTime(
-                                    task.dueDate,
+                                text = AppDateFormatUtils.formatDue(
+                                    Due(task.dueDate, task.hasDueTime),
+                                    dateFormatCode,
                                     use24HourFormat,
-                                    dateFormatCode
                                 ),
                                 fontSize = AppTheme.fsLabel,
                                 color = borderColor,
@@ -230,10 +230,3 @@ private fun getBorderColor(task: TaskEntity, isOverdue: Boolean): Color {
     }
     return TaskColor
 }
-
-private fun formatDueDateTime(
-    dueDate: Instant,
-    use24HourFormat: Boolean,
-    dateFormatCode: String
-): String =
-    AppDateFormatUtils.formatDateTime(dueDate, dateFormatCode, use24HourFormat)

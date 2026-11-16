@@ -36,6 +36,8 @@ data class TaskEntity(
     val title: String,
     val description: String = "",
     val dueDate: Instant? = null,
+    // False = due any time on [dueDate]'s day, which is then stored as the local start of the day.
+    val hasDueTime: Boolean = true,
     val location: String = "",
     val priority: Priority = Priority.MEDIUM,
     val size: TaskSize = TaskSize.MEDIUM,

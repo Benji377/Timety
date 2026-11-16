@@ -44,6 +44,8 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.task.Due
+import io.github.benji377.timety.util.task.due
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
 import kotlinx.coroutines.flow.first
@@ -96,7 +98,7 @@ class TaskWidget : GlanceAppWidget() {
             isRecurring = false,
             title = title,
             accentColor = priorityColor(priority),
-            dueLabel = dueLabel(dueDate, today, zone, use24Hour),
+            dueLabel = dueLabel(due, today, zone, use24Hour),
             isOverdue = dueDate?.atZone(zone)?.toLocalDate()?.isBefore(today) == true,
         )
 
@@ -105,7 +107,7 @@ class TaskWidget : GlanceAppWidget() {
             isRecurring = true,
             title = title,
             accentColor = TaskColor,
-            dueLabel = dueLabel(dueDate, today, zone, use24Hour),
+            dueLabel = dueLabel(due, today, zone, use24Hour),
             isOverdue = dueDate.atZone(zone).toLocalDate().isBefore(today),
         )
 
@@ -254,19 +256,22 @@ class TaskWidget : GlanceAppWidget() {
         }
     }
 
-    /** Time of day for tasks due today, a short date otherwise; empty when there is no due date. */
+    /**
+     * Time of day for tasks due today, a short date otherwise; empty when there is no due date or
+     * it is due all day today.
+     */
     private fun dueLabel(
-        dueDate: Instant?,
+        due: Due?,
         today: LocalDate,
         zone: ZoneId,
         use24Hour: Boolean
     ): String {
-        if (dueDate == null) return ""
-        val dueDay = dueDate.atZone(zone).toLocalDate()
-        return if (dueDay == today) {
-            AppDateFormatUtils.formatTime(dueDate, use24Hour)
-        } else {
-            AppDateFormatUtils.formatShortDate(dueDay)
+        if (due == null) return ""
+        val dueDay = due.date(zone)
+        return when {
+            dueDay != today -> AppDateFormatUtils.formatShortDate(dueDay)
+            due.hasTime -> AppDateFormatUtils.formatTime(due.at, use24Hour)
+            else -> ""
         }
     }
 

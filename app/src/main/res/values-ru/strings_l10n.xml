@@ -284,7 +284,6 @@
     <string name="taskFocusLogSnackbar">Сессия фокуса прикреплена</string>
     <string name="taskFocusLogTitle">Записать время фокуса</string>
     <string name="taskDetailsLabelDescription">Описание</string>
-    <string name="taskDetailsLabelDueDate">Срок: %1$s в %2$s</string>
     <string name="taskDetailsLabelDueDateSet">Задать срок</string>
     <string name="taskDetailsLabelEffort">Объём</string>
     <string name="taskDetailsLabelLocation">Место</string>
