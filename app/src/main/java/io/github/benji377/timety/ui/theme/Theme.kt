@@ -16,7 +16,7 @@ import androidx.core.view.WindowCompat
 // Fixed color schemes for light and dark mode. No Material You / dynamic color — the palette is
 // always the same regardless of device wallpaper.
 
-private val DarkColorScheme = darkColorScheme(
+internal val DarkColorScheme = darkColorScheme(
     primary = TaskColor,
     onPrimary = Color.White,
     secondary = FocusColor,
@@ -42,7 +42,7 @@ private val DarkColorScheme = darkColorScheme(
     outlineVariant = Color(0xFF343434),
 )
 
-private val LightColorScheme = lightColorScheme(
+internal val LightColorScheme = lightColorScheme(
     primary = TaskColor,
     onPrimary = Color.White,
     secondary = FocusColor,

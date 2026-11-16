@@ -8,10 +8,10 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.ImageProvider
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CheckBox
+import androidx.glance.appwidget.CheckboxDefaults
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
@@ -40,6 +40,7 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.ui.navigation.AppRoute
 import io.github.benji377.timety.ui.navigation.BottomNavItem
+import io.github.benji377.timety.ui.components.task.recurringStatusColor
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
@@ -58,7 +59,9 @@ private data class TaskWidgetRow(
     val id: String,
     val isRecurring: Boolean,
     val title: String,
-    val accentColor: Color,
+    val priorityColor: Color,
+    // Same rule as the app's task tiles: red overdue, orange due today, blue otherwise.
+    val statusColor: Color,
     val dueLabel: String,
     val isOverdue: Boolean,
 )
@@ -93,23 +96,35 @@ class TaskWidget : GlanceAppWidget() {
         val upcomingRecurring = recurringByStatus[RecurringStatus.UPCOMING].orEmpty()
 
         // this.id: the enclosing provideGlance's GlanceId parameter shadows the entity property.
-        fun TaskEntity.toRow() = TaskWidgetRow(
-            id = this.id,
-            isRecurring = false,
-            title = title,
-            accentColor = priorityColor(priority),
-            dueLabel = dueLabel(due, today, zone, use24Hour),
-            isOverdue = dueDate?.atZone(zone)?.toLocalDate()?.isBefore(today) == true,
-        )
+        fun TaskEntity.toRow(): TaskWidgetRow {
+            val isOverdue = due?.isOverdue(now, zone) == true
+            return TaskWidgetRow(
+                id = this.id,
+                isRecurring = false,
+                title = title,
+                priorityColor = priorityColor(priority),
+                statusColor = when {
+                    isOverdue -> ErrorColor
+                    due?.date(zone) == today -> WarningColor
+                    else -> TaskColor
+                },
+                dueLabel = dueLabel(due, today, zone, use24Hour),
+                isOverdue = isOverdue,
+            )
+        }
 
-        fun RecurringTaskEntity.toRow() = TaskWidgetRow(
-            id = this.id,
-            isRecurring = true,
-            title = title,
-            accentColor = TaskColor,
-            dueLabel = dueLabel(due, today, zone, use24Hour),
-            isOverdue = dueDate.atZone(zone).toLocalDate().isBefore(today),
-        )
+        fun RecurringTaskEntity.toRow(): TaskWidgetRow {
+            val status = RecurrenceUtils.statusOf(this, now, horizonDays)
+            return TaskWidgetRow(
+                id = this.id,
+                isRecurring = true,
+                title = title,
+                priorityColor = TaskColor,
+                statusColor = recurringStatusColor(status),
+                dueLabel = dueLabel(due, today, zone, use24Hour),
+                isOverdue = status == RecurringStatus.OVERDUE,
+            )
+        }
 
         // Each section sorts by the actual due instant, like the Home screen's lists.
         val dueSorted = (duePlain.map { it.dueDate to it.toRow() } +
@@ -122,7 +137,7 @@ class TaskWidget : GlanceAppWidget() {
             .map { it.second }
 
         provideContent {
-            GlanceTheme { WidgetContent(context, dueSorted, upcomingSorted) }
+            GlanceTheme(colors = TimetyWidgetColors) { WidgetContent(context, dueSorted, upcomingSorted) }
         }
     }
 
@@ -131,56 +146,63 @@ class TaskWidget : GlanceAppWidget() {
         val openTasksTab = actionStartActivity(
             widgetNavIntent(context, BottomNavItem.Tasks.route)
         )
-        Column(
-            modifier = GlanceModifier
-                .fillMaxSize()
-                .background(ImageProvider(R.drawable.widget_background))
-                .padding(12.dp)
-                .clickable(openTasksTab),
+        OutlinedBox(
+            border = GlanceTheme.colors.outline,
+            fill = GlanceTheme.colors.background,
+            modifier = GlanceModifier.fillMaxSize(),
+            corners = WidgetCorners.CARD,
+            innerModifier = GlanceModifier.fillMaxSize(),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
-                    .clickable(openTasksTab)
+            Column(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .padding(12.dp)
+                    .clickable(openTasksTab),
             ) {
-                Text(
-                    text = context.getString(R.string.widgetTasksDue, due.size),
-                    style = TextStyle(
-                        color = ColorProvider(TaskColor),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    ),
-                )
-            }
-
-            if (due.isEmpty() && upcoming.isEmpty()) {
-                Box(
-                    modifier = GlanceModifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
+                        .clickable(openTasksTab)
                 ) {
                     Text(
-                        text = context.getString(R.string.widgetNoUrgentTasks),
-                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
+                        text = context.getString(R.string.widgetTasksDue, due.size),
+                        style = TextStyle(
+                            color = ColorProvider(WarningColor),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
                     )
                 }
-            } else {
-                LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                    itemsIndexed(due) { _, row -> TaskRowItem(context, row) }
-                    if (upcoming.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = "${context.getString(R.string.commonTimeUpcoming)} (${upcoming.size})",
-                                style = TextStyle(
-                                    color = GlanceTheme.colors.onSurfaceVariant,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 11.sp
-                                ),
-                                modifier = GlanceModifier.padding(
-                                    top = 4.dp, bottom = 6.dp, start = 2.dp
+
+                if (due.isEmpty() && upcoming.isEmpty()) {
+                    Box(
+                        modifier = GlanceModifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = context.getString(R.string.widgetNoUrgentTasks),
+                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
+                        )
+                    }
+                } else {
+                    LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                        itemsIndexed(due) { _, row -> TaskRowItem(context, row) }
+                        if (upcoming.isNotEmpty()) {
+                            item {
+                                Text(
+                                    text = "${context.getString(R.string.commonTimeUpcoming)} (${upcoming.size})",
+                                    style = TextStyle(
+                                        color = ColorProvider(TaskColor),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    ),
+                                    modifier = GlanceModifier.padding(
+                                        top = 4.dp, bottom = 6.dp, start = 2.dp
+                                    )
                                 )
-                            )
+                            }
+                            itemsIndexed(upcoming) { _, row -> TaskRowItem(context, row) }
                         }
-                        itemsIndexed(upcoming) { _, row -> TaskRowItem(context, row) }
                     }
                 }
             }
@@ -203,52 +225,64 @@ class TaskWidget : GlanceAppWidget() {
         }
 
         Column(modifier = GlanceModifier.fillMaxWidth()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = GlanceModifier
-                    .fillMaxWidth()
-                    .background(ImageProvider(R.drawable.widget_task_item_bg))
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            OutlinedBox(
+                border = ColorProvider(row.statusColor),
+                fill = GlanceTheme.colors.surface,
+                modifier = GlanceModifier.fillMaxWidth(),
             ) {
-                CheckBox(checked = false, onCheckedChange = completeAction)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = GlanceModifier
-                        .defaultWeight()
-                        .padding(vertical = 6.dp)
-                        .clickable(actionStartActivity(widgetNavIntent(context, detailRoute))),
+                        .fillMaxWidth()
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
-                    Text(
-                        text = if (row.isRecurring) "↻" else "●",
-                        style = TextStyle(
-                            color = ColorProvider(row.accentColor),
-                            fontSize = if (row.isRecurring) 12.sp else 10.sp
+                    CheckBox(
+                        checked = false,
+                        onCheckedChange = completeAction,
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = ColorProvider(TaskColor),
+                            uncheckedColor = ColorProvider(TaskColor),
                         ),
                     )
-                    Spacer(modifier = GlanceModifier.width(8.dp))
-                    Text(
-                        text = row.title,
-                        maxLines = 1,
-                        style = TextStyle(
-                            color = GlanceTheme.colors.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        ),
-                        modifier = GlanceModifier.defaultWeight()
-                    )
-                    if (row.dueLabel.isNotEmpty()) {
-                        Spacer(modifier = GlanceModifier.width(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = GlanceModifier
+                            .defaultWeight()
+                            .padding(vertical = 6.dp)
+                            .clickable(actionStartActivity(widgetNavIntent(context, detailRoute))),
+                    ) {
                         Text(
-                            text = row.dueLabel,
+                            text = if (row.isRecurring) "↻" else "●",
                             style = TextStyle(
-                                color = if (row.isOverdue) {
-                                    ColorProvider(ErrorColor)
-                                } else {
-                                    GlanceTheme.colors.onSurfaceVariant
-                                },
-                                fontSize = 12.sp
+                                color = ColorProvider(row.priorityColor),
+                                fontSize = if (row.isRecurring) 12.sp else 10.sp
                             ),
                         )
+                        Spacer(modifier = GlanceModifier.width(8.dp))
+                        Text(
+                            text = row.title,
+                            maxLines = 1,
+                            style = TextStyle(
+                                color = GlanceTheme.colors.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            ),
+                            modifier = GlanceModifier.defaultWeight()
+                        )
+                        if (row.dueLabel.isNotEmpty()) {
+                            Spacer(modifier = GlanceModifier.width(8.dp))
+                            Text(
+                                text = row.dueLabel,
+                                style = TextStyle(
+                                    color = if (row.isOverdue) {
+                                        ColorProvider(ErrorColor)
+                                    } else {
+                                        GlanceTheme.colors.onSurfaceVariant
+                                    },
+                                    fontSize = 12.sp
+                                ),
+                            )
+                        }
                     }
                 }
             }

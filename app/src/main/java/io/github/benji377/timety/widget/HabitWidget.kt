@@ -7,10 +7,12 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.ImageProvider
 import androidx.glance.action.actionParametersOf
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CheckBox
+import androidx.compose.ui.graphics.Color
+import androidx.glance.layout.fillMaxHeight
+import androidx.glance.appwidget.CheckboxDefaults
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.action.actionStartActivity
@@ -57,6 +59,7 @@ private sealed interface HabitWidgetRow {
         val isDone: Boolean,
         val isLocked: Boolean,
         val isStacked: Boolean,
+        val color: Color,
     ) : HabitWidgetRow
 
     data object StackFooter : HabitWidgetRow
@@ -89,7 +92,7 @@ class HabitWidget : GlanceAppWidget() {
         val rows = buildRows(context, todayHabits, today)
 
         provideContent {
-            GlanceTheme { WidgetContent(context, todayHabits.size, rows) }
+            GlanceTheme(colors = TimetyWidgetColors) { WidgetContent(context, todayHabits.size, rows) }
         }
     }
 
@@ -129,6 +132,7 @@ class HabitWidget : GlanceAppWidget() {
                             isDone = isDone,
                             isLocked = HabitUtils.isHabitLocked(i, isDone, prevDone),
                             isStacked = true,
+                            color = Color(hwc.habit.colorValue),
                         )
                     )
                 }
@@ -143,6 +147,7 @@ class HabitWidget : GlanceAppWidget() {
                         isDone = completionStatus[hwc.habit.id] ?: false,
                         isLocked = false,
                         isStacked = false,
+                        color = Color(hwc.habit.colorValue),
                     )
                 )
             }
@@ -154,51 +159,58 @@ class HabitWidget : GlanceAppWidget() {
         val openHabitsTab = actionStartActivity(
             widgetNavIntent(context, BottomNavItem.Habits.route)
         )
-        Column(
-            modifier = GlanceModifier
-                .fillMaxSize()
-                .background(ImageProvider(R.drawable.widget_background))
-                .padding(12.dp)
-                .clickable(openHabitsTab),
+        OutlinedBox(
+            border = GlanceTheme.colors.outline,
+            fill = GlanceTheme.colors.background,
+            modifier = GlanceModifier.fillMaxSize(),
+            corners = WidgetCorners.CARD,
+            innerModifier = GlanceModifier.fillMaxSize(),
         ) {
-            // Header
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
+            Column(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .padding(12.dp)
+                    .clickable(openHabitsTab),
             ) {
-                Text(
-                    text = context.getString(R.string.widgetHabitsToday),
-                    style = TextStyle(
-                        color = ColorProvider(HabitColor),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    ),
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                Spacer(modifier = GlanceModifier.width(8.dp))
-                Text(
-                    text = "$dueCount",
-                    style = TextStyle(
-                        color = ColorProvider(HabitColor),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                )
-            }
-
-            if (rows.isEmpty()) {
-                Box(
-                    modifier = GlanceModifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                // Header
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = GlanceModifier.fillMaxWidth().padding(bottom = 8.dp)
                 ) {
                     Text(
-                        text = context.getString(R.string.habitScreenEmpty),
-                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
+                        text = context.getString(R.string.widgetHabitsToday),
+                        style = TextStyle(
+                            color = ColorProvider(HabitColor),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
+                        modifier = GlanceModifier.defaultWeight()
+                    )
+                    Spacer(modifier = GlanceModifier.width(8.dp))
+                    Text(
+                        text = "$dueCount",
+                        style = TextStyle(
+                            color = ColorProvider(HabitColor),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
                     )
                 }
-            } else {
-                LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
-                    itemsIndexed(rows) { _, row -> RenderRow(context, row, openHabitsTab) }
+
+                if (rows.isEmpty()) {
+                    Box(
+                        modifier = GlanceModifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = context.getString(R.string.habitScreenEmpty),
+                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant)
+                        )
+                    }
+                } else {
+                    LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
+                        itemsIndexed(rows) { _, row -> RenderRow(context, row, openHabitsTab) }
+                    }
                 }
             }
         }
@@ -212,66 +224,86 @@ class HabitWidget : GlanceAppWidget() {
         openHabitsTab: androidx.glance.action.Action,
     ) {
         when (row) {
-            is HabitWidgetRow.StackHeader -> Row(
-                modifier = GlanceModifier.fillMaxWidth()
-                    .background(ImageProvider(R.drawable.widget_habit_stack_header_bg))
-                    .padding(8.dp)
-                    .clickable(openHabitsTab),
-                verticalAlignment = Alignment.CenterVertically
+            // A stack is one outlined block, as in the app: header, habit rows, closing footer.
+            is HabitWidgetRow.StackHeader -> OutlinedBox(
+                border = GlanceTheme.colors.outline,
+                fill = GlanceTheme.colors.surfaceVariant,
+                modifier = GlanceModifier.fillMaxWidth(),
+                corners = WidgetCorners.TOP,
             ) {
-                Text(
-                    text = row.name.uppercase(Locale.getDefault()),
-                    maxLines = 1,
-                    style = TextStyle(
-                        color = ColorProvider(HabitColor),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp
-                    ),
-                    modifier = GlanceModifier.defaultWeight()
-                )
-                Spacer(modifier = GlanceModifier.width(8.dp))
-                Text(
-                    text = "${row.completed} / ${row.total}",
-                    style = TextStyle(
-                        color = ColorProvider(if (row.completed == row.total) SuccessColor else HabitColor),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth().padding(8.dp).clickable(openHabitsTab),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = row.name.uppercase(Locale.getDefault()),
+                        maxLines = 1,
+                        style = TextStyle(
+                            color = GlanceTheme.colors.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp
+                        ),
+                        modifier = GlanceModifier.defaultWeight()
                     )
-                )
+                    Spacer(modifier = GlanceModifier.width(8.dp))
+                    Text(
+                        text = "${row.completed} / ${row.total}",
+                        style = TextStyle(
+                            color = if (row.completed == row.total) ColorProvider(SuccessColor)
+                            else GlanceTheme.colors.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp
+                        )
+                    )
+                }
             }
 
             is HabitWidgetRow.Habit -> if (row.isStacked) {
-                Row(
-                    modifier = GlanceModifier.fillMaxWidth()
-                        .background(ImageProvider(R.drawable.widget_habit_stack_item_bg))
-                        .padding(horizontal = 8.dp, vertical = 0.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                OutlinedBox(
+                    border = GlanceTheme.colors.outline,
+                    fill = GlanceTheme.colors.surface,
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    corners = WidgetCorners.NONE,
                 ) {
-                    HabitRowContent(context, row)
+                    Row(
+                        modifier = GlanceModifier.fillMaxWidth().padding(end = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // The habit's color bar, the app's stacked-tile accent; neutral once done.
+                        Box(
+                            modifier = GlanceModifier.width(4.dp).fillMaxHeight()
+                                .background(if (row.isDone) GlanceTheme.colors.outline else ColorProvider(row.color))
+                        ) {}
+                        Spacer(modifier = GlanceModifier.width(4.dp))
+                        HabitRowContent(context, row)
+                    }
                 }
             } else {
                 Column(modifier = GlanceModifier.fillMaxWidth()) {
-                    Row(
-                        modifier = GlanceModifier.fillMaxWidth()
-                            .background(
-                                ImageProvider(
-                                    if (row.isDone) R.drawable.widget_habit_standalone_done_bg
-                                    else R.drawable.widget_habit_standalone_pending_bg
-                                )
-                            )
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Same rule as the app's tiles: the habit's color, the neutral outline once done.
+                    OutlinedBox(
+                        border = if (row.isDone) GlanceTheme.colors.outline else ColorProvider(row.color),
+                        fill = GlanceTheme.colors.surface,
+                        modifier = GlanceModifier.fillMaxWidth(),
                     ) {
-                        HabitRowContent(context, row)
+                        Row(
+                            modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            HabitRowContent(context, row)
+                        }
                     }
                     Spacer(modifier = GlanceModifier.height(6.dp))
                 }
             }
 
             HabitWidgetRow.StackFooter -> Column(modifier = GlanceModifier.fillMaxWidth()) {
-                Box(
-                    modifier = GlanceModifier.fillMaxWidth().height(2.dp)
-                        .background(ImageProvider(R.drawable.widget_habit_stack_footer_bg))
+                OutlinedBox(
+                    border = GlanceTheme.colors.outline,
+                    fill = GlanceTheme.colors.surface,
+                    modifier = GlanceModifier.fillMaxWidth().height(8.dp),
+                    corners = WidgetCorners.BOTTOM,
+                    innerModifier = GlanceModifier.fillMaxSize(),
                 ) {}
                 Spacer(modifier = GlanceModifier.height(8.dp))
             }
@@ -285,8 +317,13 @@ class HabitWidget : GlanceAppWidget() {
     ) {
         // Locked stacked habits can't be completed until their predecessor is, so their
         // checkbox carries no action; the text always deep-links into the habit's detail.
+        // The app's check circle: the habit's color when done, the habit section's purple before.
         CheckBox(
             checked = row.isDone,
+            colors = CheckboxDefaults.colors(
+                checkedColor = ColorProvider(row.color),
+                uncheckedColor = if (row.isLocked) GlanceTheme.colors.onSurfaceVariant else ColorProvider(HabitColor),
+            ),
             onCheckedChange = if (row.isLocked) null else actionRunCallback<ToggleHabitCompletionAction>(
                 actionParametersOf(HabitIdKey to row.id)
             ),
