@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="PluralsCandidate,UnusedResources">
     <string name="appTitle">Timety</string>
-    <string name="globalLabelGoals">Goals</string>
-    <string name="globalLabelHabits">Habits</string>
+    <string name="globalLabelGoals">الأهداف</string>
+    <string name="globalLabelHabits">العادات</string>
     <string name="globalLabelTags">Tags</string>
-    <string name="globalLabelTask">Task</string>
-    <string name="globalLabelTasks">Tasks</string>
+    <string name="globalLabelTask">المهام</string>
+    <string name="globalLabelTasks">المهام</string>
     <string name="commonButtonGotIt">Got it</string>
     <string name="commonDaytimeAfternoon">Afternoon</string>
     <string name="commonDaytimeEvening">Evening</string>
