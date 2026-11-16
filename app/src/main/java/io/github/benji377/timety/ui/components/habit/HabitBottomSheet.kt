@@ -58,15 +58,36 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.util.habit.HabitRates
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneId
 
+/** [HabitBottomSheet] wired to [viewModel]'s backfill and delete actions. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HabitHistorySheet(
+    habitWithCompletions: HabitWithCompletions,
+    viewModel: HabitViewModel,
+    onDismissRequest: () -> Unit,
+) {
+    val habitId = habitWithCompletions.habit.id
+    HabitBottomSheet(
+        habitWithCompletions = habitWithCompletions,
+        onDismissRequest = onDismissRequest,
+        onDateSelected = { viewModel.markCompletionOnDate(habitId, it) },
+        onDateDeselected = { viewModel.unmarkCompletionOnDate(habitId, it) },
+        onDeleteCompletion = { viewModel.deleteCompletion(it) },
+    )
+}
+
 /**
  * Bottom sheet showing a habit's completion history: stat summary, a month calendar, and a
- * chronological timeline. Tapping a past date adds or removes a completion for it.
+ * chronological timeline. Tapping a past date adds a check-in, or removes the latest once the
+ * day reached its target; the timeline deletes single check-ins.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +96,7 @@ fun HabitBottomSheet(
     onDismissRequest: () -> Unit,
     onDateSelected: (Instant) -> Unit,
     onDateDeselected: (LocalDate) -> Unit,
+    onDeleteCompletion: (HabitCompletionEntity) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     ModalBottomSheet(
@@ -87,6 +109,7 @@ fun HabitBottomSheet(
                 habitWithCompletions = habitWithCompletions,
                 onDateSelected = onDateSelected,
                 onDateDeselected = onDateDeselected,
+                onDeleteCompletion = onDeleteCompletion,
             )
         }
     }
@@ -98,6 +121,7 @@ private fun UnifiedCalendarSheetContent(
     habitWithCompletions: HabitWithCompletions,
     onDateSelected: (Instant) -> Unit,
     onDateDeselected: (LocalDate) -> Unit,
+    onDeleteCompletion: (HabitCompletionEntity) -> Unit,
 ) {
     val today = remember { LocalDate.now() }
     var displayedMonth by remember { mutableStateOf(YearMonth.from(today)) }
@@ -106,16 +130,17 @@ private fun UnifiedCalendarSheetContent(
     val completions = remember(habitWithCompletions) {
         habitWithCompletions.completions.sortedByDescending { it.completionDate }
     }
-    val completionDates = remember(completions) {
+    // Days that reached the target count as done; days with fewer check-ins are partial.
+    val metDays = remember(habitWithCompletions) {
+        HabitRates.completionDays(habitWithCompletions, zone).toSet()
+    }
+    val checkedInDays = remember(completions) {
         completions.map { it.completionDate.atZone(zone).toLocalDate() }.toSet()
     }
 
-    val nowInstant = remember { Instant.now() }
-    val last30 = nowInstant.minusSeconds(30L * 24 * 3600)
-    val last90 = nowInstant.minusSeconds(90L * 24 * 3600)
-    val count30 = completions.count { it.completionDate.isAfter(last30) }
-    val count90 = completions.count { it.completionDate.isAfter(last90) }
-    val countAll = completions.size
+    val count30 = metDays.count { it.isAfter(today.minusDays(30)) }
+    val count90 = metDays.count { it.isAfter(today.minusDays(90)) }
+    val countAll = metDays.size
 
     var dateForRemoval by remember { mutableStateOf<LocalDate?>(null) }
     var dateForAdd by remember { mutableStateOf<LocalDate?>(null) }
@@ -228,7 +253,8 @@ private fun UnifiedCalendarSheetContent(
                                 // Empty slot.
                             } else {
                                 val isToday = date == today
-                                val isCompleted = completionDates.contains(date)
+                                val isCompleted = date in metDays
+                                val isPartial = !isCompleted && date in checkedInDays
                                 val isFuture = date.isAfter(today)
 
                                 Box(
@@ -276,6 +302,15 @@ private fun UnifiedCalendarSheetContent(
                                                 .size(6.dp)
                                                 .background(HabitColor, CircleShape),
                                         )
+                                    } else if (isPartial) {
+                                        // A ring, not a faded dot: started but short of the target.
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.BottomCenter)
+                                                .padding(bottom = 4.dp)
+                                                .size(6.dp)
+                                                .border(1.dp, HabitColor, CircleShape),
+                                        )
                                     }
                                 }
                             }
@@ -316,9 +351,7 @@ private fun UnifiedCalendarSheetContent(
                     TimelineItem(
                         completion = completion,
                         isLast = isLast,
-                        onDelete = {
-                            onDateDeselected(completion.completionDate.atZone(zone).toLocalDate())
-                        },
+                        onDelete = { onDeleteCompletion(completion) },
                     )
                 }
             }

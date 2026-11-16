@@ -104,7 +104,7 @@ fun StatsHabitsScreen(
     }
     val buckets = remember(state.period, state.start) { PeriodBuckets.of(state.period, state.start) }
     val bucketCheckIns = remember(buckets, habits) {
-        PeriodBuckets.count(buckets, habits.flatMap { h -> h.completions.map { it.completionDate } }, zone)
+        PeriodBuckets.count(buckets, HabitRates.metCheckIns(habits, zone), zone)
     }
     val bars = buckets.indices.map { index ->
         val count = bucketCheckIns[index]

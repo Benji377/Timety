@@ -252,6 +252,9 @@
         <item quantity="other">%d times a day</item>
     </plurals>
     <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Today</string>
+    <string name="habitTodayCheckIn">Check in</string>
+    <string name="habitTodayHistory">History</string>
     <string name="habitHistoryCompletedAt">Completed at %1$s</string>
     <string name="habitHistoryEmpty">No history yet.</string>
     <string name="habitHistoryRemoveCompletion">Remove completion for %1$s?</string>

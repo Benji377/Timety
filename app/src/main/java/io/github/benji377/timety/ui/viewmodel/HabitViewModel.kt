@@ -156,6 +156,15 @@ class HabitViewModel(
         }
     }
 
+    /** Deletes one check-in, e.g. from the history timeline. */
+    fun deleteCompletion(completion: HabitCompletionEntity) {
+        viewModelScope.launch {
+            habitRepository.completionMutex.withLock { habitRepository.deleteCompletion(completion) }
+            refreshHabitReminder(completion.habitId)
+            updateWidgets()
+        }
+    }
+
     /** Reverts a [toggleCompletionToday] tap. */
     fun undoCheckIn(change: CheckInChange) {
         viewModelScope.launch {

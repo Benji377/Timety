@@ -4,6 +4,7 @@ import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.datetime.AppDateUtils
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
@@ -22,6 +23,19 @@ data class HabitRate(val done: Int, val expected: Int) {
 object HabitRates {
     private const val DAYS_PER_WEEK = 7
     private const val ROUNDING_TOLERANCE = 1e-9
+
+    /**
+     * One instant per day each habit reached its target: the check-in that reached it. Totals and
+     * charts count these, so a day short of its target counts nothing.
+     */
+    fun metCheckIns(habits: List<HabitWithCompletions>, zone: ZoneId): List<Instant> =
+        habits.flatMap { item ->
+            val target = item.habit.timesPerDay.coerceAtLeast(1)
+            item.completions
+                .groupBy { it.completionDate.atZone(zone).toLocalDate() }
+                .values
+                .mapNotNull { day -> day.map { it.completionDate }.sorted().getOrNull(target - 1) }
+        }
 
     /** The days [item] reached its daily target on, once each. */
     fun completionDays(item: HabitWithCompletions, zone: ZoneId): List<LocalDate> {

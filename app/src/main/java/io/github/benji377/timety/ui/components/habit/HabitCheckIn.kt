@@ -21,7 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.data.repository.CheckInChange
 import io.github.benji377.timety.ui.components.common.NeoSegmentedProgressBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -52,6 +54,34 @@ fun rememberHabitCheckIn(viewModel: HabitViewModel): (HabitEntity) -> Unit {
                         duration = SnackbarDuration.Short,
                     )
                     if (result == SnackbarResult.ActionPerformed) viewModel.undoCheckIn(change)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Deletes one of a habit's check-ins today, with the same snackbar and Undo as a tap; for picking
+ * out the wrong one once the tap's own Undo is gone.
+ */
+@Composable
+fun rememberHabitCheckInRemover(viewModel: HabitViewModel): (HabitEntity, HabitCompletionEntity, Int) -> Unit {
+    val snackbarHostState = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
+    val undoLabel = stringResource(R.string.commonLabelUndo)
+    val template = stringResource(R.string.habitCheckInSnackbar)
+    return remember(viewModel, snackbarHostState, undoLabel, template) {
+        { habit, completion, countAfter ->
+            viewModel.deleteCompletion(completion)
+            scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val result = snackbarHostState.showSnackbar(
+                    message = template.format(habit.name, countAfter, habit.timesPerDay),
+                    actionLabel = undoLabel,
+                    duration = SnackbarDuration.Short,
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    viewModel.undoCheckIn(CheckInChange.Removed(completion, countAfter))
                 }
             }
         }

@@ -55,6 +55,8 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
+import io.github.benji377.timety.ui.components.habit.HabitTodayCard
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
@@ -102,6 +104,9 @@ fun HabitDetailScreen(
     val allHabits by habitViewModel.allHabits.collectAsState()
     val habitTags by tagViewModel.habitTags.collectAsState()
     val existingHabit = habitId?.let { id -> allHabits.find { it.id == id } }
+    val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
+    val existingWithCompletions = habitId?.let { id -> habitsWithCompletions.find { it.habit.id == id } }
+    var showHistory by rememberSaveable { mutableStateOf(false) }
     val isNewHabit = habitId == null
 
     var isEditing by rememberSaveable { mutableStateOf(isNewHabit) }
@@ -528,6 +533,16 @@ fun HabitDetailScreen(
                         color = selectedColor,
                     )
                 }
+                // Logging, not editing the habit, so it lives in view mode only.
+                if (!isEditing && existingWithCompletions != null && existingWithCompletions.habit.timesPerDay > 1) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    HabitTodayCard(
+                        habitWithCompletions = existingWithCompletions,
+                        color = selectedColor,
+                        viewModel = habitViewModel,
+                        onOpenHistory = { showHistory = true },
+                    )
+                }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
@@ -563,6 +578,14 @@ fun HabitDetailScreen(
                 )
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
             }
+        }
+
+        if (showHistory && existingWithCompletions != null) {
+            HabitHistorySheet(
+                habitWithCompletions = existingWithCompletions,
+                viewModel = habitViewModel,
+                onDismissRequest = { showHistory = false },
+            )
         }
 
         if (showIconPicker) {

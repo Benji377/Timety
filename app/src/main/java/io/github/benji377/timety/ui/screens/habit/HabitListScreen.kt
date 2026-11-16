@@ -44,7 +44,7 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
-import io.github.benji377.timety.ui.components.habit.HabitBottomSheet
+import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
 import io.github.benji377.timety.ui.components.habit.HabitListTile
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -360,15 +360,10 @@ fun HabitListScreen(
         habitsWithCompletions.find { it.habit.id == hwc.habit.id } ?: hwc
     }
     if (sheetHabit != null) {
-        HabitBottomSheet(
+        HabitHistorySheet(
             habitWithCompletions = sheetHabit,
+            viewModel = viewModel,
             onDismissRequest = { historySheetFor = null },
-            onDateSelected = { instant ->
-                viewModel.markCompletionOnDate(sheetHabit.habit.id, instant)
-            },
-            onDateDeselected = { date ->
-                viewModel.unmarkCompletionOnDate(sheetHabit.habit.id, date)
-            },
         )
     }
 }

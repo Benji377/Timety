@@ -48,6 +48,7 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.CalendarUtils
+import io.github.benji377.timety.util.habit.HabitRates
 import io.github.benji377.timety.util.stats.PeriodSummary
 import io.github.benji377.timety.util.stats.ReportPeriod
 import java.time.LocalDate
@@ -83,8 +84,8 @@ internal fun CalendarGrid(
         sessions.map { it.startTime.atZone(zone).toLocalDate() }.toSet()
     }
     val habitDates = remember(habitsWithCompletions) {
-        habitsWithCompletions.flatMap { it.completions }
-            .map { it.completionDate.atZone(zone).toLocalDate() }
+        HabitRates.metCheckIns(habitsWithCompletions, zone)
+            .map { it.atZone(zone).toLocalDate() }
             .toSet()
     }
 
@@ -138,7 +139,7 @@ internal fun CalendarGrid(
         // would otherwise re-run on every recomposition (e.g. each day tap).
         val weeklySummaries = remember(weeks, tasks, sessions, habitsWithCompletions, recurringItems) {
             val plainTasks = tasks.map { it.task }
-            val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
+            val habitCompletions = HabitRates.metCheckIns(habitsWithCompletions, zone)
             weeks.associateWith { week ->
                 PeriodSummary.of(
                     week.first()..ReportPeriod.WEEK.endOf(week.first()),

@@ -123,8 +123,8 @@ fun StatisticsScreen(
 
     val habitRate = remember(habits, week, today) { HabitRates.total(habits, week, today, zone) }
     val checkInsPerDay = remember(habits) {
-        habits.flatMap { it.completions }
-            .groupingBy { it.completionDate.atZone(zone).toLocalDate() }
+        HabitRates.metCheckIns(habits, zone)
+            .groupingBy { it.atZone(zone).toLocalDate() }
             .eachCount()
     }
 

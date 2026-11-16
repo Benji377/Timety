@@ -49,6 +49,7 @@ import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.calendar.CalendarDayItems
+import io.github.benji377.timety.util.habit.HabitRates
 import io.github.benji377.timety.util.stats.PeriodSummary
 import io.github.benji377.timety.util.stats.ReportPeriod
 import java.time.Instant
@@ -93,7 +94,7 @@ fun CalendarScreen(
 
     openReport?.let { (period, start) ->
         val plainTasks = tasks.map { it.task }
-        val habitCompletions = habitsWithCompletions.flatMap { h -> h.completions.map { it.completionDate } }
+        val habitCompletions = HabitRates.metCheckIns(habitsWithCompletions, zone)
         fun summaryOf(range: ClosedRange<LocalDate>, until: Instant? = null) =
             PeriodSummary.of(range, plainTasks, recurringItems, habitCompletions, sessions, zone, until)
         // The current period's figures cover all of it (time still ahead adds nothing done, while

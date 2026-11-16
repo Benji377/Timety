@@ -88,6 +88,7 @@ import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.util.ProfileImageStore
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.util.habit.HabitRates
 import io.github.benji377.timety.util.stats.MoodStats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -453,7 +454,7 @@ private data class ProfileStats(
         ): ProfileStats = ProfileStats(
             // Each logged recurring occurrence counts as a completed task.
             totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.occurrences.size },
-            totalHabitsMet = habits.sumOf { it.completions.size },
+            totalHabitsMet = HabitRates.metCheckIns(habits, ZoneId.systemDefault()).size,
             // Whole minutes per session, the way the Focus stats count them.
             totalFocusMins = sessions.sumOf { it.totalSecondsFocused / 60 },
         )

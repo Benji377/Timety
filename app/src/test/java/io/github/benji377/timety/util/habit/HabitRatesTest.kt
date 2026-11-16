@@ -188,4 +188,16 @@ class HabitRatesTest {
         )
         assertEquals(listOf(monday), HabitRates.completionDays(twice, zone))
     }
+
+    @Test
+    fun metCheckIns_givesTheCheckInThatReachedTheTarget_oncePerDay() {
+        val monday = LocalDate.of(2026, 10, 26)
+        fun at(day: LocalDate, hour: Int) =
+            HabitCompletionEntity(habitId = "h", completionDate = day.atTime(hour, 0).atZone(zone).toInstant())
+        val twice = HabitWithCompletions(
+            habit(HabitFrequency.DAILY).copy(timesPerDay = 2),
+            listOf(at(monday, 20), at(monday, 8), at(monday, 22), at(monday.plusDays(1), 8)),
+        )
+        assertEquals(listOf(at(monday, 20).completionDate), HabitRates.metCheckIns(listOf(twice), zone))
+    }
 }
