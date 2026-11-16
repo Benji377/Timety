@@ -240,6 +240,13 @@
     <string name="habitFreqFlexible">%1$d / %2$d 本周</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d 本月</string>
     <string name="habitFreqWeekly">每周的 %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="other">%d times a day</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Today</string>
+    <string name="habitTodayCheckIn">Check in</string>
+    <string name="habitTodayHistory">History</string>
     <string name="habitHistoryCompletedAt">完成于 %1$s</string>
     <string name="habitHistoryEmpty">暂无历史记录。</string>
     <string name="habitHistoryRemoveCompletion">移除 %1$s 的完成记录？</string>
