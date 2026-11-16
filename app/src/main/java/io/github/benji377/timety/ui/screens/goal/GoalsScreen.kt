@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -60,6 +61,7 @@ import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.common.detailFieldColors
+import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.SuccessColor
@@ -422,7 +424,10 @@ private fun GoalEntryDialog(
                     label = { Text("${stringResource(R.string.goalEntryDialogLabelValue)} ($unitLabel)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
+                    selectAllInitially = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(rememberAutoFocus()),
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
                 Box(modifier = Modifier.clickable { showDateTimePicker = true }) {

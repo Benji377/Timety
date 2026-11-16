@@ -38,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
@@ -59,6 +60,7 @@ import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.datePickerMillis
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.TagPicker
+import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.GoalColor
@@ -244,7 +246,9 @@ fun GoalDetailScreen(
                             color = ErrorColor
                         )
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(rememberAutoFocus(isNewGoal)),
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }

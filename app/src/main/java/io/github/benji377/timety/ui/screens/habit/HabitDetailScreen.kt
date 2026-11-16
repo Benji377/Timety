@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
@@ -60,6 +61,7 @@ import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.PickerField
 import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.components.common.TagPicker
+import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.components.task.ReminderEntry
 import io.github.benji377.timety.ui.components.task.ReminderField
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -298,7 +300,9 @@ fun HabitDetailScreen(
                             color = ErrorColor
                         )
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(rememberAutoFocus(isNewHabit)),
                 )
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }

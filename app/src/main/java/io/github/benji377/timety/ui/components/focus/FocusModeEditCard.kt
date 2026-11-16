@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +53,7 @@ import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
+import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
@@ -98,6 +100,7 @@ fun FocusModeEditCard(
             if (isEditing) {
                 EditorView(
                     name = name,
+                    focusName = isNewMode,
                     onNameChange = { name = it },
                     tempPhases = tempPhases,
                     onPhaseTapped = { index ->
@@ -252,6 +255,7 @@ private fun OverviewView(
 @Composable
 private fun EditorView(
     name: String,
+    focusName: Boolean,
     onNameChange: (String) -> Unit,
     tempPhases: List<SessionPhaseEntity>,
     onPhaseTapped: (Int) -> Unit,
@@ -282,7 +286,9 @@ private fun EditorView(
         value = name,
         onValueChange = onNameChange,
         label = { Text(stringResource(R.string.focusModeLabelName)) },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(rememberAutoFocus(focusName)),
     )
     Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
 

@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
@@ -84,7 +85,9 @@ fun TextInputDialog(
             placeholder = hintText?.let { { Text(it) } },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(rememberAutoFocus()),
         )
         Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -136,7 +139,9 @@ fun NamedColorEditDialog(
                 supportingText = if (nameTaken && nameTakenMessage != null) {
                     { Text(nameTakenMessage) }
                 } else null,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(rememberAutoFocus()),
             )
             Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             Text(colorLabel)
