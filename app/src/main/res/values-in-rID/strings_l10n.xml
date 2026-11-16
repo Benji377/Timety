@@ -240,6 +240,13 @@
     <string name="habitFreqFlexible">%1$d / %2$d minggu ini</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d bulan ini</string>
     <string name="habitFreqWeekly">Mingguan pada %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="other">%d times a day</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Today</string>
+    <string name="habitTodayCheckIn">Check in</string>
+    <string name="habitTodayHistory">History</string>
     <string name="habitHistoryCompletedAt">Selesai pada %1$s</string>
     <string name="habitHistoryEmpty">Belum ada riwayat.</string>
     <string name="habitHistoryRemoveCompletion">Hapus penyelesaian untuk %1$s?</string>
