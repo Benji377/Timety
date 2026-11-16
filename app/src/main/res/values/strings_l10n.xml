@@ -270,8 +270,9 @@
     <string name="taskFocusLogSnackbar">Focus session attached</string>
     <string name="taskFocusLogTitle">Log Focus Time</string>
     <string name="taskDetailsLabelDescription">Description</string>
-    <string name="taskDetailsLabelDueDate">Due: %1$s at %2$s</string>
+    <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Set Due Date</string>
+    <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Effort</string>
     <string name="taskDetailsLabelLocation">Location</string>
     <string name="taskDetailsLabelPriority">Priority</string>
@@ -286,6 +287,7 @@
     <string name="taskDetailsReminderOptionHour">1 hour before</string>
     <string name="taskDetailsReminderOptionWeek">1 week before</string>
     <string name="taskDetailsReminderOptionOnce">On time</string>
+    <string name="taskDetailsReminderOptionOnTheDay">On the day</string>
     <string name="taskDetailsSectionChecklist">Checklist</string>
     <string name="taskDetailsSectionInfo">Task Info</string>
     <string name="taskDetailsSectionLocation">Location</string>
@@ -716,6 +718,7 @@
     <string name="reminderFieldLabel">Reminders</string>
     <string name="reminderShifted">Reminders adjusted to the new due date</string>
     <string name="reminderSheetDue">Due %1$s</string>
+    <string name="reminderSheetDueAllDay">Due %1$s, all day. Day reminders arrive at %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Applies to every occurrence</string>
     <string name="reminderSheetHint">Tap a reminder to add it. Tap it again to remove it.</string>
     <string name="reminderSheetNoDue">This task has no due date yet</string>

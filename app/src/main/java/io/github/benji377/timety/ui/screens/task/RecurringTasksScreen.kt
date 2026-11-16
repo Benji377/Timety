@@ -59,6 +59,7 @@ import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.tag.TagFilter
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
+import io.github.benji377.timety.util.task.due
 import java.time.Instant
 
 /**
@@ -210,16 +211,11 @@ private fun RecurringTaskCard(
                 Text(
                     text = stringResource(
                         R.string.recurringTasksNextDue,
-                        "${
-                            AppDateFormatUtils.formatDate(
-                                item.task.dueDate,
-                                dateFmt.dateFormatCode
-                            )
-                        } " +
-                                AppDateFormatUtils.formatTime(
-                                    item.task.dueDate,
-                                    dateFmt.use24HourFormat
-                                )
+                        AppDateFormatUtils.formatDue(
+                            item.task.due,
+                            dateFmt.dateFormatCode,
+                            dateFmt.use24HourFormat
+                        )
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

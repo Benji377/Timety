@@ -54,6 +54,8 @@ data class RecurringTaskEntity(
     val description: String = "",
     /** The next occurrence; advanced on completion. Also the anchor for week math. */
     val dueDate: Instant,
+    /** False = due any time on the day; [dueDate] is then the local start of the day. */
+    val hasDueTime: Boolean = true,
     /** Local time of day in minutes after midnight. Null = the due date's time of day. */
     val timeOfDayMinutes: Int? = null,
     val unit: RecurrenceUnit,
@@ -67,7 +69,7 @@ data class RecurringTaskEntity(
     val monthlyOrdinal: Int? = null,
     /** ISO weekday 1..7, for MONTH + NTH_WEEKDAY. Null = the due date's weekday. */
     val monthlyWeekday: Int? = null,
-    /** Reminder offsets in minutes before [dueDate]; empty = a single reminder at the due time. */
+    /** Reminder offsets in minutes before the reminder anchor; empty = a single reminder at it. */
     val reminderOffsetsMinutes: List<Int> = emptyList(),
     val createdAt: Instant,
 ) {

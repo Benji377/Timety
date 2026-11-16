@@ -36,6 +36,7 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.task.RecurringStatus
+import io.github.benji377.timety.util.task.due
 
 /** Border color that mirrors [TaskListTile]'s overdue/today/default scheme for a recurring status. */
 fun recurringStatusColor(status: RecurringStatus): Color = when (status) {
@@ -107,8 +108,8 @@ fun RecurringTaskListTile(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = AppDateFormatUtils.formatDateTime(
-                            task.dueDate, dateFmt.dateFormatCode, dateFmt.use24HourFormat
+                        text = AppDateFormatUtils.formatDue(
+                            task.due, dateFmt.dateFormatCode, dateFmt.use24HourFormat
                         ),
                         fontSize = AppTheme.fsLabel,
                         color = borderColor,

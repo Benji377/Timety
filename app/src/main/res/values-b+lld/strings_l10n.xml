@@ -298,7 +298,6 @@
     <string name="taskFocusLogSnackbar">Sescion de focus liejeda</string>
     <string name="taskFocusLogTitle">Registré tëmp de focus</string>
     <string name="taskDetailsLabelDescription">Descrizion</string>
-    <string name="taskDetailsLabelDueDate">Scadënza: %1$s dala %2$s</string>
     <string name="taskDetailsLabelDueDateSet">Met data de scadenza</string>
     <string name="taskDetailsLabelEffort">Sforz</string>
     <string name="taskDetailsLabelLocation">Luelg</string>

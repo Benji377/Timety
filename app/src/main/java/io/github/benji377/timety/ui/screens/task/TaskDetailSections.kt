@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SubdirectoryArrowRight
 import androidx.compose.material.icons.outlined.CloudOff
@@ -84,6 +85,8 @@ import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.location.LocationApi
+import io.github.benji377.timety.util.task.Due
+import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
 import java.time.Instant
 
@@ -304,39 +307,78 @@ internal fun PriorityAndEffortFields(
     }
 }
 
-/** The due date as a read-only field that opens the picker, with a clear button once set. */
+/**
+ * The due date and its optional time as two read-only fields that open their pickers. The time
+ * field appears once a date is set; without a time the task is due all day. A null [onClearDate]
+ * makes the date required.
+ */
 @Composable
-internal fun DueDateField(
-    dueDate: Instant?,
+internal fun DueDateTimeFields(
+    due: Due?,
     isEditing: Boolean,
-    onPick: () -> Unit,
-    onClear: () -> Unit,
+    dateLabel: String,
+    onPickDate: () -> Unit,
+    onPickTime: () -> Unit,
+    onClearTime: () -> Unit,
+    onClearDate: (() -> Unit)?,
 ) {
     val dateFmt = LocalDateFormatSettings.current
-    val fieldLabel = stringResource(R.string.taskDetailsLabelDueDateSet)
+    Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
+        PickerField(
+            value = due?.let { AppDateFormatUtils.formatDate(it.at, dateFmt.dateFormatCode) } ?: "",
+            label = dateLabel,
+            icon = Icons.Filled.Event,
+            isEditing = isEditing,
+            onPick = onPickDate,
+            onClear = onClearDate?.takeIf { due != null },
+            modifier = Modifier.weight(1f),
+        )
+        if (due != null) {
+            PickerField(
+                value = if (due.hasTime) {
+                    AppDateFormatUtils.formatTime(due.at, dateFmt.use24HourFormat)
+                } else {
+                    stringResource(R.string.taskDetailsLabelAllDay)
+                },
+                label = stringResource(R.string.taskDetailsLabelDueTime),
+                icon = Icons.Filled.Schedule,
+                isEditing = isEditing,
+                onPick = onPickTime,
+                onClear = onClearTime.takeIf { due.hasTime },
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+/** A read-only field that opens a picker, with a clear button when [onClear] is set. */
+@Composable
+private fun PickerField(
+    value: String,
+    label: String,
+    icon: ImageVector,
+    isEditing: Boolean,
+    onPick: () -> Unit,
+    onClear: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .clickable(enabled = isEditing, role = Role.Button, onClick = onPick)
-            .semantics { contentDescription = fieldLabel }
+            .semantics { contentDescription = label }
     ) {
         NeoOutlinedTextField(
-            value = dueDate?.let {
-                stringResource(
-                    R.string.taskDetailsLabelDueDate,
-                    AppDateFormatUtils.formatDate(it, dateFmt.dateFormatCode),
-                    AppDateFormatUtils.formatTime(it, dateFmt.use24HourFormat)
-                )
-            } ?: "",
+            value = value,
             onValueChange = {},
             enabled = false,
+            singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(fieldLabel) },
-            leadingIcon = { Icon(Icons.Filled.Event, null) },
+            label = { Text(label, maxLines = 1) },
+            leadingIcon = { Icon(icon, null) },
             trailingIcon = {
                 when {
                     !isEditing -> Unit
-                    dueDate != null -> IconButton(onClick = onClear) {
+                    onClear != null -> IconButton(onClick = onClear) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.commonClear))
                     }
                     else -> Icon(Icons.Filled.Edit, null)
@@ -347,11 +389,11 @@ internal fun DueDateField(
     }
 }
 
-/** The task's reminders: presets relative to [dueDate] plus custom times. */
+/** The task's reminders: presets relative to [due] plus custom times. */
 @Composable
 internal fun TaskReminderField(
     reminders: List<Instant>,
-    dueDate: Instant?,
+    due: Due?,
     isEditing: Boolean,
     onRemindersChange: (List<Instant>) -> Unit,
     onAddCustom: () -> Unit,
@@ -362,17 +404,18 @@ internal fun TaskReminderField(
         "${AppDateFormatUtils.formatDate(time, dateFmt.dateFormatCode)} - " +
                 AppDateFormatUtils.formatTime(time, dateFmt.use24HourFormat)
     }
+    val hasTime = due?.hasTime ?: true
     val entries = reminders.sorted().map { reminder ->
-        val preset = dueDate?.let { ReminderUtils.presetOf(it, reminder) }
+        val preset = due?.let { ReminderUtils.presetOf(it, reminder) }
         ReminderEntry(
             key = reminder.toEpochMilli(),
             preset = preset,
-            label = if (preset != null) reminderPresetLabel(preset) else formatReminder(reminder),
+            label = if (preset != null) reminderPresetLabel(preset, hasTime) else formatReminder(reminder),
             time = if (preset != null) formatReminder(reminder) else null,
         )
     }
     val warning = when {
-        dueDate == null -> stringResource(R.string.reminderWarnNoDue)
+        due == null -> stringResource(R.string.reminderWarnNoDue)
         reminders.size >= ReminderUtils.MAX_REMINDERS ->
             stringResource(R.string.reminderWarnLimit, ReminderUtils.MAX_REMINDERS)
         else -> null
@@ -380,17 +423,23 @@ internal fun TaskReminderField(
     ReminderField(
         entries = entries,
         isEditing = isEditing,
-        sheetSubtitle = if (dueDate != null) {
-            stringResource(R.string.reminderSheetDue, formatReminder(dueDate))
-        } else {
-            stringResource(R.string.reminderSheetNoDue)
+        sheetSubtitle = when {
+            due == null -> stringResource(R.string.reminderSheetNoDue)
+            due.hasTime -> stringResource(R.string.reminderSheetDue, formatReminder(due.at))
+            else -> stringResource(
+                R.string.reminderSheetDueAllDay,
+                AppDateFormatUtils.formatDate(due.at, dateFmt.dateFormatCode),
+                AppDateFormatUtils.formatTime(due.reminderAnchor(), dateFmt.use24HourFormat),
+            )
         },
         warning = warning,
+        presets = due?.presets ?: ReminderPreset.entries,
+        hasTime = hasTime,
         canAddPreset = { preset ->
-            dueDate != null && ReminderUtils.isPresetAvailable(reminders, dueDate, preset, now)
+            due != null && ReminderUtils.isPresetAvailable(reminders, due, preset, now)
         },
         onTogglePreset = { preset ->
-            dueDate?.let { onRemindersChange(ReminderUtils.toggle(reminders, it, preset)) }
+            due?.let { onRemindersChange(ReminderUtils.toggle(reminders, it, preset)) }
         },
         onRemoveCustom = { entry -> onRemindersChange(reminders.filterNot { it.toEpochMilli() == entry.key }) },
         onAddCustom = onAddCustom,

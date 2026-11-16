@@ -263,7 +263,6 @@
     <string name="taskFocusLogSnackbar">已关联专注记录</string>
     <string name="taskFocusLogTitle">记录专注时间</string>
     <string name="taskDetailsLabelDescription">描述</string>
-    <string name="taskDetailsLabelDueDate">截止：%1$s %2$s</string>
     <string name="taskDetailsLabelDueDateSet">设置截止日期</string>
     <string name="taskDetailsLabelEffort">工作量</string>
     <string name="taskDetailsLabelLocation">位置</string>

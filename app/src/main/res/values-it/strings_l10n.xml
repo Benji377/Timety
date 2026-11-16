@@ -270,7 +270,6 @@
     <string name="taskFocusLogSnackbar">Sessione di focus collegata</string>
     <string name="taskFocusLogTitle">Registra tempo di focus</string>
     <string name="taskDetailsLabelDescription">Descrizione</string>
-    <string name="taskDetailsLabelDueDate">Scadenza: %1$s alle %2$s</string>
     <string name="taskDetailsLabelDueDateSet">Imposta data di scadenza</string>
     <string name="taskDetailsLabelEffort">Sforzo</string>
     <string name="taskDetailsLabelLocation">Luogo</string>

@@ -263,7 +263,6 @@
     <string name="taskFocusLogSnackbar">Sesi fokus dilampirkan</string>
     <string name="taskFocusLogTitle">Catat Waktu Fokus</string>
     <string name="taskDetailsLabelDescription">Deskripsi</string>
-    <string name="taskDetailsLabelDueDate">Tenggat: %1$s pukul %2$s</string>
     <string name="taskDetailsLabelDueDateSet">Atur Tenggat</string>
     <string name="taskDetailsLabelEffort">Usaha</string>
     <string name="taskDetailsLabelLocation">Lokasi</string>

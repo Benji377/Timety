@@ -270,7 +270,6 @@
     <string name="taskFocusLogSnackbar">Fokus-Sitzung zugeordnet</string>
     <string name="taskFocusLogTitle">Fokuszeit eintragen</string>
     <string name="taskDetailsLabelDescription">Beschreibung</string>
-    <string name="taskDetailsLabelDueDate">Fällig: %1$s um %2$s</string>
     <string name="taskDetailsLabelDueDateSet">Fälligkeitsdatum festlegen</string>
     <string name="taskDetailsLabelEffort">Aufwand</string>
     <string name="taskDetailsLabelLocation">Ort</string>

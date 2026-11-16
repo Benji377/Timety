@@ -111,11 +111,52 @@ fun NeoDurationPickerDialog(
 }
 
 /**
- * Two-step date-then-time picker: a [DatePickerDialog] followed by a [NeoTimePickerDialog],
+ * Material date picker dialog confirming with the picked local date. Opens on [initialDate]'s
+ * local day.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NeoDatePickerDialog(
+    initialDate: Instant,
+    onConfirm: (date: LocalDate) -> Unit,
+    onDismiss: () -> Unit,
+    selectableDates: SelectableDates? = null,
+) {
+    val initialDateMillis = datePickerMillis(initialDate)
+    val state = if (selectableDates == null) {
+        rememberDatePickerState(initialSelectedDateMillis = initialDateMillis)
+    } else {
+        rememberDatePickerState(
+            initialSelectedDateMillis = initialDateMillis,
+            selectableDates = selectableDates,
+        )
+    }
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            val millis = state.selectedDateMillis
+            TextButton(
+                enabled = millis != null,
+                onClick = {
+                    if (millis != null) {
+                        onConfirm(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
+                    }
+                },
+            ) { Text(stringResource(R.string.commonLabelConfirm)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+        },
+    ) {
+        DatePicker(state = state)
+    }
+}
+
+/**
+ * Two-step date-then-time picker: a [NeoDatePickerDialog] followed by a [NeoTimePickerDialog],
  * confirming with the picked date, hour, and minute. Opens on [initialDate]'s local day; callers
  * combine the parts into an Instant in their own zone. Cancelling either step calls [onDismiss].
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NeoDateTimePickerDialog(
     initialDate: Instant,
@@ -127,38 +168,14 @@ fun NeoDateTimePickerDialog(
     selectableDates: SelectableDates? = null,
 ) {
     var pickedDate by remember { mutableStateOf<LocalDate?>(null) }
-    val initialDateMillis = datePickerMillis(initialDate)
-
     val date = pickedDate
     if (date == null) {
-        val state = if (selectableDates == null) {
-            rememberDatePickerState(initialSelectedDateMillis = initialDateMillis)
-        } else {
-            rememberDatePickerState(
-                initialSelectedDateMillis = initialDateMillis,
-                selectableDates = selectableDates,
-            )
-        }
-        DatePickerDialog(
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                val millis = state.selectedDateMillis
-                TextButton(
-                    enabled = millis != null,
-                    onClick = {
-                        if (millis != null) {
-                            pickedDate = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneOffset.UTC).toLocalDate()
-                        }
-                    },
-                ) { Text(stringResource(R.string.commonLabelConfirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
-            },
-        ) {
-            DatePicker(state = state)
-        }
+        NeoDatePickerDialog(
+            initialDate = initialDate,
+            onConfirm = { pickedDate = it },
+            onDismiss = onDismiss,
+            selectableDates = selectableDates,
+        )
     } else {
         NeoTimePickerDialog(
             initialHour = initialHour,
