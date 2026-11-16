@@ -3,6 +3,7 @@ package io.github.benji377.timety.util.habit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
@@ -188,6 +189,15 @@ object HabitUtils {
     @Composable
     @ReadOnlyComposable
     fun buildHabitSubtitle(habit: HabitEntity, completionsThisPeriod: Int): String {
+        val schedule = scheduleSubtitle(habit, completionsThisPeriod)
+        if (habit.timesPerDay <= 1) return schedule
+        val times = pluralStringResource(R.plurals.habitTimesPerDay, habit.timesPerDay, habit.timesPerDay)
+        return "$schedule · $times"
+    }
+
+    @Composable
+    @ReadOnlyComposable
+    private fun scheduleSubtitle(habit: HabitEntity, completionsThisPeriod: Int): String {
         return when (habit.frequency) {
             HabitFrequency.DAILY -> stringResource(R.string.habitFreqDaily)
             HabitFrequency.WEEKLY_EXACT -> {

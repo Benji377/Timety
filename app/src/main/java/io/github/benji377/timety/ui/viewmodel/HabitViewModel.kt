@@ -6,6 +6,7 @@ import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.tag.TaggedItemType
+import io.github.benji377.timety.data.repository.CheckInChange
 import io.github.benji377.timety.data.repository.HabitRepository
 import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.services.ReminderScheduler
@@ -145,11 +146,21 @@ class HabitViewModel(
     }
 
     /** One check-in tap on [habitId] today; see [HabitRepository.tapCheckIn]. */
-    fun toggleCompletionToday(habitId: String) {
+    fun toggleCompletionToday(habitId: String, onChange: (CheckInChange) -> Unit = {}) {
         viewModelScope.launch {
-            habitRepository.tapCheckIn(habitId) ?: return@launch
+            val change = habitRepository.tapCheckIn(habitId) ?: return@launch
+            onChange(change)
             // Done drops today's remaining reminders; undone brings them back.
             refreshHabitReminder(habitId)
+            updateWidgets()
+        }
+    }
+
+    /** Reverts a [toggleCompletionToday] tap. */
+    fun undoCheckIn(change: CheckInChange) {
+        viewModelScope.launch {
+            habitRepository.undoCheckIn(change)
+            refreshHabitReminder(change.completion.habitId)
             updateWidgets()
         }
     }

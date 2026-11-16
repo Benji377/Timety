@@ -72,6 +72,7 @@ fun HabitListTile(
     subtitleText: String,
     tags: List<TagEntity> = emptyList(),
     progressValue: Float? = null,
+    checkInsToday: Int = 0,
     isStacked: Boolean = false,
     isLocked: Boolean = false,
     isReorderMode: Boolean = false,
@@ -117,6 +118,7 @@ fun HabitListTile(
                         subtitleText = subtitleText,
                         tags = tags,
                         progressValue = progressValue,
+                        checkInsToday = checkInsToday,
                         onToggleCompleted = onToggleCompleted,
                         onTap = onTap,
                         onMarkPastCompletion = onMarkPastCompletion,
@@ -148,6 +150,7 @@ fun HabitListTile(
                     subtitleText = subtitleText,
                     tags = tags,
                     progressValue = progressValue,
+                    checkInsToday = checkInsToday,
                     onToggleCompleted = onToggleCompleted,
                     onTap = onTap,
                     onMarkPastCompletion = onMarkPastCompletion,
@@ -188,6 +191,7 @@ private fun HabitTileContent(
     subtitleText: String,
     tags: List<TagEntity>,
     progressValue: Float?,
+    checkInsToday: Int,
     onToggleCompleted: () -> Unit,
     onTap: () -> Unit,
     onMarkPastCompletion: (() -> Unit)?,
@@ -280,6 +284,16 @@ private fun HabitTileContent(
             if (tags.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
                 TagChips(tags)
+            }
+
+            if (habit.timesPerDay > 1) {
+                Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
+                HabitCheckInProgress(
+                    count = checkInsToday,
+                    target = habit.timesPerDay,
+                    color = color,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
             if (progressValue != null && !isCompleted) {

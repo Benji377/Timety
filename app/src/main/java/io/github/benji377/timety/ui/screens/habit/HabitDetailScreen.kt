@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
@@ -125,6 +126,9 @@ fun HabitDetailScreen(
         mutableIntStateOf(
             existingHabit?.targetCount ?: 3
         )
+    }
+    var timesPerDay by rememberSaveable(formHabit) {
+        mutableIntStateOf(existingHabit?.timesPerDay ?: 1)
     }
     // A weekly target can't exceed the days in a week, however the frequency got there.
     fun selectFrequency(newFrequency: HabitFrequency) {
@@ -216,6 +220,7 @@ fun HabitDetailScreen(
             name = trimmedName,
             frequency = frequency,
             targetCount = if (frequency.isFlexible) targetCount else null,
+            timesPerDay = if (frequency.allowsTimesPerDay) timesPerDay else 1,
             targetWeekdays = if (frequency == HabitFrequency.WEEKLY_EXACT) HabitUtils.serializeWeekdays(
                 selectedWeekdays
             ) else null,
@@ -512,6 +517,17 @@ fun HabitDetailScreen(
                         selectedColor = selectedColor,
                     )
                 }
+                if (frequency.allowsTimesPerDay) {
+                    if (frequency == HabitFrequency.WEEKLY_EXACT) {
+                        Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    }
+                    TimesPerDayCard(
+                        timesPerDay = timesPerDay,
+                        onChange = { timesPerDay = it },
+                        isEditing = isEditing,
+                        color = selectedColor,
+                    )
+                }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
@@ -593,3 +609,35 @@ fun HabitDetailScreen(
 }
 
 private val HABIT_DETAIL_COLORS = listOf(HabitColor) + PickerPalette
+
+/** The check-ins a day needs, from once up to [HabitUtils.MAX_TIMES_PER_DAY]. */
+@Composable
+private fun TimesPerDayCard(timesPerDay: Int, onChange: (Int) -> Unit, isEditing: Boolean, color: Color) {
+    NeoCard(containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppTheme.spaceLarge),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = pluralStringResource(R.plurals.habitTimesPerDay, timesPerDay, timesPerDay),
+                fontWeight = AppTheme.fwBold,
+            )
+            Slider(
+                value = timesPerDay.toFloat(),
+                onValueChange = { if (isEditing) onChange(it.roundToInt()) },
+                valueRange = 1f..HabitUtils.MAX_TIMES_PER_DAY.toFloat(),
+                // Steps count the stops between the ends: one per whole value.
+                steps = HabitUtils.MAX_TIMES_PER_DAY - 2,
+                enabled = isEditing,
+                colors = SliderDefaults.colors(
+                    thumbColor = color,
+                    activeTrackColor = color,
+                    disabledThumbColor = color,
+                    disabledActiveTrackColor = color,
+                ),
+            )
+        }
+    }
+}

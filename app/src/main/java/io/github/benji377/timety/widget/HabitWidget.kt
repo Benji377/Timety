@@ -325,8 +325,11 @@ class HabitWidget : GlanceAppWidget() {
         }
     }
 
+    // Habits done more than once a day show today's count instead of their schedule.
     private fun frequencySubtitle(context: Context, hwc: HabitWithCompletions): String =
-        when (hwc.habit.frequency) {
+        if (hwc.habit.timesPerDay > 1) {
+            "${HabitUtils.countOn(hwc, LocalDate.now()).coerceAtMost(hwc.habit.timesPerDay)}/${hwc.habit.timesPerDay}"
+        } else when (hwc.habit.frequency) {
             HabitFrequency.DAILY -> context.getString(R.string.habitFreqDaily)
             HabitFrequency.WEEKLY_EXACT -> {
                 val days = HabitUtils.parseWeekdays(hwc.habit.targetWeekdays)
