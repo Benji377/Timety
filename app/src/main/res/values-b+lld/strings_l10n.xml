@@ -298,8 +298,9 @@
     <string name="taskFocusLogSnackbar">Sescion de focus liejeda</string>
     <string name="taskFocusLogTitle">Registré tëmp de focus</string>
     <string name="taskDetailsLabelDescription">Descrizion</string>
-    <string name="taskDetailsLabelDueDate">Scadënza: %1$s dala %2$s</string>
+    <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Met data de scadenza</string>
+    <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Sforz</string>
     <string name="taskDetailsLabelLocation">Luelg</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
@@ -314,6 +315,7 @@
     <string name="taskDetailsReminderOptionHour">1 ora dant</string>
     <string name="taskDetailsReminderOptionWeek">1 ena dant</string>
     <string name="taskDetailsReminderOptionOnce">A l\'ora</string>
+    <string name="taskDetailsReminderOptionOnTheDay">On the day</string>
     <string name="taskDetailsSectionChecklist">Lista da cuntrolé</string>
     <string name="taskDetailsSectionInfo">Info dla ncëria</string>
     <string name="taskDetailsSectionLocation">Luelg</string>
@@ -812,6 +814,7 @@
     <string name="reminderFieldLabel">Lezic</string>
     <string name="reminderShifted">Lezic adatei ala nueva scadënza</string>
     <string name="reminderSheetDue">Scadënza %1$s</string>
+    <string name="reminderSheetDueAllDay">Due %1$s, all day. Day reminders arrive at %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Vel per uni repetizion</string>
     <string name="reminderSheetHint">Clica sun n lezit per l njunté. Clica inò per l tò demez.</string>
     <string name="reminderSheetNoDue">Chësta ncëria à mo nia na scadënza</string>
