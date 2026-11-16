@@ -13,11 +13,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -56,13 +61,21 @@ fun NeoOutlinedTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = AppTheme.brNeo,
     colors: TextFieldColors = detailFieldColors(),
+    selectAllInitially: Boolean = false,
 ) {
     val mergedTextStyle = textStyle.merge(TextStyle(color = MaterialTheme.colorScheme.onSurface))
+
+    // Held as a TextFieldValue so a field focused from code starts with the cursor after its text,
+    // or with it all selected so typing replaces a prefilled value.
+    var fieldValue by remember {
+        mutableStateOf(TextFieldValue(value, TextRange(if (selectAllInitially) 0 else value.length, value.length)))
+    }
+    val shownValue = if (fieldValue.text == value) fieldValue else fieldValue.copy(text = value)
 
     // The container background comes from [colors] via the DecorationBox Container below,
     // so callers can restyle the disabled state.
     BasicTextField(
-        value = value,
+        value = shownValue,
         modifier = modifier
             // Room for the floating label's top half, like M3's OutlinedTextFieldTopPadding;
             // without it the label gets clipped at the top.
@@ -71,7 +84,10 @@ fun NeoOutlinedTextField(
                 minWidth = OutlinedTextFieldDefaults.MinWidth,
                 minHeight = OutlinedTextFieldDefaults.MinHeight
             ),
-        onValueChange = onValueChange,
+        onValueChange = { newValue ->
+            fieldValue = newValue
+            if (newValue.text != value) onValueChange(newValue.text)
+        },
         enabled = enabled,
         readOnly = readOnly,
         textStyle = mergedTextStyle,
