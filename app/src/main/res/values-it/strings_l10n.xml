@@ -270,8 +270,9 @@
     <string name="taskFocusLogSnackbar">Sessione di focus collegata</string>
     <string name="taskFocusLogTitle">Registra tempo di focus</string>
     <string name="taskDetailsLabelDescription">Descrizione</string>
-    <string name="taskDetailsLabelDueDate">Scadenza: %1$s alle %2$s</string>
+    <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Imposta data di scadenza</string>
+    <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Sforzo</string>
     <string name="taskDetailsLabelLocation">Luogo</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
@@ -286,6 +287,7 @@
     <string name="taskDetailsReminderOptionHour">1 ora prima</string>
     <string name="taskDetailsReminderOptionWeek">1 settimana prima</string>
     <string name="taskDetailsReminderOptionOnce">Puntuale</string>
+    <string name="taskDetailsReminderOptionOnTheDay">On the day</string>
     <string name="taskDetailsSectionChecklist">Lista di controllo</string>
     <string name="taskDetailsSectionInfo">Info attività</string>
     <string name="taskDetailsSectionLocation">Luogo</string>
@@ -716,6 +718,7 @@
     <string name="reminderFieldLabel">Promemoria</string>
     <string name="reminderShifted">Promemoria adeguati alla nuova scadenza</string>
     <string name="reminderSheetDue">Scadenza %1$s</string>
+    <string name="reminderSheetDueAllDay">Due %1$s, all day. Day reminders arrive at %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Si applica a ogni ricorrenza</string>
     <string name="reminderSheetHint">Tocca un promemoria per aggiungerlo. Toccalo di nuovo per rimuoverlo.</string>
     <string name="reminderSheetNoDue">Questa attività non ha ancora una scadenza</string>
