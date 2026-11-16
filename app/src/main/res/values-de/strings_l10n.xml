@@ -270,8 +270,9 @@
     <string name="taskFocusLogSnackbar">Fokus-Sitzung zugeordnet</string>
     <string name="taskFocusLogTitle">Fokuszeit eintragen</string>
     <string name="taskDetailsLabelDescription">Beschreibung</string>
-    <string name="taskDetailsLabelDueDate">Fällig: %1$s um %2$s</string>
+    <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Fälligkeitsdatum festlegen</string>
+    <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Aufwand</string>
     <string name="taskDetailsLabelLocation">Ort</string>
     <string name="taskDetailsLabelPriority">Priorität</string>
@@ -286,6 +287,7 @@
     <string name="taskDetailsReminderOptionHour">1 Stunde vorher</string>
     <string name="taskDetailsReminderOptionWeek">1 Woche vorher</string>
     <string name="taskDetailsReminderOptionOnce">Pünktlich</string>
+    <string name="taskDetailsReminderOptionOnTheDay">On the day</string>
     <string name="taskDetailsSectionChecklist">Checkliste</string>
     <string name="taskDetailsSectionInfo">Aufgabeninfo</string>
     <string name="taskDetailsSectionLocation">Ort</string>
@@ -716,6 +718,7 @@
     <string name="reminderFieldLabel">Erinnerungen</string>
     <string name="reminderShifted">Erinnerungen an das neue Fälligkeitsdatum angepasst</string>
     <string name="reminderSheetDue">Fällig am %1$s</string>
+    <string name="reminderSheetDueAllDay">Due %1$s, all day. Day reminders arrive at %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Gilt für jede Wiederholung</string>
     <string name="reminderSheetHint">Tippe auf eine Erinnerung, um sie hinzuzufügen. Tippe erneut, um sie zu entfernen.</string>
     <string name="reminderSheetNoDue">Diese Aufgabe hat noch kein Fälligkeitsdatum</string>
