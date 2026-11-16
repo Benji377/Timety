@@ -247,6 +247,14 @@
     <string name="habitFreqFlexible">%1$d / %2$d diese Woche</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d diesen Monat</string>
     <string name="habitFreqWeekly">Wöchentlich am %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="one">Once a day</item>
+        <item quantity="other">%d times a day</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Today</string>
+    <string name="habitTodayCheckIn">Check in</string>
+    <string name="habitTodayHistory">History</string>
     <string name="habitHistoryCompletedAt">Erledigt um %1$s</string>
     <string name="habitHistoryEmpty">Noch kein Verlauf.</string>
     <string name="habitHistoryRemoveCompletion">Erledigung für %1$s entfernen?</string>
