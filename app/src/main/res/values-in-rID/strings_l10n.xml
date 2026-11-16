@@ -263,8 +263,9 @@
     <string name="taskFocusLogSnackbar">Sesi fokus dilampirkan</string>
     <string name="taskFocusLogTitle">Catat Waktu Fokus</string>
     <string name="taskDetailsLabelDescription">Deskripsi</string>
-    <string name="taskDetailsLabelDueDate">Tenggat: %1$s pukul %2$s</string>
+    <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Atur Tenggat</string>
+    <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Usaha</string>
     <string name="taskDetailsLabelLocation">Lokasi</string>
     <string name="taskDetailsLabelPriority">Prioritas</string>
@@ -279,6 +280,7 @@
     <string name="taskDetailsReminderOptionHour">1 jam sebelumnya</string>
     <string name="taskDetailsReminderOptionWeek">1 minggu sebelumnya</string>
     <string name="taskDetailsReminderOptionOnce">Tepat waktu</string>
+    <string name="taskDetailsReminderOptionOnTheDay">On the day</string>
     <string name="taskDetailsSectionChecklist">Daftar Periksa</string>
     <string name="taskDetailsSectionInfo">Info Tugas</string>
     <string name="taskDetailsSectionLocation">Lokasi</string>
@@ -692,6 +694,7 @@
     <string name="reminderFieldLabel">Pengingat</string>
     <string name="reminderShifted">Pengingat disesuaikan dengan tenggat baru</string>
     <string name="reminderSheetDue">Tenggat %1$s</string>
+    <string name="reminderSheetDueAllDay">Due %1$s, all day. Day reminders arrive at %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Berlaku untuk setiap pengulangan</string>
     <string name="reminderSheetHint">Ketuk pengingat untuk menambahkannya. Ketuk lagi untuk menghapusnya.</string>
     <string name="reminderSheetNoDue">Tugas ini belum punya tenggat</string>
