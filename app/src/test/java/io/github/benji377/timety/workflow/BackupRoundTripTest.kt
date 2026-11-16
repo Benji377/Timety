@@ -273,6 +273,47 @@ class BackupRoundTripTest {
     }
 
     @Test
+    fun backupThenRestore_keepsTimesPerDayAndEveryCheckIn() = runBlocking {
+        val habit = HabitEntity(
+            id = "teeth", name = "Brush teeth", frequency = HabitFrequency.DAILY,
+            timesPerDay = 3, createdAt = now, colorValue = 0,
+        )
+        source.habitRepository.insertHabit(habit)
+        repeat(3) { i ->
+            source.habitRepository.insertCompletion(
+                HabitCompletionEntity(habitId = habit.id, completionDate = now.plusSeconds(i * 60L))
+            )
+        }
+
+        target.backupService.importFromUri(exportFrom(source)).getOrThrow()
+
+        assertEquals(habit, target.habitRepository.allHabits.first().single())
+        assertEquals(3, target.habitRepository.allCompletions.first().size)
+    }
+
+    @Test
+    fun restore_defaultsTimesPerDayAndKeepsFlexibleHabitsAtOne() = runBlocking {
+        seedOneOfEverything(source)
+        val full = JSONObject(exportFrom(source).readText())
+        val habits = full.getJSONArray("habits")
+        val legacy = JSONObject(habits.getJSONObject(0).toString()).apply {
+            put("id", "legacy"); put("frequency", "DAILY"); remove("timesPerDay")
+        }
+        val flexible = JSONObject(habits.getJSONObject(0).toString()).apply {
+            put("id", "flexible"); put("timesPerDay", 4)
+        }
+        val tooMany = JSONObject(habits.getJSONObject(0).toString()).apply {
+            put("id", "too-many"); put("frequency", "DAILY"); put("timesPerDay", 50)
+        }
+        full.put("habits", JSONArray(listOf(legacy, flexible, tooMany)))
+
+        target.backupService.importFromJson(full).getOrThrow()
+
+        val restored = target.habitRepository.allHabits.first().associate { it.id to it.timesPerDay }
+        assertEquals(mapOf("legacy" to 1, "flexible" to 1, "too-many" to 10), restored)
+    }
+
+    @Test
     fun backupThenRestore_keepsTagsOnEveryItemType() = runBlocking {
         seedOneOfEverything(source)
         val work = TagEntity("tag-work", "Work", 1)

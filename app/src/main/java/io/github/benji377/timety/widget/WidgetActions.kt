@@ -9,14 +9,8 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.updateAll
 import io.github.benji377.timety.MainActivity
 import io.github.benji377.timety.TimetyApplication
-import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.ReminderScheduler
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.withLock
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 
 /**
  * Tap intent for a widget element: opens [MainActivity] and navigates to [route] (an AppRoute or
@@ -71,7 +65,7 @@ class CompleteRecurringTaskAction : ActionCallback {
 }
 
 /**
- * Toggles today's completion of a habit from its widget row, mirroring
+ * One check-in tap on a habit from its widget row, the same as
  * [HabitViewModel.toggleCompletionToday][io.github.benji377.timety.ui.viewmodel.HabitViewModel].
  */
 class ToggleHabitCompletionAction : ActionCallback {
@@ -82,24 +76,7 @@ class ToggleHabitCompletionAction : ActionCallback {
     ) {
         val habitId = parameters[HabitIdKey] ?: return
         val container = (context.applicationContext as TimetyApplication).container
-        val habitRepository = container.habitRepository
-        if (habitRepository.getHabitById(habitId) == null) return
-        // Shares HabitRepository's completionMutex with HabitViewModel's toggle path, since
-        // both entry points read-check-write the same completion row: unsynchronized, two
-        // quick taps (in-app or widget, or one of each) could both read "not completed" and
-        // insert a duplicate completion.
-        habitRepository.completionMutex.withLock {
-            val today = LocalDate.now()
-            val todayCompletion = habitRepository.getCompletionsForHabit(habitId).first()
-                .find { it.completionDate.atZone(ZoneId.systemDefault()).toLocalDate() == today }
-            if (todayCompletion != null) {
-                habitRepository.deleteCompletion(todayCompletion)
-            } else {
-                habitRepository.insertCompletion(
-                    HabitCompletionEntity(habitId = habitId, completionDate = Instant.now())
-                )
-            }
-        }
+        container.habitRepository.tapCheckIn(habitId) ?: return
         // Done drops today's remaining reminders; undone brings them back.
         ReminderScheduler.refreshHabitReminder(context, habitId)
         HabitWidget().updateAll(context)

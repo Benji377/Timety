@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
@@ -54,6 +55,8 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
+import io.github.benji377.timety.ui.components.habit.HabitTodayCard
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
@@ -101,6 +104,9 @@ fun HabitDetailScreen(
     val allHabits by habitViewModel.allHabits.collectAsState()
     val habitTags by tagViewModel.habitTags.collectAsState()
     val existingHabit = habitId?.let { id -> allHabits.find { it.id == id } }
+    val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
+    val existingWithCompletions = habitId?.let { id -> habitsWithCompletions.find { it.habit.id == id } }
+    var showHistory by rememberSaveable { mutableStateOf(false) }
     val isNewHabit = habitId == null
 
     var isEditing by rememberSaveable { mutableStateOf(isNewHabit) }
@@ -125,6 +131,9 @@ fun HabitDetailScreen(
         mutableIntStateOf(
             existingHabit?.targetCount ?: 3
         )
+    }
+    var timesPerDay by rememberSaveable(formHabit) {
+        mutableIntStateOf(existingHabit?.timesPerDay ?: 1)
     }
     // A weekly target can't exceed the days in a week, however the frequency got there.
     fun selectFrequency(newFrequency: HabitFrequency) {
@@ -216,6 +225,7 @@ fun HabitDetailScreen(
             name = trimmedName,
             frequency = frequency,
             targetCount = if (frequency.isFlexible) targetCount else null,
+            timesPerDay = if (frequency.allowsTimesPerDay) timesPerDay else 1,
             targetWeekdays = if (frequency == HabitFrequency.WEEKLY_EXACT) HabitUtils.serializeWeekdays(
                 selectedWeekdays
             ) else null,
@@ -512,6 +522,27 @@ fun HabitDetailScreen(
                         selectedColor = selectedColor,
                     )
                 }
+                if (frequency.allowsTimesPerDay) {
+                    if (frequency == HabitFrequency.WEEKLY_EXACT) {
+                        Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    }
+                    TimesPerDayCard(
+                        timesPerDay = timesPerDay,
+                        onChange = { timesPerDay = it },
+                        isEditing = isEditing,
+                        color = selectedColor,
+                    )
+                }
+                // Logging, not editing the habit, so it lives in view mode only.
+                if (!isEditing && existingWithCompletions != null && existingWithCompletions.habit.timesPerDay > 1) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    HabitTodayCard(
+                        habitWithCompletions = existingWithCompletions,
+                        color = selectedColor,
+                        viewModel = habitViewModel,
+                        onOpenHistory = { showHistory = true },
+                    )
+                }
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
@@ -547,6 +578,14 @@ fun HabitDetailScreen(
                 )
                 Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
             }
+        }
+
+        if (showHistory && existingWithCompletions != null) {
+            HabitHistorySheet(
+                habitWithCompletions = existingWithCompletions,
+                viewModel = habitViewModel,
+                onDismissRequest = { showHistory = false },
+            )
         }
 
         if (showIconPicker) {
@@ -593,3 +632,35 @@ fun HabitDetailScreen(
 }
 
 private val HABIT_DETAIL_COLORS = listOf(HabitColor) + PickerPalette
+
+/** The check-ins a day needs, from once up to [HabitUtils.MAX_TIMES_PER_DAY]. */
+@Composable
+private fun TimesPerDayCard(timesPerDay: Int, onChange: (Int) -> Unit, isEditing: Boolean, color: Color) {
+    NeoCard(containerColor = if (isEditing) MaterialTheme.colorScheme.surface else Color.Transparent) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppTheme.spaceLarge),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = pluralStringResource(R.plurals.habitTimesPerDay, timesPerDay, timesPerDay),
+                fontWeight = AppTheme.fwBold,
+            )
+            Slider(
+                value = timesPerDay.toFloat(),
+                onValueChange = { if (isEditing) onChange(it.roundToInt()) },
+                valueRange = 1f..HabitUtils.MAX_TIMES_PER_DAY.toFloat(),
+                // Steps count the stops between the ends: one per whole value.
+                steps = HabitUtils.MAX_TIMES_PER_DAY - 2,
+                enabled = isEditing,
+                colors = SliderDefaults.colors(
+                    thumbColor = color,
+                    activeTrackColor = color,
+                    disabledThumbColor = color,
+                    disabledActiveTrackColor = color,
+                ),
+            )
+        }
+    }
+}

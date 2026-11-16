@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "c19a99800e99394f2d490f9f45015f85",
+    "identityHash": "e012a5f7ee8c04722aa6c150b0f6bf02",
     "entities": [
       {
         "tableName": "tasks",
@@ -570,7 +570,7 @@
       },
       {
         "tableName": "habits",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `frequency` TEXT NOT NULL, `targetDaysPerWeek` INTEGER, `targetWeekdays` TEXT, `reminderTimes` TEXT, `createdAt` INTEGER NOT NULL, `colorValue` INTEGER NOT NULL, `notes` TEXT, `iconCodePoint` INTEGER, `stackName` TEXT, `stackOrder` INTEGER, `sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `frequency` TEXT NOT NULL, `targetDaysPerWeek` INTEGER, `targetWeekdays` TEXT, `timesPerDay` INTEGER NOT NULL, `reminderTimes` TEXT, `createdAt` INTEGER NOT NULL, `colorValue` INTEGER NOT NULL, `notes` TEXT, `iconCodePoint` INTEGER, `stackName` TEXT, `stackOrder` INTEGER, `sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -599,6 +599,12 @@
             "fieldPath": "targetWeekdays",
             "columnName": "targetWeekdays",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timesPerDay",
+            "columnName": "timesPerDay",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "reminderTimes",
@@ -1301,7 +1307,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c19a99800e99394f2d490f9f45015f85')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e012a5f7ee8c04722aa6c150b0f6bf02')"
     ]
   }
 }

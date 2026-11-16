@@ -63,6 +63,7 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.ui.components.habit.rememberHabitCheckIn
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.util.task.RecurringStatus
@@ -115,6 +116,7 @@ fun HomeScreen(
     val userName = userProfile?.name ?: "User"
 
     val todayLocalDate = LocalDate.now()
+    val habitCheckIn = rememberHabitCheckIn(habitViewModel)
     val focusTargetToday = dailyFocusTarget.minutesOn(todayLocalDate)
     // Same count as the Focus screen: a session crossing midnight is split between the days.
     val focusMinsToday = remember(sessions, todayLocalDate) {
@@ -344,6 +346,7 @@ fun HomeScreen(
                                             HabitListTile(
                                                 habit = hc.habit,
                                                 isCompleted = isDone,
+                                                checkInsToday = HabitUtils.countOn(hc, todayLocalDate),
                                                 isStacked = isStacked,
                                                 isLocked = isLocked,
                                                 subtitleText = HabitUtils.buildHabitSubtitle(
@@ -351,11 +354,7 @@ fun HomeScreen(
                                                     completionsThisPeriod
                                                 ),
                                                 enableDismissible = false,
-                                                onToggleCompleted = {
-                                                    habitViewModel.toggleCompletionToday(
-                                                        hc.habit.id
-                                                    )
-                                                },
+                                                onToggleCompleted = { habitCheckIn(hc.habit) },
                                                 onTap = { onNavigateToHabitDetail(hc.habit.id) }
                                             )
                                         }

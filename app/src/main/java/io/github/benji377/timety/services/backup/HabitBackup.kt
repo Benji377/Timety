@@ -18,6 +18,7 @@ internal fun HabitWithCompletions.toBackupJson(): JSONObject = JSONObject().appl
     put("frequency", habit.frequency.name)
     put("targetDaysPerWeek", orNull(habit.targetCount))
     put("targetWeekdays", orNull(habit.targetWeekdays))
+    put("timesPerDay", habit.timesPerDay)
     put("reminderTimes", orNull(habit.reminderTimes))
     put("createdAt", habit.createdAt.toString())
     put("colorValue", habit.colorValue)
@@ -31,12 +32,16 @@ internal fun HabitWithCompletions.toBackupJson(): JSONObject = JSONObject().appl
 
 internal fun habitFromBackup(json: JSONObject): HabitWithCompletions {
     val id = json.stringOrNull("id") ?: newId()
+    val frequency = json.enumOr("frequency", HabitFrequency.DAILY)
     val habit = HabitEntity(
         id = id,
         name = json.stringOrNull("name") ?: "",
-        frequency = json.enumOr("frequency", HabitFrequency.DAILY),
+        frequency = frequency,
         targetCount = json.intOrNull("targetDaysPerWeek"),
         targetWeekdays = json.stringOrNull("targetWeekdays"),
+        timesPerDay = if (frequency.allowsTimesPerDay) {
+            json.optInt("timesPerDay", 1).coerceIn(1, HabitUtils.MAX_TIMES_PER_DAY)
+        } else 1,
         // Older backups carry a single `targetTimeMinutes` instead.
         reminderTimes = json.stringOrNull("reminderTimes")
             ?: json.intOrNull("targetTimeMinutes")?.let { HabitUtils.serializeReminderTimes(listOf(it)) },

@@ -57,6 +57,7 @@ import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
+import io.github.benji377.timety.ui.components.habit.HabitCheckInProgress
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 import java.time.ZoneId
@@ -116,11 +117,21 @@ internal fun HabitsAccordion(
                                 checkmarkColor = Color.White
                             )
                         )
-                        Text(
-                            text = hwc.habit.name,
-                            textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
-                            color = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = hwc.habit.name,
+                                textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
+                                color = if (isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                            )
+                            if (hwc.habit.timesPerDay > 1) {
+                                HabitCheckInProgress(
+                                    count = HabitUtils.countOn(hwc, selectedDate),
+                                    target = hwc.habit.timesPerDay,
+                                    color = HabitColor,
+                                    modifier = Modifier.fillMaxWidth().padding(top = AppTheme.spaceXSmall),
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -3,10 +3,25 @@ package io.github.benji377.timety.data.repository
 import io.github.benji377.timety.data.local.dao.HabitDao
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.data.model.habit.HabitWithCompletions
+import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
+
+/** What one check-in tap changed: the row it added or removed, and the day's count after it. */
+sealed interface CheckInChange {
+    val completion: HabitCompletionEntity
+    val countAfter: Int
+
+    data class Added(override val completion: HabitCompletionEntity, override val countAfter: Int) : CheckInChange
+    data class Removed(override val completion: HabitCompletionEntity, override val countAfter: Int) : CheckInChange
+}
 
 /** Repository for habits and their completions, wrapping [HabitDao] with IO dispatching. */
 class HabitRepository(
@@ -15,11 +30,9 @@ class HabitRepository(
     val allHabits: Flow<List<HabitEntity>> = habitDao.getAllHabits()
     val allCompletions: Flow<List<HabitCompletionEntity>> = habitDao.getAllCompletions()
 
-    // Serializes the read-check-write completion toggles in HabitViewModel and
-    // ToggleHabitCompletionAction: this repository is a process-wide singleton (see
-    // AppContainer), so a shared lock here also covers the app-vs-widget race, not just
-    // concurrent taps within one entry point. Two unsynchronized toggles would otherwise both
-    // read "not completed" and insert a duplicate completion.
+    // Serializes every read-check-write on completions ([tapCheckIn], backfill, focus logging).
+    // This repository is a process-wide singleton (see AppContainer), so the lock also covers
+    // app-vs-widget taps; two unsynchronized taps could both read the same count and overshoot.
     val completionMutex = Mutex()
 
     suspend fun getHabitById(id: String): HabitEntity? = withContext(Dispatchers.IO) {
@@ -61,6 +74,35 @@ class HabitRepository(
 
     suspend fun deleteCompletion(completion: HabitCompletionEntity) = withContext(Dispatchers.IO) {
         habitDao.deleteCompletion(completion)
+    }
+
+    /**
+     * One check-in tap on [habitId] at [now]: below the day's target it adds one, at the target it
+     * removes the latest. Null when the habit no longer exists.
+     */
+    suspend fun tapCheckIn(habitId: String, now: Instant = Instant.now()): CheckInChange? {
+        val habit = getHabitById(habitId) ?: return null
+        return completionMutex.withLock {
+            val completions = getCompletionsForHabit(habitId).first()
+            val today = now.atZone(ZoneId.systemDefault()).toLocalDate()
+            val count = HabitUtils.countOn(HabitWithCompletions(habit, completions), today)
+            val toRemove = HabitUtils.completionToRemoveOnTap(habit, completions, today)
+            if (toRemove != null) {
+                deleteCompletion(toRemove)
+                CheckInChange.Removed(toRemove, count - 1)
+            } else {
+                val added = HabitCompletionEntity(habitId = habitId, completionDate = now)
+                CheckInChange.Added(added.copy(id = insertCompletion(added)), count + 1)
+            }
+        }
+    }
+
+    /** Reverts [change]: deletes the row it added or puts back the one it removed. */
+    suspend fun undoCheckIn(change: CheckInChange) = completionMutex.withLock {
+        when (change) {
+            is CheckInChange.Added -> deleteCompletion(change.completion)
+            is CheckInChange.Removed -> insertCompletion(change.completion)
+        }
     }
 
 }

@@ -44,7 +44,7 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
-import io.github.benji377.timety.ui.components.habit.HabitBottomSheet
+import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
 import io.github.benji377.timety.ui.components.habit.HabitListTile
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -56,6 +56,7 @@ import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
+import io.github.benji377.timety.ui.components.habit.rememberHabitCheckIn
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.tag.TagFilter
 import java.time.LocalDate
@@ -359,15 +360,10 @@ fun HabitListScreen(
         habitsWithCompletions.find { it.habit.id == hwc.habit.id } ?: hwc
     }
     if (sheetHabit != null) {
-        HabitBottomSheet(
+        HabitHistorySheet(
             habitWithCompletions = sheetHabit,
+            viewModel = viewModel,
             onDismissRequest = { historySheetFor = null },
-            onDateSelected = { instant ->
-                viewModel.markCompletionOnDate(sheetHabit.habit.id, instant)
-            },
-            onDateDeselected = { date ->
-                viewModel.unmarkCompletionOnDate(sheetHabit.habit.id, date)
-            },
         )
     }
 }
@@ -406,16 +402,18 @@ private fun HabitTileWrapper(
         completionsThisPeriod.toFloat() / (habit.targetCount ?: 1).toFloat()
     } else null
 
+    val checkIn = rememberHabitCheckIn(viewModel)
     HabitListTile(
         habit = habit,
         isCompleted = isDone,
+        checkInsToday = HabitUtils.countOn(hwc, LocalDate.now()),
         isStacked = isStacked,
         isLocked = isLocked,
         isReorderMode = isReorderMode,
         subtitleText = subtitleText,
         tags = tags,
         progressValue = progressValue,
-        onToggleCompleted = { viewModel.toggleCompletionToday(habit.id) },
+        onToggleCompleted = { checkIn(habit) },
         onMarkPastCompletion = onOpenHistory,
         onTap = { onNavigateToHabitDetail(habit.id) },
         onDelete = { viewModel.deleteHabit(habit) },
