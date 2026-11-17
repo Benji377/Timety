@@ -105,7 +105,6 @@
     <string name="focusLabelDefault">Fokus</string>
     <string name="focusLabelRest">Pause</string>
     <string name="focusLabelSetTime">Zeit einstellen</string>
-    <string name="focusLabelStopwatch">Stoppuhr</string>
     <string name="focusMinutes">%1$d Min. Fokus</string>
     <string name="focusModeDialogDeleteContent">Bist du sicher, dass du diesen benutzerdefinierten Modus löschen möchtest?</string>
     <string name="focusModeDialogDeleteTitle">Fokus-Modus löschen?</string>
@@ -180,6 +179,8 @@
     <string name="goalDetailLabelDescription">Beschreibung</string>
     <string name="goalDetailLabelDescriptionHint">Warum ist dieses Ziel wichtig?</string>
     <string name="goalDetailLabelIcon">Symbol auswählen</string>
+    <string name="goalDetailSectionInfo">Goal Info</string>
+    <string name="goalDetailSectionTarget">Target</string>
     <string name="goalDetailLabelName">Zielname</string>
     <string name="goalDetailLabelNameHint">z.B. 500 km fahren, 12 Bücher lesen…</string>
     <string name="goalDetailLabelNameRequest">Bitte gib einen Namen ein</string>
@@ -222,6 +223,9 @@
         <item quantity="other">Ziel: %d Tage pro Monat</item>
     </plurals>
     <string name="habitDetailLabelIcon">Wähle ein Icon</string>
+    <string name="habitDetailSectionInfo">Habit Info</string>
+    <string name="detailSectionAppearance">Appearance</string>
+    <string name="detailLabelIcon">Icon</string>
     <string name="habitDetailLabelName">Name der Gewohnheit</string>
     <string name="habitDetailLabelNameHint">z.B. 10 Seiten lesen, Workout…</string>
     <string name="habitDetailLabelNameRequest">Bitte gib einen Namen ein</string>
@@ -277,9 +281,12 @@
     <string name="taskDeleteTitle">Aufgabe löschen</string>
     <string name="taskFocusLogSnackbar">Fokus-Sitzung zugeordnet</string>
     <string name="taskFocusLogTitle">Fokuszeit eintragen</string>
+    <string name="taskFocusLogSkip">Skip</string>
+    <string name="taskCompletedSnackbar">Done: %1$s</string>
     <string name="taskDetailsLabelDescription">Beschreibung</string>
     <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Fälligkeitsdatum festlegen</string>
+    <string name="taskDetailsLabelDueDate">Due date</string>
     <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Aufwand</string>
     <string name="taskDetailsLabelLocation">Ort</string>
@@ -369,7 +376,7 @@
     <string name="calendarTooltipToday">Gehe zu Heute</string>
     <string name="calendarWeekSummaryDescription">Aufgaben erledigt: %1$d, Gewohnheiten erledigt: %2$d, Fokuszeit: %3$s</string>
     <string name="calendarWeeklyReportTitle">Wochenbericht</string>
-    <string name="statsLabelProductivity">Produktivitäts-Synergie</string>
+    <string name="statsLabelProductivity">Focus and tasks</string>
     <string name="statsPageTime">Zeit</string>
     <string name="statsPeriodWeek">Woche</string>
     <string name="statsPeriodMonth">Monat</string>
@@ -714,6 +721,7 @@
     <string name="recurringTaskTitleView">Wiederkehrende Aufgabe</string>
     <string name="recurringTaskLabelNextDue">Nächste Fälligkeit</string>
     <string name="recurringTaskSnackbarDueRequired">Lege zuerst das nächste Fälligkeitsdatum fest</string>
+    <string name="recurringTaskDueDayMismatch">Next due is a %1$s, which isn\'t one of the picked days. Later dates follow the picked days.</string>
     <string name="recurringTaskMonthlyOnDay">Am %1$d. Tag</string>
     <string name="recurringTaskMonthlyOnNth">Am %1$s %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">%1$d Minuten vorher</string>
@@ -792,7 +800,7 @@
     <string name="quickHabitSpecificDays">Bestimmte Tage</string>
     <string name="quickHabitStartLabel">Von</string>
     <string name="quickHabitEndLabel">Bis</string>
-    <string name="quickHabitCardSubtitle">%1$s / %2$s</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Schnell-Gewohnheit löschen</string>
     <string name="quickHabitDeleteContent">Bist du sicher, dass du \"%1$s\" löschen möchtest?</string>
