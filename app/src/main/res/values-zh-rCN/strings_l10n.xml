@@ -707,6 +707,19 @@
     <string name="reminderSheetNoDue">此任务尚未设置截止日期</string>
     <string name="reminderWarnLimit">最多可添加 %1$d 个提醒。</string>
     <string name="reminderWarnNoDue">设置截止日期后才能使用这些选项，自定义时间仍可使用。</string>
+    <string name="recurringTaskWindowLabel">Task window</string>
+    <string name="recurringTaskWindowHint">How early this task shows up in your lists</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="other">Default (%d days before)</item>
+    </plurals>
+    <string name="recurringTaskWindowDefaultHint">Change the default in Settings › Tasks</string>
+    <string name="recurringTaskWindowCustom">Custom</string>
+    <string name="recurringTaskWindowAmount">Before due</string>
+    <string name="recurringTaskWindowRequest">Enter %1$d to %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">On the due day</string>
+    <string name="recurringTaskWindowHours">Hours</string>
+    <string name="recurringTaskWindowDays">Days</string>
+    <string name="recurringTaskWindowWeeks">Weeks</string>
     <string name="recurringTaskCompleteNow">立即完成</string>
     <string name="recurringTaskHistoryTitle">历史记录</string>
     <string name="recurringTaskHistoryEmpty">暂无完成记录。</string>
