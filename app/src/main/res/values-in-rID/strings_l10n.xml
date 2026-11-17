@@ -707,6 +707,19 @@
     <string name="reminderSheetNoDue">Tugas ini belum punya tenggat</string>
     <string name="reminderWarnLimit">Kamu bisa menambahkan hingga %1$d pengingat.</string>
     <string name="reminderWarnNoDue">Atur tenggat untuk memakai opsi ini. Waktu kustom tetap bisa dipakai.</string>
+    <string name="recurringTaskWindowLabel">Task window</string>
+    <string name="recurringTaskWindowHint">How early this task shows up in your lists</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="other">Default (%d days before)</item>
+    </plurals>
+    <string name="recurringTaskWindowDefaultHint">Change the default in Settings › Tasks</string>
+    <string name="recurringTaskWindowCustom">Custom</string>
+    <string name="recurringTaskWindowAmount">Before due</string>
+    <string name="recurringTaskWindowRequest">Enter %1$d to %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">On the due day</string>
+    <string name="recurringTaskWindowHours">Hours</string>
+    <string name="recurringTaskWindowDays">Days</string>
+    <string name="recurringTaskWindowWeeks">Weeks</string>
     <string name="recurringTaskCompleteNow">Selesaikan sekarang</string>
     <string name="recurringTaskHistoryTitle">Riwayat</string>
     <string name="recurringTaskHistoryEmpty">Belum ada penyelesaian.</string>
