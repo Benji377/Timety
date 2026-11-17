@@ -832,6 +832,24 @@
     <string name="reminderSheetNoDue">Chësta ncëria à mo nia na scadënza</string>
     <string name="reminderWarnLimit">Te pëus njunté nfin a %1$d lezic.</string>
     <string name="reminderWarnNoDue">Mët na scadënza per nuzé chësta opzions. I tëmps persunalisei funziona inò.</string>
+    <string name="recurringTaskWindowLabel">Task window</string>
+    <string name="recurringTaskWindowHint">How early this task shows up in your lists</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="zero">Default (%d days before)</item>
+        <item quantity="one">Default (%d day before)</item>
+        <item quantity="two">Default (%d days before)</item>
+        <item quantity="few">Default (%d days before)</item>
+        <item quantity="many">Default (%d days before)</item>
+        <item quantity="other">Default (%d days before)</item>
+    </plurals>
+    <string name="recurringTaskWindowDefaultHint">Change the default in Settings › Tasks</string>
+    <string name="recurringTaskWindowCustom">Custom</string>
+    <string name="recurringTaskWindowAmount">Before due</string>
+    <string name="recurringTaskWindowRequest">Enter %1$d to %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">On the due day</string>
+    <string name="recurringTaskWindowHours">Hours</string>
+    <string name="recurringTaskWindowDays">Days</string>
+    <string name="recurringTaskWindowWeeks">Weeks</string>
     <string name="recurringTaskCompleteNow">Finé śën</string>
     <string name="recurringTaskHistoryTitle">Storia</string>
     <string name="recurringTaskHistoryEmpty">Niamò degun finé.</string>
