@@ -51,6 +51,7 @@ import io.github.benji377.timety.ui.components.stats.StatsEmptyState
 import io.github.benji377.timety.ui.components.stats.StatsNavRow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberToday
@@ -104,6 +105,7 @@ fun StatsGoalsScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         if (usedTags.isNotEmpty()) {
             TagFilterRow(
+                allColor = GoalColor,
                 tags = usedTags,
                 selectedIds = activeTagIds,
                 onSelectionChange = { selectedTags = it },

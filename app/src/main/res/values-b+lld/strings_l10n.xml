@@ -878,7 +878,6 @@
     <string name="quickHabitSpecificDays">Dis spezifics</string>
     <string name="quickHabitStartLabel">Da</string>
     <string name="quickHabitEndLabel">Fin a</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Scancelé abitudin svelta</string>
     <string name="quickHabitDeleteContent">T\'es segur de ulëi scancelé \"%1$s\"?</string>

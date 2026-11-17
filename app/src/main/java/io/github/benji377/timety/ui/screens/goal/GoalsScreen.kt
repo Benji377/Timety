@@ -130,6 +130,7 @@ fun GoalsScreen(
 
             item {
                 TagFilterRow(
+                    allColor = GoalColor,
                     tags = usedTags,
                     selectedIds = activeTagIds,
                     onSelectionChange = { selectedTagIds = it },

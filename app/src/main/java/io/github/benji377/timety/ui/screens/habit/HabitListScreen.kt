@@ -185,6 +185,7 @@ fun HabitListScreen(
                 // Hidden while reordering: a filtered list can't be reordered.
                 if (!reorderMode) {
                     TagFilterRow(
+                        allColor = HabitColor,
                         tags = usedTags,
                         selectedIds = activeTagIds,
                         onSelectionChange = { selectedTagIds = it },

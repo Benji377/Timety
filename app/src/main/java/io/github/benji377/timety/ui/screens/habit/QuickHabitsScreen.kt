@@ -71,6 +71,7 @@ import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.QuickHabitViewModel
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.habit.QuickHabitScheduling
+import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -549,10 +550,11 @@ private fun quickHabitSubtitle(
     else stringResource(R.string.quickHabitCardSubtitle, base, weekdaysSummary(days))
 }
 
-/** A compact weekday summary like "Mon, Wed, Fri" in Mon..Sun order. */
+/** A compact weekday summary like "Mon, Wed, Fri" in Mon..Sun order, or "Every day" for all seven. */
 @Composable
 @ReadOnlyComposable
 private fun weekdaysSummary(days: Set<Int>): String {
+    if (days.size == DayOfWeek.entries.size) return stringResource(R.string.quickHabitEveryDay)
     val labels = listOf(
         stringResource(R.string.calendarHeaderMon), stringResource(R.string.calendarHeaderTue),
         stringResource(R.string.calendarHeaderWed), stringResource(R.string.calendarHeaderThu),

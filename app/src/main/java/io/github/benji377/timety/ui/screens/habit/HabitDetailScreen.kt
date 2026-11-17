@@ -310,19 +310,19 @@ fun HabitDetailScreen(
                         .fillMaxWidth()
                         .focusRequester(rememberAutoFocus(isNewHabit)),
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
             // Habit stacking: name autocomplete. Position within the stack is set by dragging
-            // in the habit list, not entered here.
-            item {
+            // in the habit list, not entered here. View mode hides empty optional fields.
+            if (isEditing || stackName.isNotBlank()) item {
+                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 ExposedDropdownMenuBox(
                     expanded = stackNameExpanded && isEditing && filteredStacks.isNotEmpty(),
                     onExpandedChange = { if (isEditing) stackNameExpanded = it },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     NeoOutlinedTextField(
-                        value = if (isEditing) stackName else stackName.ifBlank { "-" },
+                        value = stackName,
                         onValueChange = {
                             stackName = it
                             stackNameExpanded = true
@@ -353,7 +353,6 @@ fun HabitDetailScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
             item {
@@ -362,19 +361,22 @@ fun HabitDetailScreen(
                         ?: habitTags[habitId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                NeoOutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
-                    enabled = isEditing,
-                    label = { Text(stringResource(R.string.habitDetailLabelNotes)) },
-                    placeholder = { Text(stringResource(R.string.habitDetailLabelNotesHint)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                    minLines = 3,
-                    maxLines = 6,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                if (isEditing || notes.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        enabled = isEditing,
+                        label = { Text(stringResource(R.string.habitDetailLabelNotes)) },
+                        placeholder = { Text(stringResource(R.string.habitDetailLabelNotesHint)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
             item {

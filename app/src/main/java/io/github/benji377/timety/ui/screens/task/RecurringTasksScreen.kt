@@ -131,6 +131,7 @@ fun RecurringTasksScreen(
             ) {
                 item(key = "tag-filter") {
                     TagFilterRow(
+                        allColor = TaskColor,
                         tags = usedTags,
                         selectedIds = activeTagIds,
                         onSelectionChange = { selectedTagIds = it },

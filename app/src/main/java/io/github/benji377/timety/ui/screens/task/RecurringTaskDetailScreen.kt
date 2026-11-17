@@ -1,16 +1,17 @@
 package io.github.benji377.timety.ui.screens.task
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -47,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -333,24 +336,27 @@ fun RecurringTaskDetailScreen(
                     leadingIcon = { Icon(Icons.Filled.Title, null) },
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
                 TagPicker(
                     selectedIds = pickedTagIds
                         ?: recurringTags[recurringTaskId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
-                NeoOutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    enabled = isEditing,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                    minLines = 3,
-                    maxLines = 6
-                )
+                // View mode hides empty optional fields.
+                if (isEditing || description.isNotBlank()) {
+                    Spacer(Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        enabled = isEditing,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6
+                    )
+                }
             }
 
             // Next due date (also the anchor for the rule and time of day), rule and reminders.
@@ -741,15 +747,19 @@ private fun MonthlyChoiceOption(
     enabled: Boolean,
     onSelect: () -> Unit,
 ) {
+    // The whole row takes the tap, so the radio needs no touch padding of its own and lines up
+    // with the fields above it.
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onSelect),
+            .heightIn(min = LocalMinimumInteractiveComponentSize.current)
+            .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onSelect),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium),
     ) {
         RadioButton(
             selected = selected,
-            onClick = onSelect,
+            onClick = null,
             enabled = enabled,
             // The selection is the value: keep it readable in view mode instead of the 38%
             // Material disabled fade; the label text next to it never fades either.

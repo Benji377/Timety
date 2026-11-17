@@ -822,7 +822,6 @@
     <string name="quickHabitSpecificDays">Определённые дни</string>
     <string name="quickHabitStartLabel">С</string>
     <string name="quickHabitEndLabel">До</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Удалить быструю привычку</string>
     <string name="quickHabitDeleteContent">Вы уверены, что хотите удалить «%1$s»?</string>

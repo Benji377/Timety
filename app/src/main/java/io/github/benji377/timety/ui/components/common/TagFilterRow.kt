@@ -29,13 +29,14 @@ private const val MAX_ROW_TAGS = 2
 
 /**
  * Filter pills for the [tags] used on a screen. Several can be selected, narrowing the list, and
- * "All" clears them. Shows nothing when no tag is in use.
+ * "All" clears them and takes the screen's item-type [allColor]. Shows nothing when no tag is in use.
  */
 @Composable
 fun TagFilterRow(
     tags: List<TagEntity>,
     selectedIds: Set<String>,
     onSelectionChange: (Set<String>) -> Unit,
+    allColor: Color,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(horizontal = AppTheme.spaceSmall),
 ) {
@@ -50,6 +51,7 @@ fun TagFilterRow(
                 selected = selectedIds.isEmpty(),
                 onClick = { onSelectionChange(emptySet()) },
                 label = stringResource(R.string.taskListFilterAll),
+                selectedColor = allColor,
             )
         }
         items(tags, key = { it.id }) { tag ->

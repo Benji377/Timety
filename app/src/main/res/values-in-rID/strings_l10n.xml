@@ -738,7 +738,6 @@
     <string name="quickHabitSpecificDays">Hari tertentu</string>
     <string name="quickHabitStartLabel">Dari</string>
     <string name="quickHabitEndLabel">Sampai</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Hapus Kebiasaan Cepat</string>
     <string name="quickHabitDeleteContent">Yakin ingin menghapus \"%1$s\"?</string>

@@ -243,26 +243,27 @@ fun TaskDetailScreen(
                     leadingIcon = { Icon(Icons.Filled.Title, null) },
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
-
                 TagPicker(
                     selectedIds = pickedTagIds
                         ?: taskTags[taskId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
-
-                Spacer(Modifier.height(AppTheme.spaceLarge))
-                NeoOutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    enabled = isEditing,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                    minLines = 3,
-                    maxLines = 6
-                )
+                // View mode hides empty optional fields.
+                if (isEditing || description.isNotBlank()) {
+                    Spacer(Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        enabled = isEditing,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6
+                    )
+                }
             }
 
             // Priority and effort size.
@@ -283,19 +284,24 @@ fun TaskDetailScreen(
                 )
             }
 
-            // Scheduling: due date and reminders.
-            item {
+            // Scheduling: due date and reminders. Without a due date there is nothing to show
+            // outside edit mode, since reminders need one.
+            val showScheduling = isEditing || due != null
+            if (showScheduling) item {
                 FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionScheduling),
                     Icons.Filled.CalendarToday,
                     TaskColor,
                 )
             }
-            item {
+            if (showScheduling) item {
                 DueDateTimeFields(
                     due = due,
                     isEditing = isEditing,
-                    dateLabel = stringResource(R.string.taskDetailsLabelDueDateSet),
+                    // "Set due date" invites a tap on an empty field; a filled one is just the due date.
+                    dateLabel = stringResource(
+                        if (due == null) R.string.taskDetailsLabelDueDateSet else R.string.taskDetailsLabelDueDate
+                    ),
                     onPickDate = { pickerTarget = PickerTarget.DUE_DATE },
                     onPickTime = { pickerTarget = PickerTarget.DUE_TIME },
                     onClearTime = { due?.let { changeDue(Due.of(it.date(), null)) } },
@@ -313,14 +319,14 @@ fun TaskDetailScreen(
             }
 
             // Location.
-            item {
+            if (isEditing || location.isNotBlank()) item {
                 FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionLocation),
                     Icons.Outlined.LocationOn,
                     TaskColor,
                 )
             }
-            item {
+            if (isEditing || location.isNotBlank()) item {
                 LocationField(
                     location = location,
                     place = place,

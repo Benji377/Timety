@@ -766,7 +766,6 @@
     <string name="quickHabitSpecificDays">Giorni specifici</string>
     <string name="quickHabitStartLabel">Da</string>
     <string name="quickHabitEndLabel">A</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Elimina abitudine rapida</string>
     <string name="quickHabitDeleteContent">Sei sicuro di voler eliminare \"%1$s\"?</string>

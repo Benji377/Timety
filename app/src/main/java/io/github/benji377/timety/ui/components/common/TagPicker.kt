@@ -106,11 +106,11 @@ fun TagPicker(
     val selectedTags = allTags.filter { it.id in selectedIds }
     var showSheet by remember { mutableStateOf(false) }
 
+    // View mode hides an empty field rather than saying so; [modifier] carries the gap above it.
+    if (!isEditing && selectedTags.isEmpty()) return
+
     Column(modifier = modifier.fillMaxWidth()) {
         FieldLabel(stringResource(R.string.globalLabelTags))
-        if (!isEditing && selectedTags.isEmpty()) {
-            Text(stringResource(R.string.focusTargetUntagged))
-        }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
             verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),

@@ -249,25 +249,28 @@ fun GoalDetailScreen(
                         .fillMaxWidth()
                         .focusRequester(rememberAutoFocus(isNewGoal)),
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 TagPicker(
                     selectedIds = pickedTagIds
                         ?: goalTags[goalId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                NeoOutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    enabled = isEditing,
-                    label = { Text(stringResource(R.string.goalDetailLabelDescription)) },
-                    placeholder = { Text(stringResource(R.string.goalDetailLabelDescriptionHint)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                    minLines = 3,
-                    maxLines = 6,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                // View mode hides empty optional fields.
+                if (isEditing || description.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        enabled = isEditing,
+                        label = { Text(stringResource(R.string.goalDetailLabelDescription)) },
+                        placeholder = { Text(stringResource(R.string.goalDetailLabelDescriptionHint)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
             item {
@@ -338,8 +341,8 @@ fun GoalDetailScreen(
                 )
             }
 
-            // Progress log, newest first (existing goals only).
-            if (existingGoalWithEntries != null) {
+            // Progress log, newest first: view mode only, like a recurring task's history.
+            if (existingGoalWithEntries != null && !isEditing) {
                 item {
                     FormSectionHeader(stringResource(R.string.goalDetailEntriesTitle), Icons.Filled.History, GoalColor)
                 }

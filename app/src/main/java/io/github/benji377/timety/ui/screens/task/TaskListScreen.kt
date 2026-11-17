@@ -258,6 +258,7 @@ fun TaskListScreen(
 
             // Tag filter pills.
             TagFilterRow(
+                allColor = TaskColor,
                 tags = usedTags,
                 selectedIds = activeTagIds,
                 onSelectionChange = { selectedTagIds = it },

@@ -88,7 +88,7 @@ fun ReminderField(
         NeoOutlinedTextField(
             value = when (entries.size) {
                 0 -> ""
-                1 -> entries.first().let { entry -> listOfNotNull(entry.label, entry.time).joinToString(" · ") }
+                1 -> entries.first().let { entry -> listOfNotNull(entry.label, entry.time).joinToString(" | ") }
                 else -> pluralStringResource(
                     R.plurals.reminderFieldCount, entries.size, entries.size
                 )
