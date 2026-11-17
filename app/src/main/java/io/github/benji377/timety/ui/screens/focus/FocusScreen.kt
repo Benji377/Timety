@@ -338,7 +338,13 @@ fun FocusScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        // Raised above the timer controls, so a snackbar never covers them.
+        snackbarHost = {
+            SnackbarHost(
+                snackbarHostState,
+                modifier = Modifier.padding(bottom = MAIN_BUTTON_SIZE + CONTROLS_BOTTOM_GAP),
+            )
+        },
         topBar = {
             NeoTopBar(
                 title = stringResource(R.string.focusTitle),
@@ -474,7 +480,9 @@ fun FocusScreen(
                     icon = Icons.Filled.WarningAmber,
                     contentDescription = stringResource(R.string.commonTooltipDistractions),
                     enabled = isRunning || isPaused,
-                    contentColor = WarningColor,
+                    // Grey while idle, so the warning icon doesn't read as an error before a session.
+                    contentColor = if (isRunning || isPaused) WarningColor
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.TopEnd),
@@ -530,7 +538,7 @@ fun FocusScreen(
                         }
                     },
                     modifier = Modifier
-                        .size(80.dp)
+                        .size(MAIN_BUTTON_SIZE)
                         .testTag(FocusScreenTags.MAIN),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
@@ -583,7 +591,7 @@ fun FocusScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(CONTROLS_BOTTOM_GAP))
         }
     }
 
@@ -768,3 +776,9 @@ private data class GaugeDisplay(
     val isResting: Boolean = false,
     val pulses: Boolean = false,
 )
+
+/** The round start/stop button, the tallest of the timer controls. */
+private val MAIN_BUTTON_SIZE = 80.dp
+
+/** Gap under the timer controls; the snackbar clears the controls with it. */
+private val CONTROLS_BOTTOM_GAP = 40.dp

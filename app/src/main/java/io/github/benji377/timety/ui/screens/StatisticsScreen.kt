@@ -50,7 +50,6 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
-import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
@@ -193,7 +192,7 @@ fun StatisticsScreen(
                                 stringResource(R.string.statsTileFocusGoal),
                                 goalPercent?.let { "$it%" } ?: "-",
                                 Icons.Filled.TrackChanges,
-                                WarningColor,
+                                FocusColor,
                                 onClick = { onOpenPage(StatsPage.TIME) },
                             ),
                         )

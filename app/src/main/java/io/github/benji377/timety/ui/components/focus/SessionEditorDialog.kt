@@ -52,8 +52,9 @@ import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
-import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.TypeColorScope
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
@@ -149,146 +150,149 @@ fun SessionEditorDialog(
     var showStartPicker by remember { mutableStateOf(false) }
     var showDurationPicker by remember { mutableStateOf(false) }
 
-    NeoAlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = TaskColor)
-                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                Text(title)
-            }
-        },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                ExposedDropdownMenuBox(
-                    expanded = modeExpanded,
-                    onExpandedChange = { modeExpanded = it }) {
-                    NeoOutlinedTextField(
-                        value = selectedMode?.let { localizedFocusModeName(it) } ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.dialogTimeMachineMode)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modeExpanded) },
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                    )
-                    ExposedDropdownMenu(
+    // Focus sessions take the focus color, wherever the dialog opens.
+    TypeColorScope(FocusColor) {
+        NeoAlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(icon, contentDescription = null, tint = FocusColor)
+                    Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                    Text(title)
+                }
+            },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    ExposedDropdownMenuBox(
                         expanded = modeExpanded,
-                        onDismissRequest = { modeExpanded = false }) {
-                        modes.forEach { mode ->
-                            DropdownMenuItem(
-                                text = { Text(localizedFocusModeName(mode)) },
-                                onClick = { selectedModeId = mode.id; modeExpanded = false },
-                            )
+                        onExpandedChange = { modeExpanded = it }) {
+                        NeoOutlinedTextField(
+                            value = selectedMode?.let { localizedFocusModeName(it) } ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(stringResource(R.string.dialogTimeMachineMode)) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modeExpanded) },
+                            modifier = Modifier
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                .fillMaxWidth(),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = modeExpanded,
+                            onDismissRequest = { modeExpanded = false }) {
+                            modes.forEach { mode ->
+                                DropdownMenuItem(
+                                    text = { Text(localizedFocusModeName(mode)) },
+                                    onClick = { selectedModeId = mode.id; modeExpanded = false },
+                                )
+                            }
                         }
                     }
-                }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
-                if (fixedTargetLabel != null) {
-                    NeoOutlinedTextField(
-                        value = fixedTargetLabel,
-                        onValueChange = {},
-                        readOnly = true,
-                        enabled = false,
-                        label = { Text(stringResource(R.string.focusSessionEditorTarget)) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                } else {
-                    TargetRow(target = selectedTarget, onClick = { showTargetSheet = true })
-                }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-
-                TimeRow(
-                    label = stringResource(R.string.dialogTimeMachineStartTime),
-                    value = formatDateTime(startDateTime),
-                    icon = Icons.Filled.EditCalendar,
-                    onClick = { showStartPicker = true },
-                )
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                TimeRow(
-                    label = stringResource(R.string.dialogTimeMachineDuration),
-                    value = AppDateFormatUtils.formatMinutesCompact(durationMinutes),
-                    icon = Icons.Filled.Schedule,
-                    onClick = { showDurationPicker = true },
-                )
-
-                // The derived end is shown so a session that crosses midnight is unambiguous.
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
-                Text(
-                    stringResource(
-                        R.string.dialogTimeMachineEnds,
-                        formatDateTime(endDateTime),
-                    ),
-                    fontSize = AppTheme.fsLabel,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-        dismissButton = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (onDelete != null) {
-                    TextButton(onClick = { showDeleteConfirmation = true }) {
-                        Text(stringResource(R.string.commonLabelDelete), color = ErrorColor)
+                    if (fixedTargetLabel != null) {
+                        NeoOutlinedTextField(
+                            value = fixedTargetLabel,
+                            onValueChange = {},
+                            readOnly = true,
+                            enabled = false,
+                            label = { Text(stringResource(R.string.focusSessionEditorTarget)) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    } else {
+                        TargetRow(target = selectedTarget, onClick = { showTargetSheet = true })
                     }
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+
+                    TimeRow(
+                        label = stringResource(R.string.dialogTimeMachineStartTime),
+                        value = formatDateTime(startDateTime),
+                        icon = Icons.Filled.EditCalendar,
+                        onClick = { showStartPicker = true },
+                    )
+                    Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
+                    TimeRow(
+                        label = stringResource(R.string.dialogTimeMachineDuration),
+                        value = AppDateFormatUtils.formatMinutesCompact(durationMinutes),
+                        icon = Icons.Filled.Schedule,
+                        onClick = { showDurationPicker = true },
+                    )
+
+                    // The derived end is shown so a session that crosses midnight is unambiguous.
+                    Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
+                    Text(
+                        stringResource(
+                            R.string.dialogTimeMachineEnds,
+                            formatDateTime(endDateTime),
+                        ),
+                        fontSize = AppTheme.fsLabel,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-                TextButton(onClick = onDismiss) { Text(dismissLabel) }
-            }
-        },
-        confirmButton = {
-            NeoButton(onClick = {
-                val mode = selectedMode ?: return@NeoButton
-                onSave(mode, startDateTime, initialEndTime?.takeIf { timesUntouched } ?: endDateTime, selectedTarget)
-            }) { Text(stringResource(R.string.commonLabelSave)) }
-        },
-    )
-
-    if (showTargetSheet) {
-        TargetSelectorBottomSheet(
-            onDismissRequest = { showTargetSheet = false },
-            selected = selectedTarget,
-            onTargetSelected = { selectedTarget = it },
-        )
-    }
-
-    if (showStartPicker) {
-        val startTime = startDateTime.atZone(zone)
-        NeoDateTimePickerDialog(
-            initialDate = startDateTime,
-            initialHour = startTime.hour,
-            initialMinute = startTime.minute,
-            onConfirm = { date, hour, minute ->
-                startDateTime = date.atTime(hour, minute).atZone(zone).toInstant()
-                showStartPicker = false
             },
-            onDismiss = { showStartPicker = false },
+            dismissButton = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (onDelete != null) {
+                        TextButton(onClick = { showDeleteConfirmation = true }) {
+                            Text(stringResource(R.string.commonLabelDelete), color = ErrorColor)
+                        }
+                    }
+                    TextButton(onClick = onDismiss) { Text(dismissLabel) }
+                }
+            },
+            confirmButton = {
+                NeoButton(onClick = {
+                    val mode = selectedMode ?: return@NeoButton
+                    onSave(mode, startDateTime, initialEndTime?.takeIf { timesUntouched } ?: endDateTime, selectedTarget)
+                }) { Text(stringResource(R.string.commonLabelSave)) }
+            },
+        )
+
+        if (showTargetSheet) {
+            TargetSelectorBottomSheet(
+                onDismissRequest = { showTargetSheet = false },
+                selected = selectedTarget,
+                onTargetSelected = { selectedTarget = it },
+            )
+        }
+
+        if (showStartPicker) {
+            val startTime = startDateTime.atZone(zone)
+            NeoDateTimePickerDialog(
+                initialDate = startDateTime,
+                initialHour = startTime.hour,
+                initialMinute = startTime.minute,
+                onConfirm = { date, hour, minute ->
+                    startDateTime = date.atTime(hour, minute).atZone(zone).toInstant()
+                    showStartPicker = false
+                },
+                onDismiss = { showStartPicker = false },
+            )
+        }
+
+        if (showDurationPicker) {
+            NeoDurationPickerDialog(
+                initialMinutes = durationMinutes,
+                minMinutes = MIN_SESSION_MINUTES,
+                maxMinutes = MAX_SESSION_MINUTES,
+                title = { Text(stringResource(R.string.dialogTimeMachineDuration)) },
+                onConfirm = { durationMinutes = it; showDurationPicker = false },
+                onDismiss = { showDurationPicker = false },
+            )
+        }
+
+        ConfirmationDialog(
+            visible = showDeleteConfirmation,
+            title = stringResource(R.string.focusSessionDeleteTitle),
+            content = stringResource(R.string.focusSessionDeleteContent),
+            confirmLabel = stringResource(R.string.commonLabelDelete),
+            confirmColor = ErrorColor,
+            onConfirm = {
+                showDeleteConfirmation = false
+                onDelete?.invoke()
+            },
+            onDismiss = { showDeleteConfirmation = false },
         )
     }
-
-    if (showDurationPicker) {
-        NeoDurationPickerDialog(
-            initialMinutes = durationMinutes,
-            minMinutes = MIN_SESSION_MINUTES,
-            maxMinutes = MAX_SESSION_MINUTES,
-            title = { Text(stringResource(R.string.dialogTimeMachineDuration)) },
-            onConfirm = { durationMinutes = it; showDurationPicker = false },
-            onDismiss = { showDurationPicker = false },
-        )
-    }
-
-    ConfirmationDialog(
-        visible = showDeleteConfirmation,
-        title = stringResource(R.string.focusSessionDeleteTitle),
-        content = stringResource(R.string.focusSessionDeleteContent),
-        confirmLabel = stringResource(R.string.commonLabelDelete),
-        confirmColor = ErrorColor,
-        onConfirm = {
-            showDeleteConfirmation = false
-            onDelete?.invoke()
-        },
-        onDismiss = { showDeleteConfirmation = false },
-    )
 }
 
 /**

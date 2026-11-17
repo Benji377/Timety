@@ -42,6 +42,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
@@ -115,7 +116,22 @@ fun GoalsScreen(
             )
         },
     ) { paddingValues ->
-        LazyColumn(
+        // With no goals at all, the hint sits mid-screen like the other empty lists.
+        if (goals.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = AppTheme.spaceLarge),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    stringResource(R.string.goalsEmpty),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
@@ -144,7 +160,7 @@ fun GoalsScreen(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            stringResource(if (goals.isEmpty()) R.string.goalsEmpty else R.string.tagFilterNoMatch),
+                            stringResource(R.string.tagFilterNoMatch),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }

@@ -57,7 +57,6 @@ import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
-import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.ui.theme.hairlineBorder
@@ -204,7 +203,7 @@ private fun OverviewView(
                 text = if (mode.isSystem) stringResource(R.string.focusModeLabelTypeSystem) else stringResource(
                     R.string.focusModeLabelTypeCustom
                 ),
-                color = if (mode.isSystem) MaterialTheme.colorScheme.onSurfaceVariant else TaskColor,
+                color = if (mode.isSystem) MaterialTheme.colorScheme.onSurfaceVariant else FocusColor,
                 fontSize = AppTheme.fsBodySmall,
                 fontWeight = FontWeight.Medium,
             )
@@ -236,7 +235,7 @@ private fun OverviewView(
                     onClick = onEdit,
                     icon = Icons.Filled.Edit,
                     contentDescription = stringResource(R.string.focusModeLabelEdit),
-                    contentColor = TaskColor,
+                    contentColor = FocusColor,
                 )
                 Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                 NeoIconButton(
@@ -272,7 +271,7 @@ private fun EditorView(
             stringResource(R.string.focusModeLabelEditing),
             fontWeight = FontWeight.Bold,
             fontSize = AppTheme.fsBodyLarge,
-            color = TaskColor,
+            color = FocusColor,
         )
         NeoIconButton(
             onClick = onCancel,

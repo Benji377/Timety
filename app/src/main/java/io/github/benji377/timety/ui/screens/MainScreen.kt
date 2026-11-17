@@ -55,6 +55,7 @@ import io.github.benji377.timety.ui.screens.task.RecurringTaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTasksScreen
 import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.TaskListScreen
+import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -224,21 +225,27 @@ fun MainScreen(
                 )
             }
             composable(BottomNavItem.Focus.route) {
-                FocusScreen(
-                    onNavigateToModes = { navController.navigate(AppRoute.FOCUS_MODES.route) },
-                    onNavigateToHistory = { navController.navigate(AppRoute.FOCUS_HISTORY.route) },
-                    onNavigateToFocusSettings = { navController.navigate(SettingsPage.FOCUS.route) }
-                )
+                TypeColorScope(FocusColor) {
+                    FocusScreen(
+                        onNavigateToModes = { navController.navigate(AppRoute.FOCUS_MODES.route) },
+                        onNavigateToHistory = { navController.navigate(AppRoute.FOCUS_HISTORY.route) },
+                        onNavigateToFocusSettings = { navController.navigate(SettingsPage.FOCUS.route) }
+                    )
+                }
             }
             composable(AppRoute.FOCUS_HISTORY.route) {
-                FocusHistoryScreen(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(FocusColor) {
+                    FocusHistoryScreen(
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
             composable(AppRoute.FOCUS_MODES.route) {
-                FocusModesScreen(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(FocusColor) {
+                    FocusModesScreen(
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
             composable(BottomNavItem.Tasks.route) {
                 TaskListScreen(

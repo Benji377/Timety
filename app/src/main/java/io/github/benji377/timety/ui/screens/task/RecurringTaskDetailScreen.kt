@@ -157,9 +157,9 @@ fun RecurringTaskDetailScreen(
     var hasDueTime by rememberSaveable(formTask) { mutableStateOf(existingTask?.hasDueTime ?: false) }
     val due = dueDate?.let { Due(it, hasDueTime) }
     var unit by rememberSaveable(formTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
-    // Required, with no default: a new task starts empty so the cadence is always a deliberate choice.
+    // Starts at 1, the cadence most people want; still required, so clearing it blocks saving.
     var intervalText by rememberSaveable(formTask) {
-        mutableStateOf(existingTask?.interval?.toString() ?: "")
+        mutableStateOf((existingTask?.interval ?: 1).toString())
     }
     var intervalError by rememberSaveable(formTask) { mutableStateOf(false) }
     var dueError by rememberSaveable(formTask) { mutableStateOf(false) }

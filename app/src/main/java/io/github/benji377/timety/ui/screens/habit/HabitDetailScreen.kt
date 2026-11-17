@@ -292,7 +292,7 @@ fun HabitDetailScreen(
                 .padding(paddingValues)
                 .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall)
         ) {
-            // The basics: name, stack, tags, notes.
+            // The basics: name, tags, notes, then the stack, which fewer people use.
             item {
                 FormSectionHeader(stringResource(R.string.habitDetailSectionInfo), Icons.Outlined.Info, HabitColor)
             }
@@ -310,6 +310,30 @@ fun HabitDetailScreen(
                         .fillMaxWidth()
                         .focusRequester(rememberAutoFocus(isNewHabit)),
                 )
+            }
+
+            item {
+                TagPicker(
+                    selectedIds = pickedTagIds
+                        ?: habitTags[habitId].orEmpty().mapTo(LinkedHashSet()) { it.id },
+                    onSelectionChange = { pickedTagIds = it },
+                    isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
+                )
+                if (isEditing || notes.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        enabled = isEditing,
+                        label = { Text(stringResource(R.string.habitDetailLabelNotes)) },
+                        placeholder = { Text(stringResource(R.string.habitDetailLabelNotesHint)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
             // Habit stacking: name autocomplete. Position within the stack is set by dragging
@@ -352,30 +376,6 @@ fun HabitDetailScreen(
                             }
                         }
                     }
-                }
-            }
-
-            item {
-                TagPicker(
-                    selectedIds = pickedTagIds
-                        ?: habitTags[habitId].orEmpty().mapTo(LinkedHashSet()) { it.id },
-                    onSelectionChange = { pickedTagIds = it },
-                    isEditing = isEditing,
-                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
-                )
-                if (isEditing || notes.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                    NeoOutlinedTextField(
-                        value = notes,
-                        onValueChange = { notes = it },
-                        enabled = isEditing,
-                        label = { Text(stringResource(R.string.habitDetailLabelNotes)) },
-                        placeholder = { Text(stringResource(R.string.habitDetailLabelNotesHint)) },
-                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                        minLines = 3,
-                        maxLines = 6,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
                 }
             }
 
