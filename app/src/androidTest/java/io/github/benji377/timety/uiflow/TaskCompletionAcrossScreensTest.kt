@@ -93,7 +93,7 @@ class TaskCompletionAcrossScreensTest {
         // attach a focus session to it. This prompt exists only inside the toggle composable.
         compose.waitForIdle()
         compose.onNodeWithText(context.getString(R.string.taskFocusLogTitle)).assertIsDisplayed()
-        compose.onNodeWithText(context.getString(R.string.commonLabelCancel)).performClick()
+        compose.onNodeWithText(context.getString(R.string.taskFocusLogSkip)).performClick()
         compose.waitForIdle()
 
         compose.onNodeWithText(context.getString(R.string.navigationProfile)).performClick()
