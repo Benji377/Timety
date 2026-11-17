@@ -103,7 +103,6 @@
     <string name="focusLabelDefault">专注</string>
     <string name="focusLabelRest">休息</string>
     <string name="focusLabelSetTime">设置时间</string>
-    <string name="focusLabelStopwatch">秒表</string>
     <string name="focusMinutes">%1$d分钟 专注计时</string>
     <string name="focusModeDialogDeleteContent">您确定要删除此自定义模式吗？</string>
     <string name="focusModeDialogDeleteTitle">删除专注模式？</string>
@@ -175,6 +174,8 @@
     <string name="goalDetailLabelDescription">描述</string>
     <string name="goalDetailLabelDescriptionHint">这个目标对您意味着什么？</string>
     <string name="goalDetailLabelIcon">选择图标</string>
+    <string name="goalDetailSectionInfo">Goal Info</string>
+    <string name="goalDetailSectionTarget">Target</string>
     <string name="goalDetailLabelName">目标名称</string>
     <string name="goalDetailLabelNameHint">例如：骑行 500 公里，阅读 12 本书…</string>
     <string name="goalDetailLabelNameRequest">请输入名称</string>
@@ -215,6 +216,9 @@
         <item quantity="other">目标：每月 %d 天</item>
     </plurals>
     <string name="habitDetailLabelIcon">选择图标</string>
+    <string name="habitDetailSectionInfo">Habit Info</string>
+    <string name="detailSectionAppearance">Appearance</string>
+    <string name="detailLabelIcon">Icon</string>
     <string name="habitDetailLabelName">习惯名称</string>
     <string name="habitDetailLabelNameHint">例如：阅读 10 页，锻炼几分钟…</string>
     <string name="habitDetailLabelNameRequest">请输入名称</string>
@@ -269,9 +273,12 @@
     <string name="taskDeleteTitle">删除任务</string>
     <string name="taskFocusLogSnackbar">已关联专注记录</string>
     <string name="taskFocusLogTitle">记录专注时间</string>
+    <string name="taskFocusLogSkip">Skip</string>
+    <string name="taskCompletedSnackbar">Done: %1$s</string>
     <string name="taskDetailsLabelDescription">描述</string>
     <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">设置截止日期</string>
+    <string name="taskDetailsLabelDueDate">Due date</string>
     <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">工作量</string>
     <string name="taskDetailsLabelLocation">位置</string>
@@ -361,7 +368,7 @@
     <string name="calendarTooltipToday">回到今天</string>
     <string name="calendarWeekSummaryDescription">已完成任务：%1$d，习惯打卡：%2$d，专注时长：%3$s</string>
     <string name="calendarWeeklyReportTitle">每周报告</string>
-    <string name="statsLabelProductivity">生产力协同</string>
+    <string name="statsLabelProductivity">Focus and tasks</string>
     <string name="statsPageTime">时间</string>
     <string name="statsPeriodWeek">周</string>
     <string name="statsPeriodMonth">月</string>
@@ -690,6 +697,7 @@
     <string name="recurringTaskTitleView">定期任务</string>
     <string name="recurringTaskLabelNextDue">下次到期日</string>
     <string name="recurringTaskSnackbarDueRequired">请先设置下次到期日</string>
+    <string name="recurringTaskDueDayMismatch">Next due is a %1$s, which isn\'t one of the picked days. Later dates follow the picked days.</string>
     <string name="recurringTaskMonthlyOnDay">每月 %1$d 日</string>
     <string name="recurringTaskMonthlyOnNth">第 %1$s 个 %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">提前 %1$d 分钟</string>
@@ -762,7 +770,7 @@
     <string name="quickHabitSpecificDays">指定日期</string>
     <string name="quickHabitStartLabel">开始</string>
     <string name="quickHabitEndLabel">结束</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">删除快捷习惯</string>
     <string name="quickHabitDeleteContent">确定要删除 \"%1$s\" 吗？</string>
