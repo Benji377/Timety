@@ -109,7 +109,6 @@
     <string name="focusLabelDefault">Фокус</string>
     <string name="focusLabelRest">Отдых</string>
     <string name="focusLabelSetTime">Задать время</string>
-    <string name="focusLabelStopwatch">Секундомер</string>
     <string name="focusMinutes">%1$d мин фокуса</string>
     <string name="focusModeDialogDeleteContent">Вы уверены, что хотите удалить этот пользовательский режим?</string>
     <string name="focusModeDialogDeleteTitle">Удалить режим фокуса?</string>
@@ -190,6 +189,8 @@
     <string name="goalDetailLabelDescription">Описание</string>
     <string name="goalDetailLabelDescriptionHint">Почему эта цель важна?</string>
     <string name="goalDetailLabelIcon">Выберите значок</string>
+    <string name="goalDetailSectionInfo">Goal Info</string>
+    <string name="goalDetailSectionTarget">Target</string>
     <string name="goalDetailLabelName">Название цели</string>
     <string name="goalDetailLabelNameHint">Например, проехать 500 км, прочитать 12 книг…</string>
     <string name="goalDetailLabelNameRequest">Введите название</string>
@@ -236,6 +237,9 @@
         <item quantity="other">Цель: %d дня в месяц</item>
     </plurals>
     <string name="habitDetailLabelIcon">Выберите значок</string>
+    <string name="habitDetailSectionInfo">Habit Info</string>
+    <string name="detailSectionAppearance">Appearance</string>
+    <string name="detailLabelIcon">Icon</string>
     <string name="habitDetailLabelName">Название привычки</string>
     <string name="habitDetailLabelNameHint">Например, прочитать 10 страниц, тренировка…</string>
     <string name="habitDetailLabelNameRequest">Введите название</string>
@@ -293,9 +297,12 @@
     <string name="taskDeleteTitle">Удалить задачу</string>
     <string name="taskFocusLogSnackbar">Сессия фокуса прикреплена</string>
     <string name="taskFocusLogTitle">Записать время фокуса</string>
+    <string name="taskFocusLogSkip">Skip</string>
+    <string name="taskCompletedSnackbar">Done: %1$s</string>
     <string name="taskDetailsLabelDescription">Описание</string>
     <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Задать срок</string>
+    <string name="taskDetailsLabelDueDate">Due date</string>
     <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Объём</string>
     <string name="taskDetailsLabelLocation">Место</string>
@@ -385,7 +392,7 @@
     <string name="calendarTooltipToday">К сегодняшнему дню</string>
     <string name="calendarWeekSummaryDescription">Выполнено задач: %1$d, отметок привычек: %2$d, время фокуса: %3$s</string>
     <string name="calendarWeeklyReportTitle">Отчёт за неделю</string>
-    <string name="statsLabelProductivity">Синергия продуктивности</string>
+    <string name="statsLabelProductivity">Focus and tasks</string>
     <string name="statsPageTime">Время</string>
     <string name="statsPeriodWeek">Неделя</string>
     <string name="statsPeriodMonth">Месяц</string>
@@ -762,6 +769,7 @@
     <string name="recurringTaskTitleView">Повторяющаяся задача</string>
     <string name="recurringTaskLabelNextDue">Следующий срок</string>
     <string name="recurringTaskSnackbarDueRequired">Сначала задайте следующий срок</string>
+    <string name="recurringTaskDueDayMismatch">Next due is a %1$s, which isn\'t one of the picked days. Later dates follow the picked days.</string>
     <string name="recurringTaskMonthlyOnDay">%1$d-го числа</string>
     <string name="recurringTaskMonthlyOnNth">%2$s, %1$s неделя</string>
     <string name="recurringTaskReminderMinutesBefore">За %1$d мин</string>
@@ -852,7 +860,7 @@
     <string name="quickHabitSpecificDays">Определённые дни</string>
     <string name="quickHabitStartLabel">С</string>
     <string name="quickHabitEndLabel">До</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Удалить быструю привычку</string>
     <string name="quickHabitDeleteContent">Вы уверены, что хотите удалить «%1$s»?</string>
