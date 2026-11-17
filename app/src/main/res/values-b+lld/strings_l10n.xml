@@ -113,7 +113,6 @@
     <string name="focusLabelDefault">Focus</string>
     <string name="focusLabelRest">Pausa</string>
     <string name="focusLabelSetTime">Mët l tëmp</string>
-    <string name="focusLabelStopwatch">Cronometer</string>
     <string name="focusMinutes">%1$d min focus</string>
     <string name="focusModeDialogDeleteContent">T\'es segur de ulëi scancelé chësta modalità persunalisheda?</string>
     <string name="focusModeDialogDeleteTitle">Scancelé modalità focus?</string>
@@ -200,6 +199,8 @@
     <string name="goalDetailLabelDescription">Descrizion</string>
     <string name="goalDetailLabelDescriptionHint">Per ce ie chësc finamënt important?</string>
     <string name="goalDetailLabelIcon">Cëria ora n\'icona</string>
+    <string name="goalDetailSectionInfo">Goal Info</string>
+    <string name="goalDetailSectionTarget">Target</string>
     <string name="goalDetailLabelName">Inuem dl finamënt</string>
     <string name="goalDetailLabelNameHint">ej. 500 km cun la bici, Lejer 12 libri…</string>
     <string name="goalDetailLabelNameRequest">Nserësc n inuem</string>
@@ -250,6 +251,9 @@
         <item quantity="other">Travert: %d dis al mëns</item>
     </plurals>
     <string name="habitDetailLabelIcon">Cëria ora n\'icona</string>
+    <string name="habitDetailSectionInfo">Habit Info</string>
+    <string name="detailSectionAppearance">Appearance</string>
+    <string name="detailLabelIcon">Icon</string>
     <string name="habitDetailLabelName">Inuem abitudin</string>
     <string name="habitDetailLabelNameHint">ej. Lejer 10 plates, Allenamënt…</string>
     <string name="habitDetailLabelNameRequest">Nserësc n inuem</string>
@@ -309,9 +313,12 @@
     <string name="taskDeleteTitle">Scancelé ncëria</string>
     <string name="taskFocusLogSnackbar">Sescion de focus liejeda</string>
     <string name="taskFocusLogTitle">Registré tëmp de focus</string>
+    <string name="taskFocusLogSkip">Skip</string>
+    <string name="taskCompletedSnackbar">Done: %1$s</string>
     <string name="taskDetailsLabelDescription">Descrizion</string>
     <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Met data de scadenza</string>
+    <string name="taskDetailsLabelDueDate">Due date</string>
     <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Sforz</string>
     <string name="taskDetailsLabelLocation">Luelg</string>
@@ -401,7 +408,7 @@
     <string name="calendarTooltipToday">Va al Ncuei</string>
     <string name="calendarWeekSummaryDescription">Ncëries finedes: %1$d, abitudins fates: %2$d, tëmp de focus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Relazion dl\'ena</string>
-    <string name="statsLabelProductivity">Sinergia de produtività</string>
+    <string name="statsLabelProductivity">Focus and tasks</string>
     <string name="statsPageTime">Tëmp</string>
     <string name="statsPeriodWeek">Ena</string>
     <string name="statsPeriodMonth">Mëns</string>
@@ -810,6 +817,7 @@
     <string name="recurringTaskTitleView">Ncëria recurënta</string>
     <string name="recurringTaskLabelNextDue">Proscima scadënza</string>
     <string name="recurringTaskSnackbarDueRequired">Mët dant la proscima data de scadënza</string>
+    <string name="recurringTaskDueDayMismatch">Next due is a %1$s, which isn\'t one of the picked days. Later dates follow the picked days.</string>
     <string name="recurringTaskMonthlyOnDay">L di %1$d</string>
     <string name="recurringTaskMonthlyOnNth">L %1$s %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">%1$d min dant</string>
@@ -912,7 +920,7 @@
     <string name="quickHabitSpecificDays">Dis spezifics</string>
     <string name="quickHabitStartLabel">Da</string>
     <string name="quickHabitEndLabel">Fin a</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Scancelé abitudin svelta</string>
     <string name="quickHabitDeleteContent">T\'es segur de ulëi scancelé \"%1$s\"?</string>
