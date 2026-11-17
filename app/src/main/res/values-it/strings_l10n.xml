@@ -732,6 +732,20 @@
     <string name="reminderSheetNoDue">Questa attività non ha ancora una scadenza</string>
     <string name="reminderWarnLimit">Puoi aggiungere fino a %1$d promemoria.</string>
     <string name="reminderWarnNoDue">Imposta una scadenza per usare queste opzioni. Gli orari personalizzati funzionano comunque.</string>
+    <string name="recurringTaskWindowLabel">Task window</string>
+    <string name="recurringTaskWindowHint">How early this task shows up in your lists</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="one">Default (%d day before)</item>
+        <item quantity="other">Default (%d days before)</item>
+    </plurals>
+    <string name="recurringTaskWindowDefaultHint">Change the default in Settings › Tasks</string>
+    <string name="recurringTaskWindowCustom">Custom</string>
+    <string name="recurringTaskWindowAmount">Before due</string>
+    <string name="recurringTaskWindowRequest">Enter %1$d to %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">On the due day</string>
+    <string name="recurringTaskWindowHours">Hours</string>
+    <string name="recurringTaskWindowDays">Days</string>
+    <string name="recurringTaskWindowWeeks">Weeks</string>
     <string name="recurringTaskCompleteNow">Completa ora</string>
     <string name="recurringTaskHistoryTitle">Storico</string>
     <string name="recurringTaskHistoryEmpty">Ancora nessun completamento.</string>
