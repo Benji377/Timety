@@ -21,13 +21,15 @@ enum class RecurrenceUnit {
 }
 
 /**
- * The unit of a recurring task's own task window, with the largest amount it accepts. DAY and WEEK
- * count calendar days; HOUR counts from the due time and needs one.
+ * The unit of a recurring task's own task window, with the amounts it accepts. DAY and WEEK count
+ * calendar days (0 days = only on the due day); HOUR counts from the due time and needs one.
  */
-enum class TaskWindowUnit(val maxAmount: Int) {
-    HOUR(48),
-    DAY(60),
-    WEEK(26)
+enum class TaskWindowUnit(val minAmount: Int, val maxAmount: Int) {
+    HOUR(1, 48),
+    DAY(0, 60),
+    WEEK(1, 26);
+
+    val amounts: IntRange get() = minAmount..maxAmount
 }
 
 /** How a MONTH-unit recurrence anchors inside the month. */

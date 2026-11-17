@@ -741,7 +741,8 @@
     <string name="recurringTaskWindowDefaultHint">Change the default in Settings › Tasks</string>
     <string name="recurringTaskWindowCustom">Custom</string>
     <string name="recurringTaskWindowAmount">Before due</string>
-    <string name="recurringTaskWindowRequest">Enter 1 to %1$d</string>
+    <string name="recurringTaskWindowRequest">Enter %1$d to %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">On the due day</string>
     <string name="recurringTaskWindowHours">Hours</string>
     <string name="recurringTaskWindowDays">Days</string>
     <string name="recurringTaskWindowWeeks">Weeks</string>

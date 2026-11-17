@@ -211,6 +211,20 @@ class RecurrenceUtilsTest {
     }
 
     @Test
+    fun statusOf_zeroDayWindow_showsOnlyOnTheDueDay() {
+        val t = task(at(2026, 7, 10, 18), RecurrenceUnit.WEEK)
+            .copy(windowAmount = 0, windowUnit = TaskWindowUnit.DAY)
+        assertEquals(
+            RecurringStatus.SCHEDULED,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 23), horizonDays = 7, zone = zone)
+        )
+        assertEquals(
+            RecurringStatus.DUE_TODAY,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 10, 0), horizonDays = 7, zone = zone)
+        )
+    }
+
+    @Test
     fun statusOf_customWeekWindow_opensBeyondHorizon() {
         val t = task(at(2026, 7, 30), RecurrenceUnit.MONTH)
             .copy(windowAmount = 3, windowUnit = TaskWindowUnit.WEEK)

@@ -214,7 +214,7 @@ fun RecurringTaskDetailScreen(
         // Flagged up front so the field shows its error even when another check stops the save.
         val interval = intervalText.toIntOrNull()?.takeIf { it >= 1 }
         intervalError = interval == null
-        val windowAmount = windowUnit?.let { unit -> windowAmountText.toIntOrNull()?.takeIf { it in 1..unit.maxAmount } }
+        val windowAmount = windowUnit?.let { unit -> windowAmountText.toIntOrNull()?.takeIf { it in unit.amounts } }
         windowError = windowUnit != null && windowAmount == null
         val trimmedTitle = title.trim()
         if (trimmedTitle.isEmpty()) {
@@ -722,10 +722,14 @@ private fun TaskWindowSection(
                 label = { Text(stringResource(R.string.recurringTaskWindowAmount)) },
                 isError = isError,
                 supportingText = {
-                    if (isError) Text(
-                        stringResource(R.string.recurringTaskWindowRequest, unit.maxAmount),
-                        color = ErrorColor
-                    )
+                    when {
+                        isError -> Text(
+                            stringResource(R.string.recurringTaskWindowRequest, unit.minAmount, unit.maxAmount),
+                            color = ErrorColor
+                        )
+                        unit == TaskWindowUnit.DAY && amountText == "0" ->
+                            Text(stringResource(R.string.recurringTaskWindowDueDayOnly))
+                    }
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.width(120.dp),

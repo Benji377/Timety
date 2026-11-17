@@ -98,7 +98,7 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
     // Kept only as a valid pair; anything else falls back to the global window.
     val windowUnit = json.stringOrNull("windowUnit")
         ?.let { name -> TaskWindowUnit.entries.firstOrNull { it.name == name } }
-    val windowAmount = windowUnit?.let { unit -> json.intOrNull("windowAmount")?.takeIf { it in 1..unit.maxAmount } }
+    val windowAmount = windowUnit?.let { unit -> json.intOrNull("windowAmount")?.takeIf { it in unit.amounts } }
     val task = RecurringTaskEntity(
         id = id,
         title = json.stringOrNull("title") ?: "",
