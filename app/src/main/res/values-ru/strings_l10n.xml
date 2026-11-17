@@ -782,6 +782,22 @@
     <string name="reminderSheetNoDue">У этой задачи пока нет срока</string>
     <string name="reminderWarnLimit">Можно добавить не больше %1$d напоминаний.</string>
     <string name="reminderWarnNoDue">Задайте срок, чтобы использовать эти варианты. Своё время работает и без него.</string>
+    <string name="recurringTaskWindowLabel">Task window</string>
+    <string name="recurringTaskWindowHint">How early this task shows up in your lists</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="one">Default (%d day before)</item>
+        <item quantity="few">Default (%d days before)</item>
+        <item quantity="many">Default (%d days before)</item>
+        <item quantity="other">Default (%d days before)</item>
+    </plurals>
+    <string name="recurringTaskWindowDefaultHint">Change the default in Settings › Tasks</string>
+    <string name="recurringTaskWindowCustom">Custom</string>
+    <string name="recurringTaskWindowAmount">Before due</string>
+    <string name="recurringTaskWindowRequest">Enter %1$d to %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">On the due day</string>
+    <string name="recurringTaskWindowHours">Hours</string>
+    <string name="recurringTaskWindowDays">Days</string>
+    <string name="recurringTaskWindowWeeks">Weeks</string>
     <string name="recurringTaskCompleteNow">Выполнить сейчас</string>
     <string name="recurringTaskHistoryTitle">История</string>
     <string name="recurringTaskHistoryEmpty">Выполнений пока нет.</string>
