@@ -3,9 +3,11 @@ package io.github.benji377.timety.util.task
 import io.github.benji377.timety.data.model.task.MonthlyMode
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
+import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -16,7 +18,7 @@ import java.time.temporal.TemporalAdjusters
 
 /**
  * How a recurring task's next occurrence relates to now: actionable states first, then
- * [SCHEDULED] for anything beyond the upcoming horizon (not yet worth surfacing or completing).
+ * [SCHEDULED] while its task window is still closed (not yet worth surfacing or completing).
  */
 enum class RecurringStatus {
     OVERDUE,
@@ -29,8 +31,9 @@ enum class RecurringStatus {
 object RecurrenceUtils {
     /**
      * Buckets [task]'s next due date against [now]: past its deadline = [RecurringStatus.OVERDUE],
-     * later today = [RecurringStatus.DUE_TODAY], within [horizonDays] = [RecurringStatus.UPCOMING],
-     * beyond = [RecurringStatus.SCHEDULED].
+     * window still closed = [RecurringStatus.SCHEDULED], later today = [RecurringStatus.DUE_TODAY],
+     * otherwise [RecurringStatus.UPCOMING]. [horizonDays] is the global window, used unless the
+     * task has its own.
      */
     fun statusOf(
         task: RecurringTaskEntity,
@@ -42,10 +45,34 @@ object RecurrenceUtils {
         val dueDay = task.dueDate.atZone(zone).toLocalDate()
         return when {
             task.due.isOverdue(now, zone) -> RecurringStatus.OVERDUE
+            !isWindowOpen(task, now, horizonDays, zone) -> RecurringStatus.SCHEDULED
             dueDay == today -> RecurringStatus.DUE_TODAY
-            !dueDay.isAfter(today.plusDays(horizonDays.toLong())) -> RecurringStatus.UPCOMING
-            else -> RecurringStatus.SCHEDULED
+            else -> RecurringStatus.UPCOMING
         }
+    }
+
+    /**
+     * Whether [task] has entered its task window at [now]. Day-based windows open at the start of
+     * the day, so a task is always open on its due day; an hour window counts from the due time.
+     */
+    private fun isWindowOpen(
+        task: RecurringTaskEntity,
+        now: Instant,
+        horizonDays: Int,
+        zone: ZoneId = ZoneId.systemDefault(),
+    ): Boolean {
+        val amount = task.windowAmount?.toLong()
+        val windowDays = when {
+            amount == null -> horizonDays.toLong()
+            task.windowUnit == TaskWindowUnit.HOUR && task.hasDueTime ->
+                return !now.isBefore(task.dueDate.minus(Duration.ofHours(amount)))
+            task.windowUnit == TaskWindowUnit.DAY -> amount
+            task.windowUnit == TaskWindowUnit.WEEK -> amount * DAYS_PER_WEEK
+            // No unit, or hours on a date-only task: the global window.
+            else -> horizonDays.toLong()
+        }
+        val today = now.atZone(zone).toLocalDate()
+        return !task.dueDate.atZone(zone).toLocalDate().isAfter(today.plusDays(windowDays))
     }
 
     /**
@@ -177,4 +204,5 @@ object RecurrenceUtils {
         date.plusWeeks(1).month != date.month
 
     private const val MAX_STEPS = 100_000
+    private const val DAYS_PER_WEEK = 7L
 }

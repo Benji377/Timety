@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,6 +55,7 @@ import io.github.benji377.timety.data.model.task.MonthlyMode
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
+import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
@@ -83,6 +85,7 @@ import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -106,7 +109,7 @@ private enum class RecurringPickerTarget { DUE_DATE, DUE_TIME, PAST_OCCURRENCE }
 
 /**
  * Creates, views, or edits a recurring task: title, description, next due date, the recurrence
- * rule (unit, interval, weekdays or monthly anchoring), and reminder offsets. In view mode it
+ * rule (unit, interval, weekdays or monthly anchoring), reminder offsets, and the task window. In view mode it
  * additionally shows a habit-style completion history with manual backfill.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -116,12 +119,14 @@ fun RecurringTaskDetailScreen(
     onNavigateBack: () -> Unit,
     viewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     tagViewModel: TagViewModel = activityScopedViewModel(),
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val existingState = remember(recurringTaskId) {
         recurringTaskId?.let { viewModel.observeTask(it) } ?: flowOf(null)
     }.collectAsState(initial = null)
     val existing = existingState.value
     val recurringTags by tagViewModel.recurringTaskTags.collectAsState()
+    val defaultWindowDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val existingTask = existing?.task
     val isNew = recurringTaskId == null
     val zone = ZoneId.systemDefault()
@@ -164,6 +169,13 @@ fun RecurringTaskDetailScreen(
         mutableStateOf(existingTask?.reminderOffsetsMinutes ?: emptyList())
     }
 
+    // Null = the global upcoming task window.
+    var windowUnit by rememberSaveable(formTask) { mutableStateOf(existingTask?.windowUnit) }
+    var windowAmountText by rememberSaveable(formTask) {
+        mutableStateOf(existingTask?.windowAmount?.toString() ?: "")
+    }
+    var windowError by rememberSaveable(formTask) { mutableStateOf(false) }
+
     var showDeleteConfirm by remember { mutableStateOf(false) }
     // A non-null target keeps its picker dialog open.
     var pickerTarget by remember { mutableStateOf<RecurringPickerTarget?>(null) }
@@ -176,6 +188,13 @@ fun RecurringTaskDetailScreen(
         if (timeMinutes == null) {
             reminderOffsets = reminderOffsets.filter { minutes ->
                 ReminderPreset.entries.none { it.minutes == minutes && !it.isWholeDays }
+            }
+            // Hours need a due time, so round them up to whole days.
+            if (windowUnit == TaskWindowUnit.HOUR) {
+                windowUnit = TaskWindowUnit.DAY
+                windowAmountText = windowAmountText.toIntOrNull()
+                    ?.let { ((it + HOURS_PER_DAY - 1) / HOURS_PER_DAY).coerceIn(1, TaskWindowUnit.DAY.maxAmount) }
+                    ?.toString() ?: ""
             }
         }
     }
@@ -195,6 +214,8 @@ fun RecurringTaskDetailScreen(
         // Flagged up front so the field shows its error even when another check stops the save.
         val interval = intervalText.toIntOrNull()?.takeIf { it >= 1 }
         intervalError = interval == null
+        val windowAmount = windowUnit?.let { unit -> windowAmountText.toIntOrNull()?.takeIf { it in unit.amounts } }
+        windowError = windowUnit != null && windowAmount == null
         val trimmedTitle = title.trim()
         if (trimmedTitle.isEmpty()) {
             scope.launch { snackbarHostState.showSnackbar(titleRequiredMsg) }
@@ -206,7 +227,7 @@ fun RecurringTaskDetailScreen(
             scope.launch { snackbarHostState.showSnackbar(dueRequiredMsg) }
             return
         }
-        if (interval == null) return
+        if (interval == null || windowError) return
         val effectiveChoice = when {
             monthlyChoice == MonthlyChoice.LAST_WEEKDAY && lastAvailable -> MonthlyChoice.LAST_WEEKDAY
             monthlyChoice == MonthlyChoice.NTH_WEEKDAY && nthOrdinal != null -> MonthlyChoice.NTH_WEEKDAY
@@ -249,6 +270,8 @@ fun RecurringTaskDetailScreen(
                 dueLocal.dayOfWeek.value
             } else null,
             reminderOffsetsMinutes = reminderOffsets,
+            windowAmount = windowAmount,
+            windowUnit = windowUnit,
             createdAt = existingTask?.createdAt ?: Instant.now(),
         )
         if (isNew) {
@@ -479,6 +502,31 @@ fun RecurringTaskDetailScreen(
                 Spacer(Modifier.height(AppTheme.spaceLarge))
             }
 
+            // When the task starts showing in lists.
+            item {
+                TaskWindowSection(
+                    unit = windowUnit,
+                    amountText = windowAmountText,
+                    isError = windowError,
+                    defaultDays = defaultWindowDays,
+                    hasDueTime = hasDueTime,
+                    isEditing = isEditing,
+                    onUnitChange = { new ->
+                        // Custom starts from the global value so it's valid right away.
+                        if (windowUnit == null && new != null && windowAmountText.isEmpty()) {
+                            windowAmountText = defaultWindowDays.toString()
+                        }
+                        windowUnit = new
+                        windowError = false
+                    },
+                    onAmountChange = {
+                        windowAmountText = it
+                        windowError = false
+                    },
+                )
+                Spacer(Modifier.height(AppTheme.spaceLarge))
+            }
+
             // Completion history: view mode only, like a habit's past-occurrence log.
             if (!isNew && !isEditing && existing != null) {
                 item {
@@ -609,6 +657,98 @@ fun RecurringTaskDetailScreen(
 }
 
 private const val DEFAULT_PICKER_HOUR = 12
+private const val HOURS_PER_DAY = 24
+
+/**
+ * Picks the task window: the global default, or a custom amount of hours, days or weeks before
+ * the due date. Hours are offered only when the task has a due time.
+ */
+@Composable
+private fun TaskWindowSection(
+    unit: TaskWindowUnit?,
+    amountText: String,
+    isError: Boolean,
+    defaultDays: Int,
+    hasDueTime: Boolean,
+    isEditing: Boolean,
+    onUnitChange: (TaskWindowUnit?) -> Unit,
+    onAmountChange: (String) -> Unit,
+) {
+    Text(stringResource(R.string.recurringTaskWindowLabel), fontWeight = AppTheme.fwBold)
+    Text(
+        stringResource(R.string.recurringTaskWindowHint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(AppTheme.spaceSmall))
+    MonthlyChoiceOption(
+        label = pluralStringResource(R.plurals.recurringTaskWindowDefault, defaultDays, defaultDays),
+        selected = unit == null,
+        enabled = isEditing,
+        onSelect = { onUnitChange(null) },
+    )
+    if (isEditing && unit == null) {
+        Text(
+            stringResource(R.string.recurringTaskWindowDefaultHint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = RADIO_LABEL_INSET),
+        )
+    }
+    MonthlyChoiceOption(
+        label = stringResource(R.string.recurringTaskWindowCustom),
+        selected = unit != null,
+        enabled = isEditing,
+        onSelect = { if (unit == null) onUnitChange(TaskWindowUnit.DAY) },
+    )
+    if (unit != null) {
+        val units = if (hasDueTime) TaskWindowUnit.entries else TaskWindowUnit.entries - TaskWindowUnit.HOUR
+        val unitLabels = mapOf(
+            TaskWindowUnit.HOUR to stringResource(R.string.recurringTaskWindowHours),
+            TaskWindowUnit.DAY to stringResource(R.string.recurringTaskWindowDays),
+            TaskWindowUnit.WEEK to stringResource(R.string.recurringTaskWindowWeeks),
+        )
+        Spacer(Modifier.height(AppTheme.spaceSmall))
+        Row(
+            modifier = Modifier.padding(start = RADIO_LABEL_INSET),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium),
+        ) {
+            NeoOutlinedTextField(
+                value = amountText,
+                onValueChange = { new -> if (new.length <= 2 && new.all(Char::isDigit)) onAmountChange(new) },
+                enabled = isEditing,
+                singleLine = true,
+                label = { Text(stringResource(R.string.recurringTaskWindowAmount)) },
+                isError = isError,
+                supportingText = {
+                    when {
+                        isError -> Text(
+                            stringResource(R.string.recurringTaskWindowRequest, unit.minAmount, unit.maxAmount),
+                            color = ErrorColor
+                        )
+                        unit == TaskWindowUnit.DAY && amountText == "0" ->
+                            Text(stringResource(R.string.recurringTaskWindowDueDayOnly))
+                    }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.width(120.dp),
+            )
+            NeoSegmentedSelector(
+                values = units,
+                selectedValue = unit,
+                isEditing = isEditing,
+                onSelected = { onUnitChange(it) },
+                labelBuilder = { unitLabels.getValue(it) },
+                activeBgColor = TaskColor,
+                modifier = Modifier.weight(1f).padding(top = AppTheme.spaceSmall),
+            )
+        }
+    }
+}
+
+/** Lines helper text up with a radio option's label. */
+private val RADIO_LABEL_INSET = 48.dp
 
 @Composable
 private fun MonthlyChoiceOption(
