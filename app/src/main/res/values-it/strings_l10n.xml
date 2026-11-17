@@ -105,7 +105,6 @@
     <string name="focusLabelDefault">Focus</string>
     <string name="focusLabelRest">Pausa</string>
     <string name="focusLabelSetTime">Imposta tempo</string>
-    <string name="focusLabelStopwatch">Cronometro</string>
     <string name="focusMinutes">%1$d min di focus</string>
     <string name="focusModeDialogDeleteContent">Sei sicuro di voler eliminare questa modalità personalizzata?</string>
     <string name="focusModeDialogDeleteTitle">Eliminare la modalità di focus?</string>
@@ -180,6 +179,8 @@
     <string name="goalDetailLabelDescription">Descrizione</string>
     <string name="goalDetailLabelDescriptionHint">Perché questo obiettivo conta?</string>
     <string name="goalDetailLabelIcon">Seleziona un\'icona</string>
+    <string name="goalDetailSectionInfo">Goal Info</string>
+    <string name="goalDetailSectionTarget">Target</string>
     <string name="goalDetailLabelName">Nome obiettivo</string>
     <string name="goalDetailLabelNameHint">es., Pedalare 500 km, Leggere 12 libri…</string>
     <string name="goalDetailLabelNameRequest">Inserisci un nome</string>
@@ -222,6 +223,9 @@
         <item quantity="other">Obiettivo: %d giorni al mese</item>
     </plurals>
     <string name="habitDetailLabelIcon">Seleziona un\'icona</string>
+    <string name="habitDetailSectionInfo">Habit Info</string>
+    <string name="detailSectionAppearance">Appearance</string>
+    <string name="detailLabelIcon">Icon</string>
     <string name="habitDetailLabelName">Nome dell\'abitudine</string>
     <string name="habitDetailLabelNameHint">es., Leggere 10 pagine, Allenamento…</string>
     <string name="habitDetailLabelNameRequest">Inserisci un nome</string>
@@ -277,9 +281,12 @@
     <string name="taskDeleteTitle">Elimina attività</string>
     <string name="taskFocusLogSnackbar">Sessione di focus collegata</string>
     <string name="taskFocusLogTitle">Registra tempo di focus</string>
+    <string name="taskFocusLogSkip">Skip</string>
+    <string name="taskCompletedSnackbar">Done: %1$s</string>
     <string name="taskDetailsLabelDescription">Descrizione</string>
     <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Imposta data di scadenza</string>
+    <string name="taskDetailsLabelDueDate">Due date</string>
     <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Sforzo</string>
     <string name="taskDetailsLabelLocation">Luogo</string>
@@ -369,7 +376,7 @@
     <string name="calendarTooltipToday">Vai a Oggi</string>
     <string name="calendarWeekSummaryDescription">Attività completate: %1$d, abitudini completate: %2$d, tempo di focus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Resoconto settimanale</string>
-    <string name="statsLabelProductivity">Sinergia di produttività</string>
+    <string name="statsLabelProductivity">Focus and tasks</string>
     <string name="statsPageTime">Tempo</string>
     <string name="statsPeriodWeek">Settimana</string>
     <string name="statsPeriodMonth">Mese</string>
@@ -714,6 +721,7 @@
     <string name="recurringTaskTitleView">Attività ricorrente</string>
     <string name="recurringTaskLabelNextDue">Scadenza successiva</string>
     <string name="recurringTaskSnackbarDueRequired">Imposta prima la prossima data di scadenza</string>
+    <string name="recurringTaskDueDayMismatch">Next due is a %1$s, which isn\'t one of the picked days. Later dates follow the picked days.</string>
     <string name="recurringTaskMonthlyOnDay">Il giorno %1$d</string>
     <string name="recurringTaskMonthlyOnNth">Sulla %1$s %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">%1$d min prima</string>
@@ -792,7 +800,7 @@
     <string name="quickHabitSpecificDays">Giorni specifici</string>
     <string name="quickHabitStartLabel">Da</string>
     <string name="quickHabitEndLabel">A</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Elimina abitudine rapida</string>
     <string name="quickHabitDeleteContent">Sei sicuro di voler eliminare \"%1$s\"?</string>
