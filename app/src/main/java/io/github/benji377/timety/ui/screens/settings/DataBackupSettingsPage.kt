@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,6 +36,8 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.TimetyApplication
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
@@ -167,7 +168,7 @@ internal fun DataBackupSettings(
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { showExportOptions = false }) {
+                NeoTextButton(onClick = { showExportOptions = false }) {
                     Text(stringResource(R.string.commonLabelCancel))
                 }
             }
@@ -187,7 +188,7 @@ internal fun DataBackupSettings(
             },
             text = { Text(failure.message) },
             confirmButton = {
-                TextButton(onClick = { settingsViewModel.consumeRestoreOutcome() }) {
+                NeoButton(onClick = { settingsViewModel.consumeRestoreOutcome() }) {
                     Text(stringResource(R.string.commonButtonGotIt))
                 }
             }
@@ -201,7 +202,7 @@ internal fun DataBackupSettings(
             title = { Text(stringResource(R.string.backupRestoreSuccessTitle)) },
             text = { Text(stringResource(R.string.backupRestoreSuccessBody)) },
             confirmButton = {
-                TextButton(onClick = { settingsViewModel.consumeRestoreOutcome() }) {
+                NeoButton(onClick = { settingsViewModel.consumeRestoreOutcome() }) {
                     Text(stringResource(R.string.commonButtonGotIt))
                 }
             }

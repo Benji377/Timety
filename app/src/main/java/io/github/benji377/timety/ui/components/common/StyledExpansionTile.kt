@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.benji377.timety.ui.theme.forText
 
 /**
  * Collapsible tile with a plain-text title; tapping the header toggles [content]'s visibility.
@@ -62,7 +63,7 @@ fun StyledExpansionTile(
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    color = titleColor
+                    color = titleColor.forText()
                 )
             )
             Icon(

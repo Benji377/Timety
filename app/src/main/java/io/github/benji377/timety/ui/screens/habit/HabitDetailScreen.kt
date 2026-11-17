@@ -1,21 +1,19 @@
 package io.github.benji377.timety.ui.screens.habit
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Stars
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -24,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -39,7 +38,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -49,42 +47,42 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.ui.components.common.AppearanceFields
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.FieldLabel
+import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
-import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
-import io.github.benji377.timety.ui.components.habit.HabitTodayCard
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.PickerField
-import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.components.common.TagPicker
+import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
+import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
+import io.github.benji377.timety.ui.components.habit.HabitTodayCard
 import io.github.benji377.timety.ui.components.task.ReminderEntry
 import io.github.benji377.timety.ui.components.task.ReminderField
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.PickerPalette
-import io.github.benji377.timety.ui.theme.hairlineBorder
 import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
-import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.util.habit.HabitUtils
-import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
@@ -294,7 +292,10 @@ fun HabitDetailScreen(
                 .padding(paddingValues)
                 .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall)
         ) {
-            // Habit name.
+            // The basics: name, tags, notes, then the stack, which fewer people use.
+            item {
+                FormSectionHeader(stringResource(R.string.habitDetailSectionInfo), Icons.Outlined.Info, HabitColor)
+            }
             item {
                 NeoOutlinedTextField(
                     value = name,
@@ -303,30 +304,49 @@ fun HabitDetailScreen(
                     label = { Text(stringResource(R.string.habitDetailLabelName) + " *") },
                     placeholder = { Text(stringResource(R.string.habitDetailLabelNameHint)) },
                     leadingIcon = { Icon(Icons.Filled.Stars, null, tint = selectedColor) },
-                    isError = nameError,
-                    supportingText = {
-                        if (nameError) Text(
-                            stringResource(R.string.habitDetailLabelNameRequest),
-                            color = ErrorColor
-                        )
-                    },
+                    textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = AppTheme.fwBold),
+                    errorText = if (nameError) stringResource(R.string.habitDetailLabelNameRequest) else null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(rememberAutoFocus(isNewHabit)),
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+            }
+
+            item {
+                TagPicker(
+                    selectedIds = pickedTagIds
+                        ?: habitTags[habitId].orEmpty().mapTo(LinkedHashSet()) { it.id },
+                    onSelectionChange = { pickedTagIds = it },
+                    isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
+                )
+                if (isEditing || notes.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        enabled = isEditing,
+                        label = { Text(stringResource(R.string.habitDetailLabelNotes)) },
+                        placeholder = { Text(stringResource(R.string.habitDetailLabelNotesHint)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
             // Habit stacking: name autocomplete. Position within the stack is set by dragging
-            // in the habit list, not entered here.
-            item {
+            // in the habit list, not entered here. View mode hides empty optional fields.
+            if (isEditing || stackName.isNotBlank()) item {
+                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 ExposedDropdownMenuBox(
                     expanded = stackNameExpanded && isEditing && filteredStacks.isNotEmpty(),
                     onExpandedChange = { if (isEditing) stackNameExpanded = it },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     NeoOutlinedTextField(
-                        value = if (isEditing) stackName else stackName.ifBlank { "-" },
+                        value = stackName,
                         onValueChange = {
                             stackName = it
                             stackNameExpanded = true
@@ -357,87 +377,32 @@ fun HabitDetailScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
             item {
-                TagPicker(
-                    selectedIds = pickedTagIds
-                        ?: habitTags[habitId].orEmpty().mapTo(LinkedHashSet()) { it.id },
-                    onSelectionChange = { pickedTagIds = it },
-                    isEditing = isEditing,
-                )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                FormSectionHeader(stringResource(R.string.detailSectionAppearance), Icons.Filled.Palette, HabitColor)
             }
-
-            // Appearance: icon and color.
             item {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    PickerField(
-                        label = stringResource(R.string.habitDetailLabelIcon),
-                        enabled = isEditing,
-                        onClick = { showIconPicker = true },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        // Bordered-circle treatment matching the habit icon on the Habits list
-                        // tile's completion toggle, instead of a plain floating glyph.
-                        Box(
-                            modifier = Modifier
-                                .size(AppTheme.neoIconButtonSize)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .hairlineBorder(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                imageVector = HabitIcons.iconAt(selectedIconIndex),
-                                contentDescription = null,
-                                tint = selectedColor,
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
-                    PickerField(
-                        label = stringResource(R.string.habitDetailLabelColor),
-                        enabled = isEditing,
-                        onClick = { showColorPicker = true },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(AppTheme.neoIconButtonSize)
-                                .clip(CircleShape)
-                                .background(selectedColor)
-                                .hairlineBorder()
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-            }
-
-            // Notes.
-            item {
-                NeoOutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
+                AppearanceFields(
+                    iconIndex = selectedIconIndex,
+                    color = selectedColor,
+                    colorLabel = stringResource(R.string.habitDetailLabelColor),
                     enabled = isEditing,
-                    label = { Text(stringResource(R.string.habitDetailLabelNotes)) },
-                    placeholder = { Text(stringResource(R.string.habitDetailLabelNotesHint)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                    minLines = 3,
-                    maxLines = 6,
-                    modifier = Modifier.fillMaxWidth(),
+                    onPickIcon = { showIconPicker = true },
+                    onPickColor = { showColorPicker = true },
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // Frequency.
+            // Frequency and reminders.
             item {
-                Text(
-                    stringResource(R.string.habitDetailLabelFrequency),
-                    fontWeight = AppTheme.fwBold
+                FormSectionHeader(
+                    stringResource(R.string.taskDetailsSectionScheduling),
+                    Icons.Filled.CalendarToday,
+                    HabitColor,
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
+            }
+            item {
+                FieldLabel(stringResource(R.string.habitDetailLabelFrequency))
                 val frequencyLabels = mapOf(
                     HabitFrequency.DAILY to stringResource(R.string.habitDetailLabelFrequencyDaily),
                     HabitFrequency.WEEKLY_FLEXIBLE to stringResource(R.string.habitDetailLabelFrequencyFlexible),
@@ -456,9 +421,10 @@ fun HabitDetailScreen(
                     labelBuilder = { frequencyLabels.getValue(it) },
                     activeBgColor = selectedColor,
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
 
+                // Each block below brings its own top gap, so hidden ones leave no space behind.
                 if (frequency.isFlexible) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                     val isMonthly = frequency == HabitFrequency.MONTHLY_FLEXIBLE
                     val maxTarget = if (isMonthly) HabitUtils.MAX_TARGET_PER_MONTH else HabitUtils.MAX_TARGET_PER_WEEK
                     NeoCard(
@@ -499,18 +465,12 @@ fun HabitDetailScreen(
                                 // Steps count the stops between the ends: one per whole value.
                                 steps = maxTarget - 2,
                                 enabled = isEditing,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = selectedColor,
-                                    activeTrackColor = selectedColor,
-                                    // The slider position IS the value: keep it readable in view
-                                    // mode; the muted card chrome already signals inactive.
-                                    disabledThumbColor = selectedColor,
-                                    disabledActiveTrackColor = selectedColor,
-                                ),
+                                colors = habitSliderColors(selectedColor),
                             )
                         }
                     }
                 } else if (frequency == HabitFrequency.WEEKLY_EXACT) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                     WeekdayToggleRow(
                         selected = selectedWeekdays,
                         onToggle = { day ->
@@ -522,10 +482,9 @@ fun HabitDetailScreen(
                         selectedColor = selectedColor,
                     )
                 }
-                if (frequency.allowsTimesPerDay) {
-                    if (frequency == HabitFrequency.WEEKLY_EXACT) {
-                        Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                    }
+                // Once a day is the default, so view mode only shows the card when it says more.
+                if (frequency.allowsTimesPerDay && (isEditing || timesPerDay > 1)) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                     TimesPerDayCard(
                         timesPerDay = timesPerDay,
                         onChange = { timesPerDay = it },
@@ -543,11 +502,12 @@ fun HabitDetailScreen(
                         onOpenHistory = { showHistory = true },
                     )
                 }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
             // Time reminders; monthly habits have no due days to remind on.
             if (frequency != HabitFrequency.MONTHLY_FLEXIBLE) item {
+                // The reminder field hides itself in view mode when there are none.
+                if (isEditing || reminderTimes.isNotEmpty()) Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 val use24Hour = LocalDateFormatSettings.current.use24HourFormat
                 val entries = reminderTimes.map { minutes ->
                     ReminderEntry(
@@ -576,8 +536,8 @@ fun HabitDetailScreen(
                     customLabel = stringResource(R.string.habitDetailReminderAddTime),
                     hint = stringResource(R.string.habitDetailReminderSheetHint),
                 )
-                Spacer(modifier = Modifier.height(AppTheme.space3XLarge))
             }
+            item { Spacer(modifier = Modifier.height(AppTheme.space3XLarge)) }
         }
 
         if (showHistory && existingWithCompletions != null) {
@@ -633,6 +593,29 @@ fun HabitDetailScreen(
 
 private val HABIT_DETAIL_COLORS = listOf(HabitColor) + PickerPalette
 
+/**
+ * Slider colors drawn entirely from the habit's [color], ticks and empty track included. Disabled
+ * keeps the same colors: the slider position is the value, so it must stay readable in view mode.
+ */
+@Composable
+private fun habitSliderColors(color: Color): SliderColors {
+    val inactiveTrack = color.copy(alpha = SLIDER_INACTIVE_TRACK_ALPHA)
+    return SliderDefaults.colors(
+        thumbColor = color,
+        activeTrackColor = color,
+        activeTickColor = Color.White,
+        inactiveTrackColor = inactiveTrack,
+        inactiveTickColor = color,
+        disabledThumbColor = color,
+        disabledActiveTrackColor = color,
+        disabledActiveTickColor = Color.White,
+        disabledInactiveTrackColor = inactiveTrack,
+        disabledInactiveTickColor = color,
+    )
+}
+
+private const val SLIDER_INACTIVE_TRACK_ALPHA = 0.24f
+
 /** The check-ins a day needs, from once up to [HabitUtils.MAX_TIMES_PER_DAY]. */
 @Composable
 private fun TimesPerDayCard(timesPerDay: Int, onChange: (Int) -> Unit, isEditing: Boolean, color: Color) {
@@ -654,12 +637,7 @@ private fun TimesPerDayCard(timesPerDay: Int, onChange: (Int) -> Unit, isEditing
                 // Steps count the stops between the ends: one per whole value.
                 steps = HabitUtils.MAX_TIMES_PER_DAY - 2,
                 enabled = isEditing,
-                colors = SliderDefaults.colors(
-                    thumbColor = color,
-                    activeTrackColor = color,
-                    disabledThumbColor = color,
-                    disabledActiveTrackColor = color,
-                ),
+                colors = habitSliderColors(color),
             )
         }
     }

@@ -29,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
@@ -57,6 +56,7 @@ import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
@@ -65,12 +65,14 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.QuickHabitViewModel
 import io.github.benji377.timety.util.habit.HabitUtils
 import io.github.benji377.timety.util.habit.QuickHabitScheduling
+import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -343,7 +345,7 @@ private fun QuickHabitEditDialog(
                 if (intervalTooLong) {
                     Text(
                         stringResource(R.string.quickHabitIntervalTooLong),
-                        color = MaterialTheme.colorScheme.error,
+                        color = MaterialTheme.colorScheme.error.forText(),
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = AppTheme.spaceSmall),
                     )
@@ -421,7 +423,7 @@ private fun QuickHabitEditDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
         confirmButton = {
             NeoButton(
@@ -549,10 +551,11 @@ private fun quickHabitSubtitle(
     else stringResource(R.string.quickHabitCardSubtitle, base, weekdaysSummary(days))
 }
 
-/** A compact weekday summary like "Mon, Wed, Fri" in Mon..Sun order. */
+/** A compact weekday summary like "Mon, Wed, Fri" in Mon..Sun order, or "Every day" for all seven. */
 @Composable
 @ReadOnlyComposable
 private fun weekdaysSummary(days: Set<Int>): String {
+    if (days.size == DayOfWeek.entries.size) return stringResource(R.string.quickHabitEveryDay)
     val labels = listOf(
         stringResource(R.string.calendarHeaderMon), stringResource(R.string.calendarHeaderTue),
         stringResource(R.string.calendarHeaderWed), stringResource(R.string.calendarHeaderThu),

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.forText
 
 /** Row of a tinted icon followed by a bold title, used to head a list or section. */
 @Composable
@@ -41,7 +42,7 @@ fun ListSectionHeader(
             title,
             fontSize = titleSize,
             fontWeight = AppTheme.fwBold,
-            color = color,
+            color = color.forText(),
         )
     }
 }

@@ -34,6 +34,7 @@ import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.components.common.AccentBadge
 import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.DistractionWithSession
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -76,7 +77,7 @@ internal fun SessionRow(
         }
         Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
         Column(modifier = Modifier.weight(1f)) {
-            Text(targetName, fontWeight = FontWeight.SemiBold, color = color)
+            Text(targetName, fontWeight = FontWeight.SemiBold, color = color.forText())
             val details = listOfNotNull(
                 dateStr.takeIf { showDate },
                 timeStr,

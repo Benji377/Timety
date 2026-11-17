@@ -2,6 +2,8 @@ package io.github.benji377.timety.ui.components.task
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,7 +43,21 @@ fun rememberTaskCompletionToggle(
     val scope = rememberCoroutineScope()
     val snackbarHostState = LocalSnackbarHostState.current
     val loggedMessage = stringResource(R.string.taskFocusLogSnackbar)
+    val completedMessage = stringResource(R.string.taskCompletedSnackbar)
+    val undoLabel = stringResource(R.string.commonLabelUndo)
     var pendingTask by remember { mutableStateOf<TaskEntity?>(null) }
+
+    // [task] is the entity as it was before checking it off, so undoing writes it back unchanged.
+    fun offerUndo(task: TaskEntity) {
+        scope.launch {
+            val result = snackbarHostState.showSnackbar(
+                message = completedMessage.format(task.title),
+                actionLabel = undoLabel,
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) taskViewModel.updateTask(task)
+        }
+    }
 
     pendingTask?.let { task ->
         SessionEditorDialog(
@@ -50,7 +66,12 @@ fun rememberTaskCompletionToggle(
             modes = modes,
             // Sessions logged this way are attributed to the task, so there is no target to pick.
             fixedTargetLabel = task.title,
-            onDismiss = { pendingTask = null },
+            // Skipping only skips the log; the task stays done, with the usual Undo.
+            dismissLabel = stringResource(R.string.taskFocusLogSkip),
+            onDismiss = {
+                pendingTask = null
+                offerUndo(task)
+            },
             onSave = { mode, start, end, _ ->
                 focusViewModel.logSessionForTask(mode, start, end, task.id, task.title)
                 pendingTask = null
@@ -65,7 +86,11 @@ fun rememberTaskCompletionToggle(
     return remember(taskViewModel) {
         { task ->
             taskViewModel.toggleTaskCompletion(task)
-            if (!task.isCompleted && promptEnabled.value) pendingTask = task
+            when {
+                task.isCompleted -> Unit
+                promptEnabled.value -> pendingTask = task
+                else -> offerUndo(task)
+            }
         }
     }
 }

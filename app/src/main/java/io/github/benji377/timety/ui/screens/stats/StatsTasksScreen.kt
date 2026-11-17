@@ -55,6 +55,7 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningAccent
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.utils.rememberToday
@@ -289,7 +290,7 @@ private fun EstimationCalibrationCard(
                     calibrationInsightText(insight),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = WarningAccent,
+                    color = WarningAccent.forText(),
                 )
             }
         }
@@ -307,7 +308,7 @@ private fun CalibrationBucketRow(bucket: CalibrationBucket) {
                 AppUtils.getSizeEmoji(bucket.size),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = TaskColor,
+                color = TaskColor.forText(),
             )
         }
         Spacer(modifier = Modifier.width(12.dp))

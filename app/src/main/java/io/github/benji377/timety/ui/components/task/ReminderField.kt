@@ -41,6 +41,7 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.util.task.ReminderPreset
 
 /**
@@ -88,7 +89,7 @@ fun ReminderField(
         NeoOutlinedTextField(
             value = when (entries.size) {
                 0 -> ""
-                1 -> entries.first().label
+                1 -> entries.first().let { entry -> listOfNotNull(entry.label, entry.time).joinToString(" | ") }
                 else -> pluralStringResource(
                     R.plurals.reminderFieldCount, entries.size, entries.size
                 )
@@ -110,7 +111,8 @@ fun ReminderField(
         )
     }
 
-    if (entries.isNotEmpty()) {
+    // The field names a lone reminder itself; the list only spells out several.
+    if (entries.size > 1) {
         Spacer(Modifier.height(AppTheme.spaceSmall))
         Column(
             modifier = Modifier.padding(horizontal = AppTheme.spaceMedium),
@@ -198,7 +200,7 @@ fun ReminderField(
                 }
                 Text(
                     text = warning ?: hint,
-                    color = if (warning != null) WarningColor
+                    color = if (warning != null) WarningColor.forText()
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = AppTheme.fsBodySmall,
                 )

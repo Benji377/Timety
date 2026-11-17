@@ -1,29 +1,32 @@
 package io.github.benji377.timety.ui.screens.task
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -32,7 +35,6 @@ import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,8 +46,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -59,16 +63,19 @@ import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.FieldLabel
+import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoDatePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
-import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagPicker
+import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.components.task.ReminderEntry
 import io.github.benji377.timety.ui.components.task.ReminderField
@@ -81,6 +88,8 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
@@ -100,6 +109,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.format.TextStyle
 import java.util.UUID
 
 /** Which monthly anchoring the user picked; mapped to [MonthlyMode] plus ordinal on save. */
@@ -112,7 +122,7 @@ private enum class RecurringPickerTarget { DUE_DATE, DUE_TIME, PAST_OCCURRENCE }
  * rule (unit, interval, weekdays or monthly anchoring), reminder offsets, and the task window. In view mode it
  * additionally shows a habit-style completion history with manual backfill.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecurringTaskDetailScreen(
     recurringTaskId: String? = null,
@@ -148,11 +158,12 @@ fun RecurringTaskDetailScreen(
     var hasDueTime by rememberSaveable(formTask) { mutableStateOf(existingTask?.hasDueTime ?: false) }
     val due = dueDate?.let { Due(it, hasDueTime) }
     var unit by rememberSaveable(formTask) { mutableStateOf(existingTask?.unit ?: RecurrenceUnit.WEEK) }
-    // Required, with no default: a new task starts empty so the cadence is always a deliberate choice.
+    // Starts at 1, the cadence most people want; still required, so clearing it blocks saving.
     var intervalText by rememberSaveable(formTask) {
-        mutableStateOf(existingTask?.interval?.toString() ?: "")
+        mutableStateOf((existingTask?.interval ?: 1).toString())
     }
     var intervalError by rememberSaveable(formTask) { mutableStateOf(false) }
+    var dueError by rememberSaveable(formTask) { mutableStateOf(false) }
     var selectedWeekdays by rememberSaveable(formTask) {
         mutableStateOf(HabitUtils.parseWeekdays(existingTask?.daysOfWeek))
     }
@@ -181,6 +192,7 @@ fun RecurringTaskDetailScreen(
     var pickerTarget by remember { mutableStateOf<RecurringPickerTarget?>(null) }
 
     fun changeDue(date: LocalDate, timeMinutes: Int?) {
+        dueError = false
         dueDate = Due.of(date, timeMinutes, zone).at
         dueTimeMinutes = timeMinutes
         hasDueTime = timeMinutes != null
@@ -202,7 +214,6 @@ fun RecurringTaskDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val titleRequiredMsg = stringResource(R.string.taskDetailsSnackbarTitleRequired)
-    val dueRequiredMsg = stringResource(R.string.recurringTaskSnackbarDueRequired)
 
     val dueLocalDate = dueDate?.atZone(zone)?.toLocalDate()
     // The nth-weekday options only exist for a concrete due date; a 5th occurrence of a weekday
@@ -216,6 +227,7 @@ fun RecurringTaskDetailScreen(
         intervalError = interval == null
         val windowAmount = windowUnit?.let { unit -> windowAmountText.toIntOrNull()?.takeIf { it in unit.amounts } }
         windowError = windowUnit != null && windowAmount == null
+        dueError = dueDate == null
         val trimmedTitle = title.trim()
         if (trimmedTitle.isEmpty()) {
             scope.launch { snackbarHostState.showSnackbar(titleRequiredMsg) }
@@ -223,10 +235,7 @@ fun RecurringTaskDetailScreen(
         }
         val due = dueDate
         val dueLocal = due?.atZone(zone)?.toLocalDate()
-        if (due == null || dueLocal == null) {
-            scope.launch { snackbarHostState.showSnackbar(dueRequiredMsg) }
-            return
-        }
+        if (due == null || dueLocal == null) return
         if (interval == null || windowError) return
         val effectiveChoice = when {
             monthlyChoice == MonthlyChoice.LAST_WEEKDAY && lastAvailable -> MonthlyChoice.LAST_WEEKDAY
@@ -314,7 +323,10 @@ fun RecurringTaskDetailScreen(
                 .padding(paddingValues)
                 .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall)
         ) {
-            // Title and description.
+            // The basics: title, tags, description.
+            item {
+                FormSectionHeader(stringResource(R.string.taskDetailsSectionInfo), Icons.Outlined.Info, TaskColor)
+            }
             item {
                 NeoOutlinedTextField(
                     value = title,
@@ -327,28 +339,37 @@ fun RecurringTaskDetailScreen(
                     leadingIcon = { Icon(Icons.Filled.Title, null) },
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
                 TagPicker(
                     selectedIds = pickedTagIds
                         ?: recurringTags[recurringTaskId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
-                NeoOutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    enabled = isEditing,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                    minLines = 2,
-                    maxLines = 6
-                )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
+                // View mode hides empty optional fields.
+                if (isEditing || description.isNotBlank()) {
+                    Spacer(Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        enabled = isEditing,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6
+                    )
+                }
             }
 
-            // Next due date (also the anchor for the recurrence rule and time of day).
+            // Next due date (also the anchor for the rule and time of day), rule and reminders.
+            item {
+                FormSectionHeader(
+                    stringResource(R.string.taskDetailsSectionScheduling),
+                    Icons.Filled.CalendarToday,
+                    TaskColor,
+                )
+            }
             item {
                 DueDateTimeFields(
                     due = due,
@@ -358,14 +379,13 @@ fun RecurringTaskDetailScreen(
                     onPickTime = { pickerTarget = RecurringPickerTarget.DUE_TIME },
                     onClearTime = { due?.let { changeDue(it.date(zone), null) } },
                     onClearDate = null,
+                    dateError = if (dueError) stringResource(R.string.recurringTaskSnackbarDueRequired) else null,
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
             }
 
-            // The recurrence rule.
             item {
-                Text(stringResource(R.string.recurrenceLabel), fontWeight = AppTheme.fwBold)
-                Spacer(Modifier.height(AppTheme.spaceSmall))
+                FieldLabel(stringResource(R.string.recurrenceLabel))
                 // labelBuilder isn't @Composable, so resolve the localized labels up front.
                 val recurrenceUnitLabels =
                     RecurrenceUnit.entries.associateWith { recurrenceUnitName(it) }
@@ -377,7 +397,7 @@ fun RecurringTaskDetailScreen(
                     labelBuilder = { recurrenceUnitLabels.getValue(it) },
                     activeBgColor = TaskColor,
                 )
-                Spacer(Modifier.height(AppTheme.spaceMedium))
+                Spacer(Modifier.height(AppTheme.spaceLarge))
                 NeoOutlinedTextField(
                     value = intervalText,
                     onValueChange = { new ->
@@ -389,44 +409,42 @@ fun RecurringTaskDetailScreen(
                     enabled = isEditing,
                     singleLine = true,
                     label = { Text(stringResource(R.string.recurrenceEveryLabel) + " *") },
-                    isError = intervalError,
-                    supportingText = {
-                        if (intervalError) Text(
-                            stringResource(R.string.recurrenceEveryRequest),
-                            color = ErrorColor
-                        )
-                    },
+                    errorText = if (intervalError) stringResource(R.string.recurrenceEveryRequest) else null,
                     leadingIcon = { Icon(Icons.Filled.Repeat, null) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.width(160.dp)
                 )
 
                 if (unit == RecurrenceUnit.WEEK) {
-                    Spacer(Modifier.height(AppTheme.spaceMedium))
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
-                        verticalArrangement = Arrangement.spacedBy(AppTheme.spaceSmall),
+                    Spacer(Modifier.height(AppTheme.spaceLarge))
+                    WeekdayToggleRow(
+                        selected = selectedWeekdays,
+                        onToggle = { day ->
+                            selectedWeekdays =
+                                if (day in selectedWeekdays) selectedWeekdays - day
+                                else selectedWeekdays + day
+                        },
+                        enabled = isEditing,
+                        selectedColor = TaskColor,
+                    )
+                    // Allowed, since a one-off first date can be on purpose, but worth pointing out.
+                    if (dueLocalDate != null && selectedWeekdays.isNotEmpty() &&
+                        dueLocalDate.dayOfWeek.value !in selectedWeekdays
                     ) {
-                        (1..7).forEach { day ->
-                            val isSelected = selectedWeekdays.contains(day)
-                            NeoFilterChip(
-                                selected = isSelected,
-                                enabled = isEditing,
-                                onClick = {
-                                    selectedWeekdays =
-                                        if (isSelected) selectedWeekdays - day
-                                        else selectedWeekdays + day
-                                },
-                                label = weekdayShortName(day),
-                                selectedColor = TaskColor,
-                            )
-                        }
+                        Text(
+                            stringResource(
+                                R.string.recurringTaskDueDayMismatch,
+                                dueLocalDate.dayOfWeek.getDisplayName(TextStyle.FULL, LocalLocale.current.platformLocale),
+                            ),
+                            color = WarningColor.forText(),
+                            fontSize = AppTheme.fsBodySmall,
+                            modifier = Modifier.padding(top = AppTheme.spaceSmall),
+                        )
                     }
                 }
 
                 if (unit == RecurrenceUnit.MONTH && dueLocalDate != null) {
-                    Spacer(Modifier.height(AppTheme.spaceMedium))
+                    Spacer(Modifier.height(AppTheme.spaceSmall))
                     MonthlyChoiceOption(
                         label = stringResource(
                             R.string.recurringTaskMonthlyOnDay,
@@ -463,11 +481,12 @@ fun RecurringTaskDetailScreen(
                         )
                     }
                 }
-                Spacer(Modifier.height(AppTheme.spaceLarge))
             }
 
             // Reminder offsets, re-applied to every occurrence.
             item {
+                // The reminder field hides itself in view mode when there are none.
+                if (isEditing || reminderOffsets.isNotEmpty()) Spacer(Modifier.height(AppTheme.spaceLarge))
                 val presets = due?.presets ?: ReminderPreset.entries
                 val entries = reminderOffsets.sorted().map { minutes ->
                     val preset = presets.firstOrNull { it.minutes == minutes }
@@ -499,10 +518,12 @@ fun RecurringTaskDetailScreen(
                     },
                     onAddCustom = null,
                 )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
             }
 
             // When the task starts showing in lists.
+            item {
+                FormSectionHeader(stringResource(R.string.recurringTaskWindowLabel), Icons.Filled.Visibility, TaskColor)
+            }
             item {
                 TaskWindowSection(
                     unit = windowUnit,
@@ -524,13 +545,13 @@ fun RecurringTaskDetailScreen(
                         windowError = false
                     },
                 )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
             }
 
             // Completion history: view mode only, like a habit's past-occurrence log.
             if (!isNew && !isEditing && existing != null) {
                 item {
                     val completeTask = rememberRecurringCompleter(viewModel, snackbarHostState)
+                    Spacer(Modifier.height(AppTheme.spaceXLarge))
                     NeoButton(
                         onClick = { completeTask(existing.task) },
                         modifier = Modifier.fillMaxWidth(),
@@ -539,20 +560,14 @@ fun RecurringTaskDetailScreen(
                         Spacer(Modifier.width(AppTheme.spaceSmall))
                         Text(stringResource(R.string.recurringTaskCompleteNow))
                     }
-                    Spacer(Modifier.height(AppTheme.spaceLarge))
-                    HorizontalDivider()
-                    Spacer(Modifier.height(AppTheme.spaceLarge))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
+                }
+                item {
+                    FormSectionHeader(
+                        stringResource(R.string.recurringTaskHistoryTitle),
+                        Icons.Filled.History,
+                        TaskColor,
                     ) {
-                        Text(
-                            stringResource(R.string.recurringTaskHistoryTitle),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = AppTheme.fwBold,
-                        )
-                        TextButton(onClick = {
+                        NeoTextButton(onClick = {
                             pickerTarget = RecurringPickerTarget.PAST_OCCURRENCE
                         }) {
                             Icon(
@@ -564,7 +579,6 @@ fun RecurringTaskDetailScreen(
                             Text(stringResource(R.string.recurringTaskHistoryAddPast))
                         }
                     }
-                    Spacer(Modifier.height(AppTheme.spaceSmall))
                 }
                 val occurrences = existing.occurrences.sortedByDescending { it.completedAt }
                 if (occurrences.isEmpty()) {
@@ -618,7 +632,9 @@ fun RecurringTaskDetailScreen(
         } else null
         when (target) {
             RecurringPickerTarget.DUE_DATE -> NeoDatePickerDialog(
-                initialDate = dueDate ?: Instant.now(),
+                // A new weekly task starts on its first picked day rather than today.
+                initialDate = dueDate ?: firstPickedDay(selectedWeekdays.takeIf { unit == RecurrenceUnit.WEEK })
+                    .atStartOfDay(zone).toInstant(),
                 selectableDates = selectableDates,
                 onConfirm = { date ->
                     changeDue(date, dueTime)
@@ -674,7 +690,6 @@ private fun TaskWindowSection(
     onUnitChange: (TaskWindowUnit?) -> Unit,
     onAmountChange: (String) -> Unit,
 ) {
-    Text(stringResource(R.string.recurringTaskWindowLabel), fontWeight = AppTheme.fwBold)
     Text(
         stringResource(R.string.recurringTaskWindowHint),
         style = MaterialTheme.typography.bodySmall,
@@ -720,17 +735,12 @@ private fun TaskWindowSection(
                 enabled = isEditing,
                 singleLine = true,
                 label = { Text(stringResource(R.string.recurringTaskWindowAmount)) },
-                isError = isError,
-                supportingText = {
-                    when {
-                        isError -> Text(
-                            stringResource(R.string.recurringTaskWindowRequest, unit.minAmount, unit.maxAmount),
-                            color = ErrorColor
-                        )
-                        unit == TaskWindowUnit.DAY && amountText == "0" ->
-                            Text(stringResource(R.string.recurringTaskWindowDueDayOnly))
-                    }
-                },
+                errorText = if (isError) {
+                    stringResource(R.string.recurringTaskWindowRequest, unit.minAmount, unit.maxAmount)
+                } else null,
+                supportingText = if (!isError && unit == TaskWindowUnit.DAY && amountText == "0") {
+                    { Text(stringResource(R.string.recurringTaskWindowDueDayOnly)) }
+                } else null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.width(120.dp),
             )
@@ -747,8 +757,11 @@ private fun TaskWindowSection(
     }
 }
 
-/** Lines helper text up with a radio option's label. */
-private val RADIO_LABEL_INSET = 48.dp
+/**
+ * Lines helper text up with a radio option's label: the radio's drawn width (20dp dot plus its
+ * 2dp padding on each side) and the gap before the label.
+ */
+private val RADIO_LABEL_INSET = 24.dp + AppTheme.spaceMedium
 
 @Composable
 private fun MonthlyChoiceOption(
@@ -757,15 +770,19 @@ private fun MonthlyChoiceOption(
     enabled: Boolean,
     onSelect: () -> Unit,
 ) {
+    // The whole row takes the tap, so the radio needs no touch padding of its own and lines up
+    // with the fields above it.
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onSelect),
+            .heightIn(min = LocalMinimumInteractiveComponentSize.current)
+            .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onSelect),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium),
     ) {
         RadioButton(
             selected = selected,
-            onClick = onSelect,
+            onClick = null,
             enabled = enabled,
             // The selection is the value: keep it readable in view mode instead of the 38%
             // Material disabled fade; the label text next to it never fades either.
@@ -810,4 +827,11 @@ private fun OccurrenceRow(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+/** Today, or the first of [weekdays] (ISO numbers) from today on when any are given. */
+private fun firstPickedDay(weekdays: Set<Int>?): LocalDate {
+    val today = LocalDate.now()
+    if (weekdays.isNullOrEmpty()) return today
+    return generateSequence(today) { it.plusDays(1) }.first { it.dayOfWeek.value in weekdays }
 }

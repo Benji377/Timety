@@ -21,13 +21,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +41,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
@@ -54,9 +53,11 @@ import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.components.common.TagFilterRow
@@ -65,6 +66,7 @@ import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.SuccessColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
@@ -106,30 +108,43 @@ fun GoalsScreen(
                     BackNavigationIcon(onClick = onNavigateBack)
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            NeoFab(
+                onClick = { onNavigateToGoalDetail(null) },
+                containerColor = GoalColor,
+                contentDescription = stringResource(R.string.goalsLabelAdd),
+            )
+        },
     ) { paddingValues ->
-        LazyColumn(
+        // With no goals at all, the hint sits mid-screen like the other empty lists.
+        if (goals.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = AppTheme.spaceLarge),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    stringResource(R.string.goalsEmpty),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(bottom = AppTheme.space3XLarge),
+            contentPadding = PaddingValues(
+                top = AppTheme.spaceSmall,
+                // Keep the last card's log button clear of the FAB.
+                bottom = AppTheme.space3XLarge,
+            ),
         ) {
             item {
-                NeoButton(
-                    onClick = { onNavigateToGoalDetail(null) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppTheme.spaceLarge),
-                    colors = ButtonDefaults.buttonColors(containerColor = GoalColor),
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
-                    Spacer(Modifier.width(AppTheme.spaceSmall))
-                    Text(stringResource(R.string.goalsLabelAdd))
-                }
-            }
-
-            item {
                 TagFilterRow(
+                    allColor = GoalColor,
                     tags = usedTags,
                     selectedIds = activeTagIds,
                     onSelectionChange = { selectedTagIds = it },
@@ -146,7 +161,7 @@ fun GoalsScreen(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            stringResource(if (goals.isEmpty()) R.string.goalsEmpty else R.string.tagFilterNoMatch),
+                            stringResource(R.string.tagFilterNoMatch),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -289,7 +304,7 @@ private fun GoalCard(
                             AppDateFormatUtils.formatDate(completedAt, dateFmt.dateFormatCode),
                         ),
                         style = MaterialTheme.typography.bodySmall,
-                        color = SuccessColor,
+                        color = SuccessColor.forText(),
                     )
                 } else {
                     PaceSummaryRow(goalWithEntries)
@@ -341,14 +356,14 @@ private fun PaceSummaryRow(goalWithEntries: GoalWithEntries) {
         Text(
             text = paceText,
             style = MaterialTheme.typography.bodySmall,
-            color = paceColor,
+            color = paceColor.forText(),
             modifier = Modifier.weight(1f),
         )
         Text(
             text = deadlineText,
             style = MaterialTheme.typography.bodySmall,
             color = if (daysLeft < 0) {
-                MaterialTheme.colorScheme.error
+                MaterialTheme.colorScheme.error.forText()
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             },
@@ -449,13 +464,13 @@ private fun GoalEntryDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            NeoButton(
                 enabled = value >= 1,
                 onClick = { onConfirm(value, timestamp) },
             ) { Text(stringResource(R.string.commonLabelConfirm)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
     )
 

@@ -46,6 +46,7 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
+import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.NeoDatePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
@@ -55,6 +56,7 @@ import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
@@ -223,9 +225,10 @@ fun TaskDetailScreen(
         ) {
             // The basics: title, tags, description.
             item {
-                SectionHeader(
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionInfo),
-                    Icons.Outlined.Info
+                    Icons.Outlined.Info,
+                    TaskColor,
                 )
             }
             item {
@@ -240,33 +243,35 @@ fun TaskDetailScreen(
                     leadingIcon = { Icon(Icons.Filled.Title, null) },
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
-                Spacer(Modifier.height(AppTheme.spaceLarge))
-
                 TagPicker(
                     selectedIds = pickedTagIds
                         ?: taskTags[taskId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
-
-                Spacer(Modifier.height(AppTheme.spaceLarge))
-                NeoOutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    enabled = isEditing,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                    minLines = 3,
-                    maxLines = 6
-                )
+                // View mode hides empty optional fields.
+                if (isEditing || description.isNotBlank()) {
+                    Spacer(Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        enabled = isEditing,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.taskDetailsLabelDescription)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6
+                    )
+                }
             }
 
             // Priority and effort size.
             item {
-                SectionHeader(
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionPriorityAndEffort),
-                    Icons.Filled.BarChart
+                    Icons.Filled.BarChart,
+                    TaskColor,
                 )
             }
             item {
@@ -279,24 +284,31 @@ fun TaskDetailScreen(
                 )
             }
 
-            // Scheduling: due date and reminders.
-            item {
-                SectionHeader(
+            // Scheduling: due date and reminders. Without a due date there is nothing to show
+            // outside edit mode, since reminders need one.
+            val showScheduling = isEditing || due != null
+            if (showScheduling) item {
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionScheduling),
-                    Icons.Filled.CalendarToday
+                    Icons.Filled.CalendarToday,
+                    TaskColor,
                 )
             }
-            item {
+            if (showScheduling) item {
                 DueDateTimeFields(
                     due = due,
                     isEditing = isEditing,
-                    dateLabel = stringResource(R.string.taskDetailsLabelDueDateSet),
+                    // "Set due date" invites a tap on an empty field; a filled one is just the due date.
+                    dateLabel = stringResource(
+                        if (due == null) R.string.taskDetailsLabelDueDateSet else R.string.taskDetailsLabelDueDate
+                    ),
                     onPickDate = { pickerTarget = PickerTarget.DUE_DATE },
                     onPickTime = { pickerTarget = PickerTarget.DUE_TIME },
                     onClearTime = { due?.let { changeDue(Due.of(it.date(), null)) } },
                     onClearDate = ::clearDueDate,
                 )
-                Spacer(Modifier.height(AppTheme.spaceMedium))
+                // The reminder field hides itself in view mode when there are none.
+                if (isEditing || reminders.isNotEmpty()) Spacer(Modifier.height(AppTheme.spaceLarge))
                 TaskReminderField(
                     reminders = reminders,
                     due = due,
@@ -307,13 +319,14 @@ fun TaskDetailScreen(
             }
 
             // Location.
-            item {
-                SectionHeader(
+            if (isEditing || location.isNotBlank()) item {
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionLocation),
-                    Icons.Outlined.LocationOn
+                    Icons.Outlined.LocationOn,
+                    TaskColor,
                 )
             }
-            item {
+            if (isEditing || location.isNotBlank()) item {
                 LocationField(
                     location = location,
                     place = place,
@@ -330,11 +343,12 @@ fun TaskDetailScreen(
                 )
             }
 
-            // Checklist / subtasks.
-            item {
-                SectionHeader(
+            // Checklist / subtasks; an empty checklist has nothing to show outside edit mode.
+            if (isEditing || subtasks.isNotEmpty()) item {
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionChecklist),
-                    Icons.Filled.Checklist
+                    Icons.Filled.Checklist,
+                    TaskColor,
                 )
             }
             item {

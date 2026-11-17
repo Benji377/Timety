@@ -60,12 +60,14 @@ object AppTheme {
     // Outer margin shared by every list tile so lists space identically across screens.
     val listTileScreenMargin = PaddingValues(horizontal = spaceLarge, vertical = spaceXSmall)
 
+    val radiusSmall = 4.dp
     val radiusMedium = 8.dp
     val radiusNeo = 14.dp
 
-    // Full-round: toggle controls, badges, and chips only - never cards or inputs.
+    // Full-round: segmented toggles and badges only - never chips, cards or inputs.
     val radiusPill = 24.dp
 
+    val brSmall = RoundedCornerShape(radiusSmall)
     val brMedium = RoundedCornerShape(radiusMedium)
     val brNeo = RoundedCornerShape(radiusNeo)
     val brPill = RoundedCornerShape(radiusPill)

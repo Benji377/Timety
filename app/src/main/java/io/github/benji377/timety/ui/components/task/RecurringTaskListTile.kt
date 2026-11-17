@@ -33,6 +33,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.task.RecurringStatus
@@ -112,7 +113,7 @@ fun RecurringTaskListTile(
                             task.due, dateFmt.dateFormatCode, dateFmt.use24HourFormat
                         ),
                         fontSize = AppTheme.fsLabel,
-                        color = borderColor,
+                        color = borderColor.forText(),
                         fontWeight = AppTheme.fwMedium,
                     )
                 }

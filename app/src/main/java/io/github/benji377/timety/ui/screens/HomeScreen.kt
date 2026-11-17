@@ -55,6 +55,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
@@ -222,7 +223,7 @@ fun HomeScreen(
                         text = motivation,
                         fontSize = AppTheme.fsBodyLarge,
                         fontWeight = AppTheme.fwBold,
-                        color = TaskColor
+                        color = TaskColor.forText()
                     )
                 }
             }
@@ -447,7 +448,7 @@ private fun DailyGoalCard(
                 Text(
                     text = "$focusMinsToday / $dailyTarget m",
                     fontWeight = AppTheme.fwBold,
-                    color = FocusColor
+                    color = FocusColor.forText()
                 )
             }
             Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
@@ -457,7 +458,7 @@ private fun DailyGoalCard(
                 Text(
                     text = "${(progress * 100).roundToInt()}%",
                     fontWeight = AppTheme.fwExtraBold,
-                    color = FocusColor
+                    color = FocusColor.forText()
                 )
             }
         }

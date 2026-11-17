@@ -33,7 +33,6 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +66,7 @@ import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
+import io.github.benji377.timety.ui.components.common.FieldLabel
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
@@ -81,6 +81,7 @@ import io.github.benji377.timety.ui.theme.InfoColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -89,31 +90,6 @@ import io.github.benji377.timety.util.task.Due
 import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
 import java.time.Instant
-
-@Composable
-internal fun SectionHeader(title: String, icon: ImageVector) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = AppTheme.spaceXLarge, bottom = AppTheme.spaceMedium)
-    ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(AppTheme.iconSizeSmall)
-        )
-        Spacer(Modifier.width(AppTheme.spaceSmall))
-        Text(
-            text = title.uppercase(),
-            fontSize = AppTheme.fsBodySmall,
-            fontWeight = AppTheme.fwBold,
-            letterSpacing = AppTheme.lsWide,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(Modifier.width(AppTheme.spaceSmall))
-        HorizontalDivider(modifier = Modifier.weight(1f))
-    }
-}
 
 /**
  * Segmented selector where the selected segment expands to show its label; the rest stay
@@ -272,8 +248,7 @@ internal fun PriorityAndEffortFields(
     val priorityLabels = Priority.entries.associateWith { stringResource(AppUtils.priorityLabel(it)) }
     val sizeLabels = TaskSize.entries.associateWith { stringResource(AppUtils.sizeLabel(it)) }
     Column {
-        Text(stringResource(R.string.taskDetailsLabelPriority), fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(AppTheme.spaceSmall))
+        FieldLabel(stringResource(R.string.taskDetailsLabelPriority))
         AccordionSelector(
             values = Priority.entries,
             selectedValue = priority,
@@ -288,8 +263,7 @@ internal fun PriorityAndEffortFields(
         )
 
         Spacer(Modifier.height(AppTheme.spaceLarge))
-        Text(stringResource(R.string.taskDetailsLabelEffort), fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(AppTheme.spaceSmall))
+        FieldLabel(stringResource(R.string.taskDetailsLabelEffort))
         AccordionSelector(
             values = TaskSize.entries,
             selectedValue = size,
@@ -321,6 +295,7 @@ internal fun DueDateTimeFields(
     onPickTime: () -> Unit,
     onClearTime: () -> Unit,
     onClearDate: (() -> Unit)?,
+    dateError: String? = null,
 ) {
     val dateFmt = LocalDateFormatSettings.current
     Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
@@ -331,6 +306,7 @@ internal fun DueDateTimeFields(
             isEditing = isEditing,
             onPick = onPickDate,
             onClear = onClearDate?.takeIf { due != null },
+            errorText = dateError,
             modifier = Modifier.weight(1f),
         )
         if (due != null) {
@@ -361,6 +337,7 @@ private fun PickerField(
     onPick: () -> Unit,
     onClear: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    errorText: String? = null,
 ) {
     Box(
         modifier = modifier
@@ -374,6 +351,7 @@ private fun PickerField(
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             label = { Text(label, maxLines = 1) },
+            errorText = errorText,
             leadingIcon = { Icon(icon, null) },
             trailingIcon = {
                 when {
@@ -384,7 +362,11 @@ private fun PickerField(
                     else -> Icon(Icons.Filled.Edit, null)
                 }
             },
-            colors = detailFieldColors(isEditing),
+            // A picker field is never typed into, so it is disabled and needs the error look spelled out.
+            colors = if (errorText == null) detailFieldColors(isEditing) else detailFieldColors(isEditing).copy(
+                disabledIndicatorColor = MaterialTheme.colorScheme.error,
+                disabledLabelColor = MaterialTheme.colorScheme.error,
+            ),
         )
     }
 }
@@ -486,7 +468,7 @@ internal fun LocationField(
             ) {
                 Icon(Icons.Outlined.CloudOff, contentDescription = null, tint = WarningColor, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                Text(stringResource(R.string.taskDetailsLocationOffline), fontSize = AppTheme.fsBodySmall, color = WarningColor)
+                Text(stringResource(R.string.taskDetailsLocationOffline), fontSize = AppTheme.fsBodySmall, color = WarningColor.forText())
             }
         }
 

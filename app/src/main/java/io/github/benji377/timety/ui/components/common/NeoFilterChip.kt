@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -23,7 +22,7 @@ import androidx.compose.ui.semantics.Role
 import io.github.benji377.timety.ui.theme.AppTheme
 
 /**
- * Flat replacement for Material3's `FilterChip`: a pill-shaped, hairline-bordered toggle chip
+ * Flat replacement for Material3's `FilterChip`: a rounded-square, hairline-bordered toggle chip
  * built from scratch (not a wrapper) so the selected/unselected look is fully controlled.
  *
  * When [enabled] is false the chip becomes non-clickable, but a selected chip keeps its full-
@@ -41,7 +40,7 @@ fun NeoFilterChip(
     selectedColor: Color = MaterialTheme.colorScheme.primary,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
-    val shape: Shape = RoundedCornerShape(percent = 50)
+    val shape: Shape = AppTheme.brNeo
     // An unselected chip is filled with the surface color rather than left transparent, so the
     // fill - not a border weight - is what separates it from whatever it sits on.
     val containerColor = if (selected) selectedColor else MaterialTheme.colorScheme.surface

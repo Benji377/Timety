@@ -14,7 +14,6 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,8 +28,10 @@ import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.theme.forText
 
 /**
  * Dialog for adding or editing a session phase: its type (focus or rest) and duration in
@@ -86,11 +87,11 @@ fun PhaseEditorDialog(
         dismissButton = {
             Row {
                 if (!isNew && onDelete != null) {
-                    TextButton(onClick = onDelete) {
-                        Text(stringResource(R.string.commonLabelDelete), color = ErrorColor)
+                    NeoTextButton(onClick = onDelete) {
+                        Text(stringResource(R.string.commonLabelDelete), color = ErrorColor.forText())
                     }
                 }
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+                NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
             }
         },
         confirmButton = {

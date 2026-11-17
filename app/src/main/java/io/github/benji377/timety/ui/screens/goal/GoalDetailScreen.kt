@@ -1,6 +1,5 @@
 package io.github.benji377.timety.ui.screens.goal
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
@@ -20,15 +18,15 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,23 +41,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
+import io.github.benji377.timety.ui.components.common.AppearanceFields
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
+import io.github.benji377.timety.ui.components.common.NeoDatePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
-import io.github.benji377.timety.ui.components.common.PickerField
-import io.github.benji377.timety.ui.components.common.datePickerMillis
-import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.TagPicker
+import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -69,16 +67,14 @@ import io.github.benji377.timety.ui.utils.ColorSaver
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.GoalViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
-import io.github.benji377.timety.ui.viewmodel.GoalViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import io.github.benji377.timety.util.habit.HabitIcons
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.UUID
 
 /**
@@ -230,7 +226,10 @@ fun GoalDetailScreen(
                 .padding(paddingValues)
                 .padding(horizontal = AppTheme.spaceLarge, vertical = AppTheme.spaceSmall)
         ) {
-            // Goal name.
+            // The basics: name, tags, description.
+            item {
+                FormSectionHeader(stringResource(R.string.goalDetailSectionInfo), Icons.Outlined.Info, GoalColor)
+            }
             item {
                 NeoOutlinedTextField(
                     value = name,
@@ -239,23 +238,42 @@ fun GoalDetailScreen(
                     label = { Text(stringResource(R.string.goalDetailLabelName) + " *") },
                     placeholder = { Text(stringResource(R.string.goalDetailLabelNameHint)) },
                     leadingIcon = { Icon(Icons.Filled.Flag, null, tint = selectedColor) },
-                    isError = nameError,
-                    supportingText = {
-                        if (nameError) Text(
-                            stringResource(R.string.goalDetailLabelNameRequest),
-                            color = ErrorColor
-                        )
-                    },
+                    textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = AppTheme.fwBold),
+                    errorText = if (nameError) stringResource(R.string.goalDetailLabelNameRequest) else null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(rememberAutoFocus(isNewGoal)),
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                TagPicker(
+                    selectedIds = pickedTagIds
+                        ?: goalTags[goalId].orEmpty().mapTo(LinkedHashSet()) { it.id },
+                    onSelectionChange = { pickedTagIds = it },
+                    isEditing = isEditing,
+                    modifier = Modifier.padding(top = AppTheme.spaceLarge),
+                )
+                // View mode hides empty optional fields.
+                if (isEditing || description.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                    NeoOutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        enabled = isEditing,
+                        label = { Text(stringResource(R.string.goalDetailLabelDescription)) },
+                        placeholder = { Text(stringResource(R.string.goalDetailLabelDescriptionHint)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
+                        minLines = 3,
+                        maxLines = 6,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
+            item {
+                FormSectionHeader(stringResource(R.string.goalDetailSectionTarget), Icons.Filled.TrackChanges, GoalColor)
+            }
             // Target value and unit.
             item {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
                     NeoOutlinedTextField(
                         value = targetValueText,
                         onValueChange = { input ->
@@ -268,13 +286,7 @@ fun GoalDetailScreen(
                         label = { Text(stringResource(R.string.goalDetailLabelTarget) + " *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
-                        isError = targetError,
-                        supportingText = {
-                            if (targetError) Text(
-                                stringResource(R.string.goalDetailLabelTargetRequest),
-                                color = ErrorColor
-                            )
-                        },
+                        errorText = if (targetError) stringResource(R.string.goalDetailLabelTargetRequest) else null,
                         modifier = Modifier.weight(1f),
                     )
                     Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
@@ -285,13 +297,7 @@ fun GoalDetailScreen(
                         label = { Text(stringResource(R.string.goalDetailLabelUnit) + " *") },
                         placeholder = { Text(stringResource(R.string.goalDetailLabelUnitHint)) },
                         singleLine = true,
-                        isError = unitError,
-                        supportingText = {
-                            if (unitError) Text(
-                                stringResource(R.string.goalDetailLabelUnitRequest),
-                                color = ErrorColor
-                            )
-                        },
+                        errorText = if (unitError) stringResource(R.string.goalDetailLabelUnitRequest) else null,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -313,78 +319,27 @@ fun GoalDetailScreen(
                         colors = detailFieldColors(isEditing),
                     )
                 }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            item {
-                TagPicker(
-                    selectedIds = pickedTagIds
-                        ?: goalTags[goalId].orEmpty().mapTo(LinkedHashSet()) { it.id },
-                    onSelectionChange = { pickedTagIds = it },
-                    isEditing = isEditing,
-                )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-            }
 
-            // Appearance: icon and color.
             item {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    PickerField(
-                        label = stringResource(R.string.goalDetailLabelIcon),
-                        enabled = isEditing,
-                        onClick = { showIconPicker = true },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Icon(
-                            imageVector = HabitIcons.iconAt(selectedIconIndex),
-                            contentDescription = null,
-                            tint = selectedColor,
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(AppTheme.spaceLarge))
-                    PickerField(
-                        label = stringResource(R.string.goalDetailLabelColor),
-                        enabled = isEditing,
-                        onClick = { showColorPicker = true },
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .background(
-                                    color = selectedColor,
-                                    shape = CircleShape,
-                                )
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
+                FormSectionHeader(stringResource(R.string.detailSectionAppearance), Icons.Filled.Palette, GoalColor)
             }
-
-            // Description.
             item {
-                NeoOutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
+                AppearanceFields(
+                    iconIndex = selectedIconIndex,
+                    color = selectedColor,
+                    colorLabel = stringResource(R.string.goalDetailLabelColor),
                     enabled = isEditing,
-                    label = { Text(stringResource(R.string.goalDetailLabelDescription)) },
-                    placeholder = { Text(stringResource(R.string.goalDetailLabelDescriptionHint)) },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, null) },
-                    minLines = 3,
-                    maxLines = 6,
-                    modifier = Modifier.fillMaxWidth(),
+                    onPickIcon = { showIconPicker = true },
+                    onPickColor = { showColorPicker = true },
                 )
-                Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
             }
 
-            // Progress log, newest first (existing goals only).
-            if (existingGoalWithEntries != null) {
+            // Progress log, newest first: view mode only, like a recurring task's history.
+            if (existingGoalWithEntries != null && !isEditing) {
                 item {
-                    Text(
-                        stringResource(R.string.goalDetailEntriesTitle),
-                        fontWeight = AppTheme.fwBold
-                    )
-                    Spacer(modifier = Modifier.height(AppTheme.spaceSmall))
+                    FormSectionHeader(stringResource(R.string.goalDetailEntriesTitle), Icons.Filled.History, GoalColor)
                 }
                 val sortedEntries =
                     existingGoalWithEntries.entries.sortedByDescending { it.timestamp }
@@ -438,29 +393,14 @@ fun GoalDetailScreen(
         // Deadline picker dialog. The deadline is a whole day, stored as its end so pacing and
         // days-left treat the chosen date as still "in time".
         if (showDatePicker) {
-            val state =
-                rememberDatePickerState(initialSelectedDateMillis = datePickerMillis(targetDate))
-            DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        state.selectedDateMillis?.let { millis ->
-                            targetDate = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneOffset.UTC).toLocalDate()
-                                .atTime(LocalTime.of(23, 59))
-                                .atZone(ZoneId.systemDefault()).toInstant()
-                        }
-                        showDatePicker = false
-                    }) { Text(stringResource(R.string.commonLabelConfirm)) }
+            NeoDatePickerDialog(
+                initialDate = targetDate,
+                onConfirm = { date ->
+                    targetDate = date.atTime(LocalTime.of(23, 59)).atZone(ZoneId.systemDefault()).toInstant()
+                    showDatePicker = false
                 },
-                dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) {
-                        Text(stringResource(R.string.commonLabelCancel))
-                    }
-                },
-            ) {
-                DatePicker(state = state)
-            }
+                onDismiss = { showDatePicker = false },
+            )
         }
     }
 }

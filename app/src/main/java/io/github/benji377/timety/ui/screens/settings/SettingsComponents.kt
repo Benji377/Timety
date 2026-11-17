@@ -33,7 +33,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -53,12 +52,15 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import kotlin.math.roundToInt
 
@@ -94,7 +96,7 @@ internal fun SettingsHeader(title: String) {
     Text(
         text = title.uppercase(),
         style = MaterialTheme.typography.bodySmall.copy(
-            color = TaskColor,
+            color = TaskColor.forText(),
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.2.sp
         ),
@@ -340,13 +342,13 @@ internal fun NumberPickerDialog(spec: NumberDialogSpec, onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            NeoButton(onClick = {
                 spec.onSave(value.toInt())
                 onDismiss()
             }) { Text(stringResource(R.string.commonLabelSave)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         }
     )
 }

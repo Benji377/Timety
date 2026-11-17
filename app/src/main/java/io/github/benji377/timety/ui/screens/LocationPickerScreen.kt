@@ -45,6 +45,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.util.location.LocationApi
@@ -175,7 +176,7 @@ fun LocationPickerScreen(
                 }
                 Text(
                     text = errorMsg,
-                    color = MaterialTheme.colorScheme.error,
+                    color = MaterialTheme.colorScheme.error.forText(),
                     modifier = Modifier.padding(16.dp)
                 )
             }

@@ -126,6 +126,7 @@ fun StatsPeriodControls(
             tags = tags,
             selectedIds = activeTagIds,
             onSelectionChange = { state.selectedTagIds = it },
+            allColor = accentColor,
             contentPadding = PaddingValues(horizontal = AppTheme.spaceLarge),
             modifier = Modifier.padding(bottom = AppTheme.spaceSmall),
         )

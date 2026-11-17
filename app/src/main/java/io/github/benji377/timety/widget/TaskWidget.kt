@@ -167,7 +167,7 @@ class TaskWidget : GlanceAppWidget() {
                     Text(
                         text = context.getString(R.string.widgetTasksDue, due.size),
                         style = TextStyle(
-                            color = ColorProvider(WarningColor),
+                            color = widgetTextColor(WarningColor),
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         ),
@@ -192,7 +192,7 @@ class TaskWidget : GlanceAppWidget() {
                                 Text(
                                     text = "${context.getString(R.string.commonTimeUpcoming)} (${upcoming.size})",
                                     style = TextStyle(
-                                        color = ColorProvider(TaskColor),
+                                        color = widgetTextColor(TaskColor),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 11.sp
                                     ),
@@ -275,7 +275,7 @@ class TaskWidget : GlanceAppWidget() {
                                 text = row.dueLabel,
                                 style = TextStyle(
                                     color = if (row.isOverdue) {
-                                        ColorProvider(ErrorColor)
+                                        widgetTextColor(ErrorColor)
                                     } else {
                                         GlanceTheme.colors.onSurfaceVariant
                                     },

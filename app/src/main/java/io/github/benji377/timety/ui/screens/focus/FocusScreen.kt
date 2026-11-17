@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreTime
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.TrackChanges
@@ -88,6 +87,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
@@ -325,7 +325,7 @@ fun FocusScreen(
     }
 
     fun requestStop() {
-        if (!isRunning && !awaitingContinue) return
+        if (!isRunning && !isPaused && !awaitingContinue) return
         pausedForStop = isRunning
         if (isRunning) sendAction(FocusTimerService.ACTION_PAUSE)
         showStopConfirmation = true
@@ -339,7 +339,13 @@ fun FocusScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        // Raised above the timer controls, so a snackbar never covers them.
+        snackbarHost = {
+            SnackbarHost(
+                snackbarHostState,
+                modifier = Modifier.padding(bottom = MAIN_BUTTON_SIZE + CONTROLS_BOTTOM_GAP),
+            )
+        },
         topBar = {
             NeoTopBar(
                 title = stringResource(R.string.focusTitle),
@@ -393,7 +399,7 @@ fun FocusScreen(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = AppTheme.lsWide,
-                        color = if (isRunning || isPaused) MaterialTheme.colorScheme.onSurfaceVariant else FocusColor,
+                        color = if (isRunning || isPaused) MaterialTheme.colorScheme.onSurfaceVariant else FocusColor.forText(),
                         modifier = Modifier.padding(vertical = 8.dp),
                     )
                 }
@@ -434,7 +440,7 @@ fun FocusScreen(
                             text = "$focusMinsToday / $focusTargetToday m",
                             fontWeight = FontWeight.Black,
                             fontSize = 15.sp,
-                            color = FocusColor,
+                            color = FocusColor.forText(),
                         )
                     }
                 }
@@ -475,7 +481,9 @@ fun FocusScreen(
                     icon = Icons.Filled.WarningAmber,
                     contentDescription = stringResource(R.string.commonTooltipDistractions),
                     enabled = isRunning || isPaused,
-                    contentColor = WarningColor,
+                    // Grey while idle, so the warning icon doesn't read as an error before a session.
+                    contentColor = if (isRunning || isPaused) WarningColor
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.TopEnd),
@@ -531,7 +539,7 @@ fun FocusScreen(
                         }
                     },
                     modifier = Modifier
-                        .size(80.dp)
+                        .size(MAIN_BUTTON_SIZE)
                         .testTag(FocusScreenTags.MAIN),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
@@ -554,6 +562,7 @@ fun FocusScreen(
                             when {
                                 isRunning -> R.string.focusActionStop
                                 awaitingContinue -> R.string.focusActionContinue
+                                isPaused -> R.string.focusActionResume
                                 else -> R.string.focusActionStart
                             }
                         ),
@@ -566,25 +575,13 @@ fun FocusScreen(
                 if (secondaryEnabled) {
                     NeoIconButton(
                         onClick = {
-                            when {
-                                awaitingContinue -> requestStop()
-                                isPaused -> startFromScratch()
-                                else -> sendAction(FocusTimerService.ACTION_PAUSE)
-                            }
+                            // Paused, the big button already resumes, so this one stops.
+                            if (awaitingContinue || isPaused) requestStop()
+                            else sendAction(FocusTimerService.ACTION_PAUSE)
                         },
-                        icon = if (awaitingContinue) {
-                            Icons.Filled.Stop
-                        } else if (isPaused) {
-                            Icons.Filled.PlayCircleFilled
-                        } else {
-                            Icons.Filled.Pause
-                        },
+                        icon = if (awaitingContinue || isPaused) Icons.Filled.Stop else Icons.Filled.Pause,
                         contentDescription = stringResource(
-                            when {
-                                awaitingContinue -> R.string.focusActionStop
-                                isPaused -> R.string.focusActionResume
-                                else -> R.string.focusActionPause
-                            }
+                            if (awaitingContinue || isPaused) R.string.focusActionStop else R.string.focusActionPause
                         ),
                         modifier = Modifier.testTag(FocusScreenTags.PAUSE),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -595,7 +592,7 @@ fun FocusScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(CONTROLS_BOTTOM_GAP))
         }
     }
 
@@ -703,7 +700,6 @@ private fun TimerGauge(
     val focusLabelDefault = stringResource(R.string.focusLabelDefault).uppercase()
     val focusLabelRest = stringResource(R.string.focusLabelRest).uppercase()
     val focusLabelSetTime = stringResource(R.string.focusLabelSetTime).uppercase()
-    val focusLabelStopwatch = stringResource(R.string.focusLabelStopwatch).uppercase()
 
     val isFlexibleMode = activeMode?.type == FocusModeType.FLEXIBLE
     val canDrag = isFlexibleMode && !isRunning && !isPaused
@@ -717,9 +713,10 @@ private fun TimerGauge(
             focusLabelSetTime,
             AppDateFormatUtils.formatDuration(flexibleMinutes * 60),
         )
+        // "Focus" like the timed modes: the mode's own name is already shown above the dial.
         isStopwatchPhaseType -> GaugeDisplay(
             0f,
-            focusLabelStopwatch,
+            focusLabelDefault,
             if (isActive) timerState.centerText else "00:00",
             pulses = isRunning,
         )
@@ -780,3 +777,9 @@ private data class GaugeDisplay(
     val isResting: Boolean = false,
     val pulses: Boolean = false,
 )
+
+/** The round start/stop button, the tallest of the timer controls. */
+private val MAIN_BUTTON_SIZE = 80.dp
+
+/** Gap under the timer controls; the snackbar clears the controls with it. */
+private val CONTROLS_BOTTOM_GAP = 40.dp

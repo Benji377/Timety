@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.darkColorScheme
@@ -10,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
@@ -60,6 +63,11 @@ internal val LightColorScheme = lightColorScheme(
     surfaceContainerHighest = PaperAltLight,
     surfaceContainerHigh = PaperAltLight,
     surfaceContainer = Color.White,
+    // Bottom sheets sit on these; left unset they fall back to Material's lavender baseline.
+    surfaceContainerLow = Color.White,
+    surfaceContainerLowest = Color.White,
+    surfaceDim = PaperAltLight,
+    surfaceBright = Color.White,
     outline = BorderLight,
     outlineVariant = Color(0xFFE5DED1),
 )
@@ -75,7 +83,7 @@ fun TimetyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = (if (darkTheme) DarkColorScheme else LightColorScheme).withTypeColor(TaskColor)
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -96,3 +104,29 @@ fun TimetyTheme(
         )
     }
 }
+
+/**
+ * Recolors the Material components in [content] (focused fields, cursors, text buttons, radios,
+ * date and time pickers) with an item type's [color], for screens about habits or goals.
+ */
+@Composable
+fun TypeColorScope(color: Color, content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = MaterialTheme.colorScheme.withTypeColor(color),
+        typography = MaterialTheme.typography,
+        shapes = MaterialTheme.shapes,
+        content = content,
+    )
+}
+
+/** [color] as the primary color, with tints of it in place of Material's lavender defaults. */
+private fun ColorScheme.withTypeColor(color: Color): ColorScheme = copy(
+    primary = color,
+    primaryContainer = color.copy(alpha = TYPE_CONTAINER_ALPHA).compositeOver(surface),
+    onPrimaryContainer = onSurface,
+    // Snackbar actions sit on the inverse surface, so the type color moves towards the normal surface.
+    inversePrimary = lerp(color, surface, INVERSE_PRIMARY_SHIFT),
+)
+
+private const val TYPE_CONTAINER_ALPHA = 0.18f
+private const val INVERSE_PRIMARY_SHIFT = 0.45f

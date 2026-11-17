@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,8 +26,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import kotlinx.coroutines.launch
@@ -72,7 +74,7 @@ internal fun AdvancedSettings(
                         singleLine = true,
                         isError = locationError != null,
                         supportingText = locationError?.let {
-                            { Text(it, color = MaterialTheme.colorScheme.error) }
+                            { Text(it, color = MaterialTheme.colorScheme.error.forText()) }
                         }
                     )
                     if (isCheckingLocation) {
@@ -92,13 +94,13 @@ internal fun AdvancedSettings(
                 }
             },
             dismissButton = {
-                TextButton(
+                NeoTextButton(
                     onClick = { closeLocationDialog() },
                     enabled = !isCheckingLocation
                 ) { Text(stringResource(R.string.commonLabelCancel)) }
             },
             confirmButton = {
-                TextButton(
+                NeoButton(
                     onClick = {
                         val trimmed = pendingLocationUrl.trim()
                         if (trimmed.isEmpty()) {

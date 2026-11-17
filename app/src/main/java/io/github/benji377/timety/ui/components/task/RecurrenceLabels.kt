@@ -9,6 +9,7 @@ import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.util.habit.HabitUtils
+import java.time.DayOfWeek
 
 /** The cadence name shown on the recurrence unit selector. */
 @Composable
@@ -63,6 +64,8 @@ fun recurrenceCadenceLabel(task: RecurringTaskEntity): String {
         RecurrenceUnit.WEEK -> {
             val days = HabitUtils.parseWeekdays(task.daysOfWeek).sorted()
             if (days.isEmpty()) base
+            // Weekly on all seven days is simply every day.
+            else if (n == 1 && days.size == DayOfWeek.entries.size) stringResource(R.string.quickHabitEveryDay)
             else stringResource(
                 R.string.recurrenceOnDays,
                 base,

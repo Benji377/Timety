@@ -55,7 +55,11 @@ import io.github.benji377.timety.ui.screens.task.RecurringTaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.RecurringTasksScreen
 import io.github.benji377.timety.ui.screens.task.TaskDetailScreen
 import io.github.benji377.timety.ui.screens.task.TaskListScreen
+import io.github.benji377.timety.ui.theme.FocusColor
+import io.github.benji377.timety.ui.theme.GoalColor
+import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
+import io.github.benji377.timety.ui.theme.TypeColorScope
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.util.reminder.ExactAlarmAccess
@@ -221,21 +225,27 @@ fun MainScreen(
                 )
             }
             composable(BottomNavItem.Focus.route) {
-                FocusScreen(
-                    onNavigateToModes = { navController.navigate(AppRoute.FOCUS_MODES.route) },
-                    onNavigateToHistory = { navController.navigate(AppRoute.FOCUS_HISTORY.route) },
-                    onNavigateToFocusSettings = { navController.navigate(SettingsPage.FOCUS.route) }
-                )
+                TypeColorScope(FocusColor) {
+                    FocusScreen(
+                        onNavigateToModes = { navController.navigate(AppRoute.FOCUS_MODES.route) },
+                        onNavigateToHistory = { navController.navigate(AppRoute.FOCUS_HISTORY.route) },
+                        onNavigateToFocusSettings = { navController.navigate(SettingsPage.FOCUS.route) }
+                    )
+                }
             }
             composable(AppRoute.FOCUS_HISTORY.route) {
-                FocusHistoryScreen(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(FocusColor) {
+                    FocusHistoryScreen(
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
             composable(AppRoute.FOCUS_MODES.route) {
-                FocusModesScreen(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(FocusColor) {
+                    FocusModesScreen(
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
             composable(BottomNavItem.Tasks.route) {
                 TaskListScreen(
@@ -249,13 +259,15 @@ fun MainScreen(
                 )
             }
             composable(BottomNavItem.Habits.route) {
-                HabitListScreen(
-                    onNavigateToHabitDetail = { habitId ->
-                        navController.navigate(AppRoute.habitDetail(habitId))
-                    },
-                    onNavigateToQuickHabits = { navController.navigate(AppRoute.QUICK_HABITS.route) },
-                    onNavigateToGoals = { navController.navigate(AppRoute.GOALS.route) }
-                )
+                TypeColorScope(HabitColor) {
+                    HabitListScreen(
+                        onNavigateToHabitDetail = { habitId ->
+                            navController.navigate(AppRoute.habitDetail(habitId))
+                        },
+                        onNavigateToQuickHabits = { navController.navigate(AppRoute.QUICK_HABITS.route) },
+                        onNavigateToGoals = { navController.navigate(AppRoute.GOALS.route) }
+                    )
+                }
             }
             composable(BottomNavItem.Profile.route) {
                 ProfileScreen(
@@ -315,23 +327,29 @@ fun MainScreen(
                 )
             }
             composable(AppRoute.QUICK_HABITS.route) {
-                QuickHabitsScreen(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(HabitColor) {
+                    QuickHabitsScreen(
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
             composable(AppRoute.GOALS.route) {
-                GoalsScreen(
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() },
-                    onNavigateToGoalDetail = { goalId ->
-                        navController.navigate(AppRoute.goalDetail(goalId))
-                    }
-                )
+                TypeColorScope(GoalColor) {
+                    GoalsScreen(
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() },
+                        onNavigateToGoalDetail = { goalId ->
+                            navController.navigate(AppRoute.goalDetail(goalId))
+                        }
+                    )
+                }
             }
             composable(AppRoute.GOAL_DETAIL.route) {
-                GoalDetailScreen(
-                    goalId = null,
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(GoalColor) {
+                    GoalDetailScreen(
+                        goalId = null,
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
             composable(
                 route = AppRoute.GOAL_DETAIL_WITH_ID,
@@ -340,10 +358,12 @@ fun MainScreen(
                 })
             ) { backStackEntry ->
                 val goalId = backStackEntry.arguments?.getString(AppRoute.ARG_GOAL_ID)
-                GoalDetailScreen(
-                    goalId = goalId,
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(GoalColor) {
+                    GoalDetailScreen(
+                        goalId = goalId,
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
             composable(AppRoute.RECURRING_TASKS.route) {
                 RecurringTasksScreen(
@@ -390,10 +410,12 @@ fun MainScreen(
                 )
             }
             composable(AppRoute.HABIT_DETAIL.route) {
-                HabitDetailScreen(
-                    habitId = null,
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(HabitColor) {
+                    HabitDetailScreen(
+                        habitId = null,
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
             composable(
                 route = AppRoute.HABIT_DETAIL_WITH_ID,
@@ -402,10 +424,12 @@ fun MainScreen(
                 })
             ) { backStackEntry ->
                 val habitId = backStackEntry.arguments?.getString(AppRoute.ARG_HABIT_ID)
-                HabitDetailScreen(
-                    habitId = habitId,
-                    onNavigateBack = dropUnlessResumed { navController.popBackStack() }
-                )
+                TypeColorScope(HabitColor) {
+                    HabitDetailScreen(
+                        habitId = habitId,
+                        onNavigateBack = dropUnlessResumed { navController.popBackStack() }
+                    )
+                }
             }
         }
     }

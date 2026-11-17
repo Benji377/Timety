@@ -13,6 +13,7 @@ import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.QuickHabitScheduling.MINUTES_PER_DAY
 import io.github.benji377.timety.util.habit.HabitUtils.parseWeekdays
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -192,7 +193,7 @@ object HabitUtils {
         val schedule = scheduleSubtitle(habit, completionsThisPeriod)
         if (habit.timesPerDay <= 1) return schedule
         val times = pluralStringResource(R.plurals.habitTimesPerDay, habit.timesPerDay, habit.timesPerDay)
-        return "$schedule · $times"
+        return "$schedule | $times"
     }
 
     @Composable
@@ -202,7 +203,10 @@ object HabitUtils {
             HabitFrequency.DAILY -> stringResource(R.string.habitFreqDaily)
             HabitFrequency.WEEKLY_EXACT -> {
                 val locale = LocalLocale.current.platformLocale
-                val days = parseWeekdays(habit.targetWeekdays).sorted()
+                val weekdays = parseWeekdays(habit.targetWeekdays)
+                // All seven days reads better as one word than as a full list.
+                if (weekdays.size == DayOfWeek.entries.size) return stringResource(R.string.habitFreqDaily)
+                val days = weekdays.sorted()
                     .joinToString(", ") { AppDateUtils.weekdayToStringShort(locale, it) }
                 stringResource(R.string.habitFreqWeekly, days)
             }

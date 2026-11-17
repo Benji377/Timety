@@ -50,6 +50,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberToday
@@ -345,7 +346,7 @@ internal fun FocusSessionsAccordion(
                         }
                         Text(
                             text = stringResource(R.string.focusMinutes, focusMins),
-                            color = SuccessColor,
+                            color = SuccessColor.forText(),
                             fontWeight = FontWeight.Bold
                         )
                     }
