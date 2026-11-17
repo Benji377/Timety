@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -56,11 +57,8 @@ fun PickerField(
             readOnly = true,
             enabled = enabled,
             label = { Text(label) },
-            // Start and trailing gap on the leading slot: [content] here is a 40dp swatch or icon circle,
-            // far wider than the 24dp glyph M3 sizes its own leading-icon spacing for, so without
-            // this the label sits flush against the swatch's edge. Kept at spaceSmall rather than
-            // anything wider because this padding also eats into the label's available width, and
-            // these fields are half-width - at spaceMedium "Select an Icon" wraps to two lines.
+            // [content] is a 40dp swatch or icon circle, far wider than the 24dp glyph M3 spaces
+            // its leading icon for, so without this the label sits flush against it.
             leadingIcon = {
                 Box(
                     modifier = Modifier.padding(start = AppTheme.spaceSmall, end = AppTheme.spaceSmall),
@@ -76,6 +74,57 @@ fun PickerField(
                 .clickable(enabled = enabled, role = Role.Button) { onClick() }
                 .semantics { contentDescription = label },
         )
+    }
+}
+
+/**
+ * The icon and color fields side by side, as used by habits and goals: each shows its current
+ * value in a bordered 40dp circle and opens its picker on tap.
+ */
+@Composable
+fun AppearanceFields(
+    iconIndex: Int?,
+    color: Color,
+    colorLabel: String,
+    enabled: Boolean,
+    onPickIcon: () -> Unit,
+    onPickColor: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
+    ) {
+        PickerField(
+            label = stringResource(R.string.detailLabelIcon),
+            enabled = enabled,
+            onClick = onPickIcon,
+            modifier = Modifier.weight(1f),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(AppTheme.neoIconButtonSize)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    .hairlineBorder(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(imageVector = HabitIcons.iconAt(iconIndex), contentDescription = null, tint = color)
+            }
+        }
+        PickerField(
+            label = colorLabel,
+            enabled = enabled,
+            onClick = onPickColor,
+            modifier = Modifier.weight(1f),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(AppTheme.neoIconButtonSize)
+                    .clip(CircleShape)
+                    .background(color)
+                    .hairlineBorder()
+            )
+        }
     }
 }
 

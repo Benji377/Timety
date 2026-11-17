@@ -33,7 +33,6 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +66,7 @@ import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
+import io.github.benji377.timety.ui.components.common.FieldLabel
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.StyledExpansionTile
@@ -89,31 +89,6 @@ import io.github.benji377.timety.util.task.Due
 import io.github.benji377.timety.util.task.ReminderPreset
 import io.github.benji377.timety.util.task.ReminderUtils
 import java.time.Instant
-
-@Composable
-internal fun SectionHeader(title: String, icon: ImageVector) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = AppTheme.spaceXLarge, bottom = AppTheme.spaceMedium)
-    ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(AppTheme.iconSizeSmall)
-        )
-        Spacer(Modifier.width(AppTheme.spaceSmall))
-        Text(
-            text = title.uppercase(),
-            fontSize = AppTheme.fsBodySmall,
-            fontWeight = AppTheme.fwBold,
-            letterSpacing = AppTheme.lsWide,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(Modifier.width(AppTheme.spaceSmall))
-        HorizontalDivider(modifier = Modifier.weight(1f))
-    }
-}
 
 /**
  * Segmented selector where the selected segment expands to show its label; the rest stay
@@ -272,8 +247,7 @@ internal fun PriorityAndEffortFields(
     val priorityLabels = Priority.entries.associateWith { stringResource(AppUtils.priorityLabel(it)) }
     val sizeLabels = TaskSize.entries.associateWith { stringResource(AppUtils.sizeLabel(it)) }
     Column {
-        Text(stringResource(R.string.taskDetailsLabelPriority), fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(AppTheme.spaceSmall))
+        FieldLabel(stringResource(R.string.taskDetailsLabelPriority))
         AccordionSelector(
             values = Priority.entries,
             selectedValue = priority,
@@ -288,8 +262,7 @@ internal fun PriorityAndEffortFields(
         )
 
         Spacer(Modifier.height(AppTheme.spaceLarge))
-        Text(stringResource(R.string.taskDetailsLabelEffort), fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(AppTheme.spaceSmall))
+        FieldLabel(stringResource(R.string.taskDetailsLabelEffort))
         AccordionSelector(
             values = TaskSize.entries,
             selectedValue = size,

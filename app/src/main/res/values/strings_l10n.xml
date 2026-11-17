@@ -180,6 +180,8 @@
     <string name="goalDetailLabelDescription">Description</string>
     <string name="goalDetailLabelDescriptionHint">Why does this goal matter?</string>
     <string name="goalDetailLabelIcon">Select an Icon</string>
+    <string name="goalDetailSectionInfo">Goal Info</string>
+    <string name="goalDetailSectionTarget">Target</string>
     <string name="goalDetailLabelName">Goal Name</string>
     <string name="goalDetailLabelNameHint">e.g., Ride 500 km, Read 12 books…</string>
     <string name="goalDetailLabelNameRequest">Please enter a name</string>
@@ -222,6 +224,9 @@
         <item quantity="other">Goal: %d days a month</item>
     </plurals>
     <string name="habitDetailLabelIcon">Select an Icon</string>
+    <string name="habitDetailSectionInfo">Habit Info</string>
+    <string name="detailSectionAppearance">Appearance</string>
+    <string name="detailLabelIcon">Icon</string>
     <string name="habitDetailLabelName">Habit Name</string>
     <string name="habitDetailLabelNameHint">e.g., Read 10 pages, Workout…</string>
     <string name="habitDetailLabelNameRequest">Please enter a name</string>

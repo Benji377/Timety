@@ -83,7 +83,7 @@ fun TagChips(tags: List<TagEntity>, modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .weight(1f, fill = false)
                     .widthIn(max = 120.dp)
-                    .background(Color(tag.colorValue), AppTheme.brPill)
+                    .background(Color(tag.colorValue), AppTheme.brSmall)
                     .padding(horizontal = AppTheme.spaceSmall, vertical = 2.dp),
             )
             Spacer(Modifier.width(AppTheme.spaceXSmall))

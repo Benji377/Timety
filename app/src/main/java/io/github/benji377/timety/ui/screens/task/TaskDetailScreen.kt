@@ -46,6 +46,7 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
+import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.NeoDatePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
@@ -55,6 +56,7 @@ import io.github.benji377.timety.ui.components.common.TagPicker
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
@@ -223,9 +225,10 @@ fun TaskDetailScreen(
         ) {
             // The basics: title, tags, description.
             item {
-                SectionHeader(
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionInfo),
-                    Icons.Outlined.Info
+                    Icons.Outlined.Info,
+                    TaskColor,
                 )
             }
             item {
@@ -264,9 +267,10 @@ fun TaskDetailScreen(
 
             // Priority and effort size.
             item {
-                SectionHeader(
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionPriorityAndEffort),
-                    Icons.Filled.BarChart
+                    Icons.Filled.BarChart,
+                    TaskColor,
                 )
             }
             item {
@@ -281,9 +285,10 @@ fun TaskDetailScreen(
 
             // Scheduling: due date and reminders.
             item {
-                SectionHeader(
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionScheduling),
-                    Icons.Filled.CalendarToday
+                    Icons.Filled.CalendarToday,
+                    TaskColor,
                 )
             }
             item {
@@ -296,7 +301,8 @@ fun TaskDetailScreen(
                     onClearTime = { due?.let { changeDue(Due.of(it.date(), null)) } },
                     onClearDate = ::clearDueDate,
                 )
-                Spacer(Modifier.height(AppTheme.spaceMedium))
+                // The reminder field hides itself in view mode when there are none.
+                if (isEditing || reminders.isNotEmpty()) Spacer(Modifier.height(AppTheme.spaceLarge))
                 TaskReminderField(
                     reminders = reminders,
                     due = due,
@@ -308,9 +314,10 @@ fun TaskDetailScreen(
 
             // Location.
             item {
-                SectionHeader(
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionLocation),
-                    Icons.Outlined.LocationOn
+                    Icons.Outlined.LocationOn,
+                    TaskColor,
                 )
             }
             item {
@@ -330,11 +337,12 @@ fun TaskDetailScreen(
                 )
             }
 
-            // Checklist / subtasks.
-            item {
-                SectionHeader(
+            // Checklist / subtasks; an empty checklist has nothing to show outside edit mode.
+            if (isEditing || subtasks.isNotEmpty()) item {
+                FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionChecklist),
-                    Icons.Filled.Checklist
+                    Icons.Filled.Checklist,
+                    TaskColor,
                 )
             }
             item {
