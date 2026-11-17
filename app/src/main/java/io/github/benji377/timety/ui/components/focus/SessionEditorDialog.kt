@@ -54,6 +54,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
@@ -62,8 +63,6 @@ import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 
 /** Default length a backfilled session is proposed with, matching one classic pomodoro. */
@@ -104,6 +103,7 @@ fun SessionEditorDialog(
     initialEndTime: Instant? = null,
     fixedTargetLabel: String? = null,
     onDelete: (() -> Unit)? = null,
+    dismissLabel: String = stringResource(R.string.commonLabelCancel),
 ) {
     // The pick is held as an id, not an entity: the modes list is a live Room flow, so a
     // re-emission while the dialog is open must not reset (or outdate) the user's selection.
@@ -141,10 +141,10 @@ fun SessionEditorDialog(
 
     val zone = ZoneId.systemDefault()
     val locale = LocalLocale.current.platformLocale
-    val dateTimeFormatter = remember(locale) {
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-            .withLocale(locale).withZone(zone)
-    }
+    // The app's own date format and 12/24-hour setting, like every other date and time on screen.
+    val dateFmt = LocalDateFormatSettings.current
+    fun formatDateTime(instant: Instant) =
+        AppDateFormatUtils.formatDateTime(instant, dateFmt.dateFormatCode, dateFmt.use24HourFormat, zone, locale)
 
     var showStartPicker by remember { mutableStateOf(false) }
     var showDurationPicker by remember { mutableStateOf(false) }
@@ -202,7 +202,7 @@ fun SessionEditorDialog(
 
                 TimeRow(
                     label = stringResource(R.string.dialogTimeMachineStartTime),
-                    value = dateTimeFormatter.format(startDateTime),
+                    value = formatDateTime(startDateTime),
                     icon = Icons.Filled.EditCalendar,
                     onClick = { showStartPicker = true },
                 )
@@ -219,7 +219,7 @@ fun SessionEditorDialog(
                 Text(
                     stringResource(
                         R.string.dialogTimeMachineEnds,
-                        dateTimeFormatter.format(endDateTime),
+                        formatDateTime(endDateTime),
                     ),
                     fontSize = AppTheme.fsLabel,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -233,7 +233,7 @@ fun SessionEditorDialog(
                         Text(stringResource(R.string.commonLabelDelete), color = ErrorColor)
                     }
                 }
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+                TextButton(onClick = onDismiss) { Text(dismissLabel) }
             }
         },
         confirmButton = {

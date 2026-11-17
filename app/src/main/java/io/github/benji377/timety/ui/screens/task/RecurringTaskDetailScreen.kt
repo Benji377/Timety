@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -87,6 +88,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
@@ -106,6 +108,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.format.TextStyle
 import java.util.UUID
 
 /** Which monthly anchoring the user picked; mapped to [MonthlyMode] plus ordinal on save. */
@@ -159,6 +162,7 @@ fun RecurringTaskDetailScreen(
         mutableStateOf(existingTask?.interval?.toString() ?: "")
     }
     var intervalError by rememberSaveable(formTask) { mutableStateOf(false) }
+    var dueError by rememberSaveable(formTask) { mutableStateOf(false) }
     var selectedWeekdays by rememberSaveable(formTask) {
         mutableStateOf(HabitUtils.parseWeekdays(existingTask?.daysOfWeek))
     }
@@ -187,6 +191,7 @@ fun RecurringTaskDetailScreen(
     var pickerTarget by remember { mutableStateOf<RecurringPickerTarget?>(null) }
 
     fun changeDue(date: LocalDate, timeMinutes: Int?) {
+        dueError = false
         dueDate = Due.of(date, timeMinutes, zone).at
         dueTimeMinutes = timeMinutes
         hasDueTime = timeMinutes != null
@@ -208,7 +213,6 @@ fun RecurringTaskDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val titleRequiredMsg = stringResource(R.string.taskDetailsSnackbarTitleRequired)
-    val dueRequiredMsg = stringResource(R.string.recurringTaskSnackbarDueRequired)
 
     val dueLocalDate = dueDate?.atZone(zone)?.toLocalDate()
     // The nth-weekday options only exist for a concrete due date; a 5th occurrence of a weekday
@@ -222,6 +226,7 @@ fun RecurringTaskDetailScreen(
         intervalError = interval == null
         val windowAmount = windowUnit?.let { unit -> windowAmountText.toIntOrNull()?.takeIf { it in unit.amounts } }
         windowError = windowUnit != null && windowAmount == null
+        dueError = dueDate == null
         val trimmedTitle = title.trim()
         if (trimmedTitle.isEmpty()) {
             scope.launch { snackbarHostState.showSnackbar(titleRequiredMsg) }
@@ -229,10 +234,7 @@ fun RecurringTaskDetailScreen(
         }
         val due = dueDate
         val dueLocal = due?.atZone(zone)?.toLocalDate()
-        if (due == null || dueLocal == null) {
-            scope.launch { snackbarHostState.showSnackbar(dueRequiredMsg) }
-            return
-        }
+        if (due == null || dueLocal == null) return
         if (interval == null || windowError) return
         val effectiveChoice = when {
             monthlyChoice == MonthlyChoice.LAST_WEEKDAY && lastAvailable -> MonthlyChoice.LAST_WEEKDAY
@@ -376,6 +378,7 @@ fun RecurringTaskDetailScreen(
                     onPickTime = { pickerTarget = RecurringPickerTarget.DUE_TIME },
                     onClearTime = { due?.let { changeDue(it.date(zone), null) } },
                     onClearDate = null,
+                    dateError = if (dueError) stringResource(R.string.recurringTaskSnackbarDueRequired) else null,
                 )
                 Spacer(Modifier.height(AppTheme.spaceLarge))
             }
@@ -423,6 +426,20 @@ fun RecurringTaskDetailScreen(
                         enabled = isEditing,
                         selectedColor = TaskColor,
                     )
+                    // Allowed, since a one-off first date can be on purpose, but worth pointing out.
+                    if (dueLocalDate != null && selectedWeekdays.isNotEmpty() &&
+                        dueLocalDate.dayOfWeek.value !in selectedWeekdays
+                    ) {
+                        Text(
+                            stringResource(
+                                R.string.recurringTaskDueDayMismatch,
+                                dueLocalDate.dayOfWeek.getDisplayName(TextStyle.FULL, LocalLocale.current.platformLocale),
+                            ),
+                            color = WarningColor,
+                            fontSize = AppTheme.fsBodySmall,
+                            modifier = Modifier.padding(top = AppTheme.spaceSmall),
+                        )
+                    }
                 }
 
                 if (unit == RecurrenceUnit.MONTH && dueLocalDate != null) {
@@ -614,7 +631,9 @@ fun RecurringTaskDetailScreen(
         } else null
         when (target) {
             RecurringPickerTarget.DUE_DATE -> NeoDatePickerDialog(
-                initialDate = dueDate ?: Instant.now(),
+                // A new weekly task starts on its first picked day rather than today.
+                initialDate = dueDate ?: firstPickedDay(selectedWeekdays.takeIf { unit == RecurrenceUnit.WEEK })
+                    .atStartOfDay(zone).toInstant(),
                 selectableDates = selectableDates,
                 onConfirm = { date ->
                     changeDue(date, dueTime)
@@ -737,8 +756,11 @@ private fun TaskWindowSection(
     }
 }
 
-/** Lines helper text up with a radio option's label. */
-private val RADIO_LABEL_INSET = 48.dp
+/**
+ * Lines helper text up with a radio option's label: the radio's drawn width (20dp dot plus its
+ * 2dp padding on each side) and the gap before the label.
+ */
+private val RADIO_LABEL_INSET = 24.dp + AppTheme.spaceMedium
 
 @Composable
 private fun MonthlyChoiceOption(
@@ -804,4 +826,11 @@ private fun OccurrenceRow(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+/** Today, or the first of [weekdays] (ISO numbers) from today on when any are given. */
+private fun firstPickedDay(weekdays: Set<Int>?): LocalDate {
+    val today = LocalDate.now()
+    if (weekdays.isNullOrEmpty()) return today
+    return generateSequence(today) { it.plusDays(1) }.first { it.dayOfWeek.value in weekdays }
 }

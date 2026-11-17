@@ -109,7 +109,6 @@
     <string name="focusLabelDefault">Фокус</string>
     <string name="focusLabelRest">Отдых</string>
     <string name="focusLabelSetTime">Задать время</string>
-    <string name="focusLabelStopwatch">Секундомер</string>
     <string name="focusMinutes">%1$d мин фокуса</string>
     <string name="focusModeDialogDeleteContent">Вы уверены, что хотите удалить этот пользовательский режим?</string>
     <string name="focusModeDialogDeleteTitle">Удалить режим фокуса?</string>
@@ -372,7 +371,6 @@
     <string name="calendarTooltipToday">К сегодняшнему дню</string>
     <string name="calendarWeekSummaryDescription">Выполнено задач: %1$d, отметок привычек: %2$d, время фокуса: %3$s</string>
     <string name="calendarWeeklyReportTitle">Отчёт за неделю</string>
-    <string name="statsLabelProductivity">Синергия продуктивности</string>
     <string name="statsPageTime">Время</string>
     <string name="statsPeriodWeek">Неделя</string>
     <string name="statsPeriodMonth">Месяц</string>

@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -340,7 +341,7 @@ internal fun NumberPickerDialog(spec: NumberDialogSpec, onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            NeoButton(onClick = {
                 spec.onSave(value.toInt())
                 onDismiss()
             }) { Text(stringResource(R.string.commonLabelSave)) }

@@ -294,6 +294,7 @@ internal fun DueDateTimeFields(
     onPickTime: () -> Unit,
     onClearTime: () -> Unit,
     onClearDate: (() -> Unit)?,
+    dateError: String? = null,
 ) {
     val dateFmt = LocalDateFormatSettings.current
     Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
@@ -304,6 +305,7 @@ internal fun DueDateTimeFields(
             isEditing = isEditing,
             onPick = onPickDate,
             onClear = onClearDate?.takeIf { due != null },
+            errorText = dateError,
             modifier = Modifier.weight(1f),
         )
         if (due != null) {
@@ -334,6 +336,7 @@ private fun PickerField(
     onPick: () -> Unit,
     onClear: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    errorText: String? = null,
 ) {
     Box(
         modifier = modifier
@@ -347,6 +350,7 @@ private fun PickerField(
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             label = { Text(label, maxLines = 1) },
+            errorText = errorText,
             leadingIcon = { Icon(icon, null) },
             trailingIcon = {
                 when {
@@ -357,7 +361,11 @@ private fun PickerField(
                     else -> Icon(Icons.Filled.Edit, null)
                 }
             },
-            colors = detailFieldColors(isEditing),
+            // A picker field is never typed into, so it is disabled and needs the error look spelled out.
+            colors = if (errorText == null) detailFieldColors(isEditing) else detailFieldColors(isEditing).copy(
+                disabledIndicatorColor = MaterialTheme.colorScheme.error,
+                disabledLabelColor = MaterialTheme.colorScheme.error,
+            ),
         )
     }
 }

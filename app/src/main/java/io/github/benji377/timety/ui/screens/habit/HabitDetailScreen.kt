@@ -81,8 +81,8 @@ import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
-import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID

@@ -113,7 +113,6 @@
     <string name="focusLabelDefault">Focus</string>
     <string name="focusLabelRest">Pausa</string>
     <string name="focusLabelSetTime">Mët l tëmp</string>
-    <string name="focusLabelStopwatch">Cronometer</string>
     <string name="focusMinutes">%1$d min focus</string>
     <string name="focusModeDialogDeleteContent">T\'es segur de ulëi scancelé chësta modalità persunalisheda?</string>
     <string name="focusModeDialogDeleteTitle">Scancelé modalità focus?</string>
@@ -386,7 +385,6 @@
     <string name="calendarTooltipToday">Va al Ncuei</string>
     <string name="calendarWeekSummaryDescription">Ncëries finedes: %1$d, abitudins fates: %2$d, tëmp de focus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Relazion dl\'ena</string>
-    <string name="statsLabelProductivity">Sinergia de produtività</string>
     <string name="statsPageTime">Tëmp</string>
     <string name="statsPeriodWeek">Ena</string>
     <string name="statsPeriodMonth">Mëns</string>

@@ -22,15 +22,11 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,11 +52,11 @@ import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
+import io.github.benji377.timety.ui.components.common.NeoDatePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagPicker
-import io.github.benji377.timety.ui.components.common.datePickerMillis
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
@@ -79,7 +75,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.UUID
 
 /**
@@ -398,29 +393,14 @@ fun GoalDetailScreen(
         // Deadline picker dialog. The deadline is a whole day, stored as its end so pacing and
         // days-left treat the chosen date as still "in time".
         if (showDatePicker) {
-            val state =
-                rememberDatePickerState(initialSelectedDateMillis = datePickerMillis(targetDate))
-            DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        state.selectedDateMillis?.let { millis ->
-                            targetDate = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneOffset.UTC).toLocalDate()
-                                .atTime(LocalTime.of(23, 59))
-                                .atZone(ZoneId.systemDefault()).toInstant()
-                        }
-                        showDatePicker = false
-                    }) { Text(stringResource(R.string.commonLabelConfirm)) }
+            NeoDatePickerDialog(
+                initialDate = targetDate,
+                onConfirm = { date ->
+                    targetDate = date.atTime(LocalTime.of(23, 59)).atZone(ZoneId.systemDefault()).toInstant()
+                    showDatePicker = false
                 },
-                dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) {
-                        Text(stringResource(R.string.commonLabelCancel))
-                    }
-                },
-            ) {
-                DatePicker(state = state)
-            }
+                onDismiss = { showDatePicker = false },
+            )
         }
     }
 }

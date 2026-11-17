@@ -103,7 +103,6 @@
     <string name="focusLabelDefault">Fokus</string>
     <string name="focusLabelRest">Istirahat</string>
     <string name="focusLabelSetTime">Atur waktu</string>
-    <string name="focusLabelStopwatch">Stopwatch</string>
     <string name="focusMinutes">%1$dm Fokus</string>
     <string name="focusModeDialogDeleteContent">Yakin ingin menghapus mode kustom ini?</string>
     <string name="focusModeDialogDeleteTitle">Hapus Mode Fokus?</string>
@@ -351,7 +350,6 @@
     <string name="calendarTooltipToday">Ke Hari Ini</string>
     <string name="calendarWeekSummaryDescription">Tugas selesai: %1$d, check-in kebiasaan: %2$d, waktu fokus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Laporan Mingguan</string>
-    <string name="statsLabelProductivity">Sinergi Produktivitas</string>
     <string name="statsPageTime">Waktu</string>
     <string name="statsPeriodWeek">Minggu</string>
     <string name="statsPeriodMonth">Bulan</string>

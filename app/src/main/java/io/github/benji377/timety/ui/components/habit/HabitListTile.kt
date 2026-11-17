@@ -19,7 +19,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -320,7 +320,7 @@ private fun HabitTileContent(
             // Bordered container rather than a bare glyph floating with no weight of its own.
             NeoIconButton(
                 onClick = onMarkPastCompletion,
-                icon = Icons.Filled.Schedule,
+                icon = Icons.Filled.EditCalendar,
                 contentDescription = stringResource(R.string.habitMarkPastCompletionTooltip),
             )
         }

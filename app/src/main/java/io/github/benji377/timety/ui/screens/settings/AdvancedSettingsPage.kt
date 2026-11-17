@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
@@ -98,7 +99,7 @@ internal fun AdvancedSettings(
                 ) { Text(stringResource(R.string.commonLabelCancel)) }
             },
             confirmButton = {
-                TextButton(
+                NeoButton(
                     onClick = {
                         val trimmed = pendingLocationUrl.trim()
                         if (trimmed.isEmpty()) {

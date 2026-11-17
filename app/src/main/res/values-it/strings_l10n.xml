@@ -105,7 +105,6 @@
     <string name="focusLabelDefault">Focus</string>
     <string name="focusLabelRest">Pausa</string>
     <string name="focusLabelSetTime">Imposta tempo</string>
-    <string name="focusLabelStopwatch">Cronometro</string>
     <string name="focusMinutes">%1$d min di focus</string>
     <string name="focusModeDialogDeleteContent">Sei sicuro di voler eliminare questa modalità personalizzata?</string>
     <string name="focusModeDialogDeleteTitle">Eliminare la modalità di focus?</string>
@@ -358,7 +357,6 @@
     <string name="calendarTooltipToday">Vai a Oggi</string>
     <string name="calendarWeekSummaryDescription">Attività completate: %1$d, abitudini completate: %2$d, tempo di focus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Resoconto settimanale</string>
-    <string name="statsLabelProductivity">Sinergia di produttività</string>
     <string name="statsPageTime">Tempo</string>
     <string name="statsPeriodWeek">Settimana</string>
     <string name="statsPeriodMonth">Mese</string>

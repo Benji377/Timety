@@ -67,6 +67,7 @@ import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TextInputDialog
@@ -205,7 +206,7 @@ fun ProfileScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                NeoButton(
                     enabled = preview != null,
                     onClick = {
                         showShareWrapupDialog = false

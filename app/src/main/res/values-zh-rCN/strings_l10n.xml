@@ -103,7 +103,6 @@
     <string name="focusLabelDefault">专注</string>
     <string name="focusLabelRest">休息</string>
     <string name="focusLabelSetTime">设置时间</string>
-    <string name="focusLabelStopwatch">秒表</string>
     <string name="focusMinutes">%1$d分钟 专注计时</string>
     <string name="focusModeDialogDeleteContent">您确定要删除此自定义模式吗？</string>
     <string name="focusModeDialogDeleteTitle">删除专注模式？</string>
@@ -351,7 +350,6 @@
     <string name="calendarTooltipToday">回到今天</string>
     <string name="calendarWeekSummaryDescription">已完成任务：%1$d，习惯打卡：%2$d，专注时长：%3$s</string>
     <string name="calendarWeeklyReportTitle">每周报告</string>
-    <string name="statsLabelProductivity">生产力协同</string>
     <string name="statsPageTime">时间</string>
     <string name="statsPeriodWeek">周</string>
     <string name="statsPeriodMonth">月</string>

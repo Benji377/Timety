@@ -21,7 +21,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +53,7 @@ import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
+import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
@@ -106,28 +106,25 @@ fun GoalsScreen(
                     BackNavigationIcon(onClick = onNavigateBack)
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            NeoFab(
+                onClick = { onNavigateToGoalDetail(null) },
+                containerColor = GoalColor,
+                contentDescription = stringResource(R.string.goalsLabelAdd),
+            )
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(bottom = AppTheme.space3XLarge),
+            contentPadding = PaddingValues(
+                top = AppTheme.spaceSmall,
+                // Keep the last card's log button clear of the FAB.
+                bottom = AppTheme.space3XLarge,
+            ),
         ) {
-            item {
-                NeoButton(
-                    onClick = { onNavigateToGoalDetail(null) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppTheme.spaceLarge),
-                    colors = ButtonDefaults.buttonColors(containerColor = GoalColor),
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null)
-                    Spacer(Modifier.width(AppTheme.spaceSmall))
-                    Text(stringResource(R.string.goalsLabelAdd))
-                }
-            }
-
             item {
                 TagFilterRow(
                     allColor = GoalColor,
@@ -450,7 +447,7 @@ private fun GoalEntryDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            NeoButton(
                 enabled = value >= 1,
                 onClick = { onConfirm(value, timestamp) },
             ) { Text(stringResource(R.string.commonLabelConfirm)) }
