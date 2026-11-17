@@ -28,6 +28,7 @@ import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
+import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.data.model.user.DayRatingEntity
 import io.github.benji377.timety.data.model.user.UserProfileEntity
 import io.github.benji377.timety.services.FocusTimerManager
@@ -491,6 +492,8 @@ class BackupRoundTripTest {
             interval = 2,
             monthlyDay = 31,
             reminderOffsetsMinutes = listOf(0, 60),
+            windowAmount = 3,
+            windowUnit = TaskWindowUnit.HOUR,
             createdAt = now,
         )
         val occurrence = RecurringOccurrenceEntity(

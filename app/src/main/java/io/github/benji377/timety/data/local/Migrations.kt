@@ -344,14 +344,17 @@ private fun readLegacySessions(db: SupportSQLiteDatabase): Map<String, LegacySes
     }
 
 /**
- * Adds `hasDueTime` to tasks and recurring tasks (existing due dates all have a time) and
- * `timesPerDay` to habits (existing habits are once a day).
+ * Adds `hasDueTime` to tasks and recurring tasks (existing due dates all have a time),
+ * `timesPerDay` to habits (existing habits are once a day), and the per-task window to recurring
+ * tasks (null = the global window).
  */
 val MIGRATION_6_7 = object : Migration(6, 7) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE `tasks` ADD COLUMN `hasDueTime` INTEGER NOT NULL DEFAULT 1")
         db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `hasDueTime` INTEGER NOT NULL DEFAULT 1")
         db.execSQL("ALTER TABLE `habits` ADD COLUMN `timesPerDay` INTEGER NOT NULL DEFAULT 1")
+        db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `windowAmount` INTEGER")
+        db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `windowUnit` TEXT")
     }
 }
 

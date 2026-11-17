@@ -20,6 +20,16 @@ enum class RecurrenceUnit {
     YEAR
 }
 
+/**
+ * The unit of a recurring task's own task window, with the largest amount it accepts. DAY and WEEK
+ * count calendar days; HOUR counts from the due time and needs one.
+ */
+enum class TaskWindowUnit(val maxAmount: Int) {
+    HOUR(48),
+    DAY(60),
+    WEEK(26)
+}
+
 /** How a MONTH-unit recurrence anchors inside the month. */
 enum class MonthlyMode {
     /** The same day number each month, e.g. "on day 3"; clamped in shorter months. */
@@ -71,6 +81,10 @@ data class RecurringTaskEntity(
     val monthlyWeekday: Int? = null,
     /** Reminder offsets in minutes before the reminder anchor; empty = a single reminder at it. */
     val reminderOffsetsMinutes: List<Int> = emptyList(),
+    /** How many [windowUnit]s before the due date the task shows in lists. Null = the global window. */
+    val windowAmount: Int? = null,
+    /** Null = the global upcoming task window. */
+    val windowUnit: TaskWindowUnit? = null,
     val createdAt: Instant,
 ) {
     companion object {

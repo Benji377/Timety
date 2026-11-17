@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "e012a5f7ee8c04722aa6c150b0f6bf02",
+    "identityHash": "4936d359272daf0a3fbb7db4f93c3cae",
     "entities": [
       {
         "tableName": "tasks",
@@ -159,7 +159,7 @@
       },
       {
         "tableName": "recurring_tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `hasDueTime` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `dueDate` INTEGER NOT NULL, `hasDueTime` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `windowAmount` INTEGER, `windowUnit` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -239,6 +239,16 @@
             "columnName": "reminderOffsetsMinutes",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "windowAmount",
+            "columnName": "windowAmount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "windowUnit",
+            "columnName": "windowUnit",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "createdAt",
@@ -1307,7 +1317,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e012a5f7ee8c04722aa6c150b0f6bf02')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4936d359272daf0a3fbb7db4f93c3cae')"
     ]
   }
 }

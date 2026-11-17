@@ -3,6 +3,7 @@ package io.github.benji377.timety.util.task
 import io.github.benji377.timety.data.model.task.MonthlyMode
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
+import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -190,6 +191,55 @@ class RecurrenceUtilsTest {
         val t = task(at(2026, 7, 17), RecurrenceUnit.WEEK)
         assertEquals(
             RecurringStatus.SCHEDULED,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 12), horizonDays = 7, zone = zone)
+        )
+    }
+
+    @Test
+    fun statusOf_customDayWindow_overridesHorizon() {
+        // Due Jul 12: inside the 7-day default, but outside a 2-day window until Jul 10.
+        val t = task(at(2026, 7, 12), RecurrenceUnit.WEEK)
+            .copy(windowAmount = 2, windowUnit = TaskWindowUnit.DAY)
+        assertEquals(
+            RecurringStatus.SCHEDULED,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 23), horizonDays = 7, zone = zone)
+        )
+        assertEquals(
+            RecurringStatus.UPCOMING,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 10, 0), horizonDays = 7, zone = zone)
+        )
+    }
+
+    @Test
+    fun statusOf_customWeekWindow_opensBeyondHorizon() {
+        val t = task(at(2026, 7, 30), RecurrenceUnit.MONTH)
+            .copy(windowAmount = 3, windowUnit = TaskWindowUnit.WEEK)
+        assertEquals(
+            RecurringStatus.UPCOMING,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 12), horizonDays = 7, zone = zone)
+        )
+    }
+
+    @Test
+    fun statusOf_hourWindow_hidesTodayUntilItOpens() {
+        val t = task(at(2026, 7, 9, 18), RecurrenceUnit.WEEK)
+            .copy(windowAmount = 2, windowUnit = TaskWindowUnit.HOUR)
+        assertEquals(
+            RecurringStatus.SCHEDULED,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 15), horizonDays = 7, zone = zone)
+        )
+        assertEquals(
+            RecurringStatus.DUE_TODAY,
+            RecurrenceUtils.statusOf(t, at(2026, 7, 9, 16), horizonDays = 7, zone = zone)
+        )
+    }
+
+    @Test
+    fun statusOf_hourWindowOnDateOnlyTask_usesHorizon() {
+        val t = task(at(2026, 7, 12, 0), RecurrenceUnit.WEEK)
+            .copy(hasDueTime = false, windowAmount = 2, windowUnit = TaskWindowUnit.HOUR)
+        assertEquals(
+            RecurringStatus.UPCOMING,
             RecurrenceUtils.statusOf(t, at(2026, 7, 9, 12), horizonDays = 7, zone = zone)
         )
     }

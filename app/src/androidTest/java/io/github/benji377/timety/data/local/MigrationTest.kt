@@ -344,7 +344,7 @@ class MigrationTest {
     }
 
     @Test
-    fun migrate6To7_marksDueDatesTimedAndHabitsOnceADay() {
+    fun migrate6To7_marksDueDatesTimedHabitsOnceADayAndWindowsDefault() {
         val dbName = "migration-test-6-7"
 
         helper.createDatabase(dbName, 6).apply {
@@ -376,6 +376,10 @@ class MigrationTest {
         db.query("SELECT timesPerDay FROM habits WHERE id = 'h1'").use { cursor ->
             cursor.moveToFirst()
             assertEquals(1, cursor.getInt(0))
+        }
+        db.query("SELECT windowAmount, windowUnit FROM recurring_tasks WHERE id = 'r1'").use { cursor ->
+            cursor.moveToFirst()
+            assertTrue(cursor.isNull(0) && cursor.isNull(1))
         }
         db.close()
     }

@@ -10,6 +10,7 @@ import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
+import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.util.habit.QuickHabitScheduling.MINUTES_PER_DAY
 import org.json.JSONArray
@@ -86,12 +87,18 @@ internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObjec
     put("monthlyOrdinal", orNull(task.monthlyOrdinal))
     put("monthlyWeekday", orNull(task.monthlyWeekday))
     put("reminderOffsetsMinutes", JSONArray(task.reminderOffsetsMinutes))
+    put("windowAmount", orNull(task.windowAmount))
+    put("windowUnit", orNull(task.windowUnit?.name))
     put("createdAt", task.createdAt.toString())
     put("occurrences", JSONArray(occurrences.map { it.completedAt.toString() }))
 }
 
 internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurrences {
     val id = json.stringOrNull("id") ?: newId()
+    // Kept only as a valid pair; anything else falls back to the global window.
+    val windowUnit = json.stringOrNull("windowUnit")
+        ?.let { name -> TaskWindowUnit.entries.firstOrNull { it.name == name } }
+    val windowAmount = windowUnit?.let { unit -> json.intOrNull("windowAmount")?.takeIf { it in 1..unit.maxAmount } }
     val task = RecurringTaskEntity(
         id = id,
         title = json.stringOrNull("title") ?: "",
@@ -107,6 +114,8 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
         monthlyOrdinal = json.intOrNull("monthlyOrdinal"),
         monthlyWeekday = json.intOrNull("monthlyWeekday"),
         reminderOffsetsMinutes = json.intList("reminderOffsetsMinutes"),
+        windowAmount = windowAmount,
+        windowUnit = windowUnit.takeIf { windowAmount != null },
         createdAt = json.instantOrNull("createdAt") ?: Instant.now(),
     )
     val occurrences = json.instantList("occurrences")
