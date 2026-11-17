@@ -55,6 +55,7 @@ import io.github.benji377.timety.ui.theme.GaugeBgLight
 import io.github.benji377.timety.ui.theme.GaugeLabelDark
 import io.github.benji377.timety.ui.theme.GaugeWhite
 import io.github.benji377.timety.ui.theme.LocalIsDarkTheme
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.theme.hairlineBorder
 import kotlin.math.PI
 import kotlin.math.atan2
@@ -266,7 +267,7 @@ fun InteractiveGauge(
                         text = bottomText,
                         fontSize = AppTheme.fsBodyLarge,
                         fontWeight = AppTheme.fwBold,
-                        color = bottomTextColor,
+                        color = bottomTextColor.forText(),
                     )
                 }
             }

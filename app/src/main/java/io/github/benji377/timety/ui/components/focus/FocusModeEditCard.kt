@@ -27,7 +27,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,12 +52,14 @@ import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.WifiOffColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.theme.hairlineBorder
 
 /**
@@ -203,7 +204,7 @@ private fun OverviewView(
                 text = if (mode.isSystem) stringResource(R.string.focusModeLabelTypeSystem) else stringResource(
                     R.string.focusModeLabelTypeCustom
                 ),
-                color = if (mode.isSystem) MaterialTheme.colorScheme.onSurfaceVariant else FocusColor,
+                color = if (mode.isSystem) MaterialTheme.colorScheme.onSurfaceVariant else FocusColor.forText(),
                 fontSize = AppTheme.fsBodySmall,
                 fontWeight = FontWeight.Medium,
             )
@@ -271,7 +272,7 @@ private fun EditorView(
             stringResource(R.string.focusModeLabelEditing),
             fontWeight = FontWeight.Bold,
             fontSize = AppTheme.fsBodyLarge,
-            color = FocusColor,
+            color = FocusColor.forText(),
         )
         NeoIconButton(
             onClick = onCancel,
@@ -342,7 +343,7 @@ private fun EditorView(
     Spacer(modifier = Modifier.height(AppTheme.spaceXLarge))
 
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(onClick = onCancel) { Text(stringResource(R.string.commonLabelCancel)) }
+        NeoTextButton(onClick = onCancel) { Text(stringResource(R.string.commonLabelCancel)) }
         Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
         NeoButton(onClick = onSave, colors = ButtonDefaults.elevatedButtonColors()) {
             Icon(

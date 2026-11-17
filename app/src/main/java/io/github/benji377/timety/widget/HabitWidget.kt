@@ -180,7 +180,7 @@ class HabitWidget : GlanceAppWidget() {
                     Text(
                         text = context.getString(R.string.widgetHabitsToday),
                         style = TextStyle(
-                            color = ColorProvider(HabitColor),
+                            color = widgetTextColor(HabitColor),
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         ),
@@ -190,7 +190,7 @@ class HabitWidget : GlanceAppWidget() {
                     Text(
                         text = "$dueCount",
                         style = TextStyle(
-                            color = ColorProvider(HabitColor),
+                            color = widgetTextColor(HabitColor),
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         )
@@ -249,7 +249,7 @@ class HabitWidget : GlanceAppWidget() {
                     Text(
                         text = "${row.completed} / ${row.total}",
                         style = TextStyle(
-                            color = if (row.completed == row.total) ColorProvider(SuccessColor)
+                            color = if (row.completed == row.total) widgetTextColor(SuccessColor)
                             else GlanceTheme.colors.onSurface,
                             fontWeight = FontWeight.Bold,
                             fontSize = 10.sp

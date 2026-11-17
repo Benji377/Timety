@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import io.github.benji377.timety.ui.theme.AppTheme
+import io.github.benji377.timety.ui.theme.forText
 
 /**
  * Uppercase, icon-led title that opens a group of fields on a detail screen, tinted with the item
@@ -42,7 +43,7 @@ fun FormSectionHeader(
             fontSize = AppTheme.fsBodySmall,
             fontWeight = AppTheme.fwBold,
             letterSpacing = AppTheme.lsWide,
-            color = color,
+            color = color.forText(),
         )
         Spacer(Modifier.width(AppTheme.spaceSmall))
         HorizontalDivider(modifier = Modifier.weight(1f))

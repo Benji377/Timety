@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -182,7 +181,7 @@ fun IconPickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
     )
 }
@@ -211,7 +210,7 @@ fun ColorPickerDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
     )
 }

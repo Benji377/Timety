@@ -19,7 +19,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,10 +29,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.stats.PeriodSummary
 import io.github.benji377.timety.util.stats.ReportPeriod
@@ -122,7 +123,7 @@ fun PeriodReportDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelClose)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelClose)) }
         }
     )
 }
@@ -153,7 +154,7 @@ private fun ReportRow(
                 Text(change, style = MaterialTheme.typography.bodySmall)
                 Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
             }
-            Text(value, fontWeight = FontWeight.Bold, color = color)
+            Text(value, fontWeight = FontWeight.Bold, color = color.forText())
         }
     }
     Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))

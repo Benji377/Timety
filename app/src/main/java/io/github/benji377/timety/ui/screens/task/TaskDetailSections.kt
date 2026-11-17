@@ -81,6 +81,7 @@ import io.github.benji377.timety.ui.theme.InfoColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -467,7 +468,7 @@ internal fun LocationField(
             ) {
                 Icon(Icons.Outlined.CloudOff, contentDescription = null, tint = WarningColor, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
-                Text(stringResource(R.string.taskDetailsLocationOffline), fontSize = AppTheme.fsBodySmall, color = WarningColor)
+                Text(stringResource(R.string.taskDetailsLocationOffline), fontSize = AppTheme.fsBodySmall, color = WarningColor.forText())
             }
         }
 

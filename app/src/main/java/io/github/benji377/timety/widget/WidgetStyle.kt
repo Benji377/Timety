@@ -2,11 +2,13 @@ package io.github.benji377.timety.widget
 
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.glance.ColorFilter
 import androidx.glance.GlanceModifier
 import androidx.glance.ImageProvider
 import androidx.glance.background
+import androidx.glance.color.ColorProvider as DayNightColorProvider
 import androidx.glance.layout.Box
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
@@ -15,12 +17,17 @@ import androidx.glance.unit.ColorProvider
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.DarkColorScheme
 import io.github.benji377.timety.ui.theme.LightColorScheme
+import io.github.benji377.timety.ui.theme.forText
 
 /**
  * The app's own light and dark palettes for the widgets, in place of the wallpaper-based system
  * colors. Light or dark follows the phone.
  */
 internal val TimetyWidgetColors = ColorProviders(light = LightColorScheme, dark = DarkColorScheme)
+
+/** [color] in its readable text shade for the light and the dark widget palette. */
+internal fun widgetTextColor(color: Color): ColorProvider =
+    DayNightColorProvider(day = color.forText(LightColorScheme), night = color.forText(DarkColorScheme))
 
 /**
  * Which corners an [OutlinedBox] rounds, and how much: the widget itself like the app's cards,

@@ -10,7 +10,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
@@ -68,7 +67,7 @@ fun NeoTimePickerDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
     )
 }
@@ -109,7 +108,7 @@ fun NeoDurationPickerDialog(
             }) { Text(confirmLabel ?: stringResource(R.string.commonLabelConfirm)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
     )
 }
@@ -156,7 +155,7 @@ fun NeoDatePickerDialog(
             ) { Text(stringResource(R.string.commonLabelConfirm)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
     ) {
         DatePicker(state = state, colors = colors)

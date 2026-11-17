@@ -34,6 +34,7 @@ import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
 import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.SuccessColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.util.habit.HabitUtils
 import java.time.LocalDate
 
@@ -132,7 +133,7 @@ fun GroupedHabitsSection(
                             text = "$completedCount / ${globalStack.size}",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (allDone) SuccessColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (allDone) SuccessColor.forText() else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                         // Same expand arrow as the section headers, so a collapsed stack looks tappable.

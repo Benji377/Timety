@@ -87,6 +87,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
@@ -398,7 +399,7 @@ fun FocusScreen(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = AppTheme.lsWide,
-                        color = if (isRunning || isPaused) MaterialTheme.colorScheme.onSurfaceVariant else FocusColor,
+                        color = if (isRunning || isPaused) MaterialTheme.colorScheme.onSurfaceVariant else FocusColor.forText(),
                         modifier = Modifier.padding(vertical = 8.dp),
                     )
                 }
@@ -439,7 +440,7 @@ fun FocusScreen(
                             text = "$focusMinsToday / $focusTargetToday m",
                             fontWeight = FontWeight.Black,
                             fontSize = 15.sp,
-                            color = FocusColor,
+                            color = FocusColor.forText(),
                         )
                     }
                 }

@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,11 +49,13 @@ import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TypeColorScope
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
@@ -232,11 +233,11 @@ fun SessionEditorDialog(
             dismissButton = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (onDelete != null) {
-                        TextButton(onClick = { showDeleteConfirmation = true }) {
-                            Text(stringResource(R.string.commonLabelDelete), color = ErrorColor)
+                        NeoTextButton(onClick = { showDeleteConfirmation = true }) {
+                            Text(stringResource(R.string.commonLabelDelete), color = ErrorColor.forText())
                         }
                     }
-                    TextButton(onClick = onDismiss) { Text(dismissLabel) }
+                    NeoTextButton(onClick = onDismiss) { Text(dismissLabel) }
                 }
             },
             confirmButton = {

@@ -35,7 +35,6 @@ import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,6 +71,7 @@ import io.github.benji377.timety.ui.components.common.NeoDateTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagPicker
@@ -89,6 +89,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
@@ -435,7 +436,7 @@ fun RecurringTaskDetailScreen(
                                 R.string.recurringTaskDueDayMismatch,
                                 dueLocalDate.dayOfWeek.getDisplayName(TextStyle.FULL, LocalLocale.current.platformLocale),
                             ),
-                            color = WarningColor,
+                            color = WarningColor.forText(),
                             fontSize = AppTheme.fsBodySmall,
                             modifier = Modifier.padding(top = AppTheme.spaceSmall),
                         )
@@ -566,7 +567,7 @@ fun RecurringTaskDetailScreen(
                         Icons.Filled.History,
                         TaskColor,
                     ) {
-                        TextButton(onClick = {
+                        NeoTextButton(onClick = {
                             pickerTarget = RecurringPickerTarget.PAST_OCCURRENCE
                         }) {
                             Icon(

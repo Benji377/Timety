@@ -46,6 +46,7 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.datetime.CalendarUtils
 import io.github.benji377.timety.util.habit.HabitRates
@@ -300,7 +301,7 @@ private fun WeekSummaryChip(
                         "-"
                     },
                     color = if (summary.focusMinutes > 0) {
-                        SuccessColor
+                        SuccessColor.forText()
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },

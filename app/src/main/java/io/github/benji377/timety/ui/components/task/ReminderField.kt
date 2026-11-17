@@ -41,6 +41,7 @@ import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.detailFieldColors
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.WarningColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.util.task.ReminderPreset
 
 /**
@@ -199,7 +200,7 @@ fun ReminderField(
                 }
                 Text(
                     text = warning ?: hint,
-                    color = if (warning != null) WarningColor
+                    color = if (warning != null) WarningColor.forText()
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = AppTheme.fsBodySmall,
                 )

@@ -26,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -58,6 +57,7 @@ import io.github.benji377.timety.ui.components.common.NeoFab
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoProgressBar
+import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.components.common.TagFilterRow
@@ -66,6 +66,7 @@ import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.GoalColor
 import io.github.benji377.timety.ui.theme.SuccessColor
+import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.GoalViewModel
@@ -303,7 +304,7 @@ private fun GoalCard(
                             AppDateFormatUtils.formatDate(completedAt, dateFmt.dateFormatCode),
                         ),
                         style = MaterialTheme.typography.bodySmall,
-                        color = SuccessColor,
+                        color = SuccessColor.forText(),
                     )
                 } else {
                     PaceSummaryRow(goalWithEntries)
@@ -355,14 +356,14 @@ private fun PaceSummaryRow(goalWithEntries: GoalWithEntries) {
         Text(
             text = paceText,
             style = MaterialTheme.typography.bodySmall,
-            color = paceColor,
+            color = paceColor.forText(),
             modifier = Modifier.weight(1f),
         )
         Text(
             text = deadlineText,
             style = MaterialTheme.typography.bodySmall,
             color = if (daysLeft < 0) {
-                MaterialTheme.colorScheme.error
+                MaterialTheme.colorScheme.error.forText()
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             },
@@ -469,7 +470,7 @@ private fun GoalEntryDialog(
             ) { Text(stringResource(R.string.commonLabelConfirm)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
+            NeoTextButton(onClick = onDismiss) { Text(stringResource(R.string.commonLabelCancel)) }
         },
     )
 

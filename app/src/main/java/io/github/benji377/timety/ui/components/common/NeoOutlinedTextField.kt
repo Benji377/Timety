@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.theme.forText
 
 /**
  * Outlined text field built on [BasicTextField] with M3's [OutlinedTextFieldDefaults] decoration,
@@ -70,7 +71,7 @@ fun NeoOutlinedTextField(
     selectAllInitially: Boolean = false,
 ) {
     val mergedTextStyle = textStyle.merge(TextStyle(color = MaterialTheme.colorScheme.onSurface))
-    val shownSupportingText = supportingText ?: errorText?.let { { Text(it, color = ErrorColor) } }
+    val shownSupportingText = supportingText ?: errorText?.let { { Text(it, color = ErrorColor.forText()) } }
     val showsError = isError || errorText != null
 
     // Held as a TextFieldValue so a field focused from code starts with the cursor after its text,
