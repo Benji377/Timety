@@ -103,7 +103,6 @@
     <string name="focusLabelDefault">Fokus</string>
     <string name="focusLabelRest">Istirahat</string>
     <string name="focusLabelSetTime">Atur waktu</string>
-    <string name="focusLabelStopwatch">Stopwatch</string>
     <string name="focusMinutes">%1$dm Fokus</string>
     <string name="focusModeDialogDeleteContent">Yakin ingin menghapus mode kustom ini?</string>
     <string name="focusModeDialogDeleteTitle">Hapus Mode Fokus?</string>
@@ -175,6 +174,8 @@
     <string name="goalDetailLabelDescription">Deskripsi</string>
     <string name="goalDetailLabelDescriptionHint">Kenapa tujuan ini penting?</string>
     <string name="goalDetailLabelIcon">Pilih Ikon</string>
+    <string name="goalDetailSectionInfo">Goal Info</string>
+    <string name="goalDetailSectionTarget">Target</string>
     <string name="goalDetailLabelName">Nama Tujuan</string>
     <string name="goalDetailLabelNameHint">mis., Bersepeda 500 km, Baca 12 buku…</string>
     <string name="goalDetailLabelNameRequest">Masukkan nama</string>
@@ -215,6 +216,9 @@
         <item quantity="other">Target: %d hari per bulan</item>
     </plurals>
     <string name="habitDetailLabelIcon">Pilih Ikon</string>
+    <string name="habitDetailSectionInfo">Habit Info</string>
+    <string name="detailSectionAppearance">Appearance</string>
+    <string name="detailLabelIcon">Icon</string>
     <string name="habitDetailLabelName">Nama Kebiasaan</string>
     <string name="habitDetailLabelNameHint">mis., Baca 10 halaman, Olahraga…</string>
     <string name="habitDetailLabelNameRequest">Masukkan nama</string>
@@ -269,9 +273,12 @@
     <string name="taskDeleteTitle">Hapus Tugas</string>
     <string name="taskFocusLogSnackbar">Sesi fokus dilampirkan</string>
     <string name="taskFocusLogTitle">Catat Waktu Fokus</string>
+    <string name="taskFocusLogSkip">Skip</string>
+    <string name="taskCompletedSnackbar">Done: %1$s</string>
     <string name="taskDetailsLabelDescription">Deskripsi</string>
     <string name="taskDetailsLabelAllDay">All day</string>
     <string name="taskDetailsLabelDueDateSet">Atur Tenggat</string>
+    <string name="taskDetailsLabelDueDate">Due date</string>
     <string name="taskDetailsLabelDueTime">Due time</string>
     <string name="taskDetailsLabelEffort">Usaha</string>
     <string name="taskDetailsLabelLocation">Lokasi</string>
@@ -361,7 +368,7 @@
     <string name="calendarTooltipToday">Ke Hari Ini</string>
     <string name="calendarWeekSummaryDescription">Tugas selesai: %1$d, check-in kebiasaan: %2$d, waktu fokus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Laporan Mingguan</string>
-    <string name="statsLabelProductivity">Sinergi Produktivitas</string>
+    <string name="statsLabelProductivity">Focus and tasks</string>
     <string name="statsPageTime">Waktu</string>
     <string name="statsPeriodWeek">Minggu</string>
     <string name="statsPeriodMonth">Bulan</string>
@@ -690,6 +697,7 @@
     <string name="recurringTaskTitleView">Tugas Berulang</string>
     <string name="recurringTaskLabelNextDue">Tenggat berikutnya</string>
     <string name="recurringTaskSnackbarDueRequired">Atur dulu tenggat berikutnya</string>
+    <string name="recurringTaskDueDayMismatch">Next due is a %1$s, which isn\'t one of the picked days. Later dates follow the picked days.</string>
     <string name="recurringTaskMonthlyOnDay">Pada tanggal %1$d</string>
     <string name="recurringTaskMonthlyOnNth">Pada %2$s %1$s</string>
     <string name="recurringTaskReminderMinutesBefore">%1$d mnt sebelumnya</string>
@@ -762,7 +770,7 @@
     <string name="quickHabitSpecificDays">Hari tertentu</string>
     <string name="quickHabitStartLabel">Dari</string>
     <string name="quickHabitEndLabel">Sampai</string>
-    <string name="quickHabitCardSubtitle">%1$s · %2$s</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Hapus Kebiasaan Cepat</string>
     <string name="quickHabitDeleteContent">Yakin ingin menghapus \"%1$s\"?</string>
