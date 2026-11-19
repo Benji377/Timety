@@ -179,6 +179,8 @@
     <string name="goalDetailLabelDescription">Descrizione</string>
     <string name="goalDetailLabelDescriptionHint">Perché questo obiettivo conta?</string>
     <string name="goalDetailLabelIcon">Seleziona un\'icona</string>
+    <string name="goalDetailSectionInfo">Info obiettivo</string>
+    <string name="goalDetailSectionTarget">Traguardo</string>
     <string name="goalDetailLabelName">Nome obiettivo</string>
     <string name="goalDetailLabelNameHint">es., Pedalare 500 km, Leggere 12 libri…</string>
     <string name="goalDetailLabelNameRequest">Inserisci un nome</string>
@@ -221,6 +223,9 @@
         <item quantity="other">Obiettivo: %d giorni al mese</item>
     </plurals>
     <string name="habitDetailLabelIcon">Seleziona un\'icona</string>
+    <string name="habitDetailSectionInfo">Info abitudine</string>
+    <string name="detailSectionAppearance">Aspetto</string>
+    <string name="detailLabelIcon">Icona</string>
     <string name="habitDetailLabelName">Nome dell\'abitudine</string>
     <string name="habitDetailLabelNameHint">es., Leggere 10 pagine, Allenamento…</string>
     <string name="habitDetailLabelNameRequest">Inserisci un nome</string>
@@ -246,6 +251,14 @@
     <string name="habitFreqFlexible">%1$d / %2$d questa settimana</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d questo mese</string>
     <string name="habitFreqWeekly">Settimanale: %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="one">Una volta al giorno</item>
+        <item quantity="other">%d volte al giorno</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Oggi</string>
+    <string name="habitTodayCheckIn">Completa</string>
+    <string name="habitTodayHistory">Cronologia</string>
     <string name="habitHistoryCompletedAt">Completato alle %1$s</string>
     <string name="habitHistoryEmpty">Nessuna cronologia ancora.</string>
     <string name="habitHistoryRemoveCompletion">Rimuovere il completamento per il %1$s?</string>
@@ -268,8 +281,13 @@
     <string name="taskDeleteTitle">Elimina attività</string>
     <string name="taskFocusLogSnackbar">Sessione di focus collegata</string>
     <string name="taskFocusLogTitle">Registra tempo di focus</string>
+    <string name="taskFocusLogSkip">Salta</string>
+    <string name="taskCompletedSnackbar">Fatto: %1$s</string>
     <string name="taskDetailsLabelDescription">Descrizione</string>
+    <string name="taskDetailsLabelAllDay">Tutto il giorno</string>
     <string name="taskDetailsLabelDueDateSet">Imposta data di scadenza</string>
+    <string name="taskDetailsLabelDueDate">Data di scadenza</string>
+    <string name="taskDetailsLabelDueTime">Ora di scadenza</string>
     <string name="taskDetailsLabelEffort">Sforzo</string>
     <string name="taskDetailsLabelLocation">Luogo</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
@@ -284,6 +302,7 @@
     <string name="taskDetailsReminderOptionHour">1 ora prima</string>
     <string name="taskDetailsReminderOptionWeek">1 settimana prima</string>
     <string name="taskDetailsReminderOptionOnce">Puntuale</string>
+    <string name="taskDetailsReminderOptionOnTheDay">Il giorno stesso</string>
     <string name="taskDetailsSectionChecklist">Lista di controllo</string>
     <string name="taskDetailsSectionInfo">Info attività</string>
     <string name="taskDetailsSectionLocation">Luogo</string>
@@ -357,6 +376,7 @@
     <string name="calendarTooltipToday">Vai a Oggi</string>
     <string name="calendarWeekSummaryDescription">Attività completate: %1$d, abitudini completate: %2$d, tempo di focus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Resoconto settimanale</string>
+    <string name="statsLabelProductivity">Focus e attività</string>
     <string name="statsPageTime">Tempo</string>
     <string name="statsPeriodWeek">Settimana</string>
     <string name="statsPeriodMonth">Mese</string>
@@ -701,6 +721,7 @@
     <string name="recurringTaskTitleView">Attività ricorrente</string>
     <string name="recurringTaskLabelNextDue">Scadenza successiva</string>
     <string name="recurringTaskSnackbarDueRequired">Imposta prima la prossima data di scadenza</string>
+    <string name="recurringTaskDueDayMismatch">La prossima scadenza cade di %1$s, che non è tra i giorni scelti. Le date successive seguono i giorni scelti.</string>
     <string name="recurringTaskMonthlyOnDay">Il giorno %1$d</string>
     <string name="recurringTaskMonthlyOnNth">Sulla %1$s %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">%1$d min prima</string>
@@ -713,11 +734,26 @@
     <string name="reminderFieldLabel">Promemoria</string>
     <string name="reminderShifted">Promemoria adeguati alla nuova scadenza</string>
     <string name="reminderSheetDue">Scadenza %1$s</string>
+    <string name="reminderSheetDueAllDay">Scadenza %1$s, tutto il giorno. I promemoria del giorno arrivano alle %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Si applica a ogni ricorrenza</string>
     <string name="reminderSheetHint">Tocca un promemoria per aggiungerlo. Toccalo di nuovo per rimuoverlo.</string>
     <string name="reminderSheetNoDue">Questa attività non ha ancora una scadenza</string>
     <string name="reminderWarnLimit">Puoi aggiungere fino a %1$d promemoria.</string>
     <string name="reminderWarnNoDue">Imposta una scadenza per usare queste opzioni. Gli orari personalizzati funzionano comunque.</string>
+    <string name="recurringTaskWindowLabel">Finestra attività</string>
+    <string name="recurringTaskWindowHint">Quanto in anticipo questa attività compare nelle tue liste</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="one">Predefinito (%d giorno prima)</item>
+        <item quantity="other">Predefinito (%d giorni prima)</item>
+    </plurals>
+    <string name="recurringTaskWindowDefaultHint">Cambia il valore predefinito in Impostazioni › Attività</string>
+    <string name="recurringTaskWindowCustom">Personalizzato</string>
+    <string name="recurringTaskWindowAmount">Prima della scadenza</string>
+    <string name="recurringTaskWindowRequest">Inserisci da %1$d a %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">Il giorno di scadenza</string>
+    <string name="recurringTaskWindowHours">Ore</string>
+    <string name="recurringTaskWindowDays">Giorni</string>
+    <string name="recurringTaskWindowWeeks">Settimane</string>
     <string name="recurringTaskCompleteNow">Completa ora</string>
     <string name="recurringTaskHistoryTitle">Storico</string>
     <string name="recurringTaskHistoryEmpty">Ancora nessun completamento.</string>
@@ -764,6 +800,7 @@
     <string name="quickHabitSpecificDays">Giorni specifici</string>
     <string name="quickHabitStartLabel">Da</string>
     <string name="quickHabitEndLabel">A</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Elimina abitudine rapida</string>
     <string name="quickHabitDeleteContent">Sei sicuro di voler eliminare \"%1$s\"?</string>
