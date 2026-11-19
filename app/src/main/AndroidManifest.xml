@@ -14,6 +14,12 @@
          without it, notification policy access can never be granted and Auto-DND no-ops. -->
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
+    <!-- screenOrientation="portrait" implies this feature as required, which makes Play hide
+         the app from devices without it; portrait is a preference, not a hardware need. -->
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+
     <application
         android:name=".TimetyApplication"
         android:allowBackup="true"
