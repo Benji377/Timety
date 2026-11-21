@@ -361,7 +361,8 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
 /**
  * Gives recurring tasks the priority, effort, location, and checklist of one-off tasks (#266): the
  * new fields get the defaults a new one-off task gets, the checklist is a table of its own, and
- * each logged occurrence can record how much of the checklist was done.
+ * each logged occurrence can record how much of the checklist was done. Logged rounds also get a
+ * status, so a round can be skipped (#265).
  */
 val MIGRATION_7_8 = object : Migration(7, 8) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -381,6 +382,8 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
         )
         db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `subtasksDone` INTEGER")
         db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `subtasksTotal` INTEGER")
+        // Every round logged so far was a completion; skipping is new (#265).
+        db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `status` TEXT NOT NULL DEFAULT 'COMPLETED'")
     }
 }
 

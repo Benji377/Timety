@@ -410,9 +410,12 @@ class MigrationTest {
             assertEquals("", cursor.getString(2))
             assertTrue(cursor.isNull(3))
         }
-        db.query("SELECT subtasksDone, subtasksTotal FROM recurring_occurrences WHERE recurringTaskId = 'r1'").use { cursor ->
+        db.query(
+            "SELECT subtasksDone, subtasksTotal, status FROM recurring_occurrences WHERE recurringTaskId = 'r1'"
+        ).use { cursor ->
             cursor.moveToFirst()
             assertTrue("an old round has no checklist snapshot", cursor.isNull(0) && cursor.isNull(1))
+            assertEquals("an old round was a completion", "COMPLETED", cursor.getString(2))
         }
         db.query("SELECT COUNT(*) FROM recurring_subtasks").use { cursor ->
             cursor.moveToFirst()

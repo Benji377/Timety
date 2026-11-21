@@ -51,7 +51,7 @@ class RecurringUncheckTest {
     private fun stored(): RecurringTaskEntity = runBlocking { repository.getTaskById(task.id) }!!
 
     private fun occurrences(): List<RecurringOccurrenceEntity> =
-        runBlocking { repository.observeTask(task.id).first() }!!.occurrences.sortedBy { it.id }
+        runBlocking { repository.observeTask(task.id).first() }!!.log.sortedBy { it.id }
 
     private fun complete(snapshot: RecurringTaskEntity) =
         runBlocking { CompletionActions.completeRecurringOccurrence(context, repository, snapshot) }

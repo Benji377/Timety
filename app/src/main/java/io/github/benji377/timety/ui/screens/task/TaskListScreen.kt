@@ -61,6 +61,7 @@ import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.components.task.rememberTaskCompletionToggle
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
+import io.github.benji377.timety.ui.theme.InkLight
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
@@ -181,7 +182,12 @@ fun TaskListScreen(
                     BadgedBox(
                         badge = {
                             if (badgeCount > 0) {
-                                Badge(containerColor = badgeColor, contentColor = Color.White) {
+                                // WCAG AA wants 4.5:1 for small text: white on red gives 4.8,
+                                // white on orange only 2.2, so orange gets dark ink (9.8).
+                                Badge(
+                                    containerColor = badgeColor,
+                                    contentColor = if (badgeColor == ErrorColor) Color.White else InkLight,
+                                ) {
                                     Text(badgeCount.toString())
                                 }
                             }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "37a9a0e6b6e3283c1c64d957b92b4585",
+    "identityHash": "b6916a35d7f7ab7fb4d31af9de22b976",
     "entities": [
       {
         "tableName": "tasks",
@@ -289,7 +289,7 @@
       },
       {
         "tableName": "recurring_occurrences",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `recurringTaskId` TEXT NOT NULL, `completedAt` INTEGER NOT NULL, `previousDueDate` INTEGER, `subtasksDone` INTEGER, `subtasksTotal` INTEGER, FOREIGN KEY(`recurringTaskId`) REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `recurringTaskId` TEXT NOT NULL, `completedAt` INTEGER NOT NULL, `status` TEXT NOT NULL, `previousDueDate` INTEGER, `subtasksDone` INTEGER, `subtasksTotal` INTEGER, FOREIGN KEY(`recurringTaskId`) REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -307,6 +307,12 @@
             "fieldPath": "completedAt",
             "columnName": "completedAt",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -1416,7 +1422,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '37a9a0e6b6e3283c1c64d957b92b4585')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b6916a35d7f7ab7fb4d31af9de22b976')"
     ]
   }
 }

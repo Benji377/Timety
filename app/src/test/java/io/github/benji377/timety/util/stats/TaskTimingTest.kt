@@ -40,7 +40,7 @@ class TaskTimingTest {
             unit = RecurrenceUnit.WEEK,
             createdAt = at(monday.minusDays(30)),
         ),
-        occurrences = occurrences.map { (completedAt, due) ->
+        log = occurrences.map { (completedAt, due) ->
             RecurringOccurrenceEntity(recurringTaskId = "r", completedAt = completedAt, previousDueDate = due)
         },
     )

@@ -1,6 +1,7 @@
 package io.github.benji377.timety.services.backup
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
@@ -53,6 +54,11 @@ class RecurringTaskBackupTest {
                 subtasksTotal = 3,
             ),
             RecurringOccurrenceEntity(recurringTaskId = "r1", completedAt = Instant.parse("2026-11-07T10:00:00Z")),
+            RecurringOccurrenceEntity(
+                recurringTaskId = "r1",
+                completedAt = Instant.parse("2026-10-31T10:00:00Z"),
+                status = OccurrenceStatus.SKIPPED,
+            ),
         )
         val subtasks = listOf(
             RecurringSubtaskEntity(id = "a", recurringTaskId = "r1", title = "Kitchen", isCompleted = true, sortOrder = 1),
@@ -63,11 +69,14 @@ class RecurringTaskBackupTest {
 
         assertEquals(listOf("Floors", "Kitchen"), restored.subtasks.map { it.title })
         assertEquals(listOf(false, true), restored.subtasks.map { it.isCompleted })
-        val withSnapshot = restored.occurrences.single { it.subtasksTotal != null }
+        val withSnapshot = restored.log.single { it.subtasksTotal != null }
         assertEquals(2, withSnapshot.subtasksDone)
         assertEquals(3, withSnapshot.subtasksTotal)
         assertEquals(occurrences[0].previousDueDate, withSnapshot.previousDueDate)
-        assertNull(restored.occurrences.single { it.subtasksTotal == null }.subtasksDone)
+        assertEquals(
+            listOf(OccurrenceStatus.COMPLETED, OccurrenceStatus.COMPLETED, OccurrenceStatus.SKIPPED),
+            restored.log.sortedByDescending { it.completedAt }.map { it.status },
+        )
     }
 
     @Test
@@ -79,8 +88,9 @@ class RecurringTaskBackupTest {
 
         val restored = recurringTaskFromBackup(json)
 
-        assertEquals(Instant.parse("2026-11-14T10:00:00Z"), restored.occurrences.single().completedAt)
-        assertNull(restored.occurrences.single().subtasksTotal)
+        assertEquals(Instant.parse("2026-11-14T10:00:00Z"), restored.log.single().completedAt)
+        assertNull(restored.log.single().subtasksTotal)
+        assertEquals("an old backup only logged completions", OccurrenceStatus.COMPLETED, restored.log.single().status)
         assertTrue(restored.subtasks.isEmpty())
     }
 
@@ -91,7 +101,7 @@ class RecurringTaskBackupTest {
                "occurrences": [{"completedAt": "2026-11-14T10:00:00Z", "subtasksDone": 5, "subtasksTotal": 3}]}"""
         )
 
-        val occurrence = recurringTaskFromBackup(json).occurrences.single()
+        val occurrence = recurringTaskFromBackup(json).log.single()
 
         assertNull(occurrence.subtasksDone)
         assertNull(occurrence.subtasksTotal)

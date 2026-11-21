@@ -2,6 +2,7 @@ package io.github.benji377.timety.services
 
 import android.content.Context
 import androidx.glance.appwidget.updateAll
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
@@ -54,21 +55,30 @@ object CompletionActions {
      * from the DB and returns null, changing nothing, when it is gone or its due date is no longer
      * the one in [task]: a second tap from a list that hasn't caught up yet must not complete it
      * twice.
+     *
+     * With [status] SKIPPED the round is logged as skipped instead: the due date moves on the same
+     * way, but the checklist is left as it is and nothing is recorded about it.
      */
     suspend fun completeRecurringOccurrence(
         context: Context,
         recurringTaskRepository: RecurringTaskRepository,
         task: RecurringTaskEntity,
+        status: OccurrenceStatus = OccurrenceStatus.COMPLETED,
     ): RecurringCompletionUndo? {
         val undo = recurringTaskRepository.completionMutex.withLock {
             val stored = recurringTaskRepository.getTaskById(task.id) ?: return null
             if (stored.dueDate != task.dueDate) return null
             val now = Instant.now()
-            val subtasks = recurringTaskRepository.getSubtasks(stored.id)
+            val subtasks = if (status == OccurrenceStatus.COMPLETED) {
+                recurringTaskRepository.getSubtasks(stored.id)
+            } else {
+                emptyList()
+            }
             val occurrenceId = recurringTaskRepository.insertOccurrence(
                 RecurringOccurrenceEntity(
                     recurringTaskId = stored.id,
                     completedAt = now,
+                    status = status,
                     previousDueDate = stored.dueDate,
                     // Nothing to report without a checklist, rather than "0/0".
                     subtasksDone = subtasks.takeIf { it.isNotEmpty() }?.count { it.isCompleted },

@@ -100,7 +100,18 @@ data class RecurringTaskEntity(
     }
 }
 
-/** One logged completion of a recurring task; the habit-completion pattern applied to tasks. */
+/** What happened to one round of a recurring task. */
+enum class OccurrenceStatus {
+    COMPLETED,
+
+    /** Passed over on purpose, e.g. on holiday: moves the due date on but never counts as done. */
+    SKIPPED
+}
+
+/**
+ * One logged round of a recurring task, completed or skipped; the habit-completion pattern applied
+ * to tasks.
+ */
 @Entity(
     tableName = "recurring_occurrences",
     foreignKeys = [
@@ -117,7 +128,9 @@ data class RecurringOccurrenceEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val recurringTaskId: String,
+    /** When the round was completed, or for a [OccurrenceStatus.SKIPPED] row when it was skipped. */
     val completedAt: Instant,
+    val status: OccurrenceStatus = OccurrenceStatus.COMPLETED,
     /**
      * The task's due date before this completion advanced it, so unchecking can put it back.
      * Null for backdated entries, which never moved the due date, and for rows restored from
@@ -127,13 +140,17 @@ data class RecurringOccurrenceEntity(
     /**
      * How many checklist items were ticked, and how many there were, when this round was
      * completed. Frozen then: editing the checklist later doesn't rewrite history. Both null when
-     * the task had no checklist, and for backdated entries and rows from before checklists.
+     * the task had no checklist, for skipped rounds and backdated entries, and for rows from
+     * before checklists.
      */
     val subtasksDone: Int? = null,
     val subtasksTotal: Int? = null,
 )
 
-/** A recurring task paired with its completion records and checklist, for a Room `@Relation` query. */
+/**
+ * A recurring task paired with its logged rounds and checklist, for a Room `@Relation` query.
+ * [log] holds skipped rounds too; anything that counts work done reads [completed].
+ */
 data class RecurringTaskWithOccurrences(
     @Embedded
     val task: RecurringTaskEntity,
@@ -141,13 +158,17 @@ data class RecurringTaskWithOccurrences(
         parentColumn = "id",
         entityColumn = "recurringTaskId"
     )
-    val occurrences: List<RecurringOccurrenceEntity>,
+    val log: List<RecurringOccurrenceEntity>,
     @Relation(
         parentColumn = "id",
         entityColumn = "recurringTaskId"
     )
     val subtasks: List<RecurringSubtaskEntity> = emptyList(),
-)
+) {
+    /** The rounds actually done, without skips. */
+    val completed: List<RecurringOccurrenceEntity>
+        get() = log.filter { it.status == OccurrenceStatus.COMPLETED }
+}
 
 /** The same task with its checklist in display order; Room returns relation rows unordered. */
 fun RecurringTaskWithOccurrences.withSortedSubtasks(): RecurringTaskWithOccurrences =

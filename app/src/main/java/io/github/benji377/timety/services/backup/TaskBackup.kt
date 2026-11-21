@@ -1,6 +1,7 @@
 package io.github.benji377.timety.services.backup
 
 import io.github.benji377.timety.data.model.task.MonthlyMode
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
@@ -96,9 +97,10 @@ internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObjec
     put("windowUnit", orNull(task.windowUnit?.name))
     put("createdAt", task.createdAt.toString())
     // Objects since checklists; older backups hold bare completedAt strings.
-    put("occurrences", JSONArray(occurrences.sortedBy { it.completedAt }.map { occurrence ->
+    put("occurrences", JSONArray(log.sortedBy { it.completedAt }.map { occurrence ->
         JSONObject().apply {
             put("completedAt", occurrence.completedAt.toString())
+            put("status", occurrence.status.name)
             put("previousDueDate", orNull(occurrence.previousDueDate?.toString()))
             put("subtasksDone", orNull(occurrence.subtasksDone))
             put("subtasksTotal", orNull(occurrence.subtasksTotal))
@@ -158,8 +160,9 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
 }
 
 /**
- * The logged occurrences, as objects or, from older backups, bare completedAt strings. Entries
- * whose time doesn't parse are dropped, and a checklist snapshot is kept only as a sane pair.
+ * The logged occurrences, as objects or, from older backups, bare completedAt strings (which were
+ * all completions). Entries whose time doesn't parse are dropped, and a checklist snapshot is kept
+ * only as a sane pair.
  */
 private fun occurrencesFromBackup(json: JSONObject, taskId: String): List<RecurringOccurrenceEntity> {
     val array = json.optJSONArray("occurrences") ?: return emptyList()
@@ -175,6 +178,7 @@ private fun occurrencesFromBackup(json: JSONObject, taskId: String): List<Recurr
         RecurringOccurrenceEntity(
             recurringTaskId = taskId,
             completedAt = completedAt,
+            status = entry.enumOr("status", OccurrenceStatus.COMPLETED),
             previousDueDate = entry.instantOrNull("previousDueDate"),
             subtasksDone = done,
             subtasksTotal = total.takeIf { done != null },

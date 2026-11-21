@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.viewmodel
 
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
@@ -78,20 +79,25 @@ class RecurringTaskViewModel(
 
     /**
      * Logs a completed occurrence now, rolls the task's due date forward to the next occurrence,
-     * and reschedules its reminders. [onCompleted] receives the data needed to offer
-     * an Undo action (see [undoCompleteOccurrence]); it isn't called when a repeated tap is ignored.
+     * and reschedules its reminders; with [status] SKIPPED the round is logged as skipped.
+     * [onCompleted] receives the data needed to offer an Undo action (see [undoCompleteOccurrence]);
+     * it isn't called when a repeated tap is ignored.
      */
     fun completeOccurrence(
         task: RecurringTaskEntity,
+        status: OccurrenceStatus = OccurrenceStatus.COMPLETED,
         onCompleted: (RecurringCompletionUndo) -> Unit = {},
     ) {
         viewModelScope.launch {
-            CompletionActions.completeRecurringOccurrence(application, recurringTaskRepository, task)
+            CompletionActions.completeRecurringOccurrence(application, recurringTaskRepository, task, status)
                 ?.let(onCompleted)
         }
     }
 
-    /** Reverts a completion: removes its occurrence, restores the due date and re-ticks the checklist. */
+    /**
+     * Reverts a completion or a skip: removes its occurrence, restores the due date and re-ticks the
+     * checklist.
+     */
     fun undoCompleteOccurrence(undo: RecurringCompletionUndo) {
         viewModelScope.launch {
             recurringTaskRepository.deleteOccurrenceById(undo.occurrenceId)

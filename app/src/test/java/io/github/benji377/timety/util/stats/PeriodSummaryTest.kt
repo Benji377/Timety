@@ -41,7 +41,7 @@ class PeriodSummaryTest {
                 unit = RecurrenceUnit.WEEK,
                 createdAt = at(monday.minusDays(30), 9),
             ),
-            occurrences = completions.map {
+            log = completions.map {
                 RecurringOccurrenceEntity(recurringTaskId = id, completedAt = it)
             },
         )

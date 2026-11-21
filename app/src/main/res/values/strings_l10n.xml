@@ -761,6 +761,18 @@
     <string name="recurringTaskDeleteTitle">Delete recurring task?</string>
     <string name="recurringTaskDeleteContent">This also deletes its completion history. This action cannot be undone.</string>
     <string name="recurringTaskCompletedSnackbar">Completed! Next: %1$s</string>
+    <string name="recurringTaskSkippedSnackbar">Skipped. Next: %1$s</string>
+    <string name="recurringTaskSkip">Skip</string>
+    <string name="recurringTaskSkipDescription">Skip this time</string>
+    <string name="recurringTaskHistorySkipped">Skipped</string>
+    <plurals name="recurringTaskHistoryCompletedCount">
+        <item quantity="one">%d completed</item>
+        <item quantity="other">%d completed</item>
+    </plurals>
+    <plurals name="recurringTaskHistorySkippedCount">
+        <item quantity="one">%d skipped</item>
+        <item quantity="other">%d skipped</item>
+    </plurals>
     <plurals name="recurrenceEveryDays">
         <item quantity="one">Every day</item>
         <item quantity="other">Every %d days</item>

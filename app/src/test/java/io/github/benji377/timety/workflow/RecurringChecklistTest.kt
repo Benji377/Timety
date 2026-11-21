@@ -63,7 +63,7 @@ class RecurringChecklistTest {
     }
 
     private fun latestOccurrence(): RecurringOccurrenceEntity =
-        runBlocking { repository.observeTask(task.id).first() }!!.occurrences.maxBy { it.id }
+        runBlocking { repository.observeTask(task.id).first() }!!.log.maxBy { it.id }
 
     private fun checklist(): List<RecurringSubtaskEntity> =
         runBlocking { repository.observeTask(task.id).first() }!!.subtasks

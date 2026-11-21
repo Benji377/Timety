@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Repeat
@@ -32,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
@@ -64,6 +66,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.MonthlyMode
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
@@ -101,6 +104,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
@@ -673,14 +677,31 @@ fun RecurringTaskDetailScreen(
             if (!isNew && !isEditing && existing != null) {
                 item {
                     val completeTask = rememberRecurringCompleter(viewModel, snackbarHostState)
+                    // Offered for any status: skipping a far-off round (a holiday) is legitimate.
+                    val skipTask =
+                        rememberRecurringCompleter(viewModel, snackbarHostState, OccurrenceStatus.SKIPPED)
                     Spacer(Modifier.height(AppTheme.spaceXLarge))
-                    NeoButton(
-                        onClick = { completeTask(existing.task) },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Icon(Icons.Filled.Check, contentDescription = null)
-                        Spacer(Modifier.width(AppTheme.spaceSmall))
-                        Text(stringResource(R.string.recurringTaskCompleteNow))
+                    Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
+                        NeoButton(
+                            onClick = { skipTask(existing.task) },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            ),
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = null)
+                            Spacer(Modifier.width(AppTheme.spaceSmall))
+                            Text(stringResource(R.string.recurringTaskSkip))
+                        }
+                        NeoButton(
+                            onClick = { completeTask(existing.task) },
+                            modifier = Modifier.weight(2f),
+                        ) {
+                            Icon(Icons.Filled.Check, contentDescription = null)
+                            Spacer(Modifier.width(AppTheme.spaceSmall))
+                            Text(stringResource(R.string.recurringTaskCompleteNow))
+                        }
                     }
                 }
                 item {
@@ -702,7 +723,26 @@ fun RecurringTaskDetailScreen(
                         }
                     }
                 }
-                val occurrences = existing.occurrences.sortedByDescending { it.completedAt }
+                val occurrences = existing.log.sortedByDescending { it.completedAt }
+                val skippedCount = occurrences.count { it.status == OccurrenceStatus.SKIPPED }
+                // Counts only once something was skipped; until then the list says it all.
+                if (skippedCount > 0) item {
+                    Text(
+                        text = quantityString(
+                            R.plurals.recurringTaskHistoryCompletedCount,
+                            occurrences.size - skippedCount,
+                            0,
+                            occurrences.size - skippedCount,
+                        ) + " | " + quantityString(
+                            R.plurals.recurringTaskHistorySkippedCount,
+                            skippedCount,
+                            0,
+                            skippedCount,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 if (occurrences.isEmpty()) {
                     item {
                         Text(
@@ -927,10 +967,11 @@ private fun OccurrenceRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val skipped = occurrence.status == OccurrenceStatus.SKIPPED
         Icon(
-            imageVector = Icons.Filled.Check,
-            contentDescription = null,
-            tint = SuccessColor,
+            imageVector = if (skipped) Icons.AutoMirrored.Filled.Redo else Icons.Filled.Check,
+            contentDescription = if (skipped) stringResource(R.string.recurringTaskHistorySkipped) else null,
+            tint = if (skipped) MaterialTheme.colorScheme.onSurfaceVariant else SuccessColor,
             modifier = Modifier.size(AppTheme.iconSizeSmall),
         )
         Spacer(Modifier.width(AppTheme.spaceMedium))
