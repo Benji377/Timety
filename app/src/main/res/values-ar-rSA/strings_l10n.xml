@@ -595,6 +595,26 @@
     <string name="settingsLabelTimeFormat">Use 24-hour Time</string>
     <string name="settingsLabelUpcomingTask">Upcoming Task Window</string>
     <string name="settingsLabelUpcomingTaskSubtitle">%1$d days ahead</string>
+    <string name="settingsLabelAutoSkip">Recurring Auto-Skip</string>
+    <string name="settingsLabelAutoSkipSubtitle">Skips the next round if it is less than %1$s away</string>
+    <string name="settingsAutoSkipOff">Off</string>
+    <string name="settingsAutoSkipHint">When you complete a recurring task late and its next round is closer than this, that round is skipped too. Never more than a quarter of the time between two rounds. Set it to 0 to turn this off.</string>
+    <plurals name="settingsAutoSkipHours">
+        <item quantity="zero">%d hours</item>
+        <item quantity="one">%d hour</item>
+        <item quantity="two">%d hours</item>
+        <item quantity="few">%d hours</item>
+        <item quantity="many">%d hours</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="settingsAutoSkipDays">
+        <item quantity="zero">%d days</item>
+        <item quantity="one">%d day</item>
+        <item quantity="two">%d days</item>
+        <item quantity="few">%d days</item>
+        <item quantity="many">%d days</item>
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="settingsLabelVersion">Version %1$s</string>
     <string name="settingsGroupDnd">Do Not Disturb</string>
     <string name="settingsGroupLinkedItems">Linked Tasks &amp; Habits</string>
@@ -865,6 +885,26 @@
     <string name="recurringTaskDeleteTitle">Delete recurring task?</string>
     <string name="recurringTaskDeleteContent">This also deletes its completion history. This action cannot be undone.</string>
     <string name="recurringTaskCompletedSnackbar">Completed! Next: %1$s</string>
+    <string name="recurringTaskSkippedSnackbar">Skipped. Next: %1$s</string>
+    <string name="recurringTaskSkip">Skip</string>
+    <string name="recurringTaskSkipDescription">Skip this time</string>
+    <string name="recurringTaskHistorySkipped">Skipped</string>
+    <plurals name="recurringTaskHistoryCompletedCount">
+        <item quantity="zero">%d completed</item>
+        <item quantity="one">%d completed</item>
+        <item quantity="two">%d completed</item>
+        <item quantity="few">%d completed</item>
+        <item quantity="many">%d completed</item>
+        <item quantity="other">%d completed</item>
+    </plurals>
+    <plurals name="recurringTaskHistorySkippedCount">
+        <item quantity="zero">%d skipped</item>
+        <item quantity="one">%d skipped</item>
+        <item quantity="two">%d skipped</item>
+        <item quantity="few">%d skipped</item>
+        <item quantity="many">%d skipped</item>
+        <item quantity="other">%d skipped</item>
+    </plurals>
     <plurals name="recurrenceEveryDays">
         <item quantity="zero">Every %d days</item>
         <item quantity="one">Every day</item>
