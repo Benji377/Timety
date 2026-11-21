@@ -324,7 +324,10 @@ class FocusViewModel(
                 if (entry.completed.any { it.completedAt.atZone(zone).toLocalDate() == today }) return
                 val task = entry.task
                 CompletionActions.completeRecurringOccurrence(
-                    getApplication(), recurringTaskRepository, task
+                    getApplication(),
+                    recurringTaskRepository,
+                    task,
+                    autoSkip = settingsRepository.recurringAutoSkipWindow(),
                 )
             }
 

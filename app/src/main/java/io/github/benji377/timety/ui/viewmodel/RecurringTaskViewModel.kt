@@ -9,6 +9,7 @@ import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
+import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.RecurringCompletionUndo
@@ -25,7 +26,8 @@ import java.time.Instant
 class RecurringTaskViewModel(
     private val application: android.app.Application,
     private val recurringTaskRepository: RecurringTaskRepository,
-    private val tagRepository: TagRepository
+    private val tagRepository: TagRepository,
+    private val settingsRepository: SettingsRepository,
 ) : androidx.lifecycle.AndroidViewModel(application) {
     val allRecurringTasks: StateFlow<List<RecurringTaskWithOccurrences>> =
         recurringTaskRepository.allRecurringTasks
@@ -89,8 +91,13 @@ class RecurringTaskViewModel(
         onCompleted: (RecurringCompletionUndo) -> Unit = {},
     ) {
         viewModelScope.launch {
-            CompletionActions.completeRecurringOccurrence(application, recurringTaskRepository, task, status)
-                ?.let(onCompleted)
+            CompletionActions.completeRecurringOccurrence(
+                application,
+                recurringTaskRepository,
+                task,
+                status,
+                settingsRepository.recurringAutoSkipWindow(),
+            )?.let(onCompleted)
         }
     }
 

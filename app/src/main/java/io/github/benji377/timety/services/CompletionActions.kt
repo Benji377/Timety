@@ -11,6 +11,7 @@ import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.util.task.RecurrenceUtils
 import io.github.benji377.timety.widget.TaskWidget
 import kotlinx.coroutines.sync.withLock
+import java.time.Duration
 import java.time.Instant
 
 /** What [CompletionActions.completeRecurringOccurrence] changed, so an Undo action can revert it. */
@@ -56,14 +57,18 @@ object CompletionActions {
      * the one in [task]: a second tap from a list that hasn't caught up yet must not complete it
      * twice.
      *
-     * With [status] SKIPPED the round is logged as skipped instead: the due date moves on the same
-     * way, but the checklist is left as it is and nothing is recorded about it.
+     * A completion also passes over the next round when it is closer than [autoSkip] (the user's
+     * setting, see [RecurrenceUtils.nextDueDate]).
+     *
+     * With [status] SKIPPED the round is logged as skipped instead: the due date moves on to the
+     * plain next round, the checklist is left as it is and nothing is recorded about it.
      */
     suspend fun completeRecurringOccurrence(
         context: Context,
         recurringTaskRepository: RecurringTaskRepository,
         task: RecurringTaskEntity,
         status: OccurrenceStatus = OccurrenceStatus.COMPLETED,
+        autoSkip: Duration = Duration.ZERO,
     ): RecurringCompletionUndo? {
         val undo = recurringTaskRepository.completionMutex.withLock {
             val stored = recurringTaskRepository.getTaskById(task.id) ?: return null
@@ -86,7 +91,9 @@ object CompletionActions {
                 )
             )
             if (subtasks.any { it.isCompleted }) recurringTaskRepository.resetSubtasks(stored.id)
-            val advanced = stored.copy(dueDate = RecurrenceUtils.nextDueDate(stored, now))
+            // Skipping passes over exactly one round; only doing the work can count for the next.
+            val window = if (status == OccurrenceStatus.COMPLETED) autoSkip else Duration.ZERO
+            val advanced = stored.copy(dueDate = RecurrenceUtils.nextDueDate(stored, now, autoSkip = window))
             recurringTaskRepository.updateTask(advanced)
             RecurringCompletionUndo(occurrenceId, stored.dueDate, advanced, subtasks)
         }
@@ -98,7 +105,8 @@ object CompletionActions {
      * Removes a logged occurrence. When it is the completion that last advanced the task and the
      * task is still exactly where that completion left it, the due date goes back too; otherwise
      * (a backdated entry, an older completion, or a task edited since) only the log entry goes,
-     * so the schedule never lands somewhere the user didn't set.
+     * so the schedule never lands somewhere the user didn't set. "Exactly where it left it"
+     * includes a round passed over by auto-skip, whatever that setting is now.
      */
     suspend fun uncheckRecurringOccurrence(
         context: Context,
@@ -110,7 +118,7 @@ object CompletionActions {
             val previous = occurrence.previousDueDate
             val restorable = task != null && previous != null &&
                 recurringTaskRepository.getLatestAdvancingOccurrenceId(task.id) == occurrence.id &&
-                task.dueDate == RecurrenceUtils.nextDueDate(task.copy(dueDate = previous), occurrence.completedAt)
+                task.dueDate in RecurrenceUtils.possibleNextDueDates(task.copy(dueDate = previous), occurrence.completedAt)
             recurringTaskRepository.deleteOccurrenceById(occurrence.id)
             if (restorable) task.copy(dueDate = previous).also { recurringTaskRepository.updateTask(it) } else null
         }

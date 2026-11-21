@@ -535,6 +535,18 @@
     <string name="settingsLabelTimeFormat">Use 24-hour Time</string>
     <string name="settingsLabelUpcomingTask">Upcoming Task Window</string>
     <string name="settingsLabelUpcomingTaskSubtitle">%1$d days ahead</string>
+    <string name="settingsLabelAutoSkip">Recurring Auto-Skip</string>
+    <string name="settingsLabelAutoSkipSubtitle">Skips the next round if it is less than %1$s away</string>
+    <string name="settingsAutoSkipOff">Off</string>
+    <string name="settingsAutoSkipHint">When you complete a recurring task late and its next round is closer than this, that round is skipped too. Never more than a quarter of the time between two rounds. Set it to 0 to turn this off.</string>
+    <plurals name="settingsAutoSkipHours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="settingsAutoSkipDays">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="settingsLabelVersion">Version %1$s</string>
     <string name="settingsGroupDnd">Do Not Disturb</string>
     <string name="settingsGroupLinkedItems">Linked Tasks &amp; Habits</string>
