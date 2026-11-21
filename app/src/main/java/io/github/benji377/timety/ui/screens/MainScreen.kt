@@ -253,9 +253,6 @@ fun MainScreen(
                         navController.navigate(AppRoute.taskDetail(taskId))
                     },
                     onNavigateToRecurring = { navController.navigate(AppRoute.RECURRING_TASKS.route) },
-                    onNavigateToRecurringDetail = { taskId ->
-                        navController.navigate(AppRoute.recurringTaskDetail(taskId))
-                    }
                 )
             }
             composable(BottomNavItem.Habits.route) {
