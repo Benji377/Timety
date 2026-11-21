@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -77,6 +78,7 @@ import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.TaskFilterEngine
 import io.github.benji377.timety.util.task.due
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import java.time.Instant
 import java.time.ZoneId
 
@@ -174,6 +176,19 @@ fun TaskListScreen(
             )
             engine.process(TagFilter.filter(tasks, activeTagIds, taskTags) { it.task.id }) { it.task }
         }
+
+    // Until the user scrolls, the list stays at the top. One-off and recurring tasks load
+    // separately, so a section that arrives late (like Overdue) is inserted above the rows already
+    // shown, and the list would otherwise stay on those rows with the new section out of view.
+    // Saveable, so a position restored when coming back to this screen isn't reset.
+    var userHasScrolled by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }.first { it }
+        userHasScrolled = true
+    }
+    LaunchedEffect(processedTasks, filteredRecurring) {
+        if (!userHasScrolled) listState.requestScrollToItem(0)
+    }
 
     Scaffold(
         topBar = {
