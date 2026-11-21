@@ -520,6 +520,16 @@
     <string name="settingsLabelTimeFormat">使用 24 小时制</string>
     <string name="settingsLabelUpcomingTask">即将到来的任务范围</string>
     <string name="settingsLabelUpcomingTaskSubtitle">提前 %1$d 天显示</string>
+    <string name="settingsLabelAutoSkip">Recurring Auto-Skip</string>
+    <string name="settingsLabelAutoSkipSubtitle">Skips the next round if it is less than %1$s away</string>
+    <string name="settingsAutoSkipOff">Off</string>
+    <string name="settingsAutoSkipHint">When you complete a recurring task late and its next round is closer than this, that round is skipped too. Never more than a quarter of the time between two rounds. Set it to 0 to turn this off.</string>
+    <plurals name="settingsAutoSkipHours">
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="settingsAutoSkipDays">
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="settingsLabelVersion">版本 %1$s</string>
     <string name="settingsGroupDnd">勿扰模式</string>
     <string name="settingsGroupLinkedItems">关联的任务与习惯</string>
@@ -735,6 +745,16 @@
     <string name="recurringTaskDeleteTitle">删除定期任务？</string>
     <string name="recurringTaskDeleteContent">此操作将同时删除完成历史记录，且不可撤销。</string>
     <string name="recurringTaskCompletedSnackbar">已完成！下次：%1$s</string>
+    <string name="recurringTaskSkippedSnackbar">Skipped. Next: %1$s</string>
+    <string name="recurringTaskSkip">Skip</string>
+    <string name="recurringTaskSkipDescription">Skip this time</string>
+    <string name="recurringTaskHistorySkipped">Skipped</string>
+    <plurals name="recurringTaskHistoryCompletedCount">
+        <item quantity="other">%d completed</item>
+    </plurals>
+    <plurals name="recurringTaskHistorySkippedCount">
+        <item quantity="other">%d skipped</item>
+    </plurals>
     <plurals name="recurrenceEveryDays">
         <item quantity="other">每 %d 天</item>
     </plurals>
