@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -94,6 +95,7 @@ private enum class AutoSkipUnit(val maxAmount: Int, val hoursPerUnit: Int) {
 
 /** "6 hours" or "1 day"; whole days read as days. */
 @Composable
+@ReadOnlyComposable
 private fun autoSkipLabel(hours: Int): String =
     if (hours % AutoSkipUnit.DAYS.hoursPerUnit == 0) {
         val days = hours / AutoSkipUnit.DAYS.hoursPerUnit
