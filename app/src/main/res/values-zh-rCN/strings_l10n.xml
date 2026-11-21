@@ -14,6 +14,9 @@
     <string name="commonLabelAdd">添加</string>
     <string name="commonLabelCancel">取消</string>
     <string name="commonLabelConfirm">确认</string>
+    <string name="commonLabelPin">Pin</string>
+    <string name="commonLabelUnpin">Unpin</string>
+    <string name="commonLabelPinned">Pinned</string>
     <string name="commonLabelDelete">删除</string>
     <string name="commonLabelEdit">编辑</string>
     <string name="commonLabelNext">下一个</string>
@@ -57,6 +60,7 @@
     <string name="greetingNightMotivation">夜色已深，且请收束笔墨，早些歇息罢。</string>
     <string name="homeFocusToday">今日专注</string>
     <string name="homeDailyGoalDone">今日诸事已毕，可以安心歇下了！</string>
+    <string name="homeSectionPinned">Pinned (%1$d)</string>
     <string name="homeSectionHabitsDue">今日习惯 (%1$d)</string>
     <string name="homeSectionTasksDue">待办任务 (%1$d)</string>
     <string name="homeSectionTasksUpcoming">即将到来的任务 (%1$d)</string>
