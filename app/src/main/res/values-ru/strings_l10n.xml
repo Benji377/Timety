@@ -14,6 +14,9 @@
     <string name="commonLabelAdd">Добавить</string>
     <string name="commonLabelCancel">Отмена</string>
     <string name="commonLabelConfirm">Подтвердить</string>
+    <string name="commonLabelPin">Pin</string>
+    <string name="commonLabelUnpin">Unpin</string>
+    <string name="commonLabelPinned">Pinned</string>
     <string name="commonLabelDelete">Удалить</string>
     <string name="commonLabelEdit">Изменить</string>
     <string name="commonLabelNext">Далее</string>
@@ -57,6 +60,7 @@
     <string name="greetingNightMotivation">Уже поздно! Пора закругляться.</string>
     <string name="homeFocusToday">Фокус сегодня</string>
     <string name="homeDailyGoalDone">На сегодня всё сделано!</string>
+    <string name="homeSectionPinned">Pinned (%1$d)</string>
     <string name="homeSectionHabitsDue">Привычки на сегодня (%1$d)</string>
     <string name="homeSectionTasksDue">Задачи к сроку (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Предстоящие задачи (%1$d)</string>
