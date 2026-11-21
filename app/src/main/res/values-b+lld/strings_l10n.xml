@@ -272,6 +272,15 @@
     <string name="habitDetailLabelColorPicker">Chir ora n culëur</string>
     <string name="habitDetailLabelStack">Rënga de abitudins</string>
     <string name="habitDetailLabelStackHint">ej. Routine da duman</string>
+    <string name="habitStackEdit">Edit stack</string>
+    <string name="habitStackNew">New stack</string>
+    <string name="habitStackNone">No stack</string>
+    <string name="habitStackName">Stack name</string>
+    <string name="habitStackNameEmpty">Enter a name</string>
+    <string name="habitStackNameTaken">Another stack already has this name</string>
+    <string name="habitStackInOrder">Complete in order</string>
+    <string name="habitStackInOrderHint">Each habit unlocks once the one before it is done</string>
+    <string name="habitStackUncheckLaterFirst">Uncheck the later habits in this stack first</string>
     <string name="habitDetailSnackbarSaveNoDay">Cëria ora almanco n di</string>
     <string name="habitListFilterNoMatch">Deguna abitudin ne corespuend ala cerca</string>
     <string name="habitListReorderToggleTooltip">Mudé l ordin dla abitudins</string>
