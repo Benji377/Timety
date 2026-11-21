@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "b6916a35d7f7ab7fb4d31af9de22b976",
+    "identityHash": "28f03aad6d7764fbe20cb707335c15d5",
     "entities": [
       {
         "tableName": "tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `dueDate` INTEGER, `hasDueTime` INTEGER NOT NULL, `location` TEXT NOT NULL, `priority` TEXT NOT NULL, `size` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, `completedAt` INTEGER, `createdAt` INTEGER NOT NULL, `reminders` TEXT NOT NULL, `place` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `dueDate` INTEGER, `hasDueTime` INTEGER NOT NULL, `location` TEXT NOT NULL, `priority` TEXT NOT NULL, `size` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, `completedAt` INTEGER, `createdAt` INTEGER NOT NULL, `reminders` TEXT NOT NULL, `place` TEXT, `pinnedAt` INTEGER, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -82,6 +82,11 @@
             "fieldPath": "place",
             "columnName": "place",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pinnedAt",
+            "columnName": "pinnedAt",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -159,7 +164,7 @@
       },
       {
         "tableName": "recurring_tasks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `priority` TEXT NOT NULL, `size` TEXT NOT NULL, `location` TEXT NOT NULL, `place` TEXT, `dueDate` INTEGER NOT NULL, `hasDueTime` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `windowAmount` INTEGER, `windowUnit` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `priority` TEXT NOT NULL, `size` TEXT NOT NULL, `location` TEXT NOT NULL, `place` TEXT, `dueDate` INTEGER NOT NULL, `hasDueTime` INTEGER NOT NULL, `timeOfDayMinutes` INTEGER, `unit` TEXT NOT NULL, `interval` INTEGER NOT NULL, `daysOfWeek` TEXT, `monthlyMode` TEXT NOT NULL, `monthlyDay` INTEGER, `monthlyOrdinal` INTEGER, `monthlyWeekday` INTEGER, `reminderOffsetsMinutes` TEXT NOT NULL, `windowAmount` INTEGER, `windowUnit` TEXT, `createdAt` INTEGER NOT NULL, `pinnedAt` INTEGER, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -278,6 +283,11 @@
             "columnName": "createdAt",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "pinnedAt",
+            "columnName": "pinnedAt",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -685,7 +695,7 @@
       },
       {
         "tableName": "habits",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `frequency` TEXT NOT NULL, `targetDaysPerWeek` INTEGER, `targetWeekdays` TEXT, `timesPerDay` INTEGER NOT NULL, `reminderTimes` TEXT, `createdAt` INTEGER NOT NULL, `colorValue` INTEGER NOT NULL, `notes` TEXT, `iconCodePoint` INTEGER, `stackName` TEXT, `stackOrder` INTEGER, `sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `frequency` TEXT NOT NULL, `targetDaysPerWeek` INTEGER, `targetWeekdays` TEXT, `timesPerDay` INTEGER NOT NULL, `reminderTimes` TEXT, `createdAt` INTEGER NOT NULL, `colorValue` INTEGER NOT NULL, `notes` TEXT, `iconCodePoint` INTEGER, `stackName` TEXT, `stackOrder` INTEGER, `sortOrder` INTEGER NOT NULL, `pinnedAt` INTEGER, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -763,6 +773,11 @@
             "columnName": "sortOrder",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "pinnedAt",
+            "columnName": "pinnedAt",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -1422,7 +1437,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b6916a35d7f7ab7fb4d31af9de22b976')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '28f03aad6d7764fbe20cb707335c15d5')"
     ]
   }
 }

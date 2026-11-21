@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.benji377.timety.ui.components.common.PinnedMarker
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.tag.TagEntity
@@ -87,6 +88,8 @@ fun RecurringTasksScreen(
     val activeTagIds = TagFilter.activeIds(selectedTagIds, usedTags)
     val visibleTasks = remember(recurringTasks, taskTags, activeTagIds) {
         TagFilter.filter(recurringTasks, activeTagIds, taskTags) { it.task.id }
+            // Pinned first, oldest pin first; the rest keep their order (the sort is stable).
+            .sortedWith(compareBy(nullsLast()) { it.task.pinnedAt })
     }
     val horizonDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -209,7 +212,14 @@ private fun RecurringTaskCard(
             )
             Spacer(modifier = Modifier.width(AppTheme.spaceMedium))
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.task.title, style = MaterialTheme.typography.titleMedium)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        item.task.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (item.task.pinnedAt != null) PinnedMarker()
+                }
                 Text(
                     text = recurrenceCadenceLabel(item.task),
                     style = MaterialTheme.typography.bodySmall,

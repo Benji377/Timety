@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.ui.components.common.PinnedMarker
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -116,14 +117,18 @@ fun TaskListTile(
                 )
                 Spacer(Modifier.width(AppTheme.spaceSmall))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = task.title,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
-                            color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                            fontWeight = AppTheme.fwBold,
-                        ),
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = task.title,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
+                                color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                                fontWeight = AppTheme.fwBold,
+                            ),
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        if (task.pinnedAt != null) PinnedMarker()
+                    }
                     if (showDescription && task.description.isNotEmpty()) {
                         Text(
                             text = task.description,

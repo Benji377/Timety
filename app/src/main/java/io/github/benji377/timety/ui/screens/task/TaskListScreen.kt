@@ -108,6 +108,8 @@ fun TaskListScreen(
     )
     val rowContext = TaskRowContext(rowActions, taskTags)
 
+    val isPinnedExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_PINNED)
+        .collectAsState()
     val isOverdueExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_OVERDUE)
         .collectAsState()
     val isDueTodayExpanded by settingsViewModel.accordionExpanded(AccordionKey.TASKS_DUE_TODAY)
@@ -301,6 +303,7 @@ fun TaskListScreen(
                     // Group tasks into overdue, due-today, upcoming, and completed buckets.
                     val buckets = remember(processedTasks) { TaskBuckets.of(processedTasks) }
 
+                    val pinnedTitle = "${stringResource(R.string.commonLabelPinned)} (${buckets.pinned.size})"
                     val overdueTitle = "${stringResource(R.string.taskListSectionOverdue)} (${buckets.overdue.size})"
                     val todayTitle = "${stringResource(R.string.taskListSectionToday)} (${buckets.dueToday.size})"
                     val upcomingTitle = "${stringResource(R.string.taskListSectionUpcoming)} (${buckets.todo.size})"
@@ -313,6 +316,21 @@ fun TaskListScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
+                        if (buckets.pinned.isNotEmpty()) {
+                            val now = Instant.now()
+                            taskSection(
+                                key = "pinned",
+                                title = pinnedTitle,
+                                color = TaskColor,
+                                expanded = isPinnedExpanded,
+                                onExpandedChange = {
+                                    settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_PINNED, it)
+                                },
+                                tasks = buckets.pinned,
+                                isOverdue = { it.due?.isOverdue(now) == true },
+                                row = rowContext,
+                            )
+                        }
                         if (buckets.overdue.isNotEmpty()) {
                             taskSection(
                                 key = "overdue",
@@ -323,7 +341,7 @@ fun TaskListScreen(
                                     settingsViewModel.setAccordionExpanded(AccordionKey.TASKS_OVERDUE, it)
                                 },
                                 tasks = buckets.overdue,
-                                isOverdue = true,
+                                isOverdue = { true },
                                 row = rowContext,
                             )
                         }
@@ -382,8 +400,12 @@ private fun sortOptionLabel(option: TaskSortOption): String = when (option) {
     TaskSortOption.ALPHABETICAL -> stringResource(R.string.taskListSortAlphabetical)
 }
 
-/** The task list's sections; completed tasks go to [done] whatever their due date. */
+/**
+ * The task list's sections; completed tasks go to [done] whatever their due date, and open pinned
+ * tasks to [pinned] (oldest pin first) whatever theirs.
+ */
 private data class TaskBuckets(
+    val pinned: List<TaskWithSubtasks>,
     val overdue: List<TaskWithSubtasks>,
     val dueToday: List<TaskWithSubtasks>,
     val todo: List<TaskWithSubtasks>,
@@ -398,16 +420,18 @@ private data class TaskBuckets(
             val dueToday = mutableListOf<TaskWithSubtasks>()
             val todo = mutableListOf<TaskWithSubtasks>()
             val done = mutableListOf<TaskWithSubtasks>()
+            val pinned = mutableListOf<TaskWithSubtasks>()
             tasks.forEach { item ->
                 val task = item.task
                 when {
                     task.isCompleted -> done.add(item)
+                    task.pinnedAt != null -> pinned.add(item)
                     task.due?.isOverdue(now, zone) == true -> overdue.add(item)
                     task.dueDate != null && task.dueDate.atZone(zone).toLocalDate() == today -> dueToday.add(item)
                     else -> todo.add(item)
                 }
             }
-            return TaskBuckets(overdue, dueToday, todo, done)
+            return TaskBuckets(pinned.sortedBy { it.task.pinnedAt }, overdue, dueToday, todo, done)
         }
     }
 }
@@ -434,7 +458,7 @@ private fun LazyListScope.taskSection(
     onExpandedChange: (Boolean) -> Unit,
     tasks: List<TaskWithSubtasks>,
     row: TaskRowContext,
-    isOverdue: Boolean = false,
+    isOverdue: (TaskEntity) -> Boolean = { false },
 ) {
     item(key = "$key-header") {
         ExpansionSection(
@@ -450,7 +474,7 @@ private fun LazyListScope.taskSection(
             val taskEntity = taskWithSubtasks.task
             TaskListTile(
                 task = taskEntity,
-                isOverdue = isOverdue,
+                isOverdue = isOverdue(taskEntity),
                 subtasksCompleted = taskWithSubtasks.subtasks.count { it.isCompleted },
                 subtasksTotal = taskWithSubtasks.subtasks.size,
                 onToggleCompleted = { row.actions.onToggleCompleted(taskEntity) },

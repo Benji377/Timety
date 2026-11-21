@@ -27,6 +27,7 @@ internal fun HabitWithCompletions.toBackupJson(): JSONObject = JSONObject().appl
     put("stackName", orNull(habit.stackName))
     put("stackOrder", orNull(habit.stackOrder))
     put("sortOrder", habit.sortOrder)
+    put("pinnedAt", orNull(habit.pinnedAt?.toString()))
     put("completions", JSONArray(completions.map { it.completionDate.toString() }))
 }
 
@@ -52,6 +53,8 @@ internal fun habitFromBackup(json: JSONObject): HabitWithCompletions {
         stackName = json.stringOrNull("stackName"),
         stackOrder = json.intOrNull("stackOrder"),
         sortOrder = json.optInt("sortOrder", 0),
+        // A habit in a stack is never pinned; older backups restore unpinned.
+        pinnedAt = json.instantOrNull("pinnedAt")?.takeIf { json.stringOrNull("stackName").isNullOrBlank() },
     )
     val completions = json.instantList("completions")
         .map { HabitCompletionEntity(habitId = id, completionDate = it) }

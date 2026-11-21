@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.ui.components.common.PinnedMarker
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.ui.components.common.NeoListTile
@@ -92,10 +93,14 @@ fun RecurringTaskListTile(
             )
             Spacer(Modifier.width(AppTheme.spaceSmall))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = task.title,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = AppTheme.fwBold),
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = task.title,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = AppTheme.fwBold),
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (task.pinnedAt != null) PinnedMarker()
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Filled.Repeat,

@@ -421,6 +421,10 @@ class MigrationTest {
             cursor.moveToFirst()
             assertEquals(0, cursor.getInt(0))
         }
+        db.query("SELECT pinnedAt FROM recurring_tasks WHERE id = 'r1'").use { cursor ->
+            cursor.moveToFirst()
+            assertTrue("nothing is pinned after the upgrade", cursor.isNull(0))
+        }
         db.close()
     }
 }

@@ -237,6 +237,8 @@ fun HabitDetailScreen(
             stackName = trimmedStackName,
             stackOrder = computedStackOrder,
             sortOrder = computedSortOrder,
+            // Joining a stack drops the pin; Home shows a stack as one block.
+            pinnedAt = existingHabit?.pinnedAt?.takeIf { trimmedStackName == null },
         )
 
         if (isNewHabit) {
@@ -267,6 +269,11 @@ fun HabitDetailScreen(
                         onDelete = { showDeleteDialog = true },
                         onEdit = { isEditing = true },
                         onSave = { saveHabit() },
+                        // Pinning a stacked habit would pull it out of its stack on Home.
+                        isPinned = existingHabit?.takeIf { it.stackName.isNullOrBlank() }?.let { it.pinnedAt != null },
+                        onTogglePin = {
+                            existingHabit?.let { habitViewModel.setPinned(it.id, it.pinnedAt == null) }
+                        },
                     )
                 }
             )

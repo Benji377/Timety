@@ -12,6 +12,7 @@ import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 /** Data access object for recurring tasks and their logged occurrences. */
 @Dao
@@ -41,6 +42,10 @@ interface RecurringTaskDao {
 
     @Query("DELETE FROM recurring_tasks")
     fun clearAll(): Int
+
+    /** Sets or clears just the pin, so pinning never writes back a stale copy of the task. */
+    @Query("UPDATE recurring_tasks SET pinnedAt = :pinnedAt WHERE id = :id")
+    fun setPinnedAt(id: String, pinnedAt: Instant?)
 
     // Occurrences
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -181,6 +181,11 @@ fun TaskDetailScreen(
                         isViewing = !isEditing && !isNewTask,
                         onDelete = { showDeleteConfirm = true },
                         onEdit = { isEditing = true },
+                        // A done task has nothing to stay on top for.
+                        isPinned = existingTask?.takeIf { !it.isCompleted }?.let { it.pinnedAt != null },
+                        onTogglePin = {
+                            existingTask?.let { taskViewModel.setPinned(it.id, it.pinnedAt == null) }
+                        },
                         onSave = {
                             val trimmedTitle = title.trim()
                             if (trimmedTitle.isEmpty()) {
@@ -201,6 +206,7 @@ fun TaskDetailScreen(
                                 isCompleted = existingTask?.isCompleted ?: false,
                                 completedAt = existingTask?.completedAt,
                                 createdAt = existingTask?.createdAt ?: Instant.now(),
+                                pinnedAt = existingTask?.pinnedAt,
                             )
                             if (isNewTask) {
                                 val subtasksToSave =

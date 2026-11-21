@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.benji377.timety.ui.components.common.PinnedMarker
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.tag.TagEntity
@@ -263,7 +264,9 @@ private fun HabitTileContent(
                     fontWeight = AppTheme.fwBold,
                     textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
                     color = if (isCompleted || isLocked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
+                if (habit.pinnedAt != null) PinnedMarker()
             }
 
             if (!habit.notes.isNullOrEmpty()) {

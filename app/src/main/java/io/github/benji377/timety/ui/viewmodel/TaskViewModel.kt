@@ -71,7 +71,9 @@ class TaskViewModel(
         viewModelScope.launch {
             val updatedTask = task.copy(
                 isCompleted = !task.isCompleted,
-                completedAt = if (!task.isCompleted) Instant.now() else null
+                completedAt = if (!task.isCompleted) Instant.now() else null,
+                // Done means it no longer needs the top spot; reopening it doesn't pin it again.
+                pinnedAt = if (!task.isCompleted) null else task.pinnedAt,
             )
             taskRepository.updateTask(updatedTask)
             scheduleTaskReminders(updatedTask)
@@ -87,6 +89,13 @@ class TaskViewModel(
     private suspend fun cancelTaskReminders(taskId: String) {
         ReminderScheduler.create(application)
             .cancelTaskReminders(taskId)
+    }
+
+    /** Pins the task to the top of Home and the Tasks list, or unpins it. */
+    fun setPinned(taskId: String, pinned: Boolean) {
+        viewModelScope.launch {
+            taskRepository.setPinnedAt(taskId, if (pinned) Instant.now() else null)
+        }
     }
 
     fun addSubtask(subtask: SubtaskEntity) {

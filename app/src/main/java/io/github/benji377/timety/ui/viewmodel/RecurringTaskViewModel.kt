@@ -143,6 +143,13 @@ class RecurringTaskViewModel(
         }
     }
 
+    /** Pins the task to the top of Home and the Recurring tasks page, or unpins it. */
+    fun setPinned(taskId: String, pinned: Boolean) {
+        viewModelScope.launch {
+            recurringTaskRepository.setPinnedAt(taskId, if (pinned) Instant.now() else null)
+        }
+    }
+
     fun addSubtask(subtask: RecurringSubtaskEntity) {
         viewModelScope.launch {
             recurringTaskRepository.insertSubtask(subtask)

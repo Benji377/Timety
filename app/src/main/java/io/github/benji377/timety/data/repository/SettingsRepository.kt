@@ -40,9 +40,11 @@ enum class ThemeMode(val storageValue: String) {
 
 /** A collapsible accordion section with persisted state; [defaultExpanded] applies until toggled. */
 enum class AccordionKey(val storageKey: String, val defaultExpanded: Boolean) {
+    HOME_PINNED("home_pinned", true),
     HOME_TASKS_DUE("home_tasks_due", true),
     HOME_HABITS_DUE("home_habits_due", false),
     HOME_TASKS_UPCOMING("home_tasks_upcoming", false),
+    TASKS_PINNED("tasks_pinned", true),
     TASKS_OVERDUE("tasks_overdue", true),
     TASKS_DUE_TODAY("tasks_due_today", true),
     TASKS_UPCOMING("tasks_upcoming", true),

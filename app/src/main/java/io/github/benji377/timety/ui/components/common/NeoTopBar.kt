@@ -18,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.outlined.PushPin
 import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
@@ -85,8 +87,8 @@ fun BackNavigationIcon(onClick: () -> Unit) {
 }
 
 /**
- * Top bar actions for the detail screens' view/edit modes: delete and edit buttons while
- * viewing an existing item, a save button while editing or creating. Bordered via [NeoIconButton]
+ * Top bar actions for the detail screens' view/edit modes: pin (when [isPinned] isn't null),
+ * delete and edit buttons while viewing an existing item, a save button while editing or creating. Bordered via [NeoIconButton]
  * instead of bare glyphs, so every icon in a header carries a container of its own.
  */
 @Composable
@@ -95,8 +97,20 @@ fun DetailTopBarActions(
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onSave: () -> Unit,
+    isPinned: Boolean? = null,
+    onTogglePin: () -> Unit = {},
 ) {
     if (isViewing) {
+        // Null means this item can't be pinned, so there is no button at all.
+        if (isPinned != null) {
+            NeoIconButton(
+                onClick = onTogglePin,
+                icon = if (isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                contentDescription = stringResource(if (isPinned) R.string.commonLabelUnpin else R.string.commonLabelPin),
+                contentColor = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(end = AppTheme.spaceSmall),
+            )
+        }
         NeoIconButton(
             onClick = onDelete,
             icon = Icons.Filled.DeleteOutline,
