@@ -3,6 +3,8 @@ package io.github.benji377.timety.services.backup
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
+import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.TaskPlace
@@ -10,6 +12,7 @@ import io.github.benji377.timety.data.model.task.TaskSize
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.Instant
@@ -37,6 +40,61 @@ class RecurringTaskBackupTest {
         assertEquals(TaskSize.SMALL, restored.size)
         assertEquals("Balcony", restored.location)
         assertEquals(task.place, restored.place)
+    }
+
+    @Test
+    fun theChecklistAndHistorySnapshots_surviveARoundTrip() {
+        val occurrences = listOf(
+            RecurringOccurrenceEntity(
+                recurringTaskId = "r1",
+                completedAt = Instant.parse("2026-11-14T10:00:00Z"),
+                previousDueDate = Instant.parse("2026-11-14T09:00:00Z"),
+                subtasksDone = 2,
+                subtasksTotal = 3,
+            ),
+            RecurringOccurrenceEntity(recurringTaskId = "r1", completedAt = Instant.parse("2026-11-07T10:00:00Z")),
+        )
+        val subtasks = listOf(
+            RecurringSubtaskEntity(id = "a", recurringTaskId = "r1", title = "Kitchen", isCompleted = true, sortOrder = 1),
+            RecurringSubtaskEntity(id = "b", recurringTaskId = "r1", title = "Floors", sortOrder = 0),
+        )
+
+        val restored = recurringTaskFromBackup(RecurringTaskWithOccurrences(task, occurrences, subtasks).toBackupJson())
+
+        assertEquals(listOf("Floors", "Kitchen"), restored.subtasks.map { it.title })
+        assertEquals(listOf(false, true), restored.subtasks.map { it.isCompleted })
+        val withSnapshot = restored.occurrences.single { it.subtasksTotal != null }
+        assertEquals(2, withSnapshot.subtasksDone)
+        assertEquals(3, withSnapshot.subtasksTotal)
+        assertEquals(occurrences[0].previousDueDate, withSnapshot.previousDueDate)
+        assertNull(restored.occurrences.single { it.subtasksTotal == null }.subtasksDone)
+    }
+
+    @Test
+    fun anOlderBackup_withBareTimestamps_keepsItsHistory() {
+        val json = JSONObject(
+            """{"id": "r1", "title": "Bins", "dueDate": "2026-11-21T09:00:00Z", "unit": "WEEK",
+               "occurrences": ["2026-11-14T10:00:00Z", "not a date"]}"""
+        )
+
+        val restored = recurringTaskFromBackup(json)
+
+        assertEquals(Instant.parse("2026-11-14T10:00:00Z"), restored.occurrences.single().completedAt)
+        assertNull(restored.occurrences.single().subtasksTotal)
+        assertTrue(restored.subtasks.isEmpty())
+    }
+
+    @Test
+    fun aSnapshotThatDoesNotAddUp_isDropped() {
+        val json = JSONObject(
+            """{"id": "r1", "title": "Bins", "dueDate": "2026-11-21T09:00:00Z", "unit": "WEEK",
+               "occurrences": [{"completedAt": "2026-11-14T10:00:00Z", "subtasksDone": 5, "subtasksTotal": 3}]}"""
+        )
+
+        val occurrence = recurringTaskFromBackup(json).occurrences.single()
+
+        assertNull(occurrence.subtasksDone)
+        assertNull(occurrence.subtasksTotal)
     }
 
     @Test

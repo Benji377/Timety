@@ -385,7 +385,7 @@ class MigrationTest {
     }
 
     @Test
-    fun migrate7To8_givesRecurringTasksDefaultPriorityEffortAndNoLocation() {
+    fun migrate7To8_givesRecurringTasksDefaultsAnEmptyChecklistAndNoSnapshots() {
         val dbName = "migration-test-7-8"
 
         helper.createDatabase(dbName, 7).apply {
@@ -393,6 +393,10 @@ class MigrationTest {
                 "INSERT INTO recurring_tasks (id, title, description, dueDate, hasDueTime, unit, interval, " +
                     "monthlyMode, reminderOffsetsMinutes, createdAt) " +
                     "VALUES ('r1', 'Bins', '', 1000, 1, 'WEEK', 1, 'DAY_OF_MONTH', '[]', 0)"
+            )
+            execSQL(
+                "INSERT INTO recurring_occurrences (recurringTaskId, completedAt, previousDueDate) " +
+                    "VALUES ('r1', 500, 400)"
             )
             close()
         }
@@ -405,6 +409,14 @@ class MigrationTest {
             assertEquals("MEDIUM", cursor.getString(1))
             assertEquals("", cursor.getString(2))
             assertTrue(cursor.isNull(3))
+        }
+        db.query("SELECT subtasksDone, subtasksTotal FROM recurring_occurrences WHERE recurringTaskId = 'r1'").use { cursor ->
+            cursor.moveToFirst()
+            assertTrue("an old round has no checklist snapshot", cursor.isNull(0) && cursor.isNull(1))
+        }
+        db.query("SELECT COUNT(*) FROM recurring_subtasks").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(0, cursor.getInt(0))
         }
         db.close()
     }

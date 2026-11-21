@@ -3,6 +3,7 @@ package io.github.benji377.timety.services
 import android.content.Context
 import androidx.glance.appwidget.updateAll
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
 import io.github.benji377.timety.data.repository.TaskRepository
@@ -17,6 +18,8 @@ data class RecurringCompletionUndo(
     val previousDueDate: Instant,
     /** The task as stored after completion, i.e. with the advanced due date. */
     val advancedTask: RecurringTaskEntity,
+    /** The checklist as it was before completion unticked it, so Undo can tick it back. */
+    val subtasksBefore: List<RecurringSubtaskEntity> = emptyList(),
 )
 
 /**
@@ -46,9 +49,11 @@ object CompletionActions {
 
     /**
      * Logs a completed occurrence now, rolls the task's due date forward to the next occurrence,
-     * reschedules its reminders and refreshes the task widget. Reads the task from the DB and
-     * returns null, changing nothing, when it is gone or its due date is no longer the one in
-     * [task]: a second tap from a list that hasn't caught up yet must not complete it twice.
+     * reschedules its reminders and refreshes the task widget. The occurrence records how much of
+     * the checklist was ticked, then the checklist is unticked for the next round. Reads the task
+     * from the DB and returns null, changing nothing, when it is gone or its due date is no longer
+     * the one in [task]: a second tap from a list that hasn't caught up yet must not complete it
+     * twice.
      */
     suspend fun completeRecurringOccurrence(
         context: Context,
@@ -59,16 +64,21 @@ object CompletionActions {
             val stored = recurringTaskRepository.getTaskById(task.id) ?: return null
             if (stored.dueDate != task.dueDate) return null
             val now = Instant.now()
+            val subtasks = recurringTaskRepository.getSubtasks(stored.id)
             val occurrenceId = recurringTaskRepository.insertOccurrence(
                 RecurringOccurrenceEntity(
                     recurringTaskId = stored.id,
                     completedAt = now,
                     previousDueDate = stored.dueDate,
+                    // Nothing to report without a checklist, rather than "0/0".
+                    subtasksDone = subtasks.takeIf { it.isNotEmpty() }?.count { it.isCompleted },
+                    subtasksTotal = subtasks.size.takeIf { it > 0 },
                 )
             )
+            if (subtasks.any { it.isCompleted }) recurringTaskRepository.resetSubtasks(stored.id)
             val advanced = stored.copy(dueDate = RecurrenceUtils.nextDueDate(stored, now))
             recurringTaskRepository.updateTask(advanced)
-            RecurringCompletionUndo(occurrenceId, stored.dueDate, advanced)
+            RecurringCompletionUndo(occurrenceId, stored.dueDate, advanced, subtasks)
         }
         rescheduleRecurring(context, undo.advancedTask)
         return undo

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "ebfd3fde08891d9cc7e2fc6253b9c61e",
+    "identityHash": "37a9a0e6b6e3283c1c64d957b92b4585",
     "entities": [
       {
         "tableName": "tasks",
@@ -289,7 +289,7 @@
       },
       {
         "tableName": "recurring_occurrences",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `recurringTaskId` TEXT NOT NULL, `completedAt` INTEGER NOT NULL, `previousDueDate` INTEGER, FOREIGN KEY(`recurringTaskId`) REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `recurringTaskId` TEXT NOT NULL, `completedAt` INTEGER NOT NULL, `previousDueDate` INTEGER, `subtasksDone` INTEGER, `subtasksTotal` INTEGER, FOREIGN KEY(`recurringTaskId`) REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -313,6 +313,16 @@
             "fieldPath": "previousDueDate",
             "columnName": "previousDueDate",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "subtasksDone",
+            "columnName": "subtasksDone",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "subtasksTotal",
+            "columnName": "subtasksTotal",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -330,6 +340,72 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_recurring_occurrences_recurringTaskId` ON `${TABLE_NAME}` (`recurringTaskId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "recurring_tasks",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "recurringTaskId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "recurring_subtasks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `recurringTaskId` TEXT NOT NULL, `title` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`recurringTaskId`) REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recurringTaskId",
+            "columnName": "recurringTaskId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCompleted",
+            "columnName": "isCompleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sortOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_recurring_subtasks_recurringTaskId",
+            "unique": false,
+            "columnNames": [
+              "recurringTaskId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_recurring_subtasks_recurringTaskId` ON `${TABLE_NAME}` (`recurringTaskId`)"
           }
         ],
         "foreignKeys": [
@@ -1340,7 +1416,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ebfd3fde08891d9cc7e2fc6253b9c61e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '37a9a0e6b6e3283c1c64d957b92b4585')"
     ]
   }
 }

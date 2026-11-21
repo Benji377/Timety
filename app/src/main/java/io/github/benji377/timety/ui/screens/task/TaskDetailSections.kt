@@ -63,7 +63,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.Priority
-import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskPlace
 import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.ui.components.common.FieldLabel
@@ -497,7 +496,8 @@ internal fun LocationField(
 /** Checklist row; [showDragHandle] hints that the row can be held and dragged to reorder. */
 @Composable
 internal fun SubtaskRow(
-    subtask: SubtaskEntity,
+    title: String,
+    isCompleted: Boolean,
     isEditing: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     onRemove: () -> Unit,
@@ -521,7 +521,7 @@ internal fun SubtaskRow(
             )
         }
         Checkbox(
-            checked = subtask.isCompleted,
+            checked = isCompleted,
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
                 checkedColor = SuccessColor,
@@ -530,10 +530,10 @@ internal fun SubtaskRow(
             )
         )
         Text(
-            text = subtask.title,
+            text = title,
             modifier = Modifier.weight(1f),
-            textDecoration = if (subtask.isCompleted) TextDecoration.LineThrough else null,
-            color = if (subtask.isCompleted) {
+            textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
+            color = if (isCompleted) {
                 MaterialTheme.colorScheme.onSurfaceVariant
             } else {
                 MaterialTheme.colorScheme.onSurface

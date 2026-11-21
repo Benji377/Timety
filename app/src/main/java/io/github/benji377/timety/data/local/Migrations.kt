@@ -359,8 +359,9 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
 }
 
 /**
- * Gives recurring tasks the priority, effort, and location fields of one-off tasks (#266), with the
- * same defaults a new one-off task gets.
+ * Gives recurring tasks the priority, effort, location, and checklist of one-off tasks (#266): the
+ * new fields get the defaults a new one-off task gets, the checklist is a table of its own, and
+ * each logged occurrence can record how much of the checklist was done.
  */
 val MIGRATION_7_8 = object : Migration(7, 8) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -368,6 +369,18 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
         db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `size` TEXT NOT NULL DEFAULT 'MEDIUM'")
         db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `location` TEXT NOT NULL DEFAULT ''")
         db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `place` TEXT")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `recurring_subtasks` (`id` TEXT NOT NULL, " +
+                "`recurringTaskId` TEXT NOT NULL, `title` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, " +
+                "`sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`recurringTaskId`) " +
+                "REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_recurring_subtasks_recurringTaskId` " +
+                "ON `recurring_subtasks` (`recurringTaskId`)"
+        )
+        db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `subtasksDone` INTEGER")
+        db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `subtasksTotal` INTEGER")
     }
 }
 

@@ -42,6 +42,7 @@ import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.components.common.TagFilterRow
+import io.github.benji377.timety.ui.components.task.SubtaskProgressRow
 import io.github.benji377.timety.ui.components.task.recurrenceCadenceLabel
 import io.github.benji377.timety.ui.components.task.recurringStatusColor
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -231,6 +232,13 @@ private fun RecurringTaskCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (item.subtasks.isNotEmpty()) {
+                    SubtaskProgressRow(
+                        completed = item.subtasks.count { it.isCompleted },
+                        total = item.subtasks.size,
+                        barColor = borderColor,
+                    )
+                }
                 if (tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
                     TagChips(tags)

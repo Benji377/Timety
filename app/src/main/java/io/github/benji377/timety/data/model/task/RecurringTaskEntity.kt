@@ -120,12 +120,20 @@ data class RecurringOccurrenceEntity(
     val completedAt: Instant,
     /**
      * The task's due date before this completion advanced it, so unchecking can put it back.
-     * Null for backdated entries and restored backups, which never moved the due date.
+     * Null for backdated entries, which never moved the due date, and for rows restored from
+     * backups older than this field.
      */
     val previousDueDate: Instant? = null,
+    /**
+     * How many checklist items were ticked, and how many there were, when this round was
+     * completed. Frozen then: editing the checklist later doesn't rewrite history. Both null when
+     * the task had no checklist, and for backdated entries and rows from before checklists.
+     */
+    val subtasksDone: Int? = null,
+    val subtasksTotal: Int? = null,
 )
 
-/** A recurring task paired with its completion records, for a Room `@Relation` query. */
+/** A recurring task paired with its completion records and checklist, for a Room `@Relation` query. */
 data class RecurringTaskWithOccurrences(
     @Embedded
     val task: RecurringTaskEntity,
@@ -133,5 +141,14 @@ data class RecurringTaskWithOccurrences(
         parentColumn = "id",
         entityColumn = "recurringTaskId"
     )
-    val occurrences: List<RecurringOccurrenceEntity>
+    val occurrences: List<RecurringOccurrenceEntity>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "recurringTaskId"
+    )
+    val subtasks: List<RecurringSubtaskEntity> = emptyList(),
 )
+
+/** The same task with its checklist in display order; Room returns relation rows unordered. */
+fun RecurringTaskWithOccurrences.withSortedSubtasks(): RecurringTaskWithOccurrences =
+    copy(subtasks = subtasks.sortedBy { it.sortOrder })

@@ -28,6 +28,7 @@ import io.github.benji377.timety.data.model.tag.SessionTagEntity
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.tag.TaskTagEntity
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -40,6 +41,7 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
         SubtaskEntity::class,
         RecurringTaskEntity::class,
         RecurringOccurrenceEntity::class,
+        RecurringSubtaskEntity::class,
         FocusModeEntity::class,
         SessionPhaseEntity::class,
         FocusSessionEntity::class,

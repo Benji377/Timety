@@ -105,6 +105,7 @@ fun HomeScreen(
     val showGreeting by settingsViewModel.showHomeGreeting.collectAsState()
     val upcomingWindowDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val recurringItems by recurringViewModel.allRecurringTasks.collectAsState()
+    val recurringSubtasks = remember(recurringItems) { recurringItems.associate { it.task.id to it.subtasks } }
     val completeRecurring =
         rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
     val toggleTaskCompletion = rememberTaskCompletionToggle(taskViewModel, focusViewModel)
@@ -324,6 +325,9 @@ fun HomeScreen(
                                             is HomeTaskRow.Recurring -> RecurringTaskListTile(
                                                 task = row.task,
                                                 status = row.status,
+                                                subtasksCompleted = recurringSubtasks[row.task.id]
+                                                    .orEmpty().count { it.isCompleted },
+                                                subtasksTotal = recurringSubtasks[row.task.id].orEmpty().size,
                                                 onComplete = { completeRecurring(row.task) },
                                                 onTap = { onNavigateToRecurringDetail(row.task.id) },
                                             )
@@ -410,6 +414,9 @@ fun HomeScreen(
                                             is HomeTaskRow.Recurring -> RecurringTaskListTile(
                                                 task = row.task,
                                                 status = row.status,
+                                                subtasksCompleted = recurringSubtasks[row.task.id]
+                                                    .orEmpty().count { it.isCompleted },
+                                                subtasksTotal = recurringSubtasks[row.task.id].orEmpty().size,
                                                 onComplete = { completeRecurring(row.task) },
                                                 onTap = { onNavigateToRecurringDetail(row.task.id) },
                                             )

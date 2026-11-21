@@ -61,6 +61,8 @@ fun RecurringTaskListTile(
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
     tags: List<TagEntity> = emptyList(),
+    subtasksCompleted: Int = 0,
+    subtasksTotal: Int = 0,
     margin: PaddingValues = AppTheme.listTileScreenMargin,
 ) {
     val dateFmt = LocalDateFormatSettings.current
@@ -109,6 +111,9 @@ fun RecurringTaskListTile(
                         fontSize = AppTheme.fsLabel,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+                if (subtasksTotal > 0) {
+                    SubtaskProgressRow(subtasksCompleted, subtasksTotal, barColor = borderColor)
                 }
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
