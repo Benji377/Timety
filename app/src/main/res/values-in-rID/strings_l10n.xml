@@ -520,6 +520,16 @@
     <string name="settingsLabelTimeFormat">Gunakan Format 24 Jam</string>
     <string name="settingsLabelUpcomingTask">Rentang Tugas Mendatang</string>
     <string name="settingsLabelUpcomingTaskSubtitle">%1$d hari ke depan</string>
+    <string name="settingsLabelAutoSkip">Recurring Auto-Skip</string>
+    <string name="settingsLabelAutoSkipSubtitle">Skips the next round if it is less than %1$s away</string>
+    <string name="settingsAutoSkipOff">Off</string>
+    <string name="settingsAutoSkipHint">When you complete a recurring task late and its next round is closer than this, that round is skipped too. Never more than a quarter of the time between two rounds. Set it to 0 to turn this off.</string>
+    <plurals name="settingsAutoSkipHours">
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="settingsAutoSkipDays">
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="settingsLabelVersion">Versi %1$s</string>
     <string name="settingsGroupDnd">Jangan Ganggu</string>
     <string name="settingsGroupLinkedItems">Tugas &amp; Kebiasaan Terkait</string>
@@ -735,6 +745,16 @@
     <string name="recurringTaskDeleteTitle">Hapus tugas berulang?</string>
     <string name="recurringTaskDeleteContent">Ini juga menghapus riwayat penyelesaiannya. Tindakan ini tidak dapat dibatalkan.</string>
     <string name="recurringTaskCompletedSnackbar">Selesai! Berikutnya: %1$s</string>
+    <string name="recurringTaskSkippedSnackbar">Skipped. Next: %1$s</string>
+    <string name="recurringTaskSkip">Skip</string>
+    <string name="recurringTaskSkipDescription">Skip this time</string>
+    <string name="recurringTaskHistorySkipped">Skipped</string>
+    <plurals name="recurringTaskHistoryCompletedCount">
+        <item quantity="other">%d completed</item>
+    </plurals>
+    <plurals name="recurringTaskHistorySkippedCount">
+        <item quantity="other">%d skipped</item>
+    </plurals>
     <plurals name="recurrenceEveryDays">
         <item quantity="other">Setiap %d hari</item>
     </plurals>
