@@ -258,6 +258,15 @@
     <string name="habitDetailLabelColorPicker">Выберите цвет</string>
     <string name="habitDetailLabelStack">Цепочка привычек</string>
     <string name="habitDetailLabelStackHint">Например, утренний ритуал</string>
+    <string name="habitStackEdit">Edit stack</string>
+    <string name="habitStackNew">New stack</string>
+    <string name="habitStackNone">No stack</string>
+    <string name="habitStackName">Stack name</string>
+    <string name="habitStackNameEmpty">Enter a name</string>
+    <string name="habitStackNameTaken">Another stack already has this name</string>
+    <string name="habitStackInOrder">Complete in order</string>
+    <string name="habitStackInOrderHint">Each habit unlocks once the one before it is done</string>
+    <string name="habitStackUncheckLaterFirst">Uncheck the later habits in this stack first</string>
     <string name="habitDetailSnackbarSaveNoDay">Выберите хотя бы один день</string>
     <string name="habitListFilterNoMatch">Нет привычек, подходящих под запрос</string>
     <string name="habitListReorderToggleTooltip">Изменить порядок привычек</string>
