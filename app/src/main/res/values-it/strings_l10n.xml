@@ -535,6 +535,18 @@
     <string name="settingsLabelTimeFormat">Usa formato 24 ore</string>
     <string name="settingsLabelUpcomingTask">Finestra attività imminenti</string>
     <string name="settingsLabelUpcomingTaskSubtitle">%1$d giorni in anticipo</string>
+    <string name="settingsLabelAutoSkip">Recurring Auto-Skip</string>
+    <string name="settingsLabelAutoSkipSubtitle">Skips the next round if it is less than %1$s away</string>
+    <string name="settingsAutoSkipOff">Off</string>
+    <string name="settingsAutoSkipHint">When you complete a recurring task late and its next round is closer than this, that round is skipped too. Never more than a quarter of the time between two rounds. Set it to 0 to turn this off.</string>
+    <plurals name="settingsAutoSkipHours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="settingsAutoSkipDays">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
     <string name="settingsLabelVersion">Versione %1$s</string>
     <string name="settingsGroupDnd">Non disturbare</string>
     <string name="settingsGroupLinkedItems">Attività e abitudini collegate</string>
@@ -761,6 +773,18 @@
     <string name="recurringTaskDeleteTitle">Eliminare l\'attività ricorrente?</string>
     <string name="recurringTaskDeleteContent">Questo elimina anche la sua cronologia di completamento. Questa azione non può essere annullata.</string>
     <string name="recurringTaskCompletedSnackbar">Completato! Successivo: %1$s</string>
+    <string name="recurringTaskSkippedSnackbar">Skipped. Next: %1$s</string>
+    <string name="recurringTaskSkip">Skip</string>
+    <string name="recurringTaskSkipDescription">Skip this time</string>
+    <string name="recurringTaskHistorySkipped">Skipped</string>
+    <plurals name="recurringTaskHistoryCompletedCount">
+        <item quantity="one">%d completed</item>
+        <item quantity="other">%d completed</item>
+    </plurals>
+    <plurals name="recurringTaskHistorySkippedCount">
+        <item quantity="one">%d skipped</item>
+        <item quantity="other">%d skipped</item>
+    </plurals>
     <plurals name="recurrenceEveryDays">
         <item quantity="one">Ogni giorno</item>
         <item quantity="other">Ogni %d giorni</item>
