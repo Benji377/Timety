@@ -2,10 +2,13 @@ package io.github.benji377.timety.data.repository
 
 import io.github.benji377.timety.data.local.dao.RecurringTaskDao
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
+import io.github.benji377.timety.data.model.task.withSortedSubtasks
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 
@@ -14,14 +17,14 @@ class RecurringTaskRepository(
     private val recurringTaskDao: RecurringTaskDao
 ) {
     val allRecurringTasks: Flow<List<RecurringTaskWithOccurrences>> =
-        recurringTaskDao.getAllWithOccurrences()
+        recurringTaskDao.getAllWithOccurrences().map { tasks -> tasks.map { it.withSortedSubtasks() } }
 
     // Serializes completing and unchecking across the app, the widget and focus auto-complete,
     // which all read the due date, then write it; this repository is a process-wide singleton.
     val completionMutex = Mutex()
 
     fun observeTask(id: String): Flow<RecurringTaskWithOccurrences?> =
-        recurringTaskDao.observeWithOccurrences(id)
+        recurringTaskDao.observeWithOccurrences(id).map { it?.withSortedSubtasks() }
 
     /** Every recurring task without its occurrence log, for callers that only need the schedule. */
     suspend fun getAllTasks(): List<RecurringTaskEntity> = withContext(Dispatchers.IO) {
@@ -60,5 +63,29 @@ class RecurringTaskRepository(
 
     suspend fun getLatestAdvancingOccurrenceId(taskId: String): Long? = withContext(Dispatchers.IO) {
         recurringTaskDao.getLatestAdvancingOccurrenceId(taskId)
+    }
+
+    suspend fun getSubtasks(taskId: String): List<RecurringSubtaskEntity> = withContext(Dispatchers.IO) {
+        recurringTaskDao.getSubtasks(taskId)
+    }
+
+    suspend fun insertSubtask(subtask: RecurringSubtaskEntity) = withContext(Dispatchers.IO) {
+        recurringTaskDao.insertSubtask(subtask)
+    }
+
+    suspend fun updateSubtask(subtask: RecurringSubtaskEntity) = withContext(Dispatchers.IO) {
+        recurringTaskDao.updateSubtask(subtask)
+    }
+
+    suspend fun updateSubtasks(subtasks: List<RecurringSubtaskEntity>) = withContext(Dispatchers.IO) {
+        recurringTaskDao.updateSubtasks(subtasks)
+    }
+
+    suspend fun deleteSubtask(subtask: RecurringSubtaskEntity) = withContext(Dispatchers.IO) {
+        recurringTaskDao.deleteSubtask(subtask)
+    }
+
+    suspend fun resetSubtasks(taskId: String) = withContext(Dispatchers.IO) {
+        recurringTaskDao.resetSubtasks(taskId)
     }
 }

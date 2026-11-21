@@ -413,7 +413,7 @@ class FocusAutoCompleteTest {
 
     private fun occurrenceCount(recurringTaskId: String): Int =
         container.recurringTaskRepository.allRecurringTasks.value()
-            .single { it.task.id == recurringTaskId }.occurrences.size
+            .single { it.task.id == recurringTaskId }.log.size
 
     private fun awaitOccurrences(recurringTaskId: String, expected: Int, step: String) {
         assertTrue(

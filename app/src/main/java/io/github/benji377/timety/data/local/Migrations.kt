@@ -358,6 +358,36 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
     }
 }
 
+/**
+ * Gives recurring tasks the priority, effort, location, and checklist of one-off tasks (#266): the
+ * new fields get the defaults a new one-off task gets, the checklist is a table of its own, and
+ * each logged occurrence can record how much of the checklist was done. Logged rounds also get a
+ * status, so a round can be skipped (#265).
+ */
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `priority` TEXT NOT NULL DEFAULT 'MEDIUM'")
+        db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `size` TEXT NOT NULL DEFAULT 'MEDIUM'")
+        db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `location` TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `place` TEXT")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `recurring_subtasks` (`id` TEXT NOT NULL, " +
+                "`recurringTaskId` TEXT NOT NULL, `title` TEXT NOT NULL, `isCompleted` INTEGER NOT NULL, " +
+                "`sortOrder` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`recurringTaskId`) " +
+                "REFERENCES `recurring_tasks`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_recurring_subtasks_recurringTaskId` " +
+                "ON `recurring_subtasks` (`recurringTaskId`)"
+        )
+        db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `subtasksDone` INTEGER")
+        db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `subtasksTotal` INTEGER")
+        // Every round logged so far was a completion; skipping is new (#265).
+        db.execSQL("ALTER TABLE `recurring_occurrences` ADD COLUMN `status` TEXT NOT NULL DEFAULT 'COMPLETED'")
+    }
+}
+
 /** All migrations, in order, to register on the Room builder. */
-val ALL_MIGRATIONS =
-    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+val ALL_MIGRATIONS = arrayOf(
+    MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8
+)

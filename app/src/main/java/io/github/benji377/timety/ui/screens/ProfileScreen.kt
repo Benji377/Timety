@@ -454,7 +454,7 @@ private data class ProfileStats(
             sessions: List<FocusSessionEntity>,
         ): ProfileStats = ProfileStats(
             // Each logged recurring occurrence counts as a completed task.
-            totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.occurrences.size },
+            totalTasksDone = tasks.count { it.task.isCompleted } + recurring.sumOf { it.completed.size },
             totalHabitsMet = HabitRates.metCheckIns(habits, ZoneId.systemDefault()).size,
             // Whole minutes per session, the way the Focus stats count them.
             totalFocusMins = sessions.sumOf { it.totalSecondsFocused / 60 },

@@ -52,6 +52,7 @@ class TestViewModels(
                             application,
                             container.recurringTaskRepository,
                             container.tagRepository,
+                            container.settingsRepository,
                         )
 
                     modelClass.isAssignableFrom(HabitViewModel::class.java) ->

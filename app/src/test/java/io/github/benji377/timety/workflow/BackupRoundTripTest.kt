@@ -112,7 +112,7 @@ class BackupRoundTripTest {
         assertEquals(
             "recurring occurrence",
             seeded.occurrence.copy(id = 0),
-            restoredRecurring.occurrences.single().copy(id = 0),
+            restoredRecurring.log.single().copy(id = 0),
         )
 
         val restoredGoal = target.goalRepository.allGoalsWithEntries.first().single()

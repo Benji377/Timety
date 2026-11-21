@@ -368,7 +368,8 @@ fun TaskDetailScreen(
                     },
                 ) { subtask, isDragged ->
                     SubtaskRow(
-                        subtask = subtask,
+                        title = subtask.title,
+                        isCompleted = subtask.isCompleted,
                         isEditing = isEditing,
                         onCheckedChange = { checked ->
                             val updated = subtask.copy(isCompleted = checked)

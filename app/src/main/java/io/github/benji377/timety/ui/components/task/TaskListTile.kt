@@ -83,7 +83,6 @@ fun TaskListTile(
 ) {
     val borderColor = getBorderColor(task, isOverdue)
     val hasSubtasks = subtasksTotal > 0
-    val progress = if (hasSubtasks) subtasksCompleted.toFloat() / subtasksTotal.toFloat() else 0f
 
     val card = @Composable {
         NeoListTile(
@@ -135,31 +134,11 @@ fun TaskListTile(
                     }
 
                     if (hasSubtasks) {
-                        Spacer(Modifier.height(6.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Filled.Checklist,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "$subtasksCompleted/$subtasksTotal",
-                                fontSize = AppTheme.fsLabel,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = AppTheme.fwMedium,
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            NeoProgressBar(
-                                progress = { progress },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(4.dp),
-                                color = if (task.isCompleted) SuccessColor else borderColor,
-                                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            )
-                        }
+                        SubtaskProgressRow(
+                            completed = subtasksCompleted,
+                            total = subtasksTotal,
+                            barColor = if (task.isCompleted) SuccessColor else borderColor,
+                        )
                     }
 
                     if (showDueDate && task.dueDate != null) {
@@ -217,6 +196,36 @@ fun TaskListTile(
         margin = margin,
     ) {
         card()
+    }
+}
+
+/** A tile's checklist line: "2/5" and a thin bar; [total] must be above zero. */
+@Composable
+internal fun SubtaskProgressRow(completed: Int, total: Int, barColor: Color) {
+    Spacer(Modifier.height(6.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = Icons.Filled.Checklist,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = "$completed/$total",
+            fontSize = AppTheme.fsLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = AppTheme.fwMedium,
+        )
+        Spacer(Modifier.width(8.dp))
+        NeoProgressBar(
+            progress = { completed.toFloat() / total.toFloat() },
+            modifier = Modifier
+                .weight(1f)
+                .height(4.dp),
+            color = barColor,
+            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
     }
 }
 

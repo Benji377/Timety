@@ -246,10 +246,11 @@ class BackupService(
         recurringTaskDao.clearAll()
         val recurringJson = LinkedHashMap<String, JSONObject>()
         json.objects("recurringTasks").forEach { item ->
-            val (task, occurrences) = recurringTaskFromBackup(item)
+            val (task, occurrences, subtasks) = recurringTaskFromBackup(item)
             recurringJson[task.id] = item
             recurringTaskDao.insert(task)
             occurrences.forEach(recurringTaskDao::insertOccurrence)
+            subtasks.forEach(recurringTaskDao::insertSubtask)
         }
 
         habitDao.clearAll()

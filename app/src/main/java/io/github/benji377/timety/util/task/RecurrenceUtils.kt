@@ -80,27 +80,84 @@ object RecurrenceUtils {
      * task's occurrence dates forward and skips every past one, so completing a long-overdue task
      * jumps straight to the next real occurrence instead of firing every missed one. The time of
      * day is the task's stored one, else the current due date's; a date-only task stays date-only.
+     *
+     * With an [autoSkip] window, that next occurrence is passed over too when it starts sooner
+     * than the window after [now] (see [autoSkips]): completing Saturday's task late, an hour
+     * before the next Saturday's, does that one as well rather than making it due an hour later.
      */
     fun nextDueDate(
         task: RecurringTaskEntity,
         now: Instant,
         zone: ZoneId = ZoneId.systemDefault(),
+        autoSkip: Duration = Duration.ZERO,
     ): Instant {
-        val zonedDue = task.dueDate.atZone(zone)
-        val anchor = zonedDue.toLocalDate()
-        // The stored time keeps a due time inside a DST gap (02:30 resolved to 03:30 on the
-        // spring-forward day) from sticking at the shifted time on every later occurrence.
-        val time = task.timeOfDayMinutes?.let { LocalTime.of(it / 60, it % 60) } ?: zonedDue.toLocalTime()
-        val timeMinutes = if (task.hasDueTime) time.hour * 60 + time.minute else null
-        var date = anchor
+        val walk = Walk(task, zone)
+        var previous = walk.anchor
+        var date = walk.anchor
         var guard = 0
         while (guard < MAX_STEPS) {
-            date = nextOccurrenceDate(date, task, anchor)
-            val due = Due.of(date, timeMinutes, zone)
-            if (!due.isOverdue(now, zone)) return due.at
+            previous = date
+            date = walk.after(date)
+            if (!walk.due(date).isOverdue(now, zone)) break
             guard++
         }
-        return Due.of(date, timeMinutes, zone).at
+        return if (autoSkips(walk, previous, date, now, autoSkip)) walk.due(walk.after(date)).at else walk.due(date).at
+    }
+
+    /**
+     * Every due date a completion at [completedAt] may have left [task] on: the plain next one,
+     * and the one after it when auto-skip passed over it. Lets unchecking a completion recognise
+     * its own work whatever the auto-skip setting is now.
+     */
+    fun possibleNextDueDates(
+        task: RecurringTaskEntity,
+        completedAt: Instant,
+        zone: ZoneId = ZoneId.systemDefault(),
+    ): Set<Instant> {
+        val walk = Walk(task, zone)
+        val next = nextDueDate(task, completedAt, zone)
+        return setOf(next, walk.due(walk.after(next.atZone(zone).toLocalDate())).at)
+    }
+
+    /**
+     * Whether [next] comes so soon after [now] that completing now should count for it too. The
+     * window is [setting], but never more than a quarter of the gap from the [previous]
+     * occurrence: with half, a daily 08:00 task done at 22:00 would pass over the next morning's
+     * round although it was plainly that day's. A date-only task counts whole days, so its
+     * occurrence today is passed over and tomorrow's is not.
+     */
+    private fun autoSkips(walk: Walk, previous: LocalDate, next: LocalDate, now: Instant, setting: Duration): Boolean {
+        if (setting <= Duration.ZERO) return false
+        val nextDue = walk.due(next)
+        val gap: Duration
+        val lead: Duration
+        if (nextDue.hasTime) {
+            gap = Duration.between(walk.due(previous).at, nextDue.at)
+            lead = Duration.between(now, nextDue.at)
+        } else {
+            gap = Duration.ofDays(ChronoUnit.DAYS.between(previous, next))
+            lead = Duration.ofDays(ChronoUnit.DAYS.between(now.atZone(walk.zone).toLocalDate(), next))
+        }
+        return lead < minOf(setting, gap.dividedBy(MAX_AUTO_SKIP_SHARE_OF_GAP))
+    }
+
+    /** One task's occurrence dates, aligned to its current due date, and their due times. */
+    private class Walk(private val task: RecurringTaskEntity, val zone: ZoneId) {
+        private val zonedDue = task.dueDate.atZone(zone)
+        val anchor: LocalDate = zonedDue.toLocalDate()
+
+        // The stored time keeps a due time inside a DST gap (02:30 resolved to 03:30 on the
+        // spring-forward day) from sticking at the shifted time on every later occurrence.
+        private val timeMinutes: Int? = if (task.hasDueTime) {
+            val time = task.timeOfDayMinutes?.let { LocalTime.of(it / 60, it % 60) } ?: zonedDue.toLocalTime()
+            time.hour * 60 + time.minute
+        } else {
+            null
+        }
+
+        fun after(date: LocalDate): LocalDate = nextOccurrenceDate(date, task, anchor)
+
+        fun due(date: LocalDate): Due = Due.of(date, timeMinutes, zone)
     }
 
     /** The first occurrence date strictly after [after], with week/month cycles aligned to [anchor]. */
@@ -204,5 +261,6 @@ object RecurrenceUtils {
         date.plusWeeks(1).month != date.month
 
     private const val MAX_STEPS = 100_000
+    private const val MAX_AUTO_SKIP_SHARE_OF_GAP = 4L
     private const val DAYS_PER_WEEK = 7L
 }

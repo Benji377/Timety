@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
@@ -42,6 +44,7 @@ import io.github.benji377.timety.ui.components.common.NeoListTile
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagChips
 import io.github.benji377.timety.ui.components.common.TagFilterRow
+import io.github.benji377.timety.ui.components.task.SubtaskProgressRow
 import io.github.benji377.timety.ui.components.task.recurrenceCadenceLabel
 import io.github.benji377.timety.ui.components.task.recurringStatusColor
 import io.github.benji377.timety.ui.components.task.rememberRecurringCompleter
@@ -88,6 +91,7 @@ fun RecurringTasksScreen(
     val horizonDays by settingsViewModel.upcomingTasksHorizon.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val completeTask = rememberRecurringCompleter(viewModel, snackbarHostState)
+    val skipTask = rememberRecurringCompleter(viewModel, snackbarHostState, OccurrenceStatus.SKIPPED)
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -157,6 +161,7 @@ fun RecurringTasksScreen(
                         status = RecurrenceUtils.statusOf(item.task, Instant.now(), horizonDays),
                         onClick = { onNavigateToDetail(item.task.id) },
                         onComplete = { completeTask(item.task) },
+                        onSkip = { skipTask(item.task) },
                     )
                 }
             }
@@ -171,6 +176,7 @@ private fun RecurringTaskCard(
     status: RecurringStatus,
     onClick: () -> Unit,
     onComplete: () -> Unit,
+    onSkip: () -> Unit,
 ) {
     val dateFmt = LocalDateFormatSettings.current
     val borderColor = recurringStatusColor(status)
@@ -224,13 +230,20 @@ private fun RecurringTaskCard(
                 Text(
                     text = quantityString(
                         R.plurals.recurringTasksCompletedCount,
-                        item.occurrences.size,
+                        item.completed.size,
                         0,
-                        item.occurrences.size,
+                        item.completed.size,
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (item.subtasks.isNotEmpty()) {
+                    SubtaskProgressRow(
+                        completed = item.subtasks.count { it.isCompleted },
+                        total = item.subtasks.size,
+                        barColor = borderColor,
+                    )
+                }
                 if (tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(AppTheme.spaceXSmall))
                     TagChips(tags)
@@ -239,6 +252,13 @@ private fun RecurringTaskCard(
             // Quick-complete only makes sense for actionable occurrences; far-future ones are
             // completed early through the detail page instead.
             if (status != RecurringStatus.SCHEDULED) {
+                NeoIconButton(
+                    onClick = onSkip,
+                    icon = Icons.AutoMirrored.Filled.Redo,
+                    contentDescription = stringResource(R.string.recurringTaskSkipDescription),
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
                 NeoIconButton(
                     onClick = onComplete,
                     icon = Icons.Filled.Check,
