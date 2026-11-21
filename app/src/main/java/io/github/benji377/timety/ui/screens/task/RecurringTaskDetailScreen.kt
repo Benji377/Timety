@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
@@ -56,9 +58,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.task.MonthlyMode
+import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
+import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
@@ -118,9 +122,10 @@ private enum class MonthlyChoice { DAY_OF_MONTH, NTH_WEEKDAY, LAST_WEEKDAY }
 private enum class RecurringPickerTarget { DUE_DATE, DUE_TIME, PAST_OCCURRENCE }
 
 /**
- * Creates, views, or edits a recurring task: title, description, next due date, the recurrence
- * rule (unit, interval, weekdays or monthly anchoring), reminder offsets, and the task window. In view mode it
- * additionally shows a habit-style completion history with manual backfill.
+ * Creates, views, or edits a recurring task: title, description, priority and effort, next due
+ * date, the recurrence rule (unit, interval, weekdays or monthly anchoring), reminder offsets, the
+ * task window, and location. In view mode it additionally shows a habit-style completion history
+ * with manual backfill.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,6 +155,10 @@ fun RecurringTaskDetailScreen(
     val formTask = rememberFormSource(existingTask, isEditing)
     var title by rememberSaveable(formTask) { mutableStateOf(existingTask?.title ?: "") }
     var description by rememberSaveable(formTask) { mutableStateOf(existingTask?.description ?: "") }
+    var priority by rememberSaveable(formTask) { mutableStateOf(existingTask?.priority ?: Priority.MEDIUM) }
+    var size by rememberSaveable(formTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
+    var location by rememberSaveable(formTask) { mutableStateOf(existingTask?.location ?: "") }
+    var place by rememberSaveable(formTask) { mutableStateOf(existingTask?.place) }
     // Null until the user changes them, so a save doesn't overwrite tags still loading.
     var pickedTagIds by rememberSaveable(formTask) { mutableStateOf<Set<String>?>(null) }
     var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
@@ -246,6 +255,10 @@ fun RecurringTaskDetailScreen(
             id = recurringTaskId ?: newItemId,
             title = trimmedTitle,
             description = description.trim(),
+            priority = priority,
+            size = size,
+            location = location.trim(),
+            place = place,
             dueDate = due,
             hasDueTime = hasDueTime,
             timeOfDayMinutes = if (hasDueTime) {
@@ -360,6 +373,24 @@ fun RecurringTaskDetailScreen(
                         maxLines = 6
                     )
                 }
+            }
+
+            // Priority and effort size, as on one-off tasks.
+            item {
+                FormSectionHeader(
+                    stringResource(R.string.taskDetailsSectionPriorityAndEffort),
+                    Icons.Filled.BarChart,
+                    TaskColor,
+                )
+            }
+            item {
+                PriorityAndEffortFields(
+                    priority = priority,
+                    size = size,
+                    isEditing = isEditing,
+                    onPriorityChange = { priority = it },
+                    onSizeChange = { size = it },
+                )
             }
 
             // Next due date (also the anchor for the rule and time of day), rule and reminders.
@@ -543,6 +574,31 @@ fun RecurringTaskDetailScreen(
                     onAmountChange = {
                         windowAmountText = it
                         windowError = false
+                    },
+                )
+            }
+
+            // Location; view mode hides it when empty.
+            if (isEditing || location.isNotBlank()) item {
+                FormSectionHeader(
+                    stringResource(R.string.taskDetailsSectionLocation),
+                    Icons.Outlined.LocationOn,
+                    TaskColor,
+                )
+            }
+            if (isEditing || location.isNotBlank()) item {
+                LocationField(
+                    location = location,
+                    place = place,
+                    isEditing = isEditing,
+                    onTextChange = {
+                        location = it
+                        // Typed text no longer describes the picked place, so drop its details.
+                        place = null
+                    },
+                    onPlacePicked = {
+                        location = it.name
+                        place = it
                     },
                 )
             }

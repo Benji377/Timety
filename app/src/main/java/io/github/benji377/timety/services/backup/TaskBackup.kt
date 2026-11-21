@@ -76,6 +76,10 @@ internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObjec
     put("id", task.id)
     put("title", task.title)
     put("description", task.description)
+    put("priority", task.priority.name)
+    put("size", task.size.name)
+    put("location", task.location)
+    put("place", orNull(task.place?.toJson()))
     put("dueDate", task.dueDate.toString())
     put("hasDueTime", task.hasDueTime)
     put("timeOfDayMinutes", orNull(task.timeOfDayMinutes))
@@ -103,6 +107,11 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
         id = id,
         title = json.stringOrNull("title") ?: "",
         description = json.stringOrNull("description") ?: "",
+        // Older backups have none of these four and get a new task's defaults.
+        priority = json.enumOr("priority", Priority.MEDIUM),
+        size = json.enumOr("size", TaskSize.MEDIUM),
+        location = json.stringOrNull("location") ?: "",
+        place = json.optJSONObject("place")?.let { TaskPlace.fromJson(it) },
         dueDate = json.instantOrNull("dueDate") ?: Instant.now(),
         hasDueTime = json.optBoolean("hasDueTime", true),
         timeOfDayMinutes = json.intOrNull("timeOfDayMinutes")?.takeIf { it in 0 until MINUTES_PER_DAY },

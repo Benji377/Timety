@@ -64,6 +64,11 @@ data class RecurringTaskEntity(
     val id: String,
     val title: String,
     val description: String = "",
+    val priority: Priority = Priority.MEDIUM,
+    val size: TaskSize = TaskSize.MEDIUM,
+    val location: String = "",
+    /** Set only when [location] was picked from a search; a hand-typed location has no place. */
+    val place: TaskPlace? = null,
     /** The next occurrence; advanced on completion. Also the anchor for week math. */
     val dueDate: Instant,
     /** False = due any time on the day; [dueDate] is then the local start of the day. */

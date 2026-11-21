@@ -383,4 +383,29 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate7To8_givesRecurringTasksDefaultPriorityEffortAndNoLocation() {
+        val dbName = "migration-test-7-8"
+
+        helper.createDatabase(dbName, 7).apply {
+            execSQL(
+                "INSERT INTO recurring_tasks (id, title, description, dueDate, hasDueTime, unit, interval, " +
+                    "monthlyMode, reminderOffsetsMinutes, createdAt) " +
+                    "VALUES ('r1', 'Bins', '', 1000, 1, 'WEEK', 1, 'DAY_OF_MONTH', '[]', 0)"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 8, true, MIGRATION_7_8)
+
+        db.query("SELECT priority, size, location, place FROM recurring_tasks WHERE id = 'r1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("MEDIUM", cursor.getString(0))
+            assertEquals("MEDIUM", cursor.getString(1))
+            assertEquals("", cursor.getString(2))
+            assertTrue(cursor.isNull(3))
+        }
+        db.close()
+    }
 }
