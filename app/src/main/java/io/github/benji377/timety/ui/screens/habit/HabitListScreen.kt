@@ -219,14 +219,16 @@ fun HabitListScreen(
                     val dueToday = mutableListOf<HabitWithCompletions>()
                     val upcoming = mutableListOf<HabitWithCompletions>()
                     val done = mutableListOf<HabitWithCompletions>()
+                    // Judged on every habit, so a tag filter can't make a stack look finished.
+                    val finishedStacks = HabitUtils.finishedStacksOn(habitsWithCompletions, today)
 
                     filteredHabits.forEach { hwc ->
+                        val stackName = hwc.habit.stackName?.trim()
+                        val isDone = HabitUtils.isCompletedOn(hwc, today) || HabitUtils.isPeriodGoalMet(hwc)
                         when {
-                            HabitUtils.isCompletedOn(
-                                hwc,
-                                today
-                            ) || HabitUtils.isPeriodGoalMet(hwc) -> done.add(hwc)
-
+                            // A done step stays with its stack until the whole stack is done.
+                            isDone && (stackName.isNullOrEmpty() || stackName in finishedStacks) -> done.add(hwc)
+                            isDone -> dueToday.add(hwc)
                             HabitUtils.isHabitDueToday(hwc) -> dueToday.add(hwc)
                             else -> upcoming.add(hwc)
                         }

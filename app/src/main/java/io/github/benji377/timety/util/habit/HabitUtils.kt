@@ -235,6 +235,18 @@ object HabitUtils {
     }
 
     /**
+     * Names of the stacks in [habits] whose steps on [date] (due on it, or done on it anyway) are
+     * all done; a stack with no steps that day counts as finished too.
+     */
+    fun finishedStacksOn(habits: List<HabitWithCompletions>, date: LocalDate): Set<String> =
+        habits.filter { !it.habit.stackName.isNullOrBlank() }
+            .groupBy { it.habit.stackName!!.trim() }
+            .filterValues { members ->
+                members.filter { isHabitDueToday(it) || isCompletedOn(it, date) }.all { isCompletedOn(it, date) }
+            }
+            .keys
+
+    /**
      * The lock of each of a stack's [members] on [date], by habit id. Only the steps of that day
      * count (due on it, or done on it anyway), in stack order, so a habit off today's schedule
      * never blocks the rest, and a list that shows only some of the stack still locks correctly.

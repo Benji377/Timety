@@ -100,6 +100,20 @@ class HabitUtilsTest {
     }
 
     @Test
+    fun aStackIsFinished_onlyOnceEveryStepOfTheDayIsDone() {
+        val day = LocalDate.now()
+        fun member(id: String, stack: String, done: Boolean) =
+            step(id, done, day).let { it.copy(habit = it.habit.copy(stackName = stack, stackOrder = 0)) }
+        val habits = listOf(
+            member("a", "Morning", true), member("b", "Morning", false),
+            member("c", "Evening", true), member("d", "Evening", true),
+            step("solo", true, day),
+        )
+
+        assertEquals(setOf("Evening"), HabitUtils.finishedStacksOn(habits, day))
+    }
+
+    @Test
     fun aDoneStepBeforeAnOpenOne_canBeUnchecked() {
         val day = LocalDate.of(2026, 11, 21)
         // The first step is never waiting, and the last done step is never blocked.
