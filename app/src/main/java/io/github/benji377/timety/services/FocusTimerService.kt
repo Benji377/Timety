@@ -43,6 +43,10 @@ class FocusTimerService : Service() {
         )
     }
 
+    // Whether this service instance has seen an active session. The collector below only stops the
+    // service when a session ends, never on the idle state it sees before the first one starts.
+    private var hasSeenSession = false
+
     override fun onCreate() {
         super.onCreate()
         NotificationService(this).ensureChannels()
@@ -50,6 +54,11 @@ class FocusTimerService : Service() {
         // Only re-render/re-schedule on meaningful state transitions - re-notifying and re-arming the
         // exact alarm every second would be wasteful and unnecessary since the chronometer counts down
         // on its own once set.
+        //
+        // The collector's first value can arrive before onStartCommand(ACTION_START) runs, and is
+        // then the idle state from before the session (#272). Stopping on that would end the service
+        // before it calls startForeground, and Android crashes the app with
+        // ForegroundServiceDidNotStartInTimeException. Slow phones make that ordering more likely.
         FocusTimerManager.timerState
             .distinctUntilChanged { old, new ->
                 old.isRunning == new.isRunning &&
@@ -63,8 +72,9 @@ class FocusTimerService : Service() {
                 val sessionActive = state.isSessionActive
                 dndController.syncForSessionState(sessionActive, state.isRestPhase)
                 if (sessionActive) {
+                    hasSeenSession = true
                     updateNotification(state)
-                } else {
+                } else if (hasSeenSession) {
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
                 }
@@ -104,6 +114,15 @@ class FocusTimerService : Service() {
                 // same coroutine body.
                 FocusTimerManager.stopTimer(discard = action == ACTION_DISCARD)
             }
+        }
+        // Any command other than a start, on an instance that never had a session, has nothing to
+        // show: a sticky restart after the process was killed (null intent), or a notification
+        // action that arrives after the session is gone. The collector won't stop the service in
+        // that case, so stop it here. Only this start id, so a start sent meanwhile still runs.
+        if (intent?.action != ACTION_START && !hasSeenSession &&
+            !FocusTimerManager.timerState.value.isSessionActive
+        ) {
+            stopSelf(startId)
         }
         return START_STICKY
     }
