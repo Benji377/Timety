@@ -14,6 +14,9 @@
     <string name="commonLabelAdd">Hinzufügen</string>
     <string name="commonLabelCancel">Abbrechen</string>
     <string name="commonLabelConfirm">Bestätigen</string>
+    <string name="commonLabelPin">Pin</string>
+    <string name="commonLabelUnpin">Unpin</string>
+    <string name="commonLabelPinned">Pinned</string>
     <string name="commonLabelDelete">Löschen</string>
     <string name="commonLabelEdit">Bearbeiten</string>
     <string name="commonLabelNext">Weiter</string>
@@ -57,6 +60,7 @@
     <string name="greetingNightMotivation">Es wird spät! Überleg dir, bald Feierabend zu machen.</string>
     <string name="homeFocusToday">Fokus heute</string>
     <string name="homeDailyGoalDone">Du bist für heute komplett fertig!</string>
+    <string name="homeSectionPinned">Pinned (%1$d)</string>
     <string name="homeSectionHabitsDue">Heutige Gewohnheiten (%1$d)</string>
     <string name="homeSectionTasksDue">Fällige Aufgaben (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Anstehende Aufgaben (%1$d)</string>
