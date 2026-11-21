@@ -321,10 +321,13 @@ class FocusViewModel(
                 // Once per day, like a habit: a second session must not log another occurrence.
                 val today = LocalDate.now()
                 val zone = ZoneId.systemDefault()
-                if (entry.occurrences.any { it.completedAt.atZone(zone).toLocalDate() == today }) return
+                if (entry.completed.any { it.completedAt.atZone(zone).toLocalDate() == today }) return
                 val task = entry.task
                 CompletionActions.completeRecurringOccurrence(
-                    getApplication(), recurringTaskRepository, task
+                    getApplication(),
+                    recurringTaskRepository,
+                    task,
+                    autoSkip = settingsRepository.recurringAutoSkipWindow(),
                 )
             }
 

@@ -15,6 +15,7 @@ import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.time.Duration
 
 /**
  * App settings. A settings file that can't be parsed is replaced with defaults rather than
@@ -56,6 +57,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     companion object {
         const val DEFAULT_LOCATION_API_ENDPOINT = "https://photon.komoot.io/api/"
+        // Off until the user opts in, so nobody's schedule changes on update.
+        const val DEFAULT_AUTO_SKIP_HOURS = 0
 
         val THEME_PREF = stringPreferencesKey("theme")
         val USE_24_HOUR_FORMAT = booleanPreferencesKey("use24HourFormat")
@@ -68,6 +71,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val MAX_STOPWATCH_MINS = intPreferencesKey("maxStopwatchMins")
         val MAX_NODE_MINS = intPreferencesKey("maxNodeMins")
         val UPCOMING_TASKS_HORIZON = intPreferencesKey("upcomingTasksHorizon")
+        val RECURRING_AUTO_SKIP_HOURS = intPreferencesKey("recurringAutoSkipHours")
         val DAILY_MOTIVATION_TIME = stringPreferencesKey("dailyMotivationTime")
         val END_OF_DAY_CHECKUP_TIME = stringPreferencesKey("endOfDayCheckupTime")
         val LOCATION_API_ENDPOINT = stringPreferencesKey("locationApiEndpoint")
@@ -98,6 +102,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         )
         private val RESTORABLE_INT_KEYS = listOf(
             DAILY_GOAL_MINS, MAX_STOPWATCH_MINS, MAX_NODE_MINS, UPCOMING_TASKS_HORIZON,
+            RECURRING_AUTO_SKIP_HOURS,
         )
         private val RESTORABLE_STRING_KEYS = listOf(
             THEME_PREF, DATE_FORMAT, DAILY_GOAL_WEEKDAYS, DAILY_MOTIVATION_TIME,
@@ -129,6 +134,17 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val maxStopwatchMinsFlow: Flow<Int> = dataStore.data.map { it[MAX_STOPWATCH_MINS] ?: 120 }
     val maxNodeMinsFlow: Flow<Int> = dataStore.data.map { it[MAX_NODE_MINS] ?: 240 }
     val upcomingTasksHorizonFlow: Flow<Int> = dataStore.data.map { it[UPCOMING_TASKS_HORIZON] ?: 7 }
+
+    /**
+     * How close the next round of a recurring task may be for a late completion to count for it
+     * too, in hours; 0 turns that off. Whole days are stored as multiples of 24.
+     */
+    val recurringAutoSkipHoursFlow: Flow<Int> =
+        dataStore.data.map { it[RECURRING_AUTO_SKIP_HOURS] ?: DEFAULT_AUTO_SKIP_HOURS }
+
+    /** [recurringAutoSkipHoursFlow]'s current value, for completion code outside the UI. */
+    suspend fun recurringAutoSkipWindow(): Duration =
+        Duration.ofHours(recurringAutoSkipHoursFlow.first().toLong())
     val dailyMotivationTimeFlow: Flow<String> =
         dataStore.data.map { it[DAILY_MOTIVATION_TIME] ?: "08:00" }
     val endOfDayCheckupTimeFlow: Flow<String> =
@@ -219,6 +235,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun saveUpcomingTasksHorizon(days: Int) {
         dataStore.edit { it[UPCOMING_TASKS_HORIZON] = days }
+    }
+
+    suspend fun saveRecurringAutoSkipHours(hours: Int) {
+        dataStore.edit { it[RECURRING_AUTO_SKIP_HOURS] = hours }
     }
 
     suspend fun saveDailyMotivationTime(time: String) {

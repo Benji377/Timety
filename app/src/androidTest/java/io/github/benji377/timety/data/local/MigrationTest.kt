@@ -383,4 +383,44 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate7To8_givesRecurringTasksDefaultsAnEmptyChecklistAndNoSnapshots() {
+        val dbName = "migration-test-7-8"
+
+        helper.createDatabase(dbName, 7).apply {
+            execSQL(
+                "INSERT INTO recurring_tasks (id, title, description, dueDate, hasDueTime, unit, interval, " +
+                    "monthlyMode, reminderOffsetsMinutes, createdAt) " +
+                    "VALUES ('r1', 'Bins', '', 1000, 1, 'WEEK', 1, 'DAY_OF_MONTH', '[]', 0)"
+            )
+            execSQL(
+                "INSERT INTO recurring_occurrences (recurringTaskId, completedAt, previousDueDate) " +
+                    "VALUES ('r1', 500, 400)"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 8, true, MIGRATION_7_8)
+
+        db.query("SELECT priority, size, location, place FROM recurring_tasks WHERE id = 'r1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("MEDIUM", cursor.getString(0))
+            assertEquals("MEDIUM", cursor.getString(1))
+            assertEquals("", cursor.getString(2))
+            assertTrue(cursor.isNull(3))
+        }
+        db.query(
+            "SELECT subtasksDone, subtasksTotal, status FROM recurring_occurrences WHERE recurringTaskId = 'r1'"
+        ).use { cursor ->
+            cursor.moveToFirst()
+            assertTrue("an old round has no checklist snapshot", cursor.isNull(0) && cursor.isNull(1))
+            assertEquals("an old round was a completion", "COMPLETED", cursor.getString(2))
+        }
+        db.query("SELECT COUNT(*) FROM recurring_subtasks").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(0, cursor.getInt(0))
+        }
+        db.close()
+    }
 }

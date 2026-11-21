@@ -45,7 +45,7 @@ data class CalendarDayItems(
                     .filter { it.dueDate.isOnDay() }
                     .sortedBy { it.dueDate },
                 recurringDone = recurring.flatMap { item ->
-                    item.occurrences.filter { it.completedAt.isOnDay() }.map { item.task to it }
+                    item.completed.filter { it.completedAt.isOnDay() }.map { item.task to it }
                 }.sortedBy { it.second.completedAt },
                 habits = (habits.filter { isScheduledOn(it, day) } + habits.filter { HabitUtils.isCompletedOn(it, day) })
                     .distinctBy { it.habit.id },

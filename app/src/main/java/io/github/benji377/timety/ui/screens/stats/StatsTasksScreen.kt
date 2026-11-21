@@ -141,7 +141,7 @@ fun StatsTasksScreen(
             }
             .map { it.id } +
             recurring.flatMap { item ->
-                item.occurrences
+                item.completed
                     .filter { it.completedAt.atZone(zone).toLocalDate() in range }
                     .map { item.task.id }
             }

@@ -8,6 +8,7 @@ import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.testutil.TestAppContainer
+import io.github.benji377.timety.util.task.RecurrenceUtils
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -17,6 +18,7 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -51,7 +53,7 @@ class RecurringUncheckTest {
     private fun stored(): RecurringTaskEntity = runBlocking { repository.getTaskById(task.id) }!!
 
     private fun occurrences(): List<RecurringOccurrenceEntity> =
-        runBlocking { repository.observeTask(task.id).first() }!!.occurrences.sortedBy { it.id }
+        runBlocking { repository.observeTask(task.id).first() }!!.log.sortedBy { it.id }
 
     private fun complete(snapshot: RecurringTaskEntity) =
         runBlocking { CompletionActions.completeRecurringOccurrence(context, repository, snapshot) }
@@ -114,4 +116,19 @@ class RecurringUncheckTest {
         uncheck(occurrence)
         assertEquals(due, stored().dueDate)
     }
+
+    @Test
+    fun uncheckingACompletionThatAutoSkipped_stillRestoresTheDueDate() {
+        // Daily, due 23 hours ago: the next round is an hour away, so completing passes over it.
+        val lateDaily = task.copy(dueDate = Instant.now().truncatedTo(ChronoUnit.MINUTES).minus(23, ChronoUnit.HOURS))
+        runBlocking { repository.updateTask(lateDaily) }
+        val plainNext = RecurrenceUtils.nextDueDate(lateDaily, Instant.now())
+
+        runBlocking { CompletionActions.completeRecurringOccurrence(context, repository, lateDaily, autoSkip = Duration.ofHours(24)) }
+        assertEquals("the near round was passed over", plainNext.plus(1, ChronoUnit.DAYS), stored().dueDate)
+
+        uncheck(occurrences().single())
+        assertEquals(lateDaily.dueDate, stored().dueDate)
+    }
 }
+

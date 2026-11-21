@@ -84,6 +84,11 @@ class SettingsViewModel(
         SharingStarted.WhileSubscribed(5000),
         7
     )
+    val recurringAutoSkipHours = repository.recurringAutoSkipHoursFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        SettingsRepository.DEFAULT_AUTO_SKIP_HOURS
+    )
     val dailyMotivationTime = repository.dailyMotivationTimeFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -175,6 +180,10 @@ class SettingsViewModel(
         viewModelScope.launch { repository.saveMaxStopwatchMins(mins) }
 
     fun setMaxNodeMins(mins: Int) = viewModelScope.launch { repository.saveMaxNodeMins(mins) }
+    fun setRecurringAutoSkipHours(hours: Int) = viewModelScope.launch {
+        repository.saveRecurringAutoSkipHours(hours)
+    }
+
     fun setUpcomingTasksHorizon(days: Int) = viewModelScope.launch {
         repository.saveUpcomingTasksHorizon(days)
         TaskWidget().updateAll(application)

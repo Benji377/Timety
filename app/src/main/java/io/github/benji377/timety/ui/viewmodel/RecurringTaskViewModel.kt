@@ -2,11 +2,14 @@ package io.github.benji377.timety.ui.viewmodel
 
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.RecurringTaskRepository
+import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.services.CompletionActions
 import io.github.benji377.timety.services.RecurringCompletionUndo
@@ -23,7 +26,8 @@ import java.time.Instant
 class RecurringTaskViewModel(
     private val application: android.app.Application,
     private val recurringTaskRepository: RecurringTaskRepository,
-    private val tagRepository: TagRepository
+    private val tagRepository: TagRepository,
+    private val settingsRepository: SettingsRepository,
 ) : androidx.lifecycle.AndroidViewModel(application) {
     val allRecurringTasks: StateFlow<List<RecurringTaskWithOccurrences>> =
         recurringTaskRepository.allRecurringTasks
@@ -43,9 +47,14 @@ class RecurringTaskViewModel(
         }
     }
 
-    fun addTask(task: RecurringTaskEntity, tagIds: Set<String> = emptySet()) {
+    fun addTask(
+        task: RecurringTaskEntity,
+        subtasks: List<RecurringSubtaskEntity> = emptyList(),
+        tagIds: Set<String> = emptySet(),
+    ) {
         launchToCompletion {
             recurringTaskRepository.insertTask(task)
+            subtasks.forEach { recurringTaskRepository.insertSubtask(it) }
             tagRepository.setItemTags(TaggedItemType.RECURRING_TASK, task.id, tagIds)
             scheduleReminders(task)
             TaskWidget().updateAll(application)
@@ -72,25 +81,37 @@ class RecurringTaskViewModel(
 
     /**
      * Logs a completed occurrence now, rolls the task's due date forward to the next occurrence,
-     * and reschedules its reminders. [onCompleted] receives the data needed to offer
-     * an Undo action (see [undoCompleteOccurrence]); it isn't called when a repeated tap is ignored.
+     * and reschedules its reminders; with [status] SKIPPED the round is logged as skipped.
+     * [onCompleted] receives the data needed to offer an Undo action (see [undoCompleteOccurrence]);
+     * it isn't called when a repeated tap is ignored.
      */
     fun completeOccurrence(
         task: RecurringTaskEntity,
+        status: OccurrenceStatus = OccurrenceStatus.COMPLETED,
         onCompleted: (RecurringCompletionUndo) -> Unit = {},
     ) {
         viewModelScope.launch {
-            CompletionActions.completeRecurringOccurrence(application, recurringTaskRepository, task)
-                ?.let(onCompleted)
+            CompletionActions.completeRecurringOccurrence(
+                application,
+                recurringTaskRepository,
+                task,
+                status,
+                settingsRepository.recurringAutoSkipWindow(),
+            )?.let(onCompleted)
         }
     }
 
-    /** Reverts a completion: removes its occurrence and restores the due date. */
+    /**
+     * Reverts a completion or a skip: removes its occurrence, restores the due date and re-ticks the
+     * checklist.
+     */
     fun undoCompleteOccurrence(undo: RecurringCompletionUndo) {
         viewModelScope.launch {
             recurringTaskRepository.deleteOccurrenceById(undo.occurrenceId)
             val restored = undo.advancedTask.copy(dueDate = undo.previousDueDate)
             recurringTaskRepository.updateTask(restored)
+            // Items deleted since are skipped: an update of a missing row changes nothing.
+            recurringTaskRepository.updateSubtasks(undo.subtasksBefore)
             scheduleReminders(restored)
             updateWidgets()
         }
@@ -119,6 +140,30 @@ class RecurringTaskViewModel(
     fun deleteOccurrence(occurrence: RecurringOccurrenceEntity) {
         viewModelScope.launch {
             recurringTaskRepository.deleteOccurrence(occurrence)
+        }
+    }
+
+    fun addSubtask(subtask: RecurringSubtaskEntity) {
+        viewModelScope.launch {
+            recurringTaskRepository.insertSubtask(subtask)
+        }
+    }
+
+    fun updateSubtask(subtask: RecurringSubtaskEntity) {
+        viewModelScope.launch {
+            recurringTaskRepository.updateSubtask(subtask)
+        }
+    }
+
+    fun updateSubtasks(subtasks: List<RecurringSubtaskEntity>) {
+        viewModelScope.launch {
+            recurringTaskRepository.updateSubtasks(subtasks)
+        }
+    }
+
+    fun deleteSubtask(subtask: RecurringSubtaskEntity) {
+        viewModelScope.launch {
+            recurringTaskRepository.deleteSubtask(subtask)
         }
     }
 
