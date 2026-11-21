@@ -59,3 +59,15 @@ data class HabitWithCompletions(
     )
     val completions: List<HabitCompletionEntity>
 )
+
+/**
+ * Settings of one habit stack. A stack is the [HabitEntity.stackName] its member habits share, so
+ * this row is keyed by that name; it exists while the stack has members.
+ */
+@Entity(tableName = "habit_stacks")
+data class HabitStackEntity(
+    @PrimaryKey
+    val name: String,
+    /** True = each habit unlocks once the one before it is done, and unchecking goes in reverse. */
+    val inOrder: Boolean = true,
+)

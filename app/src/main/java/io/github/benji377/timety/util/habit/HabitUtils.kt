@@ -18,6 +18,17 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
+/** Why a habit in an in-order stack can't be toggled right now. */
+enum class StackLock {
+    NONE,
+
+    /** Not done, and the habit before it isn't either. */
+    WAITING_FOR_PREVIOUS,
+
+    /** Done, and the habit after it is done too: that one has to be unchecked first. */
+    LATER_STEP_DONE,
+}
+
 /** Habit scheduling, completion, and stack-locking rules shared by the habit list and widgets. */
 object HabitUtils {
     /** Parses a `"[1,3,5]"`-style stored weekday set back into ISO weekday numbers (1 = Monday). */
@@ -224,15 +235,45 @@ object HabitUtils {
     }
 
     /**
-     * A stacked habit is locked until the one before it in the stack is done: the first habit in
-     * a stack ([index] 0) is never locked, and any already-completed habit is never locked either.
+     * Names of the stacks in [habits] whose steps on [date] (due on it, or done on it anyway) are
+     * all done; a stack with no steps that day counts as finished too.
      */
-    fun isHabitLocked(
-        index: Int,
-        isCurrentHabitDone: Boolean,
-        isPreviousHabitDone: Boolean
-    ): Boolean =
-        index > 0 && !isCurrentHabitDone && !isPreviousHabitDone
+    fun finishedStacksOn(habits: List<HabitWithCompletions>, date: LocalDate): Set<String> =
+        habits.filter { !it.habit.stackName.isNullOrBlank() }
+            .groupBy { it.habit.stackName!!.trim() }
+            .filterValues { members ->
+                members.filter { isHabitDueToday(it) || isCompletedOn(it, date) }.all { isCompletedOn(it, date) }
+            }
+            .keys
+
+    /**
+     * The lock of each of a stack's [members] on [date], by habit id. Only the steps of that day
+     * count (due on it, or done on it anyway), in stack order, so a habit off today's schedule
+     * never blocks the rest, and a list that shows only some of the stack still locks correctly.
+     */
+    fun stackLocksOn(members: List<HabitWithCompletions>, date: LocalDate, inOrder: Boolean): Map<String, StackLock> {
+        val steps = members
+            .filter { isHabitDueToday(it) || isCompletedOn(it, date) }
+            .sortedBy { it.habit.stackOrder ?: Int.MAX_VALUE }
+        return steps.map { it.habit.id }.zip(stackLocks(steps, date, inOrder)).toMap()
+    }
+
+    /**
+     * The lock of each habit in [ordered], one stack's habits in stack order, on [date]. In an
+     * [inOrder] stack a habit can be checked once the one before it is done, and unchecked once the
+     * one after it isn't; any other stack has no locks.
+     */
+    fun stackLocks(ordered: List<HabitWithCompletions>, date: LocalDate, inOrder: Boolean): List<StackLock> {
+        if (!inOrder) return ordered.map { StackLock.NONE }
+        val done = ordered.map { isCompletedOn(it, date) }
+        return done.indices.map { i ->
+            when {
+                !done[i] && i > 0 && !done[i - 1] -> StackLock.WAITING_FOR_PREVIOUS
+                done[i] && i < done.lastIndex && done[i + 1] -> StackLock.LATER_STEP_DONE
+                else -> StackLock.NONE
+            }
+        }
+    }
 
     fun isStackFullyCompleted(stackHabits: List<HabitWithCompletions>, date: LocalDate): Boolean {
         if (stackHabits.isEmpty()) return false

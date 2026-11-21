@@ -427,4 +427,36 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate7To8_givesEveryExistingStackAnInOrderRow_andTrimsStackNames() {
+        val dbName = "migration-test-7-8-stacks"
+
+        helper.createDatabase(dbName, 7).apply {
+            listOf("'h1', ' Morning '", "'h2', 'Morning'", "'h3', 'Evening'", "'h4', '  '", "'h5', NULL")
+                .forEach { values ->
+                    execSQL(
+                        "INSERT INTO habits (id, stackName, name, frequency, timesPerDay, createdAt, colorValue, sortOrder) " +
+                            "VALUES ($values, 'Habit', 'DAILY', 1, 0, 0, 0)"
+                    )
+                }
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 8, true, MIGRATION_7_8)
+
+        db.query("SELECT name, inOrder FROM habit_stacks ORDER BY name").use { cursor ->
+            val rows = buildList {
+                while (cursor.moveToNext()) add(cursor.getString(0) to cursor.getInt(1))
+            }
+            assertEquals(listOf("Evening" to 1, "Morning" to 1), rows)
+        }
+        db.query("SELECT stackName FROM habits WHERE id IN ('h1', 'h4') ORDER BY id").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("Morning", cursor.getString(0))
+            cursor.moveToNext()
+            assertTrue("a blank stack name means no stack", cursor.isNull(0))
+        }
+        db.close()
+    }
 }

@@ -15,6 +15,7 @@ import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.services.backup.dayRatingFromBackup
 import io.github.benji377.timety.services.backup.goalFromBackup
 import io.github.benji377.timety.services.backup.habitFromBackup
+import io.github.benji377.timety.services.backup.habitStackFromBackup
 import io.github.benji377.timety.services.backup.modeFromBackup
 import io.github.benji377.timety.services.backup.modeToBackupJson
 import io.github.benji377.timety.services.backup.objects
@@ -187,6 +188,7 @@ class BackupService(
                 HabitWithCompletions(it, habitCompletions[it.id].orEmpty()).toBackupJson()
                     .withTagIds(habitTags, it.id)
             }))
+            put("habitStacks", JSONArray(habitDao.getStacks().map { it.toBackupJson() }))
             put("quickHabits", JSONArray(quickHabitDao.getAll().first().map { it.toBackupJson() }))
             val goalTags = tagIdsByItem(TaggedItemType.GOAL)
             put("goals", JSONArray(goalDao.getAllGoalsWithEntries().first().map {
@@ -253,14 +255,7 @@ class BackupService(
             subtasks.forEach(recurringTaskDao::insertSubtask)
         }
 
-        habitDao.clearAll()
-        val habitJson = LinkedHashMap<String, JSONObject>()
-        json.objects("habits").forEach { item ->
-            val (habit, completions) = habitFromBackup(item)
-            habitJson[habit.id] = item
-            habitDao.insertHabit(habit)
-            completions.forEach(habitDao::insertCompletion)
-        }
+        val habitJson = restoreHabits(json)
 
         quickHabitDao.clearAll()
         json.objects("quickHabits").map(::quickHabitFromBackup).forEach(quickHabitDao::insert)
@@ -317,6 +312,23 @@ class BackupService(
             distractions.forEach(focusDao::insertDistraction)
         }
         return sessionJson
+    }
+
+    /** Replaces the habits, their check-ins and stack settings; returns each habit's JSON by id. */
+    private fun restoreHabits(json: JSONObject): Map<String, JSONObject> {
+        habitDao.clearAll()
+        habitDao.syncStacks() // drops the old stack rows along with their habits
+        val habitJson = LinkedHashMap<String, JSONObject>()
+        json.objects("habits").forEach { item ->
+            val (habit, completions) = habitFromBackup(item)
+            habitJson[habit.id] = item
+            habitDao.insertHabit(habit)
+            completions.forEach(habitDao::insertCompletion)
+        }
+        // Older backups have no stack rows: every stack then gets one, in order, as before.
+        json.objects("habitStacks").mapNotNull(::habitStackFromBackup).forEach(habitDao::upsertStack)
+        habitDao.syncStacks()
+        return habitJson
     }
 
     companion object {

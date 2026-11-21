@@ -99,6 +99,7 @@ fun HomeScreen(
 ) {
     val tasks by taskViewModel.allTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
+    val unorderedStacks by habitViewModel.unorderedStacks.collectAsState()
     val userProfile by userViewModel.userProfile.collectAsState()
     val sessions by focusViewModel.allSessions.collectAsState()
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
@@ -393,7 +394,8 @@ fun HomeScreen(
                                         allHabitsForStacks = habitsWithCompletions,
                                         targetDate = todayLocalDate,
                                         pinnedFirst = true,
-                                        habitBuilder = { hc, isDone, isStacked, isLocked, _ ->
+                                        unorderedStacks = unorderedStacks,
+                                        habitBuilder = { hc, isDone, isStacked, lock, _ ->
                                             val completionsThisPeriod =
                                                 HabitUtils.getCompletionsThisPeriod(hc)
                                             HabitListTile(
@@ -401,7 +403,7 @@ fun HomeScreen(
                                                 isCompleted = isDone,
                                                 checkInsToday = HabitUtils.countOn(hc, todayLocalDate),
                                                 isStacked = isStacked,
-                                                isLocked = isLocked,
+                                                lock = lock,
                                                 subtitleText = HabitUtils.buildHabitSubtitle(
                                                     hc.habit,
                                                     completionsThisPeriod

@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,8 @@ import io.github.benji377.timety.ui.components.common.TagFilterRow
 import io.github.benji377.timety.ui.components.habit.GroupedHabitsSection
 import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
 import io.github.benji377.timety.ui.components.habit.HabitListTile
+import io.github.benji377.timety.ui.components.habit.StackSettingsDialog
+import io.github.benji377.timety.ui.components.habit.rememberHabitCheckIn
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.InfoColor
@@ -56,8 +59,8 @@ import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
-import io.github.benji377.timety.ui.components.habit.rememberHabitCheckIn
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.habit.StackLock
 import io.github.benji377.timety.util.tag.TagFilter
 import java.time.LocalDate
 import java.time.LocalTime
@@ -88,6 +91,17 @@ fun HabitListScreen(
     var historySheetFor by remember { mutableStateOf<HabitWithCompletions?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var reorderMode by remember { mutableStateOf(false) }
+    val unorderedStacks by viewModel.unorderedStacks.collectAsState()
+    // The stack whose settings pop-up is open.
+    var editingStack by rememberSaveable { mutableStateOf<String?>(null) }
+    editingStack?.let { name ->
+        StackSettingsDialog(
+            stackName = name,
+            inOrder = name !in unorderedStacks,
+            onSave = { newName, inOrder, onResult -> viewModel.saveStack(name, newName, inOrder, onResult) },
+            onDismiss = { editingStack = null },
+        )
+    }
     var selectedTagIds by remember { mutableStateOf(emptySet<String>()) }
     val usedTags = remember(habitsWithCompletions, habitTags) {
         TagFilter.usedTags(habitsWithCompletions.map { it.habit.id }, habitTags)
@@ -205,14 +219,16 @@ fun HabitListScreen(
                     val dueToday = mutableListOf<HabitWithCompletions>()
                     val upcoming = mutableListOf<HabitWithCompletions>()
                     val done = mutableListOf<HabitWithCompletions>()
+                    // Judged on every habit, so a tag filter can't make a stack look finished.
+                    val finishedStacks = HabitUtils.finishedStacksOn(habitsWithCompletions, today)
 
                     filteredHabits.forEach { hwc ->
+                        val stackName = hwc.habit.stackName?.trim()
+                        val isDone = HabitUtils.isCompletedOn(hwc, today) || HabitUtils.isPeriodGoalMet(hwc)
                         when {
-                            HabitUtils.isCompletedOn(
-                                hwc,
-                                today
-                            ) || HabitUtils.isPeriodGoalMet(hwc) -> done.add(hwc)
-
+                            // A done step stays with its stack until the whole stack is done.
+                            isDone && (stackName.isNullOrEmpty() || stackName in finishedStacks) -> done.add(hwc)
+                            isDone -> dueToday.add(hwc)
                             HabitUtils.isHabitDueToday(hwc) -> dueToday.add(hwc)
                             else -> upcoming.add(hwc)
                         }
@@ -241,6 +257,8 @@ fun HabitListScreen(
                                         isReorderMode = reorderMode,
                                         // Reorder mode shows the real order, pins aside.
                                         pinnedFirst = !reorderMode,
+                                        unorderedStacks = unorderedStacks,
+                                        onEditStack = { editingStack = it },
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },
@@ -250,12 +268,12 @@ fun HabitListScreen(
                                                 stackName,
                                                 newOrder.map { it.habit })
                                         },
-                                    ) { habit, isDone, isStacked, isLocked, isReorderMode ->
+                                    ) { habit, isDone, isStacked, lock, isReorderMode ->
                                         HabitTileWrapper(
                                             hwc = habit,
                                             isDone = isDone,
                                             isStacked = isStacked,
-                                            isLocked = isLocked,
+                                            lock = lock,
                                             isReorderMode = isReorderMode,
                                             viewModel = viewModel,
                                             use24HourFormat = use24HourFormat,
@@ -286,6 +304,8 @@ fun HabitListScreen(
                                         isReorderMode = reorderMode,
                                         // Reorder mode shows the real order, pins aside.
                                         pinnedFirst = !reorderMode,
+                                        unorderedStacks = unorderedStacks,
+                                        onEditStack = { editingStack = it },
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },
@@ -295,12 +315,12 @@ fun HabitListScreen(
                                                 stackName,
                                                 newOrder.map { it.habit })
                                         },
-                                    ) { habit, isDone, isStacked, isLocked, isReorderMode ->
+                                    ) { habit, isDone, isStacked, lock, isReorderMode ->
                                         HabitTileWrapper(
                                             hwc = habit,
                                             isDone = isDone,
                                             isStacked = isStacked,
-                                            isLocked = isLocked,
+                                            lock = lock,
                                             isReorderMode = isReorderMode,
                                             viewModel = viewModel,
                                             use24HourFormat = use24HourFormat,
@@ -331,6 +351,8 @@ fun HabitListScreen(
                                         isReorderMode = reorderMode,
                                         // Reorder mode shows the real order, pins aside.
                                         pinnedFirst = !reorderMode,
+                                        unorderedStacks = unorderedStacks,
+                                        onEditStack = { editingStack = it },
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },
@@ -340,12 +362,12 @@ fun HabitListScreen(
                                                 stackName,
                                                 newOrder.map { it.habit })
                                         },
-                                    ) { habit, isDone, isStacked, isLocked, isReorderMode ->
+                                    ) { habit, isDone, isStacked, lock, isReorderMode ->
                                         HabitTileWrapper(
                                             hwc = habit,
                                             isDone = isDone,
                                             isStacked = isStacked,
-                                            isLocked = isLocked,
+                                            lock = lock,
                                             isReorderMode = isReorderMode,
                                             viewModel = viewModel,
                                             use24HourFormat = use24HourFormat,
@@ -380,7 +402,7 @@ private fun HabitTileWrapper(
     hwc: HabitWithCompletions,
     isDone: Boolean,
     isStacked: Boolean,
-    isLocked: Boolean,
+    lock: StackLock,
     isReorderMode: Boolean,
     viewModel: HabitViewModel,
     use24HourFormat: Boolean,
@@ -415,7 +437,7 @@ private fun HabitTileWrapper(
         isCompleted = isDone,
         checkInsToday = HabitUtils.countOn(hwc, LocalDate.now()),
         isStacked = isStacked,
-        isLocked = isLocked,
+        lock = lock,
         isReorderMode = isReorderMode,
         subtitleText = subtitleText,
         tags = tags,
