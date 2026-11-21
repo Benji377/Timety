@@ -239,6 +239,8 @@ fun HabitListScreen(
                                         allHabitsForStacks = habitsWithCompletions,
                                         targetDate = today,
                                         isReorderMode = reorderMode,
+                                        // Reorder mode shows the real order, pins aside.
+                                        pinnedFirst = !reorderMode,
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },
@@ -282,6 +284,8 @@ fun HabitListScreen(
                                         allHabitsForStacks = habitsWithCompletions,
                                         targetDate = today,
                                         isReorderMode = reorderMode,
+                                        // Reorder mode shows the real order, pins aside.
+                                        pinnedFirst = !reorderMode,
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },
@@ -325,6 +329,8 @@ fun HabitListScreen(
                                         allHabitsForStacks = habitsWithCompletions,
                                         targetDate = today,
                                         isReorderMode = reorderMode,
+                                        // Reorder mode shows the real order, pins aside.
+                                        pinnedFirst = !reorderMode,
                                         onStandaloneReordered = { newOrder ->
                                             viewModel.commitStandaloneReorder(newOrder.map { it.habit })
                                         },

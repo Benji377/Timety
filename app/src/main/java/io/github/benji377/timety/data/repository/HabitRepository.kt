@@ -105,4 +105,7 @@ class HabitRepository(
         }
     }
 
+    suspend fun setPinnedAt(id: String, pinnedAt: Instant?) = withContext(Dispatchers.IO) {
+        habitDao.setPinnedAt(id, pinnedAt)
+    }
 }

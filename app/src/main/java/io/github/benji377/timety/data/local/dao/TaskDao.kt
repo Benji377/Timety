@@ -11,6 +11,7 @@ import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
 import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 /** Data access object for tasks and subtasks. */
 @Dao
@@ -43,6 +44,10 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks")
     fun clearAll(): Int
+
+    /** Sets or clears just the pin, so pinning never writes back a stale copy of the task. */
+    @Query("UPDATE tasks SET pinnedAt = :pinnedAt WHERE id = :id")
+    fun setPinnedAt(id: String, pinnedAt: Instant?)
 
     // Subtasks
     @Insert(onConflict = OnConflictStrategy.REPLACE)

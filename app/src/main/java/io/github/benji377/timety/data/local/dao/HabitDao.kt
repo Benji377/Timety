@@ -9,6 +9,7 @@ import androidx.room.Update
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 /** Data access object for habits and their completion records. */
 @Dao
@@ -49,4 +50,8 @@ interface HabitDao {
 
     @Delete
     fun deleteCompletion(completion: HabitCompletionEntity)
+
+    /** Sets or clears just the pin, so pinning never writes back a stale copy of the habit. */
+    @Query("UPDATE habits SET pinnedAt = :pinnedAt WHERE id = :id")
+    fun setPinnedAt(id: String, pinnedAt: Instant?)
 }

@@ -93,6 +93,11 @@ data class RecurringTaskEntity(
     /** Null = the global upcoming task window. */
     val windowUnit: TaskWindowUnit? = null,
     val createdAt: Instant,
+    /**
+     * When the user pinned it, to keep it at the top of Home and the Recurring tasks page; null =
+     * not pinned. It stays pinned across rounds. Several pinned tasks show oldest pin first.
+     */
+    val pinnedAt: Instant? = null,
 ) {
     companion object {
         /** [monthlyOrdinal] value meaning "the last such weekday of the month". */

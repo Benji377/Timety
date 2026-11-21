@@ -35,6 +35,7 @@ internal fun TaskWithSubtasks.toBackupJson(): JSONObject = JSONObject().apply {
     put("completedAt", orNull(task.completedAt?.toString()))
     put("createdAt", task.createdAt.toString())
     put("reminders", JSONArray(task.reminders.map { it.toString() }))
+    put("pinnedAt", orNull(task.pinnedAt?.toString()))
     // Array order is the subtask order.
     put("subtasks", JSONArray(subtasks.sortedBy { it.sortOrder }.map { subtask ->
         JSONObject().apply {
@@ -61,6 +62,8 @@ internal fun taskFromBackup(json: JSONObject): TaskWithSubtasks {
         completedAt = json.instantOrNull("completedAt"),
         createdAt = json.instantOrNull("createdAt") ?: Instant.now(),
         reminders = json.instantList("reminders"),
+        // A done task is never pinned; older backups restore unpinned.
+        pinnedAt = json.instantOrNull("pinnedAt")?.takeIf { !json.optBoolean("isCompleted", false) },
     )
     val subtasks = json.objects("subtasks").mapIndexed { index, subtask ->
         SubtaskEntity(
@@ -96,6 +99,7 @@ internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObjec
     put("windowAmount", orNull(task.windowAmount))
     put("windowUnit", orNull(task.windowUnit?.name))
     put("createdAt", task.createdAt.toString())
+    put("pinnedAt", orNull(task.pinnedAt?.toString()))
     // Objects since checklists; older backups hold bare completedAt strings.
     put("occurrences", JSONArray(log.sortedBy { it.completedAt }.map { occurrence ->
         JSONObject().apply {
@@ -145,6 +149,7 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
         windowAmount = windowAmount,
         windowUnit = windowUnit.takeIf { windowAmount != null },
         createdAt = json.instantOrNull("createdAt") ?: Instant.now(),
+        pinnedAt = json.instantOrNull("pinnedAt"),
     )
     val occurrences = occurrencesFromBackup(json, id)
     val subtasks = json.objects("subtasks").mapIndexed { index, subtask ->

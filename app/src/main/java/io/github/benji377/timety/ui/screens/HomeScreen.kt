@@ -110,6 +110,33 @@ fun HomeScreen(
         rememberRecurringCompleter(recurringViewModel, LocalSnackbarHostState.current)
     val toggleTaskCompletion = rememberTaskCompletionToggle(taskViewModel, focusViewModel)
 
+    // One tile for a row of the pinned, due or upcoming section.
+    @Composable
+    fun HomeTaskRowTile(row: HomeTaskRow) {
+        when (row) {
+            is HomeTaskRow.OneOff -> TaskListTile(
+                task = row.task.task,
+                isOverdue = row.task.task.due?.isOverdue(Instant.now()) == true,
+                enableDismissible = false,
+                showDescription = false,
+                subtasksCompleted = row.task.subtasks.count { it.isCompleted },
+                subtasksTotal = row.task.subtasks.size,
+                onToggleCompleted = { toggleTaskCompletion(row.task.task) },
+                onTap = { onNavigateToTaskDetail(row.task.task.id) }
+            )
+            is HomeTaskRow.Recurring -> RecurringTaskListTile(
+                task = row.task,
+                status = row.status,
+                subtasksCompleted = recurringSubtasks[row.task.id].orEmpty().count { it.isCompleted },
+                subtasksTotal = recurringSubtasks[row.task.id].orEmpty().size,
+                onComplete = { completeRecurring(row.task) },
+                onTap = { onNavigateToRecurringDetail(row.task.id) },
+            )
+        }
+    }
+
+    val isPinnedExpanded by settingsViewModel.accordionExpanded(AccordionKey.HOME_PINNED)
+        .collectAsState()
     val isTasksDueExpanded by settingsViewModel.accordionExpanded(AccordionKey.HOME_TASKS_DUE)
         .collectAsState()
     val isHabitsDueExpanded by settingsViewModel.accordionExpanded(AccordionKey.HOME_HABITS_DUE)
@@ -142,19 +169,22 @@ fun HomeScreen(
         else -> stringResource(R.string.greetingNightMotivation)
     }
 
+    // Pinned tasks go in their own section whatever their due date, and only there.
+    val unpinnedTasks = remember(tasks) { tasks.filter { it.task.pinnedAt == null } }
+
     // Urgent tasks: incomplete tasks whose due day is today or earlier.
     // Memoized: these full-list scans would otherwise re-run on every recomposition.
-    val urgentTasks = remember(tasks, todayLocalDate) {
-        tasks.filter { t ->
+    val urgentTasks = remember(unpinnedTasks, todayLocalDate) {
+        unpinnedTasks.filter { t ->
             val dueDay = t.task.dueDate?.atZone(ZoneId.systemDefault())?.toLocalDate()
             !t.task.isCompleted && dueDay != null && !dueDay.isAfter(todayLocalDate)
         }.sortedBy { it.task.dueDate }
     }
 
     // Upcoming tasks: incomplete tasks due strictly after today, within the configured horizon window.
-    val upcomingTasks = remember(tasks, todayLocalDate, upcomingWindowDays) {
+    val upcomingTasks = remember(unpinnedTasks, todayLocalDate, upcomingWindowDays) {
         val upcomingEndDate = todayLocalDate.plusDays(upcomingWindowDays.toLong())
-        tasks.filter { t ->
+        unpinnedTasks.filter { t ->
             val dueDay = t.task.dueDate?.atZone(ZoneId.systemDefault())?.toLocalDate()
             !t.task.isCompleted && dueDay != null && dueDay.isAfter(todayLocalDate) && !dueDay.isAfter(
                 upcomingEndDate
@@ -172,6 +202,7 @@ fun HomeScreen(
     val recurringByStatus = remember(recurringItems, todayLocalDate, upcomingWindowDays) {
         val now = Instant.now()
         recurringItems.map { it.task }
+            .filter { it.pinnedAt == null }
             .sortedBy { it.dueDate }
             .groupBy { RecurrenceUtils.statusOf(it, now, upcomingWindowDays) }
     }
@@ -191,6 +222,15 @@ fun HomeScreen(
     }
     val upcomingRows = remember(upcomingTasks, recurringUpcoming) {
         homeTaskRows(upcomingTasks, recurringUpcoming.map { it to RecurringStatus.UPCOMING })
+    }
+    // Open pinned tasks of both kinds, oldest pin first; a done one-off task is never pinned.
+    val pinnedRows = remember(tasks, recurringItems, upcomingWindowDays) {
+        val now = Instant.now()
+        val oneOff = tasks.filter { it.task.pinnedAt != null && !it.task.isCompleted }
+            .map { HomeTaskRow.OneOff(it) to it.task.pinnedAt!! }
+        val recurring = recurringItems.map { it.task }.filter { it.pinnedAt != null }
+            .map { HomeTaskRow.Recurring(it, RecurrenceUtils.statusOf(it, now, upcomingWindowDays)) to it.pinnedAt!! }
+        (oneOff + recurring).sortedBy { it.second }.map { it.first }
     }
 
     Scaffold(
@@ -271,7 +311,7 @@ fun HomeScreen(
                 val nothingDueToday =
                     urgentTasks.isEmpty() && todaysHabits.isEmpty() && recurringDueCount == 0
                 val nothingUpcoming = upcomingTasks.isEmpty() && recurringUpcoming.isEmpty()
-                if (nothingDueToday && nothingUpcoming) {
+                if (nothingDueToday && nothingUpcoming && pinnedRows.isEmpty()) {
                     Text(
                         text = stringResource(R.string.homeDailyGoalDone),
                         modifier = Modifier.align(Alignment.Center)
@@ -281,6 +321,22 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
                     ) {
+                        // Pinned tasks accordion, above everything else.
+                        if (pinnedRows.isNotEmpty()) {
+                            item {
+                                StyledExpansionTile(
+                                    title = stringResource(R.string.homeSectionPinned, pinnedRows.size),
+                                    titleColor = TaskColor,
+                                    expanded = isPinnedExpanded,
+                                    onExpandedChange = {
+                                        settingsViewModel.setAccordionExpanded(AccordionKey.HOME_PINNED, it)
+                                    },
+                                ) {
+                                    pinnedRows.forEach { row -> HomeTaskRowTile(row) }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+                            }
+                        }
                         if (nothingDueToday) {
                             item {
                                 Text(
@@ -309,29 +365,7 @@ fun HomeScreen(
                                     },
                                 ) {
                                     dueRows.forEach { row ->
-                                        when (row) {
-                                            is HomeTaskRow.OneOff -> TaskListTile(
-                                                task = row.task.task,
-                                                isOverdue = row.task.task.due?.isOverdue(Instant.now()) == true,
-                                                enableDismissible = false,
-                                                showDescription = false,
-                                                subtasksCompleted = row.task.subtasks.count { it.isCompleted },
-                                                subtasksTotal = row.task.subtasks.size,
-                                                onToggleCompleted = {
-                                                    toggleTaskCompletion(row.task.task)
-                                                },
-                                                onTap = { onNavigateToTaskDetail(row.task.task.id) }
-                                            )
-                                            is HomeTaskRow.Recurring -> RecurringTaskListTile(
-                                                task = row.task,
-                                                status = row.status,
-                                                subtasksCompleted = recurringSubtasks[row.task.id]
-                                                    .orEmpty().count { it.isCompleted },
-                                                subtasksTotal = recurringSubtasks[row.task.id].orEmpty().size,
-                                                onComplete = { completeRecurring(row.task) },
-                                                onTap = { onNavigateToRecurringDetail(row.task.id) },
-                                            )
-                                        }
+                                        HomeTaskRowTile(row)
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }
@@ -358,6 +392,7 @@ fun HomeScreen(
                                         habits = todaysHabits,
                                         allHabitsForStacks = habitsWithCompletions,
                                         targetDate = todayLocalDate,
+                                        pinnedFirst = true,
                                         habitBuilder = { hc, isDone, isStacked, isLocked, _ ->
                                             val completionsThisPeriod =
                                                 HabitUtils.getCompletionsThisPeriod(hc)
@@ -399,28 +434,7 @@ fun HomeScreen(
                                     },
                                 ) {
                                     upcomingRows.forEach { row ->
-                                        when (row) {
-                                            is HomeTaskRow.OneOff -> TaskListTile(
-                                                task = row.task.task,
-                                                enableDismissible = false,
-                                                showDescription = false,
-                                                subtasksCompleted = row.task.subtasks.count { it.isCompleted },
-                                                subtasksTotal = row.task.subtasks.size,
-                                                onToggleCompleted = {
-                                                    toggleTaskCompletion(row.task.task)
-                                                },
-                                                onTap = { onNavigateToTaskDetail(row.task.task.id) }
-                                            )
-                                            is HomeTaskRow.Recurring -> RecurringTaskListTile(
-                                                task = row.task,
-                                                status = row.status,
-                                                subtasksCompleted = recurringSubtasks[row.task.id]
-                                                    .orEmpty().count { it.isCompleted },
-                                                subtasksTotal = recurringSubtasks[row.task.id].orEmpty().size,
-                                                onComplete = { completeRecurring(row.task) },
-                                                onTap = { onNavigateToRecurringDetail(row.task.id) },
-                                            )
-                                        }
+                                        HomeTaskRowTile(row)
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }

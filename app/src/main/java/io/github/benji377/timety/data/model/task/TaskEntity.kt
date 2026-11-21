@@ -47,6 +47,11 @@ data class TaskEntity(
     val reminders: List<Instant> = emptyList(),
     // Set only when [location] was picked from a search; a hand-typed location has no place.
     val place: TaskPlace? = null,
+    /**
+     * When the user pinned it, to keep it at the top of Home and the Tasks list; null = not
+     * pinned, and completing the task unpins it. Several pinned tasks show oldest pin first.
+     */
+    val pinnedAt: Instant? = null,
 )
 
 /** A task paired with its subtasks, for a Room `@Relation` query. */

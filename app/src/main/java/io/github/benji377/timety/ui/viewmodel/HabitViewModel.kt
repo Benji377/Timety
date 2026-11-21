@@ -71,6 +71,13 @@ class HabitViewModel(
     }
 
     /** Saves an edited habit; null [tagIds] leaves its tags as they are. */
+    /** Pins the habit to the top of Home's habits on its due days, or unpins it. */
+    fun setPinned(habitId: String, pinned: Boolean) {
+        viewModelScope.launch {
+            habitRepository.setPinnedAt(habitId, if (pinned) Instant.now() else null)
+        }
+    }
+
     fun updateHabit(habit: HabitEntity, tagIds: Set<String>? = null) {
         launchToCompletion {
             habitRepository.updateHabit(habit)

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
+import java.time.Instant
 
 /** Repository for recurring tasks and their occurrences, wrapping [RecurringTaskDao] with IO dispatching. */
 class RecurringTaskRepository(
@@ -87,5 +88,9 @@ class RecurringTaskRepository(
 
     suspend fun resetSubtasks(taskId: String) = withContext(Dispatchers.IO) {
         recurringTaskDao.resetSubtasks(taskId)
+    }
+
+    suspend fun setPinnedAt(id: String, pinnedAt: Instant?) = withContext(Dispatchers.IO) {
+        recurringTaskDao.setPinnedAt(id, pinnedAt)
     }
 }

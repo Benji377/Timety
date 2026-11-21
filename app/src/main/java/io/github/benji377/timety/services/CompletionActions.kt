@@ -31,7 +31,7 @@ data class RecurringCompletionUndo(
  */
 object CompletionActions {
     /**
-     * Marks the task complete, re-syncs its reminders and refreshes the task widget.
+     * Marks the task complete and unpins it, re-syncs its reminders and refreshes the task widget.
      * Reads the task from the DB rather than a UI snapshot, which may not have caught up yet.
      * Returns false, changing nothing, when the task is missing or already complete.
      */
@@ -42,7 +42,7 @@ object CompletionActions {
     ): Boolean {
         val task = taskRepository.getTaskById(taskId) ?: return false
         if (task.isCompleted) return false
-        val updated = task.copy(isCompleted = true, completedAt = Instant.now())
+        val updated = task.copy(isCompleted = true, completedAt = Instant.now(), pinnedAt = null)
         taskRepository.updateTask(updated)
         ReminderScheduler.create(context).scheduleTaskReminders(updated)
         TaskWidget().updateAll(context)

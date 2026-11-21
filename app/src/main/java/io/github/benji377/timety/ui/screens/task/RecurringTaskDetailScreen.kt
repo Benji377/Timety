@@ -309,6 +309,7 @@ fun RecurringTaskDetailScreen(
             windowAmount = windowAmount,
             windowUnit = windowUnit,
             createdAt = existingTask?.createdAt ?: Instant.now(),
+            pinnedAt = existingTask?.pinnedAt,
         )
         if (isNew) {
             viewModel.addTask(taskToSave, subtasks.map { it.copy(recurringTaskId = taskToSave.id) }, pickedTagIds.orEmpty())
@@ -339,6 +340,10 @@ fun RecurringTaskDetailScreen(
                         onDelete = { showDeleteConfirm = true },
                         onEdit = { isEditing = true },
                         onSave = { save() },
+                        isPinned = existing?.task?.let { it.pinnedAt != null },
+                        onTogglePin = {
+                            existing?.task?.let { viewModel.setPinned(it.id, it.pinnedAt == null) }
+                        },
                     )
                 }
             )

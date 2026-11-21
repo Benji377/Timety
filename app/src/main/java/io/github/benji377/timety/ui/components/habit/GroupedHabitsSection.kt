@@ -53,12 +53,19 @@ fun GroupedHabitsSection(
     allHabitsForStacks: List<HabitWithCompletions>,
     targetDate: LocalDate,
     isReorderMode: Boolean = false,
+    pinnedFirst: Boolean = false,
     onStandaloneReordered: (List<HabitWithCompletions>) -> Unit = {},
     onStackReordered: (stackName: String, newOrder: List<HabitWithCompletions>) -> Unit = { _, _ -> },
     onStacksReordered: (stackNames: List<String>) -> Unit = {},
     habitBuilder: @Composable (habit: HabitWithCompletions, isDone: Boolean, isStacked: Boolean, isLocked: Boolean, isReorderMode: Boolean) -> Unit,
 ) {
-    val standalone = remember(habits) { habits.filter { it.habit.stackName.isNullOrBlank() } }
+    val allStandalone = remember(habits) { habits.filter { it.habit.stackName.isNullOrBlank() } }
+    // With [pinnedFirst], pinned habits go above the stacks, oldest pin first. They keep their
+    // sort order, so unpinning puts them back where they were. Only standalone habits can be pinned.
+    val pinned = remember(allStandalone, pinnedFirst) {
+        if (pinnedFirst) allStandalone.filter { it.habit.pinnedAt != null }.sortedBy { it.habit.pinnedAt } else emptyList()
+    }
+    val standalone = remember(allStandalone, pinned) { allStandalone - pinned.toSet() }
     // Indexed once so each stack is a lookup rather than a scan of every habit.
     val globalStacks = remember(allHabitsForStacks) {
         allHabitsForStacks.groupBy { it.habit.stackName?.trim() }
@@ -74,6 +81,9 @@ fun GroupedHabitsSection(
     var expandedStacks by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
     Column {
+        pinned.forEach { hwc ->
+            habitBuilder(hwc, HabitUtils.isCompletedOn(hwc, targetDate), false, false, false)
+        }
         DraggableReorderColumn(
             items = stacks,
             key = { (stackName, _) -> stackName },
