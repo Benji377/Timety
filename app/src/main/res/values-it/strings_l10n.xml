@@ -14,6 +14,9 @@
     <string name="commonLabelAdd">Aggiungi</string>
     <string name="commonLabelCancel">Annulla</string>
     <string name="commonLabelConfirm">Conferma</string>
+    <string name="commonLabelPin">Pin</string>
+    <string name="commonLabelUnpin">Unpin</string>
+    <string name="commonLabelPinned">Pinned</string>
     <string name="commonLabelDelete">Elimina</string>
     <string name="commonLabelEdit">Modifica</string>
     <string name="commonLabelNext">Successivo</string>
@@ -57,6 +60,7 @@
     <string name="greetingNightMotivation">Si fa tardi! Pensa a chiudere presto.</string>
     <string name="homeFocusToday">Focus di oggi</string>
     <string name="homeDailyGoalDone">Hai completato tutto per oggi!</string>
+    <string name="homeSectionPinned">Pinned (%1$d)</string>
     <string name="homeSectionHabitsDue">Abitudini di oggi (%1$d)</string>
     <string name="homeSectionTasksDue">Attività in scadenza (%1$d)</string>
     <string name="homeSectionTasksUpcoming">Prossime attività (%1$d)</string>
