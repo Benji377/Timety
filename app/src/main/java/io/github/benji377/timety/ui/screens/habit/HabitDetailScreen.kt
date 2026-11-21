@@ -1,14 +1,17 @@
 package io.github.benji377.timety.ui.screens.habit
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Palette
@@ -18,6 +21,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -56,11 +60,13 @@ import io.github.benji377.timety.ui.components.common.FieldLabel
 import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagPicker
+import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
@@ -81,8 +87,8 @@ import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
@@ -162,12 +168,12 @@ fun HabitDetailScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     var stackNameExpanded by remember { mutableStateOf(false) }
-    val existingStacks = remember(allHabits) {
-        allHabits.mapNotNull { it.stackName?.trim() }.filter { it.isNotEmpty() }.distinct()
-    }
-    val filteredStacks = remember(stackName, existingStacks) {
-        if (stackName.isEmpty()) existingStacks
-        else existingStacks.filter { it.contains(stackName, ignoreCase = true) }
+    var showNewStackDialog by remember { mutableStateOf(false) }
+    val existingStacks = remember(allHabits) { HabitUtils.stackNamesInOrder(allHabits) }
+    // A stack just created with "+" has no habits yet, so it is added to the options by hand.
+    val stackOptions = remember(existingStacks, stackName) {
+        val current = stackName.trim()
+        if (current.isEmpty() || current in existingStacks) existingStacks else existingStacks + current
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -343,36 +349,44 @@ fun HabitDetailScreen(
                 }
             }
 
-            // Habit stacking: name autocomplete. Position within the stack is set by dragging
-            // in the habit list, not entered here. View mode hides empty optional fields.
+            // Habit stack: picked from the existing stacks, or a new one from "+". Position within
+            // the stack is set by dragging in the habit list. View mode hides empty optional fields.
             if (isEditing || stackName.isNotBlank()) item {
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                ExposedDropdownMenuBox(
-                    expanded = stackNameExpanded && isEditing && filteredStacks.isNotEmpty(),
-                    onExpandedChange = { if (isEditing) stackNameExpanded = it },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    NeoOutlinedTextField(
-                        value = stackName,
-                        onValueChange = {
-                            stackName = it
-                            stackNameExpanded = true
-                        },
-                        enabled = isEditing,
-                        singleLine = true,
-                        label = { Text(stringResource(R.string.habitDetailLabelStack)) },
-                        placeholder = { Text(stringResource(R.string.habitDetailLabelStackHint)) },
-                        leadingIcon = { Icon(Icons.Filled.Layers, null) },
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-                            .fillMaxWidth(),
-                    )
-                    if (filteredStacks.isNotEmpty()) {
+                val noStackLabel = stringResource(R.string.habitStackNone)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ExposedDropdownMenuBox(
+                        expanded = stackNameExpanded && isEditing,
+                        onExpandedChange = { if (isEditing) stackNameExpanded = it },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        NeoOutlinedTextField(
+                            value = stackName.trim().ifEmpty { noStackLabel },
+                            onValueChange = {},
+                            readOnly = true,
+                            enabled = isEditing,
+                            singleLine = true,
+                            label = { Text(stringResource(R.string.habitDetailLabelStack)) },
+                            leadingIcon = { Icon(Icons.Filled.Layers, null) },
+                            trailingIcon = if (isEditing) {
+                                { ExposedDropdownMenuDefaults.TrailingIcon(expanded = stackNameExpanded) }
+                            } else null,
+                            modifier = Modifier
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                .fillMaxWidth(),
+                        )
                         ExposedDropdownMenu(
                             expanded = stackNameExpanded && isEditing,
                             onDismissRequest = { stackNameExpanded = false },
                         ) {
-                            filteredStacks.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(noStackLabel) },
+                                onClick = {
+                                    stackName = ""
+                                    stackNameExpanded = false
+                                },
+                            )
+                            stackOptions.forEach { option ->
                                 DropdownMenuItem(
                                     text = { Text(option) },
                                     onClick = {
@@ -382,6 +396,14 @@ fun HabitDetailScreen(
                                 )
                             }
                         }
+                    }
+                    if (isEditing) {
+                        Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                        NeoIconButton(
+                            onClick = { showNewStackDialog = true },
+                            icon = Icons.Filled.Add,
+                            contentDescription = stringResource(R.string.habitStackNew),
+                        )
                     }
                 }
             }
@@ -555,6 +577,18 @@ fun HabitDetailScreen(
             )
         }
 
+        // An existing name just picks that stack; stacks are never duplicated.
+        TextInputDialog(
+            visible = showNewStackDialog,
+            title = stringResource(R.string.habitStackNew),
+            labelText = stringResource(R.string.habitStackName),
+            hintText = stringResource(R.string.habitDetailLabelStackHint),
+            onConfirm = { name ->
+                stackName = name
+                showNewStackDialog = false
+            },
+            onDismiss = { showNewStackDialog = false },
+        )
         if (showIconPicker) {
             IconPickerDialog(
                 title = stringResource(R.string.habitDetailLabelIcon),

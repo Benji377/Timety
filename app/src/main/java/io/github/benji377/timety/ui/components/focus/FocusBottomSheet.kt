@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
@@ -72,6 +71,7 @@ import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitIcons
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.habit.StackLock
 import java.time.LocalDate
 
 /** Bottom sheet listing distraction event types; invokes [onEventSelected] when one is tapped. */
@@ -157,6 +157,7 @@ fun TargetSelectorBottomSheet(
     val tasks by taskViewModel.allTasks.collectAsState()
     val recurringTasks by recurringTaskViewModel.allRecurringTasks.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
+    val unorderedStacks by habitViewModel.unorderedStacks.collectAsState()
     val goals by goalViewModel.goalsWithEntries.collectAsState()
     var tab by remember { mutableStateOf(TargetTab.of(selected?.type)) }
 
@@ -207,7 +208,7 @@ fun TargetSelectorBottomSheet(
                         )
 
                         TargetTab.TASKS -> TaskTab(recurringTasks, tasks, taskTags, selected, select)
-                        TargetTab.HABITS -> HabitTab(habitsWithCompletions, selected) {
+                        TargetTab.HABITS -> HabitTab(habitsWithCompletions, unorderedStacks, selected) {
                             select(FocusTargetSelection.of(FocusTargetType.HABIT, it.id, it.name))
                         }
 
@@ -445,6 +446,7 @@ private fun GoalTab(
 @Composable
 private fun HabitTab(
     habitsWithCompletions: List<HabitWithCompletions>,
+    unorderedStacks: Set<String>,
     selected: FocusTargetSelection?,
     onHabitSelected: (HabitEntity) -> Unit,
 ) {
@@ -469,12 +471,10 @@ private fun HabitTab(
         grouped.forEach { (stackName, stackHabits) ->
             val sorted = stackHabits.sortedBy { it.habit.stackOrder ?: 99 }
             item { SectionLabel(stackName) }
-            itemsIndexed(sorted) { index, hwc ->
-                val isDone = HabitUtils.isCompletedOn(hwc, today)
-                val isPrevDone =
-                    if (index > 0) HabitUtils.isCompletedOn(sorted[index - 1], today) else true
-                val isLocked = HabitUtils.isHabitLocked(index, isDone, isPrevDone)
-                HabitRow(hwc, isLocked, selected, onHabitSelected)
+            // Only the wait for an earlier habit matters when picking a target.
+            val locks = HabitUtils.stackLocksOn(sorted, today, inOrder = stackName !in unorderedStacks)
+            items(sorted) { hwc ->
+                HabitRow(hwc, locks[hwc.habit.id] == StackLock.WAITING_FOR_PREVIOUS, selected, onHabitSelected)
             }
             item { HorizontalDivider() }
         }

@@ -244,6 +244,15 @@
     <string name="habitDetailLabelColorPicker">Choose a Color</string>
     <string name="habitDetailLabelStack">Habit Stack</string>
     <string name="habitDetailLabelStackHint">e.g., Morning Routine</string>
+    <string name="habitStackEdit">Edit stack</string>
+    <string name="habitStackNew">New stack</string>
+    <string name="habitStackNone">No stack</string>
+    <string name="habitStackName">Stack name</string>
+    <string name="habitStackNameEmpty">Enter a name</string>
+    <string name="habitStackNameTaken">Another stack already has this name</string>
+    <string name="habitStackInOrder">Complete in order</string>
+    <string name="habitStackInOrderHint">Each habit unlocks once the one before it is done</string>
+    <string name="habitStackUncheckLaterFirst">Uncheck the later habits in this stack first</string>
     <string name="habitDetailSnackbarSaveNoDay">Please select at least one day</string>
     <string name="habitListFilterNoMatch">No habits match your search</string>
     <string name="habitListReorderToggleTooltip">Reorder habits</string>

@@ -363,6 +363,7 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
  * new fields get the defaults a new one-off task gets, the checklist is a table of its own, and
  * each logged occurrence can record how much of the checklist was done. Logged rounds also get a
  * status, so a round can be skipped (#265). Tasks, recurring tasks and habits can be pinned (#274).
+ * Habit stacks get a settings table (#263), and stack names on habits are trimmed to match it.
  */
 val MIGRATION_7_8 = object : Migration(7, 8) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -388,6 +389,17 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
         db.execSQL("ALTER TABLE `tasks` ADD COLUMN `pinnedAt` INTEGER")
         db.execSQL("ALTER TABLE `recurring_tasks` ADD COLUMN `pinnedAt` INTEGER")
         db.execSQL("ALTER TABLE `habits` ADD COLUMN `pinnedAt` INTEGER")
+        // Stack settings (#263): one row per stack, keyed by the trimmed name its habits share.
+        // Every existing stack keeps the in-order lock it always had.
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `habit_stacks` (`name` TEXT NOT NULL, `inOrder` INTEGER NOT NULL, " +
+                    "PRIMARY KEY(`name`))"
+        )
+        db.execSQL("UPDATE `habits` SET `stackName` = NULLIF(TRIM(`stackName`), '') WHERE `stackName` IS NOT NULL")
+        db.execSQL(
+            "INSERT OR IGNORE INTO `habit_stacks` (`name`, `inOrder`) " +
+                    "SELECT DISTINCT `stackName`, 1 FROM `habits` WHERE `stackName` IS NOT NULL"
+        )
     }
 }
 
