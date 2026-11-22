@@ -88,12 +88,14 @@ fun AppearanceFields(
     enabled: Boolean,
     onPickIcon: () -> Unit,
     onPickColor: () -> Unit,
+    showIcon: Boolean = true,
+    showColor: Boolean = true,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
     ) {
-        PickerField(
+        if (showIcon) PickerField(
             label = stringResource(R.string.detailLabelIcon),
             enabled = enabled,
             onClick = onPickIcon,
@@ -110,7 +112,7 @@ fun AppearanceFields(
                 Icon(imageVector = HabitIcons.iconAt(iconIndex), contentDescription = null, tint = color)
             }
         }
-        PickerField(
+        if (showColor) PickerField(
             label = colorLabel,
             enabled = enabled,
             onClick = onPickColor,

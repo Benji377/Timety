@@ -11,6 +11,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.github.benji377.timety.data.model.focus.DailyFocusTarget
+import io.github.benji377.timety.data.model.form.FormSkeleton
+import io.github.benji377.timety.data.model.form.HabitInput
+import io.github.benji377.timety.data.model.form.TaskInput
 import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -83,6 +86,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val AUTO_DND_LIFT_DURING_BREAKS = booleanPreferencesKey("autoDndLiftDuringBreaks")
         val BLOCK_SCREEN_CAPTURE = booleanPreferencesKey("blockScreenCapture")
 
+        // The switched-on inputs of each editor; missing means an update from before Settings >
+        // Forms, which keeps the inputs it had (see FormSkeleton.parse).
+        val TASK_INPUTS_ON = stringPreferencesKey("taskInputsOn")
+        val HABIT_INPUTS_ON = stringPreferencesKey("habitInputsOn")
+
         // Not backed up: whether the user chose "Don't ask again" on the exact-alarm prompt. A
         // device-level answer, like the permission itself. Replaces "exactAlarmPromptShown",
         // which stopped the prompt after the first launch whatever the answer was.
@@ -108,7 +116,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         )
         private val RESTORABLE_STRING_KEYS = listOf(
             THEME_PREF, DATE_FORMAT, DAILY_GOAL_WEEKDAYS, DAILY_MOTIVATION_TIME,
-            END_OF_DAY_CHECKUP_TIME, LOCATION_API_ENDPOINT, APP_LOCALE_CODE,
+            END_OF_DAY_CHECKUP_TIME, LOCATION_API_ENDPOINT, APP_LOCALE_CODE, TASK_INPUTS_ON,
+            HABIT_INPUTS_ON,
         )
     }
 
@@ -171,11 +180,43 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val storedInterruptionFilterFlow: Flow<Int?> =
         dataStore.data.map { it[STORED_INTERRUPTION_FILTER] }
 
+    val taskSkeletonFlow: Flow<FormSkeleton<TaskInput>> =
+        dataStore.data.map { FormSkeleton.parse(it[TASK_INPUTS_ON]) }
+    val habitSkeletonFlow: Flow<FormSkeleton<HabitInput>> =
+        dataStore.data.map { FormSkeleton.parse(it[HABIT_INPUTS_ON]) }
+
     fun accordionExpandedFlow(key: AccordionKey): Flow<Boolean> =
         dataStore.data.map { it[booleanPreferencesKey(key.storageKey)] ?: key.defaultExpanded }
 
     suspend fun saveAccordionExpanded(key: AccordionKey, expanded: Boolean) {
         dataStore.edit { it[booleanPreferencesKey(key.storageKey)] = expanded }
+    }
+
+    /** Switches one task input on or off as a single read-modify-write, so quick taps can't race. */
+    suspend fun setTaskInputOn(input: TaskInput, on: Boolean) {
+        dataStore.edit { prefs ->
+            val current = FormSkeleton.parse<TaskInput>(prefs[TASK_INPUTS_ON]).on
+            prefs[TASK_INPUTS_ON] = FormSkeleton.serialize(if (on) current + input else current - input)
+        }
+    }
+
+    /** Switches one habit input on or off as a single read-modify-write, so quick taps can't race. */
+    suspend fun setHabitInputOn(input: HabitInput, on: Boolean) {
+        dataStore.edit { prefs ->
+            val current = FormSkeleton.parse<HabitInput>(prefs[HABIT_INPUTS_ON]).on
+            prefs[HABIT_INPUTS_ON] = FormSkeleton.serialize(if (on) current + input else current - input)
+        }
+    }
+
+    /**
+     * Starts a new install with the short forms. Only called when the database is first created,
+     * so updates keep the inputs they had.
+     */
+    suspend fun applyNewInstallFormPreset() {
+        dataStore.edit { prefs ->
+            prefs[TASK_INPUTS_ON] = FormSkeleton.serialize(FormSkeleton.newInstallPreset<TaskInput>())
+            prefs[HABIT_INPUTS_ON] = FormSkeleton.serialize(FormSkeleton.newInstallPreset<HabitInput>())
+        }
     }
 
     suspend fun saveThemePref(theme: ThemeMode) {

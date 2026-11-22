@@ -2,6 +2,8 @@ package io.github.benji377.timety.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import io.github.benji377.timety.data.local.ALL_MIGRATIONS
 import io.github.benji377.timety.data.local.TimetyDatabase
 import io.github.benji377.timety.data.repository.DayRatingRepository
@@ -16,6 +18,7 @@ import io.github.benji377.timety.data.repository.TaskRepository
 import io.github.benji377.timety.data.repository.UserRepository
 import io.github.benji377.timety.data.repository.dataStore
 import io.github.benji377.timety.services.BackupService
+import kotlinx.coroutines.runBlocking
 
 /**
  * Provides access to the app's repositories and services, constructed once and held by the
@@ -42,7 +45,9 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
             context,
             TimetyDatabase::class.java,
             "timety_database"
-        ).addMigrations(*ALL_MIGRATIONS).build()
+        ).addMigrations(*ALL_MIGRATIONS)
+            .addCallback(NewInstallCallback(settingsRepository))
+            .build()
     }
 
     override val taskRepository: TaskRepository by lazy {
@@ -87,5 +92,16 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
     override val backupService: BackupService by lazy {
         BackupService(context, database, settingsRepository)
+    }
+}
+
+/**
+ * Sets up a new install. Room calls [onCreate] only when the database file is first created,
+ * never on an upgrade, a backup restore or "delete all data", which all keep the file, so the
+ * starting preset of Settings > Forms reaches new installs only.
+ */
+class NewInstallCallback(private val settingsRepository: SettingsRepository) : RoomDatabase.Callback() {
+    override fun onCreate(db: SupportSQLiteDatabase) {
+        runBlocking { settingsRepository.applyNewInstallFormPreset() }
     }
 }

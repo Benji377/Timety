@@ -592,6 +592,7 @@
     <string name="settingsFormsNotesInfo">Why you are building the habit, or anything else to remember</string>
     <string name="settingsFormsStackInfo">Group habits into a routine. The edit button on a stack in the Habits list sets whether they unlock in order</string>
     <string name="settingsFormsIconInfo">A symbol shown next to the habit</string>
+    <string name="settingsFormsColorInfo">Colors the habit in your lists. Switched off, new habits are purple</string>
     <string name="settingsFormsTimesPerDayInfo">Check in several times a day. The day counts once all are done. Not for flexible habits</string>
     <string name="settingsFormsHabitRemindersInfo">Notifications at set times, skipped on days the habit is done or not due</string>
     <string name="settingsFormsIcon">Icon</string>

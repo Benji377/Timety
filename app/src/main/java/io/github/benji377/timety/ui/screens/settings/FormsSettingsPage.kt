@@ -1,5 +1,6 @@
 package io.github.benji377.timety.ui.screens.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,93 +15,80 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.form.HabitInput
+import io.github.benji377.timety.data.model.form.TaskInput
 import io.github.benji377.timety.ui.components.common.NeoTabRow
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.TaskColor
-
-// UI preview only: the switches aren't saved and the editors don't read them yet.
-private enum class PreviewInput(
-    val titleRes: Int,
-    val subtitleRes: Int,
-    val icon: ImageVector,
-    val form: FormTab,
-    val offOnNewInstall: Boolean = false,
-) {
-    TASK_TAGS(R.string.globalLabelTags, R.string.settingsFormsTagsInfo, Icons.AutoMirrored.Outlined.Label, FormTab.TASKS),
-    TASK_DESCRIPTION(
-        R.string.taskDetailsLabelDescription, R.string.settingsFormsDescriptionInfo,
-        Icons.AutoMirrored.Filled.Notes, FormTab.TASKS,
-    ),
-    TASK_PRIORITY_EFFORT(
-        R.string.taskDetailsSectionPriorityAndEffort, R.string.settingsFormsPriorityInfo,
-        Icons.Filled.BarChart, FormTab.TASKS, offOnNewInstall = true,
-    ),
-    TASK_DUE(R.string.settingsFormsDueDate, R.string.settingsFormsDueInfo, Icons.Filled.CalendarToday, FormTab.TASKS),
-    TASK_REMINDERS(
-        R.string.settingsFormsReminders, R.string.settingsFormsTaskRemindersInfo,
-        Icons.Outlined.Notifications, FormTab.TASKS,
-    ),
-    TASK_LOCATION(
-        R.string.taskDetailsSectionLocation, R.string.settingsFormsLocationInfo,
-        Icons.Outlined.LocationOn, FormTab.TASKS, offOnNewInstall = true,
-    ),
-    TASK_CHECKLIST(
-        R.string.taskDetailsSectionChecklist, R.string.settingsFormsChecklistInfo,
-        Icons.Filled.Checklist, FormTab.TASKS,
-    ),
-    TASK_WINDOW(
-        R.string.recurringTaskWindowLabel, R.string.settingsFormsWindowInfo,
-        Icons.Filled.Visibility, FormTab.TASKS, offOnNewInstall = true,
-    ),
-    HABIT_TAGS(R.string.globalLabelTags, R.string.settingsFormsTagsInfo, Icons.AutoMirrored.Outlined.Label, FormTab.HABITS),
-    HABIT_NOTES(
-        R.string.habitDetailLabelNotes, R.string.settingsFormsNotesInfo,
-        Icons.AutoMirrored.Filled.Notes, FormTab.HABITS,
-    ),
-    HABIT_STACK(
-        R.string.habitDetailLabelStack, R.string.settingsFormsStackInfo,
-        Icons.Filled.Layers, FormTab.HABITS, offOnNewInstall = true,
-    ),
-    HABIT_ICON(R.string.settingsFormsIcon, R.string.settingsFormsIconInfo, Icons.Outlined.EmojiEmotions, FormTab.HABITS),
-    HABIT_TIMES_PER_DAY(
-        R.string.settingsFormsTimesPerDay, R.string.settingsFormsTimesPerDayInfo,
-        Icons.Outlined.Repeat, FormTab.HABITS, offOnNewInstall = true,
-    ),
-    HABIT_REMINDERS(
-        R.string.settingsFormsReminders, R.string.settingsFormsHabitRemindersInfo,
-        Icons.Outlined.Notifications, FormTab.HABITS,
-    ),
-}
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 
 /** The editor a tab of the Forms page configures, in its item colour. */
-private enum class FormTab(val labelRes: Int, val color: Color) {
+private enum class FormTab(@param:StringRes val labelRes: Int, val color: Color) {
     TASKS(R.string.globalLabelTasks, TaskColor),
     HABITS(R.string.globalLabelHabits, HabitColor),
 }
 
+/** How an input's switch row reads. */
+private class InputRow(@param:StringRes val titleRes: Int, @param:StringRes val subtitleRes: Int, val icon: ImageVector)
+
+private fun TaskInput.row(): InputRow = when (this) {
+    TaskInput.TAGS -> InputRow(R.string.globalLabelTags, R.string.settingsFormsTagsInfo, Icons.AutoMirrored.Outlined.Label)
+    TaskInput.DESCRIPTION -> InputRow(
+        R.string.taskDetailsLabelDescription, R.string.settingsFormsDescriptionInfo, Icons.AutoMirrored.Filled.Notes,
+    )
+    TaskInput.PRIORITY_EFFORT -> InputRow(
+        R.string.taskDetailsSectionPriorityAndEffort, R.string.settingsFormsPriorityInfo, Icons.Filled.BarChart,
+    )
+    TaskInput.DUE -> InputRow(R.string.settingsFormsDueDate, R.string.settingsFormsDueInfo, Icons.Filled.CalendarToday)
+    TaskInput.REMINDERS -> InputRow(
+        R.string.settingsFormsReminders, R.string.settingsFormsTaskRemindersInfo, Icons.Outlined.Notifications,
+    )
+    TaskInput.LOCATION -> InputRow(
+        R.string.taskDetailsSectionLocation, R.string.settingsFormsLocationInfo, Icons.Outlined.LocationOn,
+    )
+    TaskInput.CHECKLIST -> InputRow(
+        R.string.taskDetailsSectionChecklist, R.string.settingsFormsChecklistInfo, Icons.Filled.Checklist,
+    )
+    TaskInput.WINDOW -> InputRow(R.string.recurringTaskWindowLabel, R.string.settingsFormsWindowInfo, Icons.Filled.Visibility)
+}
+
+private fun HabitInput.row(): InputRow = when (this) {
+    HabitInput.TAGS -> InputRow(R.string.globalLabelTags, R.string.settingsFormsTagsInfo, Icons.AutoMirrored.Outlined.Label)
+    HabitInput.NOTES -> InputRow(R.string.habitDetailLabelNotes, R.string.settingsFormsNotesInfo, Icons.AutoMirrored.Filled.Notes)
+    HabitInput.STACK -> InputRow(R.string.habitDetailLabelStack, R.string.settingsFormsStackInfo, Icons.Filled.Layers)
+    HabitInput.ICON -> InputRow(R.string.settingsFormsIcon, R.string.settingsFormsIconInfo, Icons.Outlined.EmojiEmotions)
+    HabitInput.COLOR -> InputRow(R.string.habitDetailLabelColor, R.string.settingsFormsColorInfo, Icons.Outlined.Palette)
+    HabitInput.TIMES_PER_DAY -> InputRow(
+        R.string.settingsFormsTimesPerDay, R.string.settingsFormsTimesPerDayInfo, Icons.Outlined.Repeat,
+    )
+    HabitInput.REMINDERS -> InputRow(
+        R.string.settingsFormsReminders, R.string.settingsFormsHabitRemindersInfo, Icons.Outlined.Notifications,
+    )
+}
+
 /** Form settings: one switch per optional input of the task and habit editors, a tab per editor. */
 @Composable
-internal fun FormsSettings() {
+internal fun FormsSettings(settingsViewModel: SettingsViewModel = activityScopedViewModel()) {
     var tab by rememberSaveable { mutableStateOf(FormTab.TASKS) }
-    val switchedOff = remember {
-        mutableStateListOf(*PreviewInput.entries.filter { it.offOnNewInstall }.toTypedArray())
-    }
+    val taskSkeleton by settingsViewModel.taskSkeleton.collectAsState()
+    val habitSkeleton by settingsViewModel.habitSkeleton.collectAsState()
 
     Text(
         stringResource(R.string.settingsFormsHint),
@@ -116,17 +104,46 @@ internal fun FormsSettings() {
         modifier = Modifier.padding(horizontal = AppTheme.spaceLarge),
     )
     Spacer(Modifier.height(AppTheme.spaceSmall))
-    PreviewInput.entries.filter { it.form == tab }.forEach { input ->
-        // Reminders count from the due date, so they go when it does.
-        val needsDue = input == PreviewInput.TASK_REMINDERS && PreviewInput.TASK_DUE in switchedOff
-        SwitchSettingsItem(
-            title = stringResource(input.titleRes),
-            subtitle = stringResource(if (needsDue) R.string.settingsFormsRemindersNeedDue else input.subtitleRes),
-            icon = input.icon,
-            iconTint = tab.color,
-            checked = !needsDue && input !in switchedOff,
-            enabled = !needsDue,
-            onCheckedChange = { on -> if (on) switchedOff.remove(input) else switchedOff.add(input) },
-        )
+    when (tab) {
+        FormTab.TASKS -> TaskInput.entries.forEach { input ->
+            // Reminders count from the due date, so they go when it does.
+            val needsDue = input == TaskInput.REMINDERS && !taskSkeleton.isOn(TaskInput.DUE)
+            InputSwitch(
+                row = input.row(),
+                color = tab.color,
+                checked = !needsDue && taskSkeleton.isOn(input),
+                enabled = !needsDue,
+                subtitleOverride = if (needsDue) R.string.settingsFormsRemindersNeedDue else null,
+                onCheckedChange = { settingsViewModel.setTaskInputOn(input, it) },
+            )
+        }
+        FormTab.HABITS -> HabitInput.entries.forEach { input ->
+            InputSwitch(
+                row = input.row(),
+                color = tab.color,
+                checked = habitSkeleton.isOn(input),
+                onCheckedChange = { settingsViewModel.setHabitInputOn(input, it) },
+            )
+        }
     }
+}
+
+@Composable
+private fun InputSwitch(
+    row: InputRow,
+    color: Color,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    @StringRes subtitleOverride: Int? = null,
+) {
+    SwitchSettingsItem(
+        title = stringResource(row.titleRes),
+        subtitle = stringResource(subtitleOverride ?: row.subtitleRes),
+        icon = row.icon,
+        iconTint = color,
+        checked = checked,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange,
+    )
 }

@@ -49,6 +49,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.form.HabitInput
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.ui.components.common.AppearanceFields
@@ -83,6 +84,7 @@ import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -104,6 +106,7 @@ fun HabitDetailScreen(
     onNavigateBack: () -> Unit,
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     tagViewModel: TagViewModel = activityScopedViewModel(),
+    settingsViewModel: SettingsViewModel = activityScopedViewModel(),
 ) {
     val allHabits by habitViewModel.allHabits.collectAsState()
     val habitTags by tagViewModel.habitTags.collectAsState()
@@ -161,6 +164,23 @@ fun HabitDetailScreen(
     var reminderTimes by rememberSaveable(formHabit) {
         mutableStateOf(HabitUtils.parseReminderTimes(existingHabit?.reminderTimes))
     }
+
+    // Settings > Forms: while editing, an input shows when it's on or the habit had a value for it
+    // when editing began. View mode shows whatever is filled, as before.
+    val skeleton by settingsViewModel.habitSkeleton.collectAsState()
+    fun shows(input: HabitInput, hasValue: Boolean) = !isEditing || skeleton.shows(input, hasValue)
+    val showsTags = shows(HabitInput.TAGS, !habitTags[habitId].isNullOrEmpty())
+    val showsNotes = shows(HabitInput.NOTES, !formHabit?.notes.isNullOrBlank())
+    val showsStack = shows(HabitInput.STACK, !formHabit?.stackName.isNullOrBlank())
+    val showsIcon = shows(HabitInput.ICON, formHabit?.iconCodePoint != null)
+    // Purple is the default, so only another colour counts as a value.
+    val showsColor = shows(HabitInput.COLOR, formHabit != null && formHabit.colorValue != HabitColor.toArgb())
+    val showsAppearance = showsIcon || showsColor
+    val showsTimesPerDay = shows(HabitInput.TIMES_PER_DAY, (formHabit?.timesPerDay ?: 1) > 1)
+    val showsReminders = shows(
+        HabitInput.REMINDERS,
+        HabitUtils.parseReminderTimes(formHabit?.reminderTimes).isNotEmpty(),
+    )
 
     var showIconPicker by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
@@ -326,14 +346,14 @@ fun HabitDetailScreen(
             }
 
             item {
-                TagPicker(
+                if (showsTags) TagPicker(
                     selectedIds = pickedTagIds
                         ?: habitTags[habitId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
                     modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
-                if (isEditing || notes.isNotBlank()) {
+                if ((isEditing || notes.isNotBlank()) && showsNotes) {
                     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                     NeoOutlinedTextField(
                         value = notes,
@@ -351,7 +371,7 @@ fun HabitDetailScreen(
 
             // Habit stack: picked from the existing stacks, or a new one from "+". Position within
             // the stack is set by dragging in the habit list. View mode hides empty optional fields.
-            if (isEditing || stackName.isNotBlank()) item {
+            if ((isEditing || stackName.isNotBlank()) && showsStack) item {
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 val noStackLabel = stringResource(R.string.habitStackNone)
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -408,10 +428,10 @@ fun HabitDetailScreen(
                 }
             }
 
-            item {
+            if (showsAppearance) item {
                 FormSectionHeader(stringResource(R.string.detailSectionAppearance), Icons.Filled.Palette, HabitColor)
             }
-            item {
+            if (showsAppearance) item {
                 AppearanceFields(
                     iconIndex = selectedIconIndex,
                     color = selectedColor,
@@ -419,6 +439,8 @@ fun HabitDetailScreen(
                     enabled = isEditing,
                     onPickIcon = { showIconPicker = true },
                     onPickColor = { showColorPicker = true },
+                    showIcon = showsIcon,
+                    showColor = showsColor,
                 )
             }
 
@@ -512,7 +534,8 @@ fun HabitDetailScreen(
                     )
                 }
                 // Once a day is the default, so view mode only shows the card when it says more.
-                if (frequency.allowsTimesPerDay && (isEditing || timesPerDay > 1)) {
+                val showsTimesPerDayCard = showsTimesPerDay && (isEditing || timesPerDay > 1)
+                if (frequency.allowsTimesPerDay && showsTimesPerDayCard) {
                     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                     TimesPerDayCard(
                         timesPerDay = timesPerDay,
@@ -534,7 +557,7 @@ fun HabitDetailScreen(
             }
 
             // Time reminders; monthly habits have no due days to remind on.
-            if (frequency != HabitFrequency.MONTHLY_FLEXIBLE) item {
+            if (frequency != HabitFrequency.MONTHLY_FLEXIBLE && showsReminders) item {
                 // The reminder field hides itself in view mode when there are none.
                 if (isEditing || reminderTimes.isNotEmpty()) Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 val use24Hour = LocalDateFormatSettings.current.use24HourFormat

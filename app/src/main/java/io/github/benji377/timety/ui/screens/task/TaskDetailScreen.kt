@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.form.TaskInput
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -59,6 +60,7 @@ import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
@@ -88,6 +90,7 @@ fun TaskDetailScreen(
     onNavigateBack: () -> Unit,
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     tagViewModel: TagViewModel = activityScopedViewModel(),
+    settingsViewModel: SettingsViewModel = activityScopedViewModel(),
 ) {
     val existingTaskWithSubtasks by remember(taskId) {
         taskId?.let { taskViewModel.observeTask(it) } ?: flowOf(null)
@@ -128,6 +131,24 @@ fun TaskDetailScreen(
             existingTaskWithSubtasks?.subtasks ?: emptyList()
         )
     }
+
+    // Settings > Forms: while editing, an input shows when it's on or the task had a value for it
+    // when editing began. View mode shows whatever is filled, as before.
+    val skeleton by settingsViewModel.taskSkeleton.collectAsState()
+    val saved = formSource?.task
+    fun shows(input: TaskInput, hasValue: Boolean) = !isEditing || skeleton.shows(input, hasValue)
+    val showsTags = shows(TaskInput.TAGS, !taskTags[taskId].isNullOrEmpty())
+    val showsDescription = shows(TaskInput.DESCRIPTION, !saved?.description.isNullOrBlank())
+    val showsPriority = shows(
+        TaskInput.PRIORITY_EFFORT,
+        saved != null && (saved.priority != Priority.MEDIUM || saved.size != TaskSize.MEDIUM),
+    )
+    val showsDue = shows(TaskInput.DUE, saved?.dueDate != null)
+    // Reminders count from the due date, so they're only on while the due date is on too.
+    val hasReminders = !saved?.reminders.isNullOrEmpty()
+    val showsReminders = showsDue && shows(TaskInput.REMINDERS, hasReminders) && shows(TaskInput.DUE, hasReminders)
+    val showsLocation = shows(TaskInput.LOCATION, !saved?.location.isNullOrBlank())
+    val showsChecklist = shows(TaskInput.CHECKLIST, !formSource?.subtasks.isNullOrEmpty())
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
@@ -249,7 +270,7 @@ fun TaskDetailScreen(
                     leadingIcon = { Icon(Icons.Filled.Title, null) },
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
-                TagPicker(
+                if (showsTags) TagPicker(
                     selectedIds = pickedTagIds
                         ?: taskTags[taskId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
@@ -257,7 +278,7 @@ fun TaskDetailScreen(
                     modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
                 // View mode hides empty optional fields.
-                if (isEditing || description.isNotBlank()) {
+                if ((isEditing || description.isNotBlank()) && showsDescription) {
                     Spacer(Modifier.height(AppTheme.spaceLarge))
                     NeoOutlinedTextField(
                         value = description,
@@ -273,14 +294,14 @@ fun TaskDetailScreen(
             }
 
             // Priority and effort size.
-            item {
+            if (showsPriority) item {
                 FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionPriorityAndEffort),
                     Icons.Filled.BarChart,
                     TaskColor,
                 )
             }
-            item {
+            if (showsPriority) item {
                 PriorityAndEffortFields(
                     priority = priority,
                     size = size,
@@ -292,7 +313,7 @@ fun TaskDetailScreen(
 
             // Scheduling: due date and reminders. Without a due date there is nothing to show
             // outside edit mode, since reminders need one.
-            val showScheduling = isEditing || due != null
+            val showScheduling = (isEditing || due != null) && showsDue
             if (showScheduling) item {
                 FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionScheduling),
@@ -314,25 +335,27 @@ fun TaskDetailScreen(
                     onClearDate = ::clearDueDate,
                 )
                 // The reminder field hides itself in view mode when there are none.
-                if (isEditing || reminders.isNotEmpty()) Spacer(Modifier.height(AppTheme.spaceLarge))
-                TaskReminderField(
-                    reminders = reminders,
-                    due = due,
-                    isEditing = isEditing,
-                    onRemindersChange = { reminders = it },
-                    onAddCustom = { pickerTarget = PickerTarget.CUSTOM_REMINDER },
-                )
+                if (showsReminders) {
+                    if (isEditing || reminders.isNotEmpty()) Spacer(Modifier.height(AppTheme.spaceLarge))
+                    TaskReminderField(
+                        reminders = reminders,
+                        due = due,
+                        isEditing = isEditing,
+                        onRemindersChange = { reminders = it },
+                        onAddCustom = { pickerTarget = PickerTarget.CUSTOM_REMINDER },
+                    )
+                }
             }
 
             // Location.
-            if (isEditing || location.isNotBlank()) item {
+            if ((isEditing || location.isNotBlank()) && showsLocation) item {
                 FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionLocation),
                     Icons.Outlined.LocationOn,
                     TaskColor,
                 )
             }
-            if (isEditing || location.isNotBlank()) item {
+            if ((isEditing || location.isNotBlank()) && showsLocation) item {
                 LocationField(
                     location = location,
                     place = place,
@@ -350,14 +373,14 @@ fun TaskDetailScreen(
             }
 
             // Checklist / subtasks; an empty checklist has nothing to show outside edit mode.
-            if (isEditing || subtasks.isNotEmpty()) item {
+            if ((isEditing || subtasks.isNotEmpty()) && showsChecklist) item {
                 FormSectionHeader(
                     stringResource(R.string.taskDetailsSectionChecklist),
                     Icons.Filled.Checklist,
                     TaskColor,
                 )
             }
-            item {
+            if (showsChecklist) item {
                 // Hold a row to drag it; a lone subtask has nothing to reorder.
                 val canReorder = subtasks.size > 1
                 DraggableReorderColumn(
@@ -391,7 +414,7 @@ fun TaskDetailScreen(
                     )
                 }
             }
-            if (isEditing) {
+            if (isEditing && showsChecklist) {
                 item {
                     NewSubtaskField(onAdd = { title ->
                         val newSubtask = SubtaskEntity(
