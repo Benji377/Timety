@@ -498,8 +498,8 @@
     <string name="settingsLabelAutoDndSubtitle">Schaltet Benachrichtigungen während Fokus-Sitzungen stumm</string>
     <string name="settingsLabelBackgroundActivity">Hintergrundaktivität</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Wenn Erinnerungen verspätet ankommen, erlaube Timety, im Hintergrund zu laufen</string>
-    <string name="settingsLabelCommunity">Community &amp; Hilfe</string>
-    <string name="settingsLabelCommunitySubtitle">Stelle Fragen und teile Tipps auf GitHub</string>
+    <string name="settingsLabelGuides">Guides &amp; Help</string>
+    <string name="settingsLabelGuidesSubtitle">Learn how each feature works</string>
     <string name="settingsLabelDailyMotivation">Zeit für tägliche Motivation</string>
     <string name="settingsLabelDateFormat">Datumsformat</string>
     <string name="settingsLabelDateFormatSystem">Systemstandard</string>
