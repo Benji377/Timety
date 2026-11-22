@@ -228,7 +228,11 @@ fun RecurringTaskDetailScreen(
     val showsReminders = shows(TaskInput.REMINDERS, hasReminders) && shows(TaskInput.DUE, hasReminders)
     val showsWindow = shows(TaskInput.WINDOW, formTask?.windowUnit != null)
     val showsLocation = shows(TaskInput.LOCATION, !formTask?.location.isNullOrBlank())
-    val showsChecklist = shows(TaskInput.CHECKLIST, !formSource?.subtasks.isNullOrEmpty())
+    // Subtasks save as they change, so a recreation mid-edit would find none left after the user
+    // deleted the last one; whether there were any when editing began is saved across it.
+    val hadSubtasksAtEditStart = rememberSaveable(isEditing) { !existing?.subtasks.isNullOrEmpty() }
+    val hasSubtasks = if (isEditing) hadSubtasksAtEditStart else !existing?.subtasks.isNullOrEmpty()
+    val showsChecklist = shows(TaskInput.CHECKLIST, hasSubtasks)
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
     // A non-null target keeps its picker dialog open.

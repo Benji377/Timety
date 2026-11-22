@@ -20,12 +20,16 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.viewModelScope
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.benji377.timety.R
@@ -33,9 +37,12 @@ import io.github.benji377.timety.data.model.form.FormSkeleton
 import io.github.benji377.timety.data.model.form.HabitInput
 import io.github.benji377.timety.data.model.form.TaskInput
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.data.model.tag.TagEntity
+import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -43,6 +50,8 @@ import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.testutil.TestAppContainer
 import io.github.benji377.timety.testutil.TestViewModels
+import io.github.benji377.timety.testutil.awaitTrue
+import io.github.benji377.timety.testutil.value
 import io.github.benji377.timety.testutil.get
 import io.github.benji377.timety.ui.components.task.TaskListTile
 import io.github.benji377.timety.ui.screens.habit.HabitDetailScreen
@@ -55,7 +64,9 @@ import io.github.benji377.timety.ui.theme.TimetyTheme
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalTaskSkeleton
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -366,6 +377,81 @@ class FormSkeletonEditorTest {
         assertShown(header(R.string.taskDetailsSectionChecklist), "Buy stamps")
     }
 
+    @Test
+    fun everyInputOff_leavesTheTitle_andSavingStillWorks() {
+        skeleton(tasks = emptySet())
+        showTask(null)
+        assertShown(str(R.string.taskDetailsLabelTitle) + " *")
+        assertHidden(
+            str(R.string.taskDetailsLabelDescription),
+            header(R.string.taskDetailsSectionPriorityAndEffort),
+            header(R.string.taskDetailsSectionScheduling),
+            header(R.string.taskDetailsSectionLocation),
+            header(R.string.taskDetailsSectionChecklist),
+        )
+        compose.onNode(hasSetTextAction()).performTextInput("Only a title")
+        // The save outlives the screen, so wait for all of it before the database closes: until
+        // only the view model's own flow collectors are running again.
+        val scope = viewModels.get<TaskViewModel>().viewModelScope.coroutineContext.job
+        val collectors = scope.children.count { it.isActive }
+        save()
+        assertTrue(awaitTrue { scope.children.count { it.isActive } <= collectors })
+        assertTrue(runBlocking { container.taskRepository.allTasks.first().any { it.task.title == "Only a title" } })
+    }
+
+    @Test
+    fun tagsOff_onATaskWithTags_keepsTheTags() {
+        skeleton(tasks = allTasksOnExcept(TaskInput.TAGS))
+        task()
+        runBlocking {
+            val tag = container.tagRepository.getOrCreateTag(TagEntity(id = "tag", name = "Work", colorValue = 0))
+            container.tagRepository.setItemTags(TaggedItemType.TASK, "task", listOf(tag.id))
+        }
+        showTask("task")
+        startEditing("Errand")
+        // The field itself: the picker names tags from the app-wide tag list, not this container.
+        assertShown(str(R.string.globalLabelTags))
+    }
+
+    @Test
+    fun tagsOff_onATaskWithoutTags_hidesTheTags() {
+        skeleton(tasks = allTasksOnExcept(TaskInput.TAGS))
+        task()
+        showTask("task")
+        startEditing("Errand")
+        assertHidden(str(R.string.globalLabelTags))
+    }
+
+    @Test
+    fun checklistOff_deletingTheLastSubtaskThenRotating_keepsTheChecklist() {
+        // Subtasks save as they change, so after a recreation the stored task has none left;
+        // the editor must still remember that the task had a checklist when editing began.
+        skeleton(tasks = allTasksOnExcept(TaskInput.CHECKLIST))
+        task()
+        runBlocking {
+            container.taskRepository.insertSubtask(SubtaskEntity(id = "sub", taskId = "task", title = "Buy stamps"))
+        }
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent {
+            AppFrame {
+                TaskDetailScreen(
+                    taskId = "task",
+                    onNavigateBack = {},
+                    taskViewModel = viewModels.get(),
+                    tagViewModel = viewModels.get(),
+                    settingsViewModel = viewModels.get(),
+                )
+            }
+        }
+        startEditing("Errand")
+        assertShown("Buy stamps")
+        compose.onNodeWithContentDescription(str(R.string.commonLabelRemove)).performClick()
+        assertTrue(awaitTrue { runBlocking { container.taskRepository.allTasks.first().single().subtasks.isEmpty() } })
+
+        restoration.emulateSavedInstanceStateRestore()
+        assertShown(header(R.string.taskDetailsSectionChecklist), str(R.string.taskDetailsLabelSubtaskHint))
+    }
+
     // Recurring tasks.
 
     private fun recurring(windowUnit: TaskWindowUnit? = null) = RecurringTaskEntity(
@@ -402,6 +488,56 @@ class FormSkeletonEditorTest {
         showRecurring("recurring")
         assertShown("Water plants")
         assertHidden(header(R.string.recurringTaskWindowLabel))
+    }
+
+    @Test
+    fun recurringTask_withReminders_keepsThemWhileDueIsOff() {
+        skeleton(tasks = allTasksOnExcept(TaskInput.DUE))
+        RecurringTaskEntity(
+            id = "recurring",
+            title = "Water plants",
+            dueDate = Instant.now().plus(Duration.ofDays(1)),
+            unit = RecurrenceUnit.WEEK,
+            reminderOffsetsMinutes = listOf(60),
+            createdAt = Instant.now(),
+        ).also { runBlocking { container.recurringTaskRepository.insertTask(it) } }
+        showRecurring("recurring")
+        startEditing("Water plants")
+        assertShown(str(R.string.reminderFieldLabel))
+    }
+
+    @Test
+    fun recurringChecklistOff_deletingTheLastItemThenRotating_keepsTheChecklist() {
+        skeleton(tasks = allTasksOnExcept(TaskInput.CHECKLIST))
+        recurring()
+        runBlocking {
+            container.recurringTaskRepository.insertSubtask(
+                RecurringSubtaskEntity(id = "sub", recurringTaskId = "recurring", title = "Check the soil")
+            )
+        }
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent {
+            AppFrame {
+                RecurringTaskDetailScreen(
+                    recurringTaskId = "recurring",
+                    onNavigateBack = {},
+                    viewModel = viewModels.get(),
+                    tagViewModel = viewModels.get(),
+                    settingsViewModel = viewModels.get(),
+                )
+            }
+        }
+        startEditing("Water plants")
+        assertShown("Check the soil")
+        compose.onNodeWithContentDescription(str(R.string.commonLabelRemove)).performClick()
+        assertTrue(
+            awaitTrue {
+                runBlocking { container.recurringTaskRepository.observeTask("recurring").first()?.subtasks.isNullOrEmpty() }
+            }
+        )
+
+        restoration.emulateSavedInstanceStateRestore()
+        assertShown(header(R.string.taskDetailsSectionChecklist), str(R.string.taskDetailsLabelSubtaskHint))
     }
 
     @Test
@@ -458,6 +594,22 @@ class FormSkeletonEditorTest {
     }
 
     @Test
+    fun pickingPurple_countsAsNoColor_onceSaved() {
+        skeleton(habits = allHabitsOnExcept(HabitInput.COLOR))
+        habit(colorValue = 0xFFE53935.toInt())
+        showHabit("habit")
+        startEditing("Stretch")
+        compose.onNode(hasText(str(R.string.habitDetailLabelColor)) and hasClickAction()).performClick()
+        // The palette's first swatch is the default purple.
+        compose.onAllNodes(isSelectable())[0].performClick()
+        save()
+        assertTrue(runBlocking { container.habitRepository.allHabits.first().single().colorValue == HabitColor.toArgb() })
+
+        startEditing("Stretch")
+        assertHidden(str(R.string.habitDetailLabelColor))
+    }
+
+    @Test
     fun habitInAStack_keepsTheStackWhileEditing() {
         skeleton(habits = allHabitsOnExcept(HabitInput.STACK))
         habit(stackName = "Morning")
@@ -503,9 +655,10 @@ class FormSkeletonEditorTest {
             }
         }
         compose.onNode(switchRow(R.string.taskDetailsSectionLocation)).assertIsOn().performClick()
-        compose.waitForIdle()
+        // The write goes through DataStore on another thread; awaitTrue also drains the main
+        // looper the view model's coroutine resumes on.
+        assertTrue(awaitTrue { !settings.taskSkeletonFlow.value().isOn(TaskInput.LOCATION) })
         compose.onNode(switchRow(R.string.taskDetailsSectionLocation)).assertIsOff()
-        assertFalse(runBlocking { settings.taskSkeletonFlow.first().isOn(TaskInput.LOCATION) })
     }
 
     /** A Forms page row: the whole row is the switch. */
