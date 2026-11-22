@@ -43,7 +43,7 @@ Technical Wiki indexed on: [DeepWiki](https://deepwiki.com/Benji377/Timety)
 The user guides live in [`docs/`](docs/). The [website](https://timety.benji377.dev/docs) renders them with [Starlight](https://starlight.astro.build/) and rebuilds whenever `docs/` changes on `main`. They're in English only; readers can use their browser's page translation.
 
 * **Update the guide with the feature.** If a change alters how a feature works or looks, update its guide in the same pull request.
-* **Structure:** folders are sidebar sections, files are pages, and an `index.md` is a section's landing page. `docs/README.md` is the landing page of the guides, and the order of its links is the order of the sidebar, so add a new page there too.
+* **Structure:** each file is a page, and its path is its URL (`habits/habit-stacks.md` becomes `/docs/habits/habit-stacks`). `docs/README.md` is the landing page. Its `##` groups and their links are also the website's sidebar, in the same order, so add every new page there. A group named after a part of the app (Tasks, Habits, Focus, Goals, …) gets that section's icon and color on the website.
 * **No front matter.** The `# Heading` is the page title, and the first paragraph is its description in search results and link previews. Keep that paragraph to one or two sentences about what the feature is for.
 * **Write workflows,** not only screens and fields: "track chores you do a few times a week", then the steps.
 * **Name things exactly as the app does,** in the same case, so readers can find them.
