@@ -484,8 +484,6 @@
     <string name="settingsLabelAutoDndSubtitle">Silenzia automaticamente le notifiche durante le sessioni di focus</string>
     <string name="settingsLabelBackgroundActivity">Attività in background</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Se i promemoria arrivano in ritardo, consenti a Timety di funzionare in background</string>
-    <string name="settingsLabelCommunity">Community e Aiuto</string>
-    <string name="settingsLabelCommunitySubtitle">Fai domande e condividi consigli su GitHub</string>
     <string name="settingsLabelDailyMotivation">Orario per motivazione giornaliera</string>
     <string name="settingsLabelDateFormat">Formato data</string>
     <string name="settingsLabelDateFormatSystem">Predefinito di sistema</string>

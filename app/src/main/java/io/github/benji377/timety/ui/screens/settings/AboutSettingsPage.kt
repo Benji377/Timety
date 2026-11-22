@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -42,7 +42,7 @@ import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.WarningAccent
 
-/** About page: community and feedback links, then the app card with version and project links. */
+/** About page: the guides and feedback links, then the app card with version and project links. */
 @Composable
 internal fun AboutSettings() {
     val context = LocalContext.current
@@ -58,12 +58,12 @@ internal fun AboutSettings() {
 
     SettingsHeader(stringResource(R.string.settingsSectionSupport))
     NavSettingsItem(
-        title = stringResource(R.string.settingsLabelCommunity),
-        subtitle = stringResource(R.string.settingsLabelCommunitySubtitle),
-        icon = Icons.Outlined.Forum,
+        title = stringResource(R.string.settingsLabelGuides),
+        subtitle = stringResource(R.string.settingsLabelGuidesSubtitle),
+        icon = Icons.AutoMirrored.Outlined.MenuBook,
         iconTint = FocusColor,
         trailing = SettingsTrailing.EXTERNAL,
-        onClick = { openUrl("https://github.com/Benji377/Timety/discussions") }
+        onClick = { openUrl("https://timety.benji377.dev/docs") }
     )
     NavSettingsItem(
         title = stringResource(R.string.settingsLabelFeedback),
