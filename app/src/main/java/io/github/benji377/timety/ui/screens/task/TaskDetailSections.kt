@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +36,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,12 +53,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -297,34 +301,68 @@ internal fun DueDateTimeFields(
     dateError: String? = null,
 ) {
     val dateFmt = LocalDateFormatSettings.current
-    Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
+    val dateText = due?.let { AppDateFormatUtils.formatDate(it.at, dateFmt.dateFormatCode) } ?: ""
+    val timeText = due?.let {
+        if (it.hasTime) {
+            AppDateFormatUtils.formatTime(it.at, dateFmt.use24HourFormat)
+        } else {
+            stringResource(R.string.taskDetailsLabelAllDay)
+        }
+    }
+    val dateField = @Composable { modifier: Modifier ->
         PickerField(
-            value = due?.let { AppDateFormatUtils.formatDate(it.at, dateFmt.dateFormatCode) } ?: "",
+            value = dateText,
             label = dateLabel,
             icon = Icons.Filled.Event,
             isEditing = isEditing,
             onPick = onPickDate,
             onClear = onClearDate?.takeIf { due != null },
             errorText = dateError,
-            modifier = Modifier.weight(1f),
+            modifier = modifier,
         )
-        if (due != null) {
-            PickerField(
-                value = if (due.hasTime) {
-                    AppDateFormatUtils.formatTime(due.at, dateFmt.use24HourFormat)
-                } else {
-                    stringResource(R.string.taskDetailsLabelAllDay)
-                },
-                label = stringResource(R.string.taskDetailsLabelDueTime),
-                icon = Icons.Filled.Schedule,
-                isEditing = isEditing,
-                onPick = onPickTime,
-                onClear = onClearTime.takeIf { due.hasTime },
-                modifier = Modifier.weight(1f),
-            )
+    }
+    val timeField = @Composable { modifier: Modifier, text: String ->
+        PickerField(
+            value = text,
+            label = stringResource(R.string.taskDetailsLabelDueTime),
+            icon = Icons.Filled.Schedule,
+            isEditing = isEditing,
+            onPick = onPickTime,
+            onClear = onClearTime.takeIf { due?.hasTime == true },
+            modifier = modifier,
+        )
+    }
+
+    // Side by side, a long date format ("24/11/2026"), a long "All day" or a large font scrolls the
+    // value out of view on narrow phones, so the fields stack whenever their text doesn't fit.
+    val measurer = rememberTextMeasurer()
+    val textStyle = LocalTextStyle.current
+    val density = LocalDensity.current
+    BoxWithConstraints {
+        val widestText = remember(dateText, timeText, textStyle) {
+            listOfNotNull(dateText, timeText).maxOf { measurer.measure(it, textStyle).size.width }
+        }
+        val trailingRoom = if (isEditing) PickerIconSlot else PickerEndPadding
+        val fieldWidth = (maxWidth - AppTheme.spaceMedium) / 2
+        val fitsSideBySide = with(density) { widestText.toDp() } + PickerIconSlot + trailingRoom <= fieldWidth
+
+        if (timeText == null || fitsSideBySide) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
+                dateField(Modifier.weight(1f))
+                if (timeText != null) timeField(Modifier.weight(1f), timeText)
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
+                dateField(Modifier.fillMaxWidth())
+                timeField(Modifier.fillMaxWidth(), timeText)
+            }
         }
     }
 }
+
+// A text field's icon slot and its end padding without one (M3's sizes), for the fit check above.
+private val PickerIconSlot = 48.dp
+private val PickerEndPadding = 16.dp
 
 /** A read-only field that opens a picker, with a clear button when [onClear] is set. */
 @Composable
@@ -352,13 +390,16 @@ private fun PickerField(
             label = { Text(label, maxLines = 1) },
             errorText = errorText,
             leadingIcon = { Icon(icon, null) },
-            trailingIcon = {
-                when {
-                    !isEditing -> Unit
-                    onClear != null -> IconButton(onClick = onClear) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.commonClear))
+            // No slot at all in view mode: an empty one still takes 48dp from the value.
+            trailingIcon = if (!isEditing) null else {
+                {
+                    if (onClear != null) {
+                        IconButton(onClick = onClear) {
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.commonClear))
+                        }
+                    } else {
+                        Icon(Icons.Filled.Edit, null)
                     }
-                    else -> Icon(Icons.Filled.Edit, null)
                 }
             },
             // A picker field is never typed into, so it is disabled and needs the error look spelled out.
