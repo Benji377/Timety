@@ -483,8 +483,8 @@
     <string name="settingsLabelAutoDndSubtitle">专注期间自动静音通知</string>
     <string name="settingsLabelBackgroundActivity">后台活动</string>
     <string name="settingsLabelBackgroundActivitySubtitle">如果提醒延迟送达，请允许 Timety 在后台运行</string>
-    <string name="settingsLabelCommunity">社区 &amp;与帮助</string>
-    <string name="settingsLabelCommunitySubtitle">在 GitHub 上提问与分享技巧</string>
+    <string name="settingsLabelGuides">Guides &amp; Help</string>
+    <string name="settingsLabelGuidesSubtitle">Learn how each feature works</string>
     <string name="settingsLabelDailyMotivation">每日励志时间</string>
     <string name="settingsLabelDateFormat">日期格式</string>
     <string name="settingsLabelDateFormatSystem">跟随系统</string>
