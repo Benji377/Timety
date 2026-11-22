@@ -91,7 +91,7 @@ The search needs internet. Without a connection you see "No internet connection 
 
 Tap the checkbox on a task, on Home, the Tasks tab, the [calendar](../calendar.md) or the [widget](../widgets.md). A message with **Undo** appears for a few seconds in case you tapped the wrong one.
 
-If **Ask to log focus time** is on in **Settings › Focus**, which it is by default, Timety then offers to **Log Focus Time** for the task: enter how long you worked on it and it's saved as a focus session. Tap **Skip** to just complete the task; the message with **Undo** appears then. After **Save**, you see "Focus session attached" instead, without Undo. To reopen the task, uncheck it in **Done**.
+If **Ask to log focus time** is on in **Settings › Focus**, which it is by default, Timety then offers to **Log Focus Time** for the task: enter how long you worked on it and it's saved as a focus session. Tap **Skip** to just complete the task; the message with **Undo** appears then. After **Save**, you see "Focus session attached" instead, without Undo.
 
 To reopen a task, uncheck it in the **Done** section.
 
