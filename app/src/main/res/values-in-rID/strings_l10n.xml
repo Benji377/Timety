@@ -228,7 +228,6 @@
     <string name="habitDetailLabelPeriodWeek">Per minggu</string>
     <string name="habitDetailLabelReminder">Waktu pengingat</string>
     <string name="habitDetailReminderAddTime">Tambah waktu</string>
-    <string name="habitDetailReminderSheetHint">Pengingat dilewati pada hari ketika kebiasaan ini sudah selesai atau tidak dijadwalkan.</string>
     <string name="habitDetailLabelColor">Warna</string>
     <string name="habitDetailLabelColorPicker">Pilih Warna</string>
     <string name="habitDetailLabelStack">Rangkaian Kebiasaan</string>
@@ -711,16 +710,13 @@
     <string name="reminderSheetDue">Tenggat %1$s</string>
     <string name="reminderSheetDueAllDay">Tenggat %1$s, sepanjang hari. Pengingat hari itu muncul pukul %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Berlaku untuk setiap pengulangan</string>
-    <string name="reminderSheetHint">Ketuk pengingat untuk menambahkannya. Ketuk lagi untuk menghapusnya.</string>
     <string name="reminderSheetNoDue">Tugas ini belum punya tenggat</string>
     <string name="reminderWarnLimit">Kamu bisa menambahkan hingga %1$d pengingat.</string>
     <string name="reminderWarnNoDue">Atur tenggat untuk memakai opsi ini. Waktu kustom tetap bisa dipakai.</string>
     <string name="recurringTaskWindowLabel">Rentang tugas</string>
-    <string name="recurringTaskWindowHint">Seberapa awal tugas ini muncul di daftar kamu</string>
     <plurals name="recurringTaskWindowDefault">
         <item quantity="other">Bawaan (%d hari sebelumnya)</item>
     </plurals>
-    <string name="recurringTaskWindowDefaultHint">Ubah bawaan di Pengaturan › Tugas</string>
     <string name="recurringTaskWindowCustom">Kustom</string>
     <string name="recurringTaskWindowAmount">Sebelum tenggat</string>
     <string name="recurringTaskWindowRequest">Masukkan %1$d sampai %2$d</string>

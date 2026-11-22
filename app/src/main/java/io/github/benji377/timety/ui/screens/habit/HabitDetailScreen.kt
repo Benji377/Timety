@@ -563,7 +563,6 @@ fun HabitDetailScreen(
                     customEnabled = !atLimit,
                     presets = emptyList(),
                     customLabel = stringResource(R.string.habitDetailReminderAddTime),
-                    hint = stringResource(R.string.habitDetailReminderSheetHint),
                 )
             }
             item { Spacer(modifier = Modifier.height(AppTheme.space3XLarge)) }

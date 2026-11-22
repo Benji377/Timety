@@ -857,26 +857,12 @@ private fun TaskWindowSection(
     onUnitChange: (TaskWindowUnit?) -> Unit,
     onAmountChange: (String) -> Unit,
 ) {
-    Text(
-        stringResource(R.string.recurringTaskWindowHint),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    Spacer(Modifier.height(AppTheme.spaceSmall))
     MonthlyChoiceOption(
         label = pluralStringResource(R.plurals.recurringTaskWindowDefault, defaultDays, defaultDays),
         selected = unit == null,
         enabled = isEditing,
         onSelect = { onUnitChange(null) },
     )
-    if (isEditing && unit == null) {
-        Text(
-            stringResource(R.string.recurringTaskWindowDefaultHint),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = RADIO_LABEL_INSET),
-        )
-    }
     MonthlyChoiceOption(
         label = stringResource(R.string.recurringTaskWindowCustom),
         selected = unit != null,
