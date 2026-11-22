@@ -68,10 +68,9 @@ The task window decides how early a round shows up on Home and in the widget. Un
 By default, a round shows up as many days before it's due as the **Upcoming Task Window** in **Settings › Tasks**, 7 days unless you changed it. To give one task its own window, switch on **Task window** in **Settings › Forms** first. Then, in the task's editor:
 
 - **Default** uses the setting above.
-- **Custom** shows the task a set number of **Hours**, **Days** or **Weeks** **Before due**. Hours are only offered for tasks with a due time.
-- **On the due day** keeps the task out of sight until the day it's due.
+- **Custom** shows the task a set number of **Hours**, **Days** or **Weeks** **Before due**. Hours are only offered for tasks with a due time. Enter 0 days to keep the task out of sight until the day it's due; the field then says **On the due day**.
 
-For example, "Take out the bins" with **On the due day** stays off Home until bin day, while "Pay rent" with **Custom, 5 days** gives you time to plan.
+For example, "Take out the bins" with **Custom, 0 days** stays off Home until bin day, while "Pay rent" with **Custom, 5 days** gives you time to plan.
 
 ## Checklist
 

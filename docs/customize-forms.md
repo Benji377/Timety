@@ -12,6 +12,8 @@ Go to **Settings › Forms**. The page has two tabs, **Tasks** and **Habits**, w
 
 A switched-off input is hidden whenever you create or edit an item. Names, titles and repeat rules are always shown, because every item needs them.
 
+Some hidden inputs still have a default value. With **Priority &amp; Effort** off, for example, new tasks still get medium priority and medium effort, so the lists show an **M** and the medium priority icon on them.
+
 > [!NOTE]
 > An item that already has a value for a switched-off input keeps showing it. If you hide **Location** but a task already has a place, that task still shows its location, so nothing gets lost.
 

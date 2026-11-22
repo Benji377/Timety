@@ -58,7 +58,7 @@ The **×** in each field clears it. Clearing the date also removes the reminders
 
 ## Reminders
 
-Reminders are notifications before a task is due. They need a due date, so the **Add reminder** button appears once the task has one.
+Reminders are notifications before a task is due. Tap **Add reminder** to add one. Most options count back from the due date, so they're greyed out until the task has one. A **Custom** date and time works without a due date.
 
 For a task with a due time, pick **On time**, **30 minutes before**, **1 hour before**, **1 day before**, **1 week before** or a **Custom** date and time. For an all-day task, reminders are whole days, like **On the day** or **1 day before**, and the sheet tells you at what time they arrive.
 
@@ -91,7 +91,7 @@ The search needs internet. Without a connection you see "No internet connection 
 
 Tap the checkbox on a task, on Home, the Tasks tab, the [calendar](../calendar.md) or the [widget](../widgets.md). A message with **Undo** appears for a few seconds in case you tapped the wrong one.
 
-If **Ask to log focus time** is on in **Settings › Focus**, which it is by default, Timety then offers to **Log Focus Time** for the task: enter how long you worked on it and it's saved as a focus session. Tap **Skip** to just complete the task.
+If **Ask to log focus time** is on in **Settings › Focus**, which it is by default, Timety then offers to **Log Focus Time** for the task: enter how long you worked on it and it's saved as a focus session. Tap **Skip** to just complete the task; the message with **Undo** appears then. After **Save**, you see "Focus session attached" instead, without Undo. To reopen the task, uncheck it in **Done**.
 
 To reopen a task, uncheck it in the **Done** section.
 

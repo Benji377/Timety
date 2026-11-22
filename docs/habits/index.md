@@ -23,14 +23,14 @@ Habits in a [stack](habit-stacks.md) are grouped in a card with the stack's name
 1. On the **Habits** tab, tap the **+** button.
 2. Enter a **Habit Name**, for example "Read 10 pages".
 3. Choose a **Frequency**, see below.
-4. Optional: add **Notes**, **Tags**, **Reminder time**, an **Icon** and a **Color**.
+4. Optional: add **Notes**, **Tags**, reminders, an **Icon** and a **Color**.
 5. Tap the check mark to save.
 
 ## Frequency
 
 - **Daily**: every day.
-- **Specific**: on the days of the week you pick, like Monday, Wednesday and Friday.
 - **Flexible**: a number of days **Per week** or **Per month**, on any days you like, for example "Goal: 3 days a week" for going to the gym.
+- **Specific**: on the days of the week you pick, like Monday, Wednesday and Friday.
 
 A weekly flexible habit is due every day until you've reached the week's target, then it moves to **Done** until the next week starts. Monthly flexible habits work the same way per month, but only on the Habits tab: they don't show on Home, in the widget or in reminders, because they're not tied to any particular day.
 
@@ -40,7 +40,7 @@ Tap the circle next to a habit, on Home, the Habits tab or the [widget](../widge
 
 ### Several times a day
 
-Some habits happen more than once a day, like brushing your teeth. Switch on **Times per day** in **Settings › Forms** (it's hidden on new installs), then set it in the habit's editor, up to 10. It works for **Daily** and **Specific** habits.
+Some habits happen more than once a day, like brushing your teeth. Switch on **Times per day** in **Settings › Forms** (it's hidden on new installs), then set it with the slider in the habit's editor, up to 10. It works for **Daily** and **Specific** habits.
 
 - Each tap on the circle adds one check-in. A bar under the habit shows how many are done, and a message with **Undo** confirms it.
 - The day only counts as done once you've reached the number. That's what streaks and statistics use.
@@ -56,7 +56,7 @@ You can also check off habits for past days in the [calendar](../calendar.md). F
 
 ## Reminders
 
-Under **Reminder time**, tap **Add time** to get a notification at that time. Add several times for habits you do more than once a day.
+In the habit's editor, tap **Add reminder**, then **Add time** to get a notification at that time. Add several times for habits you do more than once a day.
 
 Reminders are skipped on days the habit is already done or isn't due. Monthly flexible habits can't have reminders.
 
