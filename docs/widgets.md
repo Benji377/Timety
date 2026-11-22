@@ -15,6 +15,10 @@ The exact steps depend on your phone's launcher, but most work this way.
 
 The tasks widget shows the same tasks as Home:
 
+<p align="center" class="screenshot">
+  <img src="images/widgets-tasks.png" width="380" alt="The tasks widget with three tasks under Tasks Due and two under Upcoming">
+</p>
+
 - **Tasks Due**: tasks and recurring tasks that are due today or overdue. When there are none, it says "No urgent tasks".
 - **Upcoming**: tasks due within your **Upcoming Task Window** (**Settings › Tasks**).
 
@@ -27,6 +31,10 @@ Their borders use the same colors as in the app: red for overdue, orange for due
 ## Habits widget
 
 The habits widget shows **Habits Today**: the habits due today, with the ones you've done marked.
+
+<p align="center" class="screenshot">
+  <img src="images/widgets-habits.png" width="380" alt="The habits widget with the Morning and Evening stacks: Meditate is checked, Journal is next, and the other habits are locked">
+</p>
 
 - Tap a habit's circle to check it in, or to undo it.
 - For a habit you do several times a day, each tap adds one, and the widget shows the count, for example 1/2.

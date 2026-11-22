@@ -32,7 +32,7 @@ The other inputs, like reminders, checklist, location and tags, work as they do 
 
 ## Complete a round
 
-Tap the checkbox on Home, in the calendar or on the widget, or tap **Complete now** on the Recurring Tasks page. A message like "Completed! Next: 28/11/26" shows the next due date, with **Undo** in case it was a mistake.
+Tap the checkbox on Home, in the calendar or on the widget, or tap **Complete now** on the Recurring Tasks page. A message like "Completed! Next: 28/11/2026" shows the next due date, with **Undo** in case it was a mistake.
 
 The next due date follows the schedule, not the day you completed it. If "Clean the flat" is due every Saturday and you do it on Monday, it's still due next Saturday.
 
