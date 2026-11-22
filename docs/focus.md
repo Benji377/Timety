@@ -24,7 +24,7 @@ The timer keeps going when you leave the app or lock the phone. Its notification
 
 Timety comes with three modes:
 
-- **Pomodoro Classic**: four rounds of focus with short rests in between, starting with 25 minutes of focus.
+- **Pomodoro Classic**: four rounds of 25 minutes of focus, each followed by a 5-minute rest. The last rest is a longer one of 15 minutes.
 - **Flexible**: a single focus block of any length. Before you start, drag the dial to set the time.
 - **Stopwatch**: counts up until you stop it. To catch a stopwatch you forgot about, it stops at the **Max Stopwatch Limit** in **Settings › Focus**.
 

@@ -45,7 +45,7 @@ If the file is damaged or isn't a Timety backup, Timety says so and nothing is c
 
 Reminders, alarms and widgets are set up again on the new phone after the restore. You may need to allow notifications and **Background activity** again.
 
-If you move with Android's own phone-to-phone transfer, Timety's data can come along with it. Google's cloud backup doesn't include Timety, so that your data never leaves your devices unless you export it. To be safe, export a backup before you switch anyway.
+If you move with Android's own phone-to-phone transfer, by cable or directly between the phones, Timety's data comes along on Android 12 and newer. Google's cloud backup never includes Timety, so that your data doesn't leave your devices unless you export it. On Android 11 and older, Android uses the same rules for both, so the transfer doesn't include Timety either. To be safe, export a backup before you switch anyway.
 
 <details>
 <summary>Can I open the backup file myself?</summary>

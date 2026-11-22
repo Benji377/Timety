@@ -469,8 +469,6 @@
     <string name="settingsLabelAutoDndSubtitle">Membisukan notifikasi secara otomatis selama sesi fokus</string>
     <string name="settingsLabelBackgroundActivity">Aktivitas latar belakang</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Jika pengingat datang terlambat, izinkan Timety berjalan di latar belakang</string>
-    <string name="settingsLabelCommunity">Komunitas &amp; Bantuan</string>
-    <string name="settingsLabelCommunitySubtitle">Ajukan pertanyaan dan bagikan tips di GitHub</string>
     <string name="settingsLabelDailyMotivation">Waktu Motivasi Harian</string>
     <string name="settingsLabelDateFormat">Format Tanggal</string>
     <string name="settingsLabelDateFormatSystem">Bawaan Sistem</string>

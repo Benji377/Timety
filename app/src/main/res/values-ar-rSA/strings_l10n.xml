@@ -544,8 +544,6 @@
     <string name="settingsLabelAutoDndSubtitle">Silences notifications automatically during focus sessions</string>
     <string name="settingsLabelBackgroundActivity">Background activity</string>
     <string name="settingsLabelBackgroundActivitySubtitle">If reminders arrive late, allow Timety to run in the background</string>
-    <string name="settingsLabelCommunity">Community &amp; Help</string>
-    <string name="settingsLabelCommunitySubtitle">Ask questions and share tips on GitHub</string>
     <string name="settingsLabelDailyMotivation">Daily Motivation Time</string>
     <string name="settingsLabelDateFormat">Date Format</string>
     <string name="settingsLabelDateFormatSystem">System Default</string>

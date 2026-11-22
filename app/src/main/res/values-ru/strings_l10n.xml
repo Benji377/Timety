@@ -514,8 +514,6 @@
     <string name="settingsLabelAutoDndSubtitle">Автоматически отключает уведомления во время сессий фокуса</string>
     <string name="settingsLabelBackgroundActivity">Работа в фоне</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Если напоминания приходят с опозданием, разрешите Timety работать в фоне</string>
-    <string name="settingsLabelCommunity">Сообщество и помощь</string>
-    <string name="settingsLabelCommunitySubtitle">Задавайте вопросы и делитесь советами на GitHub</string>
     <string name="settingsLabelDailyMotivation">Время утренней мотивации</string>
     <string name="settingsLabelDateFormat">Формат даты</string>
     <string name="settingsLabelDateFormatSystem">Как в системе</string>

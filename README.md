@@ -7,10 +7,10 @@
       <img src="https://img.shields.io/github/actions/workflow/status/Benji377/Timety/ci.yml?label=Lint&logo=kotlin&style=for-the-badge&labelColor=555555" alt="lint">
     </a>
     <a href="https://timety.benji377.dev">
-      <img src="https://img.shields.io/badge/Website-timety.benji377.dev-2563EB?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=555555" alt="website">
+      <img src="https://img.shields.io/badge/Website-Visit-2563EB?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=555555" alt="website">
     </a>
-    <a href="https://github.com/Benji377/Timety/releases">
-      <img src="https://img.shields.io/github/downloads/Benji377/Timety/total?label=Downloads&logo=github&style=for-the-badge&labelColor=555555" alt="downloads">
+    <a href="https://timety.benji377.dev/docs">
+      <img src="https://img.shields.io/badge/Guides-Read_the_docs-16A34A?style=for-the-badge&logo=readthedocs&logoColor=white&labelColor=555555" alt="guides">
     </a>
     <br>
     <a href="https://tally.so/r/ODbEoA">
@@ -45,6 +45,8 @@ Timety is an offline-first productivity and time-management application built wi
 *   **Smart Notifications:** Local reminders for tasks, specific habit times, and dynamic daily motivation.
 *   **Unified Calendar:** A custom micro-dot calendar view to see your tasks, focus sessions, and habits at a glance.
 *   **Mood Calendar:** Rate each day from the evening check-in or your profile, and see a month of moods and your all-time split at a glance.
+
+New to Timety, or wondering how a feature works? The **[user guides](https://timety.benji377.dev/docs)** explain every part of the app step by step. You can also read them right here in the [`docs` folder](docs/README.md).
 
 ## Download & Installation
 
