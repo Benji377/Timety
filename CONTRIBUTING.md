@@ -45,10 +45,8 @@ When you are ready to submit your code, please follow these steps:
 1. **Create a branch** for your feature or bugfix (e.g., `feature/awesome-new-widget` or `bugfix/fix-calendar-crash`).
 2. **Write clean, readable code.**
 3. **Run the Linter & Tests:** Ensure your code passes our CI requirements locally before pushing.
-
-
-3. **Update the UI (if applicable):** If you changed how the app looks, please include a screenshot or screen recording in your Pull Request description.
-4. **Open a Pull Request** against the `main` branch.
+4. **Update the UI (if applicable):** If you changed how the app looks, please include a screenshot or screen recording in your Pull Request description.
+5. **Open a Pull Request** against the `main` branch.
 
 I will review your PR as soon as I can. Please be patient, as I am managing this project in my free time!
 
