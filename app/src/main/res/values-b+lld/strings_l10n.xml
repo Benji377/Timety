@@ -558,8 +558,8 @@
     <string name="settingsLabelAutoDndSubtitle">Silenzea automatich la nutificazions</string>
     <string name="settingsLabelBackgroundActivity">Atività tl background</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Sce i lezic ruva tert, lascé che Timety funzionëies tl background</string>
-    <string name="settingsLabelCommunity">Cumunità y Aiut</string>
-    <string name="settingsLabelCommunitySubtitle">Fà dumandes y cunsëies sun GitHub</string>
+    <string name="settingsLabelGuides">Guides &amp; Help</string>
+    <string name="settingsLabelGuidesSubtitle">Learn how each feature works</string>
     <string name="settingsLabelDailyMotivation">Ora de mutivazion al di</string>
     <string name="settingsLabelDateFormat">Format dla data</string>
     <string name="settingsLabelDateFormatSystem">Dl Sistem</string>
