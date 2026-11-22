@@ -211,12 +211,13 @@ fun RecurringTaskDetailScreen(
     }
     var windowError by rememberSaveable(formTask) { mutableStateOf(false) }
 
-    // Settings > Forms: while editing, an input shows when it's on or the task had a value for it
-    // when editing began. View mode shows whatever is filled, as before. The due date belongs to
-    // the repeat rule here, so it has no switch, but reminders still follow the due date switch
-    // to match the Forms page.
+    // Settings > Forms: an input shows when it's on or the task has a value for it, checked against
+    // the task as it was when editing began, so clearing a field mid-edit doesn't hide it. View
+    // mode follows the same rule, so an input that's off doesn't show up with its default. The due
+    // date belongs to the repeat rule here, so it has no switch, but reminders still follow the due
+    // date switch to match the Forms page.
     val skeleton by settingsViewModel.taskSkeleton.collectAsState()
-    fun shows(input: TaskInput, hasValue: Boolean) = !isEditing || skeleton.shows(input, hasValue)
+    fun shows(input: TaskInput, hasValue: Boolean) = skeleton.shows(input, hasValue)
     val showsTags = shows(TaskInput.TAGS, !recurringTags[recurringTaskId].isNullOrEmpty())
     val showsDescription = shows(TaskInput.DESCRIPTION, !formTask?.description.isNullOrBlank())
     val showsPriority = shows(

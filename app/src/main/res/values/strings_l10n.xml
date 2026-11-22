@@ -230,6 +230,7 @@
     <string name="habitDetailSectionInfo">Habit Info</string>
     <string name="detailSectionAppearance">Appearance</string>
     <string name="detailLabelIcon">Icon</string>
+    <string name="detailIconNone">No icon</string>
     <string name="habitDetailLabelName">Habit Name</string>
     <string name="habitDetailLabelNameHint">e.g., Read 10 pages, Workout…</string>
     <string name="habitDetailLabelNameRequest">Please enter a name</string>

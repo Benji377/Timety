@@ -165,10 +165,11 @@ fun HabitDetailScreen(
         mutableStateOf(HabitUtils.parseReminderTimes(existingHabit?.reminderTimes))
     }
 
-    // Settings > Forms: while editing, an input shows when it's on or the habit had a value for it
-    // when editing began. View mode shows whatever is filled, as before.
+    // Settings > Forms: an input shows when it's on or the habit has a value for it, checked against
+    // the habit as it was when editing began, so clearing a field mid-edit doesn't hide it. View
+    // mode follows the same rule, so an input that's off doesn't show up with its default.
     val skeleton by settingsViewModel.habitSkeleton.collectAsState()
-    fun shows(input: HabitInput, hasValue: Boolean) = !isEditing || skeleton.shows(input, hasValue)
+    fun shows(input: HabitInput, hasValue: Boolean) = skeleton.shows(input, hasValue)
     val showsTags = shows(HabitInput.TAGS, !habitTags[habitId].isNullOrEmpty())
     val showsNotes = shows(HabitInput.NOTES, !formHabit?.notes.isNullOrBlank())
     val showsStack = shows(HabitInput.STACK, !formHabit?.stackName.isNullOrBlank())

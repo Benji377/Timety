@@ -52,6 +52,7 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.AppUtils
+import io.github.benji377.timety.ui.utils.showsPriorityEffort
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.ui.utils.rememberToday
 import io.github.benji377.timety.ui.viewmodel.FocusViewModel
@@ -172,7 +173,9 @@ internal fun TasksAccordion(
                     isCompleted = task.isCompleted,
                     onToggle = { onToggle(taskWithSubtasks) },
                     onClick = { onTaskClick(taskWithSubtasks) },
-                    trailing = { AppUtils.PriorityIcon(priority = task.priority) },
+                    trailing = {
+                        if (showsPriorityEffort(task.priority, task.size)) AppUtils.PriorityIcon(priority = task.priority)
+                    },
                 )
             }
             recurringDue.forEach { task ->

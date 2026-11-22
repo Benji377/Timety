@@ -13,6 +13,7 @@ import io.github.benji377.timety.ui.viewmodel.HabitViewModel
 import io.github.benji377.timety.ui.viewmodel.QuickHabitViewModel
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
+import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.TaskViewModel
 import io.github.benji377.timety.ui.viewmodel.UserViewModel
 
@@ -90,6 +91,9 @@ class TestViewModels(
                             container.dayRatingRepository,
                             container.settingsRepository,
                         )
+
+                    modelClass.isAssignableFrom(TagViewModel::class.java) ->
+                        TagViewModel(container.tagRepository)
 
                     modelClass.isAssignableFrom(SettingsViewModel::class.java) ->
                         SettingsViewModel(

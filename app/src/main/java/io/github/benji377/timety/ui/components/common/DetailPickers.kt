@@ -130,7 +130,8 @@ fun AppearanceFields(
 }
 
 /**
- * Dialog with a grid of the [HabitIcons] catalog; selecting an icon confirms and closes.
+ * Dialog with a grid of the [HabitIcons] catalog; selecting an icon confirms and closes. The first
+ * cell is "no icon" ([HabitIcons.defaultIcon], selected as null), so a picked icon can be removed.
  * The current selection is highlighted with [accentColor].
  */
 @Composable
@@ -138,9 +139,11 @@ fun IconPickerDialog(
     title: String,
     selectedIconIndex: Int?,
     accentColor: Color,
-    onSelect: (Int) -> Unit,
+    onSelect: (Int?) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    // Null first: the "no icon" cell.
+    val choices: List<Int?> = listOf(null) + HabitIcons.availableIcons.indices
     NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -151,7 +154,8 @@ fun IconPickerDialog(
                 verticalArrangement = Arrangement.spacedBy(AppTheme.spaceLarge),
                 modifier = Modifier.height(300.dp),
             ) {
-                items(HabitIcons.availableIcons.size) { index ->
+                items(choices.size) { position ->
+                    val index = choices[position]
                     val isSelected = index == selectedIconIndex
                     val interactionSource = remember { MutableInteractionSource() }
                     // Selected state is a solid fill + border, not an alpha-blended tint - the
@@ -174,8 +178,8 @@ fun IconPickerDialog(
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
-                            imageVector = HabitIcons.availableIcons[index],
-                            contentDescription = null,
+                            imageVector = HabitIcons.iconAt(index),
+                            contentDescription = if (index == null) stringResource(R.string.detailIconNone) else null,
                             tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
                         )
                     }
