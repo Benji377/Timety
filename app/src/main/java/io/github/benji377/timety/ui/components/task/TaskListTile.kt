@@ -47,8 +47,8 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.AppUtils
-import io.github.benji377.timety.ui.utils.showsPriorityEffort
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.showsPriorityEffort
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.task.Due
 import java.time.LocalDate

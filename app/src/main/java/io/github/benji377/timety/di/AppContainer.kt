@@ -97,8 +97,8 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
 
 /**
  * Sets up a new install. Room calls [onCreate] only when the database file is first created,
- * never on an upgrade, a backup restore or "delete all data", which all keep the file, so the
- * starting preset of Settings > Forms reaches new installs only.
+ * never on an upgrade or a backup restore, which both keep the file, so the starting preset of
+ * Settings > Forms reaches new installs only.
  */
 class NewInstallCallback(private val settingsRepository: SettingsRepository) : RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {
