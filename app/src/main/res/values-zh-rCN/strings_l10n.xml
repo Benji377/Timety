@@ -228,7 +228,6 @@
     <string name="habitDetailLabelPeriodWeek">每周</string>
     <string name="habitDetailLabelReminder">提醒时间</string>
     <string name="habitDetailReminderAddTime">添加时间</string>
-    <string name="habitDetailReminderSheetHint">当天已完成或无需进行该习惯时，将跳过提醒。</string>
     <string name="habitDetailLabelColor">颜色</string>
     <string name="habitDetailLabelColorPicker">选择颜色</string>
     <string name="habitDetailLabelStack">习惯堆叠</string>
@@ -711,16 +710,13 @@
     <string name="reminderSheetDue">截止：%1$s</string>
     <string name="reminderSheetDueAllDay">截止：%1$s，全天。当天提醒将在 %2$s 发出。</string>
     <string name="reminderSheetEveryOccurrence">适用于每次重复</string>
-    <string name="reminderSheetHint">点击提醒即可添加，再次点击即可移除。</string>
     <string name="reminderSheetNoDue">此任务尚未设置截止日期</string>
     <string name="reminderWarnLimit">最多可添加 %1$d 个提醒。</string>
     <string name="reminderWarnNoDue">设置截止日期后才能使用这些选项，自定义时间仍可使用。</string>
     <string name="recurringTaskWindowLabel">任务显示范围</string>
-    <string name="recurringTaskWindowHint">此任务提前多久出现在列表中</string>
     <plurals name="recurringTaskWindowDefault">
         <item quantity="other">默认（提前 %d 天）</item>
     </plurals>
-    <string name="recurringTaskWindowDefaultHint">可在“设置 › 任务”中更改默认值</string>
     <string name="recurringTaskWindowCustom">自定义</string>
     <string name="recurringTaskWindowAmount">截止前</string>
     <string name="recurringTaskWindowRequest">请输入 %1$d 到 %2$d</string>

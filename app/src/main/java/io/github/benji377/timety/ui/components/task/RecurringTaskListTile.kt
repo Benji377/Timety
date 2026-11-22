@@ -38,6 +38,7 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.showsPriorityEffort
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.due
@@ -143,10 +144,12 @@ fun RecurringTaskListTile(
                     TagChips(tags)
                 }
             }
-            Spacer(Modifier.width(AppTheme.spaceLarge))
-            Text(text = AppUtils.getSizeEmoji(task.size), fontSize = 18.sp)
-            Spacer(Modifier.width(AppTheme.listTileTrailingSpacing))
-            AppUtils.PriorityIcon(priority = task.priority)
+            if (showsPriorityEffort(task.priority, task.size)) {
+                Spacer(Modifier.width(AppTheme.spaceLarge))
+                Text(text = AppUtils.getSizeEmoji(task.size), fontSize = 18.sp)
+                Spacer(Modifier.width(AppTheme.listTileTrailingSpacing))
+                AppUtils.PriorityIcon(priority = task.priority)
+            }
         }
     }
 }

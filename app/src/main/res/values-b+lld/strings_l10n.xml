@@ -263,7 +263,6 @@
     <string name="habitDetailLabelPeriodWeek">A l\'ena</string>
     <string name="habitDetailLabelReminder">Ora dl lezit</string>
     <string name="habitDetailReminderAddTime">Njunté ora</string>
-    <string name="habitDetailReminderSheetHint">I lezic ne unirà nia mustrei i dis che chësta abitudin ie bele fata o ne ie nia da fé.</string>
     <string name="habitDetailLabelColor">Culëur</string>
     <string name="habitDetailLabelColorPicker">Chir ora n culëur</string>
     <string name="habitDetailLabelStack">Rënga de abitudins</string>
@@ -836,12 +835,10 @@
     <string name="reminderSheetDue">Scadënza %1$s</string>
     <string name="reminderSheetDueAllDay">Scadënza %1$s, dut l di. I lezic per chël di vën a %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Vel per uni repetizion</string>
-    <string name="reminderSheetHint">Clica sun n lezit per l njunté. Clica inò per l tò demez.</string>
     <string name="reminderSheetNoDue">Chësta ncëria à mo nia na scadënza</string>
     <string name="reminderWarnLimit">Te pëus njunté nfin a %1$d lezic.</string>
     <string name="reminderWarnNoDue">Mët na scadënza per nuzé chësta opzions. I tëmps persunalisei funziona inò.</string>
     <string name="recurringTaskWindowLabel">Fënestra dla ncëria</string>
-    <string name="recurringTaskWindowHint">Tan abenëura vëniel pa su chësta ncëria te ti lista</string>
     <plurals name="recurringTaskWindowDefault">
         <item quantity="zero">Standard (%d dis dant)</item>
         <item quantity="one">Standard (%d di dant)</item>
@@ -850,7 +847,6 @@
         <item quantity="many">Standard (%d dis dant)</item>
         <item quantity="other">Standard (%d dis dant)</item>
     </plurals>
-    <string name="recurringTaskWindowDefaultHint">Muda la impostazion predefinida te Mpustazions › Ncëries</string>
     <string name="recurringTaskWindowCustom">Persunalisà</string>
     <string name="recurringTaskWindowAmount">Dant ala scadënza</string>
     <string name="recurringTaskWindowRequest">Dá ite %1$d a %2$d</string>

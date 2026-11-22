@@ -249,7 +249,6 @@
     <string name="habitDetailLabelPeriodWeek">В неделю</string>
     <string name="habitDetailLabelReminder">Время напоминания</string>
     <string name="habitDetailReminderAddTime">Добавить время</string>
-    <string name="habitDetailReminderSheetHint">Напоминания пропускаются в дни, когда привычка уже выполнена или не запланирована.</string>
     <string name="habitDetailLabelColor">Цвет</string>
     <string name="habitDetailLabelColorPicker">Выберите цвет</string>
     <string name="habitDetailLabelStack">Цепочка привычек</string>
@@ -786,19 +785,16 @@
     <string name="reminderSheetDue">Срок: %1$s</string>
     <string name="reminderSheetDueAllDay">Срок: %1$s, весь день. Напоминания в этот день приходят в %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Применяется к каждому повторению</string>
-    <string name="reminderSheetHint">Нажмите на напоминание, чтобы добавить его. Нажмите ещё раз, чтобы убрать.</string>
     <string name="reminderSheetNoDue">У этой задачи пока нет срока</string>
     <string name="reminderWarnLimit">Можно добавить не больше %1$d напоминаний.</string>
     <string name="reminderWarnNoDue">Задайте срок, чтобы использовать эти варианты. Своё время работает и без него.</string>
     <string name="recurringTaskWindowLabel">Окно задачи</string>
-    <string name="recurringTaskWindowHint">Насколько заранее задача появляется в списках</string>
     <plurals name="recurringTaskWindowDefault">
         <item quantity="one">По умолчанию (за %d день)</item>
         <item quantity="few">По умолчанию (за %d дня)</item>
         <item quantity="many">По умолчанию (за %d дней)</item>
         <item quantity="other">По умолчанию (за %d дня)</item>
     </plurals>
-    <string name="recurringTaskWindowDefaultHint">Значение по умолчанию меняется в разделе Настройки › Задачи</string>
     <string name="recurringTaskWindowCustom">Своё</string>
     <string name="recurringTaskWindowAmount">До срока</string>
     <string name="recurringTaskWindowRequest">Введите от %1$d до %2$d</string>

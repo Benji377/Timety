@@ -12,6 +12,8 @@ import io.github.benji377.timety.data.model.focus.FocusSessionEntity
 import io.github.benji377.timety.data.model.focus.FocusTargetType
 import io.github.benji377.timety.data.model.focus.PhaseType
 import io.github.benji377.timety.data.model.focus.SessionPhaseEntity
+import io.github.benji377.timety.data.model.form.HabitInput
+import io.github.benji377.timety.data.model.form.TaskInput
 import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
@@ -290,6 +292,22 @@ class BackupRoundTripTest {
 
         assertEquals(habit, target.habitRepository.allHabits.first().single())
         assertEquals(3, target.habitRepository.allCompletions.first().size)
+    }
+
+    @Test
+    fun backupThenRestore_keepsTheFormSwitches_overANewInstallsPreset() = runBlocking {
+        // An empty "on" list is the extreme: every input off must survive the JSON file too.
+        TaskInput.entries.forEach { source.settingsRepository.setTaskInputOn(it, false) }
+        source.settingsRepository.setHabitInputOn(HabitInput.STACK, false)
+        target.settingsRepository.applyNewInstallFormPreset()
+
+        target.backupService.importFromUri(exportFrom(source)).getOrThrow()
+
+        assertEquals(emptySet<TaskInput>(), target.settingsRepository.taskSkeletonFlow.first().on)
+        assertEquals(
+            HabitInput.entries.toSet() - HabitInput.STACK,
+            target.settingsRepository.habitSkeletonFlow.first().on,
+        )
     }
 
     @Test

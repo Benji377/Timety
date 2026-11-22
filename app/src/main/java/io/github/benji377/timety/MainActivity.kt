@@ -17,6 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.github.benji377.timety.data.repository.SettingsRepository
@@ -29,6 +30,7 @@ import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.TimetyTheme
 import io.github.benji377.timety.ui.utils.DateFormatSettings
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.LocalTaskSkeleton
 import io.github.benji377.timety.util.LocaleHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -99,6 +101,10 @@ class MainActivity : ComponentActivity() {
 
             val use24HourFormat by settings.use24HourFormatFlow.collectAsState(initial = true)
             val dateFormatCode by settings.dateFormatFlow.collectAsState(initial = "System")
+            // Read up front like the capture block, so tiles never flash inputs that are off.
+            val taskSkeleton by settings.taskSkeletonFlow.collectAsState(
+                initial = remember { runBlocking { settings.taskSkeletonFlow.first() } },
+            )
 
             TimetyTheme(darkTheme = darkTheme) {
                 val snackbarHostState =
@@ -108,7 +114,8 @@ class MainActivity : ComponentActivity() {
                         use24HourFormat,
                         dateFormatCode
                     ),
-                    LocalSnackbarHostState provides snackbarHostState
+                    LocalSnackbarHostState provides snackbarHostState,
+                    LocalTaskSkeleton provides taskSkeleton,
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),

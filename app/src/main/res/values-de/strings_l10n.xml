@@ -235,7 +235,6 @@
     <string name="habitDetailLabelPeriodWeek">Pro Woche</string>
     <string name="habitDetailLabelReminder">Erinnerungszeit</string>
     <string name="habitDetailReminderAddTime">Zeit hinzufügen</string>
-    <string name="habitDetailReminderSheetHint">Erinnerungen entfallen an Tagen, an denen diese Gewohnheit schon erledigt oder nicht fällig ist.</string>
     <string name="habitDetailLabelColor">Farbe</string>
     <string name="habitDetailLabelColorPicker">Wähle eine Farbe</string>
     <string name="habitDetailLabelStack">Gewohnheits-Stapel</string>
@@ -736,17 +735,14 @@
     <string name="reminderSheetDue">Fällig am %1$s</string>
     <string name="reminderSheetDueAllDay">Fällig am %1$s, ganztägig. Erinnerungen für diesen Tag kommen um %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Gilt für jede Wiederholung</string>
-    <string name="reminderSheetHint">Tippe auf eine Erinnerung, um sie hinzuzufügen. Tippe erneut, um sie zu entfernen.</string>
     <string name="reminderSheetNoDue">Diese Aufgabe hat noch kein Fälligkeitsdatum</string>
     <string name="reminderWarnLimit">Du kannst bis zu %1$d Erinnerungen hinzufügen.</string>
     <string name="reminderWarnNoDue">Lege ein Fälligkeitsdatum fest, um diese Optionen zu nutzen. Eigene Zeiten funktionieren weiterhin.</string>
     <string name="recurringTaskWindowLabel">Aufgabenfenster</string>
-    <string name="recurringTaskWindowHint">Wie früh diese Aufgabe in deinen Listen erscheint</string>
     <plurals name="recurringTaskWindowDefault">
         <item quantity="one">Standard (%d Tag vorher)</item>
         <item quantity="other">Standard (%d Tage vorher)</item>
     </plurals>
-    <string name="recurringTaskWindowDefaultHint">Ändere den Standard unter Einstellungen › Aufgaben</string>
     <string name="recurringTaskWindowCustom">Benutzerdefiniert</string>
     <string name="recurringTaskWindowAmount">Vor Fälligkeit</string>
     <string name="recurringTaskWindowRequest">Gib %1$d bis %2$d ein</string>

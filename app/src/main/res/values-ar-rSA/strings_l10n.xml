@@ -263,7 +263,6 @@
     <string name="habitDetailLabelPeriodWeek">Per week</string>
     <string name="habitDetailLabelReminder">Reminder time</string>
     <string name="habitDetailReminderAddTime">Add time</string>
-    <string name="habitDetailReminderSheetHint">Reminders are skipped on days this habit is already done or not due.</string>
     <string name="habitDetailLabelColor">Color</string>
     <string name="habitDetailLabelColorPicker">Choose a Color</string>
     <string name="habitDetailLabelStack">Habit Stack</string>
@@ -836,12 +835,10 @@
     <string name="reminderSheetDue">Due %1$s</string>
     <string name="reminderSheetDueAllDay">Due %1$s, all day. Day reminders arrive at %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Applies to every occurrence</string>
-    <string name="reminderSheetHint">Tap a reminder to add it. Tap it again to remove it.</string>
     <string name="reminderSheetNoDue">This task has no due date yet</string>
     <string name="reminderWarnLimit">You can add up to %1$d reminders.</string>
     <string name="reminderWarnNoDue">Set a due date to use these options. Custom times still work.</string>
     <string name="recurringTaskWindowLabel">Task window</string>
-    <string name="recurringTaskWindowHint">How early this task shows up in your lists</string>
     <plurals name="recurringTaskWindowDefault">
         <item quantity="zero">Default (%d days before)</item>
         <item quantity="one">Default (%d day before)</item>
@@ -850,7 +847,6 @@
         <item quantity="many">Default (%d days before)</item>
         <item quantity="other">Default (%d days before)</item>
     </plurals>
-    <string name="recurringTaskWindowDefaultHint">Change the default in Settings › Tasks</string>
     <string name="recurringTaskWindowCustom">Custom</string>
     <string name="recurringTaskWindowAmount">Before due</string>
     <string name="recurringTaskWindowRequest">Enter %1$d to %2$d</string>

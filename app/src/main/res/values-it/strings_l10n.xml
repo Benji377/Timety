@@ -235,7 +235,6 @@
     <string name="habitDetailLabelPeriodWeek">A settimana</string>
     <string name="habitDetailLabelReminder">Orario promemoria</string>
     <string name="habitDetailReminderAddTime">Aggiungi orario</string>
-    <string name="habitDetailReminderSheetHint">I promemoria vengono saltati nei giorni in cui questa abitudine è già completata o non è prevista.</string>
     <string name="habitDetailLabelColor">Colore</string>
     <string name="habitDetailLabelColorPicker">Scegli un colore</string>
     <string name="habitDetailLabelStack">Sequenza di abitudini</string>
@@ -736,17 +735,14 @@
     <string name="reminderSheetDue">Scadenza %1$s</string>
     <string name="reminderSheetDueAllDay">Scadenza %1$s, tutto il giorno. I promemoria del giorno arrivano alle %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Si applica a ogni ricorrenza</string>
-    <string name="reminderSheetHint">Tocca un promemoria per aggiungerlo. Toccalo di nuovo per rimuoverlo.</string>
     <string name="reminderSheetNoDue">Questa attività non ha ancora una scadenza</string>
     <string name="reminderWarnLimit">Puoi aggiungere fino a %1$d promemoria.</string>
     <string name="reminderWarnNoDue">Imposta una scadenza per usare queste opzioni. Gli orari personalizzati funzionano comunque.</string>
     <string name="recurringTaskWindowLabel">Finestra attività</string>
-    <string name="recurringTaskWindowHint">Quanto in anticipo questa attività compare nelle tue liste</string>
     <plurals name="recurringTaskWindowDefault">
         <item quantity="one">Predefinito (%d giorno prima)</item>
         <item quantity="other">Predefinito (%d giorni prima)</item>
     </plurals>
-    <string name="recurringTaskWindowDefaultHint">Cambia il valore predefinito in Impostazioni › Attività</string>
     <string name="recurringTaskWindowCustom">Personalizzato</string>
     <string name="recurringTaskWindowAmount">Prima della scadenza</string>
     <string name="recurringTaskWindowRequest">Inserisci da %1$d a %2$d</string>
