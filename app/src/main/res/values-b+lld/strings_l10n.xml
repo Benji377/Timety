@@ -258,6 +258,7 @@
     <string name="habitDetailSectionInfo">Info dla abitudin</string>
     <string name="detailSectionAppearance">Ududa</string>
     <string name="detailLabelIcon">Icona</string>
+    <string name="detailIconNone">No icon</string>
     <string name="habitDetailLabelName">Inuem abitudin</string>
     <string name="habitDetailLabelNameHint">ej. Lejer 10 plates, Allenamënt…</string>
     <string name="habitDetailLabelNameRequest">Nserësc n inuem</string>
@@ -267,7 +268,6 @@
     <string name="habitDetailLabelPeriodWeek">A l\'ena</string>
     <string name="habitDetailLabelReminder">Ora dl lezit</string>
     <string name="habitDetailReminderAddTime">Njunté ora</string>
-    <string name="habitDetailReminderSheetHint">I lezic ne unirà nia mustrei i dis che chësta abitudin ie bele fata o ne ie nia da fé.</string>
     <string name="habitDetailLabelColor">Culëur</string>
     <string name="habitDetailLabelColorPicker">Chir ora n culëur</string>
     <string name="habitDetailLabelStack">Rënga de abitudins</string>
@@ -635,6 +635,7 @@
     <string name="settingsPageAboutSummary">Verscion, sustëni y còdesc sursënt</string>
     <string name="settingsPageAdvancedSummary">Opzions per esperc coche l\'API per crì luelg</string>
     <string name="settingsPageDataBackupSummary">Esporté y ristabilì copies de segurëza</string>
+    <string name="settingsPageFormsSummary">Choose which inputs the task and habit editors show</string>
     <string name="settingsPageFocusSummary">Finamënt dl di, lims dl timer y No sturber</string>
     <string name="settingsPageGeneralSummary">Tematica, salut, rujeneda, formac y etichetes</string>
     <string name="settingsPageNotificationsSummary">Ëures di lezic y atività tl background</string>
@@ -644,6 +645,27 @@
     <string name="settingsSectionAppearance">Ududa</string>
     <string name="settingsSectionDataBackup">Dac y Segurëza</string>
     <string name="settingsSectionFocus">Focus</string>
+    <string name="settingsSectionForms">Forms</string>
+    <string name="settingsFormsHint">Switched-off inputs are hidden when you create or edit an item, except on items that already have a value for them. Names, titles and repeat rules are always shown.</string>
+    <string name="settingsFormsDueDate">Due date and time</string>
+    <string name="settingsFormsReminders">Reminders</string>
+    <string name="settingsFormsRemindersNeedDue">Switch on the due date to use reminders</string>
+    <string name="settingsFormsTagsInfo">Your own labels, shared by tasks, habits and focus. Focus time counts towards them in Statistics</string>
+    <string name="settingsFormsDescriptionInfo">Details about the task. The first line shows in its reminders</string>
+    <string name="settingsFormsPriorityInfo">Priority sorts your task lists. Effort marks how big a task is</string>
+    <string name="settingsFormsDueInfo">When the task is due. Without a time, it is due all day</string>
+    <string name="settingsFormsTaskRemindersInfo">Notifications before the task is due</string>
+    <string name="settingsFormsLocationInfo">Where the task happens. Search for a place or type your own</string>
+    <string name="settingsFormsChecklistInfo">Subtasks to tick off. Recurring tasks start each round with a fresh checklist</string>
+    <string name="settingsFormsWindowInfo">Recurring tasks only: how early each round shows up in your lists, instead of the default in Settings › Tasks</string>
+    <string name="settingsFormsNotesInfo">Why you are building the habit, or anything else to remember</string>
+    <string name="settingsFormsStackInfo">Group habits into a routine. The edit button on a stack in the Habits list sets whether they unlock in order</string>
+    <string name="settingsFormsIconInfo">A symbol shown next to the habit</string>
+    <string name="settingsFormsColorInfo">Colors the habit in your lists. Switched off, new habits are purple</string>
+    <string name="settingsFormsTimesPerDayInfo">Check in several times a day. The day counts once all are done. Not for flexible habits</string>
+    <string name="settingsFormsHabitRemindersInfo">Notifications at set times, skipped on days the habit is done or not due</string>
+    <string name="settingsFormsIcon">Icon</string>
+    <string name="settingsFormsTimesPerDay">Times per day</string>
     <string name="settingsSectionGeneral">Generel</string>
     <string name="settingsSectionLocaleFormat">Sistem y Format</string>
     <string name="settingsSectionNotifications">Notifiches</string>
@@ -869,12 +891,10 @@
     <string name="reminderSheetDue">Scadënza %1$s</string>
     <string name="reminderSheetDueAllDay">Scadënza %1$s, dut l di. I lezic per chël di vën a %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Vel per uni repetizion</string>
-    <string name="reminderSheetHint">Clica sun n lezit per l njunté. Clica inò per l tò demez.</string>
     <string name="reminderSheetNoDue">Chësta ncëria à mo nia na scadënza</string>
     <string name="reminderWarnLimit">Te pëus njunté nfin a %1$d lezic.</string>
     <string name="reminderWarnNoDue">Mët na scadënza per nuzé chësta opzions. I tëmps persunalisei funziona inò.</string>
     <string name="recurringTaskWindowLabel">Fënestra dla ncëria</string>
-    <string name="recurringTaskWindowHint">Tan abenëura vëniel pa su chësta ncëria te ti lista</string>
     <plurals name="recurringTaskWindowDefault">
         <item quantity="zero">Standard (%d dis dant)</item>
         <item quantity="one">Standard (%d di dant)</item>
@@ -883,7 +903,6 @@
         <item quantity="many">Standard (%d dis dant)</item>
         <item quantity="other">Standard (%d dis dant)</item>
     </plurals>
-    <string name="recurringTaskWindowDefaultHint">Muda la impostazion predefinida te Mpustazions › Ncëries</string>
     <string name="recurringTaskWindowCustom">Persunalisà</string>
     <string name="recurringTaskWindowAmount">Dant ala scadënza</string>
     <string name="recurringTaskWindowRequest">Dá ite %1$d a %2$d</string>
