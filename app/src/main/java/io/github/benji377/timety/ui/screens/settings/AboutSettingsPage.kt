@@ -19,9 +19,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -118,11 +115,11 @@ internal fun AboutSettings() {
                 fontSize = 12.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.settingsLabelBuiltBy)) },
-                supportingContent = { Text(stringResource(R.string.settingsLabelMaintainer)) },
-                leadingContent = { Icon(Icons.Filled.Person, null, tint = WarningAccent) },
-                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+            InfoSettingsItem(
+                title = stringResource(R.string.settingsLabelBuiltBy),
+                subtitle = stringResource(R.string.settingsLabelMaintainer),
+                icon = Icons.Filled.Person,
+                iconTint = WarningAccent,
             )
             NavSettingsItem(
                 title = stringResource(R.string.settingsLabelDonate),

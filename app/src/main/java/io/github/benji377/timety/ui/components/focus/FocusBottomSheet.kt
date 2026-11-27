@@ -26,8 +26,9 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,6 +58,7 @@ import io.github.benji377.timety.data.model.task.TaskWithSubtasks
 import io.github.benji377.timety.ui.components.common.NeoTabRow
 import io.github.benji377.timety.ui.components.common.TagDot
 import io.github.benji377.timety.ui.components.common.TagEditDialog
+import io.github.benji377.timety.ui.components.common.rememberFullHeightSheetState
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
@@ -80,7 +82,7 @@ import java.time.LocalDate
 fun DistractionBottomSheet(
     onDismissRequest: () -> Unit,
     onEventSelected: (DistractionUIType) -> Unit,
-    sheetState: SheetState = rememberModalBottomSheetState(),
+    sheetState: SheetState = rememberBottomSheetState(SheetValue.Hidden),
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -97,7 +99,7 @@ fun DistractionBottomSheet(
 
             DistractionUIType.entries.forEach { type ->
                 ListItem(
-                    headlineContent = {
+                    content = {
                         Text(
                             type.getLocalizedName(),
                             fontWeight = FontWeight.Medium
@@ -145,7 +147,7 @@ fun TargetSelectorBottomSheet(
     onDismissRequest: () -> Unit,
     selected: FocusTargetSelection?,
     onTargetSelected: (FocusTargetSelection?) -> Unit,
-    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    sheetState: SheetState = rememberFullHeightSheetState(),
     tagViewModel: TagViewModel = activityScopedViewModel(),
     taskViewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     recurringTaskViewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -193,7 +195,7 @@ fun TargetSelectorBottomSheet(
                 if (selected != null) {
                     ListItem(
                         leadingContent = { Icon(Icons.Filled.Close, contentDescription = null) },
-                        headlineContent = { Text(stringResource(R.string.focusTargetEmpty)) },
+                        content = { Text(stringResource(R.string.focusTargetEmpty)) },
                         modifier = Modifier.clickable { select(null) },
                     )
                     HorizontalDivider()
@@ -248,7 +250,7 @@ private fun TagTab(
                     val isSelected = selected.isTarget(FocusTargetType.TAG, tag.id)
                     ListItem(
                         leadingContent = { TagDot(tag.colorValue, Modifier.size(24.dp)) },
-                        headlineContent = {
+                        content = {
                             Text(
                                 tag.name,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
@@ -264,7 +266,7 @@ private fun TagTab(
         HorizontalDivider()
         ListItem(
             leadingContent = { Icon(Icons.Filled.AddCircleOutline, contentDescription = null) },
-            headlineContent = { Text(stringResource(R.string.focusTagsLabelAdd)) },
+            content = { Text(stringResource(R.string.focusTagsLabelAdd)) },
             modifier = Modifier.clickable { onCreateNewTag() },
         )
     }
@@ -325,7 +327,7 @@ private fun TaskTab(
                             tint = TaskColor,
                         )
                     },
-                    headlineContent = {
+                    content = {
                         Text(
                             task.title,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
@@ -365,7 +367,7 @@ private fun TaskTab(
                         tint = if (task.isCompleted) SuccessColor else TaskColor,
                     )
                 },
-                headlineContent = {
+                content = {
                     Text(
                         task.title,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
@@ -417,7 +419,7 @@ private fun GoalTab(
                         tint = Color(goal.colorValue),
                     )
                 },
-                headlineContent = {
+                content = {
                     Text(
                         goal.name,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
@@ -509,7 +511,7 @@ private fun HabitRow(
                 tint = if (isLocked) MaterialTheme.colorScheme.onSurfaceVariant else Color(habit.colorValue),
             )
         },
-        headlineContent = {
+        content = {
             Text(
                 habit.name,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,

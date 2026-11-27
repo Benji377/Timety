@@ -19,13 +19,13 @@ import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
@@ -64,6 +64,7 @@ import io.github.benji377.timety.ui.components.common.NeoCard
 import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
+import io.github.benji377.timety.ui.components.common.NeoSlider
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagPicker
@@ -89,7 +90,6 @@ import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
-import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
@@ -510,13 +510,12 @@ fun HabitDetailScreen(
                                 ),
                                 fontWeight = AppTheme.fwBold,
                             )
-                            Slider(
-                                value = targetCount.toFloat(),
-                                onValueChange = { if (isEditing) targetCount = it.roundToInt() },
-                                valueRange = 1f..maxTarget.toFloat(),
-                                // Steps count the stops between the ends: one per whole value.
-                                steps = maxTarget - 2,
+                            NeoSlider(
+                                value = targetCount,
+                                onValueChange = { if (isEditing) targetCount = it },
+                                range = 1..maxTarget,
                                 enabled = isEditing,
+                                showSteps = true,
                                 colors = habitSliderColors(selectedColor),
                             )
                         }
@@ -694,13 +693,12 @@ private fun TimesPerDayCard(timesPerDay: Int, onChange: (Int) -> Unit, isEditing
                 text = pluralStringResource(R.plurals.habitTimesPerDay, timesPerDay, timesPerDay),
                 fontWeight = AppTheme.fwBold,
             )
-            Slider(
-                value = timesPerDay.toFloat(),
-                onValueChange = { if (isEditing) onChange(it.roundToInt()) },
-                valueRange = 1f..HabitUtils.MAX_TIMES_PER_DAY.toFloat(),
-                // Steps count the stops between the ends: one per whole value.
-                steps = HabitUtils.MAX_TIMES_PER_DAY - 2,
+            NeoSlider(
+                value = timesPerDay,
+                onValueChange = { if (isEditing) onChange(it) },
+                range = 1..HabitUtils.MAX_TIMES_PER_DAY,
                 enabled = isEditing,
+                showSteps = true,
                 colors = habitSliderColors(color),
             )
         }

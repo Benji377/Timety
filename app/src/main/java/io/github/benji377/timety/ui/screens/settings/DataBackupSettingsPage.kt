@@ -127,7 +127,7 @@ internal fun DataBackupSettings(
                 Column {
                     ListItem(
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        headlineContent = { Text(stringResource(R.string.backupActionSaveDevice)) },
+                        content = { Text(stringResource(R.string.backupActionSaveDevice)) },
                         supportingContent = { Text(stringResource(R.string.backupActionSaveDeviceSubtitle)) },
                         leadingContent = { Icon(Icons.Outlined.Download, null, tint = TaskColor) },
                         modifier = Modifier.clickable {
@@ -137,7 +137,7 @@ internal fun DataBackupSettings(
                     )
                     ListItem(
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        headlineContent = { Text(stringResource(R.string.backupActionShareCloud)) },
+                        content = { Text(stringResource(R.string.backupActionShareCloud)) },
                         supportingContent = { Text(stringResource(R.string.backupActionShareCloudSubtitle)) },
                         leadingContent = { Icon(Icons.Outlined.UploadFile, null, tint = FocusColor) },
                         modifier = Modifier.clickable {

@@ -75,6 +75,7 @@ import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.DigitsOnly
 import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.FieldLabel
@@ -475,11 +476,10 @@ fun RecurringTaskDetailScreen(
                 NeoOutlinedTextField(
                     value = intervalText,
                     onValueChange = { new ->
-                        if (new.length <= 3 && new.all(Char::isDigit)) {
-                            intervalText = new
-                            if ((new.toIntOrNull() ?: 0) >= 1) intervalError = false
-                        }
+                        intervalText = new
+                        if ((new.toIntOrNull() ?: 0) >= 1) intervalError = false
                     },
+                    inputTransformation = DigitsOnly(maxLength = 3),
                     enabled = isEditing,
                     singleLine = true,
                     label = { Text(stringResource(R.string.recurrenceEveryLabel) + " *") },
@@ -908,7 +908,8 @@ private fun TaskWindowSection(
         ) {
             NeoOutlinedTextField(
                 value = amountText,
-                onValueChange = { new -> if (new.length <= 2 && new.all(Char::isDigit)) onAmountChange(new) },
+                onValueChange = onAmountChange,
+                inputTransformation = DigitsOnly(maxLength = 2),
                 enabled = isEditing,
                 singleLine = true,
                 label = { Text(stringResource(R.string.recurringTaskWindowAmount)) },

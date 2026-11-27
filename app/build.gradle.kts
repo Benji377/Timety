@@ -9,7 +9,10 @@ plugins {
 
 android {
     namespace = "io.github.benji377.timety"
-    compileSdk = 37
+    // Compose UI 1.13 needs the 37.1 minor SDK to compile against.
+    compileSdk {
+        version = release(37) { minorApiLevel = 1 }
+    }
 
     defaultConfig {
         applicationId = "io.github.benji377.timety"

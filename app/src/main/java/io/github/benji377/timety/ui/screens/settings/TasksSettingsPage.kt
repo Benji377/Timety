@@ -7,13 +7,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Redo
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,12 +28,12 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
+import io.github.benji377.timety.ui.components.common.NeoSlider
 import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
-import kotlin.math.roundToInt
 
 /** Task settings: the Home upcoming-task window and recurring auto-skip. */
 @Composable
@@ -109,8 +108,8 @@ private fun autoSkipLabel(hours: Int): String =
 private fun AutoSkipDialog(currentHours: Int, onSave: (Int) -> Unit, onDismiss: () -> Unit) {
     val startsInDays = currentHours % AutoSkipUnit.DAYS.hoursPerUnit == 0
     var unit by remember { mutableStateOf(if (startsInDays) AutoSkipUnit.DAYS else AutoSkipUnit.HOURS) }
-    var amount by remember { mutableFloatStateOf((currentHours / unit.hoursPerUnit).toFloat()) }
-    val hours = amount.toInt() * unit.hoursPerUnit
+    var amount by remember { mutableIntStateOf(currentHours / unit.hoursPerUnit) }
+    val hours = amount * unit.hoursPerUnit
     val unitLabels = mapOf(
         AutoSkipUnit.HOURS to stringResource(R.string.recurringTaskWindowHours),
         AutoSkipUnit.DAYS to stringResource(R.string.recurringTaskWindowDays),
@@ -132,7 +131,7 @@ private fun AutoSkipDialog(currentHours: Int, onSave: (Int) -> Unit, onDismiss: 
                     isEditing = true,
                     onSelected = { picked ->
                         unit = picked
-                        amount = amount.coerceAtMost(picked.maxAmount.toFloat())
+                        amount = amount.coerceAtMost(picked.maxAmount)
                     },
                     labelBuilder = { unitLabels.getValue(it) },
                     activeBgColor = TaskColor,
@@ -143,10 +142,10 @@ private fun AutoSkipDialog(currentHours: Int, onSave: (Int) -> Unit, onDismiss: 
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp,
                 )
-                Slider(
+                NeoSlider(
                     value = amount,
-                    onValueChange = { amount = it.roundToInt().toFloat() },
-                    valueRange = 0f..unit.maxAmount.toFloat(),
+                    onValueChange = { amount = it },
+                    range = 0..unit.maxAmount,
                 )
             }
         },

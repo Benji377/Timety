@@ -48,6 +48,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.goal.GoalWithEntries
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
+import io.github.benji377.timety.ui.components.common.DigitsOnly
 import io.github.benji377.timety.ui.components.common.ExpansionSection
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoButton
@@ -433,9 +434,8 @@ private fun GoalEntryDialog(
             Column {
                 NeoOutlinedTextField(
                     value = valueText,
-                    onValueChange = { input ->
-                        if (input.length <= 6 && input.all { it.isDigit() }) valueText = input
-                    },
+                    onValueChange = { valueText = it },
+                    inputTransformation = DigitsOnly(maxLength = 6),
                     label = { Text("${stringResource(R.string.goalEntryDialogLabelValue)} ($unitLabel)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
