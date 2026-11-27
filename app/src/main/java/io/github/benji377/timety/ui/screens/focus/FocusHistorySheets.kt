@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +38,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.ui.components.common.MonthNavigator
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoTextButton
+import io.github.benji377.timety.ui.components.common.rememberFullHeightSheetState
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.FocusColor
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
@@ -75,7 +75,7 @@ internal fun HistoryOptionSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberFullHeightSheetState(),
     ) {
         Column(
             modifier = Modifier
@@ -116,7 +116,7 @@ internal fun HistoryDateSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberFullHeightSheetState(),
     ) {
         Column(
             modifier = Modifier

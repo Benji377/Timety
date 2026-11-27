@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +51,7 @@ import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
+import io.github.benji377.timety.ui.components.common.rememberFullHeightSheetState
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.ErrorColor
 import io.github.benji377.timety.ui.theme.HabitColor
@@ -97,7 +97,7 @@ fun HabitBottomSheet(
     onDateSelected: (Instant) -> Unit,
     onDateDeselected: (LocalDate) -> Unit,
     onDeleteCompletion: (HabitCompletionEntity) -> Unit,
-    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    sheetState: SheetState = rememberFullHeightSheetState(),
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,

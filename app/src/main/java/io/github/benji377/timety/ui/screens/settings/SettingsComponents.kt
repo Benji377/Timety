@@ -29,14 +29,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +53,7 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoDurationPickerDialog
+import io.github.benji377.timety.ui.components.common.NeoSlider
 import io.github.benji377.timety.ui.components.common.NeoTextButton
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
@@ -62,7 +62,6 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
-import kotlin.math.roundToInt
 
 /** Top bar with a back button over a scrolling column; the frame shared by every settings page. */
 @Composable
@@ -206,6 +205,22 @@ internal fun NavSettingsItem(
     )
 }
 
+/** A settings row that only shows information, lined up with the tappable rows around it. */
+@Composable
+internal fun InfoSettingsItem(
+    title: String,
+    icon: ImageVector,
+    subtitle: String? = null,
+    iconTint: Color = LocalContentColor.current,
+) {
+    SettingsRow(
+        title = title,
+        subtitle = subtitle,
+        leading = { Icon(icon, null, tint = iconTint) },
+        trailing = null,
+    )
+}
+
 /** A settings row with an on/off switch; the whole row toggles, like Android's own settings. */
 @Composable
 internal fun SwitchSettingsItem(
@@ -321,29 +336,29 @@ internal data class TimeDialogSpec(
 
 @Composable
 internal fun NumberPickerDialog(spec: NumberDialogSpec, onDismiss: () -> Unit) {
-    var value by remember(spec) { mutableFloatStateOf(spec.current.toFloat()) }
+    var value by remember(spec) { mutableIntStateOf(spec.current) }
     NeoAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(spec.title) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    "${value.toInt()} ${spec.unit}",
+                    "$value ${spec.unit}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp
                 )
-                // Continuous slider rounded to whole units: precise selection without
-                // the coarse 5-unit jumps (or dozens of tick marks) a stepped slider gives.
-                Slider(
+                // No ticks: precise selection without the coarse 5-unit jumps (or dozens of
+                // tick marks) a stepped slider gives.
+                NeoSlider(
                     value = value,
-                    onValueChange = { value = it.roundToInt().toFloat() },
-                    valueRange = spec.min.toFloat()..spec.max.toFloat()
+                    onValueChange = { value = it },
+                    range = spec.min..spec.max,
                 )
             }
         },
         confirmButton = {
             NeoButton(onClick = {
-                spec.onSave(value.toInt())
+                spec.onSave(value)
                 onDismiss()
             }) { Text(stringResource(R.string.commonLabelSave)) }
         },

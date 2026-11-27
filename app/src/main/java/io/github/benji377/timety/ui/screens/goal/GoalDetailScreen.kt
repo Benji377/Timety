@@ -50,6 +50,7 @@ import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ColorPickerDialog
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
+import io.github.benji377.timety.ui.components.common.DigitsOnly
 import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoDatePickerDialog
@@ -277,11 +278,10 @@ fun GoalDetailScreen(
                     NeoOutlinedTextField(
                         value = targetValueText,
                         onValueChange = { input ->
-                            if (input.length <= 6 && input.all { it.isDigit() }) {
-                                targetValueText = input
-                                if ((input.toIntOrNull() ?: 0) >= 1) targetError = false
-                            }
+                            targetValueText = input
+                            if ((input.toIntOrNull() ?: 0) >= 1) targetError = false
                         },
+                        inputTransformation = DigitsOnly(maxLength = 6),
                         enabled = isEditing,
                         label = { Text(stringResource(R.string.goalDetailLabelTarget) + " *") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

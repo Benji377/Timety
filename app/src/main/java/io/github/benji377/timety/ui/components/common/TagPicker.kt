@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -162,7 +161,7 @@ private fun TagSelectorSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberFullHeightSheetState(),
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
     ) {
         Text(
@@ -186,7 +185,7 @@ private fun TagSelectorSheet(
                 val isSelected = tag.id in selectedIds
                 ListItem(
                     leadingContent = { TagDot(tag.colorValue, Modifier.size(24.dp)) },
-                    headlineContent = {
+                    content = {
                         Text(
                             tag.name,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
@@ -206,7 +205,7 @@ private fun TagSelectorSheet(
         }
         ListItem(
             leadingContent = { Icon(Icons.Filled.AddCircleOutline, contentDescription = null) },
-            headlineContent = { Text(stringResource(R.string.focusTagsLabelAdd)) },
+            content = { Text(stringResource(R.string.focusTagsLabelAdd)) },
             modifier = Modifier.clickable { showCreateDialog = true },
         )
     }

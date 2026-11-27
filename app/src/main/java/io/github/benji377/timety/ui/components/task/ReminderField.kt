@@ -21,7 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
@@ -39,6 +38,7 @@ import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoFilterChip
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.detailFieldColors
+import io.github.benji377.timety.ui.components.common.rememberFullHeightSheetState
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.forText
@@ -138,7 +138,7 @@ fun ReminderField(
     if (showSheet && isEditing) {
         ModalBottomSheet(
             onDismissRequest = { showSheet = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            sheetState = rememberFullHeightSheetState(),
         ) {
             Column(
                 modifier = Modifier

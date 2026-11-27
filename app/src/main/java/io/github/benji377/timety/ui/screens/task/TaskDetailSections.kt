@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
@@ -621,7 +620,7 @@ internal fun NewSubtaskField(onAdd: (String) -> Unit) {
             modifier = Modifier.weight(1f),
             placeholder = { Text(stringResource(R.string.taskDetailsLabelSubtaskHint)) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { submit() }),
+            onKeyboardAction = { submit() },
             // A bare IconButton, like the location search: it sits inside the field's border.
             trailingIcon = {
                 IconButton(onClick = { submit() }) {

@@ -50,6 +50,7 @@ import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.DigitsOnly
 import io.github.benji377.timety.ui.components.common.NeoAlertDialog
 import io.github.benji377.timety.ui.components.common.NeoButton
 import io.github.benji377.timety.ui.components.common.NeoIconButton
@@ -324,9 +325,8 @@ private fun QuickHabitEditDialog(
                 ) {
                     NeoOutlinedTextField(
                         value = intervalText,
-                        onValueChange = { new ->
-                            if (new.length <= 4 && new.all(Char::isDigit)) intervalText = new
-                        },
+                        onValueChange = { intervalText = it },
+                        inputTransformation = DigitsOnly(maxLength = 4),
                         singleLine = true,
                         isError = intervalValue == null || intervalValue < 1 || intervalTooLong,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

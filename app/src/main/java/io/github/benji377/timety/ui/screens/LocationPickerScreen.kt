@@ -224,7 +224,7 @@ fun LocationPickerScreen(
                             val subtitle = LocationApi.detailsString(properties)
 
                             ListItem(
-                                headlineContent = { Text(title, fontWeight = FontWeight.Bold) },
+                                content = { Text(title, fontWeight = FontWeight.Bold) },
                                 supportingContent = if (subtitle.isNotEmpty()) {
                                     {
                                         Text(

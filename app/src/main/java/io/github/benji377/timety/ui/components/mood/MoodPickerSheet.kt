@@ -8,7 +8,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.user.DayRating
 import io.github.benji377.timety.ui.components.common.NeoTextButton
+import io.github.benji377.timety.ui.components.common.rememberFullHeightSheetState
 import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
@@ -35,7 +35,7 @@ fun MoodPickerSheet(
     val dfs = LocalDateFormatSettings.current
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberFullHeightSheetState(),
     ) {
         Column(
             modifier = Modifier
