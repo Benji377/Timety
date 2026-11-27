@@ -46,6 +46,7 @@ fun SettingsPageScreen(
             SettingsPage.GENERAL -> GeneralSettings(onNavigateToTags = onNavigateToTags)
             SettingsPage.FOCUS -> FocusSettings()
             SettingsPage.TASKS -> TasksSettings()
+            SettingsPage.FORMS -> FormsSettings()
             SettingsPage.NOTIFICATIONS -> NotificationSettings()
             SettingsPage.DATA_BACKUP -> DataBackupSettings()
             SettingsPage.ADVANCED -> AdvancedSettings()

@@ -20,6 +20,7 @@ import io.github.benji377.timety.data.model.goal.GoalEntity
 import io.github.benji377.timety.data.model.goal.GoalEntryEntity
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.data.model.habit.HabitStackEntity
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.data.model.tag.GoalTagEntity
 import io.github.benji377.timety.data.model.tag.HabitTagEntity
@@ -28,6 +29,7 @@ import io.github.benji377.timety.data.model.tag.SessionTagEntity
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.tag.TaskTagEntity
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.SubtaskEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -40,12 +42,14 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
         SubtaskEntity::class,
         RecurringTaskEntity::class,
         RecurringOccurrenceEntity::class,
+        RecurringSubtaskEntity::class,
         FocusModeEntity::class,
         SessionPhaseEntity::class,
         FocusSessionEntity::class,
         DistractionEntity::class,
         HabitEntity::class,
         HabitCompletionEntity::class,
+        HabitStackEntity::class,
         QuickHabitEntity::class,
         GoalEntity::class,
         GoalEntryEntity::class,
@@ -58,7 +62,7 @@ import io.github.benji377.timety.data.model.user.UserProfileEntity
         GoalTagEntity::class,
         SessionTagEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = true
 )
 /** Room database for Timety, exposing DAOs for tasks, habits, focus sessions, and the user profile. */

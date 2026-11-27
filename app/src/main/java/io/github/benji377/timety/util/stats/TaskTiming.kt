@@ -18,7 +18,7 @@ object TaskTiming {
     /** When tasks got done: each completed one-off task and each logged recurring completion. */
     fun completions(tasks: List<TaskEntity>, recurring: List<RecurringTaskWithOccurrences>): List<Instant> =
         tasks.mapNotNull { task -> task.completedAt.takeIf { task.isCompleted } } +
-            recurring.flatMap { item -> item.occurrences.map { it.completedAt } }
+            recurring.flatMap { item -> item.completed.map { it.completedAt } }
 
     private const val SECONDS_PER_DAY = 86_400.0
 
@@ -37,7 +37,7 @@ object TaskTiming {
             val due = task.dueDate
             if (completedAt != null && due != null) completedAt to due else null
         }
-        val occurrencePairs = recurring.flatMap { it.occurrences }.mapNotNull { occurrence ->
+        val occurrencePairs = recurring.flatMap { it.completed }.mapNotNull { occurrence ->
             occurrence.previousDueDate?.let { occurrence.completedAt to it }
         }
         val inRange = (taskPairs + occurrencePairs).map { (completedAt, due) ->

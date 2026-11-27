@@ -199,6 +199,8 @@
     <string name="goalDetailLabelDescription">Descrizion</string>
     <string name="goalDetailLabelDescriptionHint">Per ce ie chësc finamënt important?</string>
     <string name="goalDetailLabelIcon">Cëria ora n\'icona</string>
+    <string name="goalDetailSectionInfo">Info dl finamënt</string>
+    <string name="goalDetailSectionTarget">Travert</string>
     <string name="goalDetailLabelName">Inuem dl finamënt</string>
     <string name="goalDetailLabelNameHint">ej. 500 km cun la bici, Lejer 12 libri…</string>
     <string name="goalDetailLabelNameRequest">Nserësc n inuem</string>
@@ -249,6 +251,9 @@
         <item quantity="other">Travert: %d dis al mëns</item>
     </plurals>
     <string name="habitDetailLabelIcon">Cëria ora n\'icona</string>
+    <string name="habitDetailSectionInfo">Info dla abitudin</string>
+    <string name="detailSectionAppearance">Ududa</string>
+    <string name="detailLabelIcon">Icona</string>
     <string name="habitDetailLabelName">Inuem abitudin</string>
     <string name="habitDetailLabelNameHint">ej. Lejer 10 plates, Allenamënt…</string>
     <string name="habitDetailLabelNameRequest">Nserësc n inuem</string>
@@ -258,7 +263,6 @@
     <string name="habitDetailLabelPeriodWeek">A l\'ena</string>
     <string name="habitDetailLabelReminder">Ora dl lezit</string>
     <string name="habitDetailReminderAddTime">Njunté ora</string>
-    <string name="habitDetailReminderSheetHint">I lezic ne unirà nia mustrei i dis che chësta abitudin ie bele fata o ne ie nia da fé.</string>
     <string name="habitDetailLabelColor">Culëur</string>
     <string name="habitDetailLabelColorPicker">Chir ora n culëur</string>
     <string name="habitDetailLabelStack">Rënga de abitudins</string>
@@ -274,6 +278,18 @@
     <string name="habitFreqFlexible">%1$d / %2$d chësta ena</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d chësc mëns</string>
     <string name="habitFreqWeekly">Dl\'ena de %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="zero">%d iedesc al di</item>
+        <item quantity="one">N iede al di</item>
+        <item quantity="two">%d iedesc al di</item>
+        <item quantity="few">%d iedesc al di</item>
+        <item quantity="many">%d iedesc al di</item>
+        <item quantity="other">%d iedesc al di</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Ncuei</string>
+    <string name="habitTodayCheckIn">Scrì su</string>
+    <string name="habitTodayHistory">Storia</string>
     <string name="habitHistoryCompletedAt">Finà dala %1$s</string>
     <string name="habitHistoryEmpty">Niamò deguna storia.</string>
     <string name="habitHistoryRemoveCompletion">Tò demez l finé per l %1$s?</string>
@@ -296,8 +312,13 @@
     <string name="taskDeleteTitle">Scancelé ncëria</string>
     <string name="taskFocusLogSnackbar">Sescion de focus liejeda</string>
     <string name="taskFocusLogTitle">Registré tëmp de focus</string>
+    <string name="taskFocusLogSkip">Sauta</string>
+    <string name="taskCompletedSnackbar">Fat: %1$s</string>
     <string name="taskDetailsLabelDescription">Descrizion</string>
+    <string name="taskDetailsLabelAllDay">Dut l di</string>
     <string name="taskDetailsLabelDueDateSet">Met data de scadenza</string>
+    <string name="taskDetailsLabelDueDate">Data de scadënza</string>
+    <string name="taskDetailsLabelDueTime">Ora de scadënza</string>
     <string name="taskDetailsLabelEffort">Sforz</string>
     <string name="taskDetailsLabelLocation">Luelg</string>
     <string name="taskDetailsLabelPriority">Priorità</string>
@@ -312,6 +333,7 @@
     <string name="taskDetailsReminderOptionHour">1 ora dant</string>
     <string name="taskDetailsReminderOptionWeek">1 ena dant</string>
     <string name="taskDetailsReminderOptionOnce">A l\'ora</string>
+    <string name="taskDetailsReminderOptionOnTheDay">L medem di</string>
     <string name="taskDetailsSectionChecklist">Lista da cuntrolé</string>
     <string name="taskDetailsSectionInfo">Info dla ncëria</string>
     <string name="taskDetailsSectionLocation">Luelg</string>
@@ -385,6 +407,7 @@
     <string name="calendarTooltipToday">Va al Ncuei</string>
     <string name="calendarWeekSummaryDescription">Ncëries finedes: %1$d, abitudins fates: %2$d, tëmp de focus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Relazion dl\'ena</string>
+    <string name="statsLabelProductivity">Focus y ncëries</string>
     <string name="statsPageTime">Tëmp</string>
     <string name="statsPeriodWeek">Ena</string>
     <string name="statsPeriodMonth">Mëns</string>
@@ -521,8 +544,6 @@
     <string name="settingsLabelAutoDndSubtitle">Silenzea automatich la nutificazions</string>
     <string name="settingsLabelBackgroundActivity">Atività tl background</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Sce i lezic ruva tert, lascé che Timety funzionëies tl background</string>
-    <string name="settingsLabelCommunity">Cumunità y Aiut</string>
-    <string name="settingsLabelCommunitySubtitle">Fà dumandes y cunsëies sun GitHub</string>
     <string name="settingsLabelDailyMotivation">Ora de mutivazion al di</string>
     <string name="settingsLabelDateFormat">Format dla data</string>
     <string name="settingsLabelDateFormatSystem">Dl Sistem</string>
@@ -793,6 +814,7 @@
     <string name="recurringTaskTitleView">Ncëria recurënta</string>
     <string name="recurringTaskLabelNextDue">Proscima scadënza</string>
     <string name="recurringTaskSnackbarDueRequired">Mët dant la proscima data de scadënza</string>
+    <string name="recurringTaskDueDayMismatch">L proscimo termin ie n %1$s, che ne n\'ie nia un di dis seleziunei. Dates plu tardives vën do ai dis seleziunei.</string>
     <string name="recurringTaskMonthlyOnDay">L di %1$d</string>
     <string name="recurringTaskMonthlyOnNth">L %1$s %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">%1$d min dant</string>
@@ -809,11 +831,27 @@
     <string name="reminderFieldLabel">Lezic</string>
     <string name="reminderShifted">Lezic adatei ala nueva scadënza</string>
     <string name="reminderSheetDue">Scadënza %1$s</string>
+    <string name="reminderSheetDueAllDay">Scadënza %1$s, dut l di. I lezic per chël di vën a %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Vel per uni repetizion</string>
-    <string name="reminderSheetHint">Clica sun n lezit per l njunté. Clica inò per l tò demez.</string>
     <string name="reminderSheetNoDue">Chësta ncëria à mo nia na scadënza</string>
     <string name="reminderWarnLimit">Te pëus njunté nfin a %1$d lezic.</string>
     <string name="reminderWarnNoDue">Mët na scadënza per nuzé chësta opzions. I tëmps persunalisei funziona inò.</string>
+    <string name="recurringTaskWindowLabel">Fënestra dla ncëria</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="zero">Standard (%d dis dant)</item>
+        <item quantity="one">Standard (%d di dant)</item>
+        <item quantity="two">Standard (%d dis dant)</item>
+        <item quantity="few">Standard (%d dis dant)</item>
+        <item quantity="many">Standard (%d dis dant)</item>
+        <item quantity="other">Standard (%d dis dant)</item>
+    </plurals>
+    <string name="recurringTaskWindowCustom">Persunalisà</string>
+    <string name="recurringTaskWindowAmount">Dant ala scadënza</string>
+    <string name="recurringTaskWindowRequest">Dá ite %1$d a %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">L di dla scadënza</string>
+    <string name="recurringTaskWindowHours">Ëures</string>
+    <string name="recurringTaskWindowDays">Dis</string>
+    <string name="recurringTaskWindowWeeks">Enes</string>
     <string name="recurringTaskCompleteNow">Finé śën</string>
     <string name="recurringTaskHistoryTitle">Storia</string>
     <string name="recurringTaskHistoryEmpty">Niamò degun finé.</string>
@@ -876,6 +914,7 @@
     <string name="quickHabitSpecificDays">Dis spezifics</string>
     <string name="quickHabitStartLabel">Da</string>
     <string name="quickHabitEndLabel">Fin a</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Scancelé abitudin svelta</string>
     <string name="quickHabitDeleteContent">T\'es segur de ulëi scancelé \"%1$s\"?</string>

@@ -59,7 +59,10 @@ class CompleteRecurringTaskAction : ActionCallback {
         val container = (context.applicationContext as TimetyApplication).container
         val task = container.recurringTaskRepository.getTaskById(taskId) ?: return
         CompletionActions.completeRecurringOccurrence(
-            context, container.recurringTaskRepository, task
+            context,
+            container.recurringTaskRepository,
+            task,
+            autoSkip = container.settingsRepository.recurringAutoSkipWindow(),
         )
     }
 }

@@ -11,10 +11,14 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.github.benji377.timety.data.model.focus.DailyFocusTarget
+import io.github.benji377.timety.data.model.form.FormSkeleton
+import io.github.benji377.timety.data.model.form.HabitInput
+import io.github.benji377.timety.data.model.form.TaskInput
 import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.time.Duration
 
 /**
  * App settings. A settings file that can't be parsed is replaced with defaults rather than
@@ -39,9 +43,11 @@ enum class ThemeMode(val storageValue: String) {
 
 /** A collapsible accordion section with persisted state; [defaultExpanded] applies until toggled. */
 enum class AccordionKey(val storageKey: String, val defaultExpanded: Boolean) {
+    HOME_PINNED("home_pinned", true),
     HOME_TASKS_DUE("home_tasks_due", true),
     HOME_HABITS_DUE("home_habits_due", false),
     HOME_TASKS_UPCOMING("home_tasks_upcoming", false),
+    TASKS_PINNED("tasks_pinned", true),
     TASKS_OVERDUE("tasks_overdue", true),
     TASKS_DUE_TODAY("tasks_due_today", true),
     TASKS_UPCOMING("tasks_upcoming", true),
@@ -56,6 +62,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     companion object {
         const val DEFAULT_LOCATION_API_ENDPOINT = "https://photon.komoot.io/api/"
+        // Off until the user opts in, so nobody's schedule changes on update.
+        const val DEFAULT_AUTO_SKIP_HOURS = 0
 
         val THEME_PREF = stringPreferencesKey("theme")
         val USE_24_HOUR_FORMAT = booleanPreferencesKey("use24HourFormat")
@@ -68,6 +76,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val MAX_STOPWATCH_MINS = intPreferencesKey("maxStopwatchMins")
         val MAX_NODE_MINS = intPreferencesKey("maxNodeMins")
         val UPCOMING_TASKS_HORIZON = intPreferencesKey("upcomingTasksHorizon")
+        val RECURRING_AUTO_SKIP_HOURS = intPreferencesKey("recurringAutoSkipHours")
         val DAILY_MOTIVATION_TIME = stringPreferencesKey("dailyMotivationTime")
         val END_OF_DAY_CHECKUP_TIME = stringPreferencesKey("endOfDayCheckupTime")
         val LOCATION_API_ENDPOINT = stringPreferencesKey("locationApiEndpoint")
@@ -76,6 +85,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         val AUTO_DND_ENABLED = booleanPreferencesKey("autoDndEnabled")
         val AUTO_DND_LIFT_DURING_BREAKS = booleanPreferencesKey("autoDndLiftDuringBreaks")
         val BLOCK_SCREEN_CAPTURE = booleanPreferencesKey("blockScreenCapture")
+
+        // The switched-on inputs of each editor; missing means an update from before Settings >
+        // Forms, which keeps the inputs it had (see FormSkeleton.parse).
+        val TASK_INPUTS_ON = stringPreferencesKey("taskInputsOn")
+        val HABIT_INPUTS_ON = stringPreferencesKey("habitInputsOn")
 
         // Not backed up: whether the user chose "Don't ask again" on the exact-alarm prompt. A
         // device-level answer, like the permission itself. Replaces "exactAlarmPromptShown",
@@ -98,10 +112,12 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         )
         private val RESTORABLE_INT_KEYS = listOf(
             DAILY_GOAL_MINS, MAX_STOPWATCH_MINS, MAX_NODE_MINS, UPCOMING_TASKS_HORIZON,
+            RECURRING_AUTO_SKIP_HOURS,
         )
         private val RESTORABLE_STRING_KEYS = listOf(
             THEME_PREF, DATE_FORMAT, DAILY_GOAL_WEEKDAYS, DAILY_MOTIVATION_TIME,
-            END_OF_DAY_CHECKUP_TIME, LOCATION_API_ENDPOINT, APP_LOCALE_CODE,
+            END_OF_DAY_CHECKUP_TIME, LOCATION_API_ENDPOINT, APP_LOCALE_CODE, TASK_INPUTS_ON,
+            HABIT_INPUTS_ON,
         )
     }
 
@@ -129,6 +145,17 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val maxStopwatchMinsFlow: Flow<Int> = dataStore.data.map { it[MAX_STOPWATCH_MINS] ?: 120 }
     val maxNodeMinsFlow: Flow<Int> = dataStore.data.map { it[MAX_NODE_MINS] ?: 240 }
     val upcomingTasksHorizonFlow: Flow<Int> = dataStore.data.map { it[UPCOMING_TASKS_HORIZON] ?: 7 }
+
+    /**
+     * How close the next round of a recurring task may be for a late completion to count for it
+     * too, in hours; 0 turns that off. Whole days are stored as multiples of 24.
+     */
+    val recurringAutoSkipHoursFlow: Flow<Int> =
+        dataStore.data.map { it[RECURRING_AUTO_SKIP_HOURS] ?: DEFAULT_AUTO_SKIP_HOURS }
+
+    /** [recurringAutoSkipHoursFlow]'s current value, for completion code outside the UI. */
+    suspend fun recurringAutoSkipWindow(): Duration =
+        Duration.ofHours(recurringAutoSkipHoursFlow.first().toLong())
     val dailyMotivationTimeFlow: Flow<String> =
         dataStore.data.map { it[DAILY_MOTIVATION_TIME] ?: "08:00" }
     val endOfDayCheckupTimeFlow: Flow<String> =
@@ -153,11 +180,43 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     val storedInterruptionFilterFlow: Flow<Int?> =
         dataStore.data.map { it[STORED_INTERRUPTION_FILTER] }
 
+    val taskSkeletonFlow: Flow<FormSkeleton<TaskInput>> =
+        dataStore.data.map { FormSkeleton.parse(it[TASK_INPUTS_ON]) }
+    val habitSkeletonFlow: Flow<FormSkeleton<HabitInput>> =
+        dataStore.data.map { FormSkeleton.parse(it[HABIT_INPUTS_ON]) }
+
     fun accordionExpandedFlow(key: AccordionKey): Flow<Boolean> =
         dataStore.data.map { it[booleanPreferencesKey(key.storageKey)] ?: key.defaultExpanded }
 
     suspend fun saveAccordionExpanded(key: AccordionKey, expanded: Boolean) {
         dataStore.edit { it[booleanPreferencesKey(key.storageKey)] = expanded }
+    }
+
+    /** Switches one task input on or off as a single read-modify-write, so quick taps can't race. */
+    suspend fun setTaskInputOn(input: TaskInput, on: Boolean) {
+        dataStore.edit { prefs ->
+            val current = FormSkeleton.parse<TaskInput>(prefs[TASK_INPUTS_ON]).on
+            prefs[TASK_INPUTS_ON] = FormSkeleton.serialize(if (on) current + input else current - input)
+        }
+    }
+
+    /** Switches one habit input on or off as a single read-modify-write, so quick taps can't race. */
+    suspend fun setHabitInputOn(input: HabitInput, on: Boolean) {
+        dataStore.edit { prefs ->
+            val current = FormSkeleton.parse<HabitInput>(prefs[HABIT_INPUTS_ON]).on
+            prefs[HABIT_INPUTS_ON] = FormSkeleton.serialize(if (on) current + input else current - input)
+        }
+    }
+
+    /**
+     * Starts a new install with the short forms. Only called when the database is first created,
+     * so updates keep the inputs they had.
+     */
+    suspend fun applyNewInstallFormPreset() {
+        dataStore.edit { prefs ->
+            prefs[TASK_INPUTS_ON] = FormSkeleton.serialize(FormSkeleton.newInstallPreset<TaskInput>())
+            prefs[HABIT_INPUTS_ON] = FormSkeleton.serialize(FormSkeleton.newInstallPreset<HabitInput>())
+        }
     }
 
     suspend fun saveThemePref(theme: ThemeMode) {
@@ -219,6 +278,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun saveUpcomingTasksHorizon(days: Int) {
         dataStore.edit { it[UPCOMING_TASKS_HORIZON] = days }
+    }
+
+    suspend fun saveRecurringAutoSkipHours(hours: Int) {
+        dataStore.edit { it[RECURRING_AUTO_SKIP_HOURS] = hours }
     }
 
     suspend fun saveDailyMotivationTime(time: String) {

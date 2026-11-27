@@ -19,6 +19,8 @@ Because Timety is carefully designed around an offline, privacy-first, Neo-bruta
 
 ## Local Development Setup
 
+Technical Wiki indexed on: [DeepWiki](https://deepwiki.com/Benji377/Timety)
+
 [![Architecture diagram of benji377/timety](https://gitdiagram.com/benji377/timety/diagram.png)](https://gitdiagram.com/benji377/timety?utm_source=readme&utm_medium=picture)
 
 ### Setting up the Environment
@@ -36,6 +38,18 @@ Because Timety is carefully designed around an offline, privacy-first, Neo-bruta
   * Check for lint errors: `./gradlew lintDebug`
   * Run the tests: `./gradlew testDebugUnitTest`
 
+### User guides
+
+The user guides live in [`docs/`](docs/). The [website](https://timety.benji377.dev/docs) renders them with [Starlight](https://starlight.astro.build/) and rebuilds whenever `docs/` changes on `main`. They're in English only; readers can use their browser's page translation.
+
+* **Update the guide with the feature.** If a change alters how a feature works or looks, update its guide in the same pull request.
+* **Structure:** each file is a page, and its path is its URL (`habits/habit-stacks.md` becomes `/docs/habits/habit-stacks`). `docs/README.md` is the landing page. Its `##` groups and their links are also the website's sidebar, in the same order, so add every new page there. A group named after a part of the app (Tasks, Habits, Focus, Goals, …) gets that section's icon and color on the website.
+* **No front matter.** The `# Heading` is the page title, and the first paragraph is its description in search results and link previews. Keep that paragraph to one or two sentences about what the feature is for.
+* **Write workflows,** not only screens and fields: "track chores you do a few times a week", then the steps.
+* **Name things exactly as the app does,** in the same case, so readers can find them.
+* **Markdown and HTML that GitHub keeps.** Pages must read well both on GitHub and on the website, so use only HTML that GitHub doesn't strip: for example `img` with `width`, `picture`, `table`, `details` and `kbd`, but no `style` or `script`. You may add `class` attributes: GitHub drops them, and the website uses them for styling. For notes, use GitHub's alerts (`> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`). Link to other pages with relative `.md` paths.
+* **Images** all go in `docs/images/`, named `<page>-<what>.png` after the page that uses them (for example `habit-stacks-overview.png`). A screenshot that several pages use is named after its screen instead, for example `settings-forms.png`. Crop screenshots to the part that matters and give them a `width` and an `alt` text.
+
 ## Pull Request Process
 
 When you are ready to submit your code, please follow these steps:
@@ -43,10 +57,8 @@ When you are ready to submit your code, please follow these steps:
 1. **Create a branch** for your feature or bugfix (e.g., `feature/awesome-new-widget` or `bugfix/fix-calendar-crash`).
 2. **Write clean, readable code.**
 3. **Run the Linter & Tests:** Ensure your code passes our CI requirements locally before pushing.
-
-
-3. **Update the UI (if applicable):** If you changed how the app looks, please include a screenshot or screen recording in your Pull Request description.
-4. **Open a Pull Request** against the `main` branch.
+4. **Update the UI (if applicable):** If you changed how the app looks, please include a screenshot or screen recording in your Pull Request description.
+5. **Open a Pull Request** against the `main` branch.
 
 I will review your PR as soon as I can. Please be patient, as I am managing this project in my free time!
 

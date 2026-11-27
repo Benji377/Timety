@@ -31,6 +31,7 @@ jobs:
       version: ${{ steps.resolve.outputs.version }}
       version_code: ${{ steps.resolve.outputs.version_code }}
       previous_tag: ${{ steps.resolve.outputs.previous_tag }}
+      tag_exists: ${{ steps.resolve.outputs.tag_exists }}
 
     steps:
       - name: Checkout code
@@ -39,8 +40,12 @@ jobs:
           # Tags are needed to work out the previous release and its versionCode.
           fetch-depth: 0
 
+      # A pre-release run turns the version checks into warnings, so a rebuild of an already
+      # tagged version (for example a Play-only versionCode bump) still produces artifacts.
       - name: Resolve and check the version
         id: resolve
+        env:
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
           set -euo pipefail
           version=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts | head -1)
@@ -50,9 +55,14 @@ jobs:
             exit 1
           fi
 
+          if [ "$PRERELEASE" = "true" ]; then level=warning; else level=error; fi
+          failed=false
+
+          tag_exists=false
           if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
-            echo "::error::tag v$version already exists; bump the version before releasing"
-            exit 1
+            tag_exists=true
+            echo "::$level::tag v$version already exists; bump the version before releasing"
+            failed=true
           fi
 
           previous_tag=$(git tag --list 'v*' --sort=-v:refname | grep -vFx "v$version" | head -1 || true)
@@ -60,15 +70,20 @@ jobs:
             previous_code=$(git show "$previous_tag:app/build.gradle.kts" \
               | grep -oP 'versionCode\s*=\s*\K[0-9]+' | head -1)
             if [ -n "$previous_code" ] && [ "$version_code" -le "$previous_code" ]; then
-              echo "::error::versionCode $version_code is not above $previous_code from $previous_tag"
-              exit 1
+              echo "::$level::versionCode $version_code is not above $previous_code from $previous_tag"
+              failed=true
             fi
+          fi
+
+          if [ "$failed" = "true" ] && [ "$PRERELEASE" != "true" ]; then
+            exit 1
           fi
 
           {
             echo "version=$version"
             echo "version_code=$version_code"
             echo "previous_tag=$previous_tag"
+            echo "tag_exists=$tag_exists"
           } >> "$GITHUB_OUTPUT"
 
           {
@@ -221,6 +236,9 @@ jobs:
     name: Upload to GitHub Release
     runs-on: ubuntu-latest
     needs: [preflight, build_release]
+    # An existing tag means that version is already released; writing to it would change the
+    # published release, so such runs end with the workflow artifacts only.
+    if: needs.preflight.outputs.tag_exists != 'true'
     # contents to create the release, issues to read the milestone, id-token + attestations for
     # build provenance.
     permissions:

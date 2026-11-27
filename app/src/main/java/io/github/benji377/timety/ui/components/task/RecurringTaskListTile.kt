@@ -24,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.ui.components.common.PinnedMarker
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.ui.components.common.NeoListTile
@@ -34,7 +36,9 @@ import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.forText
+import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.showsPriorityEffort
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.task.RecurringStatus
 import io.github.benji377.timety.util.task.due
@@ -48,8 +52,8 @@ fun recurringStatusColor(status: RecurringStatus): Color = when (status) {
 
 /**
  * [TaskListTile]-style card for a recurring task appearing among normal tasks: checkbox that logs
- * an occurrence, title, cadence, and due date, with a trailing repeat icon marking it as recurring.
- * The border color reflects [status].
+ * an occurrence, title, cadence with a repeat icon marking it as recurring, and due date, with the
+ * same trailing effort and priority as a one-off task. The border color reflects [status].
  */
 @Composable
 fun RecurringTaskListTile(
@@ -59,6 +63,8 @@ fun RecurringTaskListTile(
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
     tags: List<TagEntity> = emptyList(),
+    subtasksCompleted: Int = 0,
+    subtasksTotal: Int = 0,
     margin: PaddingValues = AppTheme.listTileScreenMargin,
 ) {
     val dateFmt = LocalDateFormatSettings.current
@@ -88,17 +94,33 @@ fun RecurringTaskListTile(
             )
             Spacer(Modifier.width(AppTheme.spaceSmall))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = task.title,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = AppTheme.fwBold),
-                )
-                Text(
-                    text = recurrenceCadenceLabel(task),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontSize = AppTheme.fsLabel,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = task.title,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = AppTheme.fwBold),
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (task.pinnedAt != null) PinnedMarker()
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Filled.Repeat,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = TaskColor,
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = recurrenceCadenceLabel(task),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = AppTheme.fsLabel,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (subtasksTotal > 0) {
+                    SubtaskProgressRow(subtasksCompleted, subtasksTotal, barColor = borderColor)
+                }
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -122,12 +144,12 @@ fun RecurringTaskListTile(
                     TagChips(tags)
                 }
             }
-            Spacer(Modifier.width(AppTheme.spaceLarge))
-            Icon(
-                imageVector = Icons.Filled.Repeat,
-                contentDescription = null,
-                tint = TaskColor,
-            )
+            if (showsPriorityEffort(task.priority, task.size)) {
+                Spacer(Modifier.width(AppTheme.spaceLarge))
+                Text(text = AppUtils.getSizeEmoji(task.size), fontSize = 18.sp)
+                Spacer(Modifier.width(AppTheme.listTileTrailingSpacing))
+                AppUtils.PriorityIcon(priority = task.priority)
+            }
         }
     }
 }

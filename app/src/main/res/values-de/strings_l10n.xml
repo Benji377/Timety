@@ -179,6 +179,8 @@
     <string name="goalDetailLabelDescription">Beschreibung</string>
     <string name="goalDetailLabelDescriptionHint">Warum ist dieses Ziel wichtig?</string>
     <string name="goalDetailLabelIcon">Symbol auswählen</string>
+    <string name="goalDetailSectionInfo">Zielinfo</string>
+    <string name="goalDetailSectionTarget">Zielwert</string>
     <string name="goalDetailLabelName">Zielname</string>
     <string name="goalDetailLabelNameHint">z.B. 500 km fahren, 12 Bücher lesen…</string>
     <string name="goalDetailLabelNameRequest">Bitte gib einen Namen ein</string>
@@ -221,6 +223,9 @@
         <item quantity="other">Ziel: %d Tage pro Monat</item>
     </plurals>
     <string name="habitDetailLabelIcon">Wähle ein Icon</string>
+    <string name="habitDetailSectionInfo">Gewohnheitsinfo</string>
+    <string name="detailSectionAppearance">Erscheinungsbild</string>
+    <string name="detailLabelIcon">Icon</string>
     <string name="habitDetailLabelName">Name der Gewohnheit</string>
     <string name="habitDetailLabelNameHint">z.B. 10 Seiten lesen, Workout…</string>
     <string name="habitDetailLabelNameRequest">Bitte gib einen Namen ein</string>
@@ -230,7 +235,6 @@
     <string name="habitDetailLabelPeriodWeek">Pro Woche</string>
     <string name="habitDetailLabelReminder">Erinnerungszeit</string>
     <string name="habitDetailReminderAddTime">Zeit hinzufügen</string>
-    <string name="habitDetailReminderSheetHint">Erinnerungen entfallen an Tagen, an denen diese Gewohnheit schon erledigt oder nicht fällig ist.</string>
     <string name="habitDetailLabelColor">Farbe</string>
     <string name="habitDetailLabelColorPicker">Wähle eine Farbe</string>
     <string name="habitDetailLabelStack">Gewohnheits-Stapel</string>
@@ -246,6 +250,14 @@
     <string name="habitFreqFlexible">%1$d / %2$d diese Woche</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d diesen Monat</string>
     <string name="habitFreqWeekly">Wöchentlich am %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="one">Einmal am Tag</item>
+        <item quantity="other">%d-mal am Tag</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Heute</string>
+    <string name="habitTodayCheckIn">Eintragen</string>
+    <string name="habitTodayHistory">Verlauf</string>
     <string name="habitHistoryCompletedAt">Erledigt um %1$s</string>
     <string name="habitHistoryEmpty">Noch kein Verlauf.</string>
     <string name="habitHistoryRemoveCompletion">Erledigung für %1$s entfernen?</string>
@@ -268,8 +280,13 @@
     <string name="taskDeleteTitle">Aufgabe löschen</string>
     <string name="taskFocusLogSnackbar">Fokus-Sitzung zugeordnet</string>
     <string name="taskFocusLogTitle">Fokuszeit eintragen</string>
+    <string name="taskFocusLogSkip">Überspringen</string>
+    <string name="taskCompletedSnackbar">Erledigt: %1$s</string>
     <string name="taskDetailsLabelDescription">Beschreibung</string>
+    <string name="taskDetailsLabelAllDay">Ganztägig</string>
     <string name="taskDetailsLabelDueDateSet">Fälligkeitsdatum festlegen</string>
+    <string name="taskDetailsLabelDueDate">Fälligkeitsdatum</string>
+    <string name="taskDetailsLabelDueTime">Fälligkeitszeit</string>
     <string name="taskDetailsLabelEffort">Aufwand</string>
     <string name="taskDetailsLabelLocation">Ort</string>
     <string name="taskDetailsLabelPriority">Priorität</string>
@@ -284,6 +301,7 @@
     <string name="taskDetailsReminderOptionHour">1 Stunde vorher</string>
     <string name="taskDetailsReminderOptionWeek">1 Woche vorher</string>
     <string name="taskDetailsReminderOptionOnce">Pünktlich</string>
+    <string name="taskDetailsReminderOptionOnTheDay">Am Tag selbst</string>
     <string name="taskDetailsSectionChecklist">Checkliste</string>
     <string name="taskDetailsSectionInfo">Aufgabeninfo</string>
     <string name="taskDetailsSectionLocation">Ort</string>
@@ -357,6 +375,7 @@
     <string name="calendarTooltipToday">Gehe zu Heute</string>
     <string name="calendarWeekSummaryDescription">Aufgaben erledigt: %1$d, Gewohnheiten erledigt: %2$d, Fokuszeit: %3$s</string>
     <string name="calendarWeeklyReportTitle">Wochenbericht</string>
+    <string name="statsLabelProductivity">Fokus und Aufgaben</string>
     <string name="statsPageTime">Zeit</string>
     <string name="statsPeriodWeek">Woche</string>
     <string name="statsPeriodMonth">Monat</string>
@@ -465,8 +484,6 @@
     <string name="settingsLabelAutoDndSubtitle">Schaltet Benachrichtigungen während Fokus-Sitzungen stumm</string>
     <string name="settingsLabelBackgroundActivity">Hintergrundaktivität</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Wenn Erinnerungen verspätet ankommen, erlaube Timety, im Hintergrund zu laufen</string>
-    <string name="settingsLabelCommunity">Community &amp; Hilfe</string>
-    <string name="settingsLabelCommunitySubtitle">Stelle Fragen und teile Tipps auf GitHub</string>
     <string name="settingsLabelDailyMotivation">Zeit für tägliche Motivation</string>
     <string name="settingsLabelDateFormat">Datumsformat</string>
     <string name="settingsLabelDateFormatSystem">Systemstandard</string>
@@ -701,6 +718,7 @@
     <string name="recurringTaskTitleView">Wiederkehrende Aufgabe</string>
     <string name="recurringTaskLabelNextDue">Nächste Fälligkeit</string>
     <string name="recurringTaskSnackbarDueRequired">Lege zuerst das nächste Fälligkeitsdatum fest</string>
+    <string name="recurringTaskDueDayMismatch">Nächste Fälligkeit: %1$s, kein gewählter Tag. Spätere Termine folgen den gewählten Tagen.</string>
     <string name="recurringTaskMonthlyOnDay">Am %1$d. Tag</string>
     <string name="recurringTaskMonthlyOnNth">Am %1$s %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">%1$d Minuten vorher</string>
@@ -713,11 +731,23 @@
     <string name="reminderFieldLabel">Erinnerungen</string>
     <string name="reminderShifted">Erinnerungen an das neue Fälligkeitsdatum angepasst</string>
     <string name="reminderSheetDue">Fällig am %1$s</string>
+    <string name="reminderSheetDueAllDay">Fällig am %1$s, ganztägig. Erinnerungen für diesen Tag kommen um %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Gilt für jede Wiederholung</string>
-    <string name="reminderSheetHint">Tippe auf eine Erinnerung, um sie hinzuzufügen. Tippe erneut, um sie zu entfernen.</string>
     <string name="reminderSheetNoDue">Diese Aufgabe hat noch kein Fälligkeitsdatum</string>
     <string name="reminderWarnLimit">Du kannst bis zu %1$d Erinnerungen hinzufügen.</string>
     <string name="reminderWarnNoDue">Lege ein Fälligkeitsdatum fest, um diese Optionen zu nutzen. Eigene Zeiten funktionieren weiterhin.</string>
+    <string name="recurringTaskWindowLabel">Aufgabenfenster</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="one">Standard (%d Tag vorher)</item>
+        <item quantity="other">Standard (%d Tage vorher)</item>
+    </plurals>
+    <string name="recurringTaskWindowCustom">Benutzerdefiniert</string>
+    <string name="recurringTaskWindowAmount">Vor Fälligkeit</string>
+    <string name="recurringTaskWindowRequest">Gib %1$d bis %2$d ein</string>
+    <string name="recurringTaskWindowDueDayOnly">Am Fälligkeitstag</string>
+    <string name="recurringTaskWindowHours">Stunden</string>
+    <string name="recurringTaskWindowDays">Tage</string>
+    <string name="recurringTaskWindowWeeks">Wochen</string>
     <string name="recurringTaskCompleteNow">Jetzt erledigen</string>
     <string name="recurringTaskHistoryTitle">Verlauf</string>
     <string name="recurringTaskHistoryEmpty">Noch keine Erledigungen.</string>
@@ -764,6 +794,7 @@
     <string name="quickHabitSpecificDays">Bestimmte Tage</string>
     <string name="quickHabitStartLabel">Von</string>
     <string name="quickHabitEndLabel">Bis</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Schnell-Gewohnheit löschen</string>
     <string name="quickHabitDeleteContent">Bist du sicher, dass du \"%1$s\" löschen möchtest?</string>

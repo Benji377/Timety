@@ -41,7 +41,12 @@ data class HabitEntity(
     val iconCodePoint: Int? = null,
     val stackName: String? = null,
     val stackOrder: Int? = null,
-    val sortOrder: Int = 0
+    val sortOrder: Int = 0,
+    /**
+     * When the user pinned it, to show it first among Home's habits on days it is due; null = not
+     * pinned. A habit in a stack is never pinned. Several pinned habits show oldest pin first.
+     */
+    val pinnedAt: Instant? = null,
 )
 
 /** A habit paired with all of its completion records, for a Room `@Relation` query. */
@@ -53,4 +58,16 @@ data class HabitWithCompletions(
         entityColumn = "habitId"
     )
     val completions: List<HabitCompletionEntity>
+)
+
+/**
+ * Settings of one habit stack. A stack is the [HabitEntity.stackName] its member habits share, so
+ * this row is keyed by that name; it exists while the stack has members.
+ */
+@Entity(tableName = "habit_stacks")
+data class HabitStackEntity(
+    @PrimaryKey
+    val name: String,
+    /** True = each habit unlocks once the one before it is done, and unchecking goes in reverse. */
+    val inOrder: Boolean = true,
 )

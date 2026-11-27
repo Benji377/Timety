@@ -16,19 +16,24 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
@@ -50,18 +55,27 @@ import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.form.TaskInput
 import io.github.benji377.timety.data.model.task.MonthlyMode
+import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
+import io.github.benji377.timety.data.model.task.TaskSize
 import io.github.benji377.timety.data.model.task.TaskWindowUnit
 import io.github.benji377.timety.ui.components.common.BackNavigationIcon
 import io.github.benji377.timety.ui.components.common.ConfirmationDialog
+import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
 import io.github.benji377.timety.ui.components.common.DetailTopBarActions
 import io.github.benji377.timety.ui.components.common.FieldLabel
 import io.github.benji377.timety.ui.components.common.FormSectionHeader
@@ -91,6 +105,7 @@ import io.github.benji377.timety.ui.theme.TaskColor
 import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.RecurringTaskViewModel
@@ -118,8 +133,9 @@ private enum class MonthlyChoice { DAY_OF_MONTH, NTH_WEEKDAY, LAST_WEEKDAY }
 private enum class RecurringPickerTarget { DUE_DATE, DUE_TIME, PAST_OCCURRENCE }
 
 /**
- * Creates, views, or edits a recurring task: title, description, next due date, the recurrence
- * rule (unit, interval, weekdays or monthly anchoring), reminder offsets, and the task window. In view mode it
+ * Creates, views, or edits a recurring task: title, description, priority and effort, next due
+ * date, the recurrence rule (unit, interval, weekdays or monthly anchoring), reminder offsets, the
+ * task window, location, and a checklist that unticks itself each round. In view mode it
  * additionally shows a habit-style completion history with manual backfill.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -129,7 +145,7 @@ fun RecurringTaskDetailScreen(
     onNavigateBack: () -> Unit,
     viewModel: RecurringTaskViewModel = viewModel(factory = AppViewModelProvider.Factory),
     tagViewModel: TagViewModel = activityScopedViewModel(),
-    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    settingsViewModel: SettingsViewModel = activityScopedViewModel(),
 ) {
     val existingState = remember(recurringTaskId) {
         recurringTaskId?.let { viewModel.observeTask(it) } ?: flowOf(null)
@@ -150,6 +166,14 @@ fun RecurringTaskDetailScreen(
     val formTask = rememberFormSource(existingTask, isEditing)
     var title by rememberSaveable(formTask) { mutableStateOf(existingTask?.title ?: "") }
     var description by rememberSaveable(formTask) { mutableStateOf(existingTask?.description ?: "") }
+    var priority by rememberSaveable(formTask) { mutableStateOf(existingTask?.priority ?: Priority.MEDIUM) }
+    var size by rememberSaveable(formTask) { mutableStateOf(existingTask?.size ?: TaskSize.MEDIUM) }
+    var location by rememberSaveable(formTask) { mutableStateOf(existingTask?.location ?: "") }
+    var place by rememberSaveable(formTask) { mutableStateOf(existingTask?.place) }
+    // Saved as the user changes it, like a one-off task's checklist; a new task's list is saved
+    // with the task. Keyed on the whole loaded task, so a completion's untick shows right away.
+    val formSource = rememberFormSource(existing, isEditing)
+    var subtasks by rememberSaveable(formSource) { mutableStateOf(existing?.subtasks ?: emptyList()) }
     // Null until the user changes them, so a save doesn't overwrite tags still loading.
     var pickedTagIds by rememberSaveable(formTask) { mutableStateOf<Set<String>?>(null) }
     var dueDate by rememberSaveable(formTask) { mutableStateOf(existingTask?.dueDate) }
@@ -186,6 +210,29 @@ fun RecurringTaskDetailScreen(
         mutableStateOf(existingTask?.windowAmount?.toString() ?: "")
     }
     var windowError by rememberSaveable(formTask) { mutableStateOf(false) }
+
+    // Settings > Forms: an input shows when it's on or the task has a value for it, checked against
+    // the task as it was when editing began, so clearing a field mid-edit doesn't hide it. View
+    // mode follows the same rule, so an input that's off doesn't show up with its default. The due
+    // date belongs to the repeat rule here, so it has no switch, but reminders still follow the due
+    // date switch to match the Forms page.
+    val skeleton by settingsViewModel.taskSkeleton.collectAsState()
+    fun shows(input: TaskInput, hasValue: Boolean) = skeleton.shows(input, hasValue)
+    val showsTags = shows(TaskInput.TAGS, !recurringTags[recurringTaskId].isNullOrEmpty())
+    val showsDescription = shows(TaskInput.DESCRIPTION, !formTask?.description.isNullOrBlank())
+    val showsPriority = shows(
+        TaskInput.PRIORITY_EFFORT,
+        formTask != null && (formTask.priority != Priority.MEDIUM || formTask.size != TaskSize.MEDIUM),
+    )
+    val hasReminders = !formTask?.reminderOffsetsMinutes.isNullOrEmpty()
+    val showsReminders = shows(TaskInput.REMINDERS, hasReminders) && shows(TaskInput.DUE, hasReminders)
+    val showsWindow = shows(TaskInput.WINDOW, formTask?.windowUnit != null)
+    val showsLocation = shows(TaskInput.LOCATION, !formTask?.location.isNullOrBlank())
+    // Subtasks save as they change, so a recreation mid-edit would find none left after the user
+    // deleted the last one; whether there were any when editing began is saved across it.
+    val hadSubtasksAtEditStart = rememberSaveable(isEditing) { !existing?.subtasks.isNullOrEmpty() }
+    val hasSubtasks = if (isEditing) hadSubtasksAtEditStart else !existing?.subtasks.isNullOrEmpty()
+    val showsChecklist = shows(TaskInput.CHECKLIST, hasSubtasks)
 
     var showDeleteConfirm by remember { mutableStateOf(false) }
     // A non-null target keeps its picker dialog open.
@@ -246,6 +293,10 @@ fun RecurringTaskDetailScreen(
             id = recurringTaskId ?: newItemId,
             title = trimmedTitle,
             description = description.trim(),
+            priority = priority,
+            size = size,
+            location = location.trim(),
+            place = place,
             dueDate = due,
             hasDueTime = hasDueTime,
             timeOfDayMinutes = if (hasDueTime) {
@@ -282,9 +333,10 @@ fun RecurringTaskDetailScreen(
             windowAmount = windowAmount,
             windowUnit = windowUnit,
             createdAt = existingTask?.createdAt ?: Instant.now(),
+            pinnedAt = existingTask?.pinnedAt,
         )
         if (isNew) {
-            viewModel.addTask(taskToSave, pickedTagIds.orEmpty())
+            viewModel.addTask(taskToSave, subtasks.map { it.copy(recurringTaskId = taskToSave.id) }, pickedTagIds.orEmpty())
             onNavigateBack()
         } else {
             viewModel.updateTask(taskToSave, pickedTagIds)
@@ -312,6 +364,10 @@ fun RecurringTaskDetailScreen(
                         onDelete = { showDeleteConfirm = true },
                         onEdit = { isEditing = true },
                         onSave = { save() },
+                        isPinned = existing?.task?.let { it.pinnedAt != null },
+                        onTogglePin = {
+                            existing?.task?.let { viewModel.setPinned(it.id, it.pinnedAt == null) }
+                        },
                     )
                 }
             )
@@ -339,7 +395,7 @@ fun RecurringTaskDetailScreen(
                     leadingIcon = { Icon(Icons.Filled.Title, null) },
                     textStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
-                TagPicker(
+                if (showsTags) TagPicker(
                     selectedIds = pickedTagIds
                         ?: recurringTags[recurringTaskId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
@@ -347,7 +403,7 @@ fun RecurringTaskDetailScreen(
                     modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
                 // View mode hides empty optional fields.
-                if (isEditing || description.isNotBlank()) {
+                if ((isEditing || description.isNotBlank()) && showsDescription) {
                     Spacer(Modifier.height(AppTheme.spaceLarge))
                     NeoOutlinedTextField(
                         value = description,
@@ -360,6 +416,24 @@ fun RecurringTaskDetailScreen(
                         maxLines = 6
                     )
                 }
+            }
+
+            // Priority and effort size, as on one-off tasks.
+            if (showsPriority) item {
+                FormSectionHeader(
+                    stringResource(R.string.taskDetailsSectionPriorityAndEffort),
+                    Icons.Filled.BarChart,
+                    TaskColor,
+                )
+            }
+            if (showsPriority) item {
+                PriorityAndEffortFields(
+                    priority = priority,
+                    size = size,
+                    isEditing = isEditing,
+                    onPriorityChange = { priority = it },
+                    onSizeChange = { size = it },
+                )
             }
 
             // Next due date (also the anchor for the rule and time of day), rule and reminders.
@@ -484,7 +558,7 @@ fun RecurringTaskDetailScreen(
             }
 
             // Reminder offsets, re-applied to every occurrence.
-            item {
+            if (showsReminders) item {
                 // The reminder field hides itself in view mode when there are none.
                 if (isEditing || reminderOffsets.isNotEmpty()) Spacer(Modifier.height(AppTheme.spaceLarge))
                 val presets = due?.presets ?: ReminderPreset.entries
@@ -521,10 +595,10 @@ fun RecurringTaskDetailScreen(
             }
 
             // When the task starts showing in lists.
-            item {
+            if (showsWindow) item {
                 FormSectionHeader(stringResource(R.string.recurringTaskWindowLabel), Icons.Filled.Visibility, TaskColor)
             }
-            item {
+            if (showsWindow) item {
                 TaskWindowSection(
                     unit = windowUnit,
                     amountText = windowAmountText,
@@ -547,18 +621,116 @@ fun RecurringTaskDetailScreen(
                 )
             }
 
+            // Location; view mode hides it when empty.
+            if ((isEditing || location.isNotBlank()) && showsLocation) item {
+                FormSectionHeader(
+                    stringResource(R.string.taskDetailsSectionLocation),
+                    Icons.Outlined.LocationOn,
+                    TaskColor,
+                )
+            }
+            if ((isEditing || location.isNotBlank()) && showsLocation) item {
+                LocationField(
+                    location = location,
+                    place = place,
+                    isEditing = isEditing,
+                    onTextChange = {
+                        location = it
+                        // Typed text no longer describes the picked place, so drop its details.
+                        place = null
+                    },
+                    onPlacePicked = {
+                        location = it.name
+                        place = it
+                    },
+                )
+            }
+
+            // Checklist; it unticks itself each time a round is completed. Empty, it has nothing
+            // to show outside edit mode.
+            if ((isEditing || subtasks.isNotEmpty()) && showsChecklist) item {
+                FormSectionHeader(
+                    stringResource(R.string.taskDetailsSectionChecklist),
+                    Icons.Filled.Checklist,
+                    TaskColor,
+                )
+            }
+            if ((isEditing || subtasks.isNotEmpty()) && showsChecklist) item {
+                // Hold a row to drag it; a lone item has nothing to reorder.
+                val canReorder = subtasks.size > 1
+                DraggableReorderColumn(
+                    items = subtasks,
+                    key = { it.id },
+                    isReorderEnabled = canReorder,
+                    dragAfterLongPress = true,
+                    onOrderChanged = { ordered ->
+                        val renumbered = ordered.mapIndexed { index, subtask -> subtask.copy(sortOrder = index) }
+                        if (renumbered != subtasks) {
+                            subtasks = renumbered
+                            if (!isNew) viewModel.updateSubtasks(renumbered)
+                        }
+                    },
+                ) { subtask, isDragged ->
+                    SubtaskRow(
+                        title = subtask.title,
+                        isCompleted = subtask.isCompleted,
+                        isEditing = isEditing,
+                        onCheckedChange = { checked ->
+                            val updated = subtask.copy(isCompleted = checked)
+                            subtasks = subtasks.map { if (it.id == subtask.id) updated else it }
+                            if (!isNew) viewModel.updateSubtask(updated)
+                        },
+                        onRemove = {
+                            subtasks = subtasks.filter { it.id != subtask.id }
+                            if (!isNew) viewModel.deleteSubtask(subtask)
+                        },
+                        showDragHandle = canReorder,
+                        isDragged = isDragged,
+                    )
+                }
+                if (isEditing) {
+                    NewSubtaskField(onAdd = { title ->
+                        val newSubtask = RecurringSubtaskEntity(
+                            id = UUID.randomUUID().toString(),
+                            recurringTaskId = recurringTaskId ?: newItemId,
+                            title = title,
+                            sortOrder = (subtasks.maxOfOrNull { it.sortOrder } ?: -1) + 1,
+                        )
+                        subtasks = subtasks + newSubtask
+                        if (!isNew) viewModel.addSubtask(newSubtask)
+                    })
+                }
+            }
+
             // Completion history: view mode only, like a habit's past-occurrence log.
             if (!isNew && !isEditing && existing != null) {
                 item {
                     val completeTask = rememberRecurringCompleter(viewModel, snackbarHostState)
+                    // Offered for any status: skipping a far-off round (a holiday) is legitimate.
+                    val skipTask =
+                        rememberRecurringCompleter(viewModel, snackbarHostState, OccurrenceStatus.SKIPPED)
                     Spacer(Modifier.height(AppTheme.spaceXLarge))
-                    NeoButton(
-                        onClick = { completeTask(existing.task) },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Icon(Icons.Filled.Check, contentDescription = null)
-                        Spacer(Modifier.width(AppTheme.spaceSmall))
-                        Text(stringResource(R.string.recurringTaskCompleteNow))
+                    Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spaceMedium)) {
+                        NeoButton(
+                            onClick = { skipTask(existing.task) },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            ),
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = null)
+                            Spacer(Modifier.width(AppTheme.spaceSmall))
+                            Text(stringResource(R.string.recurringTaskSkip))
+                        }
+                        NeoButton(
+                            onClick = { completeTask(existing.task) },
+                            modifier = Modifier.weight(2f),
+                        ) {
+                            Icon(Icons.Filled.Check, contentDescription = null)
+                            Spacer(Modifier.width(AppTheme.spaceSmall))
+                            Text(stringResource(R.string.recurringTaskCompleteNow))
+                        }
                     }
                 }
                 item {
@@ -580,7 +752,26 @@ fun RecurringTaskDetailScreen(
                         }
                     }
                 }
-                val occurrences = existing.occurrences.sortedByDescending { it.completedAt }
+                val occurrences = existing.log.sortedByDescending { it.completedAt }
+                val skippedCount = occurrences.count { it.status == OccurrenceStatus.SKIPPED }
+                // Counts only once something was skipped; until then the list says it all.
+                if (skippedCount > 0) item {
+                    Text(
+                        text = quantityString(
+                            R.plurals.recurringTaskHistoryCompletedCount,
+                            occurrences.size - skippedCount,
+                            0,
+                            occurrences.size - skippedCount,
+                        ) + " | " + quantityString(
+                            R.plurals.recurringTaskHistorySkippedCount,
+                            skippedCount,
+                            0,
+                            skippedCount,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 if (occurrences.isEmpty()) {
                     item {
                         Text(
@@ -690,26 +881,12 @@ private fun TaskWindowSection(
     onUnitChange: (TaskWindowUnit?) -> Unit,
     onAmountChange: (String) -> Unit,
 ) {
-    Text(
-        stringResource(R.string.recurringTaskWindowHint),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    Spacer(Modifier.height(AppTheme.spaceSmall))
     MonthlyChoiceOption(
         label = pluralStringResource(R.plurals.recurringTaskWindowDefault, defaultDays, defaultDays),
         selected = unit == null,
         enabled = isEditing,
         onSelect = { onUnitChange(null) },
     )
-    if (isEditing && unit == null) {
-        Text(
-            stringResource(R.string.recurringTaskWindowDefaultHint),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = RADIO_LABEL_INSET),
-        )
-    }
     MonthlyChoiceOption(
         label = stringResource(R.string.recurringTaskWindowCustom),
         selected = unit != null,
@@ -805,19 +982,28 @@ private fun OccurrenceRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val skipped = occurrence.status == OccurrenceStatus.SKIPPED
         Icon(
-            imageVector = Icons.Filled.Check,
-            contentDescription = null,
-            tint = SuccessColor,
+            imageVector = if (skipped) Icons.AutoMirrored.Filled.Redo else Icons.Filled.Check,
+            contentDescription = if (skipped) stringResource(R.string.recurringTaskHistorySkipped) else null,
+            tint = if (skipped) MaterialTheme.colorScheme.onSurfaceVariant else SuccessColor,
             modifier = Modifier.size(AppTheme.iconSizeSmall),
         )
         Spacer(Modifier.width(AppTheme.spaceMedium))
+        val done = occurrence.subtasksDone
+        val total = occurrence.subtasksTotal
+        val muted = MaterialTheme.colorScheme.onSurfaceVariant
         Text(
-            text = "${
-                AppDateFormatUtils.formatDate(occurrence.completedAt, dateFmt.dateFormatCode)
-            } - ${
-                AppDateFormatUtils.formatTime(occurrence.completedAt, dateFmt.use24HourFormat)
-            }",
+            text = buildAnnotatedString {
+                append(AppDateFormatUtils.formatDate(occurrence.completedAt, dateFmt.dateFormatCode))
+                append(" - ")
+                append(AppDateFormatUtils.formatTime(occurrence.completedAt, dateFmt.use24HourFormat))
+                // How much of the checklist was ticked in that round, kept quiet next to the date.
+                if (done != null && total != null) {
+                    append(" | ")
+                    withStyle(SpanStyle(color = muted)) { append("$done/$total") }
+                }
+            },
             modifier = Modifier.weight(1f),
         )
         NeoIconButton(

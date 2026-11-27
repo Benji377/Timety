@@ -3,6 +3,7 @@ package io.github.benji377.timety.ui.screens.settings
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.SettingsBackupRestore
@@ -49,6 +50,13 @@ enum class SettingsPage(
         R.string.settingsPageTasksSummary,
         Icons.Outlined.TaskAlt,
         TaskColor,
+    ),
+    FORMS(
+        "forms",
+        R.string.settingsSectionForms,
+        R.string.settingsPageFormsSummary,
+        Icons.Outlined.EditNote,
+        HabitColor,
     ),
     NOTIFICATIONS(
         "notifications",

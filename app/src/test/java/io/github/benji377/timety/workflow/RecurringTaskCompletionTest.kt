@@ -97,7 +97,7 @@ class RecurringTaskCompletionTest {
             assertEquals(
                 "completing should log exactly one occurrence",
                 1,
-                withOccurrences.occurrences.size,
+                withOccurrences.log.size,
             )
         }
 }

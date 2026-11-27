@@ -1,9 +1,11 @@
 package io.github.benji377.timety.services.backup
 
 import io.github.benji377.timety.data.model.task.MonthlyMode
+import io.github.benji377.timety.data.model.task.OccurrenceStatus
 import io.github.benji377.timety.data.model.task.Priority
 import io.github.benji377.timety.data.model.task.RecurrenceUnit
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import io.github.benji377.timety.data.model.task.SubtaskEntity
@@ -33,6 +35,7 @@ internal fun TaskWithSubtasks.toBackupJson(): JSONObject = JSONObject().apply {
     put("completedAt", orNull(task.completedAt?.toString()))
     put("createdAt", task.createdAt.toString())
     put("reminders", JSONArray(task.reminders.map { it.toString() }))
+    put("pinnedAt", orNull(task.pinnedAt?.toString()))
     // Array order is the subtask order.
     put("subtasks", JSONArray(subtasks.sortedBy { it.sortOrder }.map { subtask ->
         JSONObject().apply {
@@ -59,6 +62,8 @@ internal fun taskFromBackup(json: JSONObject): TaskWithSubtasks {
         completedAt = json.instantOrNull("completedAt"),
         createdAt = json.instantOrNull("createdAt") ?: Instant.now(),
         reminders = json.instantList("reminders"),
+        // A done task is never pinned; older backups restore unpinned.
+        pinnedAt = json.instantOrNull("pinnedAt")?.takeIf { !json.optBoolean("isCompleted", false) },
     )
     val subtasks = json.objects("subtasks").mapIndexed { index, subtask ->
         SubtaskEntity(
@@ -76,6 +81,10 @@ internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObjec
     put("id", task.id)
     put("title", task.title)
     put("description", task.description)
+    put("priority", task.priority.name)
+    put("size", task.size.name)
+    put("location", task.location)
+    put("place", orNull(task.place?.toJson()))
     put("dueDate", task.dueDate.toString())
     put("hasDueTime", task.hasDueTime)
     put("timeOfDayMinutes", orNull(task.timeOfDayMinutes))
@@ -90,7 +99,25 @@ internal fun RecurringTaskWithOccurrences.toBackupJson(): JSONObject = JSONObjec
     put("windowAmount", orNull(task.windowAmount))
     put("windowUnit", orNull(task.windowUnit?.name))
     put("createdAt", task.createdAt.toString())
-    put("occurrences", JSONArray(occurrences.map { it.completedAt.toString() }))
+    put("pinnedAt", orNull(task.pinnedAt?.toString()))
+    // Objects since checklists; older backups hold bare completedAt strings.
+    put("occurrences", JSONArray(log.sortedBy { it.completedAt }.map { occurrence ->
+        JSONObject().apply {
+            put("completedAt", occurrence.completedAt.toString())
+            put("status", occurrence.status.name)
+            put("previousDueDate", orNull(occurrence.previousDueDate?.toString()))
+            put("subtasksDone", orNull(occurrence.subtasksDone))
+            put("subtasksTotal", orNull(occurrence.subtasksTotal))
+        }
+    }))
+    // Array order is the checklist order.
+    put("subtasks", JSONArray(subtasks.sortedBy { it.sortOrder }.map { subtask ->
+        JSONObject().apply {
+            put("id", subtask.id)
+            put("title", subtask.title)
+            put("isCompleted", subtask.isCompleted)
+        }
+    }))
 }
 
 internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurrences {
@@ -103,6 +130,11 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
         id = id,
         title = json.stringOrNull("title") ?: "",
         description = json.stringOrNull("description") ?: "",
+        // Older backups have none of these four and get a new task's defaults.
+        priority = json.enumOr("priority", Priority.MEDIUM),
+        size = json.enumOr("size", TaskSize.MEDIUM),
+        location = json.stringOrNull("location") ?: "",
+        place = json.optJSONObject("place")?.let { TaskPlace.fromJson(it) },
         dueDate = json.instantOrNull("dueDate") ?: Instant.now(),
         hasDueTime = json.optBoolean("hasDueTime", true),
         timeOfDayMinutes = json.intOrNull("timeOfDayMinutes")?.takeIf { it in 0 until MINUTES_PER_DAY },
@@ -117,8 +149,44 @@ internal fun recurringTaskFromBackup(json: JSONObject): RecurringTaskWithOccurre
         windowAmount = windowAmount,
         windowUnit = windowUnit.takeIf { windowAmount != null },
         createdAt = json.instantOrNull("createdAt") ?: Instant.now(),
+        pinnedAt = json.instantOrNull("pinnedAt"),
     )
-    val occurrences = json.instantList("occurrences")
-        .map { RecurringOccurrenceEntity(recurringTaskId = id, completedAt = it) }
-    return RecurringTaskWithOccurrences(task, occurrences)
+    val occurrences = occurrencesFromBackup(json, id)
+    val subtasks = json.objects("subtasks").mapIndexed { index, subtask ->
+        RecurringSubtaskEntity(
+            id = subtask.stringOrNull("id") ?: "${id}_sub_$index",
+            recurringTaskId = id,
+            title = subtask.stringOrNull("title") ?: "",
+            isCompleted = subtask.optBoolean("isCompleted", false),
+            sortOrder = index,
+        )
+    }
+    return RecurringTaskWithOccurrences(task, occurrences, subtasks)
+}
+
+/**
+ * The logged occurrences, as objects or, from older backups, bare completedAt strings (which were
+ * all completions). Entries whose time doesn't parse are dropped, and a checklist snapshot is kept
+ * only as a sane pair.
+ */
+private fun occurrencesFromBackup(json: JSONObject, taskId: String): List<RecurringOccurrenceEntity> {
+    val array = json.optJSONArray("occurrences") ?: return emptyList()
+    return (0 until array.length()).mapNotNull { index ->
+        val entry = array.optJSONObject(index)
+        if (entry == null) {
+            val completedAt = parseInstantFlexible(array.optString(index)) ?: return@mapNotNull null
+            return@mapNotNull RecurringOccurrenceEntity(recurringTaskId = taskId, completedAt = completedAt)
+        }
+        val completedAt = entry.instantOrNull("completedAt") ?: return@mapNotNull null
+        val total = entry.intOrNull("subtasksTotal")?.takeIf { it > 0 }
+        val done = total?.let { entry.intOrNull("subtasksDone")?.takeIf { done -> done in 0..it } }
+        RecurringOccurrenceEntity(
+            recurringTaskId = taskId,
+            completedAt = completedAt,
+            status = entry.enumOr("status", OccurrenceStatus.COMPLETED),
+            previousDueDate = entry.instantOrNull("previousDueDate"),
+            subtasksDone = done,
+            subtasksTotal = total.takeIf { done != null },
+        )
+    }
 }

@@ -2,6 +2,7 @@ name: Task / Maintenance
 description: For internal chores, documentation updates, or refactoring (Not for bugs or features)
 title: '[CHORE] <Brief description>'
 labels: ['maintenance']
+type: Task
 body:
   - type: markdown
     attributes:

@@ -8,9 +8,11 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import io.github.benji377.timety.data.model.task.RecurringOccurrenceEntity
+import io.github.benji377.timety.data.model.task.RecurringSubtaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskEntity
 import io.github.benji377.timety.data.model.task.RecurringTaskWithOccurrences
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 /** Data access object for recurring tasks and their logged occurrences. */
 @Dao
@@ -41,6 +43,10 @@ interface RecurringTaskDao {
     @Query("DELETE FROM recurring_tasks")
     fun clearAll(): Int
 
+    /** Sets or clears just the pin, so pinning never writes back a stale copy of the task. */
+    @Query("UPDATE recurring_tasks SET pinnedAt = :pinnedAt WHERE id = :id")
+    fun setPinnedAt(id: String, pinnedAt: Instant?)
+
     // Occurrences
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertOccurrence(occurrence: RecurringOccurrenceEntity): Long
@@ -57,4 +63,24 @@ interface RecurringTaskDao {
                 "WHERE recurringTaskId = :taskId AND previousDueDate IS NOT NULL"
     )
     fun getLatestAdvancingOccurrenceId(taskId: String): Long?
+
+    // Checklist
+    @Query("SELECT * FROM recurring_subtasks WHERE recurringTaskId = :taskId ORDER BY sortOrder ASC")
+    fun getSubtasks(taskId: String): List<RecurringSubtaskEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSubtask(subtask: RecurringSubtaskEntity)
+
+    @Update
+    fun updateSubtask(subtask: RecurringSubtaskEntity)
+
+    @Update
+    fun updateSubtasks(subtasks: List<RecurringSubtaskEntity>)
+
+    @Delete
+    fun deleteSubtask(subtask: RecurringSubtaskEntity)
+
+    /** Unticks the whole checklist for the next round. */
+    @Query("UPDATE recurring_subtasks SET isCompleted = 0 WHERE recurringTaskId = :taskId")
+    fun resetSubtasks(taskId: String)
 }

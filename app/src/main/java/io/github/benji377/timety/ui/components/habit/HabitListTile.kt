@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.benji377.timety.ui.components.common.PinnedMarker
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.tag.TagEntity
@@ -50,13 +51,14 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.LocalSnackbarHostState
 import io.github.benji377.timety.ui.theme.WifiOffColor
 import io.github.benji377.timety.util.habit.HabitIcons
+import io.github.benji377.timety.util.habit.StackLock
 import kotlinx.coroutines.launch
 
 /**
  * List row for a single habit, with a completion toggle, icon, name, notes, and optional progress
  * bar. Renders as a bordered card standalone, or as a slimmer row with a leading color bar when
- * [isStacked]. When [isLocked], the completion toggle is disabled and taps show a snackbar
- * instead. Swipe-to-delete is enabled by default when [onDelete] is provided.
+ * [isStacked]. While [lock] isn't [StackLock.NONE], taps on the completion toggle show a snackbar
+ * saying why instead; a habit waiting for the previous one in its stack also shows a lock. Swipe-to-delete is enabled by default when [onDelete] is provided.
  *
  * When [isReorderMode] is true, swipe-to-delete and tap/toggle are all suppressed and a drag
  * handle is shown instead, so the tile is purely a draggable row (dragging itself is handled by
@@ -74,7 +76,7 @@ fun HabitListTile(
     progressValue: Float? = null,
     checkInsToday: Int = 0,
     isStacked: Boolean = false,
-    isLocked: Boolean = false,
+    lock: StackLock = StackLock.NONE,
     isReorderMode: Boolean = false,
     onToggleCompleted: () -> Unit,
     onTap: () -> Unit,
@@ -84,7 +86,10 @@ fun HabitListTile(
     margin: PaddingValues = AppTheme.listTileScreenMargin,
 ) {
     val color = Color(habit.colorValue)
-    val lockedMessage = stringResource(R.string.focusSnackbarHabitLocked)
+    val isLocked = lock == StackLock.WAITING_FOR_PREVIOUS
+    val lockedMessage = stringResource(
+        if (lock == StackLock.LATER_STEP_DONE) R.string.habitStackUncheckLaterFirst else R.string.focusSnackbarHabitLocked
+    )
     val snackbarHostState = LocalSnackbarHostState.current
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
@@ -114,6 +119,7 @@ fun HabitListTile(
                         color = color,
                         isCompleted = isCompleted,
                         isLocked = isLocked,
+                        isToggleBlocked = lock != StackLock.NONE,
                         isReorderMode = isReorderMode,
                         subtitleText = subtitleText,
                         tags = tags,
@@ -146,6 +152,7 @@ fun HabitListTile(
                     color = color,
                     isCompleted = isCompleted,
                     isLocked = isLocked,
+                    isToggleBlocked = lock != StackLock.NONE,
                     isReorderMode = isReorderMode,
                     subtitleText = subtitleText,
                     tags = tags,
@@ -187,6 +194,7 @@ private fun HabitTileContent(
     color: Color,
     isCompleted: Boolean,
     isLocked: Boolean,
+    isToggleBlocked: Boolean,
     isReorderMode: Boolean,
     subtitleText: String,
     tags: List<TagEntity>,
@@ -223,7 +231,7 @@ private fun HabitTileContent(
                     value = isCompleted,
                     enabled = !isReorderMode,
                     role = Role.Checkbox,
-                    onValueChange = { if (isLocked) onLockedTap() else onToggleCompleted() },
+                    onValueChange = { if (isToggleBlocked) onLockedTap() else onToggleCompleted() },
                 )
                 .semantics { contentDescription = habit.name },
             contentAlignment = Alignment.Center,
@@ -263,7 +271,9 @@ private fun HabitTileContent(
                     fontWeight = AppTheme.fwBold,
                     textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
                     color = if (isCompleted || isLocked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
+                if (habit.pinnedAt != null) PinnedMarker()
             }
 
             if (!habit.notes.isNullOrEmpty()) {

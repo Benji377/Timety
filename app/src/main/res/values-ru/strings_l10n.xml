@@ -189,6 +189,8 @@
     <string name="goalDetailLabelDescription">Описание</string>
     <string name="goalDetailLabelDescriptionHint">Почему эта цель важна?</string>
     <string name="goalDetailLabelIcon">Выберите значок</string>
+    <string name="goalDetailSectionInfo">О цели</string>
+    <string name="goalDetailSectionTarget">Целевое значение</string>
     <string name="goalDetailLabelName">Название цели</string>
     <string name="goalDetailLabelNameHint">Например, проехать 500 км, прочитать 12 книг…</string>
     <string name="goalDetailLabelNameRequest">Введите название</string>
@@ -235,6 +237,9 @@
         <item quantity="other">Цель: %d дня в месяц</item>
     </plurals>
     <string name="habitDetailLabelIcon">Выберите значок</string>
+    <string name="habitDetailSectionInfo">О привычке</string>
+    <string name="detailSectionAppearance">Оформление</string>
+    <string name="detailLabelIcon">Значок</string>
     <string name="habitDetailLabelName">Название привычки</string>
     <string name="habitDetailLabelNameHint">Например, прочитать 10 страниц, тренировка…</string>
     <string name="habitDetailLabelNameRequest">Введите название</string>
@@ -244,7 +249,6 @@
     <string name="habitDetailLabelPeriodWeek">В неделю</string>
     <string name="habitDetailLabelReminder">Время напоминания</string>
     <string name="habitDetailReminderAddTime">Добавить время</string>
-    <string name="habitDetailReminderSheetHint">Напоминания пропускаются в дни, когда привычка уже выполнена или не запланирована.</string>
     <string name="habitDetailLabelColor">Цвет</string>
     <string name="habitDetailLabelColorPicker">Выберите цвет</string>
     <string name="habitDetailLabelStack">Цепочка привычек</string>
@@ -260,6 +264,16 @@
     <string name="habitFreqFlexible">%1$d / %2$d на этой неделе</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d в этом месяце</string>
     <string name="habitFreqWeekly">Еженедельно: %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="one">%d раз в день</item>
+        <item quantity="few">%d раза в день</item>
+        <item quantity="many">%d раз в день</item>
+        <item quantity="other">%d раза в день</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Сегодня</string>
+    <string name="habitTodayCheckIn">Отметить</string>
+    <string name="habitTodayHistory">История</string>
     <string name="habitHistoryCompletedAt">Выполнено в %1$s</string>
     <string name="habitHistoryEmpty">Истории пока нет.</string>
     <string name="habitHistoryRemoveCompletion">Удалить отметку за %1$s?</string>
@@ -282,8 +296,13 @@
     <string name="taskDeleteTitle">Удалить задачу</string>
     <string name="taskFocusLogSnackbar">Сессия фокуса прикреплена</string>
     <string name="taskFocusLogTitle">Записать время фокуса</string>
+    <string name="taskFocusLogSkip">Пропустить</string>
+    <string name="taskCompletedSnackbar">Готово: %1$s</string>
     <string name="taskDetailsLabelDescription">Описание</string>
+    <string name="taskDetailsLabelAllDay">Весь день</string>
     <string name="taskDetailsLabelDueDateSet">Задать срок</string>
+    <string name="taskDetailsLabelDueDate">Дата срока</string>
+    <string name="taskDetailsLabelDueTime">Время срока</string>
     <string name="taskDetailsLabelEffort">Объём</string>
     <string name="taskDetailsLabelLocation">Место</string>
     <string name="taskDetailsLabelPriority">Приоритет</string>
@@ -298,6 +317,7 @@
     <string name="taskDetailsReminderOptionHour">За 1 час</string>
     <string name="taskDetailsReminderOptionWeek">За 1 неделю</string>
     <string name="taskDetailsReminderOptionOnce">В срок</string>
+    <string name="taskDetailsReminderOptionOnTheDay">В тот же день</string>
     <string name="taskDetailsSectionChecklist">Чек-лист</string>
     <string name="taskDetailsSectionInfo">О задаче</string>
     <string name="taskDetailsSectionLocation">Место</string>
@@ -371,6 +391,7 @@
     <string name="calendarTooltipToday">К сегодняшнему дню</string>
     <string name="calendarWeekSummaryDescription">Выполнено задач: %1$d, отметок привычек: %2$d, время фокуса: %3$s</string>
     <string name="calendarWeeklyReportTitle">Отчёт за неделю</string>
+    <string name="statsLabelProductivity">Фокус и задачи</string>
     <string name="statsPageTime">Время</string>
     <string name="statsPeriodWeek">Неделя</string>
     <string name="statsPeriodMonth">Месяц</string>
@@ -493,8 +514,6 @@
     <string name="settingsLabelAutoDndSubtitle">Автоматически отключает уведомления во время сессий фокуса</string>
     <string name="settingsLabelBackgroundActivity">Работа в фоне</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Если напоминания приходят с опозданием, разрешите Timety работать в фоне</string>
-    <string name="settingsLabelCommunity">Сообщество и помощь</string>
-    <string name="settingsLabelCommunitySubtitle">Задавайте вопросы и делитесь советами на GitHub</string>
     <string name="settingsLabelDailyMotivation">Время утренней мотивации</string>
     <string name="settingsLabelDateFormat">Формат даты</string>
     <string name="settingsLabelDateFormatSystem">Как в системе</string>
@@ -747,6 +766,7 @@
     <string name="recurringTaskTitleView">Повторяющаяся задача</string>
     <string name="recurringTaskLabelNextDue">Следующий срок</string>
     <string name="recurringTaskSnackbarDueRequired">Сначала задайте следующий срок</string>
+    <string name="recurringTaskDueDayMismatch">Следующий срок: %1$s, этот день не выбран. Дальше даты будут идти по выбранным дням.</string>
     <string name="recurringTaskMonthlyOnDay">%1$d-го числа</string>
     <string name="recurringTaskMonthlyOnNth">%2$s, %1$s неделя</string>
     <string name="recurringTaskReminderMinutesBefore">За %1$d мин</string>
@@ -761,11 +781,25 @@
     <string name="reminderFieldLabel">Напоминания</string>
     <string name="reminderShifted">Напоминания перенесены под новый срок</string>
     <string name="reminderSheetDue">Срок: %1$s</string>
+    <string name="reminderSheetDueAllDay">Срок: %1$s, весь день. Напоминания в этот день приходят в %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Применяется к каждому повторению</string>
-    <string name="reminderSheetHint">Нажмите на напоминание, чтобы добавить его. Нажмите ещё раз, чтобы убрать.</string>
     <string name="reminderSheetNoDue">У этой задачи пока нет срока</string>
     <string name="reminderWarnLimit">Можно добавить не больше %1$d напоминаний.</string>
     <string name="reminderWarnNoDue">Задайте срок, чтобы использовать эти варианты. Своё время работает и без него.</string>
+    <string name="recurringTaskWindowLabel">Окно задачи</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="one">По умолчанию (за %d день)</item>
+        <item quantity="few">По умолчанию (за %d дня)</item>
+        <item quantity="many">По умолчанию (за %d дней)</item>
+        <item quantity="other">По умолчанию (за %d дня)</item>
+    </plurals>
+    <string name="recurringTaskWindowCustom">Своё</string>
+    <string name="recurringTaskWindowAmount">До срока</string>
+    <string name="recurringTaskWindowRequest">Введите от %1$d до %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">В день срока</string>
+    <string name="recurringTaskWindowHours">Часы</string>
+    <string name="recurringTaskWindowDays">Дни</string>
+    <string name="recurringTaskWindowWeeks">Недели</string>
     <string name="recurringTaskCompleteNow">Выполнить сейчас</string>
     <string name="recurringTaskHistoryTitle">История</string>
     <string name="recurringTaskHistoryEmpty">Выполнений пока нет.</string>
@@ -820,6 +854,7 @@
     <string name="quickHabitSpecificDays">Определённые дни</string>
     <string name="quickHabitStartLabel">С</string>
     <string name="quickHabitEndLabel">До</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Удалить быструю привычку</string>
     <string name="quickHabitDeleteContent">Вы уверены, что хотите удалить «%1$s»?</string>

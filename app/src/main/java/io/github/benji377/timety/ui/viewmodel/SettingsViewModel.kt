@@ -4,6 +4,9 @@ import android.net.Uri
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewModelScope
 import io.github.benji377.timety.data.model.focus.DailyFocusTarget
+import io.github.benji377.timety.data.model.form.FormSkeleton
+import io.github.benji377.timety.data.model.form.HabitInput
+import io.github.benji377.timety.data.model.form.TaskInput
 import io.github.benji377.timety.data.repository.AccordionKey
 import io.github.benji377.timety.data.repository.SettingsRepository
 import io.github.benji377.timety.data.repository.ThemeMode
@@ -84,6 +87,11 @@ class SettingsViewModel(
         SharingStarted.WhileSubscribed(5000),
         7
     )
+    val recurringAutoSkipHours = repository.recurringAutoSkipHoursFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        SettingsRepository.DEFAULT_AUTO_SKIP_HOURS
+    )
     val dailyMotivationTime = repository.dailyMotivationTimeFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -125,6 +133,18 @@ class SettingsViewModel(
         false
     )
 
+    // Eager so an editor opening never shows the wrong inputs for a frame before the setting loads.
+    val taskSkeleton = repository.taskSkeletonFlow.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        FormSkeleton.parse<TaskInput>(null),
+    )
+    val habitSkeleton = repository.habitSkeletonFlow.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        FormSkeleton.parse<HabitInput>(null),
+    )
+
     private val _restoreOutcome = MutableStateFlow<RestoreOutcome?>(null)
     val restoreOutcome: StateFlow<RestoreOutcome?> = _restoreOutcome.asStateFlow()
 
@@ -145,6 +165,12 @@ class SettingsViewModel(
     fun consumeRestoreOutcome() {
         _restoreOutcome.value = null
     }
+
+    fun setTaskInputOn(input: TaskInput, on: Boolean) =
+        viewModelScope.launch { repository.setTaskInputOn(input, on) }
+
+    fun setHabitInputOn(input: HabitInput, on: Boolean) =
+        viewModelScope.launch { repository.setHabitInputOn(input, on) }
 
     fun setThemePref(theme: ThemeMode) =
         viewModelScope.launch { repository.saveThemePref(theme) }
@@ -175,6 +201,10 @@ class SettingsViewModel(
         viewModelScope.launch { repository.saveMaxStopwatchMins(mins) }
 
     fun setMaxNodeMins(mins: Int) = viewModelScope.launch { repository.saveMaxNodeMins(mins) }
+    fun setRecurringAutoSkipHours(hours: Int) = viewModelScope.launch {
+        repository.saveRecurringAutoSkipHours(hours)
+    }
+
     fun setUpcomingTasksHorizon(days: Int) = viewModelScope.launch {
         repository.saveUpcomingTasksHorizon(days)
         TaskWidget().updateAll(application)

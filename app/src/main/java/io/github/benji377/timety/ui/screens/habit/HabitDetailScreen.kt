@@ -1,14 +1,17 @@
 package io.github.benji377.timety.ui.screens.habit
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Palette
@@ -18,6 +21,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -45,6 +49,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.benji377.timety.R
+import io.github.benji377.timety.data.model.form.HabitInput
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
 import io.github.benji377.timety.ui.components.common.AppearanceFields
@@ -56,11 +61,13 @@ import io.github.benji377.timety.ui.components.common.FieldLabel
 import io.github.benji377.timety.ui.components.common.FormSectionHeader
 import io.github.benji377.timety.ui.components.common.IconPickerDialog
 import io.github.benji377.timety.ui.components.common.NeoCard
+import io.github.benji377.timety.ui.components.common.NeoIconButton
 import io.github.benji377.timety.ui.components.common.NeoOutlinedTextField
 import io.github.benji377.timety.ui.components.common.NeoSegmentedSelector
 import io.github.benji377.timety.ui.components.common.NeoTimePickerDialog
 import io.github.benji377.timety.ui.components.common.NeoTopBar
 import io.github.benji377.timety.ui.components.common.TagPicker
+import io.github.benji377.timety.ui.components.common.TextInputDialog
 import io.github.benji377.timety.ui.components.common.WeekdayToggleRow
 import io.github.benji377.timety.ui.components.common.rememberAutoFocus
 import io.github.benji377.timety.ui.components.habit.HabitHistorySheet
@@ -77,12 +84,13 @@ import io.github.benji377.timety.ui.utils.quantityString
 import io.github.benji377.timety.ui.utils.rememberFormSource
 import io.github.benji377.timety.ui.viewmodel.AppViewModelProvider
 import io.github.benji377.timety.ui.viewmodel.HabitViewModel
+import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.TagViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalTime
 import java.util.UUID
@@ -98,6 +106,7 @@ fun HabitDetailScreen(
     onNavigateBack: () -> Unit,
     habitViewModel: HabitViewModel = viewModel(factory = AppViewModelProvider.Factory),
     tagViewModel: TagViewModel = activityScopedViewModel(),
+    settingsViewModel: SettingsViewModel = activityScopedViewModel(),
 ) {
     val allHabits by habitViewModel.allHabits.collectAsState()
     val habitTags by tagViewModel.habitTags.collectAsState()
@@ -156,18 +165,36 @@ fun HabitDetailScreen(
         mutableStateOf(HabitUtils.parseReminderTimes(existingHabit?.reminderTimes))
     }
 
+    // Settings > Forms: an input shows when it's on or the habit has a value for it, checked against
+    // the habit as it was when editing began, so clearing a field mid-edit doesn't hide it. View
+    // mode follows the same rule, so an input that's off doesn't show up with its default.
+    val skeleton by settingsViewModel.habitSkeleton.collectAsState()
+    fun shows(input: HabitInput, hasValue: Boolean) = skeleton.shows(input, hasValue)
+    val showsTags = shows(HabitInput.TAGS, !habitTags[habitId].isNullOrEmpty())
+    val showsNotes = shows(HabitInput.NOTES, !formHabit?.notes.isNullOrBlank())
+    val showsStack = shows(HabitInput.STACK, !formHabit?.stackName.isNullOrBlank())
+    val showsIcon = shows(HabitInput.ICON, formHabit?.iconCodePoint != null)
+    // Purple is the default, so only another colour counts as a value.
+    val showsColor = shows(HabitInput.COLOR, formHabit != null && formHabit.colorValue != HabitColor.toArgb())
+    val showsAppearance = showsIcon || showsColor
+    val showsTimesPerDay = shows(HabitInput.TIMES_PER_DAY, (formHabit?.timesPerDay ?: 1) > 1)
+    val showsReminders = shows(
+        HabitInput.REMINDERS,
+        HabitUtils.parseReminderTimes(formHabit?.reminderTimes).isNotEmpty(),
+    )
+
     var showIconPicker by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     var stackNameExpanded by remember { mutableStateOf(false) }
-    val existingStacks = remember(allHabits) {
-        allHabits.mapNotNull { it.stackName?.trim() }.filter { it.isNotEmpty() }.distinct()
-    }
-    val filteredStacks = remember(stackName, existingStacks) {
-        if (stackName.isEmpty()) existingStacks
-        else existingStacks.filter { it.contains(stackName, ignoreCase = true) }
+    var showNewStackDialog by remember { mutableStateOf(false) }
+    val existingStacks = remember(allHabits) { HabitUtils.stackNamesInOrder(allHabits) }
+    // A stack just created with "+" has no habits yet, so it is added to the options by hand.
+    val stackOptions = remember(existingStacks, stackName) {
+        val current = stackName.trim()
+        if (current.isEmpty() || current in existingStacks) existingStacks else existingStacks + current
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -237,6 +264,8 @@ fun HabitDetailScreen(
             stackName = trimmedStackName,
             stackOrder = computedStackOrder,
             sortOrder = computedSortOrder,
+            // Joining a stack drops the pin; Home shows a stack as one block.
+            pinnedAt = existingHabit?.pinnedAt?.takeIf { trimmedStackName == null },
         )
 
         if (isNewHabit) {
@@ -267,6 +296,11 @@ fun HabitDetailScreen(
                         onDelete = { showDeleteDialog = true },
                         onEdit = { isEditing = true },
                         onSave = { saveHabit() },
+                        // Pinning a stacked habit would pull it out of its stack on Home.
+                        isPinned = existingHabit?.takeIf { it.stackName.isNullOrBlank() }?.let { it.pinnedAt != null },
+                        onTogglePin = {
+                            existingHabit?.let { habitViewModel.setPinned(it.id, it.pinnedAt == null) }
+                        },
                     )
                 }
             )
@@ -313,14 +347,14 @@ fun HabitDetailScreen(
             }
 
             item {
-                TagPicker(
+                if (showsTags) TagPicker(
                     selectedIds = pickedTagIds
                         ?: habitTags[habitId].orEmpty().mapTo(LinkedHashSet()) { it.id },
                     onSelectionChange = { pickedTagIds = it },
                     isEditing = isEditing,
                     modifier = Modifier.padding(top = AppTheme.spaceLarge),
                 )
-                if (isEditing || notes.isNotBlank()) {
+                if ((isEditing || notes.isNotBlank()) && showsNotes) {
                     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                     NeoOutlinedTextField(
                         value = notes,
@@ -336,36 +370,44 @@ fun HabitDetailScreen(
                 }
             }
 
-            // Habit stacking: name autocomplete. Position within the stack is set by dragging
-            // in the habit list, not entered here. View mode hides empty optional fields.
-            if (isEditing || stackName.isNotBlank()) item {
+            // Habit stack: picked from the existing stacks, or a new one from "+". Position within
+            // the stack is set by dragging in the habit list. View mode hides empty optional fields.
+            if ((isEditing || stackName.isNotBlank()) && showsStack) item {
                 Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
-                ExposedDropdownMenuBox(
-                    expanded = stackNameExpanded && isEditing && filteredStacks.isNotEmpty(),
-                    onExpandedChange = { if (isEditing) stackNameExpanded = it },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    NeoOutlinedTextField(
-                        value = stackName,
-                        onValueChange = {
-                            stackName = it
-                            stackNameExpanded = true
-                        },
-                        enabled = isEditing,
-                        singleLine = true,
-                        label = { Text(stringResource(R.string.habitDetailLabelStack)) },
-                        placeholder = { Text(stringResource(R.string.habitDetailLabelStackHint)) },
-                        leadingIcon = { Icon(Icons.Filled.Layers, null) },
-                        modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
-                            .fillMaxWidth(),
-                    )
-                    if (filteredStacks.isNotEmpty()) {
+                val noStackLabel = stringResource(R.string.habitStackNone)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ExposedDropdownMenuBox(
+                        expanded = stackNameExpanded && isEditing,
+                        onExpandedChange = { if (isEditing) stackNameExpanded = it },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        NeoOutlinedTextField(
+                            value = stackName.trim().ifEmpty { noStackLabel },
+                            onValueChange = {},
+                            readOnly = true,
+                            enabled = isEditing,
+                            singleLine = true,
+                            label = { Text(stringResource(R.string.habitDetailLabelStack)) },
+                            leadingIcon = { Icon(Icons.Filled.Layers, null) },
+                            trailingIcon = if (isEditing) {
+                                { ExposedDropdownMenuDefaults.TrailingIcon(expanded = stackNameExpanded) }
+                            } else null,
+                            modifier = Modifier
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                .fillMaxWidth(),
+                        )
                         ExposedDropdownMenu(
                             expanded = stackNameExpanded && isEditing,
                             onDismissRequest = { stackNameExpanded = false },
                         ) {
-                            filteredStacks.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(noStackLabel) },
+                                onClick = {
+                                    stackName = ""
+                                    stackNameExpanded = false
+                                },
+                            )
+                            stackOptions.forEach { option ->
                                 DropdownMenuItem(
                                     text = { Text(option) },
                                     onClick = {
@@ -376,13 +418,21 @@ fun HabitDetailScreen(
                             }
                         }
                     }
+                    if (isEditing) {
+                        Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                        NeoIconButton(
+                            onClick = { showNewStackDialog = true },
+                            icon = Icons.Filled.Add,
+                            contentDescription = stringResource(R.string.habitStackNew),
+                        )
+                    }
                 }
             }
 
-            item {
+            if (showsAppearance) item {
                 FormSectionHeader(stringResource(R.string.detailSectionAppearance), Icons.Filled.Palette, HabitColor)
             }
-            item {
+            if (showsAppearance) item {
                 AppearanceFields(
                     iconIndex = selectedIconIndex,
                     color = selectedColor,
@@ -390,6 +440,8 @@ fun HabitDetailScreen(
                     enabled = isEditing,
                     onPickIcon = { showIconPicker = true },
                     onPickColor = { showColorPicker = true },
+                    showIcon = showsIcon,
+                    showColor = showsColor,
                 )
             }
 
@@ -483,7 +535,8 @@ fun HabitDetailScreen(
                     )
                 }
                 // Once a day is the default, so view mode only shows the card when it says more.
-                if (frequency.allowsTimesPerDay && (isEditing || timesPerDay > 1)) {
+                val showsTimesPerDayCard = showsTimesPerDay && (isEditing || timesPerDay > 1)
+                if (frequency.allowsTimesPerDay && showsTimesPerDayCard) {
                     Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                     TimesPerDayCard(
                         timesPerDay = timesPerDay,
@@ -505,7 +558,7 @@ fun HabitDetailScreen(
             }
 
             // Time reminders; monthly habits have no due days to remind on.
-            if (frequency != HabitFrequency.MONTHLY_FLEXIBLE) item {
+            if (frequency != HabitFrequency.MONTHLY_FLEXIBLE && showsReminders) item {
                 // The reminder field hides itself in view mode when there are none.
                 if (isEditing || reminderTimes.isNotEmpty()) Spacer(modifier = Modifier.height(AppTheme.spaceLarge))
                 val use24Hour = LocalDateFormatSettings.current.use24HourFormat
@@ -534,7 +587,6 @@ fun HabitDetailScreen(
                     customEnabled = !atLimit,
                     presets = emptyList(),
                     customLabel = stringResource(R.string.habitDetailReminderAddTime),
-                    hint = stringResource(R.string.habitDetailReminderSheetHint),
                 )
             }
             item { Spacer(modifier = Modifier.height(AppTheme.space3XLarge)) }
@@ -548,6 +600,18 @@ fun HabitDetailScreen(
             )
         }
 
+        // An existing name just picks that stack; stacks are never duplicated.
+        TextInputDialog(
+            visible = showNewStackDialog,
+            title = stringResource(R.string.habitStackNew),
+            labelText = stringResource(R.string.habitStackName),
+            hintText = stringResource(R.string.habitDetailLabelStackHint),
+            onConfirm = { name ->
+                stackName = name
+                showNewStackDialog = false
+            },
+            onDismiss = { showNewStackDialog = false },
+        )
         if (showIconPicker) {
             IconPickerDialog(
                 title = stringResource(R.string.habitDetailLabelIcon),

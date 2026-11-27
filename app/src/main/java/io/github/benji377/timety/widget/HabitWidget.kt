@@ -45,6 +45,7 @@ import io.github.benji377.timety.ui.theme.HabitColor
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.util.datetime.AppDateUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.habit.StackLock
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
@@ -57,7 +58,7 @@ private sealed interface HabitWidgetRow {
         val name: String,
         val subtitle: String,
         val isDone: Boolean,
-        val isLocked: Boolean,
+        val lock: StackLock,
         val isStacked: Boolean,
         val color: Color,
     ) : HabitWidgetRow
@@ -89,7 +90,8 @@ class HabitWidget : GlanceAppWidget() {
         }
 
         val todayHabits = habitsWithCompletions.filter { HabitUtils.isHabitDueToday(it) }
-        val rows = buildRows(context, todayHabits, today)
+        val unorderedStacks = habitRepository.getStacks().filter { !it.inOrder }.mapTo(mutableSetOf()) { it.name }
+        val rows = buildRows(context, todayHabits, today, unorderedStacks)
 
         provideContent {
             GlanceTheme(colors = TimetyWidgetColors) { WidgetContent(context, todayHabits.size, rows) }
@@ -101,6 +103,7 @@ class HabitWidget : GlanceAppWidget() {
         context: Context,
         todayHabits: List<HabitWithCompletions>,
         today: LocalDate,
+        unorderedStacks: Set<String>,
     ): List<HabitWidgetRow> {
         val completionStatus =
             todayHabits.associate { it.habit.id to HabitUtils.isCompletedOn(it, today) }
@@ -112,6 +115,8 @@ class HabitWidget : GlanceAppWidget() {
 
         return buildList {
             for ((stackName, stackHabitsList) in grouped) {
+                // Locks follow the stack order, whatever order the rows are shown in.
+                val locks = HabitUtils.stackLocksOn(stackHabitsList, today, stackName !in unorderedStacks)
                 // Incomplete habits sort before completed ones within a stack, so completed items
                 // sink to the bottom as they're checked off; ties break on the stored stack order.
                 val stackHabits = stackHabitsList.sortedWith(
@@ -120,17 +125,15 @@ class HabitWidget : GlanceAppWidget() {
                 )
                 val completedInStack = stackHabits.count { completionStatus[it.habit.id] == true }
                 add(HabitWidgetRow.StackHeader(stackName, completedInStack, stackHabits.size))
-                stackHabits.forEachIndexed { i, hwc ->
+                stackHabits.forEach { hwc ->
                     val isDone = completionStatus[hwc.habit.id] ?: false
-                    val prevDone =
-                        if (i == 0) true else completionStatus[stackHabits[i - 1].habit.id] ?: false
                     add(
                         HabitWidgetRow.Habit(
                             id = hwc.habit.id,
                             name = hwc.habit.name,
                             subtitle = frequencySubtitle(context, hwc),
                             isDone = isDone,
-                            isLocked = HabitUtils.isHabitLocked(i, isDone, prevDone),
+                            lock = locks[hwc.habit.id] ?: StackLock.NONE,
                             isStacked = true,
                             color = Color(hwc.habit.colorValue),
                         )
@@ -145,7 +148,7 @@ class HabitWidget : GlanceAppWidget() {
                         name = hwc.habit.name,
                         subtitle = frequencySubtitle(context, hwc),
                         isDone = completionStatus[hwc.habit.id] ?: false,
-                        isLocked = false,
+                        lock = StackLock.NONE,
                         isStacked = false,
                         color = Color(hwc.habit.colorValue),
                     )
@@ -315,16 +318,17 @@ class HabitWidget : GlanceAppWidget() {
         context: Context,
         row: HabitWidgetRow.Habit,
     ) {
-        // Locked stacked habits can't be completed until their predecessor is, so their
-        // checkbox carries no action; the text always deep-links into the habit's detail.
+        // A locked stacked habit's checkbox carries no action: it waits for its predecessor, or a
+        // later habit has to be unchecked first. The text always deep-links into the detail.
+        val isWaiting = row.lock == StackLock.WAITING_FOR_PREVIOUS
         // The app's check circle: the habit's color when done, the habit section's purple before.
         CheckBox(
             checked = row.isDone,
             colors = CheckboxDefaults.colors(
                 checkedColor = ColorProvider(row.color),
-                uncheckedColor = if (row.isLocked) GlanceTheme.colors.onSurfaceVariant else ColorProvider(HabitColor),
+                uncheckedColor = if (isWaiting) GlanceTheme.colors.onSurfaceVariant else ColorProvider(HabitColor),
             ),
-            onCheckedChange = if (row.isLocked) null else actionRunCallback<ToggleHabitCompletionAction>(
+            onCheckedChange = if (row.lock != StackLock.NONE) null else actionRunCallback<ToggleHabitCompletionAction>(
                 actionParametersOf(HabitIdKey to row.id)
             ),
         )
@@ -343,7 +347,7 @@ class HabitWidget : GlanceAppWidget() {
                 text = row.name,
                 maxLines = 1,
                 style = TextStyle(
-                    color = if (row.isLocked) GlanceTheme.colors.onSurfaceVariant else GlanceTheme.colors.onSurface,
+                    color = if (isWaiting) GlanceTheme.colors.onSurfaceVariant else GlanceTheme.colors.onSurface,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     textDecoration = if (row.isDone) TextDecoration.LineThrough else TextDecoration.None

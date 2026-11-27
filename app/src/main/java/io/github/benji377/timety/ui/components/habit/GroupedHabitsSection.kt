@@ -2,6 +2,7 @@ package io.github.benji377.timety.ui.components.habit
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Layers
@@ -25,10 +28,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.ui.components.common.DraggableReorderColumn
 import io.github.benji377.timety.ui.components.common.NeoListTile
@@ -36,14 +43,15 @@ import io.github.benji377.timety.ui.theme.AppTheme
 import io.github.benji377.timety.ui.theme.SuccessColor
 import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.habit.StackLock
 import java.time.LocalDate
 
 /**
  * Renders [habits] for [targetDate], grouping any that share a stack name into a collapsible card
  * with a completion count, and rendering the rest standalone. Each habit is rendered via
- * [habitBuilder], which also receives whether the habit is locked (a stacked habit becomes
- * unlockable only once the previous one in the stack is completed) and whether reorder mode is
- * active. While [isReorderMode] is true, standalone habits, whole stacks and each stack's members
+ * [habitBuilder], which also receives the habit's [StackLock] (stacks in [unorderedStacks] have
+ * none) and whether reorder mode is active. With [onEditStack], each stack header gets an edit
+ * button that passes the stack's name. While [isReorderMode] is true, standalone habits, whole stacks and each stack's members
  * become drag-reorderable (via [DraggableReorderColumn]); [onStandaloneReordered],
  * [onStacksReordered] and [onStackReordered] commit the result.
  */
@@ -53,12 +61,21 @@ fun GroupedHabitsSection(
     allHabitsForStacks: List<HabitWithCompletions>,
     targetDate: LocalDate,
     isReorderMode: Boolean = false,
+    pinnedFirst: Boolean = false,
+    unorderedStacks: Set<String> = emptySet(),
+    onEditStack: ((stackName: String) -> Unit)? = null,
     onStandaloneReordered: (List<HabitWithCompletions>) -> Unit = {},
     onStackReordered: (stackName: String, newOrder: List<HabitWithCompletions>) -> Unit = { _, _ -> },
     onStacksReordered: (stackNames: List<String>) -> Unit = {},
-    habitBuilder: @Composable (habit: HabitWithCompletions, isDone: Boolean, isStacked: Boolean, isLocked: Boolean, isReorderMode: Boolean) -> Unit,
+    habitBuilder: @Composable (habit: HabitWithCompletions, isDone: Boolean, isStacked: Boolean, lock: StackLock, isReorderMode: Boolean) -> Unit,
 ) {
-    val standalone = remember(habits) { habits.filter { it.habit.stackName.isNullOrBlank() } }
+    val allStandalone = remember(habits) { habits.filter { it.habit.stackName.isNullOrBlank() } }
+    // With [pinnedFirst], pinned habits go above the stacks, oldest pin first. They keep their
+    // sort order, so unpinning puts them back where they were. Only standalone habits can be pinned.
+    val pinned = remember(allStandalone, pinnedFirst) {
+        if (pinnedFirst) allStandalone.filter { it.habit.pinnedAt != null }.sortedBy { it.habit.pinnedAt } else emptyList()
+    }
+    val standalone = remember(allStandalone, pinned) { allStandalone - pinned.toSet() }
     // Indexed once so each stack is a lookup rather than a scan of every habit.
     val globalStacks = remember(allHabitsForStacks) {
         allHabitsForStacks.groupBy { it.habit.stackName?.trim() }
@@ -70,10 +87,14 @@ fun GroupedHabitsSection(
         val order = HabitUtils.stackNamesInOrder(allHabitsForStacks.map { it.habit })
         visible.toList().sortedBy { (name, _) -> order.indexOf(name) }
     }
+    val editStackLabel = stringResource(R.string.habitStackEdit)
     // Held here because reorder mode swaps the composables below, which would reset their state.
     var expandedStacks by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
     Column {
+        pinned.forEach { hwc ->
+            habitBuilder(hwc, HabitUtils.isCompletedOn(hwc, targetDate), false, StackLock.NONE, false)
+        }
         DraggableReorderColumn(
             items = stacks,
             key = { (stackName, _) -> stackName },
@@ -82,6 +103,11 @@ fun GroupedHabitsSection(
         ) { (stackName, stackHabitsList), _ ->
             val sortedStackHabits = remember(stackHabitsList) {
                 stackHabitsList.sortedBy { it.habit.stackOrder ?: 99 }
+            }
+            val inOrder = stackName !in unorderedStacks
+            val globalStackForLocks = globalStacks[stackName].orEmpty()
+            val locks = remember(globalStackForLocks, targetDate, inOrder) {
+                HabitUtils.stackLocksOn(globalStackForLocks, targetDate, inOrder)
             }
 
             val globalStack = globalStacks[stackName].orEmpty()
@@ -128,7 +154,27 @@ fun GroupedHabitsSection(
                             letterSpacing = 1.sp,
                             modifier = Modifier.weight(1f),
                         )
-                        Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                        if (onEditStack != null && !isReorderMode) {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .clickable(
+                                        role = Role.Button,
+                                        onClickLabel = editStackLabel,
+                                    ) { onEditStack(stackName) },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = editStackLabel,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.width(AppTheme.spaceSmall))
+                        }
                         Text(
                             text = "$completedCount / ${globalStack.size}",
                             fontSize = 11.sp,
@@ -158,22 +204,11 @@ fun GroupedHabitsSection(
                                     onOrderChanged = { onStackReordered(stackName, it) },
                                 ) { hwc, _ ->
                                     val isDone = HabitUtils.isCompletedOn(hwc, targetDate)
-                                    habitBuilder(hwc, isDone, true, false, true)
+                                    habitBuilder(hwc, isDone, true, StackLock.NONE, true)
                                 }
                             } else {
                                 sortedStackHabits.forEachIndexed { index, hwc ->
                                     val isDone = HabitUtils.isCompletedOn(hwc, targetDate)
-                                    var isLocked = false
-                                    if (index > 0) {
-                                        val prevHwc = sortedStackHabits[index - 1]
-                                        val isPrevDone =
-                                            HabitUtils.isCompletedOn(prevHwc, targetDate)
-                                        isLocked = HabitUtils.isHabitLocked(
-                                            index = index,
-                                            isCurrentHabitDone = isDone,
-                                            isPreviousHabitDone = isPrevDone,
-                                        )
-                                    }
 
                                     if (index > 0) {
                                         HorizontalDivider(
@@ -181,7 +216,7 @@ fun GroupedHabitsSection(
                                         )
                                     }
 
-                                    habitBuilder(hwc, isDone, true, isLocked, false)
+                                    habitBuilder(hwc, isDone, true, locks[hwc.habit.id] ?: StackLock.NONE, false)
                                 }
                             }
                         }
@@ -197,7 +232,7 @@ fun GroupedHabitsSection(
             onOrderChanged = onStandaloneReordered,
         ) { hwc, _ ->
             val isDone = HabitUtils.isCompletedOn(hwc, targetDate)
-            habitBuilder(hwc, isDone, false, false, isReorderMode)
+            habitBuilder(hwc, isDone, false, StackLock.NONE, isReorderMode)
         }
     }
 }

@@ -45,14 +45,81 @@ class HabitUtilsTest {
         assertEquals(days, HabitUtils.parseWeekdays(HabitUtils.serializeWeekdays(days)))
     }
 
+    private fun step(id: String, done: Boolean, day: LocalDate) = HabitWithCompletions(
+        habit(id),
+        if (done) listOf(completedOn(day).copy(habitId = id)) else emptyList(),
+    )
+
     @Test
-    fun testIsHabitLocked() {
-        // First habit of a stack is never locked.
-        assertFalse(HabitUtils.isHabitLocked(0, isCurrentHabitDone = false, isPreviousHabitDone = false))
-        // Locked only when neither the current nor the previous habit is done.
-        assertTrue(HabitUtils.isHabitLocked(1, isCurrentHabitDone = false, isPreviousHabitDone = false))
-        assertFalse(HabitUtils.isHabitLocked(1, isCurrentHabitDone = false, isPreviousHabitDone = true))
-        assertFalse(HabitUtils.isHabitLocked(1, isCurrentHabitDone = true, isPreviousHabitDone = false))
+    fun anInOrderStack_locksCheckingForwardAndUncheckingBackward() {
+        val day = LocalDate.of(2026, 11, 21)
+        val stack = listOf(step("a", true, day), step("b", true, day), step("c", false, day), step("d", false, day))
+
+        assertEquals(
+            listOf(StackLock.LATER_STEP_DONE, StackLock.NONE, StackLock.NONE, StackLock.WAITING_FOR_PREVIOUS),
+            HabitUtils.stackLocks(stack, day, inOrder = true),
+        )
+    }
+
+    @Test
+    fun aStackThatIsNotInOrder_hasNoLocks() {
+        val day = LocalDate.of(2026, 11, 21)
+        val stack = listOf(step("a", true, day), step("b", true, day), step("c", false, day), step("d", false, day))
+
+        assertEquals(List(4) { StackLock.NONE }, HabitUtils.stackLocks(stack, day, inOrder = false))
+    }
+
+    @Test
+    fun locksLookAtTheWholeStack_notJustTheStepsAListShows() {
+        val day = LocalDate.now()
+        // a done, b open, c done: the Done section only shows a and c, but b is in between.
+        val members = listOf(step("a", true, day), step("b", false, day), step("c", true, day))
+            .mapIndexed { i, hwc -> hwc.copy(habit = hwc.habit.copy(stackName = "S", stackOrder = i)) }
+
+        val locks = HabitUtils.stackLocksOn(members, day, inOrder = true)
+
+        assertEquals(StackLock.NONE, locks["a"])
+        assertEquals(StackLock.NONE, locks["c"])
+    }
+
+    @Test
+    fun aHabitOffTodaysSchedule_neverBlocksTheRestOfItsStack() {
+        val day = LocalDate.now()
+        val offToday = HabitWithCompletions(
+            habit("off").copy(
+                frequency = HabitFrequency.WEEKLY_EXACT,
+                targetWeekdays = HabitUtils.serializeWeekdays(setOf(day.plusDays(1).dayOfWeek.value)),
+                stackName = "S",
+                stackOrder = 0,
+            ),
+            emptyList(),
+        )
+        val next = step("next", false, day).let { it.copy(habit = it.habit.copy(stackName = "S", stackOrder = 1)) }
+
+        assertEquals(StackLock.NONE, HabitUtils.stackLocksOn(listOf(offToday, next), day, inOrder = true)["next"])
+    }
+
+    @Test
+    fun aStackIsFinished_onlyOnceEveryStepOfTheDayIsDone() {
+        val day = LocalDate.now()
+        fun member(id: String, stack: String, done: Boolean) =
+            step(id, done, day).let { it.copy(habit = it.habit.copy(stackName = stack, stackOrder = 0)) }
+        val habits = listOf(
+            member("a", "Morning", true), member("b", "Morning", false),
+            member("c", "Evening", true), member("d", "Evening", true),
+            step("solo", true, day),
+        )
+
+        assertEquals(setOf("Evening"), HabitUtils.finishedStacksOn(habits, day))
+    }
+
+    @Test
+    fun aDoneStepBeforeAnOpenOne_canBeUnchecked() {
+        val day = LocalDate.of(2026, 11, 21)
+        // The first step is never waiting, and the last done step is never blocked.
+        val stack = listOf(step("a", false, day), step("b", true, day))
+
+        assertEquals(listOf(StackLock.NONE, StackLock.NONE), HabitUtils.stackLocks(stack, day, inOrder = true))
     }
 
     @Test

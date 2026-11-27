@@ -383,4 +383,80 @@ class MigrationTest {
         }
         db.close()
     }
+
+    @Test
+    fun migrate7To8_givesRecurringTasksDefaultsAnEmptyChecklistAndNoSnapshots() {
+        val dbName = "migration-test-7-8"
+
+        helper.createDatabase(dbName, 7).apply {
+            execSQL(
+                "INSERT INTO recurring_tasks (id, title, description, dueDate, hasDueTime, unit, interval, " +
+                    "monthlyMode, reminderOffsetsMinutes, createdAt) " +
+                    "VALUES ('r1', 'Bins', '', 1000, 1, 'WEEK', 1, 'DAY_OF_MONTH', '[]', 0)"
+            )
+            execSQL(
+                "INSERT INTO recurring_occurrences (recurringTaskId, completedAt, previousDueDate) " +
+                    "VALUES ('r1', 500, 400)"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 8, true, MIGRATION_7_8)
+
+        db.query("SELECT priority, size, location, place FROM recurring_tasks WHERE id = 'r1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("MEDIUM", cursor.getString(0))
+            assertEquals("MEDIUM", cursor.getString(1))
+            assertEquals("", cursor.getString(2))
+            assertTrue(cursor.isNull(3))
+        }
+        db.query(
+            "SELECT subtasksDone, subtasksTotal, status FROM recurring_occurrences WHERE recurringTaskId = 'r1'"
+        ).use { cursor ->
+            cursor.moveToFirst()
+            assertTrue("an old round has no checklist snapshot", cursor.isNull(0) && cursor.isNull(1))
+            assertEquals("an old round was a completion", "COMPLETED", cursor.getString(2))
+        }
+        db.query("SELECT COUNT(*) FROM recurring_subtasks").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(0, cursor.getInt(0))
+        }
+        db.query("SELECT pinnedAt FROM recurring_tasks WHERE id = 'r1'").use { cursor ->
+            cursor.moveToFirst()
+            assertTrue("nothing is pinned after the upgrade", cursor.isNull(0))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate7To8_givesEveryExistingStackAnInOrderRow_andTrimsStackNames() {
+        val dbName = "migration-test-7-8-stacks"
+
+        helper.createDatabase(dbName, 7).apply {
+            listOf("'h1', ' Morning '", "'h2', 'Morning'", "'h3', 'Evening'", "'h4', '  '", "'h5', NULL")
+                .forEach { values ->
+                    execSQL(
+                        "INSERT INTO habits (id, stackName, name, frequency, timesPerDay, createdAt, colorValue, sortOrder) " +
+                            "VALUES ($values, 'Habit', 'DAILY', 1, 0, 0, 0)"
+                    )
+                }
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(dbName, 8, true, MIGRATION_7_8)
+
+        db.query("SELECT name, inOrder FROM habit_stacks ORDER BY name").use { cursor ->
+            val rows = buildList {
+                while (cursor.moveToNext()) add(cursor.getString(0) to cursor.getInt(1))
+            }
+            assertEquals(listOf("Evening" to 1, "Morning" to 1), rows)
+        }
+        db.query("SELECT stackName FROM habits WHERE id IN ('h1', 'h4') ORDER BY id").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("Morning", cursor.getString(0))
+            cursor.moveToNext()
+            assertTrue("a blank stack name means no stack", cursor.isNull(0))
+        }
+        db.close()
+    }
 }

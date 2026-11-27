@@ -8,6 +8,7 @@ import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.tag.TaggedItemType
 import io.github.benji377.timety.data.repository.CheckInChange
 import io.github.benji377.timety.data.repository.HabitRepository
+import io.github.benji377.timety.data.repository.StackRenameResult
 import io.github.benji377.timety.data.repository.TagRepository
 import io.github.benji377.timety.services.ReminderScheduler
 import io.github.benji377.timety.util.habit.HabitUtils
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -67,6 +69,34 @@ class HabitViewModel(
             tagRepository.setItemTags(TaggedItemType.HABIT, habit.id, tagIds)
             refreshHabitReminder(habit.id)
             HabitWidget().updateAll(application)
+        }
+    }
+
+    /** Pins the habit to the top of Home's habits on its due days, or unpins it. */
+    fun setPinned(habitId: String, pinned: Boolean) {
+        viewModelScope.launch {
+            habitRepository.setPinnedAt(habitId, if (pinned) Instant.now() else null)
+        }
+    }
+
+    /** The stacks that aren't done in order; every other stack locks its habits in order. */
+    val unorderedStacks: StateFlow<Set<String>> = habitRepository.allStacks
+        .map { stacks -> stacks.filter { !it.inOrder }.mapTo(mutableSetOf()) { it.name } }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptySet()
+        )
+
+    /**
+     * Renames stack [oldName] and sets whether it is done in order; [onResult] gets the outcome on
+     * the main thread, so the pop-up can stay open with an error.
+     */
+    fun saveStack(oldName: String, newName: String, inOrder: Boolean, onResult: (StackRenameResult) -> Unit) {
+        viewModelScope.launch {
+            val result = habitRepository.saveStack(oldName, newName, inOrder)
+            if (result == StackRenameResult.SAVED) HabitWidget().updateAll(application)
+            onResult(result)
         }
     }
 

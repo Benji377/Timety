@@ -3,6 +3,7 @@ package io.github.benji377.timety.data.repository
 import io.github.benji377.timety.data.local.dao.HabitDao
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
+import io.github.benji377.timety.data.model.habit.HabitStackEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.util.habit.HabitUtils
 import kotlinx.coroutines.Dispatchers
@@ -23,12 +24,26 @@ sealed interface CheckInChange {
     data class Removed(override val completion: HabitCompletionEntity, override val countAfter: Int) : CheckInChange
 }
 
-/** Repository for habits and their completions, wrapping [HabitDao] with IO dispatching. */
+/** What renaming a stack in its settings pop-up did. */
+enum class StackRenameResult {
+    SAVED,
+    NAME_EMPTY,
+
+    /** Another stack already has the name; stacks are never merged. */
+    NAME_TAKEN,
+}
+
+/**
+ * Repository for habits, their completions and stack settings, wrapping [HabitDao] with IO
+ * dispatching. Every habit write re-syncs the stack rows, so a stack has a row exactly while it has
+ * habits.
+ */
 class HabitRepository(
     private val habitDao: HabitDao
 ) {
     val allHabits: Flow<List<HabitEntity>> = habitDao.getAllHabits()
     val allCompletions: Flow<List<HabitCompletionEntity>> = habitDao.getAllCompletions()
+    val allStacks: Flow<List<HabitStackEntity>> = habitDao.getAllStacks()
 
     // Serializes every read-check-write on completions ([tapCheckIn], backfill, focus logging).
     // This repository is a process-wide singleton (see AppContainer), so the lock also covers
@@ -46,23 +61,46 @@ class HabitRepository(
 
     suspend fun insertHabit(habit: HabitEntity) = withContext(Dispatchers.IO) {
         habitDao.insertHabit(habit)
+        habitDao.syncStacks()
     }
 
     suspend fun updateHabit(habit: HabitEntity) = withContext(Dispatchers.IO) {
         habitDao.updateHabit(habit)
+        habitDao.syncStacks()
     }
 
     suspend fun updateHabits(habits: List<HabitEntity>) = withContext(Dispatchers.IO) {
         habitDao.updateHabits(habits)
+        habitDao.syncStacks()
     }
 
     suspend fun deleteHabit(habit: HabitEntity) = withContext(Dispatchers.IO) {
         habitDao.deleteHabit(habit)
+        habitDao.syncStacks()
     }
 
     suspend fun clearAll() = withContext(Dispatchers.IO) {
         habitDao.clearAll()
+        habitDao.syncStacks()
     }
+
+    suspend fun getStacks(): List<HabitStackEntity> = withContext(Dispatchers.IO) {
+        habitDao.getStacks()
+    }
+
+    /** Renames stack [oldName] to [newName] (trimmed) and sets whether it is done in order. */
+    suspend fun saveStack(oldName: String, newName: String, inOrder: Boolean): StackRenameResult =
+        withContext(Dispatchers.IO) {
+            val name = newName.trim()
+            when {
+                name.isEmpty() -> StackRenameResult.NAME_EMPTY
+                name != oldName && habitDao.getStacks().any { it.name == name } -> StackRenameResult.NAME_TAKEN
+                else -> {
+                    habitDao.renameStack(oldName, name, inOrder)
+                    StackRenameResult.SAVED
+                }
+            }
+        }
 
     // Completions
     fun getCompletionsForHabit(habitId: String): Flow<List<HabitCompletionEntity>> =
@@ -105,4 +143,7 @@ class HabitRepository(
         }
     }
 
+    suspend fun setPinnedAt(id: String, pinnedAt: Instant?) = withContext(Dispatchers.IO) {
+        habitDao.setPinnedAt(id, pinnedAt)
+    }
 }

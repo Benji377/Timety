@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.time.Instant
 
 /** Repository for tasks and subtasks, wrapping [TaskDao] with IO dispatching. */
 class TaskRepository(
@@ -59,5 +60,9 @@ class TaskRepository(
 
     suspend fun deleteSubtask(subtask: SubtaskEntity) = withContext(Dispatchers.IO) {
         taskDao.deleteSubtask(subtask)
+    }
+
+    suspend fun setPinnedAt(id: String, pinnedAt: Instant?) = withContext(Dispatchers.IO) {
+        taskDao.setPinnedAt(id, pinnedAt)
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.benji377.timety.ui.components.common.PinnedMarker
 import io.github.benji377.timety.R
 import io.github.benji377.timety.data.model.tag.TagEntity
 import io.github.benji377.timety.data.model.task.TaskEntity
@@ -47,6 +48,7 @@ import io.github.benji377.timety.ui.theme.WarningColor
 import io.github.benji377.timety.ui.theme.forText
 import io.github.benji377.timety.ui.utils.AppUtils
 import io.github.benji377.timety.ui.utils.LocalDateFormatSettings
+import io.github.benji377.timety.ui.utils.showsPriorityEffort
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.task.Due
 import java.time.LocalDate
@@ -83,7 +85,6 @@ fun TaskListTile(
 ) {
     val borderColor = getBorderColor(task, isOverdue)
     val hasSubtasks = subtasksTotal > 0
-    val progress = if (hasSubtasks) subtasksCompleted.toFloat() / subtasksTotal.toFloat() else 0f
 
     val card = @Composable {
         NeoListTile(
@@ -117,14 +118,18 @@ fun TaskListTile(
                 )
                 Spacer(Modifier.width(AppTheme.spaceSmall))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = task.title,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
-                            color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                            fontWeight = AppTheme.fwBold,
-                        ),
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = task.title,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
+                                color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                                fontWeight = AppTheme.fwBold,
+                            ),
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        if (task.pinnedAt != null) PinnedMarker()
+                    }
                     if (showDescription && task.description.isNotEmpty()) {
                         Text(
                             text = task.description,
@@ -135,31 +140,11 @@ fun TaskListTile(
                     }
 
                     if (hasSubtasks) {
-                        Spacer(Modifier.height(6.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Filled.Checklist,
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "$subtasksCompleted/$subtasksTotal",
-                                fontSize = AppTheme.fsLabel,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = AppTheme.fwMedium,
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            NeoProgressBar(
-                                progress = { progress },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(4.dp),
-                                color = if (task.isCompleted) SuccessColor else borderColor,
-                                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            )
-                        }
+                        SubtaskProgressRow(
+                            completed = subtasksCompleted,
+                            total = subtasksTotal,
+                            barColor = if (task.isCompleted) SuccessColor else borderColor,
+                        )
                     }
 
                     if (showDueDate && task.dueDate != null) {
@@ -190,7 +175,7 @@ fun TaskListTile(
                         TagChips(tags)
                     }
                 }
-                if (showTrailing) {
+                if (showTrailing && showsPriorityEffort(task.priority, task.size)) {
                     Spacer(Modifier.width(AppTheme.spaceLarge))
                     Text(text = AppUtils.getSizeEmoji(task.size), fontSize = 18.sp)
                     Spacer(Modifier.width(AppTheme.listTileTrailingSpacing))
@@ -217,6 +202,36 @@ fun TaskListTile(
         margin = margin,
     ) {
         card()
+    }
+}
+
+/** A tile's checklist line: "2/5" and a thin bar; [total] must be above zero. */
+@Composable
+internal fun SubtaskProgressRow(completed: Int, total: Int, barColor: Color) {
+    Spacer(Modifier.height(6.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = Icons.Filled.Checklist,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = "$completed/$total",
+            fontSize = AppTheme.fsLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = AppTheme.fwMedium,
+        )
+        Spacer(Modifier.width(8.dp))
+        NeoProgressBar(
+            progress = { completed.toFloat() / total.toFloat() },
+            modifier = Modifier
+                .weight(1f)
+                .height(4.dp),
+            color = barColor,
+            trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        )
     }
 }
 

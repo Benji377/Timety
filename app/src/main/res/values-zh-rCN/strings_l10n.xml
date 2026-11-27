@@ -174,6 +174,8 @@
     <string name="goalDetailLabelDescription">描述</string>
     <string name="goalDetailLabelDescriptionHint">这个目标对您意味着什么？</string>
     <string name="goalDetailLabelIcon">选择图标</string>
+    <string name="goalDetailSectionInfo">目标信息</string>
+    <string name="goalDetailSectionTarget">目标值</string>
     <string name="goalDetailLabelName">目标名称</string>
     <string name="goalDetailLabelNameHint">例如：骑行 500 公里，阅读 12 本书…</string>
     <string name="goalDetailLabelNameRequest">请输入名称</string>
@@ -214,6 +216,9 @@
         <item quantity="other">目标：每月 %d 天</item>
     </plurals>
     <string name="habitDetailLabelIcon">选择图标</string>
+    <string name="habitDetailSectionInfo">习惯信息</string>
+    <string name="detailSectionAppearance">外观</string>
+    <string name="detailLabelIcon">图标</string>
     <string name="habitDetailLabelName">习惯名称</string>
     <string name="habitDetailLabelNameHint">例如：阅读 10 页，锻炼几分钟…</string>
     <string name="habitDetailLabelNameRequest">请输入名称</string>
@@ -223,7 +228,6 @@
     <string name="habitDetailLabelPeriodWeek">每周</string>
     <string name="habitDetailLabelReminder">提醒时间</string>
     <string name="habitDetailReminderAddTime">添加时间</string>
-    <string name="habitDetailReminderSheetHint">当天已完成或无需进行该习惯时，将跳过提醒。</string>
     <string name="habitDetailLabelColor">颜色</string>
     <string name="habitDetailLabelColorPicker">选择颜色</string>
     <string name="habitDetailLabelStack">习惯堆叠</string>
@@ -239,6 +243,13 @@
     <string name="habitFreqFlexible">%1$d / %2$d 本周</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d 本月</string>
     <string name="habitFreqWeekly">每周的 %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="other">每天 %d 次</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s：%2$d/%3$d</string>
+    <string name="habitTodayTitle">今天</string>
+    <string name="habitTodayCheckIn">打卡</string>
+    <string name="habitTodayHistory">历史记录</string>
     <string name="habitHistoryCompletedAt">完成于 %1$s</string>
     <string name="habitHistoryEmpty">暂无历史记录。</string>
     <string name="habitHistoryRemoveCompletion">移除 %1$s 的完成记录？</string>
@@ -261,8 +272,13 @@
     <string name="taskDeleteTitle">删除任务</string>
     <string name="taskFocusLogSnackbar">已关联专注记录</string>
     <string name="taskFocusLogTitle">记录专注时间</string>
+    <string name="taskFocusLogSkip">跳过</string>
+    <string name="taskCompletedSnackbar">已完成：%1$s</string>
     <string name="taskDetailsLabelDescription">描述</string>
+    <string name="taskDetailsLabelAllDay">全天</string>
     <string name="taskDetailsLabelDueDateSet">设置截止日期</string>
+    <string name="taskDetailsLabelDueDate">截止日期</string>
+    <string name="taskDetailsLabelDueTime">截止时间</string>
     <string name="taskDetailsLabelEffort">工作量</string>
     <string name="taskDetailsLabelLocation">位置</string>
     <string name="taskDetailsLabelPriority">优先级</string>
@@ -277,6 +293,7 @@
     <string name="taskDetailsReminderOptionHour">提前 1 小时</string>
     <string name="taskDetailsReminderOptionWeek">提前 1 周</string>
     <string name="taskDetailsReminderOptionOnce">准时</string>
+    <string name="taskDetailsReminderOptionOnTheDay">当天</string>
     <string name="taskDetailsSectionChecklist">清单</string>
     <string name="taskDetailsSectionInfo">任务信息</string>
     <string name="taskDetailsSectionLocation">位置</string>
@@ -350,6 +367,7 @@
     <string name="calendarTooltipToday">回到今天</string>
     <string name="calendarWeekSummaryDescription">已完成任务：%1$d，习惯打卡：%2$d，专注时长：%3$s</string>
     <string name="calendarWeeklyReportTitle">每周报告</string>
+    <string name="statsLabelProductivity">专注与任务</string>
     <string name="statsPageTime">时间</string>
     <string name="statsPeriodWeek">周</string>
     <string name="statsPeriodMonth">月</string>
@@ -451,8 +469,6 @@
     <string name="settingsLabelAutoDndSubtitle">专注期间自动静音通知</string>
     <string name="settingsLabelBackgroundActivity">后台活动</string>
     <string name="settingsLabelBackgroundActivitySubtitle">如果提醒延迟送达，请允许 Timety 在后台运行</string>
-    <string name="settingsLabelCommunity">社区 &amp;与帮助</string>
-    <string name="settingsLabelCommunitySubtitle">在 GitHub 上提问与分享技巧</string>
     <string name="settingsLabelDailyMotivation">每日励志时间</string>
     <string name="settingsLabelDateFormat">日期格式</string>
     <string name="settingsLabelDateFormatSystem">跟随系统</string>
@@ -678,6 +694,7 @@
     <string name="recurringTaskTitleView">定期任务</string>
     <string name="recurringTaskLabelNextDue">下次到期日</string>
     <string name="recurringTaskSnackbarDueRequired">请先设置下次到期日</string>
+    <string name="recurringTaskDueDayMismatch">下一个截止日是%1$s，不在所选日期中。之后的日期将按所选日期安排。</string>
     <string name="recurringTaskMonthlyOnDay">每月 %1$d 日</string>
     <string name="recurringTaskMonthlyOnNth">第 %1$s 个 %2$s</string>
     <string name="recurringTaskReminderMinutesBefore">提前 %1$d 分钟</string>
@@ -689,11 +706,22 @@
     <string name="reminderFieldLabel">提醒</string>
     <string name="reminderShifted">提醒已按新的截止日期调整</string>
     <string name="reminderSheetDue">截止：%1$s</string>
+    <string name="reminderSheetDueAllDay">截止：%1$s，全天。当天提醒将在 %2$s 发出。</string>
     <string name="reminderSheetEveryOccurrence">适用于每次重复</string>
-    <string name="reminderSheetHint">点击提醒即可添加，再次点击即可移除。</string>
     <string name="reminderSheetNoDue">此任务尚未设置截止日期</string>
     <string name="reminderWarnLimit">最多可添加 %1$d 个提醒。</string>
     <string name="reminderWarnNoDue">设置截止日期后才能使用这些选项，自定义时间仍可使用。</string>
+    <string name="recurringTaskWindowLabel">任务显示范围</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="other">默认（提前 %d 天）</item>
+    </plurals>
+    <string name="recurringTaskWindowCustom">自定义</string>
+    <string name="recurringTaskWindowAmount">截止前</string>
+    <string name="recurringTaskWindowRequest">请输入 %1$d 到 %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">截止当天</string>
+    <string name="recurringTaskWindowHours">小时</string>
+    <string name="recurringTaskWindowDays">天</string>
+    <string name="recurringTaskWindowWeeks">周</string>
     <string name="recurringTaskCompleteNow">立即完成</string>
     <string name="recurringTaskHistoryTitle">历史记录</string>
     <string name="recurringTaskHistoryEmpty">暂无完成记录。</string>
@@ -736,6 +764,7 @@
     <string name="quickHabitSpecificDays">指定日期</string>
     <string name="quickHabitStartLabel">开始</string>
     <string name="quickHabitEndLabel">结束</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">删除快捷习惯</string>
     <string name="quickHabitDeleteContent">确定要删除 \"%1$s\" 吗？</string>

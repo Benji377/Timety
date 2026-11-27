@@ -174,6 +174,8 @@
     <string name="goalDetailLabelDescription">Deskripsi</string>
     <string name="goalDetailLabelDescriptionHint">Kenapa tujuan ini penting?</string>
     <string name="goalDetailLabelIcon">Pilih Ikon</string>
+    <string name="goalDetailSectionInfo">Info Tujuan</string>
+    <string name="goalDetailSectionTarget">Target</string>
     <string name="goalDetailLabelName">Nama Tujuan</string>
     <string name="goalDetailLabelNameHint">mis., Bersepeda 500 km, Baca 12 buku…</string>
     <string name="goalDetailLabelNameRequest">Masukkan nama</string>
@@ -214,6 +216,9 @@
         <item quantity="other">Target: %d hari per bulan</item>
     </plurals>
     <string name="habitDetailLabelIcon">Pilih Ikon</string>
+    <string name="habitDetailSectionInfo">Info Kebiasaan</string>
+    <string name="detailSectionAppearance">Tampilan</string>
+    <string name="detailLabelIcon">Ikon</string>
     <string name="habitDetailLabelName">Nama Kebiasaan</string>
     <string name="habitDetailLabelNameHint">mis., Baca 10 halaman, Olahraga…</string>
     <string name="habitDetailLabelNameRequest">Masukkan nama</string>
@@ -223,7 +228,6 @@
     <string name="habitDetailLabelPeriodWeek">Per minggu</string>
     <string name="habitDetailLabelReminder">Waktu pengingat</string>
     <string name="habitDetailReminderAddTime">Tambah waktu</string>
-    <string name="habitDetailReminderSheetHint">Pengingat dilewati pada hari ketika kebiasaan ini sudah selesai atau tidak dijadwalkan.</string>
     <string name="habitDetailLabelColor">Warna</string>
     <string name="habitDetailLabelColorPicker">Pilih Warna</string>
     <string name="habitDetailLabelStack">Rangkaian Kebiasaan</string>
@@ -239,6 +243,13 @@
     <string name="habitFreqFlexible">%1$d / %2$d minggu ini</string>
     <string name="habitFreqFlexibleMonth">%1$d / %2$d bulan ini</string>
     <string name="habitFreqWeekly">Mingguan pada %1$s</string>
+    <plurals name="habitTimesPerDay">
+        <item quantity="other">%d kali sehari</item>
+    </plurals>
+    <string name="habitCheckInSnackbar">%1$s: %2$d/%3$d</string>
+    <string name="habitTodayTitle">Hari ini</string>
+    <string name="habitTodayCheckIn">Check-in</string>
+    <string name="habitTodayHistory">Riwayat</string>
     <string name="habitHistoryCompletedAt">Selesai pada %1$s</string>
     <string name="habitHistoryEmpty">Belum ada riwayat.</string>
     <string name="habitHistoryRemoveCompletion">Hapus penyelesaian untuk %1$s?</string>
@@ -261,8 +272,13 @@
     <string name="taskDeleteTitle">Hapus Tugas</string>
     <string name="taskFocusLogSnackbar">Sesi fokus dilampirkan</string>
     <string name="taskFocusLogTitle">Catat Waktu Fokus</string>
+    <string name="taskFocusLogSkip">Lewati</string>
+    <string name="taskCompletedSnackbar">Selesai: %1$s</string>
     <string name="taskDetailsLabelDescription">Deskripsi</string>
+    <string name="taskDetailsLabelAllDay">Sepanjang hari</string>
     <string name="taskDetailsLabelDueDateSet">Atur Tenggat</string>
+    <string name="taskDetailsLabelDueDate">Tanggal tenggat</string>
+    <string name="taskDetailsLabelDueTime">Waktu tenggat</string>
     <string name="taskDetailsLabelEffort">Usaha</string>
     <string name="taskDetailsLabelLocation">Lokasi</string>
     <string name="taskDetailsLabelPriority">Prioritas</string>
@@ -277,6 +293,7 @@
     <string name="taskDetailsReminderOptionHour">1 jam sebelumnya</string>
     <string name="taskDetailsReminderOptionWeek">1 minggu sebelumnya</string>
     <string name="taskDetailsReminderOptionOnce">Tepat waktu</string>
+    <string name="taskDetailsReminderOptionOnTheDay">Pada hari itu</string>
     <string name="taskDetailsSectionChecklist">Daftar Periksa</string>
     <string name="taskDetailsSectionInfo">Info Tugas</string>
     <string name="taskDetailsSectionLocation">Lokasi</string>
@@ -350,6 +367,7 @@
     <string name="calendarTooltipToday">Ke Hari Ini</string>
     <string name="calendarWeekSummaryDescription">Tugas selesai: %1$d, check-in kebiasaan: %2$d, waktu fokus: %3$s</string>
     <string name="calendarWeeklyReportTitle">Laporan Mingguan</string>
+    <string name="statsLabelProductivity">Fokus dan tugas</string>
     <string name="statsPageTime">Waktu</string>
     <string name="statsPeriodWeek">Minggu</string>
     <string name="statsPeriodMonth">Bulan</string>
@@ -451,8 +469,6 @@
     <string name="settingsLabelAutoDndSubtitle">Membisukan notifikasi secara otomatis selama sesi fokus</string>
     <string name="settingsLabelBackgroundActivity">Aktivitas latar belakang</string>
     <string name="settingsLabelBackgroundActivitySubtitle">Jika pengingat datang terlambat, izinkan Timety berjalan di latar belakang</string>
-    <string name="settingsLabelCommunity">Komunitas &amp; Bantuan</string>
-    <string name="settingsLabelCommunitySubtitle">Ajukan pertanyaan dan bagikan tips di GitHub</string>
     <string name="settingsLabelDailyMotivation">Waktu Motivasi Harian</string>
     <string name="settingsLabelDateFormat">Format Tanggal</string>
     <string name="settingsLabelDateFormatSystem">Bawaan Sistem</string>
@@ -678,6 +694,7 @@
     <string name="recurringTaskTitleView">Tugas Berulang</string>
     <string name="recurringTaskLabelNextDue">Tenggat berikutnya</string>
     <string name="recurringTaskSnackbarDueRequired">Atur dulu tenggat berikutnya</string>
+    <string name="recurringTaskDueDayMismatch">Tenggat berikutnya jatuh pada hari %1$s, yang tidak termasuk hari yang dipilih. Tanggal berikutnya mengikuti hari yang dipilih.</string>
     <string name="recurringTaskMonthlyOnDay">Pada tanggal %1$d</string>
     <string name="recurringTaskMonthlyOnNth">Pada %2$s %1$s</string>
     <string name="recurringTaskReminderMinutesBefore">%1$d mnt sebelumnya</string>
@@ -689,11 +706,22 @@
     <string name="reminderFieldLabel">Pengingat</string>
     <string name="reminderShifted">Pengingat disesuaikan dengan tenggat baru</string>
     <string name="reminderSheetDue">Tenggat %1$s</string>
+    <string name="reminderSheetDueAllDay">Tenggat %1$s, sepanjang hari. Pengingat hari itu muncul pukul %2$s.</string>
     <string name="reminderSheetEveryOccurrence">Berlaku untuk setiap pengulangan</string>
-    <string name="reminderSheetHint">Ketuk pengingat untuk menambahkannya. Ketuk lagi untuk menghapusnya.</string>
     <string name="reminderSheetNoDue">Tugas ini belum punya tenggat</string>
     <string name="reminderWarnLimit">Kamu bisa menambahkan hingga %1$d pengingat.</string>
     <string name="reminderWarnNoDue">Atur tenggat untuk memakai opsi ini. Waktu kustom tetap bisa dipakai.</string>
+    <string name="recurringTaskWindowLabel">Rentang tugas</string>
+    <plurals name="recurringTaskWindowDefault">
+        <item quantity="other">Bawaan (%d hari sebelumnya)</item>
+    </plurals>
+    <string name="recurringTaskWindowCustom">Kustom</string>
+    <string name="recurringTaskWindowAmount">Sebelum tenggat</string>
+    <string name="recurringTaskWindowRequest">Masukkan %1$d sampai %2$d</string>
+    <string name="recurringTaskWindowDueDayOnly">Pada hari tenggat</string>
+    <string name="recurringTaskWindowHours">Jam</string>
+    <string name="recurringTaskWindowDays">Hari</string>
+    <string name="recurringTaskWindowWeeks">Minggu</string>
     <string name="recurringTaskCompleteNow">Selesaikan sekarang</string>
     <string name="recurringTaskHistoryTitle">Riwayat</string>
     <string name="recurringTaskHistoryEmpty">Belum ada penyelesaian.</string>
@@ -736,6 +764,7 @@
     <string name="quickHabitSpecificDays">Hari tertentu</string>
     <string name="quickHabitStartLabel">Dari</string>
     <string name="quickHabitEndLabel">Sampai</string>
+    <string name="quickHabitCardSubtitle">%1$s | %2$s</string>
     <string name="quickHabitWindowFormat">%1$s–%2$s</string>
     <string name="quickHabitDeleteTitle">Hapus Kebiasaan Cepat</string>
     <string name="quickHabitDeleteContent">Yakin ingin menghapus \"%1$s\"?</string>

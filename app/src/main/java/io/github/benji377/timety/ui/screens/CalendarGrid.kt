@@ -77,7 +77,7 @@ internal fun CalendarGrid(
         val taskDays = tasks.mapNotNull { it.task.dueDate }
             .map { it.atZone(zone).toLocalDate() }
         val recurringDays = recurringItems.flatMap { item ->
-            item.occurrences.map { it.completedAt } + item.task.dueDate
+            item.completed.map { it.completedAt } + item.task.dueDate
         }.map { it.atZone(zone).toLocalDate() }
         (taskDays + recurringDays).toSet()
     }

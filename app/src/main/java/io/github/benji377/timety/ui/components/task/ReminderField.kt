@@ -76,7 +76,6 @@ fun ReminderField(
     presets: List<ReminderPreset> = ReminderPreset.entries,
     hasTime: Boolean = true,
     customLabel: String = stringResource(R.string.taskDetailsReminderOptionCustom),
-    hint: String = stringResource(R.string.reminderSheetHint),
 ) {
     if (!isEditing && entries.isEmpty()) return
     var showSheet by remember { mutableStateOf(false) }
@@ -198,12 +197,9 @@ fun ReminderField(
                         )
                     }
                 }
-                Text(
-                    text = warning ?: hint,
-                    color = if (warning != null) WarningColor.forText()
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = AppTheme.fsBodySmall,
-                )
+                warning?.let {
+                    Text(text = it, color = WarningColor.forText(), fontSize = AppTheme.fsBodySmall)
+                }
                 NeoButton(onClick = { showSheet = false }, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.commonLabelClose))
                 }

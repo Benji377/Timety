@@ -152,7 +152,7 @@ data class PeriodSummary(
                 tasksDue = tasks.count { it.dueDate != null && inRange(it.dueDate) } +
                     recurring.count { inRange(it.task.dueDate) },
                 tasksCompleted = tasks.count { it.isCompleted && it.completedAt != null && inRange(it.completedAt) } +
-                    recurring.sumOf { item -> item.occurrences.count { inRange(it.completedAt) } },
+                    recurring.sumOf { item -> item.completed.count { inRange(it.completedAt) } },
                 habitCheckIns = habitCompletions.count { inRange(it) },
                 focusSessions = sessions.count { inRange(it.startTime) },
                 focusMinutes = focusMinutes,

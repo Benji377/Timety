@@ -96,6 +96,7 @@ import io.github.benji377.timety.ui.viewmodel.SettingsViewModel
 import io.github.benji377.timety.ui.viewmodel.activityScopedViewModel
 import io.github.benji377.timety.util.datetime.AppDateFormatUtils
 import io.github.benji377.timety.util.habit.HabitUtils
+import io.github.benji377.timety.util.habit.StackLock
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -161,6 +162,7 @@ fun FocusScreen(
     val selectedTarget by focusViewModel.selectedTarget.collectAsState()
     val allSessions by focusViewModel.allSessions.collectAsState()
     val habitsWithCompletions by habitViewModel.habitsWithCompletions.collectAsState()
+    val unorderedStacks by habitViewModel.unorderedStacks.collectAsState()
     val dailyFocusTarget by settingsViewModel.dailyFocusTarget.collectAsState()
     val keepScreenOnDuringFocus by settingsViewModel.keepScreenOnDuringFocus.collectAsState()
     val maxStopwatchMins by settingsViewModel.maxStopwatchMins.collectAsState()
@@ -267,9 +269,9 @@ fun FocusScreen(
         sendAction(FocusTimerService.ACTION_START)
     }
 
-    // A habit target is locked if it belongs to a stack and the habit before it in that stack
-    // hasn't been completed yet.
-    val targetLocked = remember(selectedTarget, habitsWithCompletions) {
+    // A habit target is locked if it belongs to an in-order stack and the habit before it in that
+    // stack hasn't been completed yet.
+    val targetLocked = remember(selectedTarget, habitsWithCompletions, unorderedStacks) {
         val target = selectedTarget
         if (target?.type != FocusTargetType.HABIT) {
             false
@@ -279,18 +281,9 @@ fun FocusScreen(
             if (hwc == null || stackName.isNullOrEmpty()) {
                 false
             } else {
-                val stackHabits = habitsWithCompletions
-                    .filter { it.habit.stackName?.trim() == stackName }
-                    .sortedBy { it.habit.stackOrder ?: 99 }
-                val index = stackHabits.indexOfFirst { it.habit.id == target.id }
-                if (index <= 0) {
-                    false
-                } else {
-                    val today = LocalDate.now()
-                    val isCurrentDone = HabitUtils.isCompletedOn(stackHabits[index], today)
-                    val isPrevDone = HabitUtils.isCompletedOn(stackHabits[index - 1], today)
-                    HabitUtils.isHabitLocked(index, isCurrentDone, isPrevDone)
-                }
+                val stackHabits = habitsWithCompletions.filter { it.habit.stackName?.trim() == stackName }
+                val locks = HabitUtils.stackLocksOn(stackHabits, LocalDate.now(), stackName !in unorderedStacks)
+                locks[target.id] == StackLock.WAITING_FOR_PREVIOUS
             }
         }
     }

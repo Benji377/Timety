@@ -3,6 +3,7 @@ package io.github.benji377.timety.services.backup
 import io.github.benji377.timety.data.model.habit.HabitCompletionEntity
 import io.github.benji377.timety.data.model.habit.HabitEntity
 import io.github.benji377.timety.data.model.habit.HabitFrequency
+import io.github.benji377.timety.data.model.habit.HabitStackEntity
 import io.github.benji377.timety.data.model.habit.HabitWithCompletions
 import io.github.benji377.timety.data.model.habit.QuickHabitEntity
 import io.github.benji377.timety.util.habit.HabitUtils
@@ -27,6 +28,7 @@ internal fun HabitWithCompletions.toBackupJson(): JSONObject = JSONObject().appl
     put("stackName", orNull(habit.stackName))
     put("stackOrder", orNull(habit.stackOrder))
     put("sortOrder", habit.sortOrder)
+    put("pinnedAt", orNull(habit.pinnedAt?.toString()))
     put("completions", JSONArray(completions.map { it.completionDate.toString() }))
 }
 
@@ -49,13 +51,27 @@ internal fun habitFromBackup(json: JSONObject): HabitWithCompletions {
         colorValue = json.optInt("colorValue", 0),
         notes = json.stringOrNull("notes"),
         iconCodePoint = json.intOrNull("iconCodePoint"),
-        stackName = json.stringOrNull("stackName"),
+        // Trimmed, so it matches the stack's settings row.
+        stackName = json.stringOrNull("stackName")?.trim()?.ifEmpty { null },
         stackOrder = json.intOrNull("stackOrder"),
         sortOrder = json.optInt("sortOrder", 0),
+        // A habit in a stack is never pinned; older backups restore unpinned.
+        pinnedAt = json.instantOrNull("pinnedAt")?.takeIf { json.stringOrNull("stackName").isNullOrBlank() },
     )
     val completions = json.instantList("completions")
         .map { HabitCompletionEntity(habitId = id, completionDate = it) }
     return HabitWithCompletions(habit, completions)
+}
+
+internal fun HabitStackEntity.toBackupJson(): JSONObject = JSONObject().apply {
+    put("name", name)
+    put("inOrder", inOrder)
+}
+
+/** Null for an entry without a name; restore rebuilds rows for stacks missing from the backup. */
+internal fun habitStackFromBackup(json: JSONObject): HabitStackEntity? {
+    val name = json.stringOrNull("name")?.trim()?.ifEmpty { null } ?: return null
+    return HabitStackEntity(name = name, inOrder = json.optBoolean("inOrder", true))
 }
 
 internal fun QuickHabitEntity.toBackupJson(): JSONObject = JSONObject().apply {
